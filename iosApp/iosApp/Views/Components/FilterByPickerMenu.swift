@@ -10,10 +10,8 @@ import SwiftUI
 
 struct FilterByPickerMenu: View {
     private let type: InstanceType
-    
+    private let filterBy: FilterBy
     private let changeFilterBy: (FilterBy) -> Void
-    
-    @State private var filteredBy: FilterBy
     
     init(
         type: InstanceType,
@@ -21,13 +19,16 @@ struct FilterByPickerMenu: View {
         changeFilterBy: @escaping (FilterBy) -> Void
     ) {
         self.type = type
-        self.filteredBy = filterBy
+        self.filterBy = filterBy
         self.changeFilterBy = changeFilterBy
     }
     
     var body: some View {
         Menu {
-            Picker(MR.strings().filter_by.localized(), selection: $filteredBy) {
+            Picker(MR.strings().filter_by.localized(), selection: Binding(get: { filterBy }, set: { newValue in
+                Haptics.selection()
+                changeFilterBy(newValue)
+            })) {
                 ForEach(FilterBy.companion.typeEntries(type: type), id: \.self) { filterOption in
                     Text(filterOption.resource.localized())
                         .tag(filterOption)
@@ -35,10 +36,7 @@ struct FilterByPickerMenu: View {
             }
             .pickerStyle(.inline)
         } label: {
-            Label(filteredBy.resource.localized(), systemImage: "line.3.horizontal.decrease")
+            Label(filterBy.resource.localized(), systemImage: "line.3.horizontal.decrease")
         }
-        .onChange(of: filteredBy, { _, newValue in
-            changeFilterBy(newValue)
-        })
     }
 }

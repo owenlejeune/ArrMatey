@@ -13,7 +13,7 @@ struct SeriesDetailsView: View {
     let isActive: Bool
     
     private var countString: String {
-        let progress = Int(item.statusProgress)
+        let progress = Int(item.statusProgress * 100)
         return "\(item.episodeFileCount)/\(item.episodeCount) (\(progress)%)"
     }
     
@@ -99,10 +99,6 @@ struct SeriesDetailsView: View {
     private func formatDate(_ instant: KotlinInstant) -> String {
         let timeInterval = TimeInterval(instant.epochSeconds)
         let date = Date(timeIntervalSince1970: timeInterval)
-        
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        return date.relativeString()
     }
 }

@@ -40,6 +40,7 @@ struct SortByPickerMenu: View {
         Menu {
             ForEach(sortByOptions, id: \.self) { sortOption in
                 Button(action: {
+                    Haptics.selection()
                     if sortBy == sortOption {
                         changeSortOrder((sortOrder == .asc) ? .desc : .asc)
                     } else {

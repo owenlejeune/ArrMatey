@@ -15,10 +15,7 @@ struct MovieDetailsView: View {
         guard let releaseDate = item.releaseDate else { return nil }
         let timeInterval = TimeInterval(releaseDate.epochSeconds)
         let date = Date(timeIntervalSince1970: timeInterval)
-        
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        return date.relativeString()
     }
     
     private var runtimeString: String? {

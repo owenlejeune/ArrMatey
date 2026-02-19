@@ -51,6 +51,7 @@ struct ArrTab: View {
                 toolbarContent
             }
             .refreshable {
+                Haptics.selection()
                 arrMediaViewModel.refresh()
             }
             .onReceive(instancesViewModel.$instancesState) { newState in

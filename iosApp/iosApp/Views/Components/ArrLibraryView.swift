@@ -65,7 +65,7 @@ struct ArrLibraryView: View {
                 )
             }
         }
-        .id(items.count)
+        .id("\(items.count)-\(prefs.sortBy.name)-\(prefs.sortOrder.name)")
     }
     
     @ViewBuilder
