@@ -22,25 +22,25 @@ import org.koin.core.component.KoinComponent
 
 abstract class BaseArrClient(
     protected val httpClient: HttpClient
-): KoinComponent, ArrClient {
+): KoinComponent {
     protected abstract val instance: Instance
 
     protected val baseUrl: String
         get() = "${instance.url}/${instance.type.apiBase}"
 
-    override suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>> =
+    open suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>> =
         get("qualityprofile")
 
-    override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> =
+    open suspend fun getRootFolders(): NetworkResult<List<RootFolder>> =
         get("rootfolder")
 
-    override suspend fun getTags(): NetworkResult<List<Tag>> =
+    open suspend fun getTags(): NetworkResult<List<Tag>> =
         get("tag")
 
-    override suspend fun command(payload: CommandPayload): NetworkResult<CommandResponse> =
+    open suspend fun command(payload: CommandPayload): NetworkResult<CommandResponse> =
         post("command", payload)
 
-    override suspend fun fetchActivityTasks(
+    open suspend fun fetchActivityTasks(
         page: Int,
         pageSize: Int
     ): NetworkResult<QueuePage> =
@@ -54,12 +54,12 @@ abstract class BaseArrClient(
             "includeArtist" to true
         )).map { it.setInstance(instance.id, instance.label) }
 
-    override suspend fun downloadRelease(
+    open suspend fun downloadRelease(
         payload: DownloadReleasePayload
     ): NetworkResult<Any> =
         post("release", payload)
 
-    override suspend fun deleteActivityTask(
+    open suspend fun deleteActivityTask(
         id: Int,
         removeFromClient: Boolean,
         blocklist: Boolean,

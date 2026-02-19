@@ -70,5 +70,16 @@ enum class InstanceType(
         apiBase = "api/v1",
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Cover
+    ),
+    Prowlarr(
+        resource = MR.strings.prowlarr_description,
+        github = "https://github.com/Prowlarr/Prowlarr",
+        website = "https://prowlarr.com/",
+        iconKey = "prowlarr",
+        defaultPort = 9696,
+        supportsActivityQueue = false,
+        apiBase = "api/v1",
+        includeTopLevelAutomaticSearchOption = false,
+        aspectRatio = AspectRatio.Cover
     )
 }

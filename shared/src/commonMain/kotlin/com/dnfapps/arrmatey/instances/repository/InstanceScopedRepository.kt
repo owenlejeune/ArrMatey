@@ -1,7 +1,9 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.arr.api.client.ArrClient
+import com.dnfapps.arrmatey.arr.api.client.BaseArrClient
 import com.dnfapps.arrmatey.arr.api.client.LidarrClient
+import com.dnfapps.arrmatey.arr.api.client.ProwlarrClient
 import com.dnfapps.arrmatey.arr.api.client.RadarrClient
 import com.dnfapps.arrmatey.arr.api.client.SonarrClient
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
@@ -32,7 +34,6 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,7 +47,10 @@ class InstanceScopedRepository(
     val instance: Instance,
     private val httpClient: HttpClient
 ) {
-    val client: ArrClient = createClient()
+    val client: BaseArrClient = createClient()
+
+    private val arrClient: ArrClient
+        get() = client as? ArrClient ?: throw IllegalStateException("Client for ${instance.type} does not implement ArrClient")
 
     val sonarrClient: SonarrClient
         get() = client as? SonarrClient ?: throw IllegalStateException("Client is not a SonarrClient instance")
@@ -57,10 +61,14 @@ class InstanceScopedRepository(
     val lidarrClient: LidarrClient
         get() = client as? LidarrClient ?: throw IllegalStateException("Client is not a LidarrClient instance")
 
-    private fun createClient(): ArrClient = when (instance.type) {
+    val prowlarrClient: ProwlarrClient
+        get() = client as? ProwlarrClient ?: throw IllegalStateException("Client is not a ProwlarrClient instance")
+
+    private fun createClient(): BaseArrClient = when (instance.type) {
             InstanceType.Sonarr -> SonarrClient(instance, httpClient)
             InstanceType.Radarr -> RadarrClient(instance, httpClient)
             InstanceType.Lidarr -> LidarrClient(instance, httpClient)
+            InstanceType.Prowlarr -> ProwlarrClient(instance, httpClient)
         }
 
     private val _library = MutableStateFlow<NetworkResult<List<ArrMedia>>?>(null)
@@ -132,11 +140,11 @@ class InstanceScopedRepository(
 
     suspend fun refreshLibrary() {
         _library.value = NetworkResult.Loading
-        _library.value = client.getLibrary()
+        _library.value = arrClient.getLibrary()
     }
 
     suspend fun getMediaDetails(id: Long): NetworkResult<ArrMedia> {
-        return client.getDetail(id)
+        return arrClient.getDetail(id)
             .onSuccess { media ->
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
                 currentCache[id] = media
@@ -145,17 +153,17 @@ class InstanceScopedRepository(
     }
 
     suspend fun refreshQualityProfiles() {
-        client.getQualityProfiles()
+        arrClient.getQualityProfiles()
             .onSuccess { _qualityProfiles.value = it }
     }
 
     suspend fun refreshRootFolders() {
-        client.getRootFolders()
+        arrClient.getRootFolders()
             .onSuccess { _rootFolders.value = it }
     }
 
     suspend fun refreshTags() {
-        client.getTags()
+        arrClient.getTags()
             .onSuccess { _tags.value = it }
     }
 
@@ -168,7 +176,7 @@ class InstanceScopedRepository(
     }
 
     suspend fun refreshActivityTasks(page: Int = 1, pageSize: Int = 100) {
-        client.fetchActivityTasks(page, pageSize)
+        arrClient.fetchActivityTasks(page, pageSize)
             .onSuccess { queue ->
                 _activityTasks.value = queue.records
             }
@@ -182,7 +190,7 @@ class InstanceScopedRepository(
 
         _lookupResults.value = NetworkResult.Loading
 
-        client.lookup(query)
+        arrClient.lookup(query)
             .onSuccess { results ->
                 _lookupResults.value = NetworkResult.Success(results)
             }
@@ -198,7 +206,7 @@ class InstanceScopedRepository(
     suspend fun addItem(item: ArrMedia) {
         _addItemStatus.value = OperationStatus.InProgress
 
-        client.addItemToLibrary(item)
+        arrClient.addItemToLibrary(item)
             .onSuccess { addedItem ->
                 _addItemStatus.value = OperationStatus.Success("Item added successfully")
                 addedItem.id?.let {
@@ -221,7 +229,7 @@ class InstanceScopedRepository(
     suspend fun getReleases(params: ReleaseParams) {
         _releases.value = NetworkResult.Loading
 
-        client.getReleases(params)
+        arrClient.getReleases(params)
             .onSuccess { releases ->
                 _releases.value = NetworkResult.Success(releases)
             }
@@ -235,7 +243,7 @@ class InstanceScopedRepository(
     ): NetworkResult<Any> {
         _downloadStatus.value = DownloadState.Loading(payload.guid)
 
-        return client.downloadRelease(payload)
+        return arrClient.downloadRelease(payload)
             .onSuccess {
                 _downloadStatus.value = DownloadState.Success
             }
@@ -253,13 +261,13 @@ class InstanceScopedRepository(
         addToBlocklist: Boolean,
         skipRedownload: Boolean
     ): NetworkResult<Unit> {
-        return client.deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
+        return arrClient.deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
     }
 
     suspend fun executeAutomaticSearch(itemId: Long) {
         _searchStatus.value = OperationStatus.InProgress
 
-        client.performAutomaticSearch(itemId)
+        arrClient.performAutomaticSearch(itemId)
             .onSuccess {
                 _searchStatus.value = OperationStatus.Success("Search initiated")
             }
@@ -272,13 +280,13 @@ class InstanceScopedRepository(
     }
 
     suspend fun executeCommand(payload: CommandPayload): NetworkResult<Any> {
-        return client.command(payload)
+        return arrClient.command(payload)
     }
 
     suspend fun getItemHistory(itemId: Long, page: Int = 1, pageSize: Int = 100): NetworkResult<List<HistoryItem>> {
         _historyStatus.value = OperationStatus.InProgress
 
-        return client.getItemHistory(itemId, page, pageSize)
+        return arrClient.getItemHistory(itemId, page, pageSize)
             .onSuccess { history ->
                 val currentCache = _historyCache.value.toMutableMap()
                 currentCache[itemId] = history
@@ -295,7 +303,7 @@ class InstanceScopedRepository(
 
     suspend fun editMediaItem(item: ArrMedia, moveFiles: Boolean): NetworkResult<Unit> {
         _editItemStatus.value = OperationStatus.InProgress
-        return client.edit(item, moveFiles)
+        return arrClient.edit(item, moveFiles)
             .onSuccess {
                 val id = item.id ?: return@onSuccess
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
@@ -318,7 +326,7 @@ class InstanceScopedRepository(
     suspend fun updateMediaItem(item: ArrMedia): NetworkResult<ArrMedia> {
         _monitorStatus.value = OperationStatus.InProgress
 
-        return client.update(item)
+        return arrClient.update(item)
             .onSuccess { updateItem ->
                 _monitorStatus.value = OperationStatus.Success("Item updated successfully")
 
@@ -341,7 +349,7 @@ class InstanceScopedRepository(
         deleteFiles: Boolean,
         addImportExclusion: Boolean
     ): NetworkResult<Unit> =
-        client.delete(id, deleteFiles, addImportExclusion)
+        arrClient.delete(id, deleteFiles, addImportExclusion)
             .onSuccess {
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
                 currentCache.remove(id)
@@ -363,7 +371,7 @@ class InstanceScopedRepository(
     suspend fun setMonitorState(id: Long, status: Boolean): NetworkResult<MonitoredResponse?> {
         _monitorStatus.value = OperationStatus.InProgress
 
-        val result = client.setMonitorStatus(id, status)
+        val result = arrClient.setMonitorStatus(id, status)
 
         return result
             .map { it.firstOrNull() }
@@ -399,7 +407,7 @@ class InstanceScopedRepository(
 
         val updatedSeries = currentSeries.copy(seasons = updatedSeason)
 
-        return client.update(updatedSeries)
+        return arrClient.update(updatedSeries)
             .onSuccess { resultSeries ->
                 _monitorStatus.value = OperationStatus.Success("Season monitor toggled")
 
@@ -542,7 +550,7 @@ class InstanceScopedRepository(
     fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> = flow {
         emit(NetworkResult.Loading)
 
-        val result = client.getDetail(id)
+        val result = arrClient.getDetail(id)
         when (result) {
             is NetworkResult.Success -> {
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
@@ -703,28 +711,22 @@ class InstanceScopedRepository(
     private suspend inline fun <reified T> safePerformSonarr(
         operation: suspend (SonarrClient) -> NetworkResult<T>
     ): NetworkResult<T> {
-        if (instance.type != InstanceType.Sonarr) {
-            return NetworkResult.Error(message = "Not a Sonarr instance")
-        }
-        return operation(client as SonarrClient)
+        val client = client as? SonarrClient ?: return NetworkResult.Error(message = "Not a Sonarr instance")
+        return operation(client)
     }
 
     private suspend inline fun <reified T> safePerformRadarr(
         operation: suspend (RadarrClient) -> NetworkResult<T>
     ): NetworkResult<T> {
-        if (instance.type != InstanceType.Radarr) {
-            return NetworkResult.Error(message = "Not a Radarr instance")
-        }
-        return operation(client as RadarrClient)
+        val client = client as? RadarrClient ?: return NetworkResult.Error(message = "Not a Radarr instance")
+        return operation(client)
     }
 
     private suspend inline fun <reified T> safePerformLidarr(
         operation: suspend (LidarrClient) -> NetworkResult<T>
     ): NetworkResult<T> {
-        if (instance.type != InstanceType.Lidarr) {
-            return NetworkResult.Error(message = "Not a Lidarr instance")
-        }
-        return operation(client as LidarrClient)
+        val client = client as? LidarrClient ?: return NetworkResult.Error(message = "Not a Lidarr instance")
+        return operation(client)
     }
 
 }

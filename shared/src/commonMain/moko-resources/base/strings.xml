@@ -10,6 +10,7 @@
     <string name="settings">Settings</string>
     <string name="movies">Movies</string>
     <string name="music">Music</string>
+    <string name="indexers">Indexers</string>
     <string name="home">Home</string>
 
     <string name="type_series">series</string>
@@ -213,6 +214,7 @@
     <string name="sonarr_description">Sonarr is a PVR for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them. It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available.</string>
     <string name="radarr_description">Radarr is a movie collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new movies and will interface with clients and indexers to grab, sort, and rename them. It can also be configured to automatically upgrade the quality of existing files in the library when a better quality format becomes available</string>
     <string name="lidarr_description">Lidarr is a music collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new tracks from your favorite artists and will grab, sort and rename them. It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available.</string>
+    <string name="prowlarr_description">Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base stack to integrate with your various PVR apps. Prowlarr supports management of both Torrent Trackers and Usenet Indexers.</string>
 
     <!-- Movie Statuses -->
     <string name="tba">TBA</string>

@@ -24,7 +24,7 @@ import kotlinx.datetime.LocalDate
 class SonarrClient(
     override val instance: Instance,
     httpClient: HttpClient
-) : BaseArrClient(httpClient) {
+) : BaseArrClient(httpClient), ArrClient {
 
     override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> =
         get<List<ArrSeries>>("series")

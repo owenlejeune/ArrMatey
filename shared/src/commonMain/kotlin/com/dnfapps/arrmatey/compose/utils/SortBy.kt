@@ -56,6 +56,7 @@ enum class SortBy(
                 InstanceType.Sonarr -> sonarrOps
                 InstanceType.Radarr -> radarrOps
                 InstanceType.Lidarr -> lidarrOps
+                InstanceType.Prowlarr -> emptyList()
             }
 
         fun lookupEntries() = listOf(Relevance, Year, Rating)

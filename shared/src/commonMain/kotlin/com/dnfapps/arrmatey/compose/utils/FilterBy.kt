@@ -26,6 +26,7 @@ enum class FilterBy(
                 InstanceType.Sonarr -> listOf(All, Monitored, Unmonitored, Missing, ContinuingOnly, EndedOnly)
                 InstanceType.Radarr -> listOf(All, Monitored, Unmonitored, Missing, Wanted, Downloaded)
                 InstanceType.Lidarr -> listOf(All, Monitored, Unmonitored, Missing)
+                InstanceType.Prowlarr -> emptyList()
             }
     }
 }

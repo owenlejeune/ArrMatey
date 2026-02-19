@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.service
 
+import com.dnfapps.arrmatey.arr.api.client.ArrClient
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -98,6 +99,7 @@ class CalendarService(
                         InstanceType.Radarr -> fetchMovies(repository, start, end)
                         InstanceType.Sonarr -> fetchEpisodes(repository, start, end)
                         InstanceType.Lidarr -> fetchAlbums(repository, start, end)
+                        InstanceType.Prowlarr -> {}
                     }
                 }
             }
@@ -111,7 +113,8 @@ class CalendarService(
         start: LocalDate,
         end: LocalDate
     ) {
-        repository.client.getMovieCalendar(start, end)
+        val client = repository.client as? ArrClient ?: return
+        client.getMovieCalendar(start, end)
             .onSuccess { movies ->
                 val currentMovies = _movies.value.toMutableMap()
 
@@ -161,7 +164,8 @@ class CalendarService(
         start: LocalDate,
         end: LocalDate
     ) {
-        repository.client.getEpisodeCalendar(start, end)
+        val client = repository.client as? ArrClient ?: return
+        client.getEpisodeCalendar(start, end)
             .onSuccess { episodes ->
                 val currentEpisodes = _episodes.value.toMutableMap()
 
@@ -226,7 +230,8 @@ class CalendarService(
         start: LocalDate,
         end: LocalDate
     ) {
-        repository.client.getAlbumCalendar(start, end)
+        val client = repository.client as? ArrClient ?: return
+        client.getAlbumCalendar(start, end)
             .onSuccess { albums ->
                 val currentAlbums = _albums.value.toMutableMap()
 

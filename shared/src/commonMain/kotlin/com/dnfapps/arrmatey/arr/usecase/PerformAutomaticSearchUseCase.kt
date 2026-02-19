@@ -29,6 +29,7 @@ class PerformAutomaticSearchUseCase {
                     else -> CommandPayload.Artist(mediaId)
                 }
             }
+            InstanceType.Prowlarr -> return NetworkResult.Error(message = "Not supported for Prowlarr")
         }
         return repository.executeCommand(payload)
     }
