@@ -24,8 +24,16 @@ struct CalendarDaySection: View {
     }
     
     private var dateString: String {
-        let dayOfWeek = date.dayOfWeek.name.capitalized
-        return isToday ? MR.strings().today.localized() : dayOfWeek
+        var components = DateComponents()
+        components.year = Int(date.year)
+        components.month = Int(date.month.number())
+        components.day = Int(date.dayOfMonth)
+        
+        if let swiftDate = Calendar.current.date(from: components) {
+            return swiftDate.relativeString()
+        }
+        
+        return date.dayOfWeek.name.capitalized
     }
     
     private var dateDetailString: String {

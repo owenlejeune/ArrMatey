@@ -31,7 +31,8 @@ struct CalendarListView: View {
             
             if showScrollToToday {
                 ScrollToTodayButton {
-                    withAnimation {
+                    Haptics.selection()
+                    withAnimation(.spring()) {
                         scrollToToday()
                     }
                 }
@@ -43,8 +44,10 @@ struct CalendarListView: View {
         }
         .onChange(of: state.dates) { _, newDates in
             if !hasScrolledInitially && !newDates.isEmpty {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    scrollToToday()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    withAnimation(.spring()) {
+                        scrollToToday()
+                    }
                     hasScrolledInitially = true
                 }
             }
@@ -60,8 +63,10 @@ struct CalendarListView: View {
             .onAppear {
                 scrollProxy = proxy
                 if !state.dates.isEmpty && !hasScrolledInitially {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        scrollToToday()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        withAnimation(.spring()) {
+                            scrollToToday()
+                        }
                         hasScrolledInitially = true
                     }
                 }
