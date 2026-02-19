@@ -49,8 +49,8 @@ class GetMediaDetailsUseCase(
                                 loadLidarrDetails(repository, mediaId, detailsResult.data)
                                     .collect { send(it) }
                             }
-                            InstanceType.Prowlarr -> {
-                                // Prowlarr has no media details, should not be here
+                            InstanceType.Prowlarr, InstanceType.QBittorrent, InstanceType.Sabnzbd -> {
+                                // These types have no media details, should not be here
                             }
                         }
                     }

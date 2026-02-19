@@ -35,7 +35,7 @@ class PreferencesStore(
         InstanceType.Sonarr -> sonarrInfoCardKey
         InstanceType.Radarr -> radarrInfoCardKey
         InstanceType.Lidarr -> lidarrInfoCardKey
-        InstanceType.Prowlarr -> prowlarrInfoCardKey
+        InstanceType.Prowlarr, InstanceType.QBittorrent, InstanceType.Sabnzbd -> prowlarrInfoCardKey
     }
 
     private val scope = CoroutineScope(Dispatchers.IO)

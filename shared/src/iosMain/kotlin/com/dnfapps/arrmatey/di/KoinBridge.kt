@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
+import com.dnfapps.arrmatey.downloads.viewmodel.DownloadsViewModel
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -66,6 +67,9 @@ object KoinBridge: KoinComponent {
         getKoin().get()
 
     fun getProwlarrSearchViewModel(): ProwlarrSearchViewModel =
+        getKoin().get()
+
+    fun getDownloadsViewModel(): DownloadsViewModel =
         getKoin().get()
 
 

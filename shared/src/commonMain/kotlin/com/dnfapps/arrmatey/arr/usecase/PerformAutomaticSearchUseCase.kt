@@ -29,7 +29,7 @@ class PerformAutomaticSearchUseCase {
                     else -> CommandPayload.Artist(mediaId)
                 }
             }
-            InstanceType.Prowlarr -> return NetworkResult.Error(message = "Not supported for Prowlarr")
+            InstanceType.Prowlarr, InstanceType.QBittorrent, InstanceType.Sabnzbd -> return NetworkResult.Error(message = "Not supported for this instance type")
         }
         return repository.executeCommand(payload)
     }
