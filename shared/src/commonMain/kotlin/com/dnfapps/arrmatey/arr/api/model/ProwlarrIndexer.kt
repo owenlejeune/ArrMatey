@@ -14,7 +14,7 @@ data class ProwlarrIndexer(
     val tags: List<Int> = emptyList(),
     val presets: List<String> = emptyList(),
     val enable: Boolean,
-    val redirect: String? = null,
+    val redirect: Boolean = false,
     val supportsRss: Boolean,
     val supportsSearch: Boolean,
     val supportsRedirect: Boolean,

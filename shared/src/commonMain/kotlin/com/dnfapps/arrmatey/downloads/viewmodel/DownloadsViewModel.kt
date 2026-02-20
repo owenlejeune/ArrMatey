@@ -2,22 +2,21 @@ package com.dnfapps.arrmatey.downloads.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.client.ErrorType
-import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.downloads.state.DownloadsState
-import com.dnfapps.arrmatey.downloads.usecase.GetDownloadQueueUseCase
+import com.dnfapps.arrmatey.downloads.usecase.GetDownloadsUseCase
 import com.dnfapps.arrmatey.downloads.usecase.PerformDownloadActionUseCase
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 class DownloadsViewModel(
-    private val getDownloadQueueUseCase: GetDownloadQueueUseCase,
+    private val getDownloadsUseCase: GetDownloadsUseCase,
     private val performDownloadActionUseCase: PerformDownloadActionUseCase,
     private val observeSelectedInstanceUseCase: ObserveSelectedInstanceUseCase
 ) : ViewModel() {
@@ -47,16 +46,8 @@ class DownloadsViewModel(
     fun refresh() {
         val id = selectedInstanceId ?: return
         viewModelScope.launch {
-            _queueState.value = DownloadsState.Loading
-            getDownloadQueueUseCase(id).collect {
-                _queueState.value = when (it) {
-                    is NetworkResult.Success -> DownloadsState.Success(it.data)
-                    is NetworkResult.Error -> DownloadsState.Error(
-                        message = it.message ?: "Failed to fetch queue",
-                        type = if (it.code == null) ErrorType.Network else ErrorType.Http
-                    )
-                    is NetworkResult.Loading -> DownloadsState.Loading
-                }
+            getDownloadsUseCase(id).collect { state ->
+                _queueState.value = state
             }
         }
     }

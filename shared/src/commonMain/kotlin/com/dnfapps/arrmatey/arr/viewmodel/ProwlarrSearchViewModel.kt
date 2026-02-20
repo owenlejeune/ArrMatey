@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -44,7 +45,7 @@ class ProwlarrSearchViewModel(
         val id = selectedInstanceId ?: return
         _searchQuery.value = query
         viewModelScope.launch {
-            performProwlarrSearchUseCase(id, query).collectLatest { state ->
+            performProwlarrSearchUseCase(id, query).collect { state ->
                 _searchResults.value = state
             }
         }

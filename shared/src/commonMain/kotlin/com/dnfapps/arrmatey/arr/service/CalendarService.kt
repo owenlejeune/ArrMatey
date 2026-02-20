@@ -99,7 +99,6 @@ class CalendarService(
                         InstanceType.Radarr -> fetchMovies(repository, start, end)
                         InstanceType.Sonarr -> fetchEpisodes(repository, start, end)
                         InstanceType.Lidarr -> fetchAlbums(repository, start, end)
-                        InstanceType.Prowlarr, InstanceType.QBittorrent, InstanceType.Sabnzbd -> {}
                         else -> {}
                     }
                 }

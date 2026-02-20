@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 
-class GetDownloadQueueUseCase(
+class GetDownloadsUseCase(
     private val instanceManager: InstanceManager
 ) {
     operator fun invoke(instanceId: Long): Flow<DownloadsState> = flow {

@@ -49,9 +49,6 @@ class GetMediaDetailsUseCase(
                                 loadLidarrDetails(repository, mediaId, detailsResult.data)
                                     .collect { send(it) }
                             }
-                            InstanceType.Prowlarr, InstanceType.QBittorrent, InstanceType.Sabnzbd -> {
-                                // These types have no media details, should not be here
-                            }
                             else -> {
                                 send(MediaDetailsUiState.Error("Unsupported instance type"))
                             }

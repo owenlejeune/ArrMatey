@@ -49,7 +49,7 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetCalendarUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetProwlarrIndexersUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformProwlarrSearchUseCase
-import com.dnfapps.arrmatey.downloads.usecase.GetDownloadQueueUseCase
+import com.dnfapps.arrmatey.downloads.usecase.GetDownloadsUseCase
 import com.dnfapps.arrmatey.downloads.usecase.PerformDownloadActionUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetEpisodeHistoryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
@@ -154,7 +154,7 @@ val useCaseModule = module {
     factory { DeleteAlbumFilesUseCase() }
     factory { GetProwlarrIndexersUseCase(get()) }
     factory { PerformProwlarrSearchUseCase(get()) }
-    factory { GetDownloadQueueUseCase(get()) }
+    factory { GetDownloadsUseCase(get()) }
     factory { PerformDownloadActionUseCase(get()) }
 }
 
