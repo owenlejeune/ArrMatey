@@ -19,7 +19,7 @@ data class ProwlarrIndexer(
     val supportsSearch: Boolean,
     val supportsRedirect: Boolean,
     val appFriendlyName: String? = null,
-    val protocol: String? = null, // torrent, usenet
+    val protocol: ReleaseProtocol? = null, // torrent, usenet
     val priority: Int,
     val downloadClientId: Int? = null
 )
