@@ -2,8 +2,9 @@ package com.dnfapps.arrmatey.downloads.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.client.ErrorType
 import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.downloads.api.model.DownloadQueueItem
+import com.dnfapps.arrmatey.downloads.state.DownloadsState
 import com.dnfapps.arrmatey.downloads.usecase.GetDownloadQueueUseCase
 import com.dnfapps.arrmatey.downloads.usecase.PerformDownloadActionUseCase
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -21,8 +22,8 @@ class DownloadsViewModel(
     private val observeSelectedInstanceUseCase: ObserveSelectedInstanceUseCase
 ) : ViewModel() {
 
-    private val _queueState = MutableStateFlow<NetworkResult<List<DownloadQueueItem>>>(NetworkResult.Loading)
-    val queueState: StateFlow<NetworkResult<List<DownloadQueueItem>>> = _queueState.asStateFlow()
+    private val _queueState = MutableStateFlow<DownloadsState>(DownloadsState.Initial)
+    val queueState: StateFlow<DownloadsState> = _queueState.asStateFlow()
 
     private var selectedInstanceId: Long? = null
 
@@ -46,8 +47,16 @@ class DownloadsViewModel(
     fun refresh() {
         val id = selectedInstanceId ?: return
         viewModelScope.launch {
+            _queueState.value = DownloadsState.Loading
             getDownloadQueueUseCase(id).collect {
-                _queueState.value = it
+                _queueState.value = when (it) {
+                    is NetworkResult.Success -> DownloadsState.Success(it.data)
+                    is NetworkResult.Error -> DownloadsState.Error(
+                        message = it.message ?: "Failed to fetch queue",
+                        type = if (it.code == null) ErrorType.Network else ErrorType.Http
+                    )
+                    is NetworkResult.Loading -> DownloadsState.Loading
+                }
             }
         }
     }

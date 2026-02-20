@@ -25,6 +25,8 @@ class PreferencesStore(
     private val radarrInfoCardKey = booleanPreferencesKey("radarrInfoCard")
     private val lidarrInfoCardKey = booleanPreferencesKey("lidarrInfoCard")
     private val prowlarrInfoCardKey = booleanPreferencesKey("prowlarrInfoCard")
+    private val qBittorrentInfoCardKey = booleanPreferencesKey("qBittorrentInfoCard")
+    private val sabnzbdInfoCardKey = booleanPreferencesKey("sabnzbdInfoCard")
     private val calendarViewTypeKey = stringPreferencesKey("calendarViewType")
     private val activityPollingKey = booleanPreferencesKey("enableActivityPolling")
     private val httpLogLevelKey = stringPreferencesKey("httpLogLevel")
@@ -35,7 +37,9 @@ class PreferencesStore(
         InstanceType.Sonarr -> sonarrInfoCardKey
         InstanceType.Radarr -> radarrInfoCardKey
         InstanceType.Lidarr -> lidarrInfoCardKey
-        InstanceType.Prowlarr, InstanceType.QBittorrent, InstanceType.Sabnzbd -> prowlarrInfoCardKey
+        InstanceType.Prowlarr -> prowlarrInfoCardKey
+        InstanceType.QBittorrent -> qBittorrentInfoCardKey
+        InstanceType.Sabnzbd -> sabnzbdInfoCardKey
     }
 
     private val scope = CoroutineScope(Dispatchers.IO)

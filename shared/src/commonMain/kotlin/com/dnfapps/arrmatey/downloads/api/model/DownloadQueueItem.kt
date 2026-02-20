@@ -7,18 +7,11 @@ data class DownloadQueueItem(
     val id: String,
     val name: String,
     val size: Long,
-    val progress: Double, // 0.0 to 1.0
+    val progress: Double,
     val status: String,
-    val speed: Long, // bytes per second
-    val eta: Long?, // seconds
+    val speed: Long,
+    val eta: Long?,
     val seeds: Int? = null,
     val peers: Int? = null,
     val category: String? = null
-)
-
-@Serializable
-data class DownloadClientStatus(
-    val dlSpeed: Long,
-    val upSpeed: Long,
-    val isPaused: Boolean
 )

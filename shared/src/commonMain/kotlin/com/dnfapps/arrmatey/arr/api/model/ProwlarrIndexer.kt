@@ -10,7 +10,7 @@ data class ProwlarrIndexer(
     val implementation: String? = null,
     val configContract: String? = null,
     val infoLink: String? = null,
-    val message: String? = null,
+    val message: ProviderMessage? = null,
     val tags: List<Int> = emptyList(),
     val presets: List<String> = emptyList(),
     val enable: Boolean,

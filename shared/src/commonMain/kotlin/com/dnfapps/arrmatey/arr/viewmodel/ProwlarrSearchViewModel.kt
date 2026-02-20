@@ -2,11 +2,10 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
+import com.dnfapps.arrmatey.arr.state.ProwlarrSearchState
 import com.dnfapps.arrmatey.arr.usecase.PerformProwlarrSearchUseCase
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,8 +18,8 @@ class ProwlarrSearchViewModel(
     private val observeSelectedInstanceUseCase: ObserveSelectedInstanceUseCase
 ): ViewModel() {
 
-    private val _searchResults = MutableStateFlow<NetworkResult<List<ProwlarrSearchResult>>?>(null)
-    val searchResults: StateFlow<NetworkResult<List<ProwlarrSearchResult>>?> = _searchResults.asStateFlow()
+    private val _searchResults = MutableStateFlow<ProwlarrSearchState>(ProwlarrSearchState.Initial)
+    val searchResults: StateFlow<ProwlarrSearchState> = _searchResults.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -43,20 +42,16 @@ class ProwlarrSearchViewModel(
 
     fun performSearch(query: String) {
         val id = selectedInstanceId ?: return
-        if (query.isBlank()) {
-            _searchResults.value = null
-            return
-        }
-        
         _searchQuery.value = query
         viewModelScope.launch {
-            _searchResults.value = NetworkResult.Loading
-            _searchResults.value = performProwlarrSearchUseCase(id, query)
+            performProwlarrSearchUseCase(id, query).collectLatest { state ->
+                _searchResults.value = state
+            }
         }
     }
 
     fun clearSearch() {
         _searchQuery.value = ""
-        _searchResults.value = null
+        _searchResults.value = ProwlarrSearchState.Initial
     }
 }

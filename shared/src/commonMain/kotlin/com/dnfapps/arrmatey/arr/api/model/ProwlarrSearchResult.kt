@@ -1,6 +1,8 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Serializable
 data class ProwlarrSearchResult(
@@ -12,11 +14,11 @@ data class ProwlarrSearchResult(
     val age: Int,
     val ageHours: Double,
     val ageMinutes: Double,
-    val publishDate: String? = null,
+    @Contextual val publishDate: Instant? = null,
     val downloadUrl: String? = null,
     val infoUrl: String? = null,
     val magnetUrl: String? = null,
-    val protocol: String? = null,
+    val protocol: ReleaseProtocol? = null,
     val seeders: Int? = null,
     val leechers: Int? = null,
     val grabs: Int? = null,
@@ -24,11 +26,6 @@ data class ProwlarrSearchResult(
     val categories: List<ProwlarrCategory> = emptyList(),
     val downloadAllowed: Boolean,
     val fullSeason: Boolean,
-    val releaseGroup: String? = null
-)
-
-@Serializable
-data class ProwlarrCategory(
-    val id: Int,
-    val name: String? = null
+    val releaseGroup: String? = null,
+    val providerMessage: ProviderMessage? = null
 )
