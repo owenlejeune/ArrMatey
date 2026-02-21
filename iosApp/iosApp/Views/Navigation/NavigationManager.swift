@@ -13,6 +13,8 @@ class NavigationManager: ObservableObject {
     @Published var seriesPath = NavigationPath()
     @Published var moviePath = NavigationPath()
     @Published var musicPath = NavigationPath()
+    @Published var prowlarrPath = NavigationPath()
+    @Published var downloadClientPath = NavigationPath()
     
     @Published var selectedTab: TabItem = .shows
     @Published var selectedDrawerTab: TabItem? = nil
@@ -25,6 +27,10 @@ class NavigationManager: ObservableObject {
             moviePath.append(route)
         case .lidarr:
             musicPath.append(route)
+        case .prowlarr:
+            prowlarrPath.append(route)
+        case .qbittorrent, .sabnzbd:
+            downloadClientPath.append(route)
         }
     }
     
@@ -39,6 +45,12 @@ class NavigationManager: ObservableObject {
         case .lidarr:
             musicPath.removeLast()
             musicPath.append(route)
+        case .prowlarr:
+            prowlarrPath.removeLast()
+            prowlarrPath.append(route)
+        case .qbittorrent, .sabnzbd:
+            downloadClientPath.removeLast()
+            downloadClientPath.append(route)
         }
     }
     

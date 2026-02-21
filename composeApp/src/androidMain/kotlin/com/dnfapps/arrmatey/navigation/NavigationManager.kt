@@ -28,6 +28,7 @@ class NavigationManager(
         InstanceType.Sonarr -> seriesNavigation
         InstanceType.Radarr -> movieNavigation
         InstanceType.Lidarr -> musicNavigation
+        else -> throw Exception("") // TODO - implement this for qBittorrent, sabNZB, prowlarr
     }
 
     fun series() = seriesNavigation

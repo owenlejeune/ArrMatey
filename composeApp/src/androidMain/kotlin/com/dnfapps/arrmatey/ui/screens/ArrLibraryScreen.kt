@@ -223,6 +223,7 @@ private fun EmptySearchResultsView(
         InstanceType.Sonarr -> mokoString(MR.strings.type_series)
         InstanceType.Radarr -> mokoString(MR.strings.type_movie)
         InstanceType.Lidarr -> mokoString(MR.strings.type_artist)
+        else -> mokoString(MR.strings.unknown)
     }
     Column(
         verticalArrangement = Arrangement.Center,
