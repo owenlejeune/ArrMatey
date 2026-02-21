@@ -10,7 +10,6 @@ import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -32,8 +31,6 @@ class DownloadsViewModel(
 
     private fun observeSelectedInstance() {
         viewModelScope.launch {
-            // We need to decide which type to observe or handle both
-            // For now let's just pick QBittorrent as default for testing
             observeSelectedInstanceUseCase(InstanceType.QBittorrent)
                 .filterNotNull()
                 .collectLatest { instance ->
@@ -46,9 +43,7 @@ class DownloadsViewModel(
     fun refresh() {
         val id = selectedInstanceId ?: return
         viewModelScope.launch {
-            getDownloadsUseCase(id).collect { state ->
-                _queueState.value = state
-            }
+            getDownloadsUseCase(id).collect { _queueState.value = it }
         }
     }
 
@@ -56,7 +51,6 @@ class DownloadsViewModel(
         val id = selectedInstanceId ?: return
         viewModelScope.launch {
             performDownloadActionUseCase.pause(id, itemId)
-            refresh()
         }
     }
 
@@ -64,7 +58,6 @@ class DownloadsViewModel(
         val id = selectedInstanceId ?: return
         viewModelScope.launch {
             performDownloadActionUseCase.resume(id, itemId)
-            refresh()
         }
     }
 }

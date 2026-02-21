@@ -42,9 +42,7 @@ class ProwlarrIndexersViewModel(
     fun refresh() {
         val id = selectedInstanceId ?: return
         viewModelScope.launch {
-            getProwlarrIndexersUseCase(id).collect { state ->
-                _indexers.value = state
-            }
+            getProwlarrIndexersUseCase(id).collect { _indexers.value = it }
         }
     }
 }

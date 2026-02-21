@@ -5,7 +5,7 @@ import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.downloads.api.client.DownloadClient
 import com.dnfapps.arrmatey.downloads.api.client.QBittorrentClient
 import com.dnfapps.arrmatey.downloads.api.client.SABnzbdClient
-import com.dnfapps.arrmatey.downloads.api.model.DownloadClientStatus
+import com.dnfapps.arrmatey.downloads.state.DownloadStatusState
 import com.dnfapps.arrmatey.downloads.state.DownloadsState
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -27,12 +27,12 @@ class DownloadRepository(
     private val _queue = MutableStateFlow<DownloadsState>(DownloadsState.Loading)
     val queue: StateFlow<DownloadsState> = _queue.asStateFlow()
 
-    private val _status = MutableStateFlow<NetworkResult<DownloadClientStatus>>(NetworkResult.Loading)
-    val status: StateFlow<NetworkResult<DownloadClientStatus>> = _status.asStateFlow()
+    private val _status = MutableStateFlow<DownloadStatusState>(DownloadStatusState.Initial)
+    val status: StateFlow<DownloadStatusState> = _status.asStateFlow()
 
     suspend fun refresh() {
         _queue.value = DownloadsState.Loading
-        _status.value = NetworkResult.Loading
+        _status.value = DownloadStatusState.Loading
 
         _queue.value = when (val queueResult = client.getQueue()) {
             is NetworkResult.Success -> DownloadsState.Success(queueResult.data)
@@ -42,7 +42,15 @@ class DownloadRepository(
             )
             is NetworkResult.Loading -> DownloadsState.Loading
         }
-        _status.value = client.getStatus()
+
+        _status.value = when (val statusResult = client.getStatus()) {
+            is NetworkResult.Success -> DownloadStatusState.Success(statusResult.data)
+            is NetworkResult.Error -> DownloadStatusState.Error(
+                message = statusResult.message ?: "Failed to fetch status",
+                type = if (statusResult.code == null) ErrorType.Network else ErrorType.Http
+            )
+            is NetworkResult.Loading -> DownloadStatusState.Loading
+        }
     }
 
     suspend fun pause(id: String) = client.pause(id)
