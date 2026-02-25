@@ -6,8 +6,10 @@ import com.dnfapps.arrmatey.client.safeGet
 import com.dnfapps.arrmatey.client.safePost
 import com.dnfapps.arrmatey.client.safePut
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -18,6 +20,8 @@ interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
     suspend fun getRequests(page: Int = 1, pageSize: Int = 20): NetworkResult<RequestResponse>
+    suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
+    suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
 }
 
 class SeerrClientImpl(
@@ -42,6 +46,13 @@ class SeerrClientImpl(
             "take" to pageSize,
             "skip" to (page - 1) * pageSize
         ))
+
+    override suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails> =
+        get("movie/$tmdbId")
+
+    override suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails> =
+        get("tv/$tmdbId")
+
 
     /**
      * Helpers

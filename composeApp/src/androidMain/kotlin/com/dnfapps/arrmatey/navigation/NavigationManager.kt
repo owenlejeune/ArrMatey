@@ -11,7 +11,8 @@ class NavigationManager(
     private val settingsNavigation: SettingsNavigation,
     private val seriesNavigation: SeriesTabNavigation,
     private val movieNavigation: MoviesTabNavigation,
-    private val musicNavigation: MusicTabNavigation
+    private val musicNavigation: MusicTabNavigation,
+    private val requestsNavigation: RequestsTabNavigation
 ) {
     private val _drawerExpandedState = MutableStateFlow(false)
     val drawerExpandedState: StateFlow<Boolean> = _drawerExpandedState.asStateFlow()
@@ -26,6 +27,7 @@ class NavigationManager(
     fun series() = seriesNavigation
     fun movies() = movieNavigation
     fun music() = musicNavigation
+    fun requests() = requestsNavigation
 
     fun arr(type: InstanceType) = when (type) {
         InstanceType.Sonarr -> seriesNavigation

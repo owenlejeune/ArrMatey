@@ -9,8 +9,10 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClient
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClientImpl
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
+import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +23,7 @@ class SeerrInstanceRepository(
     httpClient: HttpClient
 ): InstanceScopedRepository {
     val client: SeerrClient = SeerrClientImpl(instance, httpClient)
+    private val mediaPackageService = MediaRequestPackageService(client)
 
     private val _loggedInUser = MutableStateFlow<SeerrUser?>(null)
     val loggedInUser: StateFlow<SeerrUser?> = _loggedInUser.asStateFlow()
@@ -33,14 +36,15 @@ class SeerrInstanceRepository(
             .onSuccess { _loggedInUser.value = it }
     }
 
-    fun getRequestsPaging(): PagingSource<MediaRequest> {
+    fun getRequestsPaging(): PagingSource<MediaRequestPackage> {
         return BasePagingSource(
             fetcher = { page ->
                 client.getRequests(page = page)
             },
             processor = { response ->
+                val enrichedRequests = mediaPackageService.enrichRequests(response.results)
                 PageResult(
-                    items = response.results,
+                    items = enrichedRequests,
                     hasNextPage = response.pageInfo.page < response.pageInfo.pages
                 )
             }

@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
+import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
@@ -28,10 +29,10 @@ class RequestsViewModel(
     private val getRequestsUseCase: GetRequestsUseCase,
 ): ViewModel() {
 
-    private var pagingController: PagingController<MediaRequest>? = null
+    private var pagingController: PagingController<MediaRequestPackage>? = null
 
-    private val _requestsState = MutableStateFlow<PagedData<MediaRequest>>(PagedData())
-    val requestsState: StateFlow<PagedData<MediaRequest>> = _requestsState.asStateFlow()
+    private val _requestsState = MutableStateFlow<PagedData<MediaRequestPackage>>(PagedData())
+    val requestsState: StateFlow<PagedData<MediaRequestPackage>> = _requestsState.asStateFlow()
 
     private val selectedRepository = getSeerrInstanceRepositoryUseCase
         .observeSelected()

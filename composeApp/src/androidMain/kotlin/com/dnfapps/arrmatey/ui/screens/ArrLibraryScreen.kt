@@ -62,6 +62,7 @@ import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InstancePicker
 import com.dnfapps.arrmatey.ui.components.MediaView
+import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -265,54 +266,6 @@ private fun EmptySearchResultsView(
                 }
             }
         )
-    }
-}
-
-@Composable
-private fun NoInstanceView(
-    type: InstanceType,
-    modifier: Modifier = Modifier,
-    navigationManager: NavigationManager = koinInject()
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-    ) {
-        Icon(
-            imageVector = Icons.Default.CloudQueue,
-            contentDescription = null,
-            modifier = Modifier.size(128.dp)
-        )
-        Text(
-            text = mokoString(MR.strings.no_type_instances, type.name),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium
-        )
-        Text(text = mokoString(MR.strings.no_type_instances_message, type.name))
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Button(
-            onClick = {
-                navigationManager.openNewInstanceScreen(type)
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Default.AddCircle,
-                contentDescription = null
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = mokoString(MR.strings.add_instance),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
     }
 }
 

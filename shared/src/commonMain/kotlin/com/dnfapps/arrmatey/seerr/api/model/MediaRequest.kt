@@ -23,7 +23,7 @@ data class MediaRequest(
     val modifiedBy: RequestUser? = null,
     val requestedBy: RequestUser,
     val seasonCount: Int,
-    val canRemove: Boolean
+    val canRemove: Boolean = false
 ) {
     val isMovie: Boolean get() = type == RequestType.Movie
     val isTv: Boolean get() = type == RequestType.Tv

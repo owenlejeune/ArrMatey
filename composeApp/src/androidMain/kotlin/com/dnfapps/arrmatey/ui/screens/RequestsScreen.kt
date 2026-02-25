@@ -1,4 +1,4 @@
-package com.dnfapps.arrmatey.ui.tabs
+package com.dnfapps.arrmatey.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,23 +43,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.entensions.collectAsLazyPagingItems
-import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
+import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestStatus
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
+import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import org.koin.compose.koinInject
+import com.dnfapps.arrmatey.utils.koinInjectParams
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun RequestsTab(
-    viewModel: RequestsViewModel = koinInject()
+fun RequestsScreen(
+    viewModel: RequestsViewModel,
+    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr)
 ) {
+    val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val userState by viewModel.userState.collectAsStateWithLifecycle()
-
     val requestsPagingState = viewModel.requestsState.collectAsLazyPagingItems(
         onLoadMore = { viewModel.loadNextPage() },
         onRefresh = { viewModel.refresh() },
@@ -77,93 +80,99 @@ fun RequestsTab(
         PullToRefreshBox(
             isRefreshing = requestsPagingState.isLoading,
             onRefresh = { requestsPagingState.refresh() },
-            modifier = Modifier.fillMaxSize().padding(paddingValues)
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            contentAlignment = Alignment.Center
         ) {
-            when {
-                requestsPagingState.isLoading && requestsPagingState.itemCount == 0 -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        LoadingIndicator(
-                            modifier = Modifier.size(96.dp)
-                        )
-                    }
-                }
-
-                requestsPagingState.isEmpty -> {
-                    EmptyState(
-                        message = "No requests found",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                else -> {
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        item {
-                            Column  {
-                                userState?.let {
-                                    Text(it.id.toString())
-                                    Text(it.displayName)
-                                    Text(it.plexId?.toString() ?: "")
-                                }
-                            }
-                        }
-                        items(
-                            count = requestsPagingState.itemCount,
-                            key = { index -> requestsPagingState.peek(index)?.id ?: index }
-                        ) { index ->
-                            requestsPagingState[index]?.let { request ->
-                                RequestCard(request = request)
-                            }
-                        }
-
-                        if (requestsPagingState.isLoadingMore) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            requestsPagingState.error?.let { error ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+            if (instancesState.selectedInstance == null) {
+                NoInstanceView(InstanceType.Seerr)
+            } else {
+                when {
+                    requestsPagingState.isLoading && requestsPagingState.itemCount == 0 -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = error,
-                                modifier = Modifier.weight(1f),
-                                color = MaterialTheme.colorScheme.onErrorContainer
+                            LoadingIndicator(
+                                modifier = Modifier.size(96.dp)
                             )
-                            TextButton(onClick = { requestsPagingState.retry() }) {
-                                Text("Retry")
+                        }
+                    }
+
+                    requestsPagingState.isEmpty -> {
+                        EmptyState(
+                            message = "No requests found",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    else -> {
+                        LazyColumn(
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            item {
+                                Column {
+                                    userState?.let {
+                                        Text(it.id.toString())
+                                        Text(it.displayName)
+                                        Text(it.plexId?.toString() ?: "")
+                                    }
+                                }
                             }
-                            IconButton(onClick = { viewModel.clearError() }) {
-                                Icon(Icons.Default.Close, "Dismiss")
+                            items(
+                                count = requestsPagingState.itemCount,
+                                key = { index -> requestsPagingState.peek(index)?.request?.id ?: index }
+                            ) { index ->
+                                requestsPagingState[index]?.let { request ->
+                                    RequestCard(mediaPackage = request)
+                                }
+                            }
+
+                            if (requestsPagingState.isLoadingMore) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                requestsPagingState.error?.let { error ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = error,
+                                    modifier = Modifier.weight(1f),
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                TextButton(onClick = { requestsPagingState.retry() }) {
+                                    Text("Retry")
+                                }
+                                IconButton(onClick = { viewModel.clearError() }) {
+                                    Icon(Icons.Default.Close, "Dismiss")
+                                }
                             }
                         }
                     }
@@ -174,7 +183,8 @@ fun RequestsTab(
 }
 
 @Composable
-private fun RequestCard(request: MediaRequest) {
+private fun RequestCard(mediaPackage: MediaRequestPackage) {
+    val request = mediaPackage.request
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -182,6 +192,7 @@ private fun RequestCard(request: MediaRequest) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            Text("Has details - ${mediaPackage.details != null}")
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
