@@ -47,7 +47,7 @@ class PreferencesStore(
         InstanceType.Sonarr -> sonarrInfoCardKey
         InstanceType.Radarr -> radarrInfoCardKey
         InstanceType.Lidarr -> lidarrInfoCardKey
-//        InstanceType.Seerr -> seerrInfoCardKey
+        InstanceType.Seerr -> seerrInfoCardKey
     }
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -236,7 +236,7 @@ class PreferencesStore(
         }
 
         val allTabs = TabItem.navigationEntries
-        val displayedAndHidden = (savedPrefs.bottomTabItems + savedPrefs.hiddenTabs).filter { it in allTabs }
+        val displayedAndHidden = savedPrefs.bottomTabItems + savedPrefs.hiddenTabs
         val newTabs = allTabs.filter { it !in displayedAndHidden }
 
         return if (newTabs.isNotEmpty()) {

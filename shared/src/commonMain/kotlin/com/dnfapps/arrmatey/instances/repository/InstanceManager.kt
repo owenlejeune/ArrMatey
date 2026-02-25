@@ -12,7 +12,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -61,7 +60,7 @@ class InstanceManager(
 
     private fun createScopedRepository(instance: Instance, httpClient: HttpClient): InstanceScopedRepository {
         return when (instance.type) {
-//            InstanceType.Seerr -> SeerrInstanceRepository(instance, httpClient)
+            InstanceType.Seerr -> SeerrInstanceRepository(instance, httpClient)
             InstanceType.Sonarr,
             InstanceType.Radarr,
             InstanceType.Lidarr -> ArrInstanceRepository(instance, httpClient)
@@ -83,11 +82,11 @@ class InstanceManager(
                 instance?.let { getArrRepository(it.id) }
             }
 
-    fun getSelectedSeerrRepository(): Flow<SeerrInstanceRepository?> = flow { emit(null) }
-//        instanceRepository.observeSelectedInstance(InstanceType.Seerr)
-//            .map { instance ->
-//                instance?.let { getSeerrRepository(it.id) }
-//            }
+    fun getSelectedSeerrRepository(): Flow<SeerrInstanceRepository?> =
+        instanceRepository.observeSelectedInstance(InstanceType.Seerr)
+            .map { instance ->
+                instance?.let { getSeerrRepository(it.id) }
+            }
 
     fun getAllRepositories(): List<InstanceScopedRepository> {
         return _instanceRepositories.value.values.toList()
