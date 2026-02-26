@@ -36,7 +36,7 @@ class MediaRequestPackageService(
 
         client.getMovieDetails(tmdbId)
             .onSuccess { movieDetails ->
-                details = RequestMediaDetails.Movie(movieDetails)
+                details = movieDetails
             }
             .onError { _, message, _ ->
                 println("Error fetching movie details: $message")
@@ -50,7 +50,7 @@ class MediaRequestPackageService(
 
         client.getTvDetails(tmdbId)
             .onSuccess { tvDetails ->
-                details = RequestMediaDetails.Tv(tvDetails)
+                details = tvDetails
             }
             .onError { _, message, _ ->
                 println("Error fetching tv details: $message")

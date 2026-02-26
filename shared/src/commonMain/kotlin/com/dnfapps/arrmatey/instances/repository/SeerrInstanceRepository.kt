@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.client.paging.PagingSource
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClient
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClientImpl
+import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
@@ -56,5 +57,13 @@ class SeerrInstanceRepository(
         pageSize: Int = 10
     ): NetworkResult<RequestResponse> {
         return client.getRequests(page = page, pageSize = pageSize)
+    }
+
+    suspend fun setRequestStatus(requestId: Long, status: ApprovalStatus): NetworkResult<MediaRequest> {
+        return client.setRequestStatus(requestId, status)
+    }
+
+    suspend fun deleteRequest(requestId: Long): NetworkResult<Unit> {
+        return client.deleteRequest(requestId)
     }
 }

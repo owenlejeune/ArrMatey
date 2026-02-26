@@ -25,4 +25,13 @@ data class SeerrUser(
     @Contextual val createdAt: Instant? = null,
     @Contextual val updatedAt: Instant? = null,
     // settings: UserSettings? = null
-)
+) {
+    fun hasPermission(permission: UserPermission): Boolean {
+        if ((this.permissions and UserPermission.ADMIN.bit) != 0) return true
+        return (this.permissions and permission.bit) != 0
+    }
+
+    fun hasAnyPermission(vararg permissions: UserPermission): Boolean {
+        return permissions.any { hasPermission(it) }
+    }
+}

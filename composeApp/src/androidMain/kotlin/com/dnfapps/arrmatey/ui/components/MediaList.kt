@@ -91,7 +91,7 @@ fun <T: ArrMedia> MediaItem(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BannerView(
-                item = item,
+                bannerUrl = item.getBanner()?.remoteUrl,
                 modifier = Modifier.matchParentSize()
             )
             Box(modifier = Modifier.matchParentSize().background(TranslucentBlack))
@@ -238,7 +238,6 @@ private fun ColumnScope.ArtistDetails(
     }
     Text(statusStr, color = Color.White, fontSize = 14.sp, lineHeight = 18.sp)
 
-//    Spacer(modifier = Modifier.weight(1f))
     if (item.id != null) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -261,11 +260,10 @@ private fun ColumnScope.ArtistDetails(
 
 @Composable
 fun BannerView(
-    item: ArrMedia,
+    bannerUrl: String?,
     modifier: Modifier = Modifier
 ) {
-    val banner = item.getBanner()?.remoteUrl
-    banner?.let { bannerUrl ->
+    bannerUrl?.let { bannerUrl ->
         AsyncImage(
             model = rememberRemoteImageData(bannerUrl),
             contentDescription = null,

@@ -73,6 +73,10 @@ fun HomeScreen(
 
     val pagerState = rememberPagerState { tabPreferences.bottomTabItems.size }
 
+    LaunchedEffect(tabPreferences) {
+        navigationManager.setSelectedTab(tabPreferences.bottomTabItems.first())
+    }
+
     LaunchedEffect(selectedTab) {
         val index = visibleTabs.indexOf(selectedTab)
         if (index >= 0) {

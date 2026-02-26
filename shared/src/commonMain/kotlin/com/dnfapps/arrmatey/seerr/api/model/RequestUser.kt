@@ -12,7 +12,7 @@ data class RequestUser(
     val email: String,
     val plexUsername: String? = null,
     val jellyfinUsername: String? = null,
-    val username: String,
+    val username: String? = null,
     @Contextual val recoveryLinkExpirationDate: Instant? = null,
     val userType: Int,
     val plexId: String? = null,

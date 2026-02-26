@@ -2,14 +2,18 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
-import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
+import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
+import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +23,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
@@ -27,12 +32,17 @@ class RequestsViewModel(
     getSeerrInstanceRepositoryUseCase: GetSeerrInstanceRepositoryUseCase,
     private val getCurrentSeerrUserUseCase: GetCurrentSeerrUserUseCase,
     private val getRequestsUseCase: GetRequestsUseCase,
+    private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase,
+    private val cancelRequestUseCase: CancelRequestUseCase
 ): ViewModel() {
 
     private var pagingController: PagingController<MediaRequestPackage>? = null
 
     private val _requestsState = MutableStateFlow<PagedData<MediaRequestPackage>>(PagedData())
     val requestsState: StateFlow<PagedData<MediaRequestPackage>> = _requestsState.asStateFlow()
+
+    private val _operationsState = MutableStateFlow(RequestOperationsState())
+    val operationsState: StateFlow<RequestOperationsState> = _operationsState.asStateFlow()
 
     private val selectedRepository = getSeerrInstanceRepositoryUseCase
         .observeSelected()
@@ -89,6 +99,59 @@ class RequestsViewModel(
 
     fun retry() {
         pagingController?.retry()
+    }
+
+    fun approveRequest(requestId: Long) {
+        val repository = selectedRepository.value ?: return
+        viewModelScope.launch {
+            setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Approve, repository)
+                .collect { status ->
+                    _operationsState.update {
+                        val currentStates = it.approvalStates.toMutableMap()
+                        currentStates[requestId] = status
+                        it.copy(
+                            approvalStates = currentStates
+                        )
+                    }
+                    if (status is OperationStatus.Success) {
+                        refresh()
+                    }
+                }
+        }
+    }
+
+    fun declineRequest(requestId: Long) {
+        val repository = selectedRepository.value ?: return
+        viewModelScope.launch {
+            setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Decline, repository)
+                .collect { status ->
+                    _operationsState.update {
+                        val currentStates = it.cancelStates.toMutableMap()
+                        currentStates[requestId] = status
+                        it.copy(cancelStates = currentStates)
+                    }
+                    if (status is OperationStatus.Success) {
+                        refresh()
+                    }
+                }
+        }
+    }
+
+    fun cancelRequest(requestId: Long) {
+        val repository = selectedRepository.value ?: return
+        viewModelScope.launch {
+            cancelRequestUseCase(requestId, repository)
+                .collect { status ->
+                    _operationsState.update {
+                        val currentStates = it.cancelStates.toMutableMap()
+                        currentStates[requestId] = status
+                        it.copy(cancelStates = currentStates)
+                    }
+                    if (status is OperationStatus.Success) {
+                        refresh()
+                    }
+                }
+        }
     }
 
 }

@@ -65,8 +65,10 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateCalendarFilterPreferenceUseCase
+import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.NetworkConnectivityObserverFactory
@@ -156,6 +158,8 @@ val useCaseModule = module {
     factory { GetSeerrInstanceRepositoryUseCase(get()) }
     factory { GetCurrentSeerrUserUseCase() }
     factory { GetRequestsUseCase() }
+    factory { CancelRequestUseCase() }
+    factory { SetRequestApprovalStatusUseCase() }
 }
 
 val viewModelModule = module {
@@ -193,7 +197,7 @@ val viewModelModule = module {
         ArrInstanceDashboardViewModel(instanceId, get())
     }
     factory { CalendarViewModel(get(), get(), get(), get()) }
-    factory { RequestsViewModel(get(), get(), get()) }
+    factory { RequestsViewModel(get(), get(), get(), get(), get() ) }
 }
 
 val resourcesModule = module {

@@ -6,6 +6,8 @@ import com.dnfapps.arrmatey.client.safeGet
 import com.dnfapps.arrmatey.client.safePost
 import com.dnfapps.arrmatey.client.safePut
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
@@ -22,6 +24,8 @@ interface SeerrClient {
     suspend fun getRequests(page: Int = 1, pageSize: Int = 20): NetworkResult<RequestResponse>
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
+    suspend fun setRequestStatus(requestId: Long, status: ApprovalStatus): NetworkResult<MediaRequest>
+    suspend fun deleteRequest(requestId: Long): NetworkResult<Unit>
 }
 
 class SeerrClientImpl(
@@ -53,6 +57,15 @@ class SeerrClientImpl(
     override suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails> =
         get("tv/$tmdbId")
 
+    override suspend fun setRequestStatus(
+        requestId: Long,
+        status: ApprovalStatus
+    ): NetworkResult<MediaRequest> =
+        post("request/$requestId/${status.name.lowercase()}")
+
+    override suspend fun deleteRequest(requestId: Long): NetworkResult<Unit> =
+        delete("request/$requestId")
+
 
     /**
      * Helpers
@@ -77,6 +90,13 @@ class SeerrClientImpl(
         httpClient.safePost<R>("$baseUrl/$endpoint") {
             contentType(ContentType.Application.Json)
             setBody(body)
+        }
+
+    private suspend inline fun <reified T> post(
+        endpoint: String
+    ): NetworkResult<T> =
+        httpClient.safePost<T>("$baseUrl/$endpoint") {
+            contentType(ContentType.Application.Json)
         }
 
     private suspend inline fun <reified T, reified R> put(
