@@ -31,6 +31,7 @@ class PagingController<T: Any>(
                     _state.update {
                         PagedData(
                             items = result.data,
+                            totalItemCount = result.totalItemCount,
                             currentPage = result.currentPage,
                             hasMore = result.hasNextPage,
                             isLoading = false,

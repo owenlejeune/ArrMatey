@@ -142,15 +142,6 @@ fun RequestsScreen(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            item {
-                                Column {
-                                    userState?.let {
-                                        Text(it.id.toString())
-                                        Text(it.displayName)
-                                        Text(it.plexId?.toString() ?: "")
-                                    }
-                                }
-                            }
                             items(
                                 count = requestsPagingState.itemCount,
                                 key = { index -> requestsPagingState.peek(index)?.request?.id ?: index }

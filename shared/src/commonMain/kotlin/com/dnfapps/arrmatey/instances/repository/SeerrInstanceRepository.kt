@@ -46,6 +46,7 @@ class SeerrInstanceRepository(
                 val enrichedRequests = mediaPackageService.enrichRequests(response.results)
                 PageResult(
                     items = enrichedRequests,
+                    totalItemCount = response.pageInfo.results,
                     hasNextPage = response.pageInfo.page < response.pageInfo.pages
                 )
             }

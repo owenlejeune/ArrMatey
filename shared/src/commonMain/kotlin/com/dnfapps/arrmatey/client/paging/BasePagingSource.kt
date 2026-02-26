@@ -19,7 +19,8 @@ class BasePagingSource<T : Any, R : Any>(
                     LoadResult.Page(
                         data = pageResult.items,
                         currentPage = page,
-                        hasNextPage = pageResult.hasNextPage
+                        hasNextPage = pageResult.hasNextPage,
+                        totalItemCount = pageResult.totalItemCount
                     )
                 } catch (e: Exception) {
                     LoadResult.Error(e)

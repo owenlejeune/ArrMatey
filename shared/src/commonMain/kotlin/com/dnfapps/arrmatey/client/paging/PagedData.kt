@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.client.paging
 
 data class PagedData<T>(
     val items: List<T> = emptyList(),
+    val totalItemCount: Int = 0,
     val currentPage: Int = 0,
     val hasMore: Boolean = false,
     val isLoading: Boolean = false,
