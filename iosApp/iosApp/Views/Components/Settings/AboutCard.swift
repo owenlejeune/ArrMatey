@@ -10,6 +10,7 @@ import Shared
 import Flow
 
 struct AboutCard: View {
+    let onFeatureRequestClick: () -> Void
     let onBugReportClick: () -> Void
     let onGitHubClick: () -> Void
     let onDonateClick: () -> Void
@@ -34,6 +35,7 @@ struct AboutCard: View {
             
             HFlow(spacing: 10) {
                 Chip(title: MR.strings().bug_report.localized(), icon: "ladybug.fill", action: onBugReportClick)
+                Chip(title: MR.strings().feature_request.localized(), icon: "sparkle.text.clipboard", action: onFeatureRequestClick)
                 Chip(title: MR.strings().donate.localized(), icon: "heart", action: onDonateClick)
                 Chip(title: MR.strings().github.localized(), icon: "terminal", action: onGitHubClick)
                 Chip(title: MR.strings().libraries.localized(), icon: "book.closed", action: onLibrariesClick)

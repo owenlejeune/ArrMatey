@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dnfapps.arrmatey.arr.api.client.LoggerLevel
@@ -11,6 +12,7 @@ import com.dnfapps.arrmatey.arr.state.CalendarFilterState
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.state.ContentFilter
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.features.ReleaseNotes
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +44,7 @@ class PreferencesStore(
     private val useDynamicThemeKey = booleanPreferencesKey("useDynamicTheme")
     private val useClearLogoKey = booleanPreferencesKey("useClearLogo")
     private val tabPreferencesKey = stringPreferencesKey("tabPreferences")
+    private val lastReleaseNotesKey = intPreferencesKey("lastReleaseNotes")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> sonarrInfoCardKey
@@ -243,6 +246,20 @@ class PreferencesStore(
             savedPrefs.copy(hiddenTabs = savedPrefs.hiddenTabs + newTabs)
         } else {
             savedPrefs
+        }
+    }
+
+    val shouldShowReleaseNotes: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            val lastCode = preferences[lastReleaseNotesKey] ?: -1
+            lastCode < ReleaseNotes.latestUpdate.buildCode
+        }
+
+    fun markReleaseNotesAsSeen() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                preferences[lastReleaseNotesKey] = ReleaseNotes.latestUpdate.buildCode
+            }
         }
     }
 

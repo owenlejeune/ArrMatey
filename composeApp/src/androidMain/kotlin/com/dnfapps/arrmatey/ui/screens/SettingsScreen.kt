@@ -110,9 +110,7 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
-        PullToRefreshBox(
-            isRefreshing = instanceConnectionStatues.values.any { it is OperationStatus.InProgress },
-            onRefresh = { viewModel.refreshInstanceConnections() },
+        Box(
             modifier = Modifier.padding(paddingValues)
         ) {
             Column(
@@ -198,7 +196,7 @@ fun SettingsScreen(
                             imageVector = Icons.Default.Navigation,
                             contentDescription = null,
                             modifier = Modifier.size(40.dp),
-                            tint = MaterialTheme.colorScheme.primaryContainer
+                            tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
                             text = mokoString(MR.strings.navigation_bar_configuration),
@@ -210,6 +208,9 @@ fun SettingsScreen(
                 }
 
                 AboutCard(
+                    onFeatureRequestClick = {
+                        context.openLink(moko.getString(MR.strings.feature_request_link))
+                    },
                     onBugReportClick = {
                         confirmShareLastLog = crashManager.getLastCrashLog()
                         if (confirmShareLastLog == null) {

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,6 +33,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AboutCard(
+    onFeatureRequestClick: () -> Unit,
     onBugReportClick: () -> Unit,
     onGitHubClick: () -> Unit,
     onDonateClick: () -> Unit,
@@ -85,6 +87,18 @@ fun AboutCard(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.BugReport,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+                AssistChip(
+                    onClick = onFeatureRequestClick,
+                    label = { Text(mokoString(MR.strings.feature_request)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.NewReleases,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )

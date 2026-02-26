@@ -32,6 +32,7 @@ kotlin {
             implementation(libs.androidx.browser)
             implementation(libs.aboutlibraries.compose)
             implementation(libs.reorderable)
+            implementation(libs.compose.markdown)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

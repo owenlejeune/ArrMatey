@@ -24,7 +24,6 @@ import org.koin.compose.koinInject
 @Composable
 fun ArrTab(
     type: InstanceType,
-    arrMediaViewModel: ArrMediaViewModel = koinInjectParams(type),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigation<ArrScreen> = navigationManager.arr(type)
 ) {
@@ -33,7 +32,7 @@ fun ArrTab(
         onBack = { navigation.popBackStack() },
         entryProvider = entryProvider {
             entry<ArrScreen.Library> {
-                ArrLibraryScreen(type, arrMediaViewModel)
+                ArrLibraryScreen(type)
             }
             entry<ArrScreen.Details> { details ->
                 MediaDetailsScreen(details.id, type)

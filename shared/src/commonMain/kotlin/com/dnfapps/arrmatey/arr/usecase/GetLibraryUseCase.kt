@@ -31,10 +31,13 @@ class GetLibraryUseCase(
         }
         val preferencesRepository = preferencesStoreRepository.getInstancePreferences(instanceId)
 
-        emit(ArrLibrary.Loading)
-        coroutineScope {
-            launch {
-                repository.refreshLibrary()
+
+        if (repository.library.value == null) {
+            emit(ArrLibrary.Loading)
+            coroutineScope {
+                launch {
+                        repository.refreshLibrary()
+                }
             }
         }
 

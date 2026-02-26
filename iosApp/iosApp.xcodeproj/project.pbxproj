@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4405C4E52F21671700F7FEC8 /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 4405C4E42F21671700F7FEC8 /* Flow */; };
+		44E4C29C2F50A6D00024109F /* MarkdownView in Frameworks */ = {isa = PBXBuildFile; productRef = 44E4C29B2F50A6D00024109F /* MarkdownView */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44E4C29C2F50A6D00024109F /* MarkdownView in Frameworks */,
 				4405C4E52F21671700F7FEC8 /* Flow in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -129,6 +131,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				4405C4E32F21671700F7FEC8 /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */,
+				44E4C29A2F50A6D00024109F /* XCRemoteSwiftPackageReference "MarkdownView" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D5D342071E63D7F728C5AA6C /* Products */;
@@ -419,6 +422,14 @@
 				minimumVersion = 3.1.1;
 			};
 		};
+		44E4C29A2F50A6D00024109F /* XCRemoteSwiftPackageReference "MarkdownView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/LiYanan2004/MarkdownView.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -426,6 +437,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4405C4E32F21671700F7FEC8 /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */;
 			productName = Flow;
+		};
+		44E4C29B2F50A6D00024109F /* MarkdownView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 44E4C29A2F50A6D00024109F /* XCRemoteSwiftPackageReference "MarkdownView" */;
+			productName = MarkdownView;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

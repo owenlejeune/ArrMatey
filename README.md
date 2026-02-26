@@ -122,6 +122,16 @@
   </tr>
 </table>
 
+### Instance Management
+<table>
+  <tr>
+    <td><img src="screenshots/instance_dashboard.png" width="250"/><img src="screenshots/instance_dashboard_ios.png" width="250"/></td>
+  </tr>
+  <tr>
+    <td> align="center"><em>Instance Dashbaord</em></td>
+  </tr>
+</table>
+
 ## Getting Started
 
 This is a Kotlin Multiplatform project targeting Android, iOS.

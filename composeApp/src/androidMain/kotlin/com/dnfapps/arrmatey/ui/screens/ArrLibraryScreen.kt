@@ -74,7 +74,7 @@ import org.koin.compose.koinInject
 @Composable
 fun ArrLibraryScreen(
     type: InstanceType,
-    arrMediaViewModel: ArrMediaViewModel,
+    arrMediaViewModel: ArrMediaViewModel = koinInjectParams(type),
     instancesViewModel: InstancesViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject(),
     navigationManager: NavigationManager = koinInject(),

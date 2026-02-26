@@ -136,11 +136,13 @@ fun ActivityTab(
                 .padding(paddingValues)
                 .fillMaxSize(),
             contentAlignment = Alignment.Center,
-            isRefreshing = false,
+            isRefreshing = isLoading,
             onRefresh = { viewModel.refresh() }
         ) {
             if (queueItems.isEmpty()) {
-                EmptyActivityState()
+                EmptyActivityState(modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()))
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -158,24 +160,24 @@ fun ActivityTab(
                     }
                 }
             }
-        }
 
-        selectedItem?.let { item ->
-            QueueItemInfoSheet(
-                item = item,
-                onDismiss = { selectedItem = null },
-                onRemove = { showConfirmRemove = true }
-            )
-        }
+            selectedItem?.let { item ->
+                QueueItemInfoSheet(
+                    item = item,
+                    onDismiss = { selectedItem = null },
+                    onRemove = { showConfirmRemove = true }
+                )
+            }
 
-        if (showConfirmRemove && selectedItem != null) {
-            ConfirmDeleteItemSheet(
-                onDismiss = { showConfirmRemove = false },
-                deleteInProgress = removeItemStatus is OperationStatus.InProgress,
-                onDelete = { clientRemove, blocklist, skipRedownload ->
-                    viewModel.removeQueueItem(selectedItem!!, clientRemove, blocklist, skipRedownload)
-                }
-            )
+            if (showConfirmRemove && selectedItem != null) {
+                ConfirmDeleteItemSheet(
+                    onDismiss = { showConfirmRemove = false },
+                    deleteInProgress = removeItemStatus is OperationStatus.InProgress,
+                    onDelete = { clientRemove, blocklist, skipRedownload ->
+                        viewModel.removeQueueItem(selectedItem!!, clientRemove, blocklist, skipRedownload)
+                    }
+                )
+            }
         }
     }
 }

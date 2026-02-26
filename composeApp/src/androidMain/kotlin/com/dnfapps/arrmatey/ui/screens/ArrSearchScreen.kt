@@ -114,6 +114,7 @@ fun ArrSearchScreen(
                         )
                     } else {
                         MediaList(
+                            aspectRatio = type.aspectRatio,
                             items = state.items,
                             onItemClick = { item ->
                                 val destination = if (item.id == null) {

@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -27,6 +28,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -178,7 +180,8 @@ private fun DrawerContent(
                 label = { Text(mokoString(item.resource)) },
                 selected = overlayTab == item,
                 icon = { Icon(item.androidIcon, contentDescription = null) },
-                onClick = { onDrawerTabClick(item) }
+                onClick = { onDrawerTabClick(item) },
+                badge = { BadgeContent(item) }
             )
         }
 
@@ -201,34 +204,39 @@ private fun MainNavigationContent(
     pagerState: PagerState,
     onTabSelected: (TabItem) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        bottomBar = {
+            if (visibleTabs.size > 1) {
+                NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+                    visibleTabs.forEach { entry ->
+                        NavigationBarItem(
+                            selected = entry == selectedTab,
+                            onClick = { onTabSelected(entry) },
+                            icon = {
+                                BadgedBox(badge = { BadgeContent(tabItem = entry) }) {
+                                    Icon(
+                                        imageVector = entry.androidIcon,
+                                        contentDescription = mokoString(entry.resource)
+                                    )
+                                }
+                            },
+                            label = { Text(text = mokoString(entry.resource)) }
+                        )
+                    }
+                }
+            }
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { paddingValues ->
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
             userScrollEnabled = false,
             beyondViewportPageCount = visibleTabs.size
         ) { page ->
             TabItemContent(visibleTabs[page])
-        }
-
-        if (visibleTabs.size > 1) {
-            NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-                visibleTabs.forEach { entry ->
-                    NavigationBarItem(
-                        selected = entry == selectedTab,
-                        onClick = { onTabSelected(entry) },
-                        icon = {
-                            BadgedBox(badge = { BadgeContent(tabItem = entry) }) {
-                                Icon(
-                                    imageVector = entry.androidIcon,
-                                    contentDescription = mokoString(entry.resource)
-                                )
-                            }
-                        },
-                        label = { Text(text = mokoString(entry.resource)) }
-                    )
-                }
-            }
         }
     }
 }

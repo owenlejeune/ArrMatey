@@ -90,6 +90,9 @@ struct SettingsScreen: View {
             }
             
             AboutCard(
+                onFeatureRequestClick: { if let url = URL(string: MR.strings().feature_request_link.localized()) {
+                    openURL(url)
+                } },
                 onBugReportClick: {
                     if crashManager.getLastCrashLog() != nil {
                         showShareLogAlert = true

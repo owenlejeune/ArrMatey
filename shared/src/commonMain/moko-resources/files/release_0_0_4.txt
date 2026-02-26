@@ -1,0 +1,18 @@
+First off, huge thanks to everyone for giving ArrMatey a try! This has been a passion project of mine for the past few months, and seeing so many people excited about the it has been amazing. Thanks to everyone who's submitted contributions, bug reports, and feature requests over the past few weeks. The app will likely be moving out of alpha and into beta soon, but I wanted to share some exiting changes that have been made in the last few releases.
+
+### Navigation Customization
+* Don't use a service? Only care about checking your upcoming release schedule? Navigation customization options are here! This new settings panel allows you to drag-and-drop to reorder the items in your navigation bar, or hide them entirely in the overflow drawer.
+
+### Local Network Switching
+* If you have your instance exposed to the network, but prefer a local connection at home, you can now configure separate local and remote endpoint per-instance in your instance settings.
+
+### Instance Insights
+* Speaking of instances, tapping on an instance in Settings now opens the new instance dashboard. Initially, this dashboard shows service health alerts, disk space metrics, and system details. If there's additional information you'd like to see here, feel free to open a feature request!
+
+### Better Bug Reporting
+* The app now includes automatic crash log capture. If you experience an app crash, tapping the Bug Report option in Settings will give you the option to copy the log or share it directly.
+
+### Upcoming Features
+* Work has begun on Seerr, Prowlarr, and download client (qBittorrent/Transmission/Deluge/SABnzbd) integration, so keep an eye out for that coming soon!
+
+As always feel free to open bug reports or feature requests on the GitHub project, I'm checking it daily and working to add fixes and updates as quickly as possible. And if you see a feature you want already requested, give it a thumbs-up so I know others want that feature too. There are also updated contribution guidelines for those interesting in contributing to the project!

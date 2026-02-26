@@ -45,6 +45,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
+import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
@@ -55,6 +56,7 @@ private val defaultHeight = 100.dp
 
 @Composable
 fun <T: ArrMedia> MediaList(
+    aspectRatio: AspectRatio,
     items: List<T>,
     onItemClick: (T) -> Unit,
     itemIsActive: (T) -> Boolean,
@@ -69,13 +71,14 @@ fun <T: ArrMedia> MediaList(
     ) {
         items(items) { item ->
             val isActive = itemIsActive(item)
-            MediaItem(item, onItemClick, isActive)
+            MediaItem(aspectRatio, item, onItemClick, isActive)
         }
     }
 }
 
 @Composable
 fun <T: ArrMedia> MediaItem(
+    aspectRatio: AspectRatio,
     item: T,
     onItemClick: (T) -> Unit,
     isActive: Boolean = false
@@ -108,7 +111,7 @@ fun <T: ArrMedia> MediaItem(
                     contentDescription = null,
                     modifier = Modifier
                         .height(defaultHeight)
-                        .aspectRatio(0.675f, true)
+                        .aspectRatio(aspectRatio.ratio, true)
                         .clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Fit
                 )

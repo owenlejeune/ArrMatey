@@ -150,14 +150,13 @@ fun InteractiveSearchScreen(
         Box(
             modifier = Modifier
                 .padding(paddingValues)
-                .fillMaxSize()
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
             when (val state = releaseUiState) {
                 is ReleaseLibrary.Loading -> {
                     LoadingIndicator(
-                        modifier = Modifier
-                            .size(96.dp)
-                            .align(Alignment.Center)
+                        modifier = Modifier.size(96.dp)
                     )
                 }
                 is ReleaseLibrary.Success -> {
@@ -188,7 +187,7 @@ fun InteractiveSearchScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "No results found"
+                                        text = mokoString(MR.strings.no_results_found)
                                     )
                                 }
                             }

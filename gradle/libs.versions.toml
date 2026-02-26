@@ -32,6 +32,7 @@ moko = "0.26.0"
 windowSize = "1.4.0"
 aboutLibraries = "13.2.1"
 reorderable = "3.0.0"
+composeMarkdown = "0.5.8"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -81,6 +82,7 @@ resources-generator = { module = "dev.icerock.moko:resources-generator", version
 aboutlibraries = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
 aboutlibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
+compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "composeMarkdown" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

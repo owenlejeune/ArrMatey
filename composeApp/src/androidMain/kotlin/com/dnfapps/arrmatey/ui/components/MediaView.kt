@@ -20,6 +20,7 @@ fun MediaView(
 ) {
     when (viewType) {
         ViewType.List -> MediaList(
+            aspectRatio = type.aspectRatio,
             items = items,
             onItemClick = onItemClick,
             itemIsActive = itemIsActive,
