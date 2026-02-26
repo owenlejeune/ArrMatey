@@ -5,10 +5,10 @@ enum class MediaStatus(val value: Int) {
     Pending(2),
     Processing(3),
     PartiallyAvailable(4),
-    Available(5);
+    Available(5),
+    Deleted(7);
 
     companion object {
-        fun fromValue(value: Int) =
-            entries.firstOrNull { it.value == value } ?: Unknown
+        fun fromValue(value: Int) = entries.firstOrNull { it.value == value } ?: Unknown
     }
 }

@@ -62,6 +62,7 @@ import com.dnfapps.arrmatey.entensions.collectAsLazyPagingItems
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
+import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
@@ -221,7 +222,7 @@ private fun RequestCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
         colors = CardDefaults.cardColors(
             containerColor = inverseSurfaceLight,
             contentColor = inverseOnSurfaceLight
@@ -271,9 +272,9 @@ private fun RequestCard(
                         )
                         Row(
                             verticalAlignment = Alignment.Top,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            StatusChip(RequestStatus.fromValue(request.status))
+                            StatusChip(request)
 
                             Column {
                                 Row(
@@ -351,6 +352,8 @@ private fun RequestCard(
                     }
                 }
 
+                Spacer(Modifier.height(12.dp))
+
                 val isAdmin = user?.hasPermission(UserPermission.ADMIN) == true
                 RequestButtons(
                     isAdmin = isAdmin,
@@ -378,22 +381,43 @@ private fun RequestCard(
 }
 
 @Composable
-private fun StatusChip(status: RequestStatus) {
-    val (container, color) = when (status) {
-        RequestStatus.Pending -> MaterialTheme.colorScheme.onTertiary to MaterialTheme.colorScheme.tertiary
-        RequestStatus.Approved -> MaterialTheme.colorScheme.onPrimary to MaterialTheme.colorScheme.primary
-        RequestStatus.Declined -> MaterialTheme.colorScheme.onError to MaterialTheme.colorScheme.error
-        RequestStatus.Available -> MaterialTheme.colorScheme.onSecondary to MaterialTheme.colorScheme.secondary
-        RequestStatus.PartiallyAvailable -> MaterialTheme.colorScheme.onSecondary to MaterialTheme.colorScheme.secondary
+private fun StatusChip(request: MediaRequest) {
+    val mediaStatus = MediaStatus.fromValue(request.media.status)
+    val requestStatus = RequestStatus.fromValue(request.status)
+
+    // Priority Logic: If media is Processing, Available, or Deleted, show that.
+    // Otherwise, show the Request status (Pending/Approved/Declined).
+    val (label, container, content) = when {
+        mediaStatus == MediaStatus.Deleted ->
+            Triple("Deleted", MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+
+        mediaStatus == MediaStatus.Available ->
+            Triple("Available", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
+
+        mediaStatus == MediaStatus.PartiallyAvailable ->
+            Triple("Partially Available", MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+
+        mediaStatus == MediaStatus.Processing ->
+            Triple("Processing", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+
+        requestStatus == RequestStatus.Declined ->
+            Triple("Declined", MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+
+        requestStatus == RequestStatus.Approved ->
+            Triple("Approved", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+
+        else -> // Default to Pending
+            Triple("Pending", MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
     }
 
     AssistChip(
         onClick = { },
-        label = { Text(status.name) },
+        label = { Text(label) },
         colors = AssistChipDefaults.assistChipColors(
             containerColor = container,
-            labelColor = color
-        )
+            labelColor = content
+        ),
+        border = null // Clean up the look for status chips
     )
 }
 
