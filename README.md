@@ -128,7 +128,7 @@
     <td><img src="screenshots/instance_dashboard.png" width="250"/><img src="screenshots/instance_dashboard_ios.png" width="250"/></td>
   </tr>
   <tr>
-    <td> align="center"><em>Instance Dashbaord</em></td>
+    <td align="center"><em>Instance Dashbaord</em></td>
   </tr>
 </table>
 
@@ -175,12 +175,13 @@ Any new strings should be added to strings.xml, or plurals.xml for plural string
 3. Select your instance type (Sonarr/Radarr/Lidarr)
 4. Enter your instance details:
   - **Label**: A friendly name for this instance
-  - **Host**: Your instance URL (e.g., `http://192.168.1.100:8989`)
+  - **Host**: Your instance URL (e.g., `http://192.168.1.100:8989`, `https://service.mydomain.com`)
   - **API Key**: Found in your instance settings under General → Security
 5. (Optional) Configure advanced settings:
   - **Slow Instance**: Enable for remote instances with higher latency
   - **Custom Timeout**: Set a custom timeout in seconds (default: 60s)
   - **Custom Headers**: Add additional HTTP headers if needed
+  - **Local Endpoint**: If you use a custom domain for remoote access, you can specify the local address of your instance to use on your home network.
 6. Tap **Test Connection** to verify
 7. Save your instance
 

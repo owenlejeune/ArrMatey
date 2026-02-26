@@ -45,6 +45,7 @@ class PreferencesStore(
     private val useClearLogoKey = booleanPreferencesKey("useClearLogo")
     private val tabPreferencesKey = stringPreferencesKey("tabPreferences")
     private val lastReleaseNotesKey = intPreferencesKey("lastReleaseNotes")
+    private val isFirstLaunchKey = booleanPreferencesKey("isFirstLaunch")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> sonarrInfoCardKey
@@ -249,16 +250,37 @@ class PreferencesStore(
         }
     }
 
-    val shouldShowReleaseNotes: Flow<Boolean> = dataStore.data
+    val isFirstLaunch: Flow<Boolean> = dataStore.data
         .map { preferences ->
-            val lastCode = preferences[lastReleaseNotesKey] ?: -1
-            lastCode < ReleaseNotes.latestUpdate.buildCode
+            preferences[isFirstLaunchKey] ?: true
+        }
+
+    val shouldShowReleaseNotes: Flow<Boolean> = dataStore.data
+        .combine(isFirstLaunch) { preferences, isFirst ->
+            if (isFirst) {
+                false
+            } else {
+                val lastCode = preferences[lastReleaseNotesKey] ?: -1
+                lastCode < ReleaseNotes.latestUpdate.buildCode
+            }
         }
 
     fun markReleaseNotesAsSeen() {
         scope.launch {
             dataStore.edit { preferences ->
                 preferences[lastReleaseNotesKey] = ReleaseNotes.latestUpdate.buildCode
+            }
+        }
+    }
+
+    fun markFirstLaunchComplete() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[isFirstLaunchKey] ?: true
+                if (current) {
+                    markReleaseNotesAsSeen()
+                }
+                preferences[isFirstLaunchKey] = false
             }
         }
     }

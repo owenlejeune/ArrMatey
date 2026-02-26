@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,6 +29,10 @@ import org.koin.compose.koinInject
 fun App() {
     val preferences: PreferencesStore = koinInject()
     val showReleaseNotesSheet by preferences.shouldShowReleaseNotes.collectAsStateWithLifecycle(false)
+
+    LaunchedEffect(Unit) {
+        preferences.markFirstLaunchComplete()
+    }
 
     ArrMateyTheme {
         HomeScreen()

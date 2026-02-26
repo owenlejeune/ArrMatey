@@ -79,7 +79,7 @@ fun HomeScreen(
         navigationManager.setSelectedTab(tabPreferences.bottomTabItems.first())
     }
 
-    LaunchedEffect(selectedTab) {
+    LaunchedEffect(selectedTab, visibleTabs) {
         val index = visibleTabs.indexOf(selectedTab)
         if (index >= 0) {
             pagerState.scrollToPage(index)
@@ -234,7 +234,8 @@ private fun MainNavigationContent(
                 .fillMaxSize()
                 .padding(paddingValues),
             userScrollEnabled = false,
-            beyondViewportPageCount = visibleTabs.size
+            beyondViewportPageCount = visibleTabs.size,
+            key = { page -> visibleTabs[page].name }
         ) { page ->
             TabItemContent(visibleTabs[page])
         }
