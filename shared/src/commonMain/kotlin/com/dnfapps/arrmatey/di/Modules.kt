@@ -188,7 +188,7 @@ val viewModelModule = module {
     factory { (seriesId: Long, episode: Episode) ->
         EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get())
     }
-    factory { MoreScreenViewModel(get(), get()) }
+    factory { MoreScreenViewModel(get(), get(), get()) }
     factory { AddInstanceViewModel(get(), get(), get(), get()) }
     factory { (instanceId: Long) ->
         EditInstanceViewModel(instanceId, get(), get(), get(), get())

@@ -2,6 +2,7 @@ First off, huge thanks to everyone for giving ArrMatey a try! This has been a pa
 
 ### Navigation Customization
 * Don't use a service? Only care about checking your upcoming release schedule? Navigation customization options are here! This new settings panel allows you to drag-and-drop to reorder the items in your navigation bar, or hide them entirely in the overflow drawer.
+* You can also toggle using service logos for navigation icons. If enabled, logos for Sonarr, Radarr, and Lidarr will be used for navigation icons instead of the default system images.
 
 ### Local Network Switching
 * If you have your instance exposed to the network, but prefer a local connection at home, you can now configure separate local and remote endpoint per-instance in your instance settings.

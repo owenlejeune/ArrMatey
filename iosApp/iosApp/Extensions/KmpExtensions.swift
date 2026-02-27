@@ -103,3 +103,23 @@ extension ArrHealth: @retroactive Identifiable {
         return "\(String(describing: self.source)) \(self.type.name)"
     }
 }
+
+extension Shared.ImageResource {
+    func toImage(renderingMode: Image.TemplateRenderingMode = .template) -> Image {
+        if let uiImage = self.toUIImage() {
+            let scaledImage = uiImage.scaleToTabBarSize()
+            return Image(uiImage: scaledImage)
+                .renderingMode(renderingMode)
+        } else {
+            return Image(systemName: "exclamationmark.triangle")
+        }
+    }
+    
+    var systemName: String? {
+        let description = self.description
+        if description.contains("system:") {
+            return description.components(separatedBy: "system:").last?.trimmingCharacters(in: .whitespaces)
+        }
+        return nil
+    }
+}

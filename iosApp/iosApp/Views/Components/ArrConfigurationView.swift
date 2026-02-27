@@ -97,7 +97,8 @@ struct ArrConfigurationView: View {
     private func infoCardView() -> some View {
         VStack(spacing: 8) {
             HStack {
-                SVGImageView(filename: instanceType.iconKey)
+                Image(resource: instanceType.icon)
+                    .resizable()
                     .frame(width: 24, height: 24)
                 Text(String(instanceType.name))
                     .font(.system(size: 18, weight: .medium))
@@ -332,9 +333,7 @@ struct ArrConfigurationView: View {
                     }
                 }
             )) {
-                VStack(alignment: .leading) {
-                    Text(MR.strings().use_local_network.localized())
-                }
+                Text(MR.strings().use_local_network.localized())
             }
                 
             if uiState.localNetworkEnabled {

@@ -5,6 +5,15 @@ struct ContentView: View {
     @EnvironmentObject var navigationManager: NavigationManager
     @ObservedObject private var queueViewModel = ActivityQueueViewModelS()
     @ObservedObject private var preferences = PreferencesViewModel()
+    
+    init() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground() // Restores the standard blur/translucency
+        
+        // This ensures the background remains consistent
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
 
     var body: some View {
         TabView(selection: $navigationManager.selectedTab) {
@@ -15,7 +24,14 @@ struct ContentView: View {
                 }
                 .id(tabItem.name)
                 .tabItem {
-                    Label(tabItem.resource.localized(), systemImage: tabItem.iosIcon)
+                    if preferences.useServiceNavLogos, let logo = tabItem.associatedType?.tabIcon {
+                        Label(
+                            title: { Text(tabItem.resource.localized()) },
+                            icon: { logo.toImage(renderingMode: .template) }
+                        )
+                    } else {
+                        Label(tabItem.resource.localized(), systemImage: tabItem.iosIcon)
+                    }
                 }
                 .tag(tabItem)
                 .badge(badgeValue(for: tabItem))
@@ -93,16 +109,22 @@ struct AppLauncherGrid: View {
             ForEach(preferences.tabPreferences.hiddenTabs, id: \.self) { item in
                 NavigationLink(value: item) {
                     VStack(spacing: 12) {
-                        Image(systemName: item.iosIcon)
-                            .font(.system(size: 30))
-                            .frame(width: 65, height: 65)
-                            .background(Color.accentColor.opacity(0.1))
-                            .cornerRadius(16)
+                        if preferences.useServiceNavLogos, let logo = item.associatedType?.tabIcon {
+                            logo.toImage(renderingMode: .template)
+                                .foregroundColor(.themeOnPrimaryContainer)
+                        } else {
+                            Image(systemName: item.iosIcon)
+                                .font(.system(size: 30))
+                                .foregroundColor(.themeOnPrimaryContainer)
+                        }
                         
                         Text(item.resource.localized())
                             .font(.caption)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.themeOnPrimaryContainer)
                     }
+                    .frame(width: 80, height: 80)
+                    .background(.themePrimary.opacity(0.1))
+                    .cornerRadius(16)
                 }
             }
         }

@@ -206,7 +206,7 @@ fun InteractiveSearchScreen(
                                 navigationManager.openEditInstanceScreen(it.id)
                             }
                         },
-                        onRetry = {}
+                        onRetry = { viewModel.getRelease(releaseParams) }
                     )
                 }
                 else -> {}

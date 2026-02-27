@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.client.DEFAULT_SLOW_TIMEOUT
 import com.dnfapps.arrmatey.database.dao.ConflictField
 import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.entensions.openAppSettings
@@ -368,7 +369,7 @@ fun CustomTimeoutArea(
                 modifier = Modifier.fillMaxWidth(),
                 label = mokoString(MR.strings.custom_timeout_seconds),
                 enabled = isSlowInstance,
-                placeholder = "300",
+                placeholder = DEFAULT_SLOW_TIMEOUT.toString(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }

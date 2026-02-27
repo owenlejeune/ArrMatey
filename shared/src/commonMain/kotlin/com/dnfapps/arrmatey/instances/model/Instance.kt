@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.getNetworkUtils
+import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.StringResource
 
 @Entity(
@@ -66,7 +67,8 @@ data class Instance(
 
 enum class InstanceType(
     val resource: StringResource,
-    val iconKey: String,
+    val icon: ImageResource,
+    val tabIcon: ImageResource?,
     val github: String,
     val website: String,
     val defaultPort: Int,
@@ -80,7 +82,8 @@ enum class InstanceType(
         resource = MR.strings.sonarr_description,
         github = "https://github.com/Sonarr/Sonarr",
         website = "https://sonarr.tv/",
-        iconKey = "sonarr",
+        icon = MR.images.sonarr,
+        tabIcon = MR.images.sonarr_tab,
         defaultPort = 8989,
         supportsActivityQueue = true,
         apiBase = "api/v3",
@@ -92,7 +95,8 @@ enum class InstanceType(
         resource = MR.strings.radarr_description,
         github = "https://github.com/Radarr/Radarr",
         website = "https://radarr.video/",
-        iconKey = "radarr",
+        icon = MR.images.radarr,
+        tabIcon = MR.images.radarr_tab,
         defaultPort = 7878,
         supportsActivityQueue = true,
         apiBase = "api/v3",
@@ -104,7 +108,8 @@ enum class InstanceType(
         resource = MR.strings.lidarr_description,
         github = "https://github.com/Lidarr/Lidarr",
         website = "https://lidarr.audio/",
-        iconKey = "lidarr",
+        icon = MR.images.lidarr,
+        tabIcon = MR.images.lidarr_tab,
         defaultPort = 8686,
         supportsActivityQueue = true,
         apiBase = "api/v1",
@@ -116,7 +121,8 @@ enum class InstanceType(
         resource = MR.strings.seerr_description,
         github = "https://github.com/seerr-team/seerr",
         website = "https://docs.seerr.dev/",
-        iconKey = "seerr",
+        icon = MR.images.seerr,
+        tabIcon = MR.images.seerr_tab,
         defaultPort = 5055,
         supportsActivityQueue = false,
         apiBase = "api/v1",

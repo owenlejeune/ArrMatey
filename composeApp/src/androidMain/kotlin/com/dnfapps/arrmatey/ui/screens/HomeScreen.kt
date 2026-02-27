@@ -38,10 +38,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.entensions.BadgeContent
+import com.dnfapps.arrmatey.entensions.TabItemIconView
 import com.dnfapps.arrmatey.entensions.androidIcon
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.NavigationManager
@@ -60,15 +62,19 @@ import org.koin.compose.koinInject
 @Composable
 fun HomeScreen(
     navigationManager: NavigationManager = koinInject(),
-    preferencesStore: PreferencesStore = koinInject()
+    preferencesStore: PreferencesStore = koinInject(),
+    activityQueue: ActivityQueueViewModel = koinInject()
 ) {
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+    val activityQueueIssuesCount by activityQueue.tasksWithIssues.collectAsStateWithLifecycle()
 
     val drawerExtendedState by navigationManager.drawerExpandedState.collectAsStateWithLifecycle()
     val overlayTab by navigationManager.overlayTab.collectAsStateWithLifecycle()
     val selectedTab by navigationManager.selectedTab.collectAsStateWithLifecycle()
 
+    val useServiceNavIcons by preferencesStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
     val tabPreferences by preferencesStore.tabPreferences.collectAsStateWithLifecycle(TabPreferences())
     val visibleTabs = tabPreferences.bottomTabItems
     val drawerTabs = tabPreferences.hiddenTabs
@@ -112,6 +118,8 @@ fun HomeScreen(
                 DrawerContent(
                     drawerTabs = drawerTabs,
                     overlayTab = overlayTab,
+                    useServiceNavIcons = useServiceNavIcons,
+                    activityQueueIssuesCount = activityQueueIssuesCount,
                     onHomeClick = {
                         scope.launch {
                             navigationManager.closeOverlay()
@@ -147,6 +155,8 @@ fun HomeScreen(
                 TabItemContent(currentOverlay)
             } else {
                 MainNavigationContent(
+                    useServiceNavIcons = useServiceNavIcons,
+                    activityQueueIssuesCount = activityQueueIssuesCount,
                     visibleTabs = visibleTabs,
                     selectedTab = selectedTab,
                     pagerState = pagerState,
@@ -159,6 +169,8 @@ fun HomeScreen(
 
 @Composable
 private fun DrawerContent(
+    useServiceNavIcons: Boolean,
+    activityQueueIssuesCount: Int,
     drawerTabs: List<TabItem>,
     overlayTab: TabItem?,
     onHomeClick: () -> Unit,
@@ -181,9 +193,10 @@ private fun DrawerContent(
             NavigationDrawerItem(
                 label = { Text(mokoString(item.resource)) },
                 selected = overlayTab == item,
-                icon = { Icon(item.androidIcon, contentDescription = null) },
+                icon = {
+                    TabItemIconView(item, useServiceNavIcons, activityQueueIssuesCount)
+                },
                 onClick = { onDrawerTabClick(item) },
-                badge = { BadgeContent(item) }
             )
         }
 
@@ -201,6 +214,8 @@ private fun DrawerContent(
 
 @Composable
 private fun MainNavigationContent(
+    useServiceNavIcons: Boolean,
+    activityQueueIssuesCount: Int,
     visibleTabs: List<TabItem>,
     selectedTab: TabItem,
     pagerState: PagerState,
@@ -215,12 +230,11 @@ private fun MainNavigationContent(
                             selected = entry == selectedTab,
                             onClick = { onTabSelected(entry) },
                             icon = {
-                                BadgedBox(badge = { BadgeContent(tabItem = entry) }) {
-                                    Icon(
-                                        imageVector = entry.androidIcon,
-                                        contentDescription = mokoString(entry.resource)
-                                    )
-                                }
+                                TabItemIconView(
+                                    tabItem = entry,
+                                    useServiceNavIcons = useServiceNavIcons,
+                                    activityQueueIssuesCount = activityQueueIssuesCount
+                                )
                             },
                             label = { Text(text = mokoString(entry.resource)) }
                         )

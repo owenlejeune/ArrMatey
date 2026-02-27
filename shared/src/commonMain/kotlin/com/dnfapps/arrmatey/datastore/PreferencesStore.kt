@@ -43,6 +43,7 @@ class PreferencesStore(
     private val httpLogLevelKey = stringPreferencesKey("httpLogLevel")
     private val useDynamicThemeKey = booleanPreferencesKey("useDynamicTheme")
     private val useClearLogoKey = booleanPreferencesKey("useClearLogo")
+    private val useServiceNavLogosKey = booleanPreferencesKey("useServiceNavLogos")
     private val tabPreferencesKey = stringPreferencesKey("tabPreferences")
     private val lastReleaseNotesKey = intPreferencesKey("lastReleaseNotes")
     private val isFirstLaunchKey = booleanPreferencesKey("isFirstLaunch")
@@ -227,6 +228,12 @@ class PreferencesStore(
         }
     }
 
+    fun updateTabPreferences(tabPreferences: TabPreferences) {
+        scope.launch {
+            saveTabPreferences(tabPreferences)
+        }
+    }
+
     private fun extractTabPreferences(preferences: Preferences): TabPreferences {
         val json = preferences[tabPreferencesKey]
         val savedPrefs = if (json != null) {
@@ -281,6 +288,20 @@ class PreferencesStore(
                     markReleaseNotesAsSeen()
                 }
                 preferences[isFirstLaunchKey] = false
+            }
+        }
+    }
+
+    val useServiceNavLogos: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[useServiceNavLogosKey] ?: false
+        }
+
+    fun toggleUseServiceNavLogos() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[useServiceNavLogosKey] ?: false
+                preferences[useServiceNavLogosKey] = !current
             }
         }
     }

@@ -16,7 +16,9 @@ abstract class Navigation<T>(initialScreen: T) {
     }
 
     fun popBackStack() {
-        backStack.removeLastOrNull()
+        if (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        }
     }
 
     fun replaceCurrent(screen: T) {

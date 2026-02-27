@@ -14,11 +14,17 @@ class MoreScreenViewModelS: ObservableObject {
     
     @Published private(set) var instances: [Instance] = []
     @Published private(set) var connectionStatuses: [KotlinLong:OperationStatus] = [:]
+    @Published private(set) var useServiceNavLogos: Bool = false
     
     init() {
         self.viewModel = KoinBridge.shared.getMoreScreenViewModel()
         
         viewModel.instances.observeAsync { self.instances = $0 }
         viewModel.testingStatus.observeAsync { self.connectionStatuses = $0 }
+        viewModel.useServiceNavLogos.observeAsync { self.useServiceNavLogos = $0.boolValue }
+    }
+    
+    func toggleUseServiceNavLogos() {
+        viewModel.toggleUseServiceNavLogos()
     }
 }

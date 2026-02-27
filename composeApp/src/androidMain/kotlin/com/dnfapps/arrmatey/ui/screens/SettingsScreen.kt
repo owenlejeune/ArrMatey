@@ -1,8 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.AnchoredDraggableState
-import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,9 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,14 +46,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
-import com.dnfapps.arrmatey.entensions.getDrawableId
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.isDebug
@@ -64,6 +59,8 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsNavigation
 import com.dnfapps.arrmatey.navigation.SettingsScreen
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.LabelledSwitch
+import com.dnfapps.arrmatey.ui.components.LargeLabelledSwitch
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.settings.AboutCard
 import com.dnfapps.arrmatey.utils.CrashManager
@@ -74,11 +71,10 @@ import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
 import com.mikepenz.aboutlibraries.util.withContext
+import dev.icerock.moko.resources.compose.painterResource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
-import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,6 +93,12 @@ fun SettingsScreen(
     var showLibrariesSheet by remember { mutableStateOf(false) }
 
     var confirmShareLastLog by remember { mutableStateOf<String?>(null) }
+
+    val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
+
+    BackHandler {
+        navigationManager.openDrawer()
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -206,6 +208,15 @@ fun SettingsScreen(
                         )
                     }
                 }
+
+                LargeLabelledSwitch(
+                    label = mokoString(MR.strings.service_icons_title),
+                    sublabel = mokoString(MR.strings.service_icons_description),
+                    checked = useServiceNavLogos,
+                    onCheckedChange = {
+                        viewModel.toggleUseServiceNavLogos()
+                    }
+                )
 
                 AboutCard(
                     onFeatureRequestClick = {
@@ -342,7 +353,7 @@ fun InstanceCard(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Image(
-                painter = painterResource(getDrawableId(instance.type.iconKey)),
+                painter = painterResource(instance.type.icon),
                 contentDescription = instance.type.name,
                 modifier = Modifier.size(40.dp)
             )

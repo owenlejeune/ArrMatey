@@ -47,18 +47,7 @@ struct TabConfigurationScreen: View {
         }
         .navigationTitle(MR.strings().customize_navigation.localized())
         .navigationBarTitleDisplayMode(.inline)
-//        .navigationBarBackButtonHidden(true)
         .toolbar {
-//            ToolbarItem(placement: .topBarLeading) {
-//                Button {
-//                    if initialHiddenCount == 0 && hiddenTabCount > 0 {
-//                        navigationManager.settingsPath = NavigationPath()
-//                    }
-//                    dismiss()
-//                } label: {
-//                    Image(systemName: "chevron.backward")
-//                }
-//            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     viewModel.resetTabPreferences()
@@ -84,7 +73,7 @@ struct TabConfigurationScreen: View {
 
             VStack(spacing: 8) {
                 ForEach(bottomBarTabs, id: \.name) { tab in
-                    DraggableTabCard(tab: tab, isDropTarget: dropTargetID == tab.name, isHidden: false)
+                    DraggableTabCard(tab: tab, isDropTarget: dropTargetID == tab.name, isHidden: false, useServiceNavIcons: viewModel.useServiceNavLogos)
                         .onDrag {
                             draggedTab = tab
                             return NSItemProvider(object: tab.name as NSString)
@@ -120,7 +109,7 @@ struct TabConfigurationScreen: View {
                         .overlay(Text("Drop here").foregroundColor(.secondary))
                 } else {
                     ForEach(hiddenTabs, id: \.name) { tab in
-                        DraggableTabCard(tab: tab, isDropTarget: dropTargetID == tab.name, isHidden: true)
+                        DraggableTabCard(tab: tab, isDropTarget: dropTargetID == tab.name, isHidden: true, useServiceNavIcons: viewModel.useServiceNavLogos)
                             .onDrag {
                                 draggedTab = tab
                                 return NSItemProvider(object: tab.name as NSString)
@@ -202,14 +191,21 @@ struct DraggableTabCard: View {
     let tab: TabItem
     var isDropTarget: Bool
     var isHidden: Bool
+    var useServiceNavIcons: Bool
 
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: "line.3.horizontal")
                 .foregroundColor(.secondary)
-            Image(systemName: tab.iosIcon)
-                .foregroundColor(isHidden ? .secondary : .primary)
-                .frame(width: 24)
+            if useServiceNavIcons, let logo = tab.associatedType?.tabIcon {
+                logo.toImage(renderingMode: .template)
+                    .foregroundColor(isHidden ? .secondary : .primary)
+                    .frame(width: 24)
+            } else {
+                Image(systemName: tab.iosIcon)
+                    .foregroundColor(isHidden ? .secondary : .primary)
+                    .frame(width: 24)
+            }
             Text(tab.resource.localized())
                 .font(.body)
                 .foregroundColor(isHidden ? .secondary : .primary)

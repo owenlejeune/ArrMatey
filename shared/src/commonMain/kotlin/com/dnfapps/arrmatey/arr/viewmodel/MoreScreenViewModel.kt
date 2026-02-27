@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.database.InstanceRepository
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestNewInstanceConnectionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +17,16 @@ import kotlinx.coroutines.launch
 
 class MoreScreenViewModel(
     instanceRepository: InstanceRepository,
-    val testInstanceConnectionUseCase: TestInstanceConnectionUseCase
+    val testInstanceConnectionUseCase: TestInstanceConnectionUseCase,
+    val preferencesStore: PreferencesStore
 ): ViewModel() {
+
+    val useServiceNavLogos = preferencesStore.useServiceNavLogos
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
     val testingStatus: StateFlow<Map<Long, OperationStatus>> = _testingStatus.asStateFlow()
@@ -66,6 +75,10 @@ class MoreScreenViewModel(
                 }
             }
         }
+    }
+
+    fun toggleUseServiceNavLogos() {
+        preferencesStore.toggleUseServiceNavLogos()
     }
 
 }

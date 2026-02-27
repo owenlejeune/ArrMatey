@@ -193,6 +193,8 @@
     <string name="invalid_url">Invalid URL</string>
     <string name="bug_report">Bug report</string>
     <string name="feature_request">Feature request</string>
+    <string name="service_icons_title">Use service icons</string>
+    <string name="service_icons_description">Display service logos as navigation icons for supported services</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

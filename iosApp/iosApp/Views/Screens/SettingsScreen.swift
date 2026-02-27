@@ -38,8 +38,8 @@ struct SettingsScreen: View {
             Section {
                 ForEach(instances, id: \.self) { instance in
                     NavigationLink(value: route(for: instance)) {
-                        HStack(spacing: 24){
-                            SVGImageView(filename: instance.type.iconKey)
+                        HStack(spacing: 24) {
+                            Image(resource: instance.type.icon)
                                 .frame(width: 32, height: 32)
                             VStack(alignment: .leading, spacing: 1) {
                                 HStack(alignment: .center, spacing: 12) {
@@ -86,6 +86,12 @@ struct SettingsScreen: View {
                                 .font(.system(size: 18, weight: .medium))
                         }
                     }
+                }
+                Toggle(isOn: Binding(
+                    get: { viewModel.useServiceNavLogos },
+                    set: { _ in viewModel.toggleUseServiceNavLogos() }
+                )) {
+                    Text(MR.strings().service_icons_title.localized())
                 }
             }
             
