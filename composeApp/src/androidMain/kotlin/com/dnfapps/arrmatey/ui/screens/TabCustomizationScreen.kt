@@ -35,7 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,15 +54,14 @@ import com.dnfapps.arrmatey.navigation.SettingsScreen
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
-import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+
+private const val MAX_TABS = 5
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -137,7 +135,12 @@ fun TabCustomizationContent(
         combinedList = combinedList.toMutableList().apply {
             val fromIndex = indexOfFirst { it.key == from.key }
             val toIndex = indexOfFirst { it.key == to.key }
+
+            val dividerIndex = indexOfFirst { it is TabRow.Divider }
             add(toIndex, removeAt(fromIndex))
+            if (dividerIndex == MAX_TABS && fromIndex > MAX_TABS && toIndex <= MAX_TABS) {
+                add(MAX_TABS+1, removeAt(MAX_TABS))
+            }
         }
 
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
