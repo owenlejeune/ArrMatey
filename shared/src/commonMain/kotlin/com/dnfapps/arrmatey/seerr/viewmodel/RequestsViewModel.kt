@@ -7,12 +7,14 @@ import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +35,8 @@ class RequestsViewModel(
     private val getCurrentSeerrUserUseCase: GetCurrentSeerrUserUseCase,
     private val getRequestsUseCase: GetRequestsUseCase,
     private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase,
-    private val cancelRequestUseCase: CancelRequestUseCase
+    private val cancelRequestUseCase: CancelRequestUseCase,
+    private val removeSeerrMediaFileUseCase: RemoveSeerrMediaFileUseCase
 ): ViewModel() {
 
     private var pagingController: PagingController<MediaRequestPackage>? = null
@@ -145,6 +148,27 @@ class RequestsViewModel(
                     _operationsState.update {
                         val currentStates = it.cancelStates.toMutableMap()
                         currentStates[requestId] = status
+                        it.copy(cancelStates = currentStates)
+                    }
+                    if (status is OperationStatus.Success) {
+                        refresh()
+                    }
+                }
+        }
+    }
+
+    fun deleteMediaFile(request: MediaRequest) {
+        val repository = selectedRepository.value ?: return
+        viewModelScope.launch {
+            removeSeerrMediaFileUseCase(
+                request.media.id,
+                request.is4k,
+                repository
+            )
+                .collect { status ->
+                    _operationsState.update {
+                        val currentStates = it.cancelStates.toMutableMap()
+                        currentStates[request.id] = status
                         it.copy(cancelStates = currentStates)
                     }
                     if (status is OperationStatus.Success) {

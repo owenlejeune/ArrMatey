@@ -1,5 +1,15 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
@@ -15,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,10 +37,12 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Try
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -45,10 +59,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -72,6 +91,7 @@ import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BannerView
+import com.dnfapps.arrmatey.ui.components.ConfirmableButton
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -85,6 +105,8 @@ import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoPlural
+import com.dnfapps.arrmatey.utils.mokoString
+import kotlinx.coroutines.delay
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -132,7 +154,7 @@ fun RequestsScreen(
 
                     requestsPagingState.isEmpty -> {
                         EmptyState(
-                            message = "No requests found",
+                            message = mokoString(MR.strings.no_requests_found),
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -147,11 +169,16 @@ fun RequestsScreen(
                                 count = requestsPagingState.itemCount,
                                 key = { index -> requestsPagingState.peek(index)?.request?.id ?: index }
                             ) { index ->
-                                requestsPagingState[index]?.let { request ->
+                                requestsPagingState[index]?.let { rPackage ->
                                     RequestCard(
-                                        mediaPackage = request,
+                                        mediaPackage = rPackage,
                                         user = userState,
-                                        requestOperationsState = requestOperationsState
+                                        requestOperationsState = requestOperationsState,
+                                        onApproveClicked = { viewModel.approveRequest(rPackage.request.id) },
+                                        onDeclineClicked = { viewModel.declineRequest(rPackage.request.id) },
+                                        onEditClicked = { },
+                                        onDeleteClicked = { viewModel.cancelRequest(rPackage.request.id) },
+                                        onRemoveFromServiceClicked = { viewModel.deleteMediaFile(rPackage.request) }
                                     )
                                 }
                             }
@@ -195,7 +222,7 @@ fun RequestsScreen(
                                     color = MaterialTheme.colorScheme.onErrorContainer
                                 )
                                 TextButton(onClick = { requestsPagingState.retry() }) {
-                                    Text("Retry")
+                                    Text(mokoString(MR.strings.retry))
                                 }
                                 IconButton(onClick = { viewModel.clearError() }) {
                                     Icon(Icons.Default.Close, "Dismiss")
@@ -214,7 +241,12 @@ fun RequestsScreen(
 private fun RequestCard(
     mediaPackage: MediaRequestPackage,
     user: SeerrUser?,
-    requestOperationsState: RequestOperationsState
+    requestOperationsState: RequestOperationsState,
+    onApproveClicked: () -> Unit,
+    onDeclineClicked: () -> Unit,
+    onEditClicked: () -> Unit,
+    onDeleteClicked: () -> Unit,
+    onRemoveFromServiceClicked: () -> Unit
 ) {
     val request = mediaPackage.request
     val details = mediaPackage.details
@@ -308,7 +340,8 @@ private fun RequestCard(
                                     ) {
                                         Text(
                                             text = buildAnnotatedString {
-                                                append("Modified by ")
+                                                append(mokoString(MR.strings.modified_by))
+                                                append(" ")
                                                 withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                                                     append(modifiedBy.displayName)
                                                 }
@@ -359,21 +392,11 @@ private fun RequestCard(
                     isAdmin = isAdmin,
                     request = request,
                     operationsState = requestOperationsState,
-                    onApproveClicked = {
-
-                    },
-                    onDeclineClicked = {
-
-                    },
-                    onEditClicked = {
-
-                    },
-                    onDeleteClicked = {
-
-                    },
-                    onRemoveFromServiceClicked = {
-
-                    }
+                    onApproveClicked = onApproveClicked,
+                    onDeclineClicked = onDeclineClicked,
+                    onEditClicked = onEditClicked,
+                    onDeleteClicked = onDeleteClicked,
+                    onRemoveFromServiceClicked = onRemoveFromServiceClicked
                 )
             }
         }
@@ -389,35 +412,35 @@ private fun StatusChip(request: MediaRequest) {
     // Otherwise, show the Request status (Pending/Approved/Declined).
     val (label, container, content) = when {
         mediaStatus == MediaStatus.Deleted ->
-            Triple("Deleted", MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+            Triple(mediaStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
 
         mediaStatus == MediaStatus.Available ->
-            Triple("Available", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
+            Triple(mediaStatus.resource, MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
 
         mediaStatus == MediaStatus.PartiallyAvailable ->
-            Triple("Partially Available", MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+            Triple(mediaStatus.resource, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
 
         mediaStatus == MediaStatus.Processing ->
-            Triple("Processing", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+            Triple(mediaStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
 
         requestStatus == RequestStatus.Declined ->
-            Triple("Declined", MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+            Triple(requestStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
 
         requestStatus == RequestStatus.Approved ->
-            Triple("Approved", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+            Triple(requestStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
 
         else -> // Default to Pending
-            Triple("Pending", MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+            Triple(requestStatus.resource, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
     }
 
     AssistChip(
         onClick = { },
-        label = { Text(label) },
+        label = { Text(mokoString(label)) },
         colors = AssistChipDefaults.assistChipColors(
             containerColor = container,
             labelColor = content
         ),
-        border = null // Clean up the look for status chips
+        border = null
     )
 }
 
@@ -457,6 +480,31 @@ private fun RequestButtons(
     onDeleteClicked: () -> Unit,
     onRemoveFromServiceClicked: () -> Unit
 ) {
+    var showDeclineConfirm by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var showRemoveConfirm by remember { mutableStateOf(false) }
+
+    LaunchedEffect(showDeclineConfirm) {
+        if (showDeclineConfirm) {
+            delay(3000)
+            showDeclineConfirm = false
+        }
+    }
+
+    LaunchedEffect(showDeleteConfirm) {
+        if (showDeleteConfirm) {
+            delay(3000)
+            showDeleteConfirm = false
+        }
+    }
+
+    LaunchedEffect(showRemoveConfirm) {
+        if (showRemoveConfirm) {
+            delay(3000)
+            showRemoveConfirm = false
+        }
+    }
+
     val approveColours = ButtonDefaults.buttonColors(
         containerColor = primaryDark,
         contentColor = onPrimaryDark
@@ -471,11 +519,12 @@ private fun RequestButtons(
     )
 
     val isApproved = RequestStatus.fromValue(request.status) == RequestStatus.Approved
+    val isDeclined = RequestStatus.fromValue(request.status) == RequestStatus.Declined
 
     Column {
-        if (!isApproved) {
+        if (!isApproved && !isDeclined) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (isAdmin && !isApproved) {
+                if (isAdmin) {
                     Button(
                         onClick = onApproveClicked,
                         modifier = Modifier.weight(1f),
@@ -486,29 +535,36 @@ private fun RequestButtons(
                             CircularProgressIndicator(Modifier.size(24.dp))
                         } else {
                             Icon(Icons.Default.Check, null)
-                            Text("Approve")
+                            Text(mokoString(MR.strings.approve))
                         }
                     }
                 }
-                if (!isApproved) {
-                    Button(
-                        onClick = onDeclineClicked,
-                        modifier = Modifier.weight(1f),
-                        colors = declineColours,
-                        enabled = operationsState.cancelStates.none { it.key == request.id }
-                    ) {
+                ConfirmableButton(
+                    isConfirming = showDeclineConfirm,
+                    onClick = {
+                        if (showDeclineConfirm) {
+                            onDeclineClicked()
+                            showDeclineConfirm = false
+                        } else {
+                            showDeclineConfirm = true
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = declineColours,
+                    enabled = operationsState.cancelStates.none { it.key == request.id },
+                    content = {
                         if (operationsState.cancelStates.any { it.key == request.id }) {
-                            CircularProgressIndicator(Modifier.size(24.dp))
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onError
+                            )
                         } else {
                             Icon(Icons.Default.Close, null)
-                            if (isAdmin) {
-                                Text("Decline")
-                            } else {
-                                Text("Cancel Request")
-                            }
+                            Spacer(Modifier.width(4.dp))
+                            Text(if (isAdmin) mokoString(MR.strings.decline) else mokoString(MR.strings.cancel_request))
                         }
                     }
-                }
+                )
             }
 
             if (isAdmin || request.type == RequestType.Tv) {
@@ -523,22 +579,45 @@ private fun RequestButtons(
             }
         }
 
-        if (isAdmin && isApproved) {
-            Button(
-                onClick = onDeleteClicked,
+        if (isAdmin && (isApproved || isDeclined)) {
+            ConfirmableButton(
+                isConfirming = showDeleteConfirm,
+                onClick = {
+                    if (showDeleteConfirm) {
+                        onDeleteClicked()
+                        showDeleteConfirm = false
+                    } else {
+                        showDeleteConfirm = true
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
-                colors = declineColours
-            ) {
-                Icon(Icons.Default.Delete, null)
-                Text("Delete Request")
-            }
-            Button(
-                onClick = onRemoveFromServiceClicked,
-                modifier = Modifier.fillMaxWidth(),
-                colors = declineColours
-            ) {
-                Icon(Icons.Default.Delete, null)
-                Text("Remove from [TYPE]")
+                colors = declineColours,
+                content = {
+                    Icon(Icons.Default.Delete, null)
+                    Spacer(Modifier.width(4.dp))
+                    Text(mokoString(MR.strings.delete_request))
+                }
+            )
+
+            if (isApproved) {
+                ConfirmableButton(
+                    isConfirming = showRemoveConfirm,
+                    onClick = {
+                        if (showRemoveConfirm) {
+                            onRemoveFromServiceClicked()
+                            showRemoveConfirm = false
+                        } else {
+                            showRemoveConfirm = true
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = declineColours,
+                    content = {
+                        Icon(Icons.Default.Delete, null)
+                        Spacer(Modifier.width(4.dp))
+                        Text(mokoString(MR.strings.remove_from_service, "[SERVICE NAME]"))
+                    }
+                )
             }
         }
     }

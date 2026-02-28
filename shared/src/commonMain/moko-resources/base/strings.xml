@@ -352,4 +352,20 @@
     <string name="share_crash_log">Share Crash Log</string>
     <string name="share_crash_log_message">It looks like the app crashed the last time you were using it. Would you like to share the crash log? You will be able to copy the log to paste into GitHub or you can share to GitHub directly to open an issue.</string>
 
+    <!-- Requests -->
+    <string name="modified_by">Modified by</string>
+    <string name="no_requests_found">No requests found</string>
+    <string name="approve">Approve</string>
+    <string name="approved">Approved</string>
+    <string name="decline">Decline</string>
+    <string name="declined">Declined</string>
+    <string name="cancel_request">Cancel Request</string>
+    <string name="delete_request">Delete Request</string>
+    <string name="remove_from_service">Remove from %1$s</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="pending">Pending</string>
+    <string name="processing">Processing</string>
+    <string name="partially_available">Partially Available</string>
+    <string name="available">Available</string>
+
 </resources>

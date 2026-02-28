@@ -68,6 +68,7 @@ import com.dnfapps.arrmatey.instances.usecase.UpdateCalendarFilterPreferenceUseC
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
@@ -160,6 +161,7 @@ val useCaseModule = module {
     factory { GetRequestsUseCase() }
     factory { CancelRequestUseCase() }
     factory { SetRequestApprovalStatusUseCase() }
+    factory { RemoveSeerrMediaFileUseCase() }
 }
 
 val viewModelModule = module {
@@ -197,7 +199,7 @@ val viewModelModule = module {
         ArrInstanceDashboardViewModel(instanceId, get())
     }
     factory { CalendarViewModel(get(), get(), get(), get()) }
-    factory { RequestsViewModel(get(), get(), get(), get(), get() ) }
+    factory { RequestsViewModel(get(), get(), get(), get(), get(), get()) }
 }
 
 val resourcesModule = module {

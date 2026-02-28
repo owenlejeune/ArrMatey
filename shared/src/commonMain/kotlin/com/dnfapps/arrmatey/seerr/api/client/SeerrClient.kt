@@ -26,6 +26,7 @@ interface SeerrClient {
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
     suspend fun setRequestStatus(requestId: Long, status: ApprovalStatus): NetworkResult<MediaRequest>
     suspend fun deleteRequest(requestId: Long): NetworkResult<Unit>
+    suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit>
 }
 
 class SeerrClientImpl(
@@ -65,6 +66,9 @@ class SeerrClientImpl(
 
     override suspend fun deleteRequest(requestId: Long): NetworkResult<Unit> =
         delete("request/$requestId")
+
+    override suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit> =
+        delete("media/$mediaId", mapOf("is4k" to is4k))
 
 
     /**

@@ -67,4 +67,8 @@ class SeerrInstanceRepository(
     suspend fun deleteRequest(requestId: Long): NetworkResult<Unit> {
         return client.deleteRequest(requestId)
     }
+
+    suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit> {
+        return client.deleteMediaFile(mediaId, is4k)
+    }
 }
