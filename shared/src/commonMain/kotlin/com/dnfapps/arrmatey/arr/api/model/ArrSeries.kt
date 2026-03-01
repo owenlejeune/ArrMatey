@@ -104,7 +104,8 @@ data class ArrSeries(
         qualityProfileId: Int,
         seriesType: SeriesType,
         seasonFolder: Boolean,
-        rootFolderPath: String?
+        rootFolderPath: String?,
+        tags: List<Int>
     ) = copy(
         id = 0,
         addOptions = SeriesAddOptions(monitor = monitor),
@@ -120,14 +121,16 @@ data class ArrSeries(
         qualityProfileId: Int,
         seriesType: SeriesType,
         seasonFolder: Boolean,
-        rootFolderPath: String?
+        rootFolderPath: String?,
+        tags: List<Int>
     ) = copy(
         monitored = monitored,
         monitorNewItems = monitorNewSeasons,
         qualityProfileId = qualityProfileId,
         seriesType = seriesType,
         seasonFolder = seasonFolder,
-        rootFolderPath = rootFolderPath
+        rootFolderPath = rootFolderPath,
+        tags = tags
     )
 
 }

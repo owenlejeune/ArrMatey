@@ -9,6 +9,21 @@ import Shared
 import SwiftUI
 
 struct CalendarTab: View {
+    @Environment(\.navigationContext) private var context
+    
+    var body: some View {
+        switch context {
+        case .mainTab:
+            NavigationStack {
+                CalendarTabContent()
+            }
+        case .launcher:
+            CalendarTabContent()
+        }
+    }
+}
+
+struct CalendarTabContent: View {
     
     @ObservedObject private var viewModel = CalendarViewModelS()
     
@@ -17,7 +32,7 @@ struct CalendarTab: View {
     }
     
     var body: some View {
-        NavigationStack {
+        Group {
             ZStack {
                 if viewModel.calendarState.filterState.viewMode == .list {
                     CalendarListView(state: viewModel.calendarState, onLoadMore: { viewModel.loadMore() })

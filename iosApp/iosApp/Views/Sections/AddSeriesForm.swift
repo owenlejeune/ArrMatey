@@ -23,6 +23,7 @@ struct AddSeriesForm: View {
     @State private var selectedSeriesType: SeriesType = .standard
     @State private var useSeasonFolders: Bool = true
     @State private var selectedRootFolderId: Int32? = nil
+    @State private var selectedTags: Set<Int> = Set()
     
     private let selectableMonitorTypes: [SeriesMonitorType] = SeriesMonitorType.allCases.filter {
         $0 != .unknown && $0 != .latestSeason && $0 != .skip
@@ -83,6 +84,17 @@ struct AddSeriesForm: View {
                     }
                 }
                 
+                if tags.count > 0 {
+                    NavigationLink {
+                        TagSelectionView(tags: tags, selectedTags: $selectedTags)
+                    } label: {
+                        LabeledContent(
+                            MR.strings().tags.localized(),
+                            value: MR.plurals().tag_count.localized(selectedTags.count)
+                        )
+                    }
+                }
+                
                 Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolderId) {
                     ForEach(rootFolders, id: \.self) { rootFolder in
                         Text("\(rootFolder.path) (\(rootFolder.freeSpaceString))")
@@ -108,7 +120,14 @@ struct AddSeriesForm: View {
             Button {
                 Task {
                     if let profileId = selectedQualityProfileId, let path = selectedRootFolderPath {
-                        let newSeries = series.doCopyForCreation(monitor: monitorType, qualityProfileId: profileId, seriesType: selectedSeriesType, seasonFolder: useSeasonFolders, rootFolderPath: path)
+                        let newSeries = series.doCopyForCreation(
+                            monitor: monitorType,
+                            qualityProfileId: profileId,
+                            seriesType: selectedSeriesType,
+                            seasonFolder: useSeasonFolders,
+                            rootFolderPath: path,
+                            tags: Array(selectedTags.map { $0.asKotlinInt })
+                        )
                         onAddItem(newSeries)
                     }
                 }

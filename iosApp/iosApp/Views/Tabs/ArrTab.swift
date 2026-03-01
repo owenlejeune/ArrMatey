@@ -124,7 +124,7 @@ struct ArrTab: View {
     private var toolbarViewOptions: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button(action: {
-                navigation.go(to: .search(""), of: type)
+                navigation.go(to: .search(query: "", type: type), of: type)
             }) {
                 Image(systemName: "plus")
                     .imageScale(.medium)

@@ -39,7 +39,7 @@ struct SettingsScreen: View {
                 ForEach(instances, id: \.self) { instance in
                     NavigationLink(value: route(for: instance)) {
                         HStack(spacing: 24) {
-                            Image(resource: instance.type.icon)
+                            instance.type.icon.toImage(renderingMode: .original)
                                 .frame(width: 32, height: 32)
                             VStack(alignment: .leading, spacing: 1) {
                                 HStack(alignment: .center, spacing: 12) {

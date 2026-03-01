@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,6 +33,8 @@ import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
+import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
+import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
 
@@ -51,6 +54,7 @@ fun AddSeriesSheet(
     var seriesType by remember { mutableStateOf(SeriesType.Standard) }
     var seasonFolders by remember { mutableStateOf(true) }
     var rootFolder by remember { mutableStateOf(rootFolders.first()) }
+    val selectedTags = remember { mutableStateListOf<Int>() }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -100,6 +104,26 @@ fun AddSeriesSheet(
                 label = { Text(mokoString(MR.strings.series_type)) }
             )
 
+            if (tags.isNotEmpty()) {
+                MultiSelectDropdownPicker(
+                    options = tags.map { it.id },
+                    selectedOptions = selectedTags,
+                    valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
+                    onOptionSelected = { tag, isSelected ->
+                        if (isSelected) {
+                            selectedTags.add(tag)
+                        } else {
+                            selectedTags.remove(tag)
+                        }
+                    },
+                    getOptionLabel = { tag ->
+                        tags.firstOrNull { tag == it.id }?.label
+                            ?: mokoString(MR.strings.unknown)
+                    },
+                    label = { Text(mokoString(MR.strings.tags)) }
+                )
+            }
+
             if (rootFolders.size > 1) {
                 DropdownPicker(
                     options = rootFolders,
@@ -118,7 +142,8 @@ fun AddSeriesSheet(
                         qualityProfileId = qualityProfile.id,
                         seriesType = seriesType,
                         seasonFolder = seasonFolders,
-                        rootFolderPath = rootFolder.path
+                        rootFolderPath = rootFolder.path,
+                        tags = selectedTags
                     )
                     onAddItem(newItem)
                 },

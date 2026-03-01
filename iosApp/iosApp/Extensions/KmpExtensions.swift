@@ -20,6 +20,12 @@ extension Int32 {
     }
 }
 
+extension Int {
+    var asKotlinInt: KotlinInt {
+        return KotlinInt(int: Int32(self))
+    }
+}
+
 extension Bool {
     var asKotlinBool: KotlinBoolean {
         return KotlinBoolean(bool: self)

@@ -242,14 +242,21 @@ struct MediaDetailsScreen: View {
     private var sheetContent: some View {
         switch viewModel.item {
         case nil: EmptyView()
+            
         case let movie as ArrMovie: EditMovieSheet(item: movie, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newMovie, moveFiles in
             viewModel.editItem(newMovie, moveFiles: moveFiles)
         })
         .presentationBackground(.ultraThinMaterial)
+            
         case let series as ArrSeries: EditSeriesSheet(item: series, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newSeries, moveFiles in
             viewModel.editItem(newSeries, moveFiles: moveFiles)
         })
         .presentationBackground(.ultraThinMaterial)
+            
+        case let artist as Arrtist: EditArtistSheet(item: artist, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newSeries, moveFiles in
+            viewModel.editItem(newSeries, moveFiles: moveFiles)
+        })
+            
         default: EmptyView()
         }
     }

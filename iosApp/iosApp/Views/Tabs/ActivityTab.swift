@@ -9,6 +9,21 @@ import SwiftUI
 import Shared
 
 struct ActivityTab: View {
+    @Environment(\.navigationContext) private var context
+    
+    var body: some View {
+        switch context {
+        case .mainTab:
+            NavigationStack {
+                ActivityTabContent()
+            }
+        case .launcher:
+            ActivityTabContent()
+        }
+    }
+}
+
+struct ActivityTabContent: View {
     
     @ObservedObject private var viewModel = ActivityQueueViewModelS()
     

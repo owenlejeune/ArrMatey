@@ -75,7 +75,7 @@ struct MediaPreviewScreen: View {
         .onChange(of: lastAddedItemId) { _, newValue in
             if let id = newValue {
                 sheetPresented = false
-                navigation.replaceCurrent(with: .details(id), for: type)
+                navigation.replaceCurrent(with: .details(id: id, type: type), for: type)
             }
         }
         .sheet(isPresented: $sheetPresented) {
@@ -114,6 +114,20 @@ struct MediaPreviewScreen: View {
             )
                 .presentationDetents([.medium])
                 .presentationBackground(.ultraThinMaterial)
+        case let artist as Arrtist:
+            AddArtistForm(
+                artist: artist,
+                addItemStatus: addItemStatus,
+                qualityProfiles: qualityProfiles,
+                rootFolders: rootFolders,
+                tags: tags,
+                onAddItem: { item in
+                    viewModel.addItem(item)
+                },
+                onDismiss: { sheetPresented = false }
+            )
+            .presentationDetents([.medium])
+            .presentationBackground(.ultraThinMaterial)
         default: EmptyView()
         }
     }

@@ -7,4 +7,8 @@
         <item quantity="one">%d Album</item>
         <item quantity="other">%d Albums</item>
     </plurals>
+    <plurals name="tag_count">
+        <item quantity="one">%d tag</item>
+        <item quantity="other">%d tags</item>
+    </plurals>
 </resources>

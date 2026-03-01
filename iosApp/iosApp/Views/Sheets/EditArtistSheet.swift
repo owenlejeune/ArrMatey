@@ -1,29 +1,25 @@
 //
-//  EditSeriesSheet.swift
+//  EditArtistSheet.swift
 //  iosApp
 //
-//  Created by Owen LeJeune on 2026-02-03.
+//  Created by Owen LeJeune on 2026-03-01.
 //
 
 import SwiftUI
 import Shared
 
-struct EditSeriesSheet: View {
-    let item: ArrSeries
+struct EditArtistSheet: View {
+    let item: Arrtist
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
     let editInProgress: Bool
-    let onEditItem: (ArrSeries, Bool) -> Void
-    
-    @Environment(\.dismiss) var dismiss
+    let onEditItem: (Arrtist, Bool) -> Void
     
     @State private var monitored: Bool
-    @State private var monitorNewSeasons: Bool
+    @State private var monitorNewAlbums: ArtistMonitorType
     @State private var qualityProfileId: Int32
-    @State private var seriesType: SeriesType
-    @State private var seasonFolders: Bool
-    @State private var rootFolder: String
+    @State private var rootFolder: String?
     @State private var selectedTags: Set<Int>
     
     @State private var moveFiles: Bool = false
@@ -32,20 +28,20 @@ struct EditSeriesSheet: View {
         rootFolder != item.rootFolderPath
     }
     
-    init(item: ArrSeries, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], editInProgress: Bool, onEditItem: @escaping (ArrSeries, Bool) -> Void) {
+    private let statusOptions: [ArtistMonitorType] = [.all, .none, .future]
+    
+    init(item: Arrtist, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], editInProgress: Bool, onEditItem: @escaping (Arrtist, Bool) -> Void) {
         self.item = item
         self.qualityProfiles = qualityProfiles
         self.rootFolders = rootFolders
         self.tags = tags
         self.editInProgress = editInProgress
         self.onEditItem = onEditItem
-        
+    
         self.monitored = item.monitored
-        self.monitorNewSeasons = item.monitorNewItems == .all
+        self.monitorNewAlbums = item.monitorNewItems
         self.qualityProfileId = item.qualityProfileId
-        self.seriesType = item.seriesType
-        self.seasonFolders = item.seasonFolder
-        self.rootFolder = item.rootFolderPath ?? ""
+        self.rootFolder = item.rootFolderPath
         self.selectedTags = Set(item.tags.map(\.intValue))
     }
     
@@ -54,16 +50,16 @@ struct EditSeriesSheet: View {
             Form {
                 Section {
                     Toggle(MR.strings().monitored.localized(), isOn: $monitored)
-                    Toggle(MR.strings().monitor_new_seasons.localized(), isOn: $monitorNewSeasons)
-                    Toggle(MR.strings().season_folders.localized(), isOn: $seasonFolders)
-                    Picker(MR.strings().series_type.localized(), selection: $seriesType) {
-                        ForEach(SeriesType.allCases, id: \.self) { type in
-                            Text(type.resource.localized()).tag(type)
-                        }
-                    }
+                    
                     Picker(MR.strings().quality_profile.localized(), selection: $qualityProfileId) {
                         ForEach(qualityProfiles, id: \.id) { qp in
                             Text(qp.name ?? "").tag(qp.id)
+                        }
+                    }
+                    
+                    Picker(MR.strings().monitor_new_albums.localized(), selection: $monitorNewAlbums) {
+                        ForEach(statusOptions, id: \.self) { status in
+                            Text(status.name).tag(status)
                         }
                     }
                     if tags.count > 0 {
@@ -98,41 +94,30 @@ struct EditSeriesSheet: View {
             }
             .toolbarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigation) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Label(MR.strings().close.localized(), systemImage: "xmark")
-                            .foregroundStyle(.white)
-                    }
-                    .tint(nil)
-                }
-                
                 ToolbarItem(placement: .primaryAction) {
                     Button {
-                        let newSeries = item.doCopyForEdit(
+                        let newArtist = item.doCopyForEdit(
                             monitored: monitored,
-                            monitorNewSeasons: monitorNewSeasons ? .all : .none,
+                            monitorNew: monitorNewAlbums,
                             qualityProfileId: qualityProfileId,
-                            seriesType: seriesType,
-                            seasonFolder: seasonFolders,
                             rootFolderPath: rootFolder,
                             tags: Array(selectedTags.map { $0.asKotlinInt })
                         )
-                        onEditItem(newSeries, moveFiles && canMove)
+                        onEditItem(newArtist, moveFiles && canMove)
                     } label: {
                         if editInProgress {
                             ProgressView()
                                 .progressViewStyle(.circular)
-                                .foregroundStyle(.white)
                         } else {
                             Label(MR.strings().save.localized(), systemImage: "checkmark")
                                 .foregroundStyle(.white)
                         }
                     }
-                    .tint(nil)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.primary)
                 }
             }
         }
     }
+    
 }

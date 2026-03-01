@@ -1,33 +1,29 @@
 //
-//  AddMovieForm.swift
+//  ArrArtistForm.swift
 //  iosApp
 //
-//  Created by Owen LeJeune on 2025-12-30.
+//  Created by Owen LeJeune on 2026-03-01.
 //
 
 import Shared
 import SwiftUI
 
-struct AddMovieForm: View {
-    let movie: ArrMovie
+struct AddArtistForm: View {
+    let artist: Arrtist
     let addItemStatus: OperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
-    let onAddItem: (ArrMedia) -> Void
+    let onAddItem: (Arrtist) -> Void
     let onDismiss: () -> Void
     
-    @State private var isMonitored: Bool = true
-    @State private var selectedMinimumAvailability: MediaStatus = .announced
+    @State private var monitor: ArtistMonitorType = .all
+    @State private var monitorNew: ArtistMonitorType = .none
     @State private var selectedQualityProfileId: Int32? = nil
     @State private var selectedRootFolderId: Int32? = nil
     @State private var selectedTags: Set<Int> = Set()
     
-    private let selectableStatuses: [MediaStatus] = [
-        .announced,
-        .inCinemas,
-        .released,
-    ]
+    private let selectedStatuses: [ArtistMonitorType] = [.all, .none, .future]
     
     private var selectedRootFolderPath: String? {
         rootFolders.first { $0.id == selectedRootFolderId }?.path
@@ -60,7 +56,11 @@ struct AddMovieForm: View {
     private var content: some View {
         Form {
             Section {
-                Toggle(MR.strings().monitored.localized(), isOn: $isMonitored)
+                Picker(MR.strings().monitor.localized(), selection: $monitor) {
+                    ForEach(selectedStatuses, id: \.self) { status in
+                        Text(status.resource.localized()).tag(status)
+                    }
+                }
                 
                 if selectedQualityProfileId != nil {
                     Picker(MR.strings().quality_profile.localized(), selection: $selectedQualityProfileId) {
@@ -73,8 +73,8 @@ struct AddMovieForm: View {
                     }
                 }
                 
-                Picker(MR.strings().minimum_availability.localized(), selection: $selectedMinimumAvailability) {
-                    ForEach(selectableStatuses, id: \.self) { status in
+                Picker(MR.strings().monitor_new_albums.localized(), selection: $monitorNew) {
+                    ForEach(selectedStatuses, id: \.self) { status in
                         Text(status.resource.localized()).tag(status)
                     }
                 }
@@ -117,14 +117,14 @@ struct AddMovieForm: View {
             Button {
                 Task {
                     if let profileId = selectedQualityProfileId, let path = selectedRootFolderPath {
-                        let newMovie = movie.doCopyForCreation(
-                            monitored: isMonitored,
-                            minimumAvailability: selectedMinimumAvailability,
+                        let newArtist = artist.doCopyForCreation(
+                            monitor: monitor,
+                            monitorNew: monitorNew,
                             qualityProfileId: profileId,
                             rootFolderPath: path,
                             tags: Array(selectedTags.map { $0.asKotlinInt })
                         )
-                        onAddItem(newMovie)
+                        onAddItem(newArtist)
                     }
                 }
             } label: {
@@ -137,5 +137,4 @@ struct AddMovieForm: View {
             .disabled(isLoading)
         }
     }
-    
 }

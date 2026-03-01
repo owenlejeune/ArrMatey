@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +31,8 @@ import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
+import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
+import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,6 +50,7 @@ fun AddArtistSheet(
     var qualityProfile by remember { mutableStateOf(qualityProfiles.first()) }
     var monitorNew by remember { mutableStateOf(ArtistMonitorType.None) }
     var rootFolder by remember { mutableStateOf(rootFolders.first()) }
+    val selectedTags = remember { mutableStateListOf<Int>() }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -90,6 +94,26 @@ fun AddArtistSheet(
                 label = { Text(mokoString(MR.strings.quality_profile)) }
             )
 
+            if (tags.isNotEmpty()) {
+                MultiSelectDropdownPicker(
+                    options = tags.map { it.id },
+                    selectedOptions = selectedTags,
+                    valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
+                    onOptionSelected = { tag, isSelected ->
+                        if (isSelected) {
+                            selectedTags.add(tag)
+                        } else {
+                            selectedTags.remove(tag)
+                        }
+                    },
+                    getOptionLabel = { tag ->
+                        tags.firstOrNull { tag == it.id }?.label
+                            ?: mokoString(MR.strings.unknown)
+                    },
+                    label = { Text(mokoString(MR.strings.tags)) }
+                )
+            }
+
             if (rootFolders.size > 1) {
                 DropdownPicker(
                     options = rootFolders,
@@ -107,7 +131,8 @@ fun AddArtistSheet(
                         monitor = monitor,
                         monitorNew = monitorNew,
                         qualityProfileId = qualityProfile.id,
-                        rootFolderPath = rootFolder.path
+                        rootFolderPath = rootFolder.path,
+                        tags = selectedTags
                     )
                     onAddItem(newItem)
                 },

@@ -47,7 +47,7 @@ struct ArrLibraryView: View {
         VStack(spacing: 0) {
             if items.isEmpty {
                 EmptySearchResultsView(type: type, query: searchQuery, onShouldSearch: {
-                    navigation.go(to: .search(searchQuery), of: type)
+                    navigation.go(to: .search(query: searchQuery, type: type), of: type)
                 })
             } else {
                 mediaView(
@@ -56,7 +56,7 @@ struct ArrLibraryView: View {
                     items: items,
                     onItemClicked: { media in
                         if let id = media.id as? Int64 {
-                            navigation.go(to: .details(id), of: type)
+                            navigation.go(to: .details(id: id, type: type), of: type)
                         }
                     },
                     itemIsActive: { item in
@@ -78,7 +78,7 @@ struct ArrLibraryView: View {
     ) -> some View {
         ScrollView {
             if viewType == .grid {
-                let columns = [GridItem(.adaptive(minimum: 120), spacing: 16)]
+                let columns = [GridItem(.adaptive(minimum: 90), spacing: 16)]
                 
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(items, id: \.id) { item in

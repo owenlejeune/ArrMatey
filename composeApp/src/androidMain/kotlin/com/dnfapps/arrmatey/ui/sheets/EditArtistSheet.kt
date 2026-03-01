@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -32,6 +33,8 @@ import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
+import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
+import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +52,7 @@ fun EditArtistSheet(
     var monitorNewAlbums by remember { mutableStateOf(item.monitorNewItems) }
     var qualityProfileId by remember { mutableIntStateOf(item.qualityProfileId) }
     var rootFolder by remember { mutableStateOf(item.rootFolderPath) }
+    val selectedTags = remember { item.tags.toMutableStateList() }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -93,6 +97,26 @@ fun EditArtistSheet(
                     )
                 }
 
+            if (tags.isNotEmpty()) {
+                MultiSelectDropdownPicker(
+                    options = tags.map { it.id },
+                    selectedOptions = selectedTags,
+                    valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
+                    onOptionSelected = { tag, isSelected ->
+                        if (isSelected) {
+                            selectedTags.add(tag)
+                        } else {
+                            selectedTags.remove(tag)
+                        }
+                    },
+                    getOptionLabel = { tag ->
+                        tags.firstOrNull { tag == it.id }?.label
+                            ?: mokoString(MR.strings.unknown)
+                    },
+                    label = { Text(mokoString(MR.strings.tags)) }
+                )
+            }
+
             if (rootFolders.size > 1) {
                 rootFolders
                     .firstOrNull { it.path == rootFolder }
@@ -114,7 +138,8 @@ fun EditArtistSheet(
                         monitored = monitor,
                         monitorNew = monitorNewAlbums,
                         qualityProfileId = qualityProfileId,
-                        rootFolderPath = rootFolder
+                        rootFolderPath = rootFolder,
+                        tags = selectedTags
                     )
                     onEditItem(newItem)
                 },

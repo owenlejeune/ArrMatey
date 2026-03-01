@@ -18,6 +18,14 @@ extension StringResource {
 }
 
 extension PluralsResource {
+    func localized(_ quantity: Int) -> String {
+        return StringDescCompanion().PluralFormatted(pluralsRes: self, number: Int32(quantity), args: [quantity]).localized()
+    }
+    
+    func formatted(_ quantity: Int, _ args: [Any]) -> String {
+        return StringDescCompanion().PluralFormatted(pluralsRes: self, number: Int32(quantity), args: args).localized()
+    }
+    
     func localized(_ quantity: Int32) -> String {
         return StringDescCompanion().PluralFormatted(pluralsRes: self, number: quantity, args: [quantity]).localized()
     }

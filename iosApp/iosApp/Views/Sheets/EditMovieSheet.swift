@@ -20,6 +20,7 @@ struct EditMovieSheet: View {
     @State private var minimumAvailability: MediaStatus
     @State private var qualityProfileId: Int32
     @State private var rootFolder: String
+    @State private var selectedTags: Set<Int>
     
     @State private var moveFiles: Bool = false
     
@@ -41,6 +42,7 @@ struct EditMovieSheet: View {
         self.minimumAvailability = item.minimumAvailability
         self.qualityProfileId = item.qualityProfileId
         self.rootFolder = item.rootFolderPath
+        self.selectedTags = Set(item.tags.map(\.intValue))
     }
     
     var body: some View {
@@ -58,6 +60,16 @@ struct EditMovieSheet: View {
                     Picker(MR.strings().minimum_availability.localized(), selection: $minimumAvailability) {
                         ForEach(statusOptions, id: \.self) { status in
                             Text(status.name).tag(status)
+                        }
+                    }
+                    if tags.count > 0 {
+                        NavigationLink {
+                            TagSelectionView(tags: tags, selectedTags: $selectedTags)
+                        } label: {
+                            LabeledContent(
+                                MR.strings().tags.localized(),
+                                value: MR.plurals().tag_count.localized(selectedTags.count)
+                            )
                         }
                     }
                 }
@@ -84,7 +96,13 @@ struct EditMovieSheet: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
-                        let newMovie = item.doCopyForUpdate(monitored: monitored, minimumAvailability: minimumAvailability, qualityProfileId: qualityProfileId, rootFolderPath: rootFolder)
+                        let newMovie = item.doCopyForUpdate(
+                            monitored: monitored,
+                            minimumAvailability: minimumAvailability,
+                            qualityProfileId: qualityProfileId,
+                            rootFolderPath: rootFolder,
+                            tags: Array(selectedTags.map { $0.asKotlinInt })
+                        )
                         onEditItem(newMovie, moveFiles && canMove)
                     } label: {
                         if editInProgress {

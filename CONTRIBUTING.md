@@ -8,15 +8,15 @@ Be respectful and constructive in all interactions.
 
 ## Issue & Workflow Guidelines
 
-- Do not start any development work unless there is an approved issue associated with it.
+- Do not start any major feature development work unless there is an approved issue associated with it. Bug fixes or small features should still have issues opened but don't need approval first.
 - If an issue already has an assignee, check in with that assignee before beginning any work.
 - If an issue is open and unassigned:
     - Add a comment indicating that you’d like to work on it.
     - Include a brief description of your proposed implementation if applicable.
 - If there is no open issue:
     - Create a new issue first, including all required details and a proposal for the implementation.
-    - Wait for the issue to be approved before starting development.
-- Once the issue is approved, development work can begin.
+    - For large featurea, wait for the issue to be approved before starting development. For small features or buts feel free to start working right away!
+
 
 ## Development Setup
 

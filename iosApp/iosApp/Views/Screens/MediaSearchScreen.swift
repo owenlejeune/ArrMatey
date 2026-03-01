@@ -78,10 +78,10 @@ struct MediaSearchScreen: View {
                         .id(item.guid)
                         .onTapGesture {
                             if let id = item.id?.int64Value {
-                                navigation.go(to: .details(id), of: type)
+                                navigation.go(to: .details(id: id, type: type), of: type)
                             } else {
                                 let json = item.toJson()
-                                navigation.go(to: .preview(json), of: type)
+                                navigation.go(to: .preview(json, type: type), of: type)
                             }
                         }
                 }

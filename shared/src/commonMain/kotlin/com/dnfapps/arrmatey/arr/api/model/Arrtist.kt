@@ -88,26 +88,30 @@ data class Arrtist(
         monitor: ArtistMonitorType,
         monitorNew: ArtistMonitorType,
         qualityProfileId: Int,
-        rootFolderPath: String?
+        rootFolderPath: String?,
+        tags: List<Int>
     ) = copy(
         id = 0,
         addOptions = ArtistAddOptions(monitor = monitor),
         monitorNewItems = monitorNew,
         qualityProfileId = qualityProfileId,
         rootFolderPath = rootFolderPath,
-        metadataProfileId = 1
+        metadataProfileId = 1,
+        tags = tags
     )
 
     fun copyForEdit(
         monitored: Boolean,
         monitorNew: ArtistMonitorType,
         qualityProfileId: Int,
-        rootFolderPath: String?
+        rootFolderPath: String?,
+        tags: List<Int>
     ) = copy(
         monitored = monitored,
         monitorNewItems = monitorNew,
         qualityProfileId = qualityProfileId,
-        rootFolderPath = rootFolderPath
+        rootFolderPath = rootFolderPath,
+        tags = tags
     )
 
     override fun withLocalImages(instanceUrl: String): Arrtist  =

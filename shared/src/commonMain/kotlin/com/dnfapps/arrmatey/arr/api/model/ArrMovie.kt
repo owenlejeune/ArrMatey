@@ -126,26 +126,30 @@ data class ArrMovie(
         monitored: Boolean,
         minimumAvailability: MediaStatus,
         qualityProfileId: Int,
-        rootFolderPath: String
+        rootFolderPath: String,
+        tags: List<Int>
     ) = copy(
         id = 0,
         alternateTitles = alternateTitles.filter { it.title != null },
         monitored = monitored,
         minimumAvailability = minimumAvailability,
         qualityProfileId = qualityProfileId,
-        rootFolderPath = rootFolderPath
+        rootFolderPath = rootFolderPath,
+        tags = tags
     )
 
     fun copyForUpdate(
         monitored: Boolean,
         minimumAvailability: MediaStatus,
         qualityProfileId: Int,
-        rootFolderPath: String
+        rootFolderPath: String,
+        tags: List<Int>
     ) = copy(
         monitored = monitored,
         minimumAvailability = minimumAvailability,
         qualityProfileId = qualityProfileId,
-        rootFolderPath = rootFolderPath
+        rootFolderPath = rootFolderPath,
+        tags = tags
     )
 
 }

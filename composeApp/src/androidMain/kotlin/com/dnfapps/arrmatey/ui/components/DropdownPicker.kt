@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
+import kotlin.math.expm1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,6 +120,77 @@ fun <T> DropdownPicker(
                     onClick = {
                         isDropDownExpanded = false
                         onOptionSelected(t)
+                    },
+                    colors = MenuDefaults.itemColors(
+                        textColor = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> MultiSelectDropdownPicker(
+    options: Collection<T>,
+    selectedOptions: List<T>,
+    valueLabel: String,
+    onOptionSelected: (T, Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    label: @Composable () -> Unit = {},
+    getOptionLabel: @Composable (T) -> String = { it.toString() },
+) {
+    var isDropDownExpanded  by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        modifier = modifier,
+        expanded = isDropDownExpanded,
+        onExpandedChange = { isDropDownExpanded = it }
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            label()
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                readOnly = true,
+                value = valueLabel,
+                onValueChange = {},
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                ),
+                shape = MaterialTheme.shapes.large,
+                singleLine = true
+            )
+        }
+        ExposedDropdownMenu(
+            expanded = isDropDownExpanded,
+            onDismissRequest = { isDropDownExpanded = false },
+            shape = MaterialTheme.shapes.extraLarge,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        ) {
+            options.forEach { option ->
+                val isSelected = selectedOptions.contains(option)
+                DropdownMenuItem(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    text = {
+                        Text(
+                            text = getOptionLabel(option),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    leadingIcon = {
+                        if (isSelected) {
+                            Icon(Icons.Default.Check, null)
+                        }
+                    },
+                    onClick = {
+                        onOptionSelected(option, !isSelected)
                     },
                     colors = MenuDefaults.itemColors(
                         textColor = MaterialTheme.colorScheme.onSurface

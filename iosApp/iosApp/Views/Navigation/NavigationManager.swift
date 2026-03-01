@@ -23,32 +23,44 @@ class NavigationManager: ObservableObject {
     private var pendingSettingsRoute: SettingsRoute? = nil
     
     func go(to route: MediaRoute, of type: InstanceType) {
+        if showLauncher {
+            launcherPath.append(route)
+            return
+        }
+
         switch type {
-        case .sonarr:
-            seriesPath.append(route)
-        case .radarr:
-            moviePath.append(route)
-        case .lidarr:
-            musicPath.append(route)
+        case .sonarr: seriesPath.append(route)
+        case .radarr: moviePath.append(route)
+        case .lidarr: musicPath.append(route)
         }
     }
     
     func replaceCurrent(with route: MediaRoute, for type: InstanceType) {
+        if showLauncher {
+            if !launcherPath.isEmpty { launcherPath.removeLast() }
+            launcherPath.append(route)
+            return
+        }
+
         switch type {
         case .sonarr:
-            seriesPath.removeLast()
+            if !seriesPath.isEmpty { seriesPath.removeLast() }
             seriesPath.append(route)
         case .radarr:
-            moviePath.removeLast()
+            if !moviePath.isEmpty { moviePath.removeLast() }
             moviePath.append(route)
         case .lidarr:
-            musicPath.removeLast()
+            if !musicPath.isEmpty { musicPath.removeLast() }
             musicPath.append(route)
         }
     }
     
     func go(to route: SettingsRoute) {
-        settingsPath.append(route)
+        if showLauncher {
+            launcherPath.append(route)
+        } else {
+            settingsPath.append(route)
+        }
     }
     
     func setSelectedDrawerTab(_ tab: TabItem?) {
@@ -56,29 +68,33 @@ class NavigationManager: ObservableObject {
     }
     
     func goToNewInstance(of type: InstanceType) {
-        switch type {
-        case .sonarr: seriesPath = NavigationPath()
-        case .radarr: moviePath = NavigationPath()
-        case .lidarr: musicPath = NavigationPath()
-        }
-
+        seriesPath = NavigationPath()
+        moviePath = NavigationPath()
+        musicPath = NavigationPath()
         launcherPath = NavigationPath()
-        pendingSettingsRoute = .newInstance(type)
         
-        showLauncher = true
+        if showLauncher {
+            launcherPath.append(TabItem.settings)
+            launcherPath.append(SettingsRoute.newInstance(type))
+        } else {
+            pendingSettingsRoute = .newInstance(type)
+            showLauncher = true
+        }
     }
     
     func goToEditInstance(of type: InstanceType, _ id: Int64) {
-        switch type {
-        case .sonarr: seriesPath = NavigationPath()
-        case .radarr: moviePath = NavigationPath()
-        case .lidarr: musicPath = NavigationPath()
-        }
-
+        seriesPath = NavigationPath()
+        moviePath = NavigationPath()
+        musicPath = NavigationPath()
         launcherPath = NavigationPath()
-        pendingSettingsRoute = .editInstance(id)
         
-        showLauncher = true
+        if showLauncher {
+            launcherPath.append(TabItem.settings)
+            launcherPath.append(SettingsRoute.editInstance(id))
+        } else {
+            pendingSettingsRoute = .editInstance(id)
+            showLauncher = true
+        }
     }
     
     func maybeEditInstance(of type: InstanceType, _ instance: Instance?) {
@@ -104,12 +120,26 @@ class NavigationManager: ObservableObject {
         self.moviePath = NavigationPath()
         self.musicPath = NavigationPath()
     }
+    
+    func goInLauncher(to route: SettingsRoute) {
+        launcherPath.append(route)
+    }
+    
+    func popLauncherPath() {
+        if !launcherPath.isEmpty {
+            launcherPath.removeLast()
+        }
+    }
+    
+    func clearLauncherPath() {
+        launcherPath = NavigationPath()
+    }
 }
 
 enum MediaRoute: Hashable {
-    case details(Int64)
-    case search(String)
-    case preview(String)
+    case details(id: Int64, type: InstanceType)
+    case search(query: String, type: InstanceType)
+    case preview(_ json : String, type: InstanceType)
     case movieRelease(Int64)
     case movieFiles(String)
     case seriesReleases(
