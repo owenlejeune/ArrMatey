@@ -22,6 +22,7 @@ sealed interface RequestMediaDetails {
     val externalIds: ExternalIds?
     val mediaInfo: MediaInfo?
     val watchProviders: List<WatchProvider>
+    val relatedVideos: List<Video>
 
     val displayTitle: String
         get() = when (this) {
@@ -45,7 +46,7 @@ sealed interface RequestMediaDetails {
             "https://image.tmdb.org/t/p/w600_and_h900_bestv2$it"
         }
 
-//    /aY7NuvFj5Uzliy0nrFxVWmlZFiK.jpg
-// https://image.tmdb.org/t/p/w600_and_h900_bestv2/hjJkrLXhWvGHpLeLBDFznpBTY1S.jpg
-    //https://image.tmdb.org/t/p/w1920_and_h800_multi_faces//jP0Rhj9OTPDAwQlHQwOLFDdeE8t.jpg
+    val requestType: RequestType
+
+    fun getCertification(localeCode: String): String?
 }

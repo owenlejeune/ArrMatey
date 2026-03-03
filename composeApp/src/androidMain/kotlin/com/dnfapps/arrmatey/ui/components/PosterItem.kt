@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
 
@@ -76,6 +77,51 @@ fun PosterItem(
             }
             if (imageLoaded) {
                 additionalContent()
+            }
+        }
+    }
+}
+
+@Composable
+fun PosterItem(
+    item: RequestMediaDetails,
+    modifier: Modifier = Modifier,
+    elevation: Dp = 60.dp,
+    radius: Dp = 10.dp,
+    aspectRatio: AspectRatio = AspectRatio.Poster,
+) {
+    var imageLoadError by remember { mutableStateOf(false) }
+    var imageLoaded by remember { mutableStateOf(false) }
+
+    Card(
+        shape = RoundedCornerShape(radius),
+        elevation = CardDefaults.cardElevation(elevation),
+        modifier = modifier
+            .aspectRatio(aspectRatio.ratio, true)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = rememberRemoteImageData(
+                    url = item.fullPosterPath,
+                    onError = { _, err ->
+                        println(err.throwable.message)
+                        imageLoadError = true
+                    },
+                    onSuccess = { _, _ -> imageLoaded = true }
+                ),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds
+            )
+            if (imageLoadError) {
+                Icon(
+                    imageVector = Icons.Default.BrokenImage,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(64.dp)
+                )
             }
         }
     }

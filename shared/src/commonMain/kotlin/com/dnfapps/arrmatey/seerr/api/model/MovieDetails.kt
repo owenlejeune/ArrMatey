@@ -25,11 +25,12 @@ data class MovieDetails(
     override val externalIds: ExternalIds? = null,
     override val mediaInfo: MediaInfo? = null,
     override val watchProviders: List<WatchProvider> = emptyList(),
+    override val relatedVideos: List<Video> = emptyList(),
+    override val requestType: RequestType = RequestType.Movie,
 
     val imdbId: String? = null,
     val adult: Boolean = false,
     val budget: Long = 0,
-    val relatedVideos: List<Video> = emptyList(),
     val originalTitle: String,
     @Contextual val releaseDate: LocalDate? = null,
     val releases: Releases? = null,
@@ -38,4 +39,10 @@ data class MovieDetails(
     val title: String,
     val video: Boolean = false,
     val collection: Collection? = null
-): RequestMediaDetails
+): RequestMediaDetails {
+
+    override fun getCertification(localeCode: String): String? =
+        releases?.results?.first {
+            it.iso_3166_1 == localeCode
+        }?.rating
+}

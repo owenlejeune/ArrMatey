@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.utils
 
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import java.util.Date
@@ -18,6 +19,11 @@ actual fun Instant.format(pattern: String): String {
     val date = Date(toEpochMilliseconds())
     val sdf = SimpleDateFormat(cleanPattern, Locale.getDefault())
     return sdf.format(date)
+}
+
+actual fun LocalDate.format(pattern: String): String {
+    val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+    return sdf.format(Date(toEpochDays() * 86_400_000))
 }
 
 actual fun formatLocalDateTime(

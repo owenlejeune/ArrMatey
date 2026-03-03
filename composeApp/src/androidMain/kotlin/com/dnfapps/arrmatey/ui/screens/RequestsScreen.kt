@@ -79,6 +79,9 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.entensions.collectAsLazyPagingItems
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.Navigation
+import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.SeerrScreen
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
@@ -107,13 +110,16 @@ import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
+import org.koin.compose.koinInject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RequestsScreen(
     viewModel: RequestsViewModel,
-    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr)
+    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr),
+    navigationManager: NavigationManager = koinInject(),
+    navigation: Navigation<SeerrScreen> = navigationManager.requests()
 ) {
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val userState by viewModel.userState.collectAsStateWithLifecycle()
@@ -142,20 +148,14 @@ fun RequestsScreen(
             } else {
                 when {
                     requestsPagingState.isLoading && requestsPagingState.itemCount == 0 -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            LoadingIndicator(
-                                modifier = Modifier.size(96.dp)
-                            )
-                        }
+                        LoadingIndicator(
+                            modifier = Modifier.size(96.dp)
+                        )
                     }
 
                     requestsPagingState.isEmpty -> {
                         EmptyState(
-                            message = mokoString(MR.strings.no_requests_found),
-                            modifier = Modifier.fillMaxSize()
+                            message = mokoString(MR.strings.no_requests_found)
                         )
                     }
 
@@ -178,7 +178,13 @@ fun RequestsScreen(
                                         onDeclineClicked = { viewModel.declineRequest(rPackage.request.id) },
                                         onEditClicked = { },
                                         onDeleteClicked = { viewModel.cancelRequest(rPackage.request.id) },
-                                        onRemoveFromServiceClicked = { viewModel.deleteMediaFile(rPackage.request) }
+                                        onRemoveFromServiceClicked = { viewModel.deleteMediaFile(rPackage.request) },
+                                        onClick = {
+                                            navigation.navigateTo(SeerrScreen.Details(
+                                                tmdbId = rPackage.request.media.tmdbId,
+                                                requestType = rPackage.request.type
+                                            ))
+                                        }
                                     )
                                 }
                             }
@@ -246,7 +252,8 @@ private fun RequestCard(
     onDeclineClicked: () -> Unit,
     onEditClicked: () -> Unit,
     onDeleteClicked: () -> Unit,
-    onRemoveFromServiceClicked: () -> Unit
+    onRemoveFromServiceClicked: () -> Unit,
+    onClick: () -> Unit,
 ) {
     val request = mediaPackage.request
     val details = mediaPackage.details
@@ -258,7 +265,8 @@ private fun RequestCard(
         colors = CardDefaults.cardColors(
             containerColor = inverseSurfaceLight,
             contentColor = inverseOnSurfaceLight
-        )
+        ),
+        onClick = onClick
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BannerView(

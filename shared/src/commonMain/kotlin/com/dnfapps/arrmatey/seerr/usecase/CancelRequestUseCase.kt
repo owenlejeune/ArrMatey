@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.seerr.usecase
 
+import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
@@ -8,14 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class CancelRequestUseCase {
-    operator fun invoke(requestId: Long, repository: SeerrInstanceRepository): Flow<OperationStatus> = flow {
-        emit(OperationStatus.InProgress)
+    suspend operator fun invoke(requestId: Long, repository: SeerrInstanceRepository): NetworkResult<Unit> =
         repository.deleteRequest(requestId)
-            .onSuccess {
-                emit(OperationStatus.Success())
-            }
-            .onError { code, message, cause ->
-                emit(OperationStatus.Error(code, message, cause))
-            }
-    }
 }

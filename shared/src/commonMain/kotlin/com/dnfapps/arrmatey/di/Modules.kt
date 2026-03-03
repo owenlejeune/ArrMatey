@@ -65,12 +65,15 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateCalendarFilterPreferenceUseCase
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
+import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.NetworkConnectivityObserverFactory
 import com.dnfapps.arrmatey.utils.NetworkConnectivityRepository
@@ -162,6 +165,7 @@ val useCaseModule = module {
     factory { CancelRequestUseCase() }
     factory { SetRequestApprovalStatusUseCase() }
     factory { RemoveSeerrMediaFileUseCase() }
+    factory { GetSeerrMediaDetailsUseCase() }
 }
 
 val viewModelModule = module {
@@ -200,6 +204,9 @@ val viewModelModule = module {
     }
     factory { CalendarViewModel(get(), get(), get(), get()) }
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { (tmdbId: Long, mediaType: RequestType) ->
+        SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get())
+    }
 }
 
 val resourcesModule = module {

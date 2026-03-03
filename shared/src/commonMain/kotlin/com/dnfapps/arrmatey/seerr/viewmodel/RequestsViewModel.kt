@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
@@ -43,9 +44,6 @@ class RequestsViewModel(
 
     private val _requestsState = MutableStateFlow<PagedData<MediaRequestPackage>>(PagedData())
     val requestsState: StateFlow<PagedData<MediaRequestPackage>> = _requestsState.asStateFlow()
-
-    private val _operationsState = MutableStateFlow(RequestOperationsState())
-    val operationsState: StateFlow<RequestOperationsState> = _operationsState.asStateFlow()
 
     private val selectedRepository = getSeerrInstanceRepositoryUseCase
         .observeSelected()
@@ -108,18 +106,7 @@ class RequestsViewModel(
         val repository = selectedRepository.value ?: return
         viewModelScope.launch {
             setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Approve, repository)
-                .collect { status ->
-                    _operationsState.update {
-                        val currentStates = it.approvalStates.toMutableMap()
-                        currentStates[requestId] = status
-                        it.copy(
-                            approvalStates = currentStates
-                        )
-                    }
-                    if (status is OperationStatus.Success) {
-                        refresh()
-                    }
-                }
+                .onSuccess { refresh() }
         }
     }
 
@@ -127,16 +114,7 @@ class RequestsViewModel(
         val repository = selectedRepository.value ?: return
         viewModelScope.launch {
             setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Decline, repository)
-                .collect { status ->
-                    _operationsState.update {
-                        val currentStates = it.cancelStates.toMutableMap()
-                        currentStates[requestId] = status
-                        it.copy(cancelStates = currentStates)
-                    }
-                    if (status is OperationStatus.Success) {
-                        refresh()
-                    }
-                }
+                .onSuccess { refresh() }
         }
     }
 
@@ -144,16 +122,7 @@ class RequestsViewModel(
         val repository = selectedRepository.value ?: return
         viewModelScope.launch {
             cancelRequestUseCase(requestId, repository)
-                .collect { status ->
-                    _operationsState.update {
-                        val currentStates = it.cancelStates.toMutableMap()
-                        currentStates[requestId] = status
-                        it.copy(cancelStates = currentStates)
-                    }
-                    if (status is OperationStatus.Success) {
-                        refresh()
-                    }
-                }
+                .onSuccess { refresh() }
         }
     }
 
@@ -161,20 +130,12 @@ class RequestsViewModel(
         val repository = selectedRepository.value ?: return
         viewModelScope.launch {
             removeSeerrMediaFileUseCase(
+                request.id,
                 request.media.id,
                 request.is4k,
                 repository
             )
-                .collect { status ->
-                    _operationsState.update {
-                        val currentStates = it.cancelStates.toMutableMap()
-                        currentStates[request.id] = status
-                        it.copy(cancelStates = currentStates)
-                    }
-                    if (status is OperationStatus.Success) {
-                        refresh()
-                    }
-                }
+                .onSuccess { refresh() }
         }
     }
 

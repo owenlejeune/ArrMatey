@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.utils
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import platform.Foundation.NSCalendar
@@ -38,6 +39,14 @@ actual fun Instant.format(pattern: String): String {
     formatter.dateStyle = NSDateFormatterMediumStyle
     formatter.timeStyle = NSDateFormatterMediumStyle
     formatter.dateFormat = cleanPattern
+    return formatter.stringFromDate(date)
+}
+
+actual fun LocalDate.format(pattern: String): String {
+    val date = NSDate.dateWithTimeIntervalSince1970(toEpochDays().toDouble() * 86_400)
+    val formatter = NSDateFormatter()
+    formatter.dateStyle = NSDateFormatterMediumStyle
+    formatter.dateFormat = pattern
     return formatter.stringFromDate(date)
 }
 

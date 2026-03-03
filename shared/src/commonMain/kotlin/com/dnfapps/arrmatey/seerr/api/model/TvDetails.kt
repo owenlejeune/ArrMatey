@@ -25,6 +25,8 @@ data class TvDetails(
     override val externalIds: ExternalIds? = null,
     override val mediaInfo: MediaInfo? = null,
     override val watchProviders: List<WatchProvider> = emptyList(),
+    override val relatedVideos: List<Video> = emptyList(),
+    override val requestType: RequestType = RequestType.Tv,
 
     val contentRatings: ContentRatings? = null,
     val createdBy: List<Creator> = emptyList(),
@@ -44,4 +46,10 @@ data class TvDetails(
     val seasons: List<Season> = emptyList(),
     val type: String,
     val keywords: List<Keyword> = emptyList()
-): RequestMediaDetails
+): RequestMediaDetails {
+
+    override fun getCertification(localeCode: String): String? =
+        contentRatings?.results?.first {
+            it.iso_3166_1 == localeCode
+        }?.rating
+}
