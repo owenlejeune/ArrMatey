@@ -26,6 +26,10 @@ struct SettingsRouteView: View {
             TabConfigurationScreen()
         case .arrDashboard(let id):
             ArrInstanceDashboard(id: id)
+        case .newDownloadClient:
+            AddEditDownloadClientScreen()
+        case .editDownloadClient(let id):
+            AddEditDownloadClientScreen(id: id)
         }
     }
 }

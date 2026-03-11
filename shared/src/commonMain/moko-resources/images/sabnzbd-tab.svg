@@ -1,0 +1,20 @@
+<svg
+    width="100%"
+    height="100%"
+    viewBox="0 0 1000 1000"
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xml:space="preserve"
+    xmlns:serif="http://www.serif.com/"
+    style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"
+>
+    <path
+        d="M153.495,596.9l-114.095,-119.8l161,0l0,-437.8l598.1,-0l0,437.8l161,0l-114.215,119.9l-77.785,0l0,-97.4l-100.1,0l-0,284.138l-46,48.29l0,-235.128l-246.2,0l0,51.5l146.1,0l0,45.9l-146.1,0l0,135.39l-46,-48.3l0,-87.09l-82.943,0l-43.714,-45.9l126.657,-0l0,-51.5l-175.705,0Zm456.977,246.6l-111.072,116.6l-111.048,-116.6l222.119,0Zm185.85,-195.1l-28.822,30.256l0,-30.256l28.822,0Zm-321.022,143.3l0,-46l46,0l0,46l-46,0Z"
+        style="stroke:#000;stroke-opacity:0;stroke-width:74px;"
+    />
+    <path
+        d="M329.2,843.5l-246.2,0l0,-51.8l146.1,0l0,-45.9l-146.1,0l0,-148.9l246.2,0l0,51.5l-146.1,0l0,45.9l146.1,0l0,149.2Zm292.2,0l-246.2,0l0,-149.2l146.1,0l0,-45.9l-146.1,0l0,-51.5l246.2,0l0,246.6Zm-146.1,-97.8l46,0l0,46l-46,0l0,-46Zm192.1,97.8l0,-344l100.1,0l0,97.4l146.1,0l0,246.6l-246.2,0Zm100.1,-195.2l46,0l0,143.4l-46,0l0,-143.4Z"
+        style="fill-opacity:0;fill-rule:nonzero;stroke:#000;stroke-width:20px;stroke-linecap:round;stroke-miterlimit:4;"
+    />
+</svg>

@@ -743,28 +743,22 @@ class ArrInstanceRepository(
     private suspend inline fun <reified T> safePerformSonarr(
         operation: suspend (SonarrClient) -> NetworkResult<T>
     ): NetworkResult<T> {
-        if (instance.type != InstanceType.Sonarr) {
-            return NetworkResult.Error(message = "Not a Sonarr instance")
-        }
-        return operation(client as SonarrClient)
+        val client = client as? SonarrClient ?: return NetworkResult.Error(message = "Not a Sonarr instance")
+        return operation(client)
     }
 
     private suspend inline fun <reified T> safePerformRadarr(
         operation: suspend (RadarrClient) -> NetworkResult<T>
     ): NetworkResult<T> {
-        if (instance.type != InstanceType.Radarr) {
-            return NetworkResult.Error(message = "Not a Radarr instance")
-        }
-        return operation(client as RadarrClient)
+        val client = client as? RadarrClient ?: return NetworkResult.Error(message = "Not a Radarr instance")
+        return operation(client)
     }
 
     private suspend inline fun <reified T> safePerformLidarr(
         operation: suspend (LidarrClient) -> NetworkResult<T>
     ): NetworkResult<T> {
-        if (instance.type != InstanceType.Lidarr) {
-            return NetworkResult.Error(message = "Not a Lidarr instance")
-        }
-        return operation(client as LidarrClient)
+        val client = client as? LidarrClient ?: return NetworkResult.Error(message = "Not a Lidarr instance")
+        return operation(client)
     }
 
 }

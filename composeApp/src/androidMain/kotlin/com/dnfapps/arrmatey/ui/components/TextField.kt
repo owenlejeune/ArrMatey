@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,7 +30,9 @@ fun AMOutlinedTextField(
     errorMessage: String? = null,
     isError: Boolean = false,
     enabled: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -69,7 +72,9 @@ fun AMOutlinedTextField(
             } else null,
             enabled = enabled,
             keyboardOptions = keyboardOptions,
-            shape = MaterialTheme.shapes.large
+            shape = MaterialTheme.shapes.large,
+            visualTransformation = visualTransformation,
+            trailingIcon = trailingIcon
         )
         description?.let {
             Text(

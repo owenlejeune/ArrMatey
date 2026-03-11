@@ -72,7 +72,7 @@ class GetLibraryUseCase(
             SortBy.PreviousAiring -> compareBy { (it as? ArrSeries)?.previousAiring ?: Instant.DISTANT_PAST }
             SortBy.Grabbed -> compareBy { (it as? ArrMovie)?.grabbed ?: Instant.DISTANT_PAST }
             SortBy.DigitalRelease -> compareBy { (it as? ArrMovie)?.digitalRelease ?: Instant.DISTANT_PAST }
-            SortBy.Relevance -> compareBy { it.sortTitle } // should never happen for library sorting
+            else -> compareBy { it.sortTitle } // should never happen for library sorting
         }
 
         return items.orderedSortedWith(preferences.sortOrder, comparator)

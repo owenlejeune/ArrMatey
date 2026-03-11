@@ -11,6 +11,7 @@
 [![Swift](https://img.shields.io/badge/Language-Swift-orange.svg)](https://swift.org)
 
 <a href="https://www.buymeacoffee.com/owenlejeune" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/owenlejeune)
 
 ## Downloads
 
@@ -25,7 +26,7 @@
 ## Features
 
 ### Multi-Instance Support
-- Manage multiple Sonarr, Radarr, and Lidarr instances
+- Manage multiple Sonarr, Radarr, Lidarr, and Prowlarr instances
 - Quick instance switching
 - Custom instance labels and configurations
 
@@ -64,6 +65,9 @@
 - **Material 3/Liquid Glass Design**: Beautiful, modern UI with dynamic theming on Android and Liquid Glass on iOS
 - **Search Everywhere**: Unified search across your library
 
+### Download Client
+- **Multiple Integrations**: Support for Transmission, Deluge, qBittorrent, and SABnzbd
+
 ### Planned Features
 - [ ] Tablet/Large screen support
 - [ ] Home screen widgets
@@ -75,7 +79,6 @@
   - [ ] Bazarr
   - [ ] Kapowarr
   - [ ] tautulli
-  - [ ] prowlarr
 - and more to come
 
 ## Screenshots

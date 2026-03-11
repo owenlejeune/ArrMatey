@@ -18,3 +18,39 @@ fun Long.bytesAsFileSizeString(): String {
 
     return "${decimal.toInt()}.${(decimal * 10).toInt() % 10} ${units[max(exp-1,0)]}"
 }
+
+fun Long.toFormattedDuration(): String {
+    val qbInfinity = 8_640_000L
+
+    if (this == qbInfinity) return "∞"
+    if (this <= 0) return "0s"
+
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+    val seconds = this % 60
+
+    return buildString {
+        if (hours > 0) append("${hours}h ")
+        if (minutes > 0 || hours > 0) append("${minutes}m ")
+        if (seconds > 0 || (hours == 0L && minutes == 0L)) append("${seconds}s")
+    }.trim()
+}
+
+fun String.toSeconds(): Long {
+    val parts = this.split(":").filter { it.isNotBlank() }
+
+    val reversedParts = parts.reversed()
+
+    var totalSeconds = 0L
+
+    reversedParts.forEachIndexed { index, part ->
+        val value = part.toLongOrNull() ?: 0L
+        when (index) {
+            0 -> totalSeconds += value
+            1 -> totalSeconds += value * 60
+            2 -> totalSeconds += value * 3600
+        }
+    }
+
+    return totalSeconds
+}

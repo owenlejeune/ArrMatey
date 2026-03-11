@@ -129,5 +129,18 @@ enum class InstanceType(
         testEndpoint = "auth/me",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster
+    ),
+    Prowlarr(
+        resource = MR.strings.prowlarr_description,
+        github = "https://github.com/Prowlarr/Prowlarr",
+        website = "https://prowlarr.com/",
+        icon = MR.images.prowlarr,
+        tabIcon = MR.images.prowlarr_tab,
+        defaultPort = 9696,
+        supportsActivityQueue = false,
+        apiBase = "api/v1",
+        testEndpoint = "system/status",
+        includeTopLevelAutomaticSearchOption = false,
+        aspectRatio = AspectRatio.Cover
     )
 }

@@ -72,4 +72,9 @@ class NavigationManager(
         settings().navigateTo(SettingsScreen.EditInstance(id))
     }
 
+    fun openNewDownloadClientScreen() {
+        openOverlay(TabItem.SETTINGS)
+        settings().navigateTo(SettingsScreen.AddDownloadClient)
+    }
+
 }

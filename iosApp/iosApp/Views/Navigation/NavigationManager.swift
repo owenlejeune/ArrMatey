@@ -32,6 +32,7 @@ class NavigationManager: ObservableObject {
         case .sonarr: seriesPath.append(route)
         case .radarr: moviePath.append(route)
         case .lidarr: musicPath.append(route)
+        case .prowlarr: break // Prowlarr doesn't use media routes
         }
     }
     
@@ -52,6 +53,7 @@ class NavigationManager: ObservableObject {
         case .lidarr:
             if !musicPath.isEmpty { musicPath.removeLast() }
             musicPath.append(route)
+        case .prowlarr: break // Prowlarr doesn't use media routes
         }
     }
     
@@ -160,4 +162,6 @@ enum SettingsRoute : Hashable {
     case editInstance(Int64)
     case navigationConfig
     case arrDashboard(Int64)
+    case newDownloadClient
+    case editDownloadClient(Int64)
 }

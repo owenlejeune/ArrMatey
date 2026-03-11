@@ -8,5 +8,7 @@ sealed interface InsertResult {
 
 enum class ConflictField {
     InstanceUrl,
-    InstanceLabel
+    InstanceLabel,
+    DownloadClientUrl,
+    DownloadClientLabel
 }

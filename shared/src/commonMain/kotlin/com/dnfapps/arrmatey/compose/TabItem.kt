@@ -15,8 +15,10 @@ enum class TabItem(
     MOVIES("movieclapper", MR.strings.movies, associatedType = InstanceType.Radarr),
     MUSIC("music.quarternote.3", MR.strings.music, associatedType = InstanceType.Lidarr),
     ACTIVITY("square.and.arrow.down", MR.strings.activity),
+    DOWNLOADS("arrow.down.circle", MR.strings.downloads),
     CALENDAR("calendar", MR.strings.schedule),
     REQUESTS("tray.fill", MR.strings.requests),
+    PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr),
 
     SETTINGS("gear", MR.strings.settings, drawerOnly = true);
 

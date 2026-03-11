@@ -1,8 +1,10 @@
 package com.dnfapps.arrmatey.arr.api.client
 
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -61,6 +63,29 @@ fun createInstanceClient(
 class HttpClientFactory(private val json: Json, private val logger: Logger) {
     fun create(instance: Instance): HttpClient =
         createInstanceClient(instance, json, logger)
+
+    fun createDownloadClient(downloadClient: DownloadClient): HttpClient =
+        HttpClient {
+            install(ContentNegotiation) {
+                json(json)
+            }
+
+            install(HttpTimeout) {
+                requestTimeoutMillis = 30_000
+                socketTimeoutMillis = 30_000
+            }
+
+            install(HttpCookies)
+
+            install(Logging) {
+                this.logger = logger
+                level = LogLevel.ALL
+            }
+
+            defaultRequest {
+                url(downloadClient.url.trimEnd('/') + "/")
+            }
+        }
 
     fun createGeneric(): HttpClient =
         createInstanceClient(null, json, logger)

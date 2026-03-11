@@ -84,8 +84,7 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun ActivityTab(
-    viewModel: ActivityQueueViewModel = koinInject(),
-    navigationManager: NavigationManager = koinInject()
+    viewModel: ActivityQueueViewModel = koinInject()
 ) {
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()

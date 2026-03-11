@@ -9,6 +9,11 @@ object ReleaseNotes {
             buildCode = 1,
             title = "Announcements",
             contentFile = MR.files.release_0_0_4_txt
+        ),
+        FeatureUpdate(
+            buildCode = 2,
+            title = "We're out of alpha!",
+            contentFile = MR.files.release_0_1_0_txt
         )
     )
 
