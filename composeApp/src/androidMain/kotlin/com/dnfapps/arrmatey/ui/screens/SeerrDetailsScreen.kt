@@ -87,6 +87,7 @@ import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
 import com.dnfapps.arrmatey.entensions.openLink
+import com.dnfapps.arrmatey.isDebug
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -154,19 +155,27 @@ fun SeerrDetailsScreen(
                                 modifier = Modifier.padding(horizontal = 24.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
-                                MediaDetailsActions(
-                                    buttonState = buttonState,
-                                    onWatchClicked = { url, provider -> handleWatchClick(url, provider, context) },
+                                if (isDebug()) {
+                                    MediaDetailsActions(
+                                        buttonState = buttonState,
+                                        onWatchClicked = { url, provider ->
+                                            handleWatchClick(
+                                                url,
+                                                provider,
+                                                context
+                                            )
+                                        },
 //                                    onReportIssueClicked = { },
 //                                    onOpenInServiceClicked = { },
 //                                    onClearDataClicked = { },
-                                    onRequestClicked = { },
-                                    onRequest4kClicked = { },
-                                    onWatchTrailerClicked = { context.openLink(it) },
-                                    onViewRequestClicked = { showViewRequestSheet = true },
-                                    onApproveRequestClicked = { viewModel.approveRequest(it) },
-                                    onDeclineRequestClicked = { viewModel.declineRequest(it) },
-                                )
+                                        onRequestClicked = { },
+                                        onRequest4kClicked = { },
+                                        onWatchTrailerClicked = { context.openLink(it) },
+                                        onViewRequestClicked = { showViewRequestSheet = true },
+                                        onApproveRequestClicked = { viewModel.approveRequest(it) },
+                                        onDeclineRequestClicked = { viewModel.declineRequest(it) },
+                                    )
+                                }
 
                                 item.overview?.let { overview ->
                                     ItemDescriptionCard(overview)

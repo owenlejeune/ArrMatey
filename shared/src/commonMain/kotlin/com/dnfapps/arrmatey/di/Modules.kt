@@ -205,7 +205,7 @@ val viewModelModule = module {
     factory { CalendarViewModel(get(), get(), get(), get()) }
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get()) }
     factory { (tmdbId: Long, mediaType: RequestType) ->
-        SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get())
+        SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get())
     }
 }
 

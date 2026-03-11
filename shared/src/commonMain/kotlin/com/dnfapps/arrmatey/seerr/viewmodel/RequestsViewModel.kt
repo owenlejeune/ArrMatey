@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
+import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
@@ -23,8 +24,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -44,6 +49,9 @@ class RequestsViewModel(
 
     private val _requestsState = MutableStateFlow<PagedData<MediaRequestPackage>>(PagedData())
     val requestsState: StateFlow<PagedData<MediaRequestPackage>> = _requestsState.asStateFlow()
+
+    private val _operationsState = MutableStateFlow(RequestOperationsState())
+    val operationsState: StateFlow<RequestOperationsState> = _operationsState.asStateFlow()
 
     private val selectedRepository = getSeerrInstanceRepositoryUseCase
         .observeSelected()
@@ -82,7 +90,17 @@ class RequestsViewModel(
                     pagingController?.state?.collect {
                         _requestsState.value = it
                     }
+
+                    observeOperationStates(repo)
                 }
+        }
+    }
+
+    private fun observeOperationStates(repo: SeerrInstanceRepository) {
+        viewModelScope.launch {
+            repo.operationsState.collect {
+                _operationsState.value = it
+            }
         }
     }
 
