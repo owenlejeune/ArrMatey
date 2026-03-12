@@ -17,7 +17,7 @@ data class RottenTomatoesRating(
 enum class CriticsRating(val icon: ImageResource) {
     Rotten(MR.images.rt_rotten),
     Fresh(MR.images.rt_fresh)
-}//(val icon: ImageResource)
+}
 
 enum class AudienceRating(val icon: ImageResource) {
     Spilled(MR.images.rt_aud_rotten),

@@ -71,12 +71,14 @@ fun MediaDetailsActions(
     onApproveRequestClicked: (Long) -> Unit,
     onDeclineRequestClicked: (Long) -> Unit,
     onRequestClicked: () -> Unit,
-    onRequest4kClicked: () -> Unit
+    onRequest4kClicked: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
     Row(
+        modifier = modifier,
 //        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
             WatchButton(buttonState, onWatchClicked, onWatchTrailerClicked)

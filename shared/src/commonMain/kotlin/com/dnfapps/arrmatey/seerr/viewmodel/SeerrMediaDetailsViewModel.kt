@@ -2,13 +2,15 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
+import com.dnfapps.arrmatey.seerr.api.model.ImdbRating
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
@@ -17,8 +19,9 @@ import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.state.toButtonState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
-import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsRatingsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,7 +31,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SeerrMediaDetailsViewModel(
@@ -39,11 +41,31 @@ class SeerrMediaDetailsViewModel(
     private val getCurrentSeerrUserUseCase: GetCurrentSeerrUserUseCase,
     private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase,
     private val cancelRequestUseCase: CancelRequestUseCase,
-    private val getSeerrMediaDetailsRatingsUseCase: GetSeerrMediaDetailsRatingsUseCase
+    private val getSeerrTvRatingsUseCase: GetSeerrTvRatingsUseCase,
+    private val getSeerrMovieRatingsUseCase: GetSeerrMovieRatingsUseCase
 ): ViewModel() {
 
+    private val _combinedRatings = MutableStateFlow<CombinedRatings?>(null)
+    private val _rtRatings = MutableStateFlow<RottenTomatoesRating?>(null)
     private val _uiState = MutableStateFlow<SeerrDetailsState>(SeerrDetailsState.Initial)
-    val uiState: MutableStateFlow<SeerrDetailsState> = _uiState
+    val uiState: StateFlow<SeerrDetailsState> = combine(
+        _uiState,
+        _rtRatings,
+        _combinedRatings
+    ) { state, rtRatings, combinedRatings ->
+        when (state) {
+            is SeerrDetailsState.Success -> state.copy(
+                rtRatings = combinedRatings?.rt ?: rtRatings,
+                imdbRatings = combinedRatings?.imdb
+            )
+            else -> state
+        }
+    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = SeerrDetailsState.Initial
+        )
 
     private val _currentUser = MutableStateFlow<SeerrUser?>(null)
     val currentUser: StateFlow<SeerrUser?> = _currentUser.asStateFlow()
@@ -51,7 +73,6 @@ class SeerrMediaDetailsViewModel(
     val buttonState: StateFlow<MediaButtonState> = combine(
         _uiState,
         _currentUser,
-        getSeerrMediaDetailsRatingsUseCase(tmdbId)
     ) { state, user ->
         when (state) {
             is SeerrDetailsState.Success -> {
@@ -99,6 +120,14 @@ class SeerrMediaDetailsViewModel(
                 .collect { state ->
                     _currentUser.value = state
                 }
+        }
+        viewModelScope.launch {
+            getSeerrMovieRatingsUseCase(tmdbId)
+                .collect { rt -> _combinedRatings.value = rt }
+        }
+        viewModelScope.launch {
+            getSeerrTvRatingsUseCase(tmdbId)
+                .collect { rt -> _rtRatings.value = rt }
         }
     }
 

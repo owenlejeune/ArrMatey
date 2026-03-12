@@ -215,6 +215,8 @@
     <string name="original_language">Original Language</string>
     <string name="production_countries">Production Countries</string>
     <string name="studios">Studios</string>
+    <string name="cast">Cast</string>
+    <string name="crew">Crew</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

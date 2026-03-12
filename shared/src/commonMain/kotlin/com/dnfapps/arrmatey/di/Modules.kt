@@ -96,6 +96,8 @@ import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
@@ -199,6 +201,8 @@ val useCaseModule = module {
     factory { SetRequestApprovalStatusUseCase() }
     factory { RemoveSeerrMediaFileUseCase() }
     factory { GetSeerrMediaDetailsUseCase() }
+    factory { GetSeerrMovieRatingsUseCase(get()) }
+    factory { GetSeerrTvRatingsUseCase(get()) }
     factory { ObserveDownloadClientsUseCase(get()) }
     factory { ObserveDownloadQueueUseCase(get()) }
     factory { PauseDownloadUseCase(get()) }
@@ -253,7 +257,7 @@ val viewModelModule = module {
     factory { CalendarViewModel(get(), get(), get(), get()) }
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get()) }
     factory { (tmdbId: Long, mediaType: RequestType) ->
-        SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get())
+        SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get())
     }
     factory { ProwlarrIndexersViewModel(get(), get(), get()) }
     factory { ProwlarrSearchViewModel(get(), get(), get()) }

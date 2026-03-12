@@ -19,10 +19,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ItemDescriptionCard(overview: String) {
+fun ItemDescriptionCard(overview: String, modifier: Modifier = Modifier) {
     var expanded by remember { mutableStateOf(false) }
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .animateContentSize()
             .clickable(enabled = !expanded) {

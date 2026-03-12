@@ -3,8 +3,10 @@ package com.dnfapps.arrmatey.ui.screens
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.media.Rating
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -95,11 +98,13 @@ import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.format
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -166,11 +171,12 @@ fun SeerrDetailsScreen(
                             DetailsHeader(item)
 
                             Column(
-                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+                                modifier = Modifier.padding(vertical = 24.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 if (isDebug()) {
                                     MediaDetailsActions(
+                                        modifier = Modifier.padding(horizontal = 24.dp),
                                         buttonState = buttonState,
                                         onWatchClicked = { url, provider ->
                                             handleWatchClick(
@@ -194,12 +200,45 @@ fun SeerrDetailsScreen(
                                         text = it,
                                         style = MaterialTheme.typography.headlineSmall.copy(
                                             fontStyle = FontStyle.Italic
-                                        )
+                                        ),
+                                        modifier = Modifier.padding(horizontal = 24.dp)
                                     )
                                 }
 
                                 item.overview?.let { overview ->
-                                    ItemDescriptionCard(overview)
+                                    ItemDescriptionCard(overview, modifier = Modifier.padding(horizontal = 24.dp))
+                                }
+
+                                (item as? TvDetails)?.let { series ->
+                                    Text(
+                                        text = mokoString(MR.strings.seasons_header),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                    )
+                                    series.seasons.forEach { season ->
+                                        ContainerCard(modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 24.dp)
+                                        ) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = if (season.seasonNumber == 0) {
+                                                        mokoString(MR.strings.specials)
+                                                    } else {
+                                                        mokoString(MR.strings.season_label, season.seasonNumber)
+                                                    },
+                                                    style = MaterialTheme.typography.titleMedium
+                                                )
+                                                Text(
+                                                    text = "${season.episodeCount} episodes",
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
 
                                 item.credits?.let { credits ->
@@ -215,13 +254,13 @@ fun SeerrDetailsScreen(
                                         add(InfoItem(mokoString(MR.strings.revenue), movie.revenue.formatWithCommas()))
                                         add(InfoItem(mokoString(MR.strings.budget), movie.budget.formatWithCommas()))
                                     }
-                                    add(InfoItem(mokoString(MR.strings.original_language), item.originalLanguage))
                                     val countriesText = item.productionCountries.joinToString("\n") { it.name }
                                     add(InfoItem(mokoString(MR.strings.production_countries), countriesText))
                                     val studiosText = item.productionCompanies.joinToString("\n") { it.name }
                                     add(InfoItem(mokoString(MR.strings.studios), studiosText))
                                 }
                                 InfoArea(
+                                    modifier = Modifier.padding(horizontal = 24.dp),
                                     infoItems = infoItems,
                                     header = {
                                         Row(
@@ -229,7 +268,14 @@ fun SeerrDetailsScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.SpaceEvenly
                                         ) {
-
+                                            state.rtRatings?.let { rt ->
+                                                RatingView(rt.criticsRating.icon, "${rt.criticsScore}%")
+                                                RatingView(rt.audienceRating.icon, "${rt.audienceScore}%")
+                                            }
+                                            state.imdbRatings?.let { imdb ->
+                                                RatingView(MR.images.imdb, "${(imdb.criticsScore*10).roundToInt()}%")
+                                            }
+                                            RatingView(MR.images.tmdb, "${(item.voteAverage*10).roundToInt()}%")
                                         }
                                     }
                                 )
@@ -280,6 +326,24 @@ fun SeerrDetailsScreen(
                 }
             )
         }
+    }
+}
+
+@Composable
+private fun RatingView(
+    logo: ImageResource,
+    rating: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Image(
+            painter = painterResource(logo),
+            contentDescription = null,
+            modifier = Modifier.height(18.dp)
+        )
+        Text(text = rating)
     }
 }
 

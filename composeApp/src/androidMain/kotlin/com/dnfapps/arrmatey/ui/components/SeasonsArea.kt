@@ -94,13 +94,12 @@ fun SeasonsArea(
                             } else {
                                 mokoString(MR.strings.season_label, season.seasonNumber)
                             },
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 22.sp
+                            style = MaterialTheme.typography.titleMedium
                         )
                         season.statistics?.let { statistics ->
                             Text(
                                 text = "${statistics.episodeFileCount}/${statistics.totalEpisodeCount}",
-                                fontSize = 16.sp
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))

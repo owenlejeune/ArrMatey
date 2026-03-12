@@ -11,11 +11,13 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClient
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClientImpl
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
@@ -152,5 +154,13 @@ class SeerrInstanceRepository(
                     ?: NetworkResult.Error(message = "Media not found in cache")
             }
             .collect { emit(it) }
+    }
+
+    suspend fun getTvRatings(tmdbId: Long): NetworkResult<RottenTomatoesRating> {
+        return client.getTvRatings(tmdbId)
+    }
+
+    suspend fun getMovieRatings(tmdbId: Long): NetworkResult<CombinedRatings> {
+        return client.getMovieRatings(tmdbId)
     }
 }

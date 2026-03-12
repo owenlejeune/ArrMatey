@@ -39,16 +39,18 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun InfoArea(
     infoItems: List<InfoItem>,
+    modifier: Modifier = Modifier,
     title: StringResource = MR.strings.information,
     header: (@Composable () -> Unit)? = null,
-    footer: (@Composable () -> Unit)? = null
+    footer: (@Composable () -> Unit)? = null,
 ) {
     Column(
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
             text = mokoString(title),
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.titleLarge
         )
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -77,7 +79,7 @@ fun InfoArea(
                             modifier = Modifier.widthIn(max = 200.dp)
                         )
                     }
-                    if (index < infoItems.size - 1 || footer == null) {
+                    if (index < infoItems.size - 1 || footer != null) {
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     }
                 }
