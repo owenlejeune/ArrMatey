@@ -78,43 +78,26 @@ class DownloadClientSettingsViewModel(
         _uiState.update {
             it.copy(
                 url = url,
-                saveButtonEnabled = url.isNotEmpty() &&
-                        ((it.username.isNotEmpty() && it.password.isNotEmpty()) ||
-                                it.apiKey.isNotEmpty())
+                saveButtonEnabled = url.isNotEmpty()
             )
         }
     }
 
     fun updateUsername(username: String) {
         _uiState.update {
-            it.copy(
-                username = username,
-                saveButtonEnabled = it.url.isNotEmpty() &&
-                        ((username.isNotEmpty() && it.password.isNotEmpty()) ||
-                                it.apiKey.isNotEmpty())
-            )
+            it.copy(username = username)
         }
     }
 
     fun updatePassword(password: String) {
         _uiState.update {
-            it.copy(
-                password = password,
-                saveButtonEnabled = it.url.isNotEmpty() &&
-                        ((it.username.isNotEmpty() && password.isNotEmpty()) ||
-                                it.apiKey.isNotEmpty())
-            )
+            it.copy(password = password)
         }
     }
 
     fun updateApiKey(apiKey: String) {
         _uiState.update {
-            it.copy(
-                apiKey = apiKey,
-                saveButtonEnabled = it.url.isNotEmpty() &&
-                        ((it.username.isNotEmpty() && it.password.isNotEmpty()) ||
-                                apiKey.isNotEmpty())
-            )
+            it.copy(apiKey = apiKey)
         }
     }
 
