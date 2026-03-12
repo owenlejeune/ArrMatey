@@ -5,21 +5,24 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.Video
+import com.dnfapps.arrmatey.shared.MR
+import dev.icerock.moko.resources.StringResource
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class MediaButtonState(
     val showWatchButton: Boolean = false,
     val watchButtonUrl: String? = null,
-    val watchButtonLabel: String = "Watch",
+    @Contextual val watchButtonLabel: StringResource = MR.strings.watch,
     val showWatchTrailerOption: Boolean = false,
     val trailerUrl: String? = null,
 
     val showRequestButton: Boolean = false,
-    val showRequestMoreButton: Boolean = false,  // NEW: For TV shows with partial content
+    val showRequestMoreButton: Boolean = false,
     val showRequest4kButton: Boolean = false,
-    val availableSeasons: List<Int> = emptyList(),  // NEW: Seasons already available
-    val totalSeasons: Int = 0,  // NEW: Total number of seasons
+    val availableSeasons: List<Int> = emptyList(),
+    val totalSeasons: Int = 0,
 
     val showViewRequestButton: Boolean = false,
     val showApproveRequestButton: Boolean = false,
@@ -78,17 +81,17 @@ fun MediaInfo?.toButtonState(
             Triple(
                 MediaProvider.Plex,
                 iOSPlexUrl ?: mediaUrl,
-                "Watch on Plex"
+                MR.strings.watch_on_plex
             )
         }
         !jellyfinMediaId.isNullOrEmpty() -> {
             Triple(
                 MediaProvider.Jellyfin,
                 buildJellyfinUrl(jellyfinMediaId, mediaType),
-                "Watch on Jellyfin"
+                MR.strings.watch_on_jellyfin
             )
         }
-        else -> Triple(MediaProvider.None, null, "Watch")
+        else -> Triple(MediaProvider.None, null, MR.strings.watch)
     }
 
     // Find pending request

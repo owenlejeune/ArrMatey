@@ -12,4 +12,9 @@ data class CastMember(
     val name: String,
     val order: Int,
     val profilePath: String? = null
-)
+) {
+    val fullProfilePath: String?
+        get() = profilePath?.let {
+            "https://image.tmdb.org/t/p/w600_and_h900_bestv2/$it"
+        }
+}

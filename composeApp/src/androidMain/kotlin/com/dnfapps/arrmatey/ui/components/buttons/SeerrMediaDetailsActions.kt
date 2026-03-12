@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components.buttons
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -57,48 +58,26 @@ import com.dnfapps.arrmatey.seerr.state.toButtonState
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ViewType
+import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
 fun MediaDetailsActions(
     buttonState: MediaButtonState,
-//    mediaDetails: RequestMediaDetails,
-//    currentUser: SeerrUser?,
     onWatchClicked: (String, MediaProvider) -> Unit,
     onWatchTrailerClicked: (String) -> Unit,
     onViewRequestClicked: (Long) -> Unit,
     onApproveRequestClicked: (Long) -> Unit,
     onDeclineRequestClicked: (Long) -> Unit,
-//    onReportIssueClicked: () -> Unit,
-//    onOpenInServiceClicked: (String) -> Unit,
-//    onClearDataClicked: () -> Unit,
     onRequestClicked: () -> Unit,
     onRequest4kClicked: () -> Unit
 ) {
-//    val isAdmin = currentUser?.hasPermission(UserPermission.ADMIN) == true
-//    val totalSeasonCount = (mediaDetails as? TvDetails)?.numberOfSeasons ?: 0
-//    val buttonState = mediaDetails.mediaInfo.toButtonState(mediaDetails.relatedVideos, totalSeasonCount, currentUser?.id, isAdmin)
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+//        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-//        if (buttonState.showManageMenu) {
-//            IconButton(
-//                onClick = {},
-//                shape = RoundedCornerShape(10.dp),
-//                modifier = Modifier
-////                    .aspectRatio(1f)
-//                    .size(48.dp),
-//                colors = IconButtonDefaults.iconButtonColors(
-//                    containerColor = ArrOrange,//MaterialTheme.colorScheme.primary,
-//                    contentColor = Color.Black
-//                )
-//            ) {
-//                Icon(Icons.Default.Settings, null)
-//            }
-//        }
         if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
             WatchButton(buttonState, onWatchClicked, onWatchTrailerClicked)
         }
@@ -108,18 +87,6 @@ fun MediaDetailsActions(
         if (buttonState.showRequestButton) {
             RequestButton(onRequestClicked)
         }
-//        if (buttonState.showReportIssueButton) {
-//            IconButton (
-//                onClick = onReportIssueClicked,
-//                shape = RoundedCornerShape(10.dp),
-//                colors = IconButtonDefaults.iconButtonColors(
-//                    containerColor = ArrOrange,
-//                    contentColor = Color.Black
-//                ),
-//            ) {
-//                Icon(Icons.Default.Warning, null)
-//            }
-//        }
     }
 }
 
@@ -154,15 +121,16 @@ private fun WatchButton(
                     )
                 ) {
                     if (iconRes is ImageResource) {
-                        Icon(
+                        Image(
                             painter = painterResource(iconRes),
-                            contentDescription = null
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
                         )
                     } else if (iconRes is ImageVector) {
                         Icon(iconRes, null)
                     }
                     Spacer(Modifier.width(8.dp))
-                    Text(buttonState.watchButtonLabel)
+                    Text(mokoString(buttonState.watchButtonLabel))
                 }
             },
             trailingButton = {
@@ -183,7 +151,7 @@ private fun WatchButton(
                             shapes = MenuDefaults.groupShape(0, 1)
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Watch Trailer") },
+                                text = { Text(mokoString(MR.strings.watch_trailer)) },
                                 onClick = {
                                     buttonState.trailerUrl?.let(onWatchTrailerClicked)
                                     showWatchMenu = false
@@ -220,9 +188,9 @@ private fun WatchButton(
                 }
                 Spacer(Modifier.width(8.dp))
                 if (buttonState.showWatchButton) {
-                    Text(buttonState.watchButtonLabel)
+                    Text(mokoString(buttonState.watchButtonLabel))
                 } else {
-                    Text("Watch Trailer")
+                    Text(mokoString(MR.strings.watch_trailer))
                 }
             }
         }
@@ -254,7 +222,7 @@ private fun ViewRequestButton(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Schedule, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("View Request")
+                    Text(mokoString(MR.strings.view_request))
                 }
             }
         },
@@ -278,7 +246,7 @@ private fun ViewRequestButton(
                         if (buttonState.showApproveRequestButton) {
                             DropdownMenuItem(
                                 selected = false,
-                                text = { Text("Approve Request") },
+                                text = { Text(mokoString(MR.strings.approve_request)) },
                                 onClick = {
                                     buttonState.pendingRequestId?.let(onApproveRequestClicked)
                                     showRequestMenu = false
@@ -292,7 +260,7 @@ private fun ViewRequestButton(
                         if (buttonState.showDeclineRequestButton) {
                             DropdownMenuItem(
                                 selected = false,
-                                text = { Text("Decline Request") },
+                                text = { Text(mokoString(MR.strings.decline_request)) },
                                 onClick = {
                                     buttonState.pendingRequestId?.let(onDeclineRequestClicked)
                                     showRequestMenu = false
@@ -321,65 +289,6 @@ private fun RequestButton(
     ) {
         Icon(Icons.Default.Add, null)
         Spacer(Modifier.width(8.dp))
-        Text("Request")
+        Text(mokoString(MR.strings.request))
     }
 }
-
-//if (buttonState.showManageMenu) {
-//    var showMenu by remember { mutableStateOf(false) }
-//
-//    Box(modifier = if (!buttonState.showReportIssueButton) Modifier.fillMaxWidth() else Modifier.weight(1f)) {
-//        OutlinedButton(
-//            onClick = { showMenu = true },
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            Icon(Icons.Default.Settings, null)
-//            Spacer(Modifier.width(4.dp))
-//            Text("Manage")
-//        }
-//
-//        DropdownMenu(
-//            expanded = showMenu,
-//            onDismissRequest = { showMenu = false }
-//        ) {
-//            if (buttonState.showOpenInServiceButton) {
-//                DropdownMenuItem(
-//                    text = { Text("Open in ${buttonState.serviceName}") },
-//                    onClick = {
-//                        buttonState.serviceUrl?.let(onOpenInServiceClicked)
-//                        showMenu = false
-//                    },
-//                    leadingIcon = {
-//                        Icon(Icons.Default.OpenInBrowser, null)
-//                    }
-//                )
-//            }
-//
-//            if (buttonState.showClearDataButton) {
-//                DropdownMenuItem(
-//                    text = { Text("Clear Data") },
-//                    onClick = {
-//                        onClearDataClicked()
-//                        showMenu = false
-//                    },
-//                    leadingIcon = {
-//                        Icon(Icons.Default.Delete, null)
-//                    }
-//                )
-//            }
-//
-//            if (buttonState.showRequest4kButton) {
-//                DropdownMenuItem(
-//                    text = { Text("Request in 4K") },
-//                    onClick = {
-//                        onRequest4kClicked()
-//                        showMenu = false
-//                    },
-//                    leadingIcon = {
-//                        Icon(Icons.Default.HighQuality, null)
-//                    }
-//                )
-//            }
-//        }
-//    }
-//}

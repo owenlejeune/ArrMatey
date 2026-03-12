@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.entensions
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -49,7 +50,7 @@ val TabItem.androidIcon: ImageVector
         TabItem.DOWNLOADS -> Icons.Default.CloudDownload
         TabItem.CALENDAR -> Icons.Default.CalendarMonth
         TabItem.REQUESTS -> Icons.Default.Inbox
-        TabItem.PROWLARR -> Icons.Default.ManageSearch
+        TabItem.PROWLARR -> Icons.AutoMirrored.Default.ManageSearch
         TabItem.SETTINGS -> Icons.Default.Settings
     }
 

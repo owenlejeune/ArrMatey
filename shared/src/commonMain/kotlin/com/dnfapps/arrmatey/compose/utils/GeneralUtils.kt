@@ -36,6 +36,15 @@ fun Long.toFormattedDuration(): String {
     }.trim()
 }
 
+fun Long.formatWithCommas(symbol: String = "$"): String {
+    val formatted = this.toString()
+        .reversed()
+        .chunked(3)
+        .joinToString(",")
+        .reversed()
+    return "$symbol$formatted"
+}
+
 fun String.toSeconds(): Long {
     val parts = this.split(":").filter { it.isNotBlank() }
 

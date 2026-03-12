@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -55,6 +57,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
@@ -86,8 +90,16 @@ import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
+import com.dnfapps.arrmatey.compose.utils.formatWithCommas
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.isDebug
+import com.dnfapps.arrmatey.model.InfoItem
+import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
+import com.dnfapps.arrmatey.ui.components.InfoArea
+import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
+import com.dnfapps.arrmatey.ui.theme.ArrOrange
+import com.dnfapps.arrmatey.utils.MokoStrings
+import com.dnfapps.arrmatey.utils.format
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -96,20 +108,22 @@ fun SeerrDetailsScreen(
     requestType: RequestType,
     viewModel: SeerrMediaDetailsViewModel = koinInjectParams(tmdbId, requestType),
     navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<SeerrScreen> = navigationManager.requests()
+    navigation: Navigation<SeerrScreen> = navigationManager.requests(),
+    moko: MokoStrings = koinInject()
 ) {
     val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val selectedInstance by viewModel.selectedInstance.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
-//    val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
 
     var showViewRequestSheet by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        contentWindowInsets = WindowInsets.statusBars
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
@@ -152,8 +166,8 @@ fun SeerrDetailsScreen(
                             DetailsHeader(item)
 
                             Column(
-                                modifier = Modifier.padding(horizontal = 24.dp),
-                                verticalArrangement = Arrangement.spacedBy(24.dp)
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 if (isDebug()) {
                                     MediaDetailsActions(
@@ -162,12 +176,10 @@ fun SeerrDetailsScreen(
                                             handleWatchClick(
                                                 url,
                                                 provider,
-                                                context
+                                                context,
+                                                moko
                                             )
                                         },
-//                                    onReportIssueClicked = { },
-//                                    onOpenInServiceClicked = { },
-//                                    onClearDataClicked = { },
                                         onRequestClicked = { },
                                         onRequest4kClicked = { },
                                         onWatchTrailerClicked = { context.openLink(it) },
@@ -177,10 +189,50 @@ fun SeerrDetailsScreen(
                                     )
                                 }
 
+                                item.tagline?.let {
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.headlineSmall.copy(
+                                            fontStyle = FontStyle.Italic
+                                        )
+                                    )
+                                }
+
                                 item.overview?.let { overview ->
                                     ItemDescriptionCard(overview)
                                 }
 
+                                item.credits?.let { credits ->
+                                    SeerrCreditsSection(credits)
+                                }
+
+                                val infoItems = buildList {
+                                    add(InfoItem(mokoString(MR.strings.status), item.status))
+                                    (item as? MovieDetails)?.let { movie ->
+                                        movie.releaseDate?.format("MMM dd, yyyy")?.let { releaseDate ->
+                                            add(InfoItem(mokoString(MR.strings.release_date), releaseDate))
+                                        }
+                                        add(InfoItem(mokoString(MR.strings.revenue), movie.revenue.formatWithCommas()))
+                                        add(InfoItem(mokoString(MR.strings.budget), movie.budget.formatWithCommas()))
+                                    }
+                                    add(InfoItem(mokoString(MR.strings.original_language), item.originalLanguage))
+                                    val countriesText = item.productionCountries.joinToString("\n") { it.name }
+                                    add(InfoItem(mokoString(MR.strings.production_countries), countriesText))
+                                    val studiosText = item.productionCompanies.joinToString("\n") { it.name }
+                                    add(InfoItem(mokoString(MR.strings.studios), studiosText))
+                                }
+                                InfoArea(
+                                    infoItems = infoItems,
+                                    header = {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceEvenly
+                                        ) {
+
+                                        }
+                                    }
+                                )
                             }
                         }
                     }
@@ -209,7 +261,8 @@ fun SeerrDetailsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Warning,
-                                contentDescription = "Report issue"
+                                contentDescription = mokoString(MR.strings.report_issue),
+                                tint = ArrOrange
                             )
                         }
                     }
@@ -220,7 +273,7 @@ fun SeerrDetailsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
-                                contentDescription = "Manage"
+                                contentDescription = mokoString(MR.strings.manage)
                             )
                         }
                     }
@@ -230,313 +283,31 @@ fun SeerrDetailsScreen(
     }
 }
 
-fun handleWatchClick(url: String, provider: MediaProvider, context: Context) {
+fun handleWatchClick(
+    url: String,
+    provider: MediaProvider,
+    context: Context,
+    moko: MokoStrings
+) {
     when (provider) {
         MediaProvider.Plex -> {
-            // Try to open Plex app first, fallback to web
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             try {
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                // Plex app not installed, open in browser
-                val webIntent = Intent(Intent.ACTION_VIEW, url.toUri())
-                context.startActivity(webIntent)
+                Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
             }
         }
         MediaProvider.Jellyfin -> {
-            // Open Jellyfin app or web interface
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             try {
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                // Jellyfin app not installed, show message or open web
-                Toast.makeText(context, "Jellyfin app not installed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
             }
         }
         MediaProvider.None -> {
-            // Shouldn't happen, but handle gracefully
-            Toast.makeText(context, "No media provider available", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
         }
     }
 }
-
-//@Composable
-//fun MediaDetailsActions(
-//    mediaDetails: RequestMediaDetails,
-//    currentUser: SeerrUser?,
-//    onWatchClicked: (String, MediaProvider) -> Unit,
-//    onWatchTrailerClicked: (String) -> Unit,
-//    onViewRequestClicked: (Long) -> Unit,
-//    onApproveRequestClicked: (Long) -> Unit,
-//    onDeclineRequestClicked: (Long) -> Unit,
-//    onReportIssueClicked: () -> Unit,
-//    onOpenInServiceClicked: (String) -> Unit,
-//    onClearDataClicked: () -> Unit,
-//    onRequestClicked: () -> Unit,
-//    onRequest4kClicked: () -> Unit
-//) {
-//    val isAdmin = currentUser?.hasPermission(UserPermission.ADMIN) == true
-//    val totalSeasonCount = (mediaDetails as? TvDetails)?.numberOfSeasons ?: 0
-//    val buttonState = mediaDetails.mediaInfo.toButtonState(mediaDetails.relatedVideos, totalSeasonCount, currentUser?.id, isAdmin)
-//
-//    Column(
-//        modifier = Modifier.fillMaxWidth(),
-//        verticalArrangement = Arrangement.spacedBy(8.dp)
-//    ) {
-//        // Watch button with provider-specific icon and color
-//        if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
-//            var showWatchMenu by remember { mutableStateOf(false) }
-//
-//            val (buttonColor, iconRes) = when (buttonState.mediaProvider) {
-//                MediaProvider.Plex -> Color(0xFFE5A00D) to MR.images.plex
-//                MediaProvider.Jellyfin -> Color(0xff4747ed) to MR.images.jellyfin
-//                MediaProvider.None -> MaterialTheme.colorScheme.primary to Icons.Default.PlayArrow
-//            }
-//
-//            Box {
-//                Button(
-//                    onClick = {
-//                        if (buttonState.showWatchTrailerOption) {
-//                            showWatchMenu = true
-//                        } else {
-//                            buttonState.watchButtonUrl?.let { url ->
-//                                onWatchClicked(url, buttonState.mediaProvider)
-//                            }
-//                        }
-//                    },
-//                    modifier = Modifier.fillMaxWidth(),
-//                    colors = ButtonDefaults.buttonColors(
-//                        containerColor = buttonColor
-//                    )
-//                ) {
-//                    Row(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        horizontalArrangement = Arrangement.SpaceBetween,
-//                        verticalAlignment = Alignment.CenterVertically
-//                    ) {
-//                        Row(verticalAlignment = Alignment.CenterVertically) {
-//                            if (iconRes is ImageResource) {
-//                                Icon(
-//                                    painter = painterResource(iconRes),
-//                                    contentDescription = null
-//                                )
-//                            } else if (iconRes is ImageVector) {
-//                                Icon(iconRes, null)
-//                            }
-//                            Spacer(Modifier.width(8.dp))
-//                            Text(buttonState.watchButtonLabel)
-//                        }
-//
-//                        if (buttonState.showWatchTrailerOption) {
-//                            Icon(Icons.Default.ArrowDropDown, null)
-//                        }
-//                    }
-//                }
-//
-//                if (buttonState.showWatchTrailerOption) {
-//                    DropdownMenu(
-//                        expanded = showWatchMenu,
-//                        onDismissRequest = { showWatchMenu = false }
-//                    ) {
-//                        DropdownMenuItem(
-//                            text = { Text(buttonState.watchButtonLabel) },
-//                            onClick = {
-//                                buttonState.watchButtonUrl?.let { url ->
-//                                    onWatchClicked(url, buttonState.mediaProvider)
-//                                }
-//                                showWatchMenu = false
-//                            },
-//                            leadingIcon = {
-//                                if (iconRes is ImageResource) {
-//                                    Icon(
-//                                        painter = painterResource(iconRes),
-//                                        contentDescription = null
-//                                    )
-//                                } else if (iconRes is ImageVector) {
-//                                    Icon(iconRes, null)
-//                                }
-//                            }
-//                        )
-//                        DropdownMenuItem(
-//                            text = { Text("Watch Trailer") },
-//                            onClick = {
-//                                buttonState.trailerUrl?.let(onWatchTrailerClicked)
-//                                showWatchMenu = false
-//                            },
-//                            leadingIcon = {
-//                                Icon(Icons.Default.PlayArrow, null)
-//                            }
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//
-//        // View Request button with approve/decline dropdown
-//        if (buttonState.showViewRequestButton) {
-//            var showRequestMenu by remember { mutableStateOf(false) }
-//
-//            Box {
-//                Button(
-//                    onClick = {
-//                        if (buttonState.showApproveRequestButton || buttonState.showDeclineRequestButton) {
-//                            showRequestMenu = true
-//                        } else {
-//                            buttonState.pendingRequestId?.let(onViewRequestClicked)
-//                        }
-//                    },
-//                    modifier = Modifier.fillMaxWidth(),
-//                    colors = ButtonDefaults.buttonColors(
-//                        containerColor = MaterialTheme.colorScheme.tertiary
-//                    )
-//                ) {
-//                    Row(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        horizontalArrangement = Arrangement.SpaceBetween,
-//                        verticalAlignment = Alignment.CenterVertically
-//                    ) {
-//                        Row(verticalAlignment = Alignment.CenterVertically) {
-//                            Icon(Icons.Default.Schedule, null)
-//                            Spacer(Modifier.width(8.dp))
-//                            Text("View Request")
-//                        }
-//
-//                        if (buttonState.showApproveRequestButton || buttonState.showDeclineRequestButton) {
-//                            Icon(Icons.Default.ArrowDropDown, null)
-//                        }
-//                    }
-//                }
-//
-//                DropdownMenu(
-//                    expanded = showRequestMenu,
-//                    onDismissRequest = { showRequestMenu = false }
-//                ) {
-//                    DropdownMenuItem(
-//                        text = { Text("View Request") },
-//                        onClick = {
-//                            buttonState.pendingRequestId?.let(onViewRequestClicked)
-//                            showRequestMenu = false
-//                        },
-//                        leadingIcon = {
-//                            Icon(Icons.Default.Visibility, null)
-//                        }
-//                    )
-//
-//                    if (buttonState.showApproveRequestButton) {
-//                        DropdownMenuItem(
-//                            text = { Text("Approve Request") },
-//                            onClick = {
-//                                buttonState.pendingRequestId?.let(onApproveRequestClicked)
-//                                showRequestMenu = false
-//                            },
-//                            leadingIcon = {
-//                                Icon(Icons.Default.Check, null)
-//                            }
-//                        )
-//                    }
-//
-//                    if (buttonState.showDeclineRequestButton) {
-//                        DropdownMenuItem(
-//                            text = { Text("Decline Request") },
-//                            onClick = {
-//                                buttonState.pendingRequestId?.let(onDeclineRequestClicked)
-//                                showRequestMenu = false
-//                            },
-//                            leadingIcon = {
-//                                Icon(Icons.Default.Close, null)
-//                            }
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//
-//        // Request button
-//        if (buttonState.showRequestButton) {
-//            Button(
-//                onClick = onRequestClicked,
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Icon(Icons.Default.Add, null)
-//                Spacer(Modifier.width(8.dp))
-//                Text("Request")
-//            }
-//        }
-//
-//        // Report Issue & Manage Row
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            if (buttonState.showReportIssueButton) {
-//                OutlinedButton(
-//                    onClick = onReportIssueClicked,
-//                    modifier = Modifier.weight(1f)
-//                ) {
-//                    Icon(Icons.Default.Warning, null)
-//                    Spacer(Modifier.width(4.dp))
-//                    Text("Report Issue")
-//                }
-//            }
-//
-//            if (buttonState.showManageMenu) {
-//                var showMenu by remember { mutableStateOf(false) }
-//
-//                Box(modifier = if (!buttonState.showReportIssueButton) Modifier.fillMaxWidth() else Modifier.weight(1f)) {
-//                    OutlinedButton(
-//                        onClick = { showMenu = true },
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        Icon(Icons.Default.Settings, null)
-//                        Spacer(Modifier.width(4.dp))
-//                        Text("Manage")
-//                    }
-//
-//                    DropdownMenu(
-//                        expanded = showMenu,
-//                        onDismissRequest = { showMenu = false }
-//                    ) {
-//                        if (buttonState.showOpenInServiceButton) {
-//                            DropdownMenuItem(
-//                                text = { Text("Open in ${buttonState.serviceName}") },
-//                                onClick = {
-//                                    buttonState.serviceUrl?.let(onOpenInServiceClicked)
-//                                    showMenu = false
-//                                },
-//                                leadingIcon = {
-//                                    Icon(Icons.Default.OpenInBrowser, null)
-//                                }
-//                            )
-//                        }
-//
-//                        if (buttonState.showClearDataButton) {
-//                            DropdownMenuItem(
-//                                text = { Text("Clear Data") },
-//                                onClick = {
-//                                    onClearDataClicked()
-//                                    showMenu = false
-//                                },
-//                                leadingIcon = {
-//                                    Icon(Icons.Default.Delete, null)
-//                                }
-//                            )
-//                        }
-//
-//                        if (buttonState.showRequest4kButton) {
-//                            DropdownMenuItem(
-//                                text = { Text("Request in 4K") },
-//                                onClick = {
-//                                    onRequest4kClicked()
-//                                    showMenu = false
-//                                },
-//                                leadingIcon = {
-//                                    Icon(Icons.Default.HighQuality, null)
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}

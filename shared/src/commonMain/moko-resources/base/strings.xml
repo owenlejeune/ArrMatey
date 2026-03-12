@@ -209,6 +209,12 @@
     <string name="sync_profile">Sync profile</string>
     <string name="priority">Priority</string>
     <string name="privacy">Privacy</string>
+    <string name="release_date">Release Date</string>
+    <string name="revenue">Revenue</string>
+    <string name="budget">Budget</string>
+    <string name="original_language">Original Language</string>
+    <string name="production_countries">Production Countries</string>
+    <string name="studios">Studios</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>
@@ -404,6 +410,8 @@
     <string name="approved">Approved</string>
     <string name="decline">Decline</string>
     <string name="declined">Declined</string>
+    <string name="decline_request">Decline Request</string>
+    <string name="approve_request">Approve Request</string>
     <string name="cancel_request">Cancel Request</string>
     <string name="delete_request">Delete Request</string>
     <string name="remove_from_service">Remove from %1$s</string>
@@ -412,6 +420,17 @@
     <string name="processing">Processing</string>
     <string name="partially_available">Partially Available</string>
     <string name="available">Available</string>
+    <string name="no_app_found">No playback app available</string>
+    <string name="manage">Manage</string>
+    <string name="report_issue">Report issue</string>
+    <string name="watch_on_plex">Watch on Plex</string>
+    <string name="watch_on_jellyfin">Watch on Jellyfin</string>
+    <string name="watch">Watch</string>
+    <string name="watch_trailer">Watch Trailer</string>
+    <string name="view_request">View Request</string>
+    <string name="request">Request</string>
+    <string name="requested_by">Requested by</string>
+    <string name="approved_by">Approved by</string>
 
     <!--- Download Status -->
     <string name="downloading">Downloading</string>

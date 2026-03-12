@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.state.toButtonState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,7 +38,8 @@ class SeerrMediaDetailsViewModel(
     private val getSeerrMediaDetailsUseCase: GetSeerrMediaDetailsUseCase,
     private val getCurrentSeerrUserUseCase: GetCurrentSeerrUserUseCase,
     private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase,
-    private val cancelRequestUseCase: CancelRequestUseCase
+    private val cancelRequestUseCase: CancelRequestUseCase,
+    private val getSeerrMediaDetailsRatingsUseCase: GetSeerrMediaDetailsRatingsUseCase
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow<SeerrDetailsState>(SeerrDetailsState.Initial)
@@ -48,7 +50,8 @@ class SeerrMediaDetailsViewModel(
 
     val buttonState: StateFlow<MediaButtonState> = combine(
         _uiState,
-        _currentUser
+        _currentUser,
+        getSeerrMediaDetailsRatingsUseCase(tmdbId)
     ) { state, user ->
         when (state) {
             is SeerrDetailsState.Success -> {

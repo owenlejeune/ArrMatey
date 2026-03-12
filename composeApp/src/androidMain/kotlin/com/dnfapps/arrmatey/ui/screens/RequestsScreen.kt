@@ -1,15 +1,5 @@
 package com.dnfapps.arrmatey.ui.screens
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,8 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -36,13 +27,10 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Inbox
-import androidx.compose.material.icons.filled.Try
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -67,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -132,10 +119,11 @@ fun RequestsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Requests") },
+                title = { Text(mokoString(MR.strings.requests)) },
                 navigationIcon = { NavigationDrawerButton() }
             )
-        }
+        },
+        contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         PullToRefreshBox(
             isRefreshing = requestsPagingState.isLoading,
@@ -231,7 +219,7 @@ fun RequestsScreen(
                                     Text(mokoString(MR.strings.retry))
                                 }
                                 IconButton(onClick = { viewModel.clearError() }) {
-                                    Icon(Icons.Default.Close, "Dismiss")
+                                    Icon(Icons.Default.Close, null)
                                 }
                             }
                         }
@@ -323,7 +311,8 @@ private fun RequestCard(
                                 ) {
                                     Text(
                                         text = buildAnnotatedString {
-                                            append("Requested by ")
+                                            append(mokoString(MR.strings.requested_by))
+                                            append(" ")
                                             withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                                                 append(request.requestedBy.displayName)
                                             }
@@ -416,8 +405,6 @@ private fun StatusChip(request: MediaRequest) {
     val mediaStatus = MediaStatus.fromValue(request.media.status)
     val requestStatus = RequestStatus.fromValue(request.status)
 
-    // Priority Logic: If media is Processing, Available, or Deleted, show that.
-    // Otherwise, show the Request status (Pending/Approved/Declined).
     val (label, container, content) = when {
         mediaStatus == MediaStatus.Deleted ->
             Triple(mediaStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
@@ -526,11 +513,18 @@ private fun RequestButtons(
         contentColor = MaterialTheme.colorScheme.onTertiary
     )
 
-    val isApproved = RequestStatus.fromValue(request.status) == RequestStatus.Approved
-    val isDeclined = RequestStatus.fromValue(request.status) == RequestStatus.Declined
+    val requestStatusValue = request.status
+    val mediaStatusValue = request.media.status
 
-    Column {
-        if (!isApproved && !isDeclined) {
+    val isPendingApproval = requestStatusValue == 1
+    val isApproved = requestStatusValue == 2 ||
+            requestStatusValue == 5 ||
+            mediaStatusValue >= 4
+
+    val isDeclined = requestStatusValue == 3
+
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (isPendingApproval && !isApproved) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (isAdmin) {
                     Button(
@@ -543,6 +537,7 @@ private fun RequestButtons(
                             CircularProgressIndicator(Modifier.size(24.dp))
                         } else {
                             Icon(Icons.Default.Check, null)
+                            Spacer(Modifier.width(4.dp))
                             Text(mokoString(MR.strings.approve))
                         }
                     }
@@ -582,12 +577,13 @@ private fun RequestButtons(
                     colors = editColours
                 ) {
                     Icon(Icons.Default.Edit, null)
+                    Spacer(Modifier.width(4.dp))
                     Text("Edit")
                 }
             }
         }
 
-        if (isAdmin && (isApproved || isDeclined)) {
+        if (isAdmin && (isApproved || isDeclined) && !isPendingApproval) {
             ConfirmableButton(
                 isConfirming = showDeleteConfirm,
                 onClick = {
@@ -607,7 +603,12 @@ private fun RequestButtons(
                 }
             )
 
-            if (isApproved) {
+            if (isApproved && mediaStatusValue != 6) {
+                val serviceName = when (request.type) {
+                    RequestType.Movie -> InstanceType.Radarr.name
+                    RequestType.Tv -> InstanceType.Sonarr.name
+                }
+
                 ConfirmableButton(
                     isConfirming = showRemoveConfirm,
                     onClick = {
@@ -623,7 +624,7 @@ private fun RequestButtons(
                     content = {
                         Icon(Icons.Default.Delete, null)
                         Spacer(Modifier.width(4.dp))
-                        Text(mokoString(MR.strings.remove_from_service, "[SERVICE NAME]"))
+                        Text(mokoString(MR.strings.remove_from_service, serviceName))
                     }
                 )
             }

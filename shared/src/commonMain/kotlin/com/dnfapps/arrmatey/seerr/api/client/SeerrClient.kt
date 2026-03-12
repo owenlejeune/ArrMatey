@@ -7,9 +7,11 @@ import com.dnfapps.arrmatey.client.safePost
 import com.dnfapps.arrmatey.client.safePut
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
+import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import io.ktor.client.HttpClient
@@ -27,6 +29,8 @@ interface SeerrClient {
     suspend fun setRequestStatus(requestId: Long, status: ApprovalStatus): NetworkResult<MediaRequest>
     suspend fun deleteRequest(requestId: Long): NetworkResult<Unit>
     suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit>
+    suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings>
+    suspend fun getTvRatings(mediaId: Long): NetworkResult<RottenTomatoesRating>
 }
 
 class SeerrClientImpl(
@@ -69,6 +73,12 @@ class SeerrClientImpl(
 
     override suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit> =
         delete("media/$mediaId", mapOf("is4k" to is4k))
+
+    override suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings> =
+        get("movie/$mediaId/ratingscombined")
+
+    override suspend fun getTvRatings(mediaId: Long): NetworkResult<RottenTomatoesRating> =
+        get("tv/$mediaId/ratings")
 
 
     /**

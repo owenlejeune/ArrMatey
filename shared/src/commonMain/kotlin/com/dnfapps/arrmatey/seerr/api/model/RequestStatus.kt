@@ -9,7 +9,8 @@ enum class RequestStatus(
 ) {
     Pending(1, MR.strings.pending),
     Approved(2, MR.strings.approved),
-    Declined(3, MR.strings.declined);
+    Declined(3, MR.strings.declined),
+    Available(5, MR.strings.available);
 
     companion object {
         fun fromValue(value: Int) =
