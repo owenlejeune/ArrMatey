@@ -31,8 +31,7 @@ fun UpcomingDateView(item: ArrMedia) {
     }?.let { airingString ->
         Text(
             text = airingString,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
     }

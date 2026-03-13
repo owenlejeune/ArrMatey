@@ -8,10 +8,10 @@ import kotlinx.serialization.Serializable
 data class Season(
     val id: Long,
     @Contextual val airDate: LocalDate? = null,
-    val episodeCount: Int,
     val name: String,
     val overview: String? = null,
     val posterPath: String? = null,
     val seasonNumber: Int,
-    val episodes: List<Episode> = emptyList()
+    val episodes: List<Episode> = emptyList(),
+    val episodeCount: Int = episodes.size
 )

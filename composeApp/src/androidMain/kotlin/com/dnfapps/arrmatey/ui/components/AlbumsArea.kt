@@ -61,7 +61,7 @@ fun AlbumsArea(
     ) {
         Text(
             text = mokoString(MR.strings.albums_header),
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.titleLarge
         )
         albums.forEach { album ->
             var expanded by rememberSaveable { mutableStateOf(false) }

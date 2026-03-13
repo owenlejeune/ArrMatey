@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
+import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import io.ktor.client.HttpClient
@@ -31,6 +32,7 @@ interface SeerrClient {
     suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit>
     suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings>
     suspend fun getTvRatings(mediaId: Long): NetworkResult<RottenTomatoesRating>
+    suspend fun getSeasonDetails(mediaId: Long, seasonNumber: Int): NetworkResult<Season>
 }
 
 class SeerrClientImpl(
@@ -79,6 +81,9 @@ class SeerrClientImpl(
 
     override suspend fun getTvRatings(mediaId: Long): NetworkResult<RottenTomatoesRating> =
         get("tv/$mediaId/ratings")
+
+    override suspend fun getSeasonDetails(mediaId: Long, seasonNumber: Int): NetworkResult<Season> =
+        get("tv/$mediaId/season/$seasonNumber")
 
 
     /**

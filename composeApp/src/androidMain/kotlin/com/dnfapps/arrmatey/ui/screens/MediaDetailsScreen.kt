@@ -190,7 +190,7 @@ fun MediaDetailsScreen(
                             DetailsHeader(item, type)
 
                             Column(
-                                modifier = Modifier.padding(horizontal = 24.dp),
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
                                 UpcomingDateView(item)
@@ -255,8 +255,6 @@ fun MediaDetailsScreen(
                                 }.toInfoList()
                                 InfoArea(infoItems)
                             }
-
-                            Spacer(modifier = Modifier.height(12.dp))
                         }
                     }
                 }

@@ -58,7 +58,7 @@ fun MovieFileView(
         ) {
             Text(
                 text = mokoString(MR.strings.files),
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.titleLarge
             )
             Text(
                 text = mokoString(MR.strings.history),

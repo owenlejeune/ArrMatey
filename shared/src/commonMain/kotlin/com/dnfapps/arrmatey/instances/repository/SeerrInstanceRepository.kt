@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
+import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
@@ -162,5 +163,9 @@ class SeerrInstanceRepository(
 
     suspend fun getMovieRatings(tmdbId: Long): NetworkResult<CombinedRatings> {
         return client.getMovieRatings(tmdbId)
+    }
+
+    suspend fun getSeasonDetails(tmdbId: Long, seasonNumber: Int): NetworkResult<Season> {
+        return client.getSeasonDetails(tmdbId, seasonNumber)
     }
 }

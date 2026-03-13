@@ -69,7 +69,7 @@ fun SeasonsArea(
     ) {
         Text(
             text = mokoString(MR.strings.seasons_header),
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.titleLarge
         )
         series.seasons.sortedByDescending { it.seasonNumber }.forEach { season ->
             var expanded by rememberSaveable { mutableStateOf(false) }
@@ -94,7 +94,7 @@ fun SeasonsArea(
                             } else {
                                 mokoString(MR.strings.season_label, season.seasonNumber)
                             },
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleLarge
                         )
                         season.statistics?.let { statistics ->
                             Text(

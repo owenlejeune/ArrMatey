@@ -6,7 +6,13 @@ import android.content.Intent
 import android.media.Rating
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,14 +27,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.PlayArrow
@@ -41,6 +51,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -54,9 +65,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -93,14 +107,17 @@ import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
+import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.compose.utils.formatWithCommas
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.InfoItem
+import com.dnfapps.arrmatey.seerr.api.model.Episode
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
+import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.format
@@ -216,9 +233,16 @@ fun SeerrDetailsScreen(
                                         modifier = Modifier.padding(horizontal = 24.dp)
                                     )
                                     series.seasons.forEach { season ->
+                                        var expanded by rememberSaveable { mutableStateOf(false) }
+                                        val iconRotation by animateFloatAsState(
+                                            targetValue = if (expanded) 180f else 0f,
+                                            animationSpec = tween(durationMillis = 200),
+                                            label = "iconRotation"
+                                        )
                                         ContainerCard(modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = 24.dp)
+                                            .clickable { expanded = !expanded }
                                         ) {
                                             Row(
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -230,12 +254,43 @@ fun SeerrDetailsScreen(
                                                     } else {
                                                         mokoString(MR.strings.season_label, season.seasonNumber)
                                                     },
-                                                    style = MaterialTheme.typography.titleMedium
+                                                    style = MaterialTheme.typography.titleLarge
                                                 )
                                                 Text(
                                                     text = "${season.episodeCount} episodes",
                                                     style = MaterialTheme.typography.bodyMedium
                                                 )
+                                                Spacer(modifier = Modifier.weight(1f))
+                                                Icon(
+                                                    imageVector = Icons.Default.ExpandCircleDown,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.rotate(iconRotation)
+                                                )
+                                            }
+                                        }
+
+                                        AnimatedVisibility(
+                                            visible = expanded,
+                                            enter = expandVertically(),
+                                            exit = shrinkVertically()
+                                        ) {
+                                            Column(
+//                                                modifier = Modifier.padding(vertical = 24.dp),
+                                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                            ) {
+                                                season.episodes.forEachIndexed { index, episode ->
+                                                    EpisodeCard(
+                                                        episode,
+                                                        modifier = Modifier.padding(horizontal = 32.dp)
+                                                    )
+                                                    if (index < season.episodeCount - 1) {
+                                                        HorizontalDivider(
+                                                            modifier = Modifier.padding(
+                                                                horizontal = 24.dp
+                                                            )
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -300,27 +355,29 @@ fun SeerrDetailsScreen(
                     }
                 },
                 actions = {
-                    if (buttonState.showReportIssueButton) {
-                        IconButton(
-                            onClick = {  },
-                            colors = IconButtonDefaults.headerBarColors()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Warning,
-                                contentDescription = mokoString(MR.strings.report_issue),
-                                tint = ArrOrange
-                            )
+                    if (isDebug()) {
+                        if (buttonState.showReportIssueButton) {
+                            IconButton(
+                                onClick = { },
+                                colors = IconButtonDefaults.headerBarColors()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = mokoString(MR.strings.report_issue),
+                                    tint = ArrOrange
+                                )
+                            }
                         }
-                    }
-                    if (buttonState.showManageMenu) {
-                        IconButton(
-                            onClick = {  },
-                            colors = IconButtonDefaults.headerBarColors()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = mokoString(MR.strings.manage)
-                            )
+                        if (buttonState.showManageMenu) {
+                            IconButton(
+                                onClick = { },
+                                colors = IconButtonDefaults.headerBarColors()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = mokoString(MR.strings.manage)
+                                )
+                            }
                         }
                     }
                 }
@@ -344,6 +401,49 @@ private fun RatingView(
             modifier = Modifier.height(18.dp)
         )
         Text(text = rating)
+    }
+}
+
+@Composable
+fun EpisodeCard(
+    episode: Episode,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                "${episode.episodeNumber} - ${episode.name}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f)
+            )
+            episode.airDate?.let { airDate ->
+                Text(
+                    airDate.format(),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+        }
+        episode.overview?.let { overview ->
+            Text(overview, style = MaterialTheme.typography.bodyMedium)
+        }
+        episode.stillPath?.let { stillPath ->
+            AsyncImage(
+                model = rememberRemoteImageData(stillPath),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp)),
+                contentDescription = null
+            )
+        }
     }
 }
 
