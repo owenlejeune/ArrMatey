@@ -66,6 +66,7 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.entensions.collectAsLazyPagingItems
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SeerrScreen
@@ -82,6 +83,7 @@ import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.ConfirmableButton
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -265,7 +267,7 @@ private fun RequestCard(
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.padding(12.dp).fillMaxWidth()
+                modifier = Modifier.padding(18.dp).fillMaxWidth()
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -570,15 +572,17 @@ private fun RequestButtons(
                 )
             }
 
-            if (isAdmin || request.type == RequestType.Tv) {
-                Button(
-                    onClick = onEditClicked,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = editColours
-                ) {
-                    Icon(Icons.Default.Edit, null)
-                    Spacer(Modifier.width(4.dp))
-                    Text("Edit")
+            if (isDebug()) {
+                if (isAdmin || request.type == RequestType.Tv) {
+                    Button(
+                        onClick = onEditClicked,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = editColours
+                    ) {
+                        Icon(Icons.Default.Edit, null)
+                        Spacer(Modifier.width(4.dp))
+                        Text("Edit")
+                    }
                 }
             }
         }

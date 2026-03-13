@@ -188,37 +188,35 @@ fun SeerrDetailsScreen(
                             DetailsHeader(item)
 
                             Column(
-                                modifier = Modifier.padding(vertical = 24.dp),
+                                modifier = Modifier.padding(bottom = 24.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                if (isDebug()) {
-                                    MediaDetailsActions(
-                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                        buttonState = buttonState,
-                                        onWatchClicked = { url, provider ->
-                                            handleWatchClick(
-                                                url,
-                                                provider,
-                                                context,
-                                                moko
-                                            )
-                                        },
-                                        onRequestClicked = { },
-                                        onRequest4kClicked = { },
-                                        onWatchTrailerClicked = { context.openLink(it) },
-                                        onViewRequestClicked = { showViewRequestSheet = true },
-                                        onApproveRequestClicked = { viewModel.approveRequest(it) },
-                                        onDeclineRequestClicked = { viewModel.declineRequest(it) },
-                                    )
-                                }
+                                MediaDetailsActions(
+                                    modifier = Modifier.padding(horizontal = 24.dp),
+                                    buttonState = buttonState,
+                                    onWatchClicked = { url, provider ->
+                                        handleWatchClick(
+                                            url,
+                                            provider,
+                                            context,
+                                            moko
+                                        )
+                                    },
+                                    onRequestClicked = { },
+                                    onRequest4kClicked = { },
+                                    onWatchTrailerClicked = { context.openLink(it) },
+                                    onViewRequestClicked = { showViewRequestSheet = true },
+                                    onApproveRequestClicked = { viewModel.approveRequest(it) },
+                                    onDeclineRequestClicked = { viewModel.declineRequest(it) },
+                                )
 
                                 item.tagline?.let {
                                     Text(
                                         text = it,
-                                        style = MaterialTheme.typography.headlineSmall.copy(
-                                            fontStyle = FontStyle.Italic
-                                        ),
-                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        fontStyle = FontStyle.Italic,
+                                        color = MaterialTheme.colorScheme.tertiary,
+                                        modifier = Modifier.padding(horizontal = 24.dp),
                                     )
                                 }
 
@@ -275,7 +273,6 @@ fun SeerrDetailsScreen(
                                             exit = shrinkVertically()
                                         ) {
                                             Column(
-//                                                modifier = Modifier.padding(vertical = 24.dp),
                                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
                                                 season.episodes.forEachIndexed { index, episode ->
@@ -324,8 +321,16 @@ fun SeerrDetailsScreen(
                                             horizontalArrangement = Arrangement.SpaceEvenly
                                         ) {
                                             state.rtRatings?.let { rt ->
-                                                RatingView(rt.criticsRating.icon, "${rt.criticsScore}%")
-                                                RatingView(rt.audienceRating.icon, "${rt.audienceScore}%")
+                                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                    RatingView(
+                                                        rt.criticsRating.icon,
+                                                        "${rt.criticsScore}%"
+                                                    )
+                                                    RatingView(
+                                                        rt.audienceRating.icon,
+                                                        "${rt.audienceScore}%"
+                                                    )
+                                                }
                                             }
                                             state.imdbRatings?.let { imdb ->
                                                 RatingView(MR.images.imdb, "${(imdb.criticsScore*10).roundToInt()}%")

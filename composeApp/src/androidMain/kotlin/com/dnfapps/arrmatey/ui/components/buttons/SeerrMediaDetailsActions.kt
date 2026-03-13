@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
@@ -83,11 +84,18 @@ fun MediaDetailsActions(
         if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
             WatchButton(buttonState, onWatchClicked, onWatchTrailerClicked)
         }
-        if (buttonState.showViewRequestButton) {
-            ViewRequestButton(buttonState, onViewRequestClicked, onApproveRequestClicked, onDeclineRequestClicked)
-        }
-        if (buttonState.showRequestButton) {
-            RequestButton(onRequestClicked)
+        if (isDebug()) {
+            if (buttonState.showViewRequestButton) {
+                ViewRequestButton(
+                    buttonState,
+                    onViewRequestClicked,
+                    onApproveRequestClicked,
+                    onDeclineRequestClicked
+                )
+            }
+            if (buttonState.showRequestButton) {
+                RequestButton(onRequestClicked)
+            }
         }
     }
 }
