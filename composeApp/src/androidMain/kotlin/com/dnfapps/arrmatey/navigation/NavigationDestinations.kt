@@ -34,4 +34,6 @@ sealed interface SettingsScreen : NavKey {
     data class ArrDashboard(val id: Long): SettingsScreen
     data object AddDownloadClient: SettingsScreen
     data class EditDownloadClient(val id: Long): SettingsScreen
+    data object AddCustomWebpage : SettingsScreen
+    data class EditCustomWebpage(val id: Long) : SettingsScreen
 }

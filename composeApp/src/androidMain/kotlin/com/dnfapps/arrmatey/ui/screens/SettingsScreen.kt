@@ -94,6 +94,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val allInstances by viewModel.instances.collectAsStateWithLifecycle()
     val allDownloadClients by viewModel.downloadClients.collectAsStateWithLifecycle()
+    val allCustomWebpages by viewModel.customWebpages.collectAsStateWithLifecycle()
     val instanceConnectionStatues by viewModel.testingStatus.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 

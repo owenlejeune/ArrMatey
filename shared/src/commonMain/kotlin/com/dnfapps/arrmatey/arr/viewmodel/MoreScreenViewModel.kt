@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestNewInstanceConnectionUseCase
+import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 class MoreScreenViewModel(
     instanceRepository: InstanceRepository,
     downloadClientRepository: DownloadClientRepository,
+    customWebpageRepository: CustomWebpageRepository,
     private val testInstanceConnectionUseCase: TestInstanceConnectionUseCase,
     private val testDownloadClientConnectionUseCase: TestDownloadClientConnectionUseCase,
     private val preferencesStore: PreferencesStore
@@ -50,6 +52,13 @@ class MoreScreenViewModel(
         .map { downloadClient ->
             downloadClient.sortedBy { it.type }
         }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val customWebpages = customWebpageRepository.getAllWebpages()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
