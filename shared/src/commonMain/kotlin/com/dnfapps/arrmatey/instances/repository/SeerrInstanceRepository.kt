@@ -20,6 +20,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import io.ktor.client.HttpClient
@@ -45,6 +46,12 @@ class SeerrInstanceRepository(
     val operationsState: StateFlow<RequestOperationsState> = _operationsState.asStateFlow()
 
     private val _mediaDetailsCache = MutableStateFlow<Map<Long, RequestMediaDetails>>(emptyMap())
+
+    private val _radarrServices = MutableStateFlow<List<Service>>(emptyList())
+    val radarrServices: StateFlow<List<Service>> = _radarrServices.asStateFlow()
+
+    private val _sonarrServices = MutableStateFlow<List<Service>>(emptyList())
+    val sonarrServices: StateFlow<List<Service>> = _sonarrServices.asStateFlow()
 
     override suspend fun testConnection(): NetworkResult<Unit> =
         client.testConnection()

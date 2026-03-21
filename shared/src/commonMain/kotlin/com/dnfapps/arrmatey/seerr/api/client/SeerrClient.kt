@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
@@ -33,6 +34,8 @@ interface SeerrClient {
     suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings>
     suspend fun getTvRatings(mediaId: Long): NetworkResult<RottenTomatoesRating>
     suspend fun getSeasonDetails(mediaId: Long, seasonNumber: Int): NetworkResult<Season>
+    suspend fun getRadarrServices(): NetworkResult<List<Service>>
+    suspend fun getSonarrServices(): NetworkResult<List<Service>>
 }
 
 class SeerrClientImpl(
@@ -84,6 +87,12 @@ class SeerrClientImpl(
 
     override suspend fun getSeasonDetails(mediaId: Long, seasonNumber: Int): NetworkResult<Season> =
         get("tv/$mediaId/season/$seasonNumber")
+
+    override suspend fun getRadarrServices(): NetworkResult<List<Service>> =
+        get("service/radarr")
+
+    override suspend fun getSonarrServices(): NetworkResult<List<Service>> =
+        get("service/sonarr")
 
 
     /**
