@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
 class CustomWebpageViewModel(
+    private val webpageId: Long?,
     private val repository: CustomWebpageRepository
 ) : ViewModel() {
 
@@ -27,6 +28,12 @@ class CustomWebpageViewModel(
 
     private val _uiState = MutableStateFlow(CustomWebpageUiState())
     val uiState: StateFlow<CustomWebpageUiState> = _uiState.asStateFlow()
+
+    init {
+        webpageId?.let { id ->
+            loadWebpage(id)
+        }
+    }
 
     fun setName(name: String) {
         _uiState.value = _uiState.value.copy(name = name)
@@ -70,9 +77,7 @@ class CustomWebpageViewModel(
                     name = state.name,
                     url = state.url,
                     headers = state.headers,
-                    position = 0,
-                    createdAt = if (state.isEditing) state.id else currentTimeMillis(),
-                    updatedAt = currentTimeMillis()
+                    position = 0
                 )
 
                 if (state.isEditing) {

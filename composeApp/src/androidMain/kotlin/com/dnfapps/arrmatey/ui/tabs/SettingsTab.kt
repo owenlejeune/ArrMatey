@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsNavigation
 import com.dnfapps.arrmatey.navigation.SettingsScreen
+import com.dnfapps.arrmatey.ui.screens.AddEditCustomWebpageScreen
 import com.dnfapps.arrmatey.ui.screens.AddInstanceScreen
 import com.dnfapps.arrmatey.ui.screens.ArrInstanceDashboard
 import com.dnfapps.arrmatey.ui.screens.DevSettingsScreen
@@ -44,6 +45,8 @@ fun SettingsTabNavHost(
             entry<SettingsScreen.ArrDashboard> { ArrInstanceDashboard(it.id) }
             entry<SettingsScreen.AddDownloadClient> { AddEditDownloadClientScreen() }
             entry<SettingsScreen.EditDownloadClient> { AddEditDownloadClientScreen(clientId = it.id) }
+            entry<SettingsScreen.AddCustomWebpage> { AddEditCustomWebpageScreen() }
+            entry<SettingsScreen.EditCustomWebpage> { AddEditCustomWebpageScreen(webpageId = it.id) }
         }
     )
 }

@@ -12,6 +12,4 @@ data class CustomWebpage(
     val url: String,
     val headers: List<InstanceHeader> = emptyList(),
     val position: Int = 0, // For ordering tabs
-    val createdAt: Long,
-    val updatedAt: Long
 )

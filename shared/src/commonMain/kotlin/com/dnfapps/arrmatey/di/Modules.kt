@@ -98,6 +98,8 @@ import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.NetworkConnectivityObserverFactory
 import com.dnfapps.arrmatey.utils.NetworkConnectivityRepository
+import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
+import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewModel
 import dev.shivathapaa.logger.api.LogLevel
 import dev.shivathapaa.logger.api.LoggerFactory
 import dev.shivathapaa.logger.core.LoggerConfig
@@ -125,6 +127,7 @@ val databaseModule = module {
     single { getRoomDatabase(get()) }
     single { get<ArrMateyDatabase>().getInstanceDao() }
     single { get<ArrMateyDatabase>().getDownloadClientDao() }
+    single { get<ArrMateyDatabase>().getCustomWebpageDao() }
 }
 
 val networkModule = module {
@@ -157,6 +160,8 @@ val repositoryModule = module {
 
     single { DownloadClientRepository(get()) }
     single { DownloadClientManager(get(), get()) }
+
+    single { CustomWebpageRepository(get()) }
 }
 
 val serviceModule = module {
@@ -251,7 +256,7 @@ val viewModelModule = module {
     factory { (seriesId: Long, episode: Episode) ->
         EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get())
     }
-    factory { MoreScreenViewModel(get(), get(), get(), get(), get()) }
+    factory { MoreScreenViewModel(get(), get(), get(), get(), get(), get()) }
     factory { AddInstanceViewModel(get(), get(), get(), get()) }
     factory { (instanceId: Long) ->
         EditInstanceViewModel(instanceId, get(), get(), get(), get())
@@ -267,6 +272,9 @@ val viewModelModule = module {
     factory { (clientId: Long?) ->
         DownloadClientSettingsViewModel(clientId, get(), get(), get(), get(), get(), get()) }
     factory { DownloadClientsViewModel(get(), get(), get(), get(), get()) }
+    factory { (webpageId: Long?) ->
+        CustomWebpageViewModel(webpageId, get())
+    }
 }
 
 val resourcesModule = module {

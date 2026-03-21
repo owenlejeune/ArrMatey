@@ -6,17 +6,19 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.dnfapps.arrmatey.database.dao.CustomWebpageDao
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.database.migrations.migrations
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
 @Database(
-    entities = [Instance::class, DownloadClient::class],
-    version = 5,
+    entities = [Instance::class, DownloadClient::class, CustomWebpage::class],
+    version = 6,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -24,6 +26,7 @@ import kotlinx.coroutines.IO
 abstract class ArrMateyDatabase : RoomDatabase() {
     abstract fun getInstanceDao(): InstanceDao
     abstract fun getDownloadClientDao(): DownloadClientDao
+    abstract fun getCustomWebpageDao(): CustomWebpageDao
 }
 
 @Suppress("KotlinNoActualForExpect")
