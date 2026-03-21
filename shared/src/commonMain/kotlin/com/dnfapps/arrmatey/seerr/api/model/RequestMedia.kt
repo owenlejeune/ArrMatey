@@ -6,8 +6,8 @@ import kotlin.time.Instant
 
 @Serializable
 data class RequestMedia(
-    val downloadStatus: List<String> = emptyList(),
-    val downloadStatus4k: List<String> = emptyList(),
+    val downloadStatus: List<DownloadStatus> = emptyList(),
+    val downloadStatus4k: List<DownloadStatus> = emptyList(),
     val id: Long,
     val mediaType: String,
     val tmdbId: Long,

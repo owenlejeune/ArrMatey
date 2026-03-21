@@ -49,7 +49,7 @@ data class TvDetails(
 ): RequestMediaDetails {
 
     override fun getCertification(localeCode: String): String? =
-        contentRatings?.results?.first {
+        contentRatings?.results?.firstOrNull {
             it.iso_3166_1 == localeCode
         }?.rating
 }

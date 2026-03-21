@@ -8,7 +8,6 @@ import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SeerrScreen
-import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.ui.screens.RequestsScreen
 import com.dnfapps.arrmatey.ui.screens.SeerrDetailsScreen

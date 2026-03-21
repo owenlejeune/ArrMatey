@@ -42,7 +42,7 @@ data class MovieDetails(
 ): RequestMediaDetails {
 
     override fun getCertification(localeCode: String): String? =
-        releases?.results?.first {
+        releases?.results?.firstOrNull {
             it.iso_3166_1 == localeCode
         }?.rating
 }
