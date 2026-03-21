@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.utils
 
 fun String.isValidUrl(): Boolean {
-    println("url: $this - ${lowercase()}")
     // Check if URL starts with http:// or https://
     if (!lowercase().startsWith("http://") && !lowercase().startsWith("https://")) {
         return false
@@ -25,7 +24,7 @@ fun String.isValidUrl(): Boolean {
     if (portMatch != null) {
         val port = portMatch.groupValues[1].toInt()
         // Port must be between 1 and 65535
-        if (port < 1 || port > 65535) {
+        if (port !in 1..65535) {
             return false
         }
     }

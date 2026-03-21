@@ -13,6 +13,7 @@ struct DevSettingsScreen: View {
     @Environment(\.dismiss) var dismiss
     
     @ObservedObject var preferences: PreferencesViewModel = PreferencesViewModel()
+    @StateObject private var logViewModel: LogsViewModel = LogsViewModel()
     
     var body: some View {
         Form {
@@ -40,6 +41,43 @@ struct DevSettingsScreen: View {
                     }
                 }
             }
+            
+//            Section("Application Logs") {
+//                LogsView(logContent: logViewModel.logContent)
+//                    .frame(height: 250)
+//            }
         }
+        .onAppear {
+            logViewModel.startPolling()
+        }
+        .onDisappear {
+            logViewModel.stopPolling()
+        }
+    }
+}
+
+struct LogsView: View {
+    let logContent: String
+    
+    var body: some View {
+        ZStack {
+            Color(uiColor: .systemBackground)
+                .opacity(0.05)
+            
+            ScrollView([.horizontal, .vertical]) {
+                Text(logContent.isEmpty ? "NO LOGS" : logContent)
+                    .font(.system(.caption, design: .monospaced))
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
+            }
+            .onChange(of: logContent) { _, newValue in
+                // Only scroll to bottom if content actually changed
+                if !newValue.isEmpty {
+                    // Scroll handling moved to a more stable approach
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

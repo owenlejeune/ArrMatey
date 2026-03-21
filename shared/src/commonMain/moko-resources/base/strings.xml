@@ -217,6 +217,9 @@
     <string name="studios">Studios</string>
     <string name="cast">Cast</string>
     <string name="crew">Crew</string>
+    <string name="authentication">Authentication</string>
+    <string name="or">or</string>
+    <string name="download_client_authentication">Enter your (optional) username/password or API key as required by your download client configuration</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>
@@ -325,8 +328,8 @@
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="yesterday">Yesterday</string>
-    <string name="premier">Premier</string>
-    <string name="premiers_only">Premiers</string>
+    <string name="premier">Premiere</string>
+    <string name="premiers_only">Premieres</string>
     <string name="finales_only">Finales</string>
     <string name="additional_episodes_count">+%1$d more</string>
     <string name="schedule">Schedule</string>
@@ -402,8 +405,8 @@
 
     <!-- Crash Reporting -->
     <string name="crash_report_subject">ArrMatey Crash Report</string>
-    <string name="share_crash_log">Share Crash Log</string>
-    <string name="share_crash_log_message">It looks like the app crashed the last time you were using it. Would you like to share the crash log? You will be able to copy the log to paste into GitHub or you can share to GitHub directly to open an issue.</string>
+    <string name="share_crash_log">Share Logs</string>
+    <string name="share_crash_log_message">Would you like to share the apps most recent logs? You will be able to share the log directly to GitHub if you have the app installed, or you can download the log file to your device and attach to an issue manually.</string>
 
     <!-- Requests -->
     <string name="modified_by">Modified by</string>

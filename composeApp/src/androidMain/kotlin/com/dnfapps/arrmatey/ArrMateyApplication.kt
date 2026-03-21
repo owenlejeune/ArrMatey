@@ -5,7 +5,8 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import com.dnfapps.arrmatey.di.appModules
-import com.dnfapps.arrmatey.utils.AndroidCrashManager
+import com.dnfapps.arrmatey.logging.LogFileManager
+import com.dnfapps.arrmatey.logging.initLogging
 import com.dnfapps.arrmatey.utils.CrashManager
 import com.dnfapps.arrmatey.utils.initializeNetworkUtils
 import org.koin.android.ext.android.inject
@@ -27,6 +28,7 @@ class ArrMateyApplication : Application(), SingletonImageLoader.Factory {
             modules(appModules() + listOf(androidModule))
         }
 
+        LogFileManager.initialize(this)
         crashManager.initialize()
     }
 

@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.extensions.orderedSortedWith
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -21,11 +22,13 @@ import kotlin.time.Instant
 
 class GetLibraryUseCase(
     private val instanceManager: InstanceManager,
-    private val preferencesStoreRepository: InstancePreferenceStoreRepository
+    private val preferencesStoreRepository: InstancePreferenceStoreRepository,
+    private val logger: Logger
 ) {
     operator fun invoke(instanceId: Long): Flow<ArrLibrary> = flow {
         val repository = instanceManager.getArrRepository(instanceId)
         if (repository == null) {
+            logger.error { "Instance not found: $instanceId" }
             emit(ArrLibrary.Error("Instance not found", ErrorType.Unexpected))
             return@flow
         }
@@ -36,7 +39,7 @@ class GetLibraryUseCase(
             emit(ArrLibrary.Loading)
             coroutineScope {
                 launch {
-                        repository.refreshLibrary()
+                    repository.refreshLibrary()
                 }
             }
         }

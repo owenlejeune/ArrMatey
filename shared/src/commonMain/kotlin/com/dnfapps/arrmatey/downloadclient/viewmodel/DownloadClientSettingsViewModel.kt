@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.downloadclient.usecase.DeleteDownloadClientUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.GetDownloadClientByIdUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientUseCase
+import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,6 +58,7 @@ class DownloadClientSettingsViewModel(
                             username = client.username,
                             password = client.password,
                             apiKey = client.apiKey,
+                            headers = client.headers,
                             enabled = client.enabled,
                             isEditing = true
                         )
@@ -101,6 +103,10 @@ class DownloadClientSettingsViewModel(
         }
     }
 
+    fun updateHeaders(headers: List<InstanceHeader>) {
+        _uiState.update { it.copy(headers = headers) }
+    }
+
     fun updateEnabled(enabled: Boolean) {
         _uiState.update { it.copy(enabled = enabled) }
     }
@@ -138,6 +144,7 @@ class DownloadClientSettingsViewModel(
             username = uiState.value.username,
             password = uiState.value.password,
             apiKey = uiState.value.apiKey,
+            headers = uiState.value.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
             enabled = uiState.value.enabled,
             selected = downloadClient.value?.selected ?: false
         )

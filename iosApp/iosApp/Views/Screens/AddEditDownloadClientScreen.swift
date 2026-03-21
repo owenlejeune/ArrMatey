@@ -41,6 +41,7 @@ struct AddEditDownloadClientScreen: View {
         Form {
             typeSection
             authSection
+            headersSection
             Section {
                 Toggle(
                     MR.strings().client_enabled.localized(),
@@ -151,6 +152,44 @@ struct AddEditDownloadClientScreen: View {
                 .multilineTextAlignment(.trailing)
                 .textInputAutocapitalization(.never)
             }
+        }
+    }
+    
+    @ViewBuilder
+    private var headersSection: some View {
+        Section {
+            ForEach(viewModel.uiState.headers.indices, id: \.self) { index in
+                HeaderItemView(
+                    header: Binding(
+                        get: { viewModel.uiState.headers[index] },
+                        set: { newValue in
+                            var headers = viewModel.uiState.headers
+                            headers[index] = newValue
+                            viewModel.updateHeadrs(headers)
+                        }
+                    )
+                )
+                .swipeActions {
+                    Button(MR.strings().delete.localized()) {
+                        var headers = viewModel.uiState.headers
+                        headers.remove(at: index)
+                        viewModel.updateHeadrs(headers)
+                    }
+                    .tint(.red)
+                }
+            }
+            
+            Button(action: {
+                var headers = viewModel.uiState.headers
+                headers.append(InstanceHeader(key: "", value: ""))
+                viewModel.updateHeadrs(headers)
+            }) {
+                Label(MR.strings().add_header.localized(), systemImage: "plus")
+            }
+        } header: {
+            Text(MR.strings().custom_headers.localized())
+        } footer: {
+            Text(MR.strings().custom_headers_description.localized())
         }
     }
     

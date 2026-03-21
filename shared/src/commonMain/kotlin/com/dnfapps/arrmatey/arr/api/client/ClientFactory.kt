@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -45,6 +46,11 @@ fun createInstanceClient(
             }
         }
 
+        install(HttpRequestRetry) {
+            retryOnExceptionOrServerErrors(maxRetries = 3)
+            exponentialDelay()
+        }
+
         install(Logging) {
             logger = customLogger
             level = LogLevel.ALL
@@ -75,6 +81,11 @@ class HttpClientFactory(private val json: Json, private val logger: Logger) {
                 socketTimeoutMillis = 30_000
             }
 
+            install(HttpRequestRetry) {
+                retryOnExceptionOrServerErrors(maxRetries = 3)
+                exponentialDelay()
+            }
+
             install(HttpCookies)
 
             install(Logging) {
@@ -84,6 +95,9 @@ class HttpClientFactory(private val json: Json, private val logger: Logger) {
 
             defaultRequest {
                 url(downloadClient.url.trimEnd('/') + "/")
+                downloadClient.headers.forEach { (key, value) ->
+                    header(key, value)
+                }
             }
         }
 
@@ -102,7 +116,8 @@ enum class LoggerLevel(
 }
 
 class DynamicLogger(
-    private val preferencesStore: PreferencesStore
+    private val preferencesStore: PreferencesStore,
+    private val logger: dev.shivathapaa.logger.api.Logger
 ): Logger {
     private var currentLogLevel = LogLevel.HEADERS
 
@@ -118,7 +133,7 @@ class DynamicLogger(
     override fun log(message: String) {
         if (currentLogLevel == LogLevel.NONE) return
         if (currentLogLevel == LogLevel.ALL) {
-            println(message)
+            logger.info { message }
             return
         }
 
@@ -134,7 +149,8 @@ class DynamicLogger(
                 }
                 LogLevel.HEADERS -> {
                     // Include everything except the body sections
-                    !isBodyLine(line)
+                    !isBodyLine(line) &&
+                            !line.contains("X-Api-Key", ignoreCase = true)
                 }
                 LogLevel.BODY -> {
                     // Include Request/Response lines and the JSON body, skip headers
@@ -153,7 +169,7 @@ class DynamicLogger(
 
         val result = filteredOutput.toString().trim()
         if (result.isNotEmpty()) {
-            println(result)
+            logger.info { result }
         }
     }
 }

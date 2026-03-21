@@ -33,6 +33,7 @@ import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -46,7 +47,8 @@ import kotlinx.coroutines.launch
 
 class ArrInstanceRepository(
     override val instance: Instance,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val logger: Logger
 ): InstanceScopedRepository {
     val client: ArrClient = createClient()
 
@@ -149,14 +151,22 @@ class ArrInstanceRepository(
     suspend fun refreshLibrary() {
         _library.value = NetworkResult.Loading
         _library.value = client.getLibrary()
+            .onSuccess { logger.info { "Library: $it" } }
+            .onError { code, message, cause ->
+                logger.error(cause) { "Error getting library: $message" }
+            }
     }
 
     suspend fun getMediaDetails(id: Long): NetworkResult<ArrMedia> {
         return client.getDetail(id)
             .onSuccess { media ->
+                logger.info { "Media details for $id: $media" }
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
                 currentCache[id] = media
                 _mediaDetailsCache.value = currentCache
+            }
+            .onError { code, message, cause ->
+                logger.error(cause) { "Error getting media details for $id: $message" }
             }
     }
 
@@ -188,7 +198,6 @@ class ArrInstanceRepository(
     suspend fun refreshHealth() {
         client.getHealth()
             .onSuccess { _health.value = it }
-            .onError { i, string, throwable -> print("ERROR - $i, $string, $throwable") }
     }
 
     suspend fun refreshAllMetadata() {
@@ -210,7 +219,11 @@ class ArrInstanceRepository(
     suspend fun refreshActivityTasks(page: Int = 1, pageSize: Int = 100) {
         client.fetchActivityTasks(page, pageSize)
             .onSuccess { queue ->
+                logger.info { "Activity tasks: $queue" }
                 _activityTasks.value = queue.records
+            }
+            .onError { code, message, cause ->
+                logger.error(cause) { "Error getting activity tasks: $message" }
             }
     }
 
@@ -224,9 +237,11 @@ class ArrInstanceRepository(
 
         client.lookup(query)
             .onSuccess { results ->
+                logger.info { "Lookup results: $results" }
                 _lookupResults.value = NetworkResult.Success(results)
             }
             .onError { code, message, cause ->
+                logger.error(cause) { "Error performing lookup: $message" }
                 _lookupResults.value = NetworkResult.Error(code, message, cause)
             }
     }
@@ -263,9 +278,11 @@ class ArrInstanceRepository(
 
         client.getReleases(params)
             .onSuccess { releases ->
+                logger.info { "Got releases: $releases" }
                 _releases.value = NetworkResult.Success(releases)
             }
             .onError { code, message, cause ->
+                logger.error(cause) { "Error getting releases: $message" }
                 _releases.value = NetworkResult.Error(code, message, cause)
             }
     }
@@ -277,13 +294,12 @@ class ArrInstanceRepository(
 
         return client.downloadRelease(payload)
             .onSuccess {
+                logger.info { "Download release success: $it" }
                 _downloadStatus.value = DownloadState.Success
             }
             .onError { code, error, cause ->
+                logger.error(cause) { "Download release error: $error" }
                 _downloadStatus.value = DownloadState.Error
-            }
-            .also {
-                _downloadStatus.value = DownloadState.Initial
             }
     }
 
@@ -301,9 +317,11 @@ class ArrInstanceRepository(
 
         client.performAutomaticSearch(itemId)
             .onSuccess {
+                logger.info { "Search initiated: $it" }
                 _searchStatus.value = OperationStatus.Success("Search initiated")
             }
             .onError { code, error, cause ->
+                logger.error(cause) { "Search error: $error" }
                 _searchStatus.value = OperationStatus.Error(code, error, cause)
             }
             .also {
@@ -344,15 +362,10 @@ class ArrInstanceRepository(
 
                 updateItemInLibraryCache(item)
                 _editItemStatus.value = OperationStatus.Success("Item edited successfully")
-//                _editItemStatus.value = OperationStatus.Idle
             }
             .onError { code, message, cause ->
                 _editItemStatus.value = OperationStatus.Error(code, message, cause)
-//                _editItemStatus.value = OperationStatus.Idle
             }
-//            .also {
-//                _editItemStatus.value = OperationStatus.Idle
-//            }
     }
 
     suspend fun updateMediaItem(item: ArrMedia): NetworkResult<ArrMedia> {
@@ -414,7 +427,8 @@ class ArrInstanceRepository(
                 response?.let { updateMonitoredInCache(it.id, it.monitored) }
             }
             .onError { code, message, cause ->
-                println("error setting monitor status")
+                logger.error(cause) { "Error setting monitor status: $message" }
+                _monitorStatus.value = OperationStatus.Error(code, message, cause)
             }.also {
                 _monitorStatus.value = OperationStatus.Idle
             }

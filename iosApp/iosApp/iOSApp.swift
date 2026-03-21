@@ -9,8 +9,9 @@ struct iOSApp: App {
     
     init() {
         KoinHelperKt.doInitKoin()
+        LoggingHelperKt.doInitLogging()
         NetworkUtilsKt.initializeNetworkUtils()
-        IOSCrashManager().initialize()
+        IOSCrashManager.shared.initialize()
         preferences = PreferencesViewModel()
     }
     

@@ -63,4 +63,12 @@ private val MIGRATION_3_4 = object: Migration(3, 4) {
     }
 }
 
-val migrations = listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+private val MIGRATION_4_5 = object: Migration(4, 5) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "ALTER TABLE download_clients ADD COLUMN headers TEXT NOT NULL DEFAULT '[]'"
+        )
+    }
+}
+
+val migrations = listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)

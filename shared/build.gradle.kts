@@ -95,6 +95,8 @@ kotlin {
             // MOKO Resources
             api(libs.moko.resources)
             api(libs.moko.resources.compose)
+
+            implementation(libs.kmp.logger)
         }
 
         commonTest.dependencies {

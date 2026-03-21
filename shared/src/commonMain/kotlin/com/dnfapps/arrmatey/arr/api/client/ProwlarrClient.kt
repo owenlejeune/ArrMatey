@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.safeGet
 import com.dnfapps.arrmatey.client.safePost
+import com.dnfapps.arrmatey.client.safePut
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
@@ -21,16 +22,36 @@ class ProwlarrClient(
 ) : KoinComponent {
 
     private val baseUrl: String
-        get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}"
+        get() {
+            val cleanUrl = instance.getEffectiveBaseUrl().trim().trimEnd('|', '/', ' ')
+            val apiBase = instance.type.apiBase.trim().trimStart('/', ' ')
+            return "$cleanUrl/$apiBase"
+        }
 
-    suspend fun testConnection(): NetworkResult<Unit> =
-        httpClient.safeGet("$baseUrl/${instance.type.testEndpoint}")
+    suspend fun testConnection(): NetworkResult<Unit> {
+        val url = "$baseUrl/${instance.type.testEndpoint}"
+        return httpClient.safeGet(url)
+    }
 
-    suspend fun getIndexers(): NetworkResult<List<ProwlarrIndexer>> =
-        httpClient.safeGet("$baseUrl/indexer")
+    suspend fun getIndexers(): NetworkResult<List<ProwlarrIndexer>> {
+        val url = "$baseUrl/indexer"
+        return httpClient.safeGet(url)
+    }
 
     suspend fun getIndexerStatus(): NetworkResult<List<IndexerStatus>> =
         httpClient.safeGet("$baseUrl/indexerStatus")
+
+    suspend fun testIndexer(indexer: ProwlarrIndexer): NetworkResult<Unit> =
+        httpClient.safePost("$baseUrl/indexer/${indexer.id}/test") {
+            contentType(ContentType.Application.Json)
+            setBody(indexer)
+        }
+
+    suspend fun updateIndexer(indexer: ProwlarrIndexer): NetworkResult<ProwlarrIndexer> =
+        httpClient.safePut("$baseUrl/indexer/${indexer.id}") {
+            contentType(ContentType.Application.Json)
+            setBody(indexer)
+        }
 
     suspend fun search(
         query: String,

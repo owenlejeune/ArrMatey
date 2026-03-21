@@ -6,10 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -25,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -63,11 +67,13 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsScreen
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import com.dnfapps.arrmatey.utils.thenGet
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -177,14 +183,16 @@ fun AddEditDownloadClientScreen(
                 scrollBehavior = scrollBehavior
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = navigationBarBottomInset()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AnimatedVisibility(
@@ -268,47 +276,89 @@ fun AddEditDownloadClientScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
                 )
 
-                AMOutlinedTextField(
-                    value = uiState.username,
-                    onValueChange = { viewModel.updateUsername(it) },
-                    label = mokoString(MR.strings.client_username),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
+                Card(
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = mokoString(MR.strings.authentication),
+                            style = MaterialTheme.typography.titleMedium
+                        )
 
-                var showPassword by remember { mutableStateOf(false) }
-                AMOutlinedTextField(
-                    value = uiState.password,
-                    onValueChange = { viewModel.updatePassword(it) },
-                    label = mokoString(MR.strings.client_password),
-                    visualTransformation = if (showPassword) {
-                        VisualTransformation.None
-                    } else {
-                        PasswordVisualTransformation()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    trailingIcon = {
-                        AnimatedContent (
-                            targetState = showPassword,
-                            modifier = Modifier.clickable { showPassword = !showPassword }
-                        ) { visible ->
-                            if (visible) {
-                                Icon(Icons.Default.Visibility, null)
+                        Text(
+                            text = mokoString(MR.strings.download_client_authentication),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        AMOutlinedTextField(
+                            value = uiState.username,
+                            onValueChange = { viewModel.updateUsername(it) },
+                            label = mokoString(MR.strings.client_username),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+
+                        var showPassword by remember { mutableStateOf(false) }
+                        AMOutlinedTextField(
+                            value = uiState.password,
+                            onValueChange = { viewModel.updatePassword(it) },
+                            label = mokoString(MR.strings.client_password),
+                            visualTransformation = if (showPassword) {
+                                VisualTransformation.None
                             } else {
-                                Icon(Icons.Default.VisibilityOff, null)
+                                PasswordVisualTransformation()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            trailingIcon = {
+                                AnimatedContent(
+                                    targetState = showPassword,
+                                    modifier = Modifier.clickable { showPassword = !showPassword }
+                                ) { visible ->
+                                    if (visible) {
+                                        Icon(Icons.Default.Visibility, null)
+                                    } else {
+                                        Icon(Icons.Default.VisibilityOff, null)
+                                    }
+                                }
                             }
-                        }
-                    }
-                )
+                        )
 
-                AMOutlinedTextField(
-                    value = uiState.apiKey,
-                    onValueChange = { viewModel.updateApiKey(it) },
-                    label = mokoString(MR.strings.client_api_key),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    placeholder = mokoString(MR.strings.api_key_placeholder)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+                        ) {
+                            HorizontalDivider(Modifier.weight(1f))
+                            Text(
+                                mokoString(MR.strings.or),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            HorizontalDivider(Modifier.weight(1f))
+                        }
+
+                        AMOutlinedTextField(
+                            value = uiState.apiKey,
+                            onValueChange = { viewModel.updateApiKey(it) },
+                            label = mokoString(MR.strings.client_api_key),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            placeholder = mokoString(MR.strings.api_key_placeholder)
+                        )
+                    }
+                }
+
+                CustomHeaderSection(
+                    headers = uiState.headers,
+                    onHeadersChanged = { viewModel.updateHeaders(it) }
                 )
 
                 Card(

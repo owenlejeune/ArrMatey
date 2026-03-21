@@ -66,7 +66,7 @@ struct ArrConfigurationView: View {
             testSection
             localNetworkArea
             slowInstanceSection
-            headersSection
+            
         }
         .onChange(of: instanceType, initial: true) { _, newValue in
             instanceLabel = newValue.name

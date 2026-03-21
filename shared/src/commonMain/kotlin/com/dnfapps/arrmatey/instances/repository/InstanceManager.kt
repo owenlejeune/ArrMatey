@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,12 +13,16 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class InstanceManager(
     private val instanceRepository: InstanceRepository,
-    private val httpClientFactory: HttpClientFactory
+    private val httpClientFactory: HttpClientFactory,
+    private val logger: Logger
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -51,14 +56,18 @@ class InstanceManager(
         instances.forEach { instance ->
             if (!currentRepos.containsKey(instance.id)) {
                 val httpClient = httpClientFactory.create(instance)
-                currentRepos[instance.id] = createScopedRepository(instance, httpClient)
+                currentRepos[instance.id] = createScopedRepository(instance, httpClient, logger)
             }
         }
 
         _instanceRepositories.value = currentRepos
     }
 
-    private fun createScopedRepository(instance: Instance, httpClient: HttpClient): InstanceScopedRepository {
+    private fun createScopedRepository(
+        instance: Instance,
+        httpClient: HttpClient,
+        logger: Logger
+    ): InstanceScopedRepository {
         return when (instance.type) {
             InstanceType.Seerr -> SeerrInstanceRepository(instance, httpClient)
 
@@ -66,7 +75,7 @@ class InstanceManager(
 
             InstanceType.Sonarr,
             InstanceType.Radarr,
-            InstanceType.Lidarr -> ArrInstanceRepository(instance, httpClient)
+            InstanceType.Lidarr -> ArrInstanceRepository(instance, httpClient, logger)
         }
     }
 
@@ -84,8 +93,9 @@ class InstanceManager(
 
     fun getSelectedArrRepository(type: InstanceType): Flow<ArrInstanceRepository?> =
         instanceRepository.observeSelectedInstance(type)
-            .map { instance ->
-                instance?.let { getArrRepository(it.id) }
+            .flatMapLatest { instance ->
+                if (instance == null) flowOf(null)
+                else _instanceRepositories.map { repos -> repos[instance.id] as? ArrInstanceRepository }
             }
 
     fun getSelectedSeerrRepository(): Flow<SeerrInstanceRepository?> =
@@ -96,8 +106,9 @@ class InstanceManager(
 
     fun getSelectedProwlarrRepository(): Flow<ProwlarrInstanceRepository?> =
         instanceRepository.observeSelectedInstance(InstanceType.Prowlarr)
-            .map { instance ->
-                instance?.let { getProwlarrRepository(it.id) }
+            .flatMapLatest { instance ->
+                if (instance == null) flowOf(null)
+                else _instanceRepositories.map { repos -> repos[instance.id] as? ProwlarrInstanceRepository }
             }
 
     fun getAllRepositories(): List<InstanceScopedRepository> {
@@ -114,9 +125,8 @@ class InstanceManager(
 
     fun repositoriesByType(type: InstanceType): Flow<List<InstanceScopedRepository>> =
         instanceRepository.observeInstancesByType(type)
-            .map { instances ->
-                val current = _instanceRepositories.value
-                instances.mapNotNull { current[it.id] }
+            .combine(_instanceRepositories) { instances, repos ->
+                instances.mapNotNull { repos[it.id] }
             }
 
     fun getRepositoriesByType(type: InstanceType): List<InstanceScopedRepository> {

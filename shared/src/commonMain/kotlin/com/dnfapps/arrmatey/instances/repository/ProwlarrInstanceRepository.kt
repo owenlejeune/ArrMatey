@@ -42,6 +42,12 @@ class ProwlarrInstanceRepository(
     ): NetworkResult<List<ProwlarrSearchResult>> =
         prowlarrClient.search(query = query, categories = categories, indexerIds = indexerIds)
 
+    suspend fun testIndexer(indexer: ProwlarrIndexer): NetworkResult<Unit> =
+        prowlarrClient.testIndexer(indexer)
+
+    suspend fun updateIndexer(indexer: ProwlarrIndexer): NetworkResult<ProwlarrIndexer> =
+        prowlarrClient.updateIndexer(indexer)
+
     suspend fun grabRelease(guid: String, indexerId: Long): NetworkResult<ProwlarrSearchResult> =
         prowlarrClient.grab(guid, indexerId)
 }

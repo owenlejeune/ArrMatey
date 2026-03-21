@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.downloadclient.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.dnfapps.arrmatey.instances.model.InstanceHeader
 
 @Entity(
     tableName = "download_clients",
@@ -20,5 +21,6 @@ data class DownloadClient(
     val password: String = "",
     val apiKey: String = "",
     val enabled: Boolean = true,
-    val selected: Boolean = false
+    val selected: Boolean = false,
+    val headers: List<InstanceHeader> = emptyList()
 )

@@ -32,7 +32,7 @@ ArrMatey is an all-in-one mobile companion for your home server media stack. Sup
 <li>
 <ul>View upcoming episodes, movie, and album releases</ul>
 <ul>Switch between list and month views</ul>
-<ul>Filter by content type, monitored status, premiers/finales</ul>
+<ul>Filter by content type, monitored status, premieres/finales</ul>
 <ul>Scroll-to-today for easy navigation</ul>
 </li>
 

@@ -18,7 +18,7 @@ struct SettingsScreen: View {
     @State private var showLibrariesSheet: Bool = false
     @State private var showShareLogAlert: Bool = false
     
-    private let crashManager = IOSCrashManager()
+    private let crashManager = IOSCrashManager.shared
     
     private var instances: [Instance] {
         viewModel.instances
@@ -89,11 +89,7 @@ struct SettingsScreen: View {
                     openURL(url)
                 } },
                 onBugReportClick: {
-                    if crashManager.getLastCrashLog() != nil {
-                        showShareLogAlert = true
-                    } else if let url = URL(string: MR.strings().bug_report_link.localized()) {
-                        openURL(url)
-                    }
+                    showShareLogAlert = true
                 },
                 onGitHubClick: { if let url = URL(string: MR.strings().app_link.localized()) {
                     openURL(url)
@@ -125,14 +121,12 @@ struct SettingsScreen: View {
         }
         .alert(MR.strings().share_crash_log.localized(), isPresented: $showShareLogAlert) {
             Button(MR.strings().yes.localized()) {
-                if let log = crashManager.getLastCrashLog() {
-                    crashManager.shareCrashLog(log: log)
-                }
-                finalizeCrashCleanup()
+                shareLogs()
+                showShareLogAlert = false
             }
             
             Button(MR.strings().no.localized(), role: .cancel) {
-                finalizeCrashCleanup()
+                showShareLogAlert = false
                 if let url = URL(string: MR.strings().bug_report_link.localized()) {
                     openURL(url)
                 }
@@ -142,9 +136,44 @@ struct SettingsScreen: View {
         }
     }
     
-    private func finalizeCrashCleanup() {
-        crashManager.clearCrashLog()
-        showShareLogAlert = false
+    func shareLogs() {
+        let logPath = LogReader.shared.getLogFilePath()
+        let logURL = URL(fileURLWithPath: logPath)
+
+        guard FileManager.default.fileExists(atPath: logPath) else {
+            print("Log file does not exist at path: \(logPath)")
+            return
+        }
+
+        let items: [Any] = [logURL]
+        let activityViewController = UIActivityViewController(
+            activityItems: items,
+            applicationActivities: nil
+        )
+
+        activityViewController.setValue("ArrMatey Application Logs", forKey: "subject")
+
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let topController = window.rootViewController else {
+            print("Could not find a valid view controller to present the share sheet")
+            return
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if let popover = activityViewController.popoverPresentationController {
+                popover.sourceView = topController.view
+                popover.sourceRect = CGRect(x: topController.view.bounds.midX, y: topController.view.bounds.midY, width: 0, height: 0)
+                popover.permittedArrowDirections = []
+            }
+            
+            if topController.presentedViewController != nil {
+                print("Already presenting a view controller, skipping share presentation")
+                return
+            }
+            
+            topController.present(activityViewController, animated: true, completion: nil)
+        }
     }
 }
 

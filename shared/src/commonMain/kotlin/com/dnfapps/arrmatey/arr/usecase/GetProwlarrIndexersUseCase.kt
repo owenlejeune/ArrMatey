@@ -23,11 +23,12 @@ class GetProwlarrIndexersUseCase(
             is NetworkResult.Success -> emit(ProwlarrIndexersState.Success(result.data))
             is NetworkResult.Error -> emit(
                 ProwlarrIndexersState.Error(
-                    message = result.message ?: "Failed to fetch indexers",
+                    message = result.message ?: result.cause?.let { "${it::class.simpleName}: ${it.message}" } ?: "Failed to fetch indexers",
                     type = if (result.code == null) ErrorType.Network else ErrorType.Http
                 )
             )
             is NetworkResult.Loading -> emit(ProwlarrIndexersState.Loading)
+            else -> emit(ProwlarrIndexersState.Error("Unexpected state", ErrorType.Unexpected))
         }
     }
 }

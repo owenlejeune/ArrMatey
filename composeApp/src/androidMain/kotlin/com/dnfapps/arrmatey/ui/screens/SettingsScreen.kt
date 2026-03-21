@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -57,6 +59,7 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.isDebug
+import com.dnfapps.arrmatey.logging.LogReader
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsNavigation
 import com.dnfapps.arrmatey.navigation.SettingsScreen
@@ -68,6 +71,7 @@ import com.dnfapps.arrmatey.ui.components.settings.AboutCard
 import com.dnfapps.arrmatey.utils.CrashManager
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
@@ -95,7 +99,7 @@ fun SettingsScreen(
 
     var showLibrariesSheet by remember { mutableStateOf(false) }
 
-    var confirmShareLastLog by remember { mutableStateOf<String?>(null) }
+    var confirmShareLastLog by remember { mutableStateOf(false) }
 
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
 
@@ -113,213 +117,210 @@ fun SettingsScreen(
                 },
                 scrollBehavior = scrollBehavior
             )
-        }
+        },
+        contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
-        Box(
-            modifier = Modifier.padding(paddingValues)
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = navigationBarBottomInset())
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = mokoString(MR.strings.instances),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        allInstances.forEach { instance ->
-                            InstanceCard(
-                                instance = instance,
-                                connectionStatus = instanceConnectionStatues[instance.id],
-                                onClick = {
-                                    settingsNav.onInstanceTap(instance.id, instance.type)
-                                }
-                            )
-                        }
-
-                        Card(
-                            shape = MaterialTheme.shapes.extraLarge,
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                settingsNav.navigateTo(SettingsScreen.AddInstance())
-                            },
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(20.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AddCircleOutline,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(40.dp),
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                                Text(
-                                    text = mokoString(MR.strings.add_instance),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = mokoString(MR.strings.download_clients),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        allDownloadClients.forEach { client ->
-                            DownloadClientCard(
-                                client = client,
-                                connectionStatus = instanceConnectionStatues[client.id + 100_000],
-                                onClick = {
-                                    settingsNav.navigateTo(SettingsScreen.EditDownloadClient(client.id))
-                                }
-                            )
-                        }
-
-                        Card(
-                            shape = MaterialTheme.shapes.extraLarge,
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                settingsNav.navigateTo(SettingsScreen.AddDownloadClient)
-                            },
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(20.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CloudDownload,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(40.dp),
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                                Text(
-                                    text = mokoString(MR.strings.download_clients),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
-                    }
-                }
-
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = mokoString(MR.strings.user_interface),
+                    text = mokoString(MR.strings.instances),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Card(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        settingsNav.navigateTo(SettingsScreen.TabPreferences)
-                    },
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Navigation,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    allInstances.forEach { instance ->
+                        InstanceCard(
+                            instance = instance,
+                            connectionStatus = instanceConnectionStatues[instance.id],
+                            onClick = {
+                                settingsNav.onInstanceTap(instance.id, instance.type)
+                            }
                         )
-                        Text(
-                            text = mokoString(MR.strings.navigation_bar_configuration),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                LargeLabelledSwitch(
-                    label = mokoString(MR.strings.service_icons_title),
-                    sublabel = mokoString(MR.strings.service_icons_description),
-                    checked = useServiceNavLogos,
-                    onCheckedChange = {
-                        viewModel.toggleUseServiceNavLogos()
-                    }
-                )
-
-                AboutCard(
-                    onFeatureRequestClick = {
-                        context.openLink(moko.getString(MR.strings.feature_request_link))
-                    },
-                    onBugReportClick = {
-                        confirmShareLastLog = crashManager.getLastCrashLog()
-                        if (confirmShareLastLog == null) {
-                            context.openLink(moko.getString(MR.strings.bug_report_link))
-                        }
-                    },
-                    onGitHubClick = {
-                        context.openLink(moko.getString(MR.strings.app_link))
-                    },
-                    onDonateClick = {
-                        context.openLink(moko.getString(MR.strings.bmac_link))
-                    },
-                    onLibrariesClick = { showLibrariesSheet = true },
-                    modifier = Modifier.padding(top = 12.dp)
-                )
-
-                if (isDebug()) {
-                    Button(onClick = {
-                       throw IllegalStateException("THIS IS A SIMULATED CRASH")
-                    }) {
-                        Text("Simulate crash")
                     }
 
                     Card(
                         shape = MaterialTheme.shapes.extraLarge,
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
-                            settingsNav.navigateTo(SettingsScreen.Dev)
+                            settingsNav.navigateTo(SettingsScreen.AddInstance())
                         },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
-                        Text(
-                            text = "Development Settings",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(20.dp)
-                        )
+                        Row(
+                            modifier = Modifier.padding(20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AddCircleOutline,
+                                contentDescription = null,
+                                modifier = Modifier.size(40.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = mokoString(MR.strings.add_instance),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = mokoString(MR.strings.download_clients),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    allDownloadClients.forEach { client ->
+                        DownloadClientCard(
+                            client = client,
+                            connectionStatus = instanceConnectionStatues[client.id + 100_000],
+                            onClick = {
+                                settingsNav.navigateTo(SettingsScreen.EditDownloadClient(client.id))
+                            }
+                        )
+                    }
+
+                    Card(
+                        shape = MaterialTheme.shapes.extraLarge,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            settingsNav.navigateTo(SettingsScreen.AddDownloadClient)
+                        },
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CloudDownload,
+                                contentDescription = null,
+                                modifier = Modifier.size(40.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = mokoString(MR.strings.download_clients),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+            }
+
+            Text(
+                text = mokoString(MR.strings.user_interface),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Card(
+                shape = MaterialTheme.shapes.extraLarge,
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    settingsNav.navigateTo(SettingsScreen.TabPreferences)
+                },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Navigation,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = mokoString(MR.strings.navigation_bar_configuration),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            LargeLabelledSwitch(
+                label = mokoString(MR.strings.service_icons_title),
+                sublabel = mokoString(MR.strings.service_icons_description),
+                checked = useServiceNavLogos,
+                onCheckedChange = {
+                    viewModel.toggleUseServiceNavLogos()
+                }
+            )
+
+            AboutCard(
+                onFeatureRequestClick = {
+                    context.openLink(moko.getString(MR.strings.feature_request_link))
+                },
+                onBugReportClick = {
+                    confirmShareLastLog = true
+                },
+                onGitHubClick = {
+                    context.openLink(moko.getString(MR.strings.app_link))
+                },
+                onDonateClick = {
+                    context.openLink(moko.getString(MR.strings.bmac_link))
+                },
+                onLibrariesClick = { showLibrariesSheet = true },
+                modifier = Modifier.padding(top = 12.dp)
+            )
+
+            if (isDebug()) {
+                Button(onClick = {
+                   throw IllegalStateException("THIS IS A SIMULATED CRASH")
+                }) {
+                    Text("Simulate crash")
+                }
+
+                Card(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        settingsNav.navigateTo(SettingsScreen.Dev)
+                    },
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Text(
+                        text = "Development Settings",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(20.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
         }
 
         if (showLibrariesSheet) {
@@ -352,26 +353,23 @@ fun SettingsScreen(
             }
         }
 
-        confirmShareLastLog?.let { log ->
+        if (confirmShareLastLog) {
             AlertDialog(
                 onDismissRequest = {
-                    confirmShareLastLog = null
-                    crashManager.clearCrashLog()
+                    confirmShareLastLog = false
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            crashManager.shareCrashLog(log)
-                            crashManager.clearCrashLog()
-                            confirmShareLastLog = null
+                            shareLogs(context)
+                            confirmShareLastLog = false
                         }
                     ) { Text(mokoString(MR.strings.yes)) }
                 },
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            confirmShareLastLog = null
-                            crashManager.clearCrashLog()
+                            confirmShareLastLog = false
                             context.openLink(moko.getString(MR.strings.bug_report_link))
                         }
                     ) { Text(mokoString(MR.strings.no)) }

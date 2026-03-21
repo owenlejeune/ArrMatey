@@ -28,6 +28,6 @@ val androidModule = module {
     }
 
     single<CrashManager> {
-        AndroidCrashManager(get(), get())
+        AndroidCrashManager()
     }
 }
