@@ -51,6 +51,8 @@
     <!-- Actions -->
     <string name="close">Close</string>
     <string name="back">Back</string>
+    <string name="forward">Forward</string>
+    <string name="share">Share</string>
     <string name="save">Save</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -212,6 +214,7 @@
     <string name="authentication">Authentication</string>
     <string name="or">or</string>
     <string name="download_client_authentication">Enter your (optional) username/password or API key as required by your download client configuration</string>
+    <string name="custom_webpage">Custom Webpage</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

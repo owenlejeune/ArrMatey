@@ -46,6 +46,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
+import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.database.ArrMateyDatabase
 import com.dnfapps.arrmatey.database.InstanceRepository
@@ -99,7 +100,11 @@ import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.NetworkConnectivityObserverFactory
 import com.dnfapps.arrmatey.utils.NetworkConnectivityRepository
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
-import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewModel
+import com.dnfapps.arrmatey.webpage.usecase.AddCustomWebpageUseCase
+import com.dnfapps.arrmatey.webpage.usecase.DeleteCustomWebpageUseCase
+import com.dnfapps.arrmatey.webpage.usecase.UpdateCustomWebpageUseCase
+import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
+import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
 import dev.shivathapaa.logger.api.LogLevel
 import dev.shivathapaa.logger.api.LoggerFactory
 import dev.shivathapaa.logger.core.LoggerConfig
@@ -162,6 +167,8 @@ val repositoryModule = module {
     single { DownloadClientManager(get(), get()) }
 
     single { CustomWebpageRepository(get()) }
+
+    single { TabManager(get(), get()) }
 }
 
 val serviceModule = module {
@@ -228,6 +235,9 @@ val useCaseModule = module {
     factory { SetDownloadClientActiveUseCase(get()) }
     factory { GetProwlarrIndexersStatusUseCase(get()) }
     factory { GetProwlarrInstanceRepositoryUseCase(get()) }
+    factory { AddCustomWebpageUseCase(get()) }
+    factory { UpdateCustomWebpageUseCase(get()) }
+    factory { DeleteCustomWebpageUseCase(get()) }
 }
 
 val viewModelModule = module {
@@ -273,7 +283,10 @@ val viewModelModule = module {
         DownloadClientSettingsViewModel(clientId, get(), get(), get(), get(), get(), get()) }
     factory { DownloadClientsViewModel(get(), get(), get(), get(), get()) }
     factory { (webpageId: Long?) ->
-        CustomWebpageViewModel(webpageId, get())
+        CustomWebpageConfigurationViewModel(webpageId, get(), get(), get(), get())
+    }
+    factory { (webpageId: Long) ->
+        CustomWebpageViewerViewModel(webpageId, get())
     }
 }
 

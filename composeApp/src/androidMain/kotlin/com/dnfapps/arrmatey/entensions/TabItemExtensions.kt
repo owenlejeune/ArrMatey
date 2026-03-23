@@ -18,7 +18,7 @@ fun BadgeContent(
     activityQueueIssuesCount: Int
 ) {
     when (tabItem) {
-        TabItem.ACTIVITY -> {
+        TabItem.Standard.ACTIVITY -> {
             if (activityQueueIssuesCount > 0) {
                 Badge { Text(activityQueueIssuesCount.toString()) }
             }

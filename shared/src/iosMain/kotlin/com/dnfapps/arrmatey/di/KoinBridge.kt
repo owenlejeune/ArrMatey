@@ -26,6 +26,8 @@ import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
+import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
+import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.parameter.parametersOf
 
@@ -86,6 +88,12 @@ object KoinBridge: KoinComponent {
 
     fun getProwlarrSearchViewModel(): ProwlarrSearchViewModel =
         getKoin().get()
+
+    fun getCustomWebpageConfigurationViewModel(webpageId: Long): CustomWebpageConfigurationViewModel =
+        getKoin().get { parametersOf(webpageId) }
+
+    fun getCustomWebpageViewerViewModel(webpageId: Long): CustomWebpageViewerViewModel =
+        getKoin().get { parametersOf(webpageId) }
 
     fun getGenericClient(): GenericClient =
         getKoin().get()

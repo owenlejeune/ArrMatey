@@ -10,6 +10,5 @@ data class CustomWebpage(
     val id: Long = 0,
     val name: String,
     val url: String,
-    val headers: List<InstanceHeader> = emptyList(),
-    val position: Int = 0, // For ordering tabs
+    val headers: List<InstanceHeader> = emptyList()
 )

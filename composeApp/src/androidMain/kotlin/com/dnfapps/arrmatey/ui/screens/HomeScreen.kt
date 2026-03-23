@@ -17,6 +17,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
@@ -33,12 +34,14 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.entensions.TabItemIconView
@@ -54,6 +57,7 @@ import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.RequestsTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -62,7 +66,8 @@ import org.koin.compose.koinInject
 fun HomeScreen(
     navigationManager: NavigationManager = koinInject(),
     preferencesStore: PreferencesStore = koinInject(),
-    activityQueue: ActivityQueueViewModel = koinInject()
+    activityQueue: ActivityQueueViewModel = koinInject(),
+    tabManager: TabManager = koinInject(),
 ) {
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -74,15 +79,20 @@ fun HomeScreen(
     val selectedTab by navigationManager.selectedTab.collectAsStateWithLifecycle()
 
     val useServiceNavIcons by preferencesStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
-    val tabPreferences by preferencesStore.tabPreferences.collectAsStateWithLifecycle(TabPreferences())
-    val visibleTabs = tabPreferences.bottomTabItems
-    val drawerTabs = tabPreferences.hiddenTabs
+    val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle(
+        initialValue = TabManager.TabConfiguration(
+            visibleTabs = TabItem.defaultStandardEntries(),
+            drawerTabs = listOf(TabItem.Standard.SETTINGS)
+        )
+    )
+    val visibleTabs = tabConfig.visibleTabs
+    val drawerTabs = tabConfig.drawerTabs.filter { it != TabItem.Standard.SETTINGS }
 
-    val pagerState = rememberPagerState { tabPreferences.bottomTabItems.size }
+    val pagerState = rememberPagerState { visibleTabs.size }
 
-    LaunchedEffect(tabPreferences, overlayTab) {
+    LaunchedEffect(visibleTabs, overlayTab) {
         if (overlayTab == null) {
-            navigationManager.setSelectedTab(tabPreferences.bottomTabItems.first())
+            navigationManager.setSelectedTab(visibleTabs.first())
         }
     }
 
@@ -134,13 +144,14 @@ fun HomeScreen(
                     },
                     onSettingsClick = {
                         scope.launch {
-                            navigationManager.openOverlay(TabItem.SETTINGS)
+                            navigationManager.openOverlay(TabItem.Standard.SETTINGS)
                             drawerState.close()
                         }
                     }
                 )
             }
-        }
+        },
+        gesturesEnabled = false
     ) {
         AnimatedContent(
             targetState = overlayTab,
@@ -151,7 +162,7 @@ fun HomeScreen(
             label = "OverlayTransition"
         ) { currentOverlay ->
             if (currentOverlay != null) {
-                TabItemContent(currentOverlay)
+                TabItemContent(currentOverlay, hasBottomBar = false)
             } else {
                 MainNavigationContent(
                     useServiceNavIcons = useServiceNavIcons,
@@ -190,10 +201,22 @@ private fun DrawerContent(
 
         drawerTabs.forEach { item ->
             NavigationDrawerItem(
-                label = { Text(mokoString(item.resource)) },
+                label = {
+                    when (item) {
+                        is TabItem.Standard -> Text(mokoString(item.resource))
+                        is TabItem.CustomWebpage -> Text(item.name)
+                    }
+                },
                 selected = overlayTab == item,
                 icon = {
-                    TabItemIconView(item, useServiceNavIcons, activityQueueIssuesCount)
+                    when (item) {
+                        is TabItem.Standard -> {
+                            TabItemIconView(item, useServiceNavIcons, activityQueueIssuesCount)
+                        }
+                        is TabItem.CustomWebpage -> {
+                            Icon(Icons.Default.Language, contentDescription = null)
+                        }
+                    }
                 },
                 onClick = { onDrawerTabClick(item) },
             )
@@ -203,7 +226,7 @@ private fun DrawerContent(
 
         HorizontalDivider()
         NavigationDrawerItem(
-            selected = overlayTab == TabItem.SETTINGS,
+            selected = overlayTab == TabItem.Standard.SETTINGS,
             icon = { Icon(Icons.Default.Settings, contentDescription = null) },
             label = { Text(mokoString(MR.strings.settings)) },
             onClick = onSettingsClick
@@ -229,13 +252,25 @@ private fun MainNavigationContent(
                             selected = entry == selectedTab,
                             onClick = { onTabSelected(entry) },
                             icon = {
-                                TabItemIconView(
-                                    tabItem = entry,
-                                    useServiceNavIcons = useServiceNavIcons,
-                                    activityQueueIssuesCount = activityQueueIssuesCount
-                                )
+                                when (entry) {
+                                    is TabItem.Standard -> {
+                                        TabItemIconView(
+                                            tabItem = entry,
+                                            useServiceNavIcons = useServiceNavIcons,
+                                            activityQueueIssuesCount = activityQueueIssuesCount
+                                        )
+                                    }
+                                    is TabItem.CustomWebpage -> {
+                                        Icon(Icons.Default.Language, contentDescription = entry.name)
+                                    }
+                                }
                             },
-                            label = { Text(text = mokoString(entry.resource)) }
+                            label = {
+                                when (entry) {
+                                    is TabItem.Standard -> Text(text = mokoString(entry.resource))
+                                    is TabItem.CustomWebpage -> Text(text = entry.name)
+                                }
+                            }
                         )
                     }
                 }
@@ -249,26 +284,46 @@ private fun MainNavigationContent(
                 .fillMaxSize()
                 .padding(paddingValues),
             userScrollEnabled = false,
-            beyondViewportPageCount = visibleTabs.size,
-            key = { page -> visibleTabs[page].name }
+            beyondViewportPageCount = 0,//visibleTabs.size,
+            key = { page -> visibleTabs[page].key }
         ) { page ->
-            TabItemContent(visibleTabs[page])
+            TabItemContent(visibleTabs[page], hasBottomBar = visibleTabs.size > 1)
         }
     }
 }
 
 @Composable
-private fun TabItemContent(tab: TabItem) {
+private fun TabItemContent(
+    tab: TabItem,
+    hasBottomBar: Boolean
+) {
     when (tab) {
-        TabItem.SHOWS -> ArrTab(InstanceType.Sonarr)
-        TabItem.MOVIES -> ArrTab(InstanceType.Radarr)
-        TabItem.MUSIC -> ArrTab(InstanceType.Lidarr)
-        TabItem.ACTIVITY -> ActivityTab()
-        TabItem.DOWNLOADS -> DownloadsTab()
-        TabItem.CALENDAR -> CalendarTab()
-        TabItem.REQUESTS -> RequestsTab()
-        TabItem.PROWLARR -> ProwlarrTab()
+        is TabItem.Standard -> {
+            StandardTabContent(tab)
+        }
+        is TabItem.CustomWebpage -> {
+            key(tab.id) {
+                CustomWebpageViewerScreen(
+                    webpageId = tab.id,
+                    hasBottomBar = hasBottomBar
+                )
+            }
+        }
+    }
+}
 
-        TabItem.SETTINGS -> SettingsTabNavHost()
+@Composable
+private fun StandardTabContent(tab: TabItem.Standard) {
+    when (tab) {
+        TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr)
+        TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr)
+        TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr)
+        TabItem.Standard.ACTIVITY -> ActivityTab()
+        TabItem.Standard.DOWNLOADS -> DownloadsTab()
+        TabItem.Standard.CALENDAR -> CalendarTab()
+        TabItem.Standard.REQUESTS -> RequestsTab()
+        TabItem.Standard.PROWLARR -> ProwlarrTab()
+
+        TabItem.Standard.SETTINGS -> SettingsTabNavHost()
     }
 }

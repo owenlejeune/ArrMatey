@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,11 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,10 +24,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsScreen
@@ -31,40 +39,58 @@ import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewModel
+import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditCustomWebpageScreen(
     webpageId: Long? = null,
-    viewModel: CustomWebpageViewModel = koinInjectParams(webpageId),
+    viewModel: CustomWebpageConfigurationViewModel = koinInjectParams(webpageId),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigation<SettingsScreen> = navigationManager.settings()
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-//    LaunchedEffect(uiState.error) {
-//        if (uiState.error == null && uiState.name.isEmpty() && uiState.url.isEmpty() && !uiState.isEditing) {
-//            navigation.popBackStack()
-//        }
-//    }
+    LaunchedEffect(uiState.saveResult) {
+        when (val state = uiState.saveResult) {
+            is InsertResult.Success -> {
+                viewModel.reset()
+                navigation.popBackStack()
+            }
+            is InsertResult.Error -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+            }
+            else -> {}
+        }
+    }
+
+    val titleText = remember(uiState.isEditing) {
+        if (uiState.isEditing) {
+            "Edit Webpage"
+        } else {
+            "Add Webpage"
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (uiState.isEditing) "Edit Webpage" else "Add Webpage")
+                    Text(titleText)
                 },
                 navigationIcon = { BackButton(navigation) },
                 actions = {
-                    TextButton(
+                    FilledTonalButton(
                         onClick = {
                             viewModel.saveWebpage()
                         },
-                        enabled = uiState.name.isNotBlank() && uiState.url.isNotBlank()
+                        enabled = uiState.saveButtonEnabled,
+                        modifier = Modifier.padding(end = 16.dp)
                     ) {
-                        Text(mokoString(MR.strings.save))
+                        Text(text = mokoString(MR.strings.save))
                     }
                 }
             )

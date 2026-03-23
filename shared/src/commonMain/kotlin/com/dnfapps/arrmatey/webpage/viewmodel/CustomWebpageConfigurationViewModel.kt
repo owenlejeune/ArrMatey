@@ -6,17 +6,25 @@ import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import com.dnfapps.arrmatey.webpage.state.CustomWebpageUiState
+import com.dnfapps.arrmatey.webpage.usecase.AddCustomWebpageUseCase
+import com.dnfapps.arrmatey.webpage.usecase.DeleteCustomWebpageUseCase
+import com.dnfapps.arrmatey.webpage.usecase.UpdateCustomWebpageUseCase
+import io.ktor.http.headers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
-class CustomWebpageViewModel(
-    private val webpageId: Long?,
-    private val repository: CustomWebpageRepository
+class CustomWebpageConfigurationViewModel(
+    webpageId: Long?,
+    private val repository: CustomWebpageRepository,
+    private val addWebpageUseCase: AddCustomWebpageUseCase,
+    private val updateWebpageUseCase: UpdateCustomWebpageUseCase,
+    private val deleteCustomWebpageUseCase: DeleteCustomWebpageUseCase
 ) : ViewModel() {
 
     val webpages: StateFlow<List<CustomWebpage>> = repository.getAllWebpages()
@@ -36,11 +44,17 @@ class CustomWebpageViewModel(
     }
 
     fun setName(name: String) {
-        _uiState.value = _uiState.value.copy(name = name)
+        _uiState.value = _uiState.value.copy(
+            name = name,
+            saveButtonEnabled = name.isNotBlank() && _uiState.value.url.isNotBlank()
+        )
     }
 
     fun setUrl(url: String) {
-        _uiState.value = _uiState.value.copy(url = url)
+        _uiState.value = _uiState.value.copy(
+            url = url,
+            saveButtonEnabled = url.isNotBlank() && _uiState.value.name.isNotBlank()
+        )
     }
 
     fun setHeaders(headers: List<InstanceHeader>) {
@@ -63,45 +77,26 @@ class CustomWebpageViewModel(
     }
 
     fun saveWebpage() {
-        val state = _uiState.value
-
-        if (state.name.isBlank() || state.url.isBlank()) {
-            _uiState.value = state.copy(error = "Name and URL are required")
-            return
-        }
-
         viewModelScope.launch {
-            try {
-                val webpage = CustomWebpage(
-                    id = state.id,
-                    name = state.name,
-                    url = state.url,
-                    headers = state.headers,
-                    position = 0
-                )
+            val newWebpage = CustomWebpage(
+                id = _uiState.value.id,
+                name = _uiState.value.name,
+                url = _uiState.value.url,
+                headers = _uiState.value.headers
+            )
 
-                if (state.isEditing) {
-                    repository.updateWebpage(webpage)
-                } else {
-                    repository.addWebpage(webpage)
-                }
-
-                _uiState.value = CustomWebpageUiState()
-            } catch (e: Exception) {
-                _uiState.value = state.copy(error = e.message ?: "Failed to save")
+            val result = if (_uiState.value.isEditing) {
+                updateWebpageUseCase(newWebpage)
+            } else {
+                addWebpageUseCase(newWebpage)
             }
+            _uiState.update { it.copy(saveResult = result) }
         }
     }
 
     fun deleteWebpage(id: Long) {
         viewModelScope.launch {
-            repository.deleteWebpageById(id)
-        }
-    }
-
-    fun reorderWebpages(webpages: List<CustomWebpage>) {
-        viewModelScope.launch {
-            repository.updatePositions(webpages)
+            deleteCustomWebpageUseCase(id)
         }
     }
 

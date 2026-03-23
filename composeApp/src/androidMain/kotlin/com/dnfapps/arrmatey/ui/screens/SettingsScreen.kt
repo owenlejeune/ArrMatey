@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Security
@@ -216,6 +217,27 @@ fun SettingsScreen(
                 )
 
                 SettingsGroup(
+                    title = "Custom Web Pages",
+                    items = allCustomWebPages.map { webpage ->
+                        SettingItem(
+                            title = webpage.name,
+                            subtitle = webpage.url,
+                            icon = IconSource.Vector(Icons.Default.Language),
+                            onClick = {
+                                settingsNav.navigateTo(SettingsScreen.EditCustomWebpage(webpage.id))
+                            }
+                        )
+                    } + SettingItem(
+                        title = "Add custom webpages",
+                        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                        icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                        onClick = {
+                            settingsNav.navigateTo(SettingsScreen.AddCustomWebpage)
+                        }
+                    )
+                )
+
+                SettingsGroup(
                     title = mokoString(MR.strings.user_interface),
                     items = listOf(
                         SettingItem(
@@ -237,27 +259,6 @@ fun SettingsScreen(
                             },
                             onClick = { viewModel.toggleUseServiceNavLogos() }
                         )
-                    )
-                )
-
-                SettingsGroup(
-                    title = "Custom Web Pages",
-                    items = allCustomWebPages.map { webpage ->
-                        SettingItem(
-                            title = webpage.name,
-                            subtitle = webpage.url,
-                            icon = IconSource.Vector(Icons.Default.Web),
-                            onClick = {
-                                settingsNav.navigateTo(SettingsScreen.EditCustomWebpage(webpage.id))
-                            }
-                        )
-                    } + SettingItem(
-                        title = "Add custom webpages",
-                        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                        icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                        onClick = {
-                            settingsNav.navigateTo(SettingsScreen.AddCustomWebpage)
-                        }
                     )
                 )
 

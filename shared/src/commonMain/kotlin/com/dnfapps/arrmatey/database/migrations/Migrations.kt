@@ -78,15 +78,8 @@ private val MIGRATION_5_6 = object: Migration(5, 6) {
                     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                     name TEXT NOT NULL,
                     url TEXT NOT NULL,
-                    headers TEXT NOT NULL DEFAULT '[]',
-                    position INTEGER NOT NULL DEFAULT 0
+                    headers TEXT NOT NULL DEFAULT '[]'
                 )
-            """.trimIndent()
-        )
-
-        connection.execSQL("""
-                CREATE INDEX IF NOT EXISTS index_custom_webpages_position 
-                ON custom_webpages(position)
             """.trimIndent()
         )
     }

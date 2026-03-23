@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "e3a82c6ebab0eaddbf1e8a2683c18b20",
+    "identityHash": "9a0f8bdc62512938d29a7a47b3c575ff",
     "entities": [
       {
         "tableName": "instances",
@@ -205,7 +205,7 @@
       },
       {
         "tableName": "custom_webpages",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, `headers` TEXT NOT NULL, `position` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, `headers` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -230,12 +230,6 @@
             "columnName": "headers",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "position",
-            "columnName": "position",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -248,7 +242,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e3a82c6ebab0eaddbf1e8a2683c18b20')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9a0f8bdc62512938d29a7a47b3c575ff')"
     ]
   }
 }
