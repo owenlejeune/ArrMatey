@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -119,44 +120,44 @@ fun TabCustomizationContent(
         combinedList = TabRow.buildList(visibleTabs, drawerTabs)
     }
 
-    fun savePreferences(list: List<TabRow>) {
-        val dividerIndex = list.indexOfFirst { it is TabRow.Divider }
-        if (dividerIndex < 0) return
-
-        val visible = list.subList(0, dividerIndex)
-            .filterIsInstance<TabRow.Tab>()
-            .map { it.item.key }
-
-        val hidden = list.subList(dividerIndex + 1, list.size)
-            .filterIsInstance<TabRow.Tab>()
-            .map { it.item.key }
-
-        updatePreferences(TabPreferences(visible, hidden))
-    }
-
     val lazyListState = rememberLazyListState()
-    val reorderableLazyColumnState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        val fromIndex = combinedList.indexOfFirst { it.key == from.key }
-        val toIndex = combinedList.indexOfFirst { it.key == to.key }
+    val reorderableLazyColumnState = rememberReorderableLazyListState(
+        lazyListState = lazyListState,
+        onMove = { from, to ->
+            val fromIndex = combinedList.indexOfFirst { it.key == from.key }
+            val toIndex = combinedList.indexOfFirst { it.key == to.key }
 
-        if (fromIndex == -1 || toIndex == -1) return@rememberReorderableLazyListState
+            if (fromIndex != -1 && toIndex != -1) {
+                val newList = combinedList.toMutableList()
 
-        val newList = combinedList.toMutableList()
-        val movedItem = newList.removeAt(fromIndex)
-        newList.add(toIndex, movedItem)
+                val movedItem = newList.removeAt(fromIndex)
+                newList.add(toIndex, movedItem)
 
-        val dividerIndex = newList.indexOfFirst { it is TabRow.Divider }
-        val tabsAbove = newList.subList(0, dividerIndex).filterIsInstance<TabRow.Tab>()
+                val dividerIndex = newList.indexOfFirst { it is TabRow.Divider }
+                val tabsAbove = newList.subList(0, dividerIndex).filterIsInstance<TabRow.Tab>()
+                if (tabsAbove.size > MAX_TABS) {
+                    val overflowItem = newList.removeAt(dividerIndex - 1)
+                    newList.add(dividerIndex, overflowItem)
+                }
 
-        if (tabsAbove.size > MAX_TABS) {
-            val overflowItem = newList.removeAt(dividerIndex - 1)
-            newList.add(dividerIndex, overflowItem)
+                combinedList = newList
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                val filtered = combinedList.filter { it !is TabRow.Placeholder }
+                val finalDividerIndex = filtered.indexOfFirst { it is TabRow.Divider }
+
+                val newNav = filtered.subList(0, finalDividerIndex)
+                    .filterIsInstance<TabRow.Tab>()
+                    .map { it.item.key }
+
+                val newHidden = filtered.subList(finalDividerIndex + 1, filtered.size)
+                    .filterIsInstance<TabRow.Tab>()
+                    .map { it.item.key }
+
+                updatePreferences(TabPreferences(newNav, newHidden))
+            }
         }
-
-        combinedList = newList
-        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        savePreferences(newList)
-    }
+    )
 
     LazyColumn(
         state = lazyListState,
@@ -179,8 +180,9 @@ fun TabCustomizationContent(
                 style = MaterialTheme.typography.titleMedium
             )
         }
+
         itemsIndexed(combinedList, key = { _, item -> item.key }) { index, row ->
-            ReorderableItem(reorderableLazyColumnState, row.key, enabled = row is TabRow.Tab) { isDragging ->
+            ReorderableItem(reorderableLazyColumnState, row.key) { isDragging ->
                 val interactionSource = remember { MutableInteractionSource() }
 
                 when (row) {
@@ -193,28 +195,29 @@ fun TabCustomizationContent(
                                 )
                         ) {
                             HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                            Text(text = mokoString(row.text))
+                            Text(
+                                text = mokoString(row.text),
+
+                                )
                         }
                     }
                     is TabRow.Placeholder -> {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                        )
+                        Spacer(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp))
                     }
                     is TabRow.Tab -> {
                         val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
 
                         val dividerIndex = combinedList.indexOfFirst { it is TabRow.Divider }
-                        val currentIndex = combinedList.indexOf(row)
+                        val currentIndex = index
                         val isBelowDivider = currentIndex > dividerIndex
 
                         val ghostAlpha by animateFloatAsState(if (isBelowDivider) 0.6f else 1f)
 
                         Box(modifier = Modifier.graphicsLayer { alpha = ghostAlpha }) {
                             TabItemCard(
-                                modifier = Modifier.draggableHandle(),
+                                modifier = Modifier.draggableHandle(enabled = true),
                                 tab = row.item,
                                 useServiceNavLogos = useServiceNavLogos,
                                 isDragging = isDragging,
@@ -299,7 +302,17 @@ fun TabItemCard(
                             )
                         }
                     }
-                    else -> {}
+                    TabItem.Settings -> {
+                        // Settings shouldn't appear here, but handle it just in case
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = null
+                        )
+                        Text(
+                            text = mokoString(tab.resource),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 }
             }
         }

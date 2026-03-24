@@ -216,7 +216,12 @@ class PreferencesStore(
     fun saveTabPreferences(tabPreferences: TabPreferences) {
         scope.launch {
             dataStore.edit { preferences ->
-                preferences[tabPreferencesKey] = Json.encodeToString(tabPreferences)
+                val json = Json {
+                    encodeDefaults = true
+                }
+                val jsonString = json.encodeToString(tabPreferences)
+
+                preferences[tabPreferencesKey] = jsonString
             }
         }
     }
