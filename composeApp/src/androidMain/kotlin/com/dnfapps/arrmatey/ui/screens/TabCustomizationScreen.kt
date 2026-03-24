@@ -75,15 +75,8 @@ fun TabCustomizationScreen(
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigation<SettingsScreen> = navigationManager.settings()
 ) {
-    val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle(
-        initialValue = TabManager.TabConfiguration(
-            visibleTabs = emptyList(),
-            drawerTabs = emptyList()
-        )
-    )
+    val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle()
     val useServiceNavLogos by preferenceStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
-
-    var resetTrigger by remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -91,7 +84,7 @@ fun TabCustomizationScreen(
                 title = { Text(mokoString(MR.strings.customize_navigation)) },
                 navigationIcon = { BackButton(navigation) },
                 actions = {
-                    IconButton(onClick = { resetTrigger++ }) {
+                    IconButton(onClick = { preferenceStore.resetTabPreferences() }) {
                         Icon(Icons.Default.RestartAlt, contentDescription = "Reset")
                     }
                 }
@@ -102,9 +95,8 @@ fun TabCustomizationScreen(
             TabCustomizationContent(
                 useServiceNavLogos = useServiceNavLogos,
                 visibleTabs = tabConfig.visibleTabs,
-                drawerTabs = tabConfig.drawerTabs.filter { it != TabItem.Standard.SETTINGS },
-                updatePreferences = { preferenceStore.updateTabPreferences(it) },
-                resetTrigger = resetTrigger
+                drawerTabs = tabConfig.drawerTabs,
+                updatePreferences = { preferenceStore.updateTabPreferences(it) }
             )
         }
     }
@@ -115,12 +107,10 @@ fun TabCustomizationContent(
     useServiceNavLogos: Boolean,
     visibleTabs: List<TabItem>,
     drawerTabs: List<TabItem>,
-    updatePreferences: (TabPreferences) -> Unit,
-    resetTrigger: Int
+    updatePreferences: (TabPreferences) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
-    // Build the list including the Header as the first element
     var combinedList by remember {
         mutableStateOf(TabRow.buildList(visibleTabs, drawerTabs))
     }
@@ -149,17 +139,13 @@ fun TabCustomizationContent(
         val fromIndex = combinedList.indexOfFirst { it.key == from.key }
         val toIndex = combinedList.indexOfFirst { it.key == to.key }
 
-        // Prevent dragging anything into or above the Header (index 0)
         if (fromIndex == -1 || toIndex == -1) return@rememberReorderableLazyListState
 
         val newList = combinedList.toMutableList()
         val movedItem = newList.removeAt(fromIndex)
         newList.add(toIndex, movedItem)
 
-        // 5-Tab Limit Logic
         val dividerIndex = newList.indexOfFirst { it is TabRow.Divider }
-        // Header is at 0, so visible tabs start at 1. Max visible is Header(0) + 5 tabs = index 5.
-        // Divider should be at index 6.
         val tabsAbove = newList.subList(0, dividerIndex).filterIsInstance<TabRow.Tab>()
 
         if (tabsAbove.size > MAX_TABS) {
@@ -220,7 +206,6 @@ fun TabCustomizationContent(
                     is TabRow.Tab -> {
                         val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
 
-                        // Calculate UI state based on current location in combinedList
                         val dividerIndex = combinedList.indexOfFirst { it is TabRow.Divider }
                         val currentIndex = combinedList.indexOf(row)
                         val isBelowDivider = currentIndex > dividerIndex
@@ -314,6 +299,7 @@ fun TabItemCard(
                             )
                         }
                     }
+                    else -> {}
                 }
             }
         }

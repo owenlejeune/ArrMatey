@@ -3,10 +3,10 @@ package com.dnfapps.arrmatey.entensions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowCircleDown
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.FileDownload
@@ -52,9 +52,9 @@ val TabItem.androidIcon: ImageVector
             TabItem.Standard.CALENDAR -> Icons.Default.CalendarMonth
             TabItem.Standard.REQUESTS -> Icons.Default.Inbox
             TabItem.Standard.PROWLARR -> Icons.Default.ManageSearch
-            TabItem.Standard.SETTINGS -> Icons.Default.Settings
         }
         is TabItem.CustomWebpage -> Icons.Default.Language
+        is TabItem.Settings -> Icons.Default.Settings
     }
 
 val SortBy.androidIcon: ImageVector

@@ -217,7 +217,7 @@ fun SettingsScreen(
                 )
 
                 SettingsGroup(
-                    title = "Custom Web Pages",
+                    title = mokoString(MR.strings.custom_webpages),
                     items = allCustomWebPages.map { webpage ->
                         SettingItem(
                             title = webpage.name,
@@ -225,10 +225,17 @@ fun SettingsScreen(
                             icon = IconSource.Vector(Icons.Default.Language),
                             onClick = {
                                 settingsNav.navigateTo(SettingsScreen.EditCustomWebpage(webpage.id))
-                            }
+                            },
+                            trailingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            },
                         )
                     } + SettingItem(
-                        title = "Add custom webpages",
+                        title = mokoString(MR.strings.add_custom_webpage),
                         backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                         icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                         onClick = {

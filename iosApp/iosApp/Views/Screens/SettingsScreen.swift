@@ -28,6 +28,10 @@ struct SettingsScreen: View {
         viewModel.downloadClients
     }
     
+    private var customWebpages: [CustomWebpage] {
+        viewModel.customWebpages
+    }
+    
     private func route(for instance: Instance) -> SettingsRoute {
         switch instance.type {
         case .sonarr, .radarr, .lidarr:
@@ -61,6 +65,16 @@ struct SettingsScreen: View {
                 }
             } header: {
                 Text(MR.strings().download_clients.localized())
+            }
+            
+            Section {
+                ForEach(customWebpages, id: \.self) { webpage in
+                    WebpageCard(webpage: webpage)
+                }
+                NavigationLink(value: SettingsRoute.newCustomWebpage) {
+                    Text("Add custom webpage")
+                        .foregroundColor(.themePrimary)
+                }
             }
 
             Section {
@@ -184,7 +198,7 @@ struct InstanceCard: View {
     
     var body: some View {
         NavigationLink(value: route) {
-            HStack(spacing: 24) {
+            HStack(spacing: 8) {
                 instance.type.icon.toImage(renderingMode: .original)
                     .frame(width: 32, height: 32)
                 VStack(alignment: .leading, spacing: 1) {
@@ -220,7 +234,7 @@ struct DownloadClientCard: View {
     
     var body: some View {
         NavigationLink(value: SettingsRoute.editDownloadClient(client.id)) {
-            HStack(spacing: 24) {
+            HStack(spacing: 8) {
                 client.type.icon.toImage(renderingMode: .original)
                     .frame(width: 32, height: 32)
                 VStack(alignment: .leading, spacing: 1) {
@@ -243,6 +257,25 @@ struct DownloadClientCard: View {
                         .frame(width: 8, height: 8)
                     }
                     Text(client.url)
+                        .font(.system(size: 16))
+                }
+            }
+        }
+    }
+}
+
+struct WebpageCard: View {
+    let webpage: CustomWebpage
+    
+    var body: some View {
+        NavigationLink(value: SettingsRoute.editCustomWebpage(webpage.id)) {
+            HStack(spacing: 8) {
+                Image(systemName: "globe")
+                    .frame(width: 32, height: 32)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(webpage.name)
+                        .font(.system(size: 18, weight: .medium))
+                    Text(webpage.url)
                         .font(.system(size: 16))
                 }
             }

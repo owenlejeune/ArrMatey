@@ -79,14 +79,9 @@ fun HomeScreen(
     val selectedTab by navigationManager.selectedTab.collectAsStateWithLifecycle()
 
     val useServiceNavIcons by preferencesStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
-    val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle(
-        initialValue = TabManager.TabConfiguration(
-            visibleTabs = TabItem.defaultStandardEntries(),
-            drawerTabs = listOf(TabItem.Standard.SETTINGS)
-        )
-    )
+    val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle()
     val visibleTabs = tabConfig.visibleTabs
-    val drawerTabs = tabConfig.drawerTabs.filter { it != TabItem.Standard.SETTINGS }
+    val drawerTabs = tabConfig.drawerTabs//.filter { it != TabItem.Standard.SETTINGS }
 
     val pagerState = rememberPagerState { visibleTabs.size }
 
@@ -144,7 +139,7 @@ fun HomeScreen(
                     },
                     onSettingsClick = {
                         scope.launch {
-                            navigationManager.openOverlay(TabItem.Standard.SETTINGS)
+                            navigationManager.openOverlay(TabItem.Settings)
                             drawerState.close()
                         }
                     }
@@ -162,7 +157,7 @@ fun HomeScreen(
             label = "OverlayTransition"
         ) { currentOverlay ->
             if (currentOverlay != null) {
-                TabItemContent(currentOverlay, hasBottomBar = false)
+                TabItemContent(currentOverlay)
             } else {
                 MainNavigationContent(
                     useServiceNavIcons = useServiceNavIcons,
@@ -205,6 +200,7 @@ private fun DrawerContent(
                     when (item) {
                         is TabItem.Standard -> Text(mokoString(item.resource))
                         is TabItem.CustomWebpage -> Text(item.name)
+                        else -> {}
                     }
                 },
                 selected = overlayTab == item,
@@ -216,6 +212,7 @@ private fun DrawerContent(
                         is TabItem.CustomWebpage -> {
                             Icon(Icons.Default.Language, contentDescription = null)
                         }
+                        else -> {}
                     }
                 },
                 onClick = { onDrawerTabClick(item) },
@@ -226,7 +223,7 @@ private fun DrawerContent(
 
         HorizontalDivider()
         NavigationDrawerItem(
-            selected = overlayTab == TabItem.Standard.SETTINGS,
+            selected = overlayTab == TabItem.Settings,
             icon = { Icon(Icons.Default.Settings, contentDescription = null) },
             label = { Text(mokoString(MR.strings.settings)) },
             onClick = onSettingsClick
@@ -263,12 +260,14 @@ private fun MainNavigationContent(
                                     is TabItem.CustomWebpage -> {
                                         Icon(Icons.Default.Language, contentDescription = entry.name)
                                     }
+                                    else -> {}
                                 }
                             },
                             label = {
                                 when (entry) {
                                     is TabItem.Standard -> Text(text = mokoString(entry.resource))
                                     is TabItem.CustomWebpage -> Text(text = entry.name)
+                                    else -> {}
                                 }
                             }
                         )
@@ -284,31 +283,26 @@ private fun MainNavigationContent(
                 .fillMaxSize()
                 .padding(paddingValues),
             userScrollEnabled = false,
-            beyondViewportPageCount = 0,//visibleTabs.size,
+            beyondViewportPageCount = visibleTabs.size, //0
             key = { page -> visibleTabs[page].key }
         ) { page ->
-            TabItemContent(visibleTabs[page], hasBottomBar = visibleTabs.size > 1)
+            TabItemContent(visibleTabs[page])
         }
     }
 }
 
 @Composable
-private fun TabItemContent(
-    tab: TabItem,
-    hasBottomBar: Boolean
-) {
+private fun TabItemContent(tab: TabItem) {
     when (tab) {
         is TabItem.Standard -> {
             StandardTabContent(tab)
         }
         is TabItem.CustomWebpage -> {
             key(tab.id) {
-                CustomWebpageViewerScreen(
-                    webpageId = tab.id,
-                    hasBottomBar = hasBottomBar
-                )
+                CustomWebpageViewerScreen(webpageId = tab.id)
             }
         }
+        is TabItem.Settings -> SettingsTabNavHost()
     }
 }
 
@@ -323,7 +317,5 @@ private fun StandardTabContent(tab: TabItem.Standard) {
         TabItem.Standard.CALENDAR -> CalendarTab()
         TabItem.Standard.REQUESTS -> RequestsTab()
         TabItem.Standard.PROWLARR -> ProwlarrTab()
-
-        TabItem.Standard.SETTINGS -> SettingsTabNavHost()
     }
 }

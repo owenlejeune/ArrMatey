@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.webpage.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
+import com.dnfapps.arrmatey.utils.isValidUrl
 import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import com.dnfapps.arrmatey.webpage.state.CustomWebpageUiState
@@ -61,7 +62,7 @@ class CustomWebpageConfigurationViewModel(
         _uiState.value = _uiState.value.copy(headers = headers)
     }
 
-    fun loadWebpage(id: Long) {
+    private fun loadWebpage(id: Long) {
         viewModelScope.launch {
             val webpage = repository.getWebpageById(id)
             if (webpage != null) {
@@ -78,6 +79,11 @@ class CustomWebpageConfigurationViewModel(
 
     fun saveWebpage() {
         viewModelScope.launch {
+            if (!_uiState.value.url.isValidUrl()) {
+                _uiState.update { it.copy(endpointError = true) }
+                return@launch
+            }
+
             val newWebpage = CustomWebpage(
                 id = _uiState.value.id,
                 name = _uiState.value.name,
@@ -94,9 +100,9 @@ class CustomWebpageConfigurationViewModel(
         }
     }
 
-    fun deleteWebpage(id: Long) {
+    fun deleteWebpage() {
         viewModelScope.launch {
-            deleteCustomWebpageUseCase(id)
+            deleteCustomWebpageUseCase(_uiState.value.id)
         }
     }
 
@@ -106,9 +112,5 @@ class CustomWebpageConfigurationViewModel(
 
     fun reset() {
         _uiState.value = CustomWebpageUiState()
-    }
-
-    private fun currentTimeMillis(): Long {
-        return Clock.System.now().toEpochMilliseconds()
     }
 }

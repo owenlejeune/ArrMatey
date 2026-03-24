@@ -30,6 +30,10 @@ struct SettingsRouteView: View {
             AddEditDownloadClientScreen()
         case .editDownloadClient(let id):
             AddEditDownloadClientScreen(id: id)
+        case .newCustomWebpage:
+            AddEditCustomWebpageScreen()
+        case .editCustomWebpage(let id):
+            AddEditCustomWebpageScreen(id: id)
         }
     }
 }

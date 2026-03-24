@@ -16,7 +16,7 @@ struct BottomTabView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
-                            navigationManager.setSelectedDrawerTab(.settings)
+                            navigationManager.openSettings()
                         } label: {
                             Image(systemName: "gear")
                         }

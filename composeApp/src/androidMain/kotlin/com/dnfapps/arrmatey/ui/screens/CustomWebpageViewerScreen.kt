@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -41,16 +43,13 @@ import org.koin.compose.koinInject
 @Composable
 fun CustomWebpageViewerScreen(
     webpageId: Long,
-    hasBottomBar: Boolean = false,
-    customWebpageViewModel: CustomWebpageViewerViewModel = koinInjectParams(webpageId),
-    mokoStrings: MokoStrings = koinInject()
+    customWebpageViewModel: CustomWebpageViewerViewModel = koinInjectParams(webpageId)
 ) {
     val webpage by customWebpageViewModel.webpage.collectAsStateWithLifecycle()
     var webView by remember { mutableStateOf<WebView?>(null) }
     var canGoBack by remember { mutableStateOf(false) }
     var canGoForward by remember { mutableStateOf(false) }
-    var isToolbarVisible by remember { mutableStateOf(true) }
-    var lastScrollY by remember { mutableIntStateOf(0) }
+    var menuExpanded by remember { mutableStateOf(false) }
 
     val lifecyclerOwner = LocalLifecycleOwner.current
 
@@ -105,69 +104,63 @@ fun CustomWebpageViewerScreen(
         topBar = {
             TopAppBar(
                 title = { Text(webpage?.name ?: "") },
-                navigationIcon = { NavigationDrawerButton() }
-            )
-        },
-        contentWindowInsets = WindowInsets.statusBars
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            webpage?.let { webpage ->
-                AnimatedVisibility(
-                    visible = isToolbarVisible,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .offset(y = -ScreenOffset)
-                        .zIndex(1f)
-                        .padding(
-                            end = 12.dp,
-                            bottom = if (!hasBottomBar) {
-                                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                            } else {
-                                0.dp
-                            }
-                        )
-                ) {
-                    HorizontalFloatingToolbar(
-                        expanded = true,
-                        content = {
-                            AppBarRow {
-                                clickableItem(
-                                    onClick = { webView?.goBack() },
-                                    icon = {
-                                        Icon(Icons.AutoMirrored.Default.ArrowBack, null)
-                                    },
-                                    label = mokoStrings.getString(MR.strings.back),
-                                    enabled = canGoBack
+                navigationIcon = { NavigationDrawerButton() },
+                actions = {
+                    IconButton(
+                        onClick = { webView?.goBack() },
+                        enabled = canGoBack
+                    ) {
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                    }
+                    IconButton(
+                        onClick = { webView?.goForward() },
+                        enabled = canGoForward
+                    ) {
+                        Icon(Icons.AutoMirrored.Default.ArrowForward, null)
+                    }
+                    Box {
+                        IconButton(onClick = {
+                            menuExpanded = true
+                        }) {
+                            Icon(Icons.Default.MoreVert, null)
+                        }
+                        DropdownMenuPopup(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false }
+                        ) {
+                            DropdownMenuGroup(
+                                shapes = MenuDefaults.groupShape(0, 1)
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(mokoString(MR.strings.refresh)) },
+                                    selected = false,
+                                    shapes = MenuDefaults.itemShape(0, 2),
+                                    leadingIcon = { Icon(Icons.Default.Refresh, null) },
+                                    onClick = {
+                                        menuExpanded = false
+                                        webView?.reload()
+                                    }
                                 )
-                                clickableItem(
-                                    onClick = { webView?.goForward() },
-                                    icon = {
-                                        Icon(Icons.AutoMirrored.Default.ArrowForward, null)
-                                    },
-                                    label = mokoStrings.getString(MR.strings.forward),
-                                    enabled = canGoForward
-                                )
-                                clickableItem(
-                                    onClick = { webView?.reload() },
-                                    icon = {
-                                        Icon(Icons.Default.Refresh, null)
-                                    },
-                                    label = mokoStrings.getString(MR.strings.refresh)
-                                )
-                                clickableItem(
-                                    onClick = { },
-                                    icon = {
-                                        Icon(Icons.Default.Share, null)
-                                    },
-                                    label = mokoStrings.getString(MR.strings.share)
+                                DropdownMenuItem(
+                                    text = { Text(mokoString(MR.strings.share)) },
+                                    selected = false,
+                                    shapes = MenuDefaults.itemShape(1, 2),
+                                    leadingIcon = { Icon(Icons.Default.Share, null) },
+                                    onClick = {
+                                        menuExpanded = false
+                                        // todo -share
+                                    }
                                 )
                             }
                         }
-                    )
+                    }
                 }
-
+            )
+        },
+        contentWindowInsets = WindowInsets.systemBars
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            webpage?.let { webpage ->
                 AndroidView(
                     factory = { context ->
                         WebView(context).apply {
@@ -181,21 +174,6 @@ fun CustomWebpageViewerScreen(
                                     canGoBack = view?.canGoBack() == true
                                     canGoForward = view?.canGoForward() == true
                                 }
-                            }
-
-                            setOnScrollChangeListener { _, _, scrollY, _, _ ->
-                                val scrollDelta = scrollY - lastScrollY
-
-                                when {
-                                    scrollDelta > 10 -> {
-                                        isToolbarVisible = false
-                                    }
-                                    scrollDelta < -10 -> {
-                                        isToolbarVisible = true
-                                    }
-                                }
-
-                                lastScrollY = scrollY
                             }
 
                             settings.apply {

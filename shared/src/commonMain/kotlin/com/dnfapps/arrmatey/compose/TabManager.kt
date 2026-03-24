@@ -4,8 +4,15 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 class TabManager(
     preferencesStore: PreferencesStore,
@@ -15,11 +22,13 @@ class TabManager(
     private val customWebpagesFlow = customWebpageRepository.getAllWebpages()
 
     data class TabConfiguration(
-        val visibleTabs: List<TabItem>,
-        val drawerTabs: List<TabItem>
-    )
+        val visibleTabs: List<TabItem> = TabItem.defaultStandardEntries(),
+        val drawerTabs: List<TabItem> = TabItem.defaultHiddenStandard()
+    ) {
+        constructor(): this(TabItem.defaultStandardEntries()) // empty ios constructor
+    }
 
-    val tabConfiguration: Flow<TabConfiguration> = combine(
+    val tabConfiguration: StateFlow<TabConfiguration> = combine(
         tabPreferencesFlow,
         customWebpagesFlow
     ) { prefs, webpages ->
@@ -28,6 +37,11 @@ class TabManager(
             drawerTabs = buildDrawerTabs(prefs, webpages)
         )
     }
+        .stateIn(
+            scope = CoroutineScope(Dispatchers.IO),
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = TabConfiguration()
+        )
 
     fun getVisibleTabs(): Flow<List<TabItem>> {
         return combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
@@ -51,12 +65,10 @@ class TabManager(
         prefs: TabPreferences,
         webpages: List<CustomWebpage>
     ): List<TabItem> {
-        // Map of all possible items
         val standardItems = TabItem.Standard.entries.associateBy { it.key }
         val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }
         val allItems = standardItems + webpageItems
 
-        // Resolve keys in the exact order saved in preferences
         return prefs.orderedVisibleKeys.mapNotNull { key -> allItems[key] }
     }
 
@@ -69,18 +81,11 @@ class TabManager(
         val allItems = standardItems + webpageItems
 
         return buildList {
-            // 1. Add explicitly hidden items in order
             prefs.orderedHiddenKeys.mapNotNull { key -> allItems[key] }.forEach { add(it) }
 
-            // 2. Safety: Catch webpages that exist in DB but aren't in preferences yet
             val tracked = (prefs.orderedVisibleKeys + prefs.orderedHiddenKeys).toSet()
             webpages.filter { "webpage_${it.id}" !in tracked }.forEach {
                 add(TabItem.CustomWebpage(it.id, it.name, it.url, it.headers))
-            }
-
-            // 3. Force Settings to be at the bottom if missing
-            if (this.none { it == TabItem.Standard.SETTINGS }) {
-                add(TabItem.Standard.SETTINGS)
             }
         }
     }

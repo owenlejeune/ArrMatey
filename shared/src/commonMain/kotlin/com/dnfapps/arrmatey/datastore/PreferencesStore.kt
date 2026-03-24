@@ -22,7 +22,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -204,6 +205,14 @@ class PreferencesStore(
         }
     }
 
+    fun resetTabPreferences() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                preferences.remove(tabPreferencesKey)
+            }
+        }
+    }
+
     fun saveTabPreferences(tabPreferences: TabPreferences) {
         scope.launch {
             dataStore.edit { preferences ->
@@ -224,19 +233,14 @@ class PreferencesStore(
         return try {
             val jsonElement = Json.parseToJsonElement(jsonString).jsonObject
 
-            // 1. If we already have the new keys, just decode normally
             if (jsonElement.containsKey("orderedVisibleKeys")) {
                 return Json.decodeFromString<TabPreferences>(jsonString)
             }
 
-            // 2. MIGRATION: Extract from old List<TabItem> format
-            // We look for "bottomTabItems" and "hiddenTabs"
-            fun extractKey(element: kotlinx.serialization.json.JsonElement): String? {
-                return if (element is kotlinx.serialization.json.JsonPrimitive) {
-                    // If it was just an enum name (old standard): "SHOWS" -> "standard_SHOWS"
+            fun extractKey(element: JsonElement): String? {
+                return if (element is JsonPrimitive) {
                     "standard_${element.content}"
                 } else {
-                    // If it was an object (new sealed interface or webpage)
                     element.jsonObject["key"]?.jsonPrimitive?.content
                         ?: element.jsonObject["id"]?.jsonPrimitive?.content?.let { "webpage_$it" }
                 }
@@ -245,13 +249,12 @@ class PreferencesStore(
             val migratedVisible = jsonElement["bottomTabItems"]?.jsonArray?.mapNotNull { extractKey(it) } ?: emptyList()
             val migratedHidden = jsonElement["hiddenTabs"]?.jsonArray?.mapNotNull { extractKey(it) } ?: emptyList()
 
-            // 3. Safety Check: Ensure all mandatory Standard items are tracked
             val allStandardKeys = TabItem.Standard.entries.map { it.key }
             val trackedKeys = (migratedVisible + migratedHidden).toSet()
             val missingKeys = allStandardKeys.filter { key ->
                 val name = key.replace("standard_", "")
                 val entry = TabItem.Standard.entries.find { it.name == name }
-                key !in trackedKeys && entry?.drawerOnly == false && !entry.isDisabled
+                key !in trackedKeys && entry?.isDisabled == false
             }
 
             TabPreferences(

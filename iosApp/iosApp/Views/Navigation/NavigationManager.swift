@@ -15,8 +15,8 @@ class NavigationManager: ObservableObject {
     @Published var musicPath = NavigationPath()
     @Published var launcherPath = NavigationPath()
     
-    @Published var selectedTab: TabItem = .shows
-    @Published var selectedDrawerTab: TabItem? = nil
+    @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemSettings.shared)
+    @Published var selectedDrawerTab: AnyTabItem? = nil
     
     @Published var showLauncher: Bool = false
     
@@ -65,38 +65,45 @@ class NavigationManager: ObservableObject {
         }
     }
     
-    func setSelectedDrawerTab(_ tab: TabItem?) {
+    func setSelectedDrawerTab(_ tab: AnyTabItem?) {
         selectedDrawerTab = tab
     }
     
+    func setSelectedDrawerTab(_ tab: TabItem) {
+        selectedDrawerTab = AnyTabItem(item: tab)
+    }
+    
     func goToNewInstance(of type: InstanceType) {
-        seriesPath = NavigationPath()
-        moviePath = NavigationPath()
-        musicPath = NavigationPath()
-        launcherPath = NavigationPath()
+        clearAllPaths()
         
         if showLauncher {
-            launcherPath.append(TabItem.settings)
+            let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
+            launcherPath.append(settingsTab)
             launcherPath.append(SettingsRoute.newInstance(type))
         } else {
             pendingSettingsRoute = .newInstance(type)
             showLauncher = true
         }
     }
-    
+
     func goToEditInstance(of type: InstanceType, _ id: Int64) {
-        seriesPath = NavigationPath()
-        moviePath = NavigationPath()
-        musicPath = NavigationPath()
-        launcherPath = NavigationPath()
+        clearAllPaths()
         
         if showLauncher {
-            launcherPath.append(TabItem.settings)
+            let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
+            launcherPath.append(settingsTab)
             launcherPath.append(SettingsRoute.editInstance(id))
         } else {
             pendingSettingsRoute = .editInstance(id)
             showLauncher = true
         }
+    }
+    
+    private func clearAllPaths() {
+        seriesPath = NavigationPath()
+        moviePath = NavigationPath()
+        musicPath = NavigationPath()
+        launcherPath = NavigationPath()
     }
     
     func maybeEditInstance(of type: InstanceType, _ instance: Instance?) {
@@ -136,6 +143,10 @@ class NavigationManager: ObservableObject {
     func clearLauncherPath() {
         launcherPath = NavigationPath()
     }
+    
+    func openSettings() {
+        launcherPath.append(AnyTabItem(item: TabItemSettings.shared as TabItem))
+    }
 }
 
 enum MediaRoute: Hashable {
@@ -164,4 +175,6 @@ enum SettingsRoute : Hashable {
     case arrDashboard(Int64)
     case newDownloadClient
     case editDownloadClient(Int64)
+    case newCustomWebpage
+    case editCustomWebpage(Int64)
 }

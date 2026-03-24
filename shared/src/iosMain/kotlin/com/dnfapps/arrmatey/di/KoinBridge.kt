@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
+import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
@@ -89,13 +90,16 @@ object KoinBridge: KoinComponent {
     fun getProwlarrSearchViewModel(): ProwlarrSearchViewModel =
         getKoin().get()
 
-    fun getCustomWebpageConfigurationViewModel(webpageId: Long): CustomWebpageConfigurationViewModel =
+    fun getCustomWebpageConfigurationViewModel(webpageId: Long?): CustomWebpageConfigurationViewModel =
         getKoin().get { parametersOf(webpageId) }
 
     fun getCustomWebpageViewerViewModel(webpageId: Long): CustomWebpageViewerViewModel =
         getKoin().get { parametersOf(webpageId) }
 
     fun getGenericClient(): GenericClient =
+        getKoin().get()
+
+    fun getTabManager(): TabManager =
         getKoin().get()
 
     fun getPreferencesStore(): PreferencesStore =

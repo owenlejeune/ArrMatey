@@ -11,5 +11,8 @@ data class CustomWebpageUiState(
     val isEditing: Boolean = false,
     val error: String? = null,
     val saveButtonEnabled: Boolean = false,
-    val saveResult: InsertResult? = null
-)
+    val saveResult: InsertResult? = null,
+    val endpointError: Boolean = false
+) {
+    constructor(): this(0) // empty ios constructor
+}

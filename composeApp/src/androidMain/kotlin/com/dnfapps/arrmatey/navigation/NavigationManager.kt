@@ -61,17 +61,17 @@ class NavigationManager(
     }
 
     fun openNewInstanceScreen(type: InstanceType) {
-        openOverlay(TabItem.Standard.SETTINGS)
+        openOverlay(TabItem.Settings)
         settings().navigateTo(SettingsScreen.AddInstance(type))
     }
 
     fun openEditInstanceScreen(id: Long) {
-        openOverlay(TabItem.Standard.SETTINGS)
+        openOverlay(TabItem.Settings)
         settings().navigateTo(SettingsScreen.EditInstance(id))
     }
 
     fun openNewDownloadClientScreen() {
-        openOverlay(TabItem.Standard.SETTINGS)
+        openOverlay(TabItem.Settings)
         settings().navigateTo(SettingsScreen.AddDownloadClient)
     }
 

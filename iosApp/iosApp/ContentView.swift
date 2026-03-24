@@ -15,37 +15,56 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView(selection: $navigationManager.selectedTab) {
-            ForEach(preferences.tabPreferences.bottomTabItems, id: \.self) { tabItem in
-                NavigationStack(path: $navigationManager.settingsPath) {
-                    TabItemContent(tabItem: tabItem)
-                        .toolbar { toolbarItem }
-                }
-                .id(tabItem.name)
-                .tabItem {
-                    if preferences.useServiceNavLogos, let logo = tabItem.associatedType?.tabIcon {
-                        Label(
-                            title: { Text(tabItem.resource.localized()) },
-                            icon: { logo.toImage(renderingMode: .template) }
-                        )
-                    } else {
-                        Label(tabItem.resource.localized(), systemImage: tabItem.iosIcon)
+        Group {
+            if preferences.bottomTabItems.isEmpty {
+                ProgressView()
+            } else {
+                TabView(selection: Binding(
+                    get: { navigationManager.selectedTab.key },
+                    set: { newKey in
+                        if let match = preferences.bottomTabItems.first(where: { $0.key == newKey }) {
+                            navigationManager.selectedTab = match
+                        }
+                    }
+                )) {
+                    ForEach(preferences.bottomTabItems, id: \.key) { tabItem in
+                        NavigationStack {
+                            TabItemContent(tabItem: tabItem.item)
+                                .toolbar { toolbarItem }
+                        }
+                        .tabItem {
+                            TabLabel(item: tabItem.item, useServiceLogos: preferences.useServiceNavLogos)
+                        }
+                        .tag(tabItem.key)
                     }
                 }
-                .tag(tabItem)
-                .badge(badgeValue(for: tabItem))
-                .toolbar(preferences.tabPreferences.bottomTabItems.count <= 1 ? .hidden : .visible, for: .tabBar)
             }
         }
-        .tabViewStyle(.sidebarAdaptable)
+        .onAppear {
+            validateSelection(items: preferences.bottomTabItems)
+        }
+        .onChange(of: preferences.bottomTabItems.map { $0.key }) { _, _ in
+            validateSelection(items: preferences.bottomTabItems)
+        }
         .fullScreenCover(isPresented: $navigationManager.showLauncher) {
             AppLauncherGrid()
                 .environmentObject(navigationManager)
         }
     }
+    
+    private func validateSelection(items: [AnyTabItem]) {
+        guard !items.isEmpty else { return }
+        
+        if !items.contains(where: { $0.key == navigationManager.selectedTab.key }) {
+            navigationManager.selectedTab = items.first!
+        }
+    }
 
     private func badgeValue(for tabItem: TabItem) -> Int {
-        tabItem == .activity ? Int(queueViewModel.tasksWithIssues) : 0
+        if let standard = tabItem as? TabItemStandard, standard == .activity {
+            return Int(queueViewModel.tasksWithIssues)
+        }
+        return 0
     }
     
     private var toolbarItem: some ToolbarContent {
@@ -82,14 +101,14 @@ struct AppLauncherGrid: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        navigationManager.launcherPath.append(TabItem.settings)
+                        navigationManager.openSettings()
                     } label: {
                         Image(systemName: "gearshape.fill")
                     }
                 }
             }
-            .navigationDestination(for: TabItem.self) { item in
-                LauncherTabView(tabItem: item)
+            .navigationDestination(for: AnyTabItem.self) { item in
+                LauncherTabView(tabItem: item.item)
             }
             .navigationDestination(for: SettingsRoute.self) { route in
                 SettingsRouteView(route: route)
@@ -102,17 +121,16 @@ struct AppLauncherGrid: View {
     
     private var launcherContent: some View {
         LazyVGrid(columns: columns, spacing: 25) {
-            ForEach(preferences.tabPreferences.hiddenTabs, id: \.self) { item in
+            ForEach(preferences.hiddenTabs, id: \.key) { item in
                 Button {
-                    print("🔘 Tapped item: \(item.name)")
                     navigationManager.launcherPath.append(item)
-                    print("📊 Launcher path count: \(navigationManager.launcherPath.count)")
                 } label: {
                     VStack(spacing: 12) {
-                        launcherIcon(for: item)
+                        launcherIcon(for: item.item)
                         
-                        Text(item.resource.localized())
+                        Text(item.item is TabItemCustomWebpage ? (item.item as! TabItemCustomWebpage).name : item.item.resource.localized())
                             .font(.caption)
+                            .lineLimit(1)
                             .foregroundColor(.themeOnPrimaryContainer)
                     }
                     .frame(width: 80, height: 80)
@@ -144,34 +162,43 @@ struct LauncherTabView: View {
     
     var body: some View {
         Group {
-            switch tabItem {
-            case .shows:
-                SeriesTab()
-                    .environment(\.navigationContext, .launcher)
-            case .movies:
-                MoviesTab()
-                    .environment(\.navigationContext, .launcher)
-            case .music:
-                MusicTab()
-                    .environment(\.navigationContext, .launcher)
-            case .activity:
-                ActivityTab()
-                    .environment(\.navigationContext, .launcher)
-            case .calendar:
-                CalendarTab()
-                    .environment(\.navigationContext, .launcher)
-            case .downloads:
-                DownloadsTab()
-                    .environment(\.navigationContext, .launcher)
-            case .requests:
-                EmptyView()
-            case .prowlarr:
-                ProwlarrTab()
-                    .environment(\.navigationContext, .launcher)
-            case .settings:
+            if let standard = tabItem as? TabItemStandard {
+                switch standard {
+                case .shows: SeriesTab().environment(\.navigationContext, .launcher)
+                case .movies: MoviesTab().environment(\.navigationContext, .launcher)
+                case .music: MusicTab().environment(\.navigationContext, .launcher)
+                case .activity: ActivityTab().environment(\.navigationContext, .launcher)
+                case .calendar: CalendarTab().environment(\.navigationContext, .launcher)
+                case .downloads: DownloadsTab().environment(\.navigationContext, .launcher)
+                case .requests: EmptyView()
+                case .prowlarr: ProwlarrTab().environment(\.navigationContext, .launcher)
+                }
+            } else if let custom = tabItem as? TabItemCustomWebpage {
+                CustomWebpageViewerScreen(webpageId: custom.id)
+            } else if let _ = tabItem as? TabItemSettings {
                 SettingsScreen()
             }
         }
-        .navigationTitle(LocalizedStringKey(tabItem.resource.localized()))
+        .navigationTitle(tabItem is TabItemCustomWebpage ? (tabItem as! TabItemCustomWebpage).name : tabItem.resource.localized())
+    }
+}
+
+struct TabLabel: View {
+    let item: TabItem
+    let useServiceLogos: Bool
+
+    var body: some View {
+        if let standard = item as? TabItemStandard {
+            if useServiceLogos, let logo = standard.associatedType?.tabIcon {
+                Label(
+                    title: { Text(standard.resource.localized()) },
+                    icon: { logo.toImage(renderingMode: .template) }
+                )
+            } else {
+                Label(standard.resource.localized(), systemImage: standard.iosIcon)
+            }
+        } else if let custom = item as? TabItemCustomWebpage {
+            Label(custom.name, systemImage: custom.iosIcon)
+        }
     }
 }
