@@ -31,7 +31,7 @@ sealed interface QueueItem {
     val quality: QualityInfo
     val customFormats: List<CustomFormat>
     val customFormatScore: Int?
-    val added: Instant
+    val added: Instant?
     var estimatedCompletionTime: Instant?
     val status: QueueItemStatus?
     val statusMessages: List<QueueStatusMessage>

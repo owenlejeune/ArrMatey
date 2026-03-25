@@ -21,7 +21,7 @@ data class SonarrQueueItem(
     override val quality: QualityInfo,
     override val customFormats: List<CustomFormat> = emptyList(),
     override val customFormatScore: Int? = null,
-    @Contextual override val added: Instant,
+    @Contextual override val added: Instant? = null,
     @Contextual override var estimatedCompletionTime: Instant? = null,
     override val status: QueueItemStatus? = null,
     override val statusMessages: List<QueueStatusMessage> = emptyList(),
