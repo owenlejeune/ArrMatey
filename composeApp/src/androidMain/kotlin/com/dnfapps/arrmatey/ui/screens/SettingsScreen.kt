@@ -7,20 +7,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
@@ -34,6 +36,7 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -60,18 +63,20 @@ import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.logging.LogReader
+import com.dnfapps.arrmatey.model.IconSource
+import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsNavigation
 import com.dnfapps.arrmatey.navigation.SettingsScreen
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.LargeLabelledSwitch
+import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.settings.AboutCard
 import com.dnfapps.arrmatey.utils.CrashManager
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
@@ -94,6 +99,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val allInstances by viewModel.instances.collectAsStateWithLifecycle()
     val allDownloadClients by viewModel.downloadClients.collectAsStateWithLifecycle()
+    val allCustomWebPages by viewModel.customWebpages.collectAsStateWithLifecycle()
     val instanceConnectionStatues by viewModel.testingStatus.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -117,210 +123,197 @@ fun SettingsScreen(
                 },
                 scrollBehavior = scrollBehavior
             )
-        },
-        contentWindowInsets = WindowInsets.statusBars
+        }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = navigationBarBottomInset())
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Box(
+            modifier = Modifier.padding(paddingValues)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = mokoString(MR.strings.instances),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    allInstances.forEach { instance ->
-                        InstanceCard(
-                            instance = instance,
-                            connectionStatus = instanceConnectionStatues[instance.id],
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                SettingsGroup(
+                    title = mokoString(MR.strings.instances),
+                    items = allInstances.map { instance ->
+                        SettingItem(
+                            icon = IconSource.Resource(instance.type.icon),
+                            title = instance.label,
+                            subtitle = instance.url,
+                            trailingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            },
                             onClick = {
                                 settingsNav.onInstanceTap(instance.id, instance.type)
+                            },
+                            titleExtraContent = {
+                                Box(
+                                    modifier = Modifier.size(18.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    when (instanceConnectionStatues[instance.id]) {
+                                        is OperationStatus.InProgress -> CircularProgressIndicator()
+                                        is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
+                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff,  null, tint = Color.Red)
+                                        else -> {}
+                                    }
+                                }
                             }
                         )
-                    }
-
-                    Card(
-                        shape = MaterialTheme.shapes.extraLarge,
-                        modifier = Modifier.fillMaxWidth(),
+                    } + SettingItem(
+                        title = mokoString(MR.strings.add_instance),
+                        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                        icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                         onClick = {
                             settingsNav.navigateTo(SettingsScreen.AddInstance())
-                        },
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(20.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AddCircleOutline,
-                                contentDescription = null,
-                                modifier = Modifier.size(40.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Text(
-                                text = mokoString(MR.strings.add_instance),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
                         }
-                    }
-                }
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = mokoString(MR.strings.download_clients),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    )
                 )
 
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    allDownloadClients.forEach { client ->
-                        DownloadClientCard(
-                            client = client,
-                            connectionStatus = instanceConnectionStatues[client.id + 100_000],
+                SettingsGroup(
+                    title = mokoString(MR.strings.download_clients),
+                    items = allDownloadClients.map { downloadClient ->
+                        SettingItem(
+                            icon = IconSource.Resource(downloadClient.type.icon),
+                            title = downloadClient.label,
+                            subtitle = downloadClient.url,
+                            trailingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            },
                             onClick = {
-                                settingsNav.navigateTo(SettingsScreen.EditDownloadClient(client.id))
+                                settingsNav.navigateTo(SettingsScreen.EditDownloadClient(downloadClient.id))
+                            },
+                            titleExtraContent = {
+                                Box(
+                                    modifier = Modifier.size(18.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    when (instanceConnectionStatues[downloadClient.id + 100_000]) {
+                                        is OperationStatus.InProgress -> CircularProgressIndicator()
+                                        is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
+                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff,  null, tint = Color.Red)
+                                        else -> {}
+                                    }
+                                }
                             }
                         )
+                    } + SettingItem(
+                        title = mokoString(MR.strings.add_download_client),
+                        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                        icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                        onClick = {
+                            settingsNav.navigateTo(SettingsScreen.AddDownloadClient)
+                        }
+                    )
+                )
+
+                SettingsGroup(
+                    title = mokoString(MR.strings.custom_webpages),
+                    items = allCustomWebPages.map { webpage ->
+                        SettingItem(
+                            title = webpage.name,
+                            subtitle = webpage.url,
+                            icon = IconSource.Vector(Icons.Default.Language),
+                            onClick = {
+                                settingsNav.navigateTo(SettingsScreen.EditCustomWebpage(webpage.id))
+                            },
+                            trailingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            },
+                        )
+                    } + SettingItem(
+                        title = mokoString(MR.strings.add_custom_webpage),
+                        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                        icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                        onClick = {
+                            settingsNav.navigateTo(SettingsScreen.AddCustomWebpage)
+                        }
+                    )
+                )
+
+                SettingsGroup(
+                    title = mokoString(MR.strings.user_interface),
+                    items = listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Navigation),
+                            title = mokoString(MR.strings.navigation_bar_configuration),
+                            onClick = {
+                                settingsNav.navigateTo(SettingsScreen.TabPreferences)
+                            }
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.MiscellaneousServices),
+                            title = mokoString(MR.strings.service_icons_title),
+                            subtitle = mokoString(MR.strings.service_icons_description),
+                            trailingContent = {
+                                Switch(
+                                    checked = useServiceNavLogos,
+                                    onCheckedChange = { viewModel.toggleUseServiceNavLogos() }
+                                )
+                            },
+                            onClick = { viewModel.toggleUseServiceNavLogos() }
+                        )
+                    )
+                )
+
+                AboutCard(
+                    onFeatureRequestClick = {
+                        context.openLink(moko.getString(MR.strings.feature_request_link))
+                    },
+                    onBugReportClick = {
+                        confirmShareLastLog = true
+                    },
+                    onGitHubClick = {
+                        context.openLink(moko.getString(MR.strings.app_link))
+                    },
+                    onDonateClick = {
+                        context.openLink(moko.getString(MR.strings.bmac_link))
+                    },
+                    onLibrariesClick = { showLibrariesSheet = true },
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+
+                if (isDebug()) {
+                    Button(onClick = {
+                        throw IllegalStateException("THIS IS A SIMULATED CRASH")
+                    }) {
+                        Text("Simulate crash")
                     }
 
                     Card(
                         shape = MaterialTheme.shapes.extraLarge,
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
-                            settingsNav.navigateTo(SettingsScreen.AddDownloadClient)
+                            settingsNav.navigateTo(SettingsScreen.Dev)
                         },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
                         ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(20.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CloudDownload,
-                                contentDescription = null,
-                                modifier = Modifier.size(40.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Text(
-                                text = mokoString(MR.strings.download_clients),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
+                        Text(
+                            text = "Development Settings",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(20.dp)
+                        )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
-
-            Text(
-                text = mokoString(MR.strings.user_interface),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Card(
-                shape = MaterialTheme.shapes.extraLarge,
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    settingsNav.navigateTo(SettingsScreen.TabPreferences)
-                },
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Navigation,
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = mokoString(MR.strings.navigation_bar_configuration),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            LargeLabelledSwitch(
-                label = mokoString(MR.strings.service_icons_title),
-                sublabel = mokoString(MR.strings.service_icons_description),
-                checked = useServiceNavLogos,
-                onCheckedChange = {
-                    viewModel.toggleUseServiceNavLogos()
-                }
-            )
-
-            AboutCard(
-                onFeatureRequestClick = {
-                    context.openLink(moko.getString(MR.strings.feature_request_link))
-                },
-                onBugReportClick = {
-                    confirmShareLastLog = true
-                },
-                onGitHubClick = {
-                    context.openLink(moko.getString(MR.strings.app_link))
-                },
-                onDonateClick = {
-                    context.openLink(moko.getString(MR.strings.bmac_link))
-                },
-                onLibrariesClick = { showLibrariesSheet = true },
-                modifier = Modifier.padding(top = 12.dp)
-            )
-
-            if (isDebug()) {
-                Button(onClick = {
-                   throw IllegalStateException("THIS IS A SIMULATED CRASH")
-                }) {
-                    Text("Simulate crash")
-                }
-
-                Card(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        settingsNav.navigateTo(SettingsScreen.Dev)
-                    },
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Text(
-                        text = "Development Settings",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(20.dp)
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
         }
 
         if (showLibrariesSheet) {
@@ -343,11 +336,11 @@ fun SettingsScreen(
                         licenseDialogContentPadding = 16.dp
                     ),
                     header = { item {
-                      Text(
-                          text = mokoString(MR.strings.libraries),
-                          style = MaterialTheme.typography.headlineMedium,
-                          modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                      )
+                        Text(
+                            text = mokoString(MR.strings.libraries),
+                            style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                        )
                     } }
                 )
             }

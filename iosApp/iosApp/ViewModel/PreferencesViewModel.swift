@@ -11,6 +11,7 @@ import Shared
 @MainActor
 class PreferencesViewModel: ObservableObject {
     private let preferenceStore: PreferencesStore
+    private let tabManager: TabManager
 
     @Published var showInfoCardMap: [InstanceType:Bool] = [:]
     @Published var enableAcitivityPolling: Bool = true
@@ -19,8 +20,12 @@ class PreferencesViewModel: ObservableObject {
     @Published var shouldShowReleaseNotes: Bool = false
     @Published var useServiceNavLogos: Bool = false
     
+    @Published var bottomTabItems: [AnyTabItem] = []
+    @Published var hiddenTabs: [AnyTabItem] = []
+    
     init() {
         self.preferenceStore = KoinBridge.shared.getPreferencesStore()
+        self.tabManager = KoinBridge.shared.getTabManager()
         observeFlows()
     }
     
@@ -35,6 +40,11 @@ class PreferencesViewModel: ObservableObject {
         preferenceStore.tabPreferences.observeAsync { self.tabPreferences = $0 }
         preferenceStore.shouldShowReleaseNotes.observeAsync { self.shouldShowReleaseNotes = $0.boolValue }
         preferenceStore.useServiceNavLogos.observeAsync { self.useServiceNavLogos = $0.boolValue }
+        
+        tabManager.tabConfiguration.observeAsync { [weak self] config in
+            self?.bottomTabItems = config.visibleTabs.map({ AnyTabItem(item: $0) })
+            self?.hiddenTabs = config.drawerTabs.map({ AnyTabItem(item: $0) })
+        }
     }
     
     func setInfoCardVisibility(type: InstanceType, visible: Bool) {
@@ -49,16 +59,24 @@ class PreferencesViewModel: ObservableObject {
         preferenceStore.setLogLevel(level: level)
     }
     
-    func saveTabPreferences(_ preferences: TabPreferences) {
-        preferenceStore.saveTabPreferences(tabPreferences: preferences)
-    }
-    
     func resetTabPreferences() {
         preferenceStore.resetTabPreferences()
     }
     
-    func updateBottomBarTabs(_ tabs: [TabItem]) {
-        preferenceStore.updateBottomBarTabs(tabs: tabs)
+    func saveTabPreferences(_ preferences: TabPreferences) {
+        preferenceStore.saveTabPreferences(tabPreferences: preferences)
+    }
+    
+    func updateTabPreferences(_ preferences: TabPreferences) {
+        preferenceStore.updateTabPreferences(tabPreferences: preferences)
+    }
+    
+    func saveNavigationLayout(visible: [TabItem], hidden: [TabItem]) {
+        let newPrefs = TabPreferences(
+            orderedVisibleKeys: visible.map { $0.key },
+            orderedHiddenKeys: hidden.map { $0.key }
+        )
+        preferenceStore.updateTabPreferences(tabPreferences: newPrefs)
     }
     
     func markReleaseNotesAsSeen() {

@@ -33,7 +33,7 @@ struct ReleaseItemView: View {
                 Text(item.typeLabel)
                     .foregroundColor(Color(hex: item.peerColorHex))
                 
-                Text(" • \(item.quality.qualityLabel) • \(item.size.bytesAsFileSizeString())")
+                Text(" • \(item.quality?.qualityLabel) • \(item.size.bytesAsFileSizeString())")
             }
             .font(.subheadline)
             .lineLimit(1)

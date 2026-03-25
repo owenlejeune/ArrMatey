@@ -112,7 +112,6 @@ fun AddEditDownloadClientScreen(
                 snackbarHostState.showSnackbar(state.message)
             }
             is DownloadClientMutationState.ConnectionFailed -> {
-                // Show connection failed error but stay on page
                 snackbarHostState.showSnackbar(
                     message = "Connection test failed: ${state.message}",
                     duration = SnackbarDuration.Long

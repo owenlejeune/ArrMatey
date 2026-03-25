@@ -394,7 +394,7 @@ fun QueueItemInfoSheet(
                 MR.strings.download_client to item.downloadClient,
                 MR.strings.indexer to item.indexer,
                 MR.strings.languages to item.languageLabels.takeUnless { it.isEmpty() }?.joinToString(", "),
-                MR.strings.added to item.added.format(),
+                MR.strings.added to item.added?.format(),
                 MR.strings.destination to item.outputPath
             )
             LazyVerticalGrid(

@@ -17,7 +17,7 @@ class NavigationManager(
     private val _drawerExpandedState = MutableStateFlow(false)
     val drawerExpandedState: StateFlow<Boolean> = _drawerExpandedState.asStateFlow()
 
-    private val _selectedTab = MutableStateFlow(TabItem.SHOWS)
+    private val _selectedTab = MutableStateFlow<TabItem>(TabItem.Standard.SHOWS)
     val selectedTab: StateFlow<TabItem> = _selectedTab.asStateFlow()
 
     private val _overlayTab = MutableStateFlow<TabItem?>(null)
@@ -63,17 +63,17 @@ class NavigationManager(
     }
 
     fun openNewInstanceScreen(type: InstanceType) {
-        openOverlay(TabItem.SETTINGS)
+        openOverlay(TabItem.Settings)
         settings().navigateTo(SettingsScreen.AddInstance(type))
     }
 
     fun openEditInstanceScreen(id: Long) {
-        openOverlay(TabItem.SETTINGS)
+        openOverlay(TabItem.Settings)
         settings().navigateTo(SettingsScreen.EditInstance(id))
     }
 
     fun openNewDownloadClientScreen() {
-        openOverlay(TabItem.SETTINGS)
+        openOverlay(TabItem.Settings)
         settings().navigateTo(SettingsScreen.AddDownloadClient)
     }
 

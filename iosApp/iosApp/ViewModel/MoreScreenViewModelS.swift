@@ -14,6 +14,7 @@ class MoreScreenViewModelS: ObservableObject {
     
     @Published private(set) var instances: [Instance] = []
     @Published private(set) var downloadClients: [DownloadClient] = []
+    @Published private(set) var customWebpages: [CustomWebpage] = []
     @Published private(set) var connectionStatuses: [KotlinLong:OperationStatus] = [:]
     @Published private(set) var useServiceNavLogos: Bool = false
     
@@ -22,6 +23,7 @@ class MoreScreenViewModelS: ObservableObject {
         
         viewModel.instances.observeAsync { self.instances = $0 }
         viewModel.downloadClients.observeAsync { self.downloadClients = $0 }
+        viewModel.customWebpages.observeAsync { self.customWebpages = $0 }
         viewModel.testingStatus.observeAsync { self.connectionStatuses = $0 }
         viewModel.useServiceNavLogos.observeAsync { self.useServiceNavLogos = $0.boolValue }
     }

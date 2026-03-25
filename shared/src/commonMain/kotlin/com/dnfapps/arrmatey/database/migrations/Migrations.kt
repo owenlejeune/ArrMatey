@@ -71,4 +71,18 @@ private val MIGRATION_4_5 = object: Migration(4, 5) {
     }
 }
 
-val migrations = listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+private val MIGRATION_5_6 = object: Migration(5, 6) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+                CREATE TABLE IF NOT EXISTS custom_webpages (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    name TEXT NOT NULL,
+                    url TEXT NOT NULL,
+                    headers TEXT NOT NULL DEFAULT '[]'
+                )
+            """.trimIndent()
+        )
+    }
+}
+
+val migrations = listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)

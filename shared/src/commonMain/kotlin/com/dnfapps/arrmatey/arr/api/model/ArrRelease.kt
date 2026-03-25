@@ -11,14 +11,14 @@ import kotlin.time.Instant
 sealed interface ArrRelease {
     val id: Int?
     val guid: String
-    val quality: QualityInfo
+    val quality: QualityInfo?
     val qualityWeight: Float
     val age: Float
     val ageHours: Float
     val ageMinutes: Float
     val size: Long
     val indexerId: Int
-    val indexer: String
+    val indexer: String?
     val releaseGroup: String?
     val subGroup: String?
     val releaseHash: String?
@@ -29,16 +29,16 @@ sealed interface ArrRelease {
     val temporarilyRejected: Boolean
     val rejected: Boolean
     val rejections: List<String>
-    val publishDate: Instant
-    val commentUrl: String
-    val downloadUrl: String
-    val infoUrl: String
+    val publishDate: Instant?
+    val commentUrl: String?
+    val downloadUrl: String?
+    val infoUrl: String?
     val downloadAllowed: Boolean
     val releaseWeight: Float
     val customFormats: List<CustomFormat>
     val customFormatScore: Float
     val magnetUrl: String?
-    val infoHash: String
+    val infoHash: String?
     val seeders: Int
     val leechers: Int
     val protocol: ReleaseProtocol
@@ -55,7 +55,7 @@ sealed interface ArrRelease {
         }
 
     val indexerLabel: String
-        get() = indexer
+        get() = indexer ?: "Unknown"
 
     val peerColor: Color
         get() = when {

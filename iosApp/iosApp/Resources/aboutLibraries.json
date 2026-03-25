@@ -1992,7 +1992,7 @@
                     "name": "Shiva Thapa"
                 }
             ],
-            "artifactVersion": "1.2.0",
+            "artifactVersion": "1.2.1",
             "description": "Kotlin Multiplatform logger",
             "scm": {
                 "url": "https://github.com/shivathapaa/KMP-Logger"

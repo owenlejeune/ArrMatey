@@ -35,6 +35,22 @@ struct AddEditDownloadClientScreen: View {
                     dismiss()
                 }
             }
+            .alert(MR.strings().confirm.localized(), isPresented: $confirmDelete) {
+                confirmDeleteButtons()
+            } message: {
+                Text(MR.strings().confirm_delete_download_client.localized())
+            }
+    }
+    
+    @ViewBuilder
+    private func confirmDeleteButtons() -> some View {
+        Button(MR.strings().yes.localized(), role: .destructive) {
+            viewModel.deleteClient()
+            dismiss()
+        }
+        Button(MR.strings().no.localized(), role: .cancel) {
+            confirmDelete = false
+        }
     }
     
     private var formContent: some View {
@@ -102,7 +118,11 @@ struct AddEditDownloadClientScreen: View {
                     .multilineTextAlignment(.trailing)
                     .textInputAutocapitalization(.never)
                 }
-                if hasUrlConflict {
+                if viewModel.uiState.endpointError {
+                    Text(MR.strings().invalid_host.localized())
+                        .font(.caption)
+                        .foregroundColor(.red)
+                } else if hasUrlConflict {
                     Text(MR.strings().field_conflict.formatted(args: [MR.strings().client_url.localized()]))
                         .font(.caption)
                         .foregroundColor(.red)

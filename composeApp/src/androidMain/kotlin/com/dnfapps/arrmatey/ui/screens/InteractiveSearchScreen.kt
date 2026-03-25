@@ -289,8 +289,10 @@ fun <T: ArrRelease> ReleaseItem(
                         append(item.typeLabel)
                     }
                     bullet()
-                    append(item.quality.qualityLabel)
-                    bullet()
+                    item.quality?.qualityLabel?.let { qualityLabel ->
+                        append(qualityLabel)
+                        bullet()
+                    }
                     append(item.size.bytesAsFileSizeString())
                 }
                 Text(

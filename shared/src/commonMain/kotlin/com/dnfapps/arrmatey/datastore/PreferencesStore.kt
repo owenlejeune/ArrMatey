@@ -22,6 +22,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 class PreferencesStore(
     dataStoreFactory: DataStoreFactory
@@ -200,33 +205,24 @@ class PreferencesStore(
         }
     }
 
-    fun saveTabPreferences(tabPreferences: TabPreferences) {
+    fun resetTabPreferences() {
         scope.launch {
             dataStore.edit { preferences ->
-                preferences[tabPreferencesKey] = Json.encodeToString(tabPreferences)
+                preferences.remove(tabPreferencesKey)
             }
         }
     }
 
-    fun resetTabPreferences() {
-        saveTabPreferences(TabPreferences())
-    }
-
-    fun updateBottomBarTabs(tabs: List<TabItem>) {
+    fun saveTabPreferences(tabPreferences: TabPreferences) {
         scope.launch {
-            val validTabs = tabs.filter { !it.drawerOnly }.take(5)
-            if (validTabs.isEmpty()) {
-                throw IllegalArgumentException("At least one tab must be visible")
+            dataStore.edit { preferences ->
+                val json = Json {
+                    encodeDefaults = true
+                }
+                val jsonString = json.encodeToString(tabPreferences)
+
+                preferences[tabPreferencesKey] = jsonString
             }
-
-            val hidden = TabItem.navigationEntries.filter { !validTabs.contains(it) }
-
-            saveTabPreferences(
-                TabPreferences(
-                    bottomTabItems = validTabs,
-                    hiddenTabs = hidden
-                )
-            )
         }
     }
 
@@ -237,25 +233,41 @@ class PreferencesStore(
     }
 
     private fun extractTabPreferences(preferences: Preferences): TabPreferences {
-        val json = preferences[tabPreferencesKey]
-        val savedPrefs = if (json != null) {
-            try {
-                Json.decodeFromString<TabPreferences>(json)
-            } catch (e: Exception) {
-                TabPreferences()
+        val jsonString = preferences[tabPreferencesKey] ?: return TabPreferences()
+
+        return try {
+            val jsonElement = Json.parseToJsonElement(jsonString).jsonObject
+
+            if (jsonElement.containsKey("orderedVisibleKeys")) {
+                return Json.decodeFromString<TabPreferences>(jsonString)
             }
-        } else {
+
+            fun extractKey(element: JsonElement): String? {
+                return if (element is JsonPrimitive) {
+                    "standard_${element.content}"
+                } else {
+                    element.jsonObject["key"]?.jsonPrimitive?.content
+                        ?: element.jsonObject["id"]?.jsonPrimitive?.content?.let { "webpage_$it" }
+                }
+            }
+
+            val migratedVisible = jsonElement["bottomTabItems"]?.jsonArray?.mapNotNull { extractKey(it) } ?: emptyList()
+            val migratedHidden = jsonElement["hiddenTabs"]?.jsonArray?.mapNotNull { extractKey(it) } ?: emptyList()
+
+            val allStandardKeys = TabItem.Standard.entries.map { it.key }
+            val trackedKeys = (migratedVisible + migratedHidden).toSet()
+            val missingKeys = allStandardKeys.filter { key ->
+                val name = key.replace("standard_", "")
+                val entry = TabItem.Standard.entries.find { it.name == name }
+                key !in trackedKeys && entry?.isDisabled == false
+            }
+
+            TabPreferences(
+                orderedVisibleKeys = migratedVisible,
+                orderedHiddenKeys = migratedHidden + missingKeys
+            )
+        } catch (e: Exception) {
             TabPreferences()
-        }
-
-        val allTabs = TabItem.navigationEntries
-        val displayedAndHidden = savedPrefs.bottomTabItems + savedPrefs.hiddenTabs
-        val newTabs = allTabs.filter { it !in displayedAndHidden }
-
-        return if (newTabs.isNotEmpty()) {
-            savedPrefs.copy(hiddenTabs = savedPrefs.hiddenTabs + newTabs)
-        } else {
-            savedPrefs
         }
     }
 
@@ -267,6 +279,7 @@ class PreferencesStore(
     val shouldShowReleaseNotes: Flow<Boolean> = dataStore.data
         .combine(isFirstLaunch) { preferences, isFirst ->
             if (isFirst) {
+                dataStore.edit { it[lastReleaseNotesKey] = ReleaseNotes.latestUpdate.buildCode }
                 false
             } else {
                 val lastCode = preferences[lastReleaseNotesKey] ?: -1

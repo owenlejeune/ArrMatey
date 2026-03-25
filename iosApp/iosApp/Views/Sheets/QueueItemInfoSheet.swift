@@ -162,7 +162,7 @@ struct QueueItemInfoSheet: View {
         if !item.languageLabels.isEmpty {
             items.append((key: MR.strings().languages.localized(), value: item.languageLabels.joined(separator: ", ")))
         }
-        items.append((key: MR.strings().added.localized(), value: item.added.description))
+        items.append((key: MR.strings().added.localized(), value: item.added?.description))
         items.append((key: MR.strings().destination.localized(), value: item.outputPath))
         return items
     }

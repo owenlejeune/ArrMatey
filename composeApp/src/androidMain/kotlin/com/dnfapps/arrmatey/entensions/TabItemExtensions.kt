@@ -23,13 +23,13 @@ fun BadgeContent(
     requestsViewModel: RequestsViewModel = koinInject()
 ) {
     when (tabItem) {
-        TabItem.ACTIVITY -> {
+        TabItem.Standard.ACTIVITY -> {
             if (activityQueueIssuesCount > 0) {
                 Badge { Text(activityQueueIssuesCount.toString()) }
             }
         }
 
-        TabItem.REQUESTS -> {
+        TabItem.Standard.REQUESTS -> {
             val pagedData by requestsViewModel.requestsState.collectAsStateWithLifecycle()
             if (pagedData.totalItemCount > 0) {
                 Badge { Text(pagedData.totalItemCount.toString()) }

@@ -2,9 +2,6 @@
 -dontobfuscate
 
 # Keeps the attributes that help keep the build deterministic
-<<<<<<< HEAD
--keepattributes SourceFile,LineNumberTable
-=======
 -keepattributes SourceFile,LineNumberTable
 
 # Keep the Moko Resources generated classes exactly as they are
@@ -15,4 +12,17 @@
 -keepclassmembers class com.dnfapps.arrmatey.shared.MR** {
     <clinit>();
 }
->>>>>>> main
+# WebView
+-keepclassmembers class * extends android.webkit.WebViewClient {
+    public void *(android.webkit.WebView, java.lang.String, android.graphics.Bitmap);
+    public boolean *(android.webkit.WebView, java.lang.String);
+}
+-keepclassmembers class * extends android.webkit.WebChromeClient {
+    public void *(android.webkit.WebView, java.lang.String);
+}
+
+# Keep WebView JavaScript interfaces
+-keepattributes JavascriptInterface
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}

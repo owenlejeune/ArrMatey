@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.downloadclient.usecase.GetDownloadClientByIdUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientUseCase
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
+import com.dnfapps.arrmatey.utils.isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -158,6 +159,10 @@ class DownloadClientSettingsViewModel(
 
     private fun createClient(downloadClient: DownloadClient) {
         viewModelScope.launch {
+            if (!_uiState.value.url.isValidUrl()) {
+                _uiState.update { it.copy(endpointError = true, isTesting = false) }
+                return@launch
+            }
             _uiState.update { it.copy(isTesting = true) }
 
             when (val createResult = createDownloadClientUseCase(downloadClient)) {

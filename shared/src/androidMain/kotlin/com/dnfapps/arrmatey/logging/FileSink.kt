@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.logging
 
 import android.content.Context
+import android.util.Log
 import dev.shivathapaa.logger.core.LogEvent
 import dev.shivathapaa.logger.sink.LogSink
 import kotlinx.coroutines.CoroutineScope
@@ -19,11 +20,14 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedQueue
 
-actual class FileSink actual constructor(private val filename: String): LogSink {
-    private val file: File = File(LogFileManager.getLogFilePath(filename))
+actual class FileSink actual constructor(private val filename: String) : LogSink {
+    private var file: File = File(LogFileManager.getLogFilePath(filename))
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
     private val logQueue = ConcurrentLinkedQueue<String>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    actual val maxFileSizeBytes: Long = 5 * 1024 * 1024 // 5MB
+    actual val maxBackupFiles: Int = 3
 
     init {
         file.parentFile?.mkdirs()
@@ -47,6 +51,10 @@ actual class FileSink actual constructor(private val filename: String): LogSink 
         if (logQueue.isEmpty()) return
 
         try {
+            if (shouldRotate()) {
+                rotateLogFile()
+            }
+
             BufferedWriter(FileWriter(file, true)).use { writer ->
                 while (logQueue.isNotEmpty()) {
                     logQueue.poll()?.let { line ->
@@ -55,7 +63,40 @@ actual class FileSink actual constructor(private val filename: String): LogSink 
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("FileSink", "Failed to write queued logs", e)
+            Log.e("FileSink", "Failed to write queued logs", e)
+        }
+    }
+
+    private fun shouldRotate(): Boolean {
+        return file.exists() && file.length() >= maxFileSizeBytes
+    }
+
+    private fun rotateLogFile() {
+        try {
+            for (i in maxBackupFiles - 1 downTo 1) {
+                val oldFile = File(LogFileManager.getLogFilePath("$filename.$i"))
+                val newFile = File(LogFileManager.getLogFilePath("$filename.${i + 1}"))
+
+                if (oldFile.exists()) {
+                    if (newFile.exists()) {
+                        newFile.delete()
+                    }
+                    oldFile.renameTo(newFile)
+                }
+            }
+
+            val backupFile = File(LogFileManager.getLogFilePath("$filename.1"))
+            if (backupFile.exists()) {
+                backupFile.delete()
+            }
+            file.renameTo(backupFile)
+
+            file = File(LogFileManager.getLogFilePath(filename))
+            file.createNewFile()
+
+            Log.d("FileSink", "Rotated log file: $filename")
+        } catch (e: Exception) {
+            Log.e("FileSink", "Failed to rotate log file", e)
         }
     }
 
@@ -75,8 +116,32 @@ actual class FileSink actual constructor(private val filename: String): LogSink 
 
     actual fun clearLogs() {
         logQueue.clear()
+
         file.delete()
         file.createNewFile()
+
+        for (i in 1..maxBackupFiles) {
+            val backupFile = File(LogFileManager.getLogFilePath("$filename.$i"))
+            if (backupFile.exists()) {
+                backupFile.delete()
+            }
+        }
+    }
+
+    fun getAllLogFiles(): List<File> {
+        return buildList {
+            if (file.exists()) add(file)
+            for (i in 1..maxBackupFiles) {
+                val backupFile = File(LogFileManager.getLogFilePath("$filename.$i"))
+                if (backupFile.exists()) {
+                    add(backupFile)
+                }
+            }
+        }
+    }
+
+    fun getTotalLogSize(): Long {
+        return getAllLogFiles().sumOf { it.length() }
     }
 
     fun shutdown() {
@@ -98,5 +163,18 @@ actual object LogFileManager {
 
     actual fun getLogFilePath(filename: String): String {
         return File(getLogDirectory(), filename).absolutePath
+    }
+
+    fun getAllLogFiles(): List<File> {
+        val logDir = File(getLogDirectory())
+        return logDir.listFiles()?.toList() ?: emptyList()
+    }
+
+    fun getTotalLogDirectorySize(): Long {
+        return getAllLogFiles().sumOf { it.length() }
+    }
+
+    fun clearAllLogs() {
+        getAllLogFiles().forEach { it.delete() }
     }
 }

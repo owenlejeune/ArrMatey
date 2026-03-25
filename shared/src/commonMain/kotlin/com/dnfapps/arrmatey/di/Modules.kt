@@ -46,6 +46,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
+import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.database.ArrMateyDatabase
 import com.dnfapps.arrmatey.database.InstanceRepository
@@ -106,6 +107,12 @@ import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.NetworkConnectivityObserverFactory
 import com.dnfapps.arrmatey.utils.NetworkConnectivityRepository
+import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
+import com.dnfapps.arrmatey.webpage.usecase.AddCustomWebpageUseCase
+import com.dnfapps.arrmatey.webpage.usecase.DeleteCustomWebpageUseCase
+import com.dnfapps.arrmatey.webpage.usecase.UpdateCustomWebpageUseCase
+import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
+import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
 import dev.shivathapaa.logger.api.LogLevel
 import dev.shivathapaa.logger.api.LoggerFactory
 import dev.shivathapaa.logger.core.LoggerConfig
@@ -133,6 +140,7 @@ val databaseModule = module {
     single { getRoomDatabase(get()) }
     single { get<ArrMateyDatabase>().getInstanceDao() }
     single { get<ArrMateyDatabase>().getDownloadClientDao() }
+    single { get<ArrMateyDatabase>().getCustomWebpageDao() }
 }
 
 val networkModule = module {
@@ -165,6 +173,10 @@ val repositoryModule = module {
 
     single { DownloadClientRepository(get()) }
     single { DownloadClientManager(get(), get()) }
+
+    single { CustomWebpageRepository(get()) }
+
+    single { TabManager(get(), get()) }
 }
 
 val serviceModule = module {
@@ -237,6 +249,9 @@ val useCaseModule = module {
     factory { SetDownloadClientActiveUseCase(get()) }
     factory { GetProwlarrIndexersStatusUseCase(get()) }
     factory { GetProwlarrInstanceRepositoryUseCase(get()) }
+    factory { AddCustomWebpageUseCase(get()) }
+    factory { UpdateCustomWebpageUseCase(get()) }
+    factory { DeleteCustomWebpageUseCase(get()) }
 }
 
 val viewModelModule = module {
@@ -265,7 +280,7 @@ val viewModelModule = module {
     factory { (seriesId: Long, episode: Episode) ->
         EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get())
     }
-    factory { MoreScreenViewModel(get(), get(), get(), get(), get()) }
+    factory { MoreScreenViewModel(get(), get(), get(), get(), get(), get()) }
     factory { AddInstanceViewModel(get(), get(), get(), get()) }
     factory { (instanceId: Long) ->
         EditInstanceViewModel(instanceId, get(), get(), get(), get())
@@ -284,6 +299,12 @@ val viewModelModule = module {
     factory { (clientId: Long?) ->
         DownloadClientSettingsViewModel(clientId, get(), get(), get(), get(), get(), get()) }
     factory { DownloadClientsViewModel(get(), get(), get(), get(), get()) }
+    factory { (webpageId: Long?) ->
+        CustomWebpageConfigurationViewModel(webpageId, get(), get(), get(), get())
+    }
+    factory { (webpageId: Long) ->
+        CustomWebpageViewerViewModel(webpageId, get())
+    }
 }
 
 val resourcesModule = module {

@@ -4,10 +4,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import androidx.compose.material.icons.filled.ArrowCircleDown
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.FileDownload
@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.ManageSearch
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.MusicNote
@@ -43,15 +44,18 @@ val ContentFilter.imageVector: ImageVector
 
 val TabItem.androidIcon: ImageVector
     get() = when(this) {
-        TabItem.SHOWS -> Icons.Default.Tv
-        TabItem.MOVIES -> Icons.Default.Movie
-        TabItem.MUSIC -> Icons.Default.MusicNote
-        TabItem.ACTIVITY -> Icons.Default.Download
-        TabItem.DOWNLOADS -> Icons.Default.CloudDownload
-        TabItem.CALENDAR -> Icons.Default.CalendarMonth
-        TabItem.REQUESTS -> Icons.Default.Inbox
-        TabItem.PROWLARR -> Icons.AutoMirrored.Default.ManageSearch
-        TabItem.SETTINGS -> Icons.Default.Settings
+        is TabItem.Standard -> when (this) {
+            TabItem.Standard.SHOWS -> Icons.Default.Tv
+            TabItem.Standard.MOVIES -> Icons.Default.Movie
+            TabItem.Standard.MUSIC -> Icons.Default.MusicNote
+            TabItem.Standard.ACTIVITY -> Icons.Default.Download
+            TabItem.Standard.DOWNLOADS -> Icons.Default.CloudDownload
+            TabItem.Standard.CALENDAR -> Icons.Default.CalendarMonth
+            TabItem.Standard.REQUESTS -> Icons.Default.Inbox
+            TabItem.Standard.PROWLARR -> Icons.Default.ManageSearch
+        }
+        is TabItem.CustomWebpage -> Icons.Default.Language
+        is TabItem.Settings -> Icons.Default.Settings
     }
 
 val SortBy.androidIcon: ImageVector
