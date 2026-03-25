@@ -1,43 +1,49 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.content.Intent
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.*
-import androidx.compose.material3.FloatingToolbarDefaults.ScreenOffset
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.DropdownMenuGroup
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
-import kotlinx.coroutines.delay
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -52,6 +58,7 @@ fun CustomWebpageViewerScreen(
     var menuExpanded by remember { mutableStateOf(false) }
 
     val lifecyclerOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
 
     DisposableEffect(lifecyclerOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -148,7 +155,11 @@ fun CustomWebpageViewerScreen(
                                     leadingIcon = { Icon(Icons.Default.Share, null) },
                                     onClick = {
                                         menuExpanded = false
-                                        // todo -share
+                                        val intent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_TEXT, webpage?.url)
+                                        }
+                                        context.startActivity(Intent.createChooser(intent, null))
                                     }
                                 )
                             }

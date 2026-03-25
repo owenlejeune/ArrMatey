@@ -15,7 +15,7 @@ struct WebViewContainer: UIViewRepresentable {
     @Binding var canGoBack: Bool
     @Binding var canGoForward: Bool
     @Binding var webView: WKWebView?
-    var onScroll: (CGFloat) -> Void
+//    var onScroll: (CGFloat) -> Void
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -29,7 +29,7 @@ struct WebViewContainer: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        var fixedUrlString = url.trimmingCharacters(in: .whitespacesAndNewlines)
+        let fixedUrlString = url.trimmingCharacters(in: .whitespacesAndNewlines)
         
         guard let urlObj = URL(string: fixedUrlString) else {
             return
@@ -53,7 +53,7 @@ struct WebViewContainer: UIViewRepresentable {
 
     class Coordinator: NSObject, WKNavigationDelegate, UIScrollViewDelegate {
         var parent: WebViewContainer
-        private var lastContentOffset: CGFloat = 0
+//        private var lastContentOffset: CGFloat = 0
 
         init(_ parent: WebViewContainer) {
             self.parent = parent
@@ -72,11 +72,11 @@ struct WebViewContainer: UIViewRepresentable {
             print("WebView navigation failed: \(error.localizedDescription)")
         }
 
-        func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            let offset = scrollView.contentOffset.y
-            let delta = offset - lastContentOffset
-            parent.onScroll(delta)
-            lastContentOffset = offset
-        }
+//        func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//            let offset = scrollView.contentOffset.y
+//            let delta = offset - lastContentOffset
+//            parent.onScroll(delta)
+//            lastContentOffset = offset
+//        }
     }
 }

@@ -12,7 +12,6 @@ import WebKit
 struct CustomWebpageViewerScreen: View {
     let webpageId: Int64
     
-    // Use StateObject to prevent ViewModel from resetting on view updates
     @StateObject private var viewModel: CustomWebpageViewerViewModelS
     
     @State private var webView: WKWebView? = nil
@@ -34,19 +33,8 @@ struct CustomWebpageViewerScreen: View {
                     canGoBack: $canGoBack,
                     canGoForward: $canGoForward,
                     webView: $webView
-                ) { delta in
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        if delta > 15 { isToolbarVisible = false }
-                        else if delta < -15 { isToolbarVisible = true }
-                    }
-                }
+                )
                 .ignoresSafeArea(edges: .bottom)
-
-                if isToolbarVisible {
-                    floatingToolbar
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                        .padding(.bottom, 20)
-                }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -54,35 +42,36 @@ struct CustomWebpageViewerScreen: View {
         }
         .navigationTitle(viewModel.webpage?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private var floatingToolbar: some View {
-        HStack(spacing: 30) {
-            Button(action: { webView?.goBack() }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .semibold))
-            }.disabled(!canGoBack)
-
-            Button(action: { webView?.goForward() }) {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 18, weight: .semibold))
-            }.disabled(!canGoForward)
-
-            Button(action: { webView?.reload() }) {
-                Image(systemName: "arrow.clockwise")
-                    .font(.system(size: 18, weight: .semibold))
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: { webView?.goBack() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
+                }.disabled(!canGoBack)
             }
-
-            Button(action: { sharePage() }) {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 18, weight: .semibold))
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: { webView?.goForward() }) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 18, weight: .semibold))
+                }.disabled(!canGoForward)
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button(action: { webView?.reload() }) {
+                        Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
+                    }
+                    Button(action: {
+                        sharePage()
+                    }) {
+                        Label(MR.strings().share.localized(), systemImage: "square.and.arrow.up")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .imageScale(.medium)
+                }
+                .menuIndicator(.hidden)
             }
         }
-        .padding(.vertical, 14)
-        .padding(.horizontal, 28)
-        .background(Capsule().fill(.ultraThinMaterial))
-        .overlay(Capsule().stroke(Color.primary.opacity(0.1), lineWidth: 0.5))
-        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
     }
 
     private func sharePage() {
