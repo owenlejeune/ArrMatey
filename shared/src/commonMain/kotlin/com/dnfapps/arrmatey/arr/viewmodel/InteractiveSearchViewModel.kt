@@ -85,7 +85,7 @@ class InteractiveSearchViewModel(
         val comparator: Comparator<ArrRelease> = when (filter.sortBy) {
             ReleaseSortBy.Weight -> compareBy { it.releaseWeight }
             ReleaseSortBy.Age -> compareBy { it.ageMinutes }
-            ReleaseSortBy.Quality -> compareBy { it.quality.qualityLabel }
+            ReleaseSortBy.Quality -> compareBy { it.quality?.qualityLabel }
             ReleaseSortBy.Seeders -> compareBy { it.seeders }
             ReleaseSortBy.FileSize -> compareBy { it.size }
             ReleaseSortBy.CustomScore -> compareBy { it.customFormatScore }
@@ -104,7 +104,7 @@ class InteractiveSearchViewModel(
             (filter.language == null || item.languages.any { it.id == filter.language.id }) &&
             (filter.protocol == null || item.protocol == filter.protocol) &&
             (filter.indexer == null || item.indexer == filter.indexer) &&
-            (filter.quality == null || item.quality.quality.id == filter.quality.quality.id) &&
+            (filter.quality == null || item.quality?.quality?.id == filter.quality.quality.id) &&
             (filter.customFormat == null || item.customFormats.any { it.id == filter.customFormat.id }) &&
             (query.isEmpty() || item.title.contains(query, ignoreCase = true))
         }

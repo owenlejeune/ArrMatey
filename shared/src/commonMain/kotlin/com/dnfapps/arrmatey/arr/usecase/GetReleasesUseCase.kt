@@ -65,7 +65,7 @@ class GetReleasesUseCase(
 
     private fun parseQualities(items: List<ArrRelease>): Set<QualityInfo> {
         return items
-            .map { it.quality }
+            .mapNotNull { it.quality }
             .sortedBy { it.quality.resolution }
             .toSet()
     }
