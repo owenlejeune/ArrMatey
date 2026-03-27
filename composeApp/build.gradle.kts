@@ -14,7 +14,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -33,7 +33,7 @@ kotlin {
             implementation(libs.aboutlibraries.compose)
             implementation(libs.reorderable)
             implementation(libs.compose.markdown)
-            
+
             implementation(libs.kmp.logger)
         }
         commonMain.dependencies {
@@ -59,7 +59,7 @@ kotlin {
             implementation(libs.moko.resources.compose)
 
             implementation(libs.aboutlibraries)
-            
+
             implementation(libs.kmp.logger)
         }
         commonTest.dependencies {
@@ -82,6 +82,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/version-control-info.textproto"
+            excludes += "/META-INF/com.android.tools.build.gradle.proto"
         }
     }
     buildTypes {
