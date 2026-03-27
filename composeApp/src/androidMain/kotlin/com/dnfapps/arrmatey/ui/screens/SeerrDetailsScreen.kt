@@ -44,7 +44,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -88,6 +87,7 @@ import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
+import com.dnfapps.arrmatey.ui.sheets.SeerrReportIssueSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.format
@@ -109,7 +109,9 @@ fun SeerrDetailsScreen(
     val selectedInstance by viewModel.selectedInstance.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
 
-    var showViewRequestSheet by remember { mutableStateOf(false) }
+    val isViewRequestSheetVisible by viewModel.isViewRequestSheetVisible.collectAsStateWithLifecycle()
+    val isReportIssueSheetVisible by viewModel.isReportIssueSheetVisible.collectAsStateWithLifecycle()
+    val reportIssueState by viewModel.reportIssueState.collectAsStateWithLifecycle()
 
     val scrollState = rememberScrollState()
 
@@ -175,7 +177,7 @@ fun SeerrDetailsScreen(
                                     onRequestClicked = { },
                                     onRequest4kClicked = { },
                                     onWatchTrailerClicked = { context.openLink(it) },
-                                    onViewRequestClicked = { showViewRequestSheet = true },
+                                    onViewRequestClicked = { viewModel.showViewRequestSheet() },
                                     onApproveRequestClicked = { viewModel.approveRequest(it) },
                                     onDeclineRequestClicked = { viewModel.declineRequest(it) },
                                 )
@@ -330,19 +332,19 @@ fun SeerrDetailsScreen(
                     }
                 },
                 actions = {
-                    if (isDebug()) {
-                        if (buttonState.showReportIssueButton) {
-                            IconButton(
-                                onClick = { },
-                                colors = IconButtonDefaults.headerBarColors()
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Warning,
-                                    contentDescription = mokoString(MR.strings.report_issue),
-                                    tint = ArrOrange
-                                )
-                            }
+                    if (buttonState.showReportIssueButton) {
+                        IconButton(
+                            onClick = { viewModel.showReportIssueSheet() },
+                            colors = IconButtonDefaults.headerBarColors()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = mokoString(MR.strings.report_issue),
+                                tint = ArrOrange
+                            )
                         }
+                    }
+                    if (isDebug()) {
                         if (buttonState.showManageMenu) {
                             IconButton(
                                 onClick = { },
@@ -357,6 +359,19 @@ fun SeerrDetailsScreen(
                     }
                 }
             )
+
+            if (isReportIssueSheetVisible) {
+                SeerrReportIssueSheet(
+                    state = reportIssueState,
+                    updateIssueType = { viewModel.setIssueType(it) },
+                    updateMessage = { viewModel.setIssueMessage(it) },
+                    updateProblemSeason = { viewModel.setProblemSeason(it) },
+                    updateProblemEpisode = { viewModel.setProblemEpisode(it) },
+                    onReset = { viewModel.resetIssueState() },
+                    onSubmit = { viewModel.submitIssue() },
+                    onDismiss = { viewModel.hideReportIssueSheet() }
+                )
+            }
         }
     }
 }

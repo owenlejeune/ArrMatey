@@ -44,7 +44,7 @@ fun RequestsScreen(
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         PullToRefreshBox(
-            isRefreshing = pagedData.isLoading && pagedData.items.isEmpty(),
+            isRefreshing = pagedData.isLoading && pagedData.items.isNotEmpty(),
             onRefresh = { viewModel.refresh() },
             modifier = Modifier.fillMaxSize().padding(paddingValues),
             contentAlignment = Alignment.Center

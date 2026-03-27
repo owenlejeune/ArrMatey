@@ -2,19 +2,22 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
-import com.dnfapps.arrmatey.seerr.api.model.ImdbRating
+import com.dnfapps.arrmatey.seerr.api.model.IssueBody
+import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
+import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
 import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.state.toButtonState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
@@ -23,6 +26,7 @@ import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +35,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SeerrMediaDetailsViewModel(
@@ -42,7 +47,8 @@ class SeerrMediaDetailsViewModel(
     private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase,
     private val cancelRequestUseCase: CancelRequestUseCase,
     private val getSeerrTvRatingsUseCase: GetSeerrTvRatingsUseCase,
-    private val getSeerrMovieRatingsUseCase: GetSeerrMovieRatingsUseCase
+    private val getSeerrMovieRatingsUseCase: GetSeerrMovieRatingsUseCase,
+    private val submitIssueUseCase: SubmitIssueUseCase
 ): ViewModel() {
 
     private val _combinedRatings = MutableStateFlow<CombinedRatings?>(null)
@@ -65,6 +71,38 @@ class SeerrMediaDetailsViewModel(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = SeerrDetailsState.Initial
+        )
+
+    private val _isReportIssueSheetVisible = MutableStateFlow(false)
+    val isReportIssueSheetVisible: StateFlow<Boolean> = _isReportIssueSheetVisible.asStateFlow()
+
+    private val _isViewRequestSheetVisible = MutableStateFlow(false)
+    val isViewRequestSheetVisible: StateFlow<Boolean> = _isViewRequestSheetVisible.asStateFlow()
+
+    private var seerrMediaId: Long? = null
+
+    private val _reportIssueState = MutableStateFlow(ReportIssueUiState())
+    val reportIssueState: StateFlow<ReportIssueUiState> = _reportIssueState
+        .combine(_uiState) { issueState, uiState ->
+            if (uiState is SeerrDetailsState.Success) {
+                seerrMediaId = uiState.item.mediaInfo?.id
+                if (issueState.saveSuccess) {
+                    _isReportIssueSheetVisible.value = false
+                }
+                issueState.copy(
+                    includeSeriesOptions = uiState.item.requestType == RequestType.Tv,
+                    mediaTitle = uiState.item.displayTitle,
+                    availableSeasons = (uiState.item as? TvDetails)?.seasons ?: emptyList(),
+                    saveButtonEnabled = issueState.message.isNotEmpty() && !issueState.saveInProgress
+                )
+            } else {
+                issueState
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ReportIssueUiState()
         )
 
     private val _currentUser = MutableStateFlow<SeerrUser?>(null)
@@ -158,6 +196,74 @@ class SeerrMediaDetailsViewModel(
         viewModelScope.launch {
             cancelRequestUseCase(requestId, repository)
                 .onSuccess { refreshDetails() }
+        }
+    }
+
+    fun showViewRequestSheet() {
+        _isViewRequestSheetVisible.value = true
+    }
+
+    fun hideViewRequestSheet() {
+        _isViewRequestSheetVisible.value = false
+    }
+
+    fun showReportIssueSheet() {
+        _isReportIssueSheetVisible.value = true
+    }
+
+    fun hideReportIssueSheet() {
+        _isReportIssueSheetVisible.value = false
+    }
+
+    fun setIssueType(issueType: IssueType) {
+        _reportIssueState.update {
+            it.copy(issueType = issueType)
+        }
+    }
+
+    fun setIssueMessage(message: String) {
+        _reportIssueState.update {
+            it.copy(message = message)
+        }
+    }
+
+    fun setProblemSeason(season: Int?) {
+        _reportIssueState.update {
+            it.copy(problemSeason = season)
+        }
+    }
+
+    fun setProblemEpisode(episode: Int?) {
+        _reportIssueState.update {
+            it.copy(problemEpisode = episode)
+        }
+    }
+
+    fun resetIssueState() {
+        _reportIssueState.value = ReportIssueUiState()
+    }
+
+    fun submitIssue() {
+        val seerrId = seerrMediaId ?: return
+        val state = _reportIssueState.value
+        val issue = IssueBody(
+            issueType = state.issueType.value,
+            message = state.message,
+            mediaId = seerrId,
+            problemSeason = state.problemSeason ?: 0,
+            problemEpisode = state.problemSeason?.let { state.problemEpisode } ?: 0
+        )
+        viewModelScope.launch {
+            submitIssueUseCase(issue)
+                .collect { issueStatus ->
+                    _reportIssueState.update {
+                        it.copy(
+                            saveInProgress = issueStatus == OperationStatus.InProgress,
+                            saveError = (issueStatus as? OperationStatus.Error)?.message,
+                            saveSuccess = issueStatus is OperationStatus.Success
+                        )
+                    }
+                }
         }
     }
 

@@ -16,6 +16,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.max
 
 @Composable
 fun AMOutlinedTextField(
@@ -30,6 +31,8 @@ fun AMOutlinedTextField(
     errorMessage: String? = null,
     isError: Boolean = false,
     enabled: Boolean = true,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    minLines: Int = 1,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -74,7 +77,9 @@ fun AMOutlinedTextField(
             keyboardOptions = keyboardOptions,
             shape = MaterialTheme.shapes.large,
             visualTransformation = visualTransformation,
-            trailingIcon = trailingIcon
+            trailingIcon = trailingIcon,
+            maxLines = maxLines,
+            minLines = minLines
         )
         description?.let {
             Text(

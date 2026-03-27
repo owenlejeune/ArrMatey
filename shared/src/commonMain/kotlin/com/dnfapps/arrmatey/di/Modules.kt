@@ -102,6 +102,7 @@ import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
@@ -252,6 +253,7 @@ val useCaseModule = module {
     factory { AddCustomWebpageUseCase(get()) }
     factory { UpdateCustomWebpageUseCase(get()) }
     factory { DeleteCustomWebpageUseCase(get()) }
+    factory { SubmitIssueUseCase(get()) }
 }
 
 val viewModelModule = module {
@@ -291,7 +293,7 @@ val viewModelModule = module {
     factory { CalendarViewModel(get(), get(), get(), get()) }
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get()) }
     factory { (tmdbId: Long, mediaType: RequestType) ->
-        SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get())
+        SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { ProwlarrIndexersViewModel(get(), get(), get()) }
     factory { ProwlarrSearchViewModel(get(), get(), get()) }

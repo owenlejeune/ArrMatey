@@ -8,6 +8,8 @@ import com.dnfapps.arrmatey.client.safePut
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
+import com.dnfapps.arrmatey.seerr.api.model.Issue
+import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
@@ -36,6 +38,7 @@ interface SeerrClient {
     suspend fun getSeasonDetails(mediaId: Long, seasonNumber: Int): NetworkResult<Season>
     suspend fun getRadarrServices(): NetworkResult<List<Service>>
     suspend fun getSonarrServices(): NetworkResult<List<Service>>
+    suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue>
 }
 
 class SeerrClientImpl(
@@ -93,6 +96,9 @@ class SeerrClientImpl(
 
     override suspend fun getSonarrServices(): NetworkResult<List<Service>> =
         get("service/sonarr")
+
+    override suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> =
+        post("issue", issue)
 
 
     /**

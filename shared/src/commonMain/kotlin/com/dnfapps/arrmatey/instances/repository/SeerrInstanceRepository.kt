@@ -12,6 +12,8 @@ import com.dnfapps.arrmatey.seerr.api.client.SeerrClient
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClientImpl
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
+import com.dnfapps.arrmatey.seerr.api.model.Issue
+import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
@@ -174,5 +176,9 @@ class SeerrInstanceRepository(
 
     suspend fun getSeasonDetails(tmdbId: Long, seasonNumber: Int): NetworkResult<Season> {
         return client.getSeasonDetails(tmdbId, seasonNumber)
+    }
+
+    suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> {
+        return client.submitIssue(issue)
     }
 }

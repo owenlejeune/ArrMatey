@@ -42,7 +42,8 @@ fun <T> DropdownPicker(
     label: @Composable () -> Unit = {},
     includeAllOption: Boolean = false,
     allLabel: String = mokoString(MR.strings.all),
-    onAllSelected: () -> Unit = {}
+    onAllSelected: () -> Unit = {},
+    allDivider: (@Composable () -> Unit)? = { HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp)) }
 ) {
     var isDropDownExpanded by remember { mutableStateOf(false) }
 
@@ -98,7 +99,7 @@ fun <T> DropdownPicker(
                         textColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+                allDivider?.invoke()
             }
             options.forEach { t ->
                 DropdownMenuItem(

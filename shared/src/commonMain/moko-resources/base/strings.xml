@@ -468,4 +468,10 @@
     <string name="most_recent_failure">Most recent failure</string>
     <string name="initial_failure">Initial failure</string>
 
+    <!-- Issue Type -->
+    <string name="video">Video</string>
+    <string name="audio">Audio</string>
+    <string name="subtitle">Subtitle</string>
+    <string name="other">Other</string>
+
 </resources>
