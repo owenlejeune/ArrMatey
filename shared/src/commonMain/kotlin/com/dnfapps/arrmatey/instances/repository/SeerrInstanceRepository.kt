@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
+import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
@@ -23,6 +24,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
+import com.dnfapps.arrmatey.seerr.service.MediaIssuePackageService
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import io.ktor.client.HttpClient
@@ -40,6 +42,7 @@ class SeerrInstanceRepository(
 ): InstanceScopedRepository {
     val client: SeerrClient = SeerrClientImpl(instance, httpClient)
     private val mediaPackageService = MediaRequestPackageService(client)
+    private val issuePackageService = MediaIssuePackageService(client)
 
     private val _loggedInUser = MutableStateFlow<SeerrUser?>(null)
     val loggedInUser: StateFlow<SeerrUser?> = _loggedInUser.asStateFlow()
@@ -180,5 +183,33 @@ class SeerrInstanceRepository(
 
     suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> {
         return client.submitIssue(issue)
+    }
+
+    fun getIssuesPaging(): PagingSource<MediaIssuePackage> {
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getIssues(page = page)
+            },
+            processor = { response ->
+                val enrichedIssues = issuePackageService.enrichIssues(response.results)
+                PageResult(
+                    items = enrichedIssues,
+                    totalItemCount = response.pageInfo.results,
+                    hasNextPage = response.pageInfo.page < response.pageInfo.pages
+                )
+            }
+        )
+    }
+
+    suspend fun submitIssueComment(issueId: Long, comment: String): NetworkResult<Issue> {
+        return client.submitIssueComment(issueId, comment)
+    }
+
+    suspend fun getIssueDetails(issueId: Long): NetworkResult<Issue> {
+        return client.getIssueDetails(issueId)
+    }
+
+    suspend fun closeIssue(issueId: Long): NetworkResult<Unit> {
+        return client.closeIssue(issueId)
     }
 }

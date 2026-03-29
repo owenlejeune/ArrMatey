@@ -6,32 +6,32 @@ import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
+import com.dnfapps.arrmatey.compose.SeerrTab
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.Issue
+import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetIssuesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueCommentUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
@@ -40,18 +40,26 @@ class RequestsViewModel(
     getSeerrInstanceRepositoryUseCase: GetSeerrInstanceRepositoryUseCase,
     private val getCurrentSeerrUserUseCase: GetCurrentSeerrUserUseCase,
     private val getRequestsUseCase: GetRequestsUseCase,
+    private val getIssuesUseCase: GetIssuesUseCase,
     private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase,
     private val cancelRequestUseCase: CancelRequestUseCase,
     private val removeSeerrMediaFileUseCase: RemoveSeerrMediaFileUseCase
 ): ViewModel() {
 
-    private var pagingController: PagingController<MediaRequestPackage>? = null
+    private var requestsPagingController: PagingController<MediaRequestPackage>? = null
+    private var issuesPagingController: PagingController<MediaIssuePackage>? = null
 
     private val _requestsState = MutableStateFlow<PagedData<MediaRequestPackage>>(PagedData())
     val requestsState: StateFlow<PagedData<MediaRequestPackage>> = _requestsState.asStateFlow()
 
+    private val _issuesState = MutableStateFlow<PagedData<MediaIssuePackage>>(PagedData())
+    val issuesState: StateFlow<PagedData<MediaIssuePackage>> = _issuesState.asStateFlow()
+
     private val _operationsState = MutableStateFlow(RequestOperationsState())
     val operationsState: StateFlow<RequestOperationsState> = _operationsState.asStateFlow()
+
+    private val _selectedTab = MutableStateFlow(SeerrTab.Requests)
+    val selectedTab: StateFlow<SeerrTab> = _selectedTab.asStateFlow()
 
     private val selectedRepository = getSeerrInstanceRepositoryUseCase
         .observeSelected()
@@ -85,10 +93,22 @@ class RequestsViewModel(
             selectedRepository
                 .filterNotNull()
                 .collect { repo ->
-                    pagingController = getRequestsUseCase.createPagingController(repo, viewModelScope)
-                    pagingController?.loadInitialPage()
-                    pagingController?.state?.collect {
-                        _requestsState.value = it
+                    viewModelScope.launch {
+                        requestsPagingController =
+                            getRequestsUseCase.createPagingController(repo, viewModelScope)
+                        requestsPagingController?.loadInitialPage()
+                        requestsPagingController?.state?.collect {
+                            _requestsState.value = it
+                        }
+                    }
+
+                    viewModelScope.launch {
+                        issuesPagingController =
+                            getIssuesUseCase.createPagingController(repo, viewModelScope)
+                        issuesPagingController?.loadInitialPage()
+                        issuesPagingController?.state?.collect {
+                            _issuesState.value = it
+                        }
                     }
 
                     observeOperationStates(repo)
@@ -104,20 +124,33 @@ class RequestsViewModel(
         }
     }
 
-    fun loadNextPage() {
-        pagingController?.loadNextPage()
+    fun loadNextRequestsPage() {
+        requestsPagingController?.loadNextPage()
+    }
+
+    fun clearRequestsError() {
+        requestsPagingController?.clearError()
+    }
+
+    fun retryRequests() {
+        requestsPagingController?.retry()
+    }
+
+    fun loadNextIssuesPage() {
+        issuesPagingController?.loadNextPage()
+    }
+
+    fun clearIssuesError() {
+        issuesPagingController?.clearError()
+    }
+
+    fun retryIssues() {
+        issuesPagingController?.retry()
     }
 
     fun refresh() {
-        pagingController?.refresh()
-    }
-
-    fun clearError() {
-        pagingController?.clearError()
-    }
-
-    fun retry() {
-        pagingController?.retry()
+        requestsPagingController?.refresh()
+        issuesPagingController?.refresh()
     }
 
     fun approveRequest(requestId: Long) {
@@ -155,6 +188,10 @@ class RequestsViewModel(
             )
                 .onSuccess { refresh() }
         }
+    }
+
+    fun setSelectedTab(tab: SeerrTab) {
+        _selectedTab.value = tab
     }
 
 }

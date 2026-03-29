@@ -102,6 +102,7 @@ fun RequestCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun RequestCardHeader(
     posterUrl: String?,
@@ -137,7 +138,7 @@ private fun RequestCardHeader(
             }
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLargeEmphasized,
                 modifier = Modifier.padding(top = 2.dp)
             )
             Row(
@@ -176,35 +177,6 @@ private fun RequestMetadata(request: MediaRequest) {
                 style = MaterialTheme.typography.bodySmall
             )
         }
-    }
-}
-
-@Composable
-private fun UserInfoRow(
-    label: String,
-    displayName: String,
-    avatar: String?
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = buildAnnotatedString {
-                append(label)
-                append(" ")
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(displayName)
-                }
-            },
-            style = MaterialTheme.typography.bodyMedium
-        )
-        AsyncImage(
-            model = rememberRemoteImageData(avatar),
-            modifier = Modifier.size(18.dp).clip(CircleShape),
-            contentDescription = null,
-            contentScale = ContentScale.Fit
-        )
     }
 }
 

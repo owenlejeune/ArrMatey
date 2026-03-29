@@ -95,14 +95,20 @@ import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
 import com.dnfapps.arrmatey.logging.FileSink
+import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
+import com.dnfapps.arrmatey.seerr.usecase.CloseIssueUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetIssueDetailsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetIssuesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueCommentUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
+import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
@@ -229,6 +235,10 @@ val useCaseModule = module {
     factory { GetSeerrInstanceRepositoryUseCase(get()) }
     factory { GetCurrentSeerrUserUseCase() }
     factory { GetRequestsUseCase() }
+    factory { GetIssuesUseCase() }
+    factory { GetIssueDetailsUseCase(get()) }
+    factory { SubmitIssueUseCase(get()) }
+    factory { SubmitIssueCommentUseCase(get()) }
     factory { CancelRequestUseCase() }
     factory { SetRequestApprovalStatusUseCase() }
     factory { RemoveSeerrMediaFileUseCase() }
@@ -253,7 +263,7 @@ val useCaseModule = module {
     factory { AddCustomWebpageUseCase(get()) }
     factory { UpdateCustomWebpageUseCase(get()) }
     factory { DeleteCustomWebpageUseCase(get()) }
-    factory { SubmitIssueUseCase(get()) }
+    factory { CloseIssueUseCase(get()) }
 }
 
 val viewModelModule = module {
@@ -291,7 +301,7 @@ val viewModelModule = module {
         ArrInstanceDashboardViewModel(instanceId, get())
     }
     factory { CalendarViewModel(get(), get(), get(), get()) }
-    factory { RequestsViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { RequestsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { (tmdbId: Long, mediaType: RequestType) ->
         SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get(), get())
     }
@@ -306,6 +316,9 @@ val viewModelModule = module {
     }
     factory { (webpageId: Long) ->
         CustomWebpageViewerViewModel(webpageId, get())
+    }
+    factory { (issuePackage: MediaIssuePackage) ->
+        IssueDetailsViewModel(issuePackage, get(), get(), get())
     }
 }
 

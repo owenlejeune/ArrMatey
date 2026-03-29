@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
+import com.dnfapps.arrmatey.seerr.api.model.IssuesResponse
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
@@ -22,12 +23,14 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.koin.core.component.KoinComponent
 
 interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
-    suspend fun getRequests(page: Int = 1, pageSize: Int = 20): NetworkResult<RequestResponse>
+    suspend fun getRequests(page: Int = 1, pageSize: Int = 100): NetworkResult<RequestResponse>
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
     suspend fun setRequestStatus(requestId: Long, status: ApprovalStatus): NetworkResult<MediaRequest>
@@ -38,7 +41,11 @@ interface SeerrClient {
     suspend fun getSeasonDetails(mediaId: Long, seasonNumber: Int): NetworkResult<Season>
     suspend fun getRadarrServices(): NetworkResult<List<Service>>
     suspend fun getSonarrServices(): NetworkResult<List<Service>>
+    suspend fun getIssues(page: Int = 1, pageSize: Int = 100): NetworkResult<IssuesResponse>
     suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue>
+    suspend fun submitIssueComment(issueId: Long, comment: String): NetworkResult<Issue>
+    suspend fun getIssueDetails(issueId: Long): NetworkResult<Issue>
+    suspend fun closeIssue(issueId: Long): NetworkResult<Unit>
 }
 
 class SeerrClientImpl(
@@ -97,8 +104,26 @@ class SeerrClientImpl(
     override suspend fun getSonarrServices(): NetworkResult<List<Service>> =
         get("service/sonarr")
 
+    override suspend fun getIssues(page: Int, pageSize: Int): NetworkResult<IssuesResponse> =
+        get("issue", mapOf(
+            "take" to pageSize,
+            "skip" to (page - 1) * pageSize,
+            "filter" to "open"
+        ))
+
     override suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> =
         post("issue", issue)
+
+    override suspend fun submitIssueComment(issueId: Long, comment: String): NetworkResult<Issue> =
+        post("issue/$issueId/comment", buildJsonObject {
+            put("message", comment)
+        })
+
+    override suspend fun getIssueDetails(issueId: Long): NetworkResult<Issue> =
+        get("issue/$issueId")
+
+    override suspend fun closeIssue(issueId: Long): NetworkResult<Unit> =
+        delete("issue/$issueId")
 
 
     /**
