@@ -34,6 +34,7 @@ sealed interface TabItem {
         SHOWS("tv", MR.strings.series, associatedType = InstanceType.Sonarr),
         MOVIES("movieclapper", MR.strings.movies, associatedType = InstanceType.Radarr),
         MUSIC("music.quarternote.3", MR.strings.music, associatedType = InstanceType.Lidarr),
+        BOOKS("book", MR.strings.books, associatedType = InstanceType.Booksehelf),
         ACTIVITY("square.and.arrow.down", MR.strings.activity),
         DOWNLOADS("arrow.down.circle", MR.strings.downloads),
         CALENDAR("calendar", MR.strings.schedule),

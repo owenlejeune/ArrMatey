@@ -137,6 +137,20 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = false
     ),
+    Booksehelf(
+      resource = MR.strings.bookshelf_description,
+        github = "https://github.com/pennydreadful/bookshelf",
+        website = "https://github.com/pennydreadful/bookshelf",
+        icon = MR.images.bookshelf,
+        tabIcon = MR.images.bookshelf_tab,
+        defaultPort = 8787,
+        supportsActivityQueue = true,
+        apiBase = "api/v1",
+        testEndpoint = "system/status",
+        includeTopLevelAutomaticSearchOption = false,
+        aspectRatio = AspectRatio.Cover,
+        supportsNotifications = false
+    ),
     Prowlarr(
         resource = MR.strings.prowlarr_description,
         github = "https://github.com/Prowlarr/Prowlarr",

@@ -12,6 +12,7 @@
     <string name="settings">Settings</string>
     <string name="movies">Movies</string>
     <string name="music">Music</string>
+    <string name="books">Books</string>
     <string name="indexers">Indexers</string>
     <string name="home">Home</string>
     <string name="requests">Requests</string>
@@ -122,6 +123,7 @@
     <string name="all_episodes">All episodes</string>
     <string name="airing_next">Next episode</string>
     <string name="next_album">Next album</string>
+    <string name="next_book">Next book</string>
     <string name="continuing_unknown">Continuing - Unknown</string>
     <string name="files">Files</string>\
     <string name="no_files">No files</string>
@@ -285,6 +287,9 @@
     <string name="sonarr_description">Sonarr is a PVR for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them. It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available.</string>
     <string name="radarr_description">Radarr is a movie collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new movies and will interface with clients and indexers to grab, sort, and rename them. It can also be configured to automatically upgrade the quality of existing files in the library when a better quality format becomes available</string>
     <string name="lidarr_description">Lidarr is a music collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new tracks from your favorite artists and will grab, sort and rename them. It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available.</string>
+    <string name="bookshelf_description">This is a revival of Readarr. The images published are configured to use working Goodreads or Hardcover metadata out of the box.
+
+        Bookshelf is an ebook and audiobook collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new books from your favorite authors and will grab, sort, and rename them. Note that only one type of a given book is supported. If you want both an audiobook and ebook of a given book you will need multiple instances.</string>
     <string name="prowlarr_description">Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base stack to integrate with your various PVR apps. Prowlarr supports management of both Torrent Trackers and Usenet Indexers.</string>
     <string name="prowlarr">Prowlarr</string>
     <string name="no_indexers_configured">No indexers configured</string>
@@ -333,6 +338,15 @@
     <string name="existing_albums">Existing Albums</string>
     <string name="first_album">First Album</string>
     <string name="latest_album">Latest Album</string>
+
+    <!-- Author Monitor Type -->
+    <string name="all_books">All Books</string>
+    <string name="future_books">Future Books</string>
+    <string name="missing_books">Missing Books</string>
+    <string name="existing_books">Existing Books</string>
+    <string name="first_book">First Book</string>
+    <string name="latest_book">Latest Book</string>
+    <string name="new_books">New Books</string>
 
     <!-- Series type -->
     <string name="standard">Standard</string>

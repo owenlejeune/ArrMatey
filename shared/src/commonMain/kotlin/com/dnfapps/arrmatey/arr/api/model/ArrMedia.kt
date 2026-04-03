@@ -116,6 +116,7 @@ fun ArrMedia.toJson(): String {
         is ArrSeries -> ArrMedia.json.encodeToJsonElement(ArrSeriesSerializer, this)
         is ArrMovie  -> ArrMedia.json.encodeToJsonElement(ArrMovieSerializer, this)
         is Arrtist -> ArrMedia.json.encodeToJsonElement(ArrtistSerializer, this)
+        is Author -> ArrMedia.json.encodeToJsonElement(AuthorSerializer, this)
     }
 
     return ArrMedia.json.encodeToString(element)
@@ -154,6 +155,17 @@ object ArrtistSerializer:
     }
 }
 
+object AuthorSerializer:
+    JsonTransformingSerializer<Author>(Author.serializer()) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        val obj = element.jsonObject
+        return buildJsonObject {
+            obj.forEach { (k, v) -> put(k, v) }
+            put("mediaType", InstanceType.Booksehelf.name)
+        }
+    }
+}
+
 
 object AnyArrMediaSerializer: KSerializer<ArrMedia> {
     override val descriptor: SerialDescriptor
@@ -170,6 +182,7 @@ object AnyArrMediaSerializer: KSerializer<ArrMedia> {
             InstanceType.Sonarr.name -> decoder.json.decodeFromJsonElement(ArrSeries.serializer(), element)
             InstanceType.Radarr.name -> decoder.json.decodeFromJsonElement(ArrMovie.serializer(), element)
             InstanceType.Lidarr.name -> decoder.json.decodeFromJsonElement(Arrtist.serializer(), element)
+            InstanceType.Booksehelf.name -> decoder.json.decodeFromJsonElement(Author.serializer(), element)
             else -> error("Unknown mediaType: $mediaType")
         }
     }
@@ -181,6 +194,7 @@ object AnyArrMediaSerializer: KSerializer<ArrMedia> {
             is ArrSeries -> json.encodeToJsonElement(ArrSeriesSerializer, value)
             is ArrMovie  -> json.encodeToJsonElement(ArrMovieSerializer, value)
             is Arrtist -> json.encodeToJsonElement(ArrtistSerializer, value)
+            is Author -> json.encodeToJsonElement(AuthorSerializer, value)
         }
         encoder.encodeJsonElement(element)
     }

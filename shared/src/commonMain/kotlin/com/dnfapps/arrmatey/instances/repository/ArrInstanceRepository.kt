@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.arr.api.client.ArrClient
+import com.dnfapps.arrmatey.arr.api.client.BookshelfClient
 import com.dnfapps.arrmatey.arr.api.client.LidarrClient
 import com.dnfapps.arrmatey.arr.api.client.RadarrClient
 import com.dnfapps.arrmatey.arr.api.client.SonarrClient
@@ -13,6 +14,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -26,11 +28,11 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
-import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import dev.shivathapaa.logger.api.Logger
@@ -61,10 +63,14 @@ class ArrInstanceRepository(
     val lidarrClient: LidarrClient
         get() = client as? LidarrClient ?: throw IllegalStateException("Client is not a LidarrClient instance")
 
+    val bookshelfClient: BookshelfClient
+        get() = client as? BookshelfClient ?: throw IllegalStateException("Client is not a BookshelfClient instance")
+
     private fun createClient(): ArrClient = when (instance.type) {
         InstanceType.Sonarr -> SonarrClient(instance, httpClient)
         InstanceType.Radarr -> RadarrClient(instance, httpClient)
         InstanceType.Lidarr -> LidarrClient(instance, httpClient)
+        InstanceType.Booksehelf -> BookshelfClient(instance, httpClient)
         else -> TODO()
     }
 
@@ -570,6 +576,7 @@ class ArrInstanceRepository(
                         is ArrSeries -> item.copy(monitored = status)
                         is ArrMovie -> item.copy(monitored = status)
                         is Arrtist -> item.copy(monitored = status)
+                        is Author -> item.copy(monitored = status)
                     }
                 } else {
                     item
@@ -586,6 +593,7 @@ class ArrInstanceRepository(
                 is ArrSeries -> item.copy(monitored = status)
                 is ArrMovie -> item.copy(monitored = status)
                 is Arrtist -> item.copy(monitored = status)
+                is Author -> item.copy(monitored = status)
             }
             val updatedCache = currentDetailsCache.toMutableMap()
             updatedCache[id] = updatedMedia

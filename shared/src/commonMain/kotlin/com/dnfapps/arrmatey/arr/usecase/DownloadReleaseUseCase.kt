@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.ArrRelease
+import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.LidarrRelease
 import com.dnfapps.arrmatey.arr.api.model.MovieRelease
@@ -25,6 +26,7 @@ class DownloadReleaseUseCase(
             is SeriesRelease -> buildSonarrPayload(release, force)
             is MovieRelease -> buildRadarrPayload(release, force)
             is LidarrRelease -> buildLidarrPayload(release, force)
+            is BookshelfRelease -> buildBookshelfPayload(release)
         }
         return repository.downloadRelease(payload)
     }
@@ -50,5 +52,11 @@ class DownloadReleaseUseCase(
             guid = release.guid,
             indexerId = release.indexerId,
             albumId = if (force) release.albumId else null
+        )
+
+    private fun buildBookshelfPayload(release: BookshelfRelease): DownloadReleasePayload =
+        DownloadReleasePayload.Book(
+            guid = release.guid,
+            indexerId = release.indexerId
         )
 }

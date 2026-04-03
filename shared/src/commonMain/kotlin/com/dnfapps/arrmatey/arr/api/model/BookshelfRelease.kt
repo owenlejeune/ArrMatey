@@ -1,0 +1,49 @@
+package com.dnfapps.arrmatey.arr.api.model
+
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
+import kotlin.time.Instant
+
+@Serializable
+data class BookshelfRelease(
+    override val id: Int? = null,
+    override val guid: String,
+    override val quality: QualityInfo? = null,
+    override val customFormats: List<CustomFormat> = emptyList(),
+    override val customFormatScore: Float = 0f,
+    override val qualityWeight: Float = 0f,
+    override val age: Float = 0f,
+    override val ageHours: Float = 0f,
+    override val ageMinutes: Float = 0f,
+    override val size: Long = 0,
+    override val indexerId: Int,
+    override val indexer: String? = null,
+    override val releaseGroup: String? = null,
+    override val subGroup: String? = null,
+    override val releaseHash: String? = null,
+    override val title: String,
+    override val sceneSource: Boolean = false,
+    override val approved: Boolean = true,
+    override val temporarilyRejected: Boolean = false,
+    override val rejected: Boolean = false,
+    override val rejections: List<String> = emptyList(),
+    @Contextual override val publishDate: Instant? = null,
+    override val commentUrl: String? = null,
+    override val downloadUrl: String? = null,
+    override val infoUrl: String? = null,
+    override val downloadAllowed: Boolean = true,
+    override val releaseWeight: Float = 0f,
+    override val infoHash: String? = null,
+    override val seeders: Int = 0,
+    override val leechers: Int = 0,
+    override val protocol: ReleaseProtocol,
+    override val downloadClientId: Int? = null,
+    override val downloadClient: String? = null,
+    override val shouldOverride: Boolean = false,
+    override val languages: List<Language> = emptyList(),
+    override val magnetUrl: String? = null,
+
+    val authorName: String? = null,
+    val bookTitle: String? = null,
+    val discography: Boolean = false
+): ArrRelease

@@ -29,4 +29,10 @@ sealed interface DownloadReleasePayload {
         override val indexerId: Int,
         val albumId: Long? = null,
     ): DownloadReleasePayload
+
+    @Serializable
+    data class Book(
+        override val guid: String,
+        override val indexerId: Int
+    ): DownloadReleasePayload
 }

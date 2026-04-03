@@ -100,4 +100,7 @@ sealed interface ReleaseParams {
         val albumId: Long,
         val artistId: Long? = null,
     ): ReleaseParams
+    data class Book(
+        val bookId: Long
+    ): ReleaseParams
 }

@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.entensions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.ManageSearch
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -48,6 +49,7 @@ val TabItem.androidIcon: ImageVector
             TabItem.Standard.SHOWS -> Icons.Default.Tv
             TabItem.Standard.MOVIES -> Icons.Default.Movie
             TabItem.Standard.MUSIC -> Icons.Default.MusicNote
+            TabItem.Standard.BOOKS -> Icons.AutoMirrored.Default.MenuBook
             TabItem.Standard.ACTIVITY -> Icons.Default.Download
             TabItem.Standard.DOWNLOADS -> Icons.Default.CloudDownload
             TabItem.Standard.CALENDAR -> Icons.Default.CalendarMonth

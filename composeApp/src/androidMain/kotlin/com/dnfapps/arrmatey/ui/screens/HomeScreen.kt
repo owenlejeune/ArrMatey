@@ -311,6 +311,7 @@ private fun StandardTabContent(tab: TabItem.Standard) {
         TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr)
         TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr)
         TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr)
+        TabItem.Standard.BOOKS -> ArrTab(InstanceType.Booksehelf)
         TabItem.Standard.ACTIVITY -> ActivityTab()
         TabItem.Standard.DOWNLOADS -> DownloadsTab()
         TabItem.Standard.CALENDAR -> CalendarTab()

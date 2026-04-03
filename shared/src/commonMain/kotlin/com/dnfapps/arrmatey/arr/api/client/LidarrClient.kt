@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistEditorBody
+import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteTrackBody
@@ -76,7 +77,7 @@ class LidarrClient(
         id: Long,
         monitorStatus: Boolean
     ): NetworkResult<List<MonitoredResponse>> =
-        put("series/editor", mapOf(
+        put("artist/editor", mapOf(
             "monitored" to monitorStatus,
             "artistIds" to listOf(id)
         ))
@@ -122,6 +123,11 @@ class LidarrClient(
         start: LocalDate,
         end: LocalDate
     ): NetworkResult<List<Episode>> = NetworkResult.Success(emptyList())
+
+    override suspend fun getBookCalendar(
+        start: LocalDate,
+        end: LocalDate
+    ): NetworkResult<List<Book>> = NetworkResult.Success(emptyList())
 
     override suspend fun getAlbumCalendar(
         start: LocalDate,

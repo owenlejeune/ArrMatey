@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +39,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
@@ -149,6 +151,7 @@ private fun ColumnScope.MediaDetails(item: ArrMedia, isActive: Boolean) {
         is ArrSeries -> SeriesDetails(item, isActive)
         is ArrMovie -> MovieDetails(item)
         is Arrtist -> ArtistDetails(item, isActive)
+        is Author -> AuthorDetails(item)
     }
 }
 
@@ -259,6 +262,18 @@ private fun ColumnScope.ArtistDetails(
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ColumnScope.AuthorDetails(
+    item: Author
+) {
+    Text(
+        text = "TODO",
+        style = MaterialTheme.typography.headlineLargeEmphasized,
+        color = Color.Red
+    )
 }
 
 @Composable

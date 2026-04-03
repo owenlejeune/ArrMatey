@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -27,6 +28,9 @@ fun UpcomingDateView(item: ArrMedia) {
         }?.let { "${mokoString(MR.strings.in_cinemas)} $it" }
         is Arrtist -> if (item.status == MediaStatus.Continuing) item.nextAlbum?.releaseDate?.format()?.let {
             "${mokoString(MR.strings.next_album)} $it"
+        } ?: mokoString(MR.strings.continuing_unknown) else null
+        is Author -> if (item.status == MediaStatus.Continuing) item.nextBook?.releaseDate?.format()?.let {
+            "${mokoString(MR.strings.next_book)} $it"
         } ?: mokoString(MR.strings.continuing_unknown) else null
     }?.let { airingString ->
         Text(

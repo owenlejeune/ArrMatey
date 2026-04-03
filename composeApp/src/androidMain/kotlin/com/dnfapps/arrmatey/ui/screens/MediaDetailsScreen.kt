@@ -57,6 +57,8 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
+import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
 import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
@@ -74,6 +76,7 @@ import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
+import com.dnfapps.arrmatey.ui.components.BooksArea
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
@@ -83,6 +86,7 @@ import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.UpcomingDateView
 import com.dnfapps.arrmatey.ui.sheets.EditArtistSheet
+import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
 import com.dnfapps.arrmatey.ui.sheets.EditMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
 import com.dnfapps.arrmatey.utils.format
@@ -246,12 +250,16 @@ fun MediaDetailsScreen(
                                         },
                                         albumDeleteInProgress = albumDeleteStatus is OperationStatus.InProgress,
                                     )
+                                    is Author -> BooksArea(
+
+                                    )
                                 }
 
                                 val infoItems = when (item) {
                                     is ArrSeries -> seriesInfo(item, qualityProfiles, tags)
                                     is ArrMovie -> movieInfo(item, qualityProfiles, tags)
                                     is Arrtist -> artistInfo(item, qualityProfiles, tags)
+                                    is Author -> authorInfo(item, qualityProfiles, tags)
                                 }.toInfoList()
                                 InfoArea(infoItems)
                             }
@@ -511,6 +519,9 @@ private fun EditMediaSheet(
             onEditItem = onEditItem,
             onDismiss = onDismiss
         )
+        is Author -> EditAuthorSheet(
+
+        )
     }
 }
 
@@ -707,6 +718,35 @@ private fun artistInfo(
         put(mokoString(MR.strings.root_folder), rootFolderPathValue)
         put(mokoString(MR.strings.path), (artist.path ?: unknown))
         put(mokoString(MR.strings.new_albums), monitorLabel)
+        put(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown))
+        put(mokoString(MR.strings.tags), tagsLabel)
+    }
+}
+
+@Composable
+private fun authorInfo(
+    author: Author,
+    qualityProfiles: List<QualityProfile>,
+    tags: List<Tag>
+): Map<String, String> {
+    val qualityProfile = qualityProfiles.firstOrNull { it.id == author.qualityProfileId }
+    val tagsLabel = author.formatTags(tags) ?: mokoString(MR.strings.none)
+
+    val unknown = mokoString(MR.strings.unknown)
+    val monitorLabel = if (author.monitorNewItems == AuthorMonitorType.All) {
+        mokoString(MR.strings.monitored)
+    } else { mokoString(MR.strings.unmonitored) }
+
+    val rootFolderPathValue = author.rootFolderPath?.takeUnless { it.isBlank() }
+        ?: mokoString(MR.strings.unknown)
+
+    val diskSize = author.fileSize.bytesAsFileSizeString()
+
+    return buildMap {
+        put(mokoString(MR.strings.size_on_disk), diskSize)
+        put(mokoString(MR.strings.root_folder), rootFolderPathValue)
+        put(mokoString(MR.strings.path), (author.path ?: unknown))
+        put(mokoString(MR.strings.new_books), monitorLabel)
         put(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown))
         put(mokoString(MR.strings.tags), tagsLabel)
     }
