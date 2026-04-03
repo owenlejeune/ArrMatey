@@ -88,7 +88,7 @@ fun CalendarDaySection(
         }
 
         movies.forEach { movie ->
-            MovieCalendarItem(movie)
+            MovieCalendarItem(date, movie)
         }
 
         episodeGroups.forEach { episode ->
