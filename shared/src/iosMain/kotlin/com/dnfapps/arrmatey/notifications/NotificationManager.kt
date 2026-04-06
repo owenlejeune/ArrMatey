@@ -2,12 +2,8 @@ package com.dnfapps.arrmatey.notifications
 
 import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationRequest
-import platform.UserNotifications.UNNotificationTrigger
 import platform.UserNotifications.UNTimeIntervalNotificationTrigger
 import platform.UserNotifications.UNUserNotificationCenter
-import platform.Foundation.NSDate
-import platform.Foundation.dateWithTimeIntervalSince1970
-import platform.Foundation.timeIntervalSinceDate
 import kotlin.time.Instant
 import kotlin.time.Clock
 
@@ -25,6 +21,7 @@ actual class NotificationManager {
         val content = UNMutableNotificationContent().apply {
             setTitle(title)
             setBody(message)
+            setUserInfo(mapOf("instanceName" to instanceName))
         }
 
         val now = Clock.System.now()
@@ -48,5 +45,18 @@ actual class NotificationManager {
 
     actual fun cancelAllNotifications() {
         notificationCenter.removeAllPendingNotificationRequests()
+    }
+
+    actual fun cancelNotificationsForInstance(instanceName: String) {
+        notificationCenter.getPendingNotificationRequestsWithCompletionHandler { requests ->
+            val identifiersToCancel = requests
+                ?.filterIsInstance<UNNotificationRequest>()
+                ?.filter { it.content.userInfo["instanceName"] == instanceName }
+                ?.map { it.identifier }
+
+            if (!identifiersToCancel.isNullOrEmpty()) {
+                notificationCenter.removePendingNotificationRequestsWithIdentifiers(identifiersToCancel)
+            }
+        }
     }
 }

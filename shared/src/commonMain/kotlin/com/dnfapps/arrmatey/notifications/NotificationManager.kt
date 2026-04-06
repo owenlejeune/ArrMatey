@@ -13,4 +13,5 @@ expect class NotificationManager {
 
     fun cancelNotification(id: Int)
     fun cancelAllNotifications()
+    fun cancelNotificationsForInstance(instanceName: String)
 }

@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.instances.usecase.DeleteInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestNewInstanceConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
+import com.dnfapps.arrmatey.notifications.NotificationManager
 import com.dnfapps.arrmatey.utils.isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,8 @@ class EditInstanceViewModel(
     private val testNewInstanceConnectionUseCase: TestNewInstanceConnectionUseCase,
     private val updateInstanceUseCase: UpdateInstanceUseCase,
     private val getInstanceByIdUseCase: GetInstanceByIdUseCase,
-    private val deleteInstanceUseCase: DeleteInstanceUseCase
+    private val deleteInstanceUseCase: DeleteInstanceUseCase,
+    private val notificationManager: NotificationManager
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(AddInstanceUiState())
@@ -49,7 +51,8 @@ class EditInstanceViewModel(
                         headers = instance.headers,
                         localNetworkEnabled = instance.localNetworkEnabled,
                         localNetworkUrl = instance.localNetworkEndpoint ?: "",
-                        localNetworkSsid = instance.localNetworkSsid ?: ""
+                        localNetworkSsid = instance.localNetworkSsid ?: "",
+                        notificationsEnabled = instance.notificationsEnabled
                     )
                 }
             }
@@ -172,7 +175,14 @@ class EditInstanceViewModel(
 
     fun updateInstance() {
         val s = _uiState.value
-        val updated = instance.value?.copy(
+        val originalInstance = instance.value ?: run {
+            _uiState.update { it.copy(
+                editResult = InsertResult.Error("Instance doesn't exist")
+            ) }
+            return
+        }
+
+        val updated = originalInstance.copy(
             label = s.instanceLabel,
             url = s.apiEndpoint,
             apiKey = s.apiKey,
@@ -181,15 +191,16 @@ class EditInstanceViewModel(
             headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
             localNetworkEnabled = s.localNetworkEnabled,
             localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
-            localNetworkSsid = s.localNetworkSsid.takeIf { s.localNetworkEnabled && it.isNotBlank() }
-        ) ?: run {
-            _uiState.update { it.copy(
-                editResult = InsertResult.Error("Instance doesn't exist")
-            ) }
-            return
-        }
+            localNetworkSsid = s.localNetworkSsid.takeIf { s.localNetworkEnabled && it.isNotBlank() },
+            notificationsEnabled = s.notificationsEnabled
+        )
 
         viewModelScope.launch {
+            if (originalInstance.notificationsEnabled && !updated.notificationsEnabled) {
+                instance.value?.label?.let { instanceName ->
+                    notificationManager.cancelNotificationsForInstance(instanceName)
+                }
+            }
             val result = updateInstanceUseCase(updated)
             _uiState.update { it.copy(editResult = result) }
         }
@@ -197,6 +208,9 @@ class EditInstanceViewModel(
 
     fun deleteInstance(instance: Instance) {
         viewModelScope.launch {
+            if (instance.notificationsEnabled) {
+                notificationManager.cancelNotificationsForInstance(instance.label)
+            }
             deleteInstanceUseCase(instance)
         }
     }

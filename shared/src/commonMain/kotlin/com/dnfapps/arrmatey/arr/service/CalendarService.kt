@@ -207,7 +207,7 @@ class CalendarService(
             when {
                 existing.tvdbId != null && episode.tvdbId != null -> existing.tvdbId == episode.tvdbId
                 existing.series?.tvdbId != null && episode.series?.tvdbId != null ->
-                    existing.series?.tvdbId == episode.series?.tvdbId &&
+                    existing.series.tvdbId == episode.series.tvdbId &&
                     existing.seasonNumber == episode.seasonNumber &&
                     existing.episodeNumber == episode.episodeNumber
                 else -> existing.id == episode.id && existing.instanceId == episode.instanceId
@@ -321,7 +321,7 @@ class CalendarService(
             if (time > Clock.System.now()) {
                 notificationManager.scheduleNotification(
                     id = id,
-                    title = mokoStrings.getString(MR.strings.new_release),
+                    title = mokoStrings.getString(MR.strings.instance_new_release, listOf(repository.instance.label)),
                     message = title,
                     scheduledTime = time,
                     instanceName = repository.instance.label

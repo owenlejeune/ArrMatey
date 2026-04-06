@@ -269,7 +269,7 @@ val viewModelModule = module {
     factory { MoreScreenViewModel(get(), get(), get(), get(), get(), get()) }
     factory { AddInstanceViewModel(get(), get(), get(), get()) }
     factory { (instanceId: Long) ->
-        EditInstanceViewModel(instanceId, get(), get(), get(), get())
+        EditInstanceViewModel(instanceId, get(), get(), get(), get(), get())
     }
     factory { (instanceId: Long) ->
         ArrInstanceDashboardViewModel(instanceId, get())

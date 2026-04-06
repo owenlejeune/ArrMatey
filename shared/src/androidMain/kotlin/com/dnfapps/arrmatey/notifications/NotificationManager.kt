@@ -20,8 +20,10 @@ actual class NotificationManager(
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as AndroidNotificationManager
 
+    private fun getChannelId(instanceName: String) = "release_notifications_$instanceName"
+
     private fun ensureChannelExists(instanceName: String): String {
-        val channelId = "release_notifications_${instanceName}"
+        val channelId = getChannelId(instanceName)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelName = mokoStrings.getString(MR.strings.instance_notification_channel, listOf(instanceName))
             val channel = NotificationChannel(
@@ -77,6 +79,14 @@ actual class NotificationManager(
     }
 
     actual fun cancelAllNotifications() {
+        notificationManager.cancelAll()
+    }
+
+    actual fun cancelNotificationsForInstance(instanceName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = getChannelId(instanceName)
+            notificationManager.deleteNotificationChannel(channelId)
+        }
         notificationManager.cancelAll()
     }
 }

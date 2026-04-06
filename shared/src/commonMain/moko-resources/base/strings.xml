@@ -224,6 +224,7 @@
     <string name="add_webpage">Add Webpage</string>
     <string name="edit_webpage">Edit Webpage</string>
     <string name="new_release">New Release</string>
+    <string name="instance_new_release">New Release - %1$s</string>
     <string name="instance_notification_channel">%1$s Release Notifications</string>
 
     <!-- History Event Type -->
