@@ -173,7 +173,7 @@ val repositoryModule = module {
 
 val serviceModule = module {
     single { ActivityQueueService(get(), get()) }
-    single { CalendarService(get()) }
+    single { CalendarService(get(), get(), get()) }
     single { DownloadQueueService(get()) }
 }
 

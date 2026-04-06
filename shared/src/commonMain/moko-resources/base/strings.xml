@@ -223,6 +223,8 @@
     <string name="custom_page_description">Full URL including https://</string>
     <string name="add_webpage">Add Webpage</string>
     <string name="edit_webpage">Edit Webpage</string>
+    <string name="new_release">New Release</string>
+    <string name="instance_notification_channel">%1$s Release Notifications</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

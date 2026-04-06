@@ -9,6 +9,9 @@ import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
+import com.dnfapps.arrmatey.notifications.NotificationManager
+import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.utils.MokoStrings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,7 +31,9 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 class CalendarService(
-    private val instanceManager: InstanceManager
+    private val instanceManager: InstanceManager,
+    private val notificationManager: NotificationManager,
+    private val mokoStrings: MokoStrings
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -120,6 +125,7 @@ class CalendarService(
                     movie.digitalRelease?.let { instant ->
                         val date = instant.toLocalDate()
                         upsertMovie(currentMovies, movie, date)
+                        scheduleNotificationIfEnabled(repository, movie.title ?: "Unknown Movie", instant, movie.tmdbId.toInt())
                     }
 
                     movie.physicalRelease?.let { instant ->
@@ -171,6 +177,12 @@ class CalendarService(
                     episode.airDateUtc?.let { instant ->
                         val date = instant.toLocalDate()
                         upsertEpisode(currentEpisodes, episode, date)
+                        scheduleNotificationIfEnabled(
+                            repository,
+                            "${episode.series?.title ?: "Unknown Series"} - S${episode.seasonNumber}E${episode.episodeNumber}",
+                            instant,
+                            episode.tvdbId?.toInt() ?: episode.id.toInt()
+                        )
                     }
                 }
 
@@ -247,6 +259,12 @@ class CalendarService(
                     album.releaseDate?.let { instant ->
                         val date = instant.toLocalDate()
                         upsertAlbum(currentAlbums, album, date)
+                        scheduleNotificationIfEnabled(
+                            repository,
+                            "${album.artist?.title ?: "Unknown Artist"} - ${album.title ?: "Unknown Album"}",
+                            instant,
+                            album.id.toInt()
+                        )
                     }
                 }
 
@@ -291,6 +309,25 @@ class CalendarService(
 
     private fun Instant.toLocalDate(): LocalDate {
         return this.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    }
+
+    private fun scheduleNotificationIfEnabled(
+        repository: ArrInstanceRepository,
+        title: String,
+        time: Instant,
+        id: Int
+    ) {
+        if (repository.instance.type.supportsNotifications && repository.instance.notificationsEnabled) {
+            if (time > Clock.System.now()) {
+                notificationManager.scheduleNotification(
+                    id = id,
+                    title = mokoStrings.getString(MR.strings.new_release),
+                    message = title,
+                    scheduledTime = time,
+                    instanceName = repository.instance.label
+                )
+            }
+        }
     }
 
     fun reset() {
