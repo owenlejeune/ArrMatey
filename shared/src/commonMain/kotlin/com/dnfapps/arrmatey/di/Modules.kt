@@ -93,6 +93,8 @@ import com.dnfapps.arrmatey.instances.usecase.UpdateCalendarFilterPreferenceUseC
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
 import com.dnfapps.arrmatey.logging.FileSink
+import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
+import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
@@ -238,6 +240,8 @@ val useCaseModule = module {
     factory { AddCustomWebpageUseCase(get()) }
     factory { UpdateCustomWebpageUseCase(get()) }
     factory { DeleteCustomWebpageUseCase(get()) }
+    factory { NotificationCleanupUseCase(get()) }
+    factory { ScheduleNotificationUseCase(get(), get()) }
 }
 
 val viewModelModule = module {
