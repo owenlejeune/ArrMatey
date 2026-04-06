@@ -144,7 +144,8 @@ fun AddInstanceScreen(
                 onLocalNetworkEnabledChanged = { viewModel.setLocalNetworkEnabled(it) },
                 onLocalNetworkUrlChanged = { viewModel.setLocalNetworkUrl(it) },
                 onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsid(it) },
-                onTestLocalConnection = { viewModel.testLocalConnection(selectedInstanceType) }
+                onTestLocalConnection = { viewModel.testLocalConnection(selectedInstanceType) },
+                onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() }
             )
         }
     }

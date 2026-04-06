@@ -87,6 +87,12 @@ class AddInstanceViewModel(
         _uiState.update { it.copy(localNetworkSsid = ssid) }
     }
 
+    fun toggleNotificationsEnabled() {
+        _uiState.update {
+            it.copy(notificationsEnabled = !it.notificationsEnabled)
+        }
+    }
+
     fun reset() {
         _uiState.value = AddInstanceUiState(
             infoCardMaps = _uiState.value.infoCardMaps

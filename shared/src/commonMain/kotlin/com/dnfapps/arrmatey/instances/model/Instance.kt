@@ -26,6 +26,7 @@ data class Instance(
     val slowInstance: Boolean = false,
     val customTimeout: Long? = null,
     val selected: Boolean = false,
+    val notificationsEnabled: Boolean = false,
     val headers: List<InstanceHeader> = emptyList(),
 
     val localNetworkEnabled: Boolean = false,
@@ -76,7 +77,8 @@ enum class InstanceType(
     val apiBase: String,
     val testEndpoint: String,
     val includeTopLevelAutomaticSearchOption: Boolean,
-    val aspectRatio: AspectRatio
+    val aspectRatio: AspectRatio,
+    val supportsNotifications: Boolean
 ) {
     Sonarr(
         resource = MR.strings.sonarr_description,
@@ -89,7 +91,8 @@ enum class InstanceType(
         apiBase = "api/v3",
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = true,
-        aspectRatio = AspectRatio.Poster
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = true
     ),
     Radarr(
         resource = MR.strings.radarr_description,
@@ -102,7 +105,8 @@ enum class InstanceType(
         apiBase = "api/v3",
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = false,
-        aspectRatio = AspectRatio.Poster
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = true
     ),
     Lidarr(
         resource = MR.strings.lidarr_description,
@@ -115,7 +119,8 @@ enum class InstanceType(
         apiBase = "api/v1",
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = true,
-        aspectRatio = AspectRatio.Cover
+        aspectRatio = AspectRatio.Cover,
+        supportsNotifications = true
     ),
     Prowlarr(
         resource = MR.strings.prowlarr_description,
@@ -128,7 +133,8 @@ enum class InstanceType(
         apiBase = "api/v1",
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = false,
-        aspectRatio = AspectRatio.Cover
+        aspectRatio = AspectRatio.Cover,
+        supportsNotifications = false
     )
 //    Seerr(
 //        resource = MR.strings.seerr_description,

@@ -23,7 +23,8 @@ data class AddInstanceUiState(
     val localNetworkEnabled: Boolean = false,
     val localNetworkUrl: String = "",
     val localNetworkSsid: String = "",
-    val localNetworkUrlError: Boolean = false
+    val localNetworkUrlError: Boolean = false,
+    val notificationsEnabled: Boolean = false
 ) {
     constructor(): this("") // helper for iOS
 }

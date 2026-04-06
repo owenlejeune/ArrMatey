@@ -27,6 +27,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Label
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -75,7 +76,8 @@ fun ArrConfigurationScreen(
     onLocalNetworkEnabledChanged: (Boolean) -> Unit,
     onLocalNetworkUrlChanged: (String) -> Unit,
     onLocalNetworkSsidChanged: (String) -> Unit,
-    onTestLocalConnection: () -> Unit
+    onTestLocalConnection: () -> Unit,
+    onToggleNotificationsEnabled: () -> Unit
 ) {
     val apiEndpoint = uiState.apiEndpoint
     val apiKey = uiState.apiKey
@@ -144,6 +146,13 @@ fun ArrConfigurationScreen(
             modifier = Modifier.fillMaxWidth(),
             placeholder = mokoString(MR.strings.api_key_placeholder),
             singleLine = true
+        )
+
+        LabelledSwitch(
+            label = "Enabled notifications",
+            sublabel = "Receive notifications for new releases",
+            checked = uiState.notificationsEnabled,
+            onCheckedChange = { onToggleNotificationsEnabled() }
         )
 
         TestConnectionSection(
