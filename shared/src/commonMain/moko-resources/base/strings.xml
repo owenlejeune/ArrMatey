@@ -433,6 +433,8 @@
 
     <!-- Notifications -->
     <string name="new_release">New Release</string>
+    <string name="new_episode">New Episode</string>
+    <string name="new_album">New Album</string>
     <string name="instance_new_release">New Release - %1$s</string>
     <string name="instance_notification_channel">%1$s Release Notifications</string>
     <string name="enable_notifications">Enable notifications</string>

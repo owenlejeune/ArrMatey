@@ -14,7 +14,7 @@ val iosDbModule = module {
 }
 
 val iosNotificationModule = module {
-    single { NotificationManager() }
+    single { NotificationManager(get()) }
 }
 
 actual fun platformModules(): List<Module> = listOf(iosDbModule, iosNotificationModule)

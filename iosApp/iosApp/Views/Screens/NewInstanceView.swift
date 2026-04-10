@@ -61,6 +61,7 @@ struct NewInstanceView: View {
             onLocalNetworkUrlChanged: { viewModel.setLocalNetworkUrl($0) },
             onLocalNetworkSsidChanged: { viewModel.setLocalNetworkSsid($0) },
             onTestLocalConnection: { viewModel.testLocalConnection(instanceType) },
+            onToggleNotificationsEnabled: { viewModel.toggleNotificationsEnabled() },
             onDismissInfoCard: { viewModel.dismissInfoCard($0) },
             showInfoCard: showInfoCard,
             showInstancePicker: true,

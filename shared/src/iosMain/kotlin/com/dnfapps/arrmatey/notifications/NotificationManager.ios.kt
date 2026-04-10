@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.notifications
 
+import dev.shivathapaa.logger.api.Logger
 import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNTimeIntervalNotificationTrigger
@@ -7,7 +8,9 @@ import platform.UserNotifications.UNUserNotificationCenter
 import kotlin.time.Instant
 import kotlin.time.Clock
 
-actual class NotificationManager {
+actual class NotificationManager(
+    private val logger: Logger
+) {
 
     private val notificationCenter = UNUserNotificationCenter.currentNotificationCenter()
 
@@ -27,6 +30,8 @@ actual class NotificationManager {
         val now = Clock.System.now()
         val timeInterval = (scheduledTime - now).inWholeSeconds.toDouble()
 
+        logger.info { "iOS notification time interval - $timeInterval" }
+
         if (timeInterval <= 0) return
 
         val trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeInterval(timeInterval, false)
@@ -34,7 +39,9 @@ actual class NotificationManager {
 
         notificationCenter.addNotificationRequest(request) { error ->
             if (error != null) {
-                println("Error scheduling notification: ${error.localizedDescription}")
+                logger.error { "Error scheduling notification: ${error.localizedDescription}" }
+            } else {
+                logger.info { "Notification set successfully" }
             }
         }
     }

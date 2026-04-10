@@ -11,6 +11,8 @@ import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
 import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
+import com.dnfapps.arrmatey.utils.format
+import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
@@ -33,7 +36,8 @@ import kotlin.time.Instant
 class CalendarService(
     private val instanceManager: InstanceManager,
     private val notificationCleanupUseCase: NotificationCleanupUseCase,
-    private val scheduleNotificationUseCase: ScheduleNotificationUseCase
+    private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
+    private val logger: Logger
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -133,12 +137,13 @@ class CalendarService(
                     )
 
                     fetchedMovies.forEach { movie ->
-                        movie.digitalRelease?.let { instant ->
+                        movie.closestFutureRelease?.let { (releaseType, instant) ->
                             scheduleNotificationUseCase(
                                 instance = repository.instance,
                                 message = movie.title ?: "Unknown Movie",
                                 scheduledTime = instant,
-                                notificationId = movie.tmdbId.toInt()
+                                notificationId = movie.tmdbId.toInt(),
+                                releaseType = releaseType
                             )
                         }
                     }
@@ -206,7 +211,7 @@ class CalendarService(
                         episode.airDateUtc?.let { instant ->
                             scheduleNotificationUseCase(
                                 instance = repository.instance,
-                                message = "${episode.series?.title ?: "Unknown Series"} - S${episode.seasonNumber}E${episode.episodeNumber}",
+                                message = "${episode.series?.title ?: "Unknown Series"} - S${episode.seasonNumber}E${episode.episodeNumber} - ${instant.format("HH:mm")}",
                                 scheduledTime = instant,
                                 notificationId = episode.tvdbId?.toInt() ?: episode.id.toInt()
                             )

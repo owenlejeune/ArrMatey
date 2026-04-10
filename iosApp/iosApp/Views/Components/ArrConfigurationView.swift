@@ -7,6 +7,7 @@
 
 import Shared
 import SwiftUI
+import UserNotifications
 
 struct ArrConfigurationView: View {
     let uiState: AddInstanceUiState
@@ -21,6 +22,7 @@ struct ArrConfigurationView: View {
     let onLocalNetworkUrlChanged: (String) -> Void
     let onLocalNetworkSsidChanged: (String) -> Void
     let onTestLocalConnection: () -> Void
+    let onToggleNotificationsEnabled: () -> Void
     let onDismissInfoCard: (InstanceType) -> Void
     let showInfoCard: Bool
     let showInstancePicker: Bool
@@ -64,6 +66,7 @@ struct ArrConfigurationView: View {
             
             instanceSection
             testSection
+            notificationSection
             localNetworkArea
             slowInstanceSection
             
@@ -243,6 +246,35 @@ struct ArrConfigurationView: View {
                     Text(testResult.boolValue ? MR.strings().success.localized() : MR.strings().failure.localized())
                         .foregroundColor(testResult.boolValue ? .green : .red)
                         .multilineTextAlignment(.trailing)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var notificationSection: some View {
+        Section {
+            Toggle(isOn: Binding(
+                get: { uiState.notificationsEnabled },
+                set: { newValue in
+                    if newValue {
+                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                            if granted {
+                                DispatchQueue.main.async {
+                                    onToggleNotificationsEnabled()
+                                }
+                            }
+                        }
+                    } else {
+                        onToggleNotificationsEnabled()
+                    }
+                }
+            )) {
+                VStack(alignment: .leading) {
+                    Text(MR.strings().enable_notifications.localized())
+                    Text(MR.strings().enable_notifications_description.localized())
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -439,4 +471,3 @@ struct ArrConfigurationView: View {
         }
     }
 }
-

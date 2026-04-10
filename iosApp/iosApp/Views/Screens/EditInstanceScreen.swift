@@ -72,6 +72,7 @@ struct EditInstanceScreen: View {
             onLocalNetworkUrlChanged: { viewModel.setLocalNetworkUrl($0) },
             onLocalNetworkSsidChanged: { viewModel.setLocalNetworkSsid($0) },
             onTestLocalConnection: { viewModel.testLocalConnection() },
+            onToggleNotificationsEnabled: { viewModel.toggleNotificationsEnabled() },
             onDismissInfoCard: { _ in },
             showInfoCard: false,
             showInstancePicker: false,

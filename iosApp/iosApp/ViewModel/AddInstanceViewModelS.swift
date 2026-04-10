@@ -66,6 +66,10 @@ class AddInstanceViewModelS: ObservableObject {
         viewModel.setLocalNetworkSsid(ssid: ssid)
     }
     
+    func toggleNotificationsEnabled() {
+        viewModel.toggleNotificationsEnabled()
+    }
+    
     func reset() {
         viewModel.reset()
     }
