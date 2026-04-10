@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.WifiFind
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,7 +26,6 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Label
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -52,6 +50,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.state.AddInstanceUiState
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.permissions.rememberLocationPermissionHandler
+import com.dnfapps.arrmatey.permissions.rememberNotificationPermissionHandler
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
@@ -105,6 +104,10 @@ fun ArrConfigurationScreen(
             ?.contains(ConflictField.InstanceUrl) == true
     }
 
+    val notificationPermissionHandler = rememberNotificationPermissionHandler(
+        onGranted = { onToggleNotificationsEnabled() }
+    )
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -148,18 +151,24 @@ fun ArrConfigurationScreen(
             singleLine = true
         )
 
-        LabelledSwitch(
-            label = "Enabled notifications",
-            sublabel = "Receive notifications for new releases",
-            checked = uiState.notificationsEnabled,
-            onCheckedChange = { onToggleNotificationsEnabled() }
-        )
-
         TestConnectionSection(
             isTesting = isTesting,
             testButtonEnabled = !isTesting && apiEndpoint.isNotBlank() && apiKey.isNotBlank(),
             testResult = testResult,
             onTestConnection = onTestConnection
+        )
+
+        LabelledSwitch(
+            label = mokoString(MR.strings.enable_notifications),
+            sublabel = mokoString(MR.strings.enable_notifications_description),
+            checked = uiState.notificationsEnabled,
+            onCheckedChange = {
+                if (!uiState.notificationsEnabled && it) {
+                    notificationPermissionHandler.requestPermission()
+                } else {
+                    onToggleNotificationsEnabled()
+                }
+            }
         )
 
         LocalNetworkArea(
