@@ -40,6 +40,6 @@ fun getRoomDatabase(
     return builder
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
-        .addMigrations(migrations = migrations.toTypedArray())
+        .addMigrations(*migrations)
         .build()
 }
