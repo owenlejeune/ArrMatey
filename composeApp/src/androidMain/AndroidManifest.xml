@@ -14,6 +14,7 @@
 
     <application
         android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:name=".ArrMateyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
