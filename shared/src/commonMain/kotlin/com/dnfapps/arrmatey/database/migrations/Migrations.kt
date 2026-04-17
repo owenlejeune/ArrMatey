@@ -93,6 +93,17 @@ private val MIGRATION_6_7 = object: Migration(6, 7) {
     }
 }
 
+private val MIGRATION_7_8 = object: Migration(7, 8) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE instances ADD COLUMN localNetworkSsids TEXT NOT NULL DEFAULT '[]'")
+
+        // Migrate existing SSID to the new list format
+        connection.execSQL("UPDATE instances SET localNetworkSsids = '[\"' || localNetworkSsid || '\"]' WHERE localNetworkSsid IS NOT NULL AND localNetworkSsid != ''")
+
+        connection.execSQL("ALTER TABLE instances DROP COLUMN localNetworkSsid")
+    }
+}
+
 val migrations = arrayOf(
-    MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7
+    MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8
 )

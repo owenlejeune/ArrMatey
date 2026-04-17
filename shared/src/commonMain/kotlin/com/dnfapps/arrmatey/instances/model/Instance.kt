@@ -30,20 +30,20 @@ data class Instance(
     val headers: List<InstanceHeader> = emptyList(),
 
     val localNetworkEnabled: Boolean = false,
-    val localNetworkSsid: String? = null,
+    val localNetworkSsids: List<String> = emptyList(),
     val localNetworkEndpoint: String? = null
 ) {
 
     fun getEffectiveBaseUrl(): String {
         if (!localNetworkEnabled ||
-            localNetworkSsid.isNullOrBlank() ||
+            localNetworkSsids.isEmpty() ||
             localNetworkEndpoint.isNullOrBlank()
-            ) {
+        ) {
             return url
         }
         return try {
             val currentSsid = getNetworkUtils().getCurrentWifiSsid()
-            if (currentSsid != null && currentSsid.equals(localNetworkSsid, ignoreCase = true)) {
+            if (currentSsid != null && localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }) {
                 localNetworkEndpoint
             } else {
                 url
@@ -59,7 +59,7 @@ data class Instance(
             localNetworkEnabled &&
                     !localNetworkEndpoint.isNullOrBlank() &&
                     currentSsid != null &&
-                    currentSsid.equals(localNetworkSsid, ignoreCase = true)
+                    localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
         } catch (e: Exception) {
             false
         }

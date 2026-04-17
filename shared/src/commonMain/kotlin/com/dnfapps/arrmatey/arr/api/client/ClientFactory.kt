@@ -64,16 +64,8 @@ fun createInstanceClient(
         instance?.let { instance ->
             defaultRequest {
                 header(HEADER_X_API_KEY, instance.apiKey)
-                val isLocal = instance.isUsingLocalNetwork()
                 instance.headers.forEach { header ->
-                    val shouldSend = when {
-                        header.sendOnlyOnLocal -> isLocal
-                        header.sendOnlyOnRemote -> !isLocal
-                        else -> true
-                    }
-                    if (shouldSend) {
-                        header(header.key, header.value)
-                    }
+                    header(header.key, header.value)
                 }
             }
         }

@@ -145,7 +145,7 @@ fun EditInstanceScreen(
                     onTestConnection = { viewModel.testConnection() },
                     onLocalNetworkEnabledChanged = { viewModel.setLocalNetworkEnabled(it) },
                     onLocalNetworkUrlChanged = { viewModel.setLocalNetworkUrl(it) },
-                    onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsid(it) },
+                    onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsids(it) },
                     onTestLocalConnection = { viewModel.testLocalConnection() },
                     onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() }
                 )

@@ -83,8 +83,8 @@ class AddInstanceViewModel(
         _uiState.update { it.copy(localNetworkUrl = url) }
     }
 
-    fun setLocalNetworkSsid(ssid: String) {
-        _uiState.update { it.copy(localNetworkSsid = ssid) }
+    fun setLocalNetworkSsid(ssids: List<String>) {
+        _uiState.update { it.copy(localNetworkSsids = ssids) }
     }
 
     fun toggleNotificationsEnabled() {
@@ -166,7 +166,7 @@ class AddInstanceViewModel(
             headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
             localNetworkEnabled = s.localNetworkEnabled,
             localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
-            localNetworkSsid = s.localNetworkSsid.takeIf { s.localNetworkEnabled && it.isNotBlank() }
+            localNetworkSsids = s.localNetworkSsids.filter { it.isNotBlank() }
         )
 
         viewModelScope.launch {

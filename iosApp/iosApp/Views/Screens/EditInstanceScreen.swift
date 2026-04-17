@@ -70,7 +70,7 @@ struct EditInstanceScreen: View {
             onTestConnection: { viewModel.testConnection() },
             onLocalNetworkEnabledChanged: { viewModel.setLocalNetworkEnabled($0) },
             onLocalNetworkUrlChanged: { viewModel.setLocalNetworkUrl($0) },
-            onLocalNetworkSsidChanged: { viewModel.setLocalNetworkSsid($0) },
+            onLocalNetworkSsidsChanged: { viewModel.setLocalNetworkSsid($0) },
             onTestLocalConnection: { viewModel.testLocalConnection() },
             onToggleNotificationsEnabled: { viewModel.toggleNotificationsEnabled() },
             onDismissInfoCard: { _ in },

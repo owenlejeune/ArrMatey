@@ -62,8 +62,12 @@ class AddInstanceViewModelS: ObservableObject {
         viewModel.setLocalNetworkUrl(url: url)
     }
     
-    func setLocalNetworkSsid(_ ssid: String) {
-        viewModel.setLocalNetworkSsid(ssid: ssid)
+    func setLocalNetworkSsids(_ ssids: [String]) {
+        viewModel.setLocalNetworkSsid(ssids: ssids)
+    }
+
+    func setAllowSelfSignedCerts(_ allow: Boolean) {
+        viewModel.setAllowSelfSignedCerts(allow: allow)
     }
     
     func toggleNotificationsEnabled() {

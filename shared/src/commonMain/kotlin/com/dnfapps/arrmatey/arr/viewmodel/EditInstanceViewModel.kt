@@ -51,7 +51,7 @@ class EditInstanceViewModel(
                         headers = instance.headers,
                         localNetworkEnabled = instance.localNetworkEnabled,
                         localNetworkUrl = instance.localNetworkEndpoint ?: "",
-                        localNetworkSsid = instance.localNetworkSsid ?: "",
+                        localNetworkSsids = instance.localNetworkSsids,
                         notificationsEnabled = instance.notificationsEnabled
                     )
                 }
@@ -107,8 +107,8 @@ class EditInstanceViewModel(
         _uiState.update { it.copy(localNetworkUrl = url) }
     }
 
-    fun setLocalNetworkSsid(ssid: String) {
-        _uiState.update { it.copy(localNetworkSsid = ssid) }
+    fun setLocalNetworkSsids(ssids: List<String>) {
+        _uiState.update { it.copy(localNetworkSsids = ssids) }
     }
 
     fun toggleNotificationsEnabled() {
@@ -191,7 +191,7 @@ class EditInstanceViewModel(
             headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
             localNetworkEnabled = s.localNetworkEnabled,
             localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
-            localNetworkSsid = s.localNetworkSsid.takeIf { s.localNetworkEnabled && it.isNotBlank() },
+            localNetworkSsids = s.localNetworkSsids.filter { it.isNotBlank() },
             notificationsEnabled = s.notificationsEnabled
         )
 

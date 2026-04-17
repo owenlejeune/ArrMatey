@@ -20,8 +20,9 @@ struct ArrConfigurationView: View {
     let onTestConnection: () -> Void
     let onLocalNetworkEnabledChanged: (Bool) -> Void
     let onLocalNetworkUrlChanged: (String) -> Void
-    let onLocalNetworkSsidChanged: (String) -> Void
+    let onLocalNetworkSsidsChanged: ([String]) -> Void
     let onTestLocalConnection: () -> Void
+    let onAllowSelfSignedCertsChanged: (Bool) -> Void
     let onToggleNotificationsEnabled: () -> Void
     let onDismissInfoCard: (InstanceType) -> Void
     let showInfoCard: Bool
@@ -69,7 +70,8 @@ struct ArrConfigurationView: View {
             notificationSection
             localNetworkArea
             slowInstanceSection
-            
+            headersSection
+            sslSection
         }
         .onChange(of: instanceType, initial: true) { _, newValue in
             instanceLabel = newValue.name
@@ -403,24 +405,33 @@ struct ArrConfigurationView: View {
                             
                     VStack {
                         HStack(spacing: 24) {
-                                Text(MR.strings().wifi_network_name.localized()).layoutPriority(2)
-                            TextField("MyHomeWiFi",
-                                      text: Binding(get: { uiState.localNetworkSsid }, set: onLocalNetworkSsidChanged))
+                            Text(MR.strings().wifi_network_name.localized()).layoutPriority(2)
+                            TextField("MyHomeWiFi, MyGuestWiFi",
+                                      text: Binding(
+                                        get: { uiState.localNetworkSsids.joined(separator: ", ") },
+                                        set: { newValue in
+                                            let ssids = newValue.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                                            onLocalNetworkSsidsChanged(ssids)
+                                        }
+                                      ))
                             .multilineTextAlignment(.trailing)
                         }
-                        
                     }
                             
                     Button(action: {
                         if let ssid = NetworkUtilsKt.getNetworkUtils().getCurrentWifiSsid() {
-                            onLocalNetworkSsidChanged(ssid)
+                            var currentSsids = uiState.localNetworkSsids
+                            if !currentSsids.contains(ssid) {
+                                currentSsids.append(ssid)
+                                onLocalNetworkSsidsChanged(currentSsids)
+                            }
                         }
                     }) {
                         Label(MR.strings().use_current_network.localized(), systemImage: "wifi")
                     }
                             
                     HStack {
-                        Button(action: onTestConnection) {
+                        Button(action: onTestLocalConnection) {
                             if uiState.localTesting {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle())
@@ -428,7 +439,7 @@ struct ArrConfigurationView: View {
                                 Text(MR.strings().test.localized())
                             }
                         }
-                        .disabled(uiState.localTesting || uiState.localNetworkUrl.isEmpty || uiState.localNetworkSsid.isEmpty)
+                        .disabled(uiState.localTesting || uiState.localNetworkUrl.isEmpty || uiState.localNetworkSsids.isEmpty)
                         
                         Spacer()
                         
@@ -456,6 +467,23 @@ struct ArrConfigurationView: View {
             }
         } message: {
             Text(MR.strings().location_rationale_description_ios.localized())
+        }
+    }
+    
+    @ViewBuilder
+    private var sslSection: some View {
+        Section {
+            Toggle(isOn: Binding(
+                get: { uiState.allowSelfSignedCerts },
+                set: { onAllowSelfSignedCertsChanged($0) }
+            )) {
+                VStack(alignment: .leading) {
+                    Text(MR.strings().allow_self_signed_certs.localized())
+                    Text(MR.strings().allow_self_signed_certs_description.localized())
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
     }
     

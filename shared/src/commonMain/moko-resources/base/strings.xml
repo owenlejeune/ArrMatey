@@ -390,7 +390,7 @@
     <string name="local_network_description">Use a different URL when connected to your home WiFi</string>
     <string name="local_network_url">Local Network URL</string>
     <string name="wifi_network_name">WiFi Network Name (SSID)</string>
-    <string name="wifi_ssid_description">The name of your WiFi network</string>
+    <string name="wifi_ssid_description">The name of your WiFi network. If you have multiple SSIDs, separate them with commas</string>
     <string name="current_network">Currently connected to: %s</string>
     <string name="test_local_connection">Test Local Connection</string>
 

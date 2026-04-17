@@ -64,8 +64,8 @@ class EditInstanceViewModelS: ObservableObject {
         viewModel.setLocalNetworkUrl(url: url)
     }
     
-    func setLocalNetworkSsid(_ ssid: String) {
-        viewModel.setLocalNetworkSsid(ssid: ssid)
+    func setLocalNetworkSsids(_ ssids: [String]) {
+        viewModel.setLocalNetworkSsids(ssids: ssids)
     }
     
     func toggleNotificationsEnabled() {
