@@ -2,7 +2,9 @@ package com.dnfapps.arrmatey.arr.api.client
 
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
+import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.utils.getNetworkUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.cookies.HttpCookies
@@ -65,7 +67,18 @@ fun createInstanceClient(
             defaultRequest {
                 header(HEADER_X_API_KEY, instance.apiKey)
                 instance.headers.forEach { header ->
-                    header(header.key, header.value)
+                    val shouldSend = when (header.restrictionType) {
+                        HeaderRestrictionType.Always -> true
+                        HeaderRestrictionType.RemoteOnly -> !instance.isUsingLocalNetwork()
+                        HeaderRestrictionType.SpecificSsids -> {
+                            val currentSsid = getNetworkUtils().getCurrentWifiSsid()
+                            currentSsid != null && header.restrictedSsids.contains(currentSsid)
+                        }
+                    }
+
+                    if (shouldSend) {
+                        header(header.key, header.value)
+                    }
                 }
             }
         }

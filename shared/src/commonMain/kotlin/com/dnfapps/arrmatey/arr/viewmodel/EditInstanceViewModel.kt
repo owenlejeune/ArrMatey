@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.database.dao.InsertResult
+import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.state.AddInstanceUiState
@@ -61,7 +62,10 @@ class EditInstanceViewModel(
 
     fun setApiEndpoint(endpoint: String) {
         _uiState.update {
-            it.copy(apiEndpoint = endpoint)
+            it.copy(
+                apiEndpoint = endpoint,
+                testResult = null
+            ).validate()
         }
     }
 
@@ -70,45 +74,41 @@ class EditInstanceViewModel(
             it.copy(
                 apiKey = value,
                 testing = false,
-                testResult = null,
-                saveButtonEnabled = false
-            )
+                testResult = null
+            ).validate()
         }
     }
 
     fun setIsSlowInstance(value: Boolean) {
-        _uiState.update { it.copy(isSlowInstance = value) }
+        _uiState.update { it.copy(isSlowInstance = value).validate() }
     }
 
     fun setCustomTimeout(value: Long?) {
-        _uiState.update { it.copy(customTimeout = value?.takeIf { v -> v > 0L } ) }
+        _uiState.update { it.copy(customTimeout = value?.takeIf { v -> v > 0L } ).validate() }
     }
 
     fun setInstanceLabel(value: String) {
         _uiState.update {
-            it.copy(
-                instanceLabel = value,
-                saveButtonEnabled = it.saveButtonEnabled && value.isNotEmpty()
-            )
+            it.copy(instanceLabel = value).validate()
         }
     }
 
     fun updateHeaders(headers: List<InstanceHeader>) {
         _uiState.update {
-            it.copy(headers = headers)
+            it.copy(headers = headers).validate()
         }
     }
 
     fun setLocalNetworkEnabled(enabled: Boolean) {
-        _uiState.update { it.copy(localNetworkEnabled = enabled) }
+        _uiState.update { it.copy(localNetworkEnabled = enabled).validate() }
     }
 
     fun setLocalNetworkUrl(url: String) {
-        _uiState.update { it.copy(localNetworkUrl = url) }
+        _uiState.update { it.copy(localNetworkUrl = url).validate() }
     }
 
     fun setLocalNetworkSsids(ssids: List<String>) {
-        _uiState.update { it.copy(localNetworkSsids = ssids) }
+        _uiState.update { it.copy(localNetworkSsids = ssids).validate() }
     }
 
     fun toggleNotificationsEnabled() {
@@ -139,12 +139,8 @@ class EditInstanceViewModel(
             _uiState.update {
                 it.copy(
                     testing = false,
-                    testResult = success,
-                    saveButtonEnabled = success &&
-                            it.apiEndpoint.isNotEmpty() &&
-                            it.apiKey.isNotEmpty() &&
-                            it.instanceLabel.isNotEmpty()
-                )
+                    testResult = success
+                ).validate()
             }
         }
     }
@@ -213,5 +209,15 @@ class EditInstanceViewModel(
             }
             deleteInstanceUseCase(instance)
         }
+    }
+
+    private fun AddInstanceUiState.validate(): AddInstanceUiState {
+        val isValid = testResult == true &&
+                apiEndpoint.isNotEmpty() &&
+                apiKey.isNotEmpty() &&
+                instanceLabel.isNotEmpty() &&
+                (!localNetworkEnabled || (localNetworkUrl.isValidUrl() && localNetworkSsids.isNotEmpty())) &&
+                headers.all { it.restrictionType != HeaderRestrictionType.SpecificSsids || it.restrictedSsids.isNotEmpty() }
+        return copy(saveButtonEnabled = isValid)
     }
 }

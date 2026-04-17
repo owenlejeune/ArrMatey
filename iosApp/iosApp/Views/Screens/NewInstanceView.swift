@@ -59,7 +59,7 @@ struct NewInstanceView: View {
             onTestConnection: { viewModel.testConnection(instanceType) },
             onLocalNetworkEnabledChanged: { viewModel.setLocalNetworkEnabled($0) },
             onLocalNetworkUrlChanged: { viewModel.setLocalNetworkUrl($0) },
-            onLocalNetworkSsidsChanged: { viewModel.setLocalNetworkSsid($0) },
+            onLocalNetworkSsidsChanged: { viewModel.setLocalNetworkSsids($0) },
             onTestLocalConnection: { viewModel.testLocalConnection(instanceType) },
             onToggleNotificationsEnabled: { viewModel.toggleNotificationsEnabled() },
             onDismissInfoCard: { viewModel.dismissInfoCard($0) },

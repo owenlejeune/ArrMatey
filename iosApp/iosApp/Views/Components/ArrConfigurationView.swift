@@ -22,7 +22,6 @@ struct ArrConfigurationView: View {
     let onLocalNetworkUrlChanged: (String) -> Void
     let onLocalNetworkSsidsChanged: ([String]) -> Void
     let onTestLocalConnection: () -> Void
-    let onAllowSelfSignedCertsChanged: (Bool) -> Void
     let onToggleNotificationsEnabled: () -> Void
     let onDismissInfoCard: (InstanceType) -> Void
     let showInfoCard: Bool
@@ -66,12 +65,11 @@ struct ArrConfigurationView: View {
             }
             
             instanceSection
-            testSection
             notificationSection
             localNetworkArea
             slowInstanceSection
             headersSection
-            sslSection
+            testSection
         }
         .onChange(of: instanceType, initial: true) { _, newValue in
             instanceLabel = newValue.name
@@ -331,7 +329,9 @@ struct ArrConfigurationView: View {
                             headers[index] = newValue
                             onHeadersChanged(headers)
                         }
-                    )
+                    ),
+                    availableSsids: uiState.localNetworkSsids,
+                    localNetworkConfigured: uiState.localNetworkConfigured
                 )
                 .swipeActions {
                     Button(MR.strings().delete.localized()) {
@@ -467,23 +467,6 @@ struct ArrConfigurationView: View {
             }
         } message: {
             Text(MR.strings().location_rationale_description_ios.localized())
-        }
-    }
-    
-    @ViewBuilder
-    private var sslSection: some View {
-        Section {
-            Toggle(isOn: Binding(
-                get: { uiState.allowSelfSignedCerts },
-                set: { onAllowSelfSignedCertsChanged($0) }
-            )) {
-                VStack(alignment: .leading) {
-                    Text(MR.strings().allow_self_signed_certs.localized())
-                    Text(MR.strings().allow_self_signed_certs_description.localized())
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
         }
     }
     

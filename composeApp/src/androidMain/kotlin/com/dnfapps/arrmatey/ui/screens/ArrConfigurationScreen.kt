@@ -2,9 +2,14 @@ package com.dnfapps.arrmatey.ui.screens
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,25 +17,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material.icons.filled.WifiFind
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,6 +57,7 @@ import com.dnfapps.arrmatey.arr.api.client.DEFAULT_SLOW_TIMEOUT
 import com.dnfapps.arrmatey.database.dao.ConflictField
 import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.entensions.openAppSettings
+import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.state.AddInstanceUiState
@@ -153,13 +164,6 @@ fun ArrConfigurationScreen(
             singleLine = true
         )
 
-        TestConnectionSection(
-            isTesting = isTesting,
-            testButtonEnabled = !isTesting && apiEndpoint.isNotBlank() && apiKey.isNotBlank(),
-            testResult = testResult,
-            onTestConnection = onTestConnection
-        )
-
         Section {
             LabelledSwitch(
                 label = mokoString(MR.strings.enable_notifications),
@@ -188,13 +192,26 @@ fun ArrConfigurationScreen(
 
         CustomTimeoutArea(isSlowInstance, customTimeout, onIsSlowInstanceChanged, onCustomTimeoutChanged)
 
-        CustomHeaderSection(uiState, headers, onHeadersChanged)
+        CustomHeaderSection(
+            localNetworkSsids = uiState.localNetworkSsids,
+            localNetworkConfigured = uiState.localNetworkConfigured,
+            headers = headers,
+            onHeadersChanged = onHeadersChanged
+        )
+
+        TestConnectionSection(
+            isTesting = isTesting,
+            testButtonEnabled = !isTesting && apiEndpoint.isNotBlank() && apiKey.isNotBlank(),
+            testResult = testResult,
+            onTestConnection = onTestConnection
+        )
     }
 }
 
 @Composable
 private fun HeadersEditor(
-    uiState: AddInstanceUiState,
+    localNetworkConfigured: Boolean,
+    localNetworkSsids: List<String>,
     headers: List<InstanceHeader>,
     onHeadersChanged: (List<InstanceHeader>) -> Unit,
     modifier: Modifier = Modifier
@@ -207,7 +224,8 @@ private fun HeadersEditor(
     ) {
         headersList.forEachIndexed { index, header ->
             HeaderItem(
-                uiState = uiState,
+                localNetworkSsids = localNetworkSsids,
+                localNetworkConfigured = localNetworkConfigured,
                 header = header,
                 onHeaderChanged = { newHeader ->
                     val updated = headersList.toMutableList().apply {
@@ -224,6 +242,7 @@ private fun HeadersEditor(
                     onHeadersChanged(updated)
                 }
             )
+            HorizontalDivider()
         }
 
         OutlinedButton(
@@ -241,9 +260,11 @@ private fun HeadersEditor(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun HeaderItem(
-    uiState: AddInstanceUiState,
+    localNetworkConfigured: Boolean,
+    localNetworkSsids: List<String>,
     header: InstanceHeader,
     onHeaderChanged: (InstanceHeader) -> Unit,
     onDelete: () -> Unit
@@ -287,7 +308,100 @@ private fun HeaderItem(
             }
         }
 
+        if (localNetworkConfigured) {
+            var expanded by remember { mutableStateOf(false) }
+            val iconRotation by animateFloatAsState(
+                targetValue = if (expanded) 180f else 0f,
+                animationSpec = tween(durationMillis = 200),
+                label = "iconRotation"
+            )
 
+            Box {
+                OutlinedButton(
+                    onClick = { expanded = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    Text(
+                        text = when (header.restrictionType) {
+                            HeaderRestrictionType.Always -> "Always"
+                            HeaderRestrictionType.RemoteOnly -> "Remote Only"
+                            HeaderRestrictionType.SpecificSsids -> {
+                                if (header.restrictedSsids.isEmpty()) "Select SSIDs"
+                                else header.restrictedSsids.joinToString(", ")
+                            }
+                        }
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Icon(
+                        imageVector = Icons.Default.ExpandCircleDown,
+                        contentDescription = null,
+                        modifier = Modifier.rotate(iconRotation)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    HeaderRestrictionType.entries.forEach { type ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = when (type) {
+                                        HeaderRestrictionType.Always -> "Always"
+                                        HeaderRestrictionType.RemoteOnly -> "Remote Only"
+                                        HeaderRestrictionType.SpecificSsids -> "Specific SSIDs"
+                                    }
+                                )
+                            },
+                            onClick = {
+                                onHeaderChanged(header.copy(restrictionType = type))
+                                if (type != HeaderRestrictionType.SpecificSsids) {
+                                    expanded = false
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            if (header.restrictionType == HeaderRestrictionType.SpecificSsids) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    localNetworkSsids.forEach { ssid ->
+                        val selected = header.restrictedSsids.contains(ssid) || localNetworkSsids.size == 1
+                        ElevatedFilterChip(
+                            selected = selected,
+                            onClick = {
+                                if (localNetworkSsids.size > 1) {
+                                    val newList = if (selected) {
+                                        header.restrictedSsids - ssid
+                                    } else {
+                                        header.restrictedSsids + ssid
+                                    }
+                                    onHeaderChanged(header.copy(restrictedSsids = newList))
+                                }
+                            },
+                            label = { Text(ssid) },
+                            leadingIcon = if (selected) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Filled.Done,
+                                        contentDescription = "Done icon",
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                    )
+                                }
+                            } else {
+                                null
+                            },
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -387,9 +501,10 @@ fun CustomTimeoutArea(
 
 @Composable
 fun CustomHeaderSection(
-    uiState: AddInstanceUiState,
     headers: List<InstanceHeader>,
-    onHeadersChanged: (List<InstanceHeader>) -> Unit
+    onHeadersChanged: (List<InstanceHeader>) -> Unit,
+    localNetworkSsids: List<String> = emptyList(),
+    localNetworkConfigured: Boolean = false,
 ) {
     Card(
         shape = MaterialTheme.shapes.large,
@@ -418,6 +533,8 @@ fun CustomHeaderSection(
             }
 
             HeadersEditor(
+                localNetworkSsids = localNetworkSsids,
+                localNetworkConfigured = localNetworkConfigured,
                 headers = headers,
                 onHeadersChanged = onHeadersChanged
             )
@@ -545,7 +662,7 @@ fun LocalNetworkArea(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        FilledTonalButton(
+                        Button(
                             onClick = onTestLocalConnection,
                             enabled = !uiState.localTesting &&
                                     uiState.localNetworkUrl.isNotBlank() &&

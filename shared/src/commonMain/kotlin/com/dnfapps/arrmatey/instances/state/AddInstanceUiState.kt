@@ -27,4 +27,7 @@ data class AddInstanceUiState(
     val notificationsEnabled: Boolean = false
 ) {
     constructor(): this("") // helper for iOS
+
+    val localNetworkConfigured: Boolean
+        get() = localNetworkEnabled && localNetworkUrl.isNotEmpty() && localNetworkSsids.isNotEmpty()
 }
