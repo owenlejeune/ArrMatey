@@ -155,8 +155,8 @@ fun MediaPreviewScreen(
                     rootFolders = rootFolders,
                     tags = tags,
                     addInProgress = addItemStatus is OperationStatus.InProgress,
-                    onAddItem = { newItem ->
-                        viewModel.addItem(newItem)
+                    onAddItem = { newItem, searchOnAdd ->
+                        viewModel.addItem(newItem, searchOnAdd)
                     },
                     onDismiss = { showBottomSheet = false }
                 )
@@ -173,7 +173,7 @@ private fun AddMediaSheet(
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     addInProgress: Boolean,
-    onAddItem: (ArrMedia) -> Unit,
+    onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     when (item) {

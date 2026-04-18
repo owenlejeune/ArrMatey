@@ -87,10 +87,10 @@ class MediaPreviewViewModel(
         }
     }
 
-    fun addItem(item: ArrMedia) {
+    fun addItem(item: ArrMedia, searchOnAdd: Boolean) {
         viewModelScope.launch {
             _addItemStatus.value = OperationStatus.InProgress
-            addMediaUseCase(instanceType, item)
+            addMediaUseCase(instanceType, item, searchOnAdd)
                 .collect { state ->
                     _addItemStatus.value = state
                 }

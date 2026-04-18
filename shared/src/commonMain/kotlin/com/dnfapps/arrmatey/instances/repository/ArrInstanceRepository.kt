@@ -250,7 +250,7 @@ class ArrInstanceRepository(
         _lookupResults.value = null
     }
 
-    suspend fun addItem(item: ArrMedia) {
+    suspend fun addItem(item: ArrMedia, searchOnAdd: Boolean) {
         _addItemStatus.value = OperationStatus.InProgress
 
         client.addItemToLibrary(item)
@@ -260,6 +260,10 @@ class ArrInstanceRepository(
                     val newMap = _mediaDetailsCache.value.toMutableMap()
                     newMap[it] = addedItem
                     _mediaDetailsCache.value = newMap
+
+                    if (searchOnAdd) {
+                        executeAutomaticSearch(it)
+                    }
                 }
                 _lastAddedItemId.value = addedItem.id
                 refreshLibrary()

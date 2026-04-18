@@ -14,7 +14,8 @@ class AddMediaItemUseCase(
 ) {
     operator fun invoke(
         instanceType: InstanceType,
-        item: ArrMedia
+        item: ArrMedia,
+        searchOnAdd: Boolean
     ): Flow<OperationStatus> = flow {
         val repository = instanceManager.getSelectedArrRepository(instanceType)
             .firstOrNull()
@@ -24,7 +25,7 @@ class AddMediaItemUseCase(
             return@flow
         }
 
-        repository.addItem(item)
+        repository.addItem(item, searchOnAdd)
 
         repository.addItemStatus.collect { status ->
             emit(status)
