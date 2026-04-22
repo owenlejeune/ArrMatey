@@ -173,19 +173,21 @@ fun ArrConfigurationScreen(
             enabled = !uiState.basicAuthEnabled
         )
 
-        Section {
-            LabelledSwitch(
-                label = mokoString(MR.strings.enable_notifications),
-                sublabel = mokoString(MR.strings.enable_notifications_description),
-                checked = uiState.notificationsEnabled,
-                onCheckedChange = {
-                    if (!uiState.notificationsEnabled && it) {
-                        notificationPermissionHandler.requestPermission()
-                    } else {
-                        onToggleNotificationsEnabled()
+        if (instanceType.supportsNotifications) {
+            Section {
+                LabelledSwitch(
+                    label = mokoString(MR.strings.enable_notifications),
+                    sublabel = mokoString(MR.strings.enable_notifications_description),
+                    checked = uiState.notificationsEnabled,
+                    onCheckedChange = {
+                        if (!uiState.notificationsEnabled && it) {
+                            notificationPermissionHandler.requestPermission()
+                        } else {
+                            onToggleNotificationsEnabled()
+                        }
                     }
-                }
-            )
+                )
+            }
         }
 
         LocalNetworkArea(
