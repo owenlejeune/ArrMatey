@@ -27,3 +27,23 @@
 -keepclassmembers class * {
     @android.webkit.JavascriptInterface <methods>;
 }
+
+# Room KMP rules
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep @androidx.room.Dao interface * { *; }
+-keep class * implements androidx.room.RoomDatabase { *; }
+-keep class **_Impl { *; }
+-keep @androidx.room.Database class * { *; }
+
+# Keep all members of Room-generated implementation classes, including synthetic ones
+-keepclassmembers class **_Impl {
+    <methods>;
+    <fields>;
+}
+
+# Keep SQLite and Room internal classes that might be accessed via reflection
+-keep class androidx.sqlite.** { *; }
+-keep class androidx.room.** { *; }
+
+# Room reflection-based access and metadata
+-keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod, MethodParameters

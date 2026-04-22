@@ -136,6 +136,7 @@ fun AddInstanceScreen(
                 uiState = uiState,
                 onApiEndpointChanged = { viewModel.setApiEndpoint(it) },
                 onApiKeyChanged = { viewModel.setApiKey(it) },
+                onBasicAuthEnabledChanged = { viewModel.setBasicAuthEnabled(it) },
                 onInstanceLabelChanged = { viewModel.setInstanceLabel(it) },
                 onIsSlowInstanceChanged = { viewModel.setIsSlowInstance(it) },
                 onCustomTimeoutChanged = { viewModel.setCustomTimeout(it) },

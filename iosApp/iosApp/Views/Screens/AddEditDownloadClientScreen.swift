@@ -146,6 +146,7 @@ struct AddEditDownloadClientScreen: View {
                 .multilineTextAlignment(.trailing)
                 .textInputAutocapitalization(.never)
             }
+            
             HStack(spacing: 24) {
                 Text(MR.strings().client_password.localized()).layoutPriority(2)
                 SecureField(
@@ -159,8 +160,15 @@ struct AddEditDownloadClientScreen: View {
                 .multilineTextAlignment(.trailing)
                 .textInputAutocapitalization(.never)
             }
+            
+            Toggle(MR.strings().use_basic_auth.localized(), isOn: Binding(
+                get: { viewModel.uiState.basicAuthEnabled },
+                set: { viewModel.updateBasicAuthEnabled($0) }
+            ))
+            
             HStack(spacing: 24) {
                 Text(MR.strings().client_api_key.localized()).layoutPriority(2)
+                    .foregroundStyle(viewModel.uiState.basicAuthEnabled ? Color.primary.opacity(1.0) : Color.primary.opacity(0.3))
                 TextField(
                     text: Binding(
                         get: { viewModel.uiState.apiKey },
@@ -169,6 +177,7 @@ struct AddEditDownloadClientScreen: View {
                 ) {
                     EmptyView()
                 }
+                .disabled(viewModel.uiState.basicAuthEnabled)
                 .multilineTextAlignment(.trailing)
                 .textInputAutocapitalization(.never)
             }

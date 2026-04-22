@@ -14,7 +14,7 @@ struct AddMovieForm: View {
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
-    let onAddItem: (ArrMedia) -> Void
+    let onAddItem: (ArrMedia, Bool) -> Void
     let onDismiss: () -> Void
     
     @State private var isMonitored: Bool = true
@@ -22,6 +22,7 @@ struct AddMovieForm: View {
     @State private var selectedQualityProfileId: Int32? = nil
     @State private var selectedRootFolderId: Int32? = nil
     @State private var selectedTags: Set<Int> = Set()
+    @State private var searchOnAdd: Bool = false
     
     private let selectableStatuses: [MediaStatus] = [
         .announced,
@@ -90,6 +91,10 @@ struct AddMovieForm: View {
                     }
                 }
                 
+                Toggle(MR.strings().search_on_add_label.localized(), isOn: $searchOnAdd)
+            }
+            
+            Section {
                 if selectedRootFolderId != nil {
                     Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolderId) {
                         ForEach(rootFolders, id: \.self) { rootFolder in
@@ -124,7 +129,7 @@ struct AddMovieForm: View {
                             rootFolderPath: path,
                             tags: Array(selectedTags.map { $0.asKotlinInt })
                         )
-                        onAddItem(newMovie)
+                        onAddItem(newMovie, searchOnAdd)
                     }
                 }
             } label: {

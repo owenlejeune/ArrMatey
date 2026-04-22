@@ -63,6 +63,7 @@ struct EditInstanceScreen: View {
             uiState: uiState,
             onApiEndpointChanged: { viewModel.setApiEndpoint($0) },
             onApiKeyChanged: { viewModel.setApiKey($0) },
+            onBasicAuthChanged: { viewModel.setBasicAuthEnabled($0) },
             onInstanceLabelChanged: { viewModel.setInstanceLabel($0) },
             onIsSlowInstanceChanged: { viewModel.setIsSlowInstance($0) },
             onCustomTimeoutChanged: { viewModel.setCustomTimeout($0) },

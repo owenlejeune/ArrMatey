@@ -31,8 +31,8 @@ class MediaPreviewViewModelS: ObservableObject {
         viewModel.lastAddedItemId.observeAsync { self.lastAddedItemId = $0?.int64Value }
     }
     
-    func addItem(_ item: ArrMedia) {
-        viewModel.addItem(item: item)
+    func addItem(_ item: ArrMedia, _ searchOnAdd: Bool) {
+        viewModel.addItem(item: item, searchOnAdd: searchOnAdd)
     }
     
 }

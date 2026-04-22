@@ -66,6 +66,7 @@ import com.dnfapps.arrmatey.permissions.rememberLocationPermissionHandler
 import com.dnfapps.arrmatey.permissions.rememberNotificationPermissionHandler
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
+import com.dnfapps.arrmatey.ui.components.LabelledCheckbox
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.getNetworkUtils
@@ -80,6 +81,7 @@ fun ArrConfigurationScreen(
     uiState: AddInstanceUiState,
     onApiEndpointChanged: (String) -> Unit,
     onApiKeyChanged: (String) -> Unit,
+    onBasicAuthEnabledChanged: (Boolean) -> Unit = {},
     onInstanceLabelChanged: (String) -> Unit,
     onIsSlowInstanceChanged: (Boolean) -> Unit,
     onCustomTimeoutChanged: (Long?) -> Unit,
@@ -154,14 +156,21 @@ fun ArrConfigurationScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
         )
 
+        LabelledCheckbox(
+            label = mokoString(MR.strings.use_basic_auth),
+            checked = uiState.basicAuthEnabled,
+            onCheckedChange = onBasicAuthEnabledChanged
+        )
+
         AMOutlinedTextField(
             label = mokoString(MR.strings.api_key),
-            required = true,
+            required = !uiState.basicAuthEnabled,
             value = apiKey,
             onValueChange = onApiKeyChanged,
             modifier = Modifier.fillMaxWidth(),
             placeholder = mokoString(MR.strings.api_key_placeholder),
-            singleLine = true
+            singleLine = true,
+            enabled = !uiState.basicAuthEnabled
         )
 
         Section {

@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 data class AddInstanceUiState(
     val apiEndpoint: String = "",
     val apiKey: String = "",
+    val basicAuthEnabled: Boolean = false,
     val instanceLabel: String = "",
     val isSlowInstance: Boolean = false,
     val customTimeout: Long? = null,

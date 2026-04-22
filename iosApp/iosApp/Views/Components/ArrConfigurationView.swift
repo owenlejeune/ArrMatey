@@ -13,6 +13,7 @@ struct ArrConfigurationView: View {
     let uiState: AddInstanceUiState
     let onApiEndpointChanged: (String) -> Void
     let onApiKeyChanged: (String) -> Void
+    let onBasicAuthChanged: (Bool) -> Void
     let onInstanceLabelChanged: (String) -> Void
     let onIsSlowInstanceChanged: (Bool) -> Void
     let onCustomTimeoutChanged: (Int64?) -> Void
@@ -30,7 +31,6 @@ struct ArrConfigurationView: View {
     @Binding var showError: Bool
     
     @State private var apiEndpoint: String = ""
-    @State private var apiKey: String = ""
     @State private var instanceLabel: String = ""
     @State private var customTimeoutText: String = ""
     @State private var headers: [InstanceHeader] = []
@@ -204,13 +204,18 @@ struct ArrConfigurationView: View {
                 }
             }
             
+            Toggle(MR.strings().use_basic_auth.localized(), isOn: Binding(
+                get: { uiState.basicAuthEnabled },
+                set: { onBasicAuthChanged($0) }
+            ))
+            
             HStack(spacing: 24) {
                 Text(MR.strings().api_key.localized())
+                    .foregroundStyle(!uiState.basicAuthEnabled ? Color.primary.opacity(1.0) : Color.primary.opacity(0.3))
                 TextField(
                     text: Binding(
-                        get: { apiKey.isEmpty ? uiState.apiKey : apiKey },
+                        get: { uiState.apiKey },
                         set: { newValue in
-                            apiKey = newValue
                             onApiKeyChanged(newValue)
                         }
                     ),
@@ -218,6 +223,7 @@ struct ArrConfigurationView: View {
                 ) {
                     EmptyView()
                 }
+                .disabled(uiState.basicAuthEnabled)
                 .multilineTextAlignment(.trailing)
                 .textInputAutocapitalization(.never)
             }

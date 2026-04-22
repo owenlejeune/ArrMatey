@@ -48,7 +48,18 @@ class AddInstanceViewModel(
     fun setApiKey(value: String) {
         _uiState.update {
             it.copy(
-                apiKey = value,
+                apiKey = if (it.basicAuthEnabled) "" else value,
+                testing = false,
+                testResult = null
+            ).validate()
+        }
+    }
+
+    fun setBasicAuthEnabled(enabled: Boolean) {
+        _uiState.update {
+            it.copy(
+                basicAuthEnabled = enabled,
+                apiKey = if (enabled) "" else it.apiKey,
                 testing = false,
                 testResult = null
             ).validate()
@@ -116,7 +127,13 @@ class AddInstanceViewModel(
 
             _uiState.update { it.copy(testing = true, endpointError = false) }
 
-            val success = testNewInstanceConnectionUseCase(state.apiEndpoint, state.apiKey, type, state.headers)
+            val success = testNewInstanceConnectionUseCase(
+                state.apiEndpoint,
+                state.apiKey,
+                type,
+                state.headers,
+                state.basicAuthEnabled
+            )
 
             _uiState.update {
                 it.copy(
@@ -157,6 +174,7 @@ class AddInstanceViewModel(
             label = s.instanceLabel,
             url = s.apiEndpoint,
             apiKey = s.apiKey,
+            basicAuthEnabled = s.basicAuthEnabled,
             slowInstance = s.isSlowInstance,
             customTimeout = if (s.isSlowInstance) s.customTimeout else null,
             headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
@@ -174,7 +192,7 @@ class AddInstanceViewModel(
     private fun AddInstanceUiState.validate(): AddInstanceUiState {
         val isValid = testResult == true &&
                 apiEndpoint.isNotEmpty() &&
-                apiKey.isNotEmpty() &&
+                (basicAuthEnabled || apiKey.isNotEmpty()) &&
                 instanceLabel.isNotEmpty() &&
                 (!localNetworkEnabled || (localNetworkUrl.isValidUrl() && localNetworkSsids.isNotEmpty())) &&
                 headers.all { it.restrictionType != HeaderRestrictionType.SpecificSsids || it.restrictedSsids.isNotEmpty() }

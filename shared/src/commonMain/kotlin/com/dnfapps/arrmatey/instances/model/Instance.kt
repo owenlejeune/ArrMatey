@@ -22,6 +22,7 @@ data class Instance(
     val label: String,
     val url: String,
     val apiKey: String,
+    val basicAuthEnabled: Boolean = false,
     val enabled: Boolean = true,
     val slowInstance: Boolean = false,
     val customTimeout: Long? = null,

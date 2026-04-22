@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -17,7 +16,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Visibility
@@ -32,7 +30,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -52,13 +49,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientConflictField
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientMutationState
@@ -68,8 +63,8 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsScreen
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
-import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
+import com.dnfapps.arrmatey.ui.components.LabelledCheckbox
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -345,13 +340,20 @@ fun AddEditDownloadClientScreen(
                             HorizontalDivider(Modifier.weight(1f))
                         }
 
+                        LabelledCheckbox(
+                            label = mokoString(MR.strings.use_basic_auth),
+                            checked = uiState.basicAuthEnabled,
+                            onCheckedChange = { viewModel.updateBasicAuthEnabled(it) }
+                        )
+
                         AMOutlinedTextField(
                             value = uiState.apiKey,
                             onValueChange = { viewModel.updateApiKey(it) },
                             label = mokoString(MR.strings.client_api_key),
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            placeholder = mokoString(MR.strings.api_key_placeholder)
+                            placeholder = mokoString(MR.strings.api_key_placeholder),
+                            enabled = !uiState.basicAuthEnabled
                         )
                     }
                 }

@@ -14,7 +14,7 @@ struct AddSeriesForm: View {
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
-    let onAddItem: (ArrMedia) -> Void
+    let onAddItem: (ArrMedia, Bool) -> Void
     let onDismiss: () -> Void
     
     
@@ -24,6 +24,7 @@ struct AddSeriesForm: View {
     @State private var useSeasonFolders: Bool = true
     @State private var selectedRootFolderId: Int32? = nil
     @State private var selectedTags: Set<Int> = Set()
+    @State private var searchOnAdd: Bool = false
     
     private let selectableMonitorTypes: [SeriesMonitorType] = SeriesMonitorType.allCases.filter {
         $0 != .unknown && $0 != .latestSeason && $0 != .skip
@@ -95,6 +96,10 @@ struct AddSeriesForm: View {
                     }
                 }
                 
+                Toggle(MR.strings().search_on_add_label.localized(), isOn: $searchOnAdd)
+            }
+             
+            Section {
                 Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolderId) {
                     ForEach(rootFolders, id: \.self) { rootFolder in
                         Text("\(rootFolder.path) (\(rootFolder.freeSpaceString))")
@@ -128,7 +133,7 @@ struct AddSeriesForm: View {
                             rootFolderPath: path,
                             tags: Array(selectedTags.map { $0.asKotlinInt })
                         )
-                        onAddItem(newSeries)
+                        onAddItem(newSeries, searchOnAdd)
                     }
                 }
             } label: {

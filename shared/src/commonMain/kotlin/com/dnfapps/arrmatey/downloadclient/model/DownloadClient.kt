@@ -20,6 +20,7 @@ data class DownloadClient(
     val username: String = "",
     val password: String = "",
     val apiKey: String = "",
+    val basicAuthEnabled: Boolean = false,
     val enabled: Boolean = true,
     val selected: Boolean = false,
     val headers: List<InstanceHeader> = emptyList()

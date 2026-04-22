@@ -38,6 +38,10 @@ class AddInstanceViewModelS: ObservableObject {
         viewModel.setApiKey(value: key)
     }
     
+    func setBasicAuthEnabled(_ enabled: Bool) {
+        viewModel.setBasicAuthEnabled(enabled: enabled)
+    }
+    
     func setIsSlowInstance(_ isSlowInstance: Bool) {
         viewModel.setIsSlowInstance(value: isSlowInstance)
     }

@@ -17,11 +17,14 @@ class GenericClient(
         endpoint: String,
         apiKey: String,
         type: InstanceType,
-        headers: List<InstanceHeader> = emptyList()
+        headers: List<InstanceHeader> = emptyList(),
+        basicAuthEnabled: Boolean = false
     ): Boolean {
         try {
             val response = httpClient.safeGet<Any>("${endpoint.trimEnd('/')}/${type.apiBase}/${type.testEndpoint}") {
-                header("X-Api-Key", apiKey)
+                if (!basicAuthEnabled) {
+                    header("X-Api-Key", apiKey)
+                }
                 headers.forEach { h ->
                     header(h.key, h.value)
                 }

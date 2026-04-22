@@ -226,6 +226,7 @@
     <string name="add_webpage">Add Webpage</string>
     <string name="edit_webpage">Edit Webpage</string>
     <string name="search_on_add_label">Search for files immediately</string>
+    <string name="use_basic_auth">Use basic auth</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

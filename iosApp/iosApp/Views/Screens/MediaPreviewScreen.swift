@@ -93,8 +93,8 @@ struct MediaPreviewScreen: View {
                 qualityProfiles: qualityProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
-                onAddItem: { item in
-                    viewModel.addItem(item)
+                onAddItem: { item, searchOnAdd in
+                    viewModel.addItem(item, searchOnAdd)
                 },
                 onDismiss: { sheetPresented = false }
             )
@@ -107,8 +107,8 @@ struct MediaPreviewScreen: View {
                 qualityProfiles: qualityProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
-                onAddItem: { item in
-                    viewModel.addItem(item)
+                onAddItem: { item, searchOnAdd in
+                    viewModel.addItem(item, searchOnAdd)
                 },
                 onDismiss: { sheetPresented = false }
             )
@@ -121,8 +121,8 @@ struct MediaPreviewScreen: View {
                 qualityProfiles: qualityProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
-                onAddItem: { item in
-                    viewModel.addItem(item)
+                onAddItem: { item, searchOnAdd in
+                    viewModel.addItem(item, searchOnAdd)
                 },
                 onDismiss: { sheetPresented = false }
             )

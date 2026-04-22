@@ -15,6 +15,7 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.basicAuth
 import io.ktor.client.request.header
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
@@ -63,9 +64,17 @@ fun createInstanceClient(
             storage = AcceptAllCookiesStorage()
         }
 
-        instance?.let { instance ->
-            defaultRequest {
-                header(HEADER_X_API_KEY, instance.apiKey)
+        defaultRequest {
+            if (!url.user.isNullOrBlank() && !url.password.isNullOrBlank()) {
+                basicAuth(url.user!!, url.password!!)
+                url.user = null
+                url.password = null
+            }
+
+            instance?.let { instance ->
+                if (!instance.basicAuthEnabled) {
+                    header(HEADER_X_API_KEY, instance.apiKey)
+                }
                 instance.headers.forEach { header ->
                     val shouldSend = when (header.restrictionType) {
                         HeaderRestrictionType.Always -> true
@@ -115,6 +124,14 @@ class HttpClientFactory(private val json: Json, private val logger: Logger) {
 
             defaultRequest {
                 url(downloadClient.url.trimEnd('/') + "/")
+                if (!url.user.isNullOrBlank() && !url.password.isNullOrBlank()) {
+                    basicAuth(url.user!!, url.password!!)
+                    url.user = null
+                    url.password = null
+                }
+                if (!downloadClient.basicAuthEnabled && downloadClient.apiKey.isNotEmpty()) {
+                    header(HEADER_X_API_KEY, downloadClient.apiKey)
+                }
                 downloadClient.headers.forEach { (key, value) ->
                     header(key, value)
                 }
@@ -170,7 +187,8 @@ class DynamicLogger(
                 LogLevel.HEADERS -> {
                     // Include everything except the body sections
                     !isBodyLine(line) &&
-                            !line.contains("X-Api-Key", ignoreCase = true)
+                            !line.contains("X-Api-Key", ignoreCase = true) &&
+                            !line.contains("Authorization", ignoreCase = true)
                 }
                 LogLevel.BODY -> {
                     // Include Request/Response lines and the JSON body, skip headers
