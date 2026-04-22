@@ -1,13 +1,16 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
+import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Serializable
@@ -121,6 +124,18 @@ data class ArrMovie(
 
     override val isWanted: Boolean
         get() = monitored && movieFile == null
+
+    val closestFutureRelease: Pair<StringResource, Instant>?
+        get() {
+            val now = Clock.System.now()
+            return listOfNotNull(
+                inCinemas?.let { MR.strings.in_cinemas to it },
+                digitalRelease?.let { MR.strings.digital_release to it },
+                physicalRelease?.let { MR.strings.physical_release to it }
+            )
+                .filter { it.second > now }
+                .minByOrNull { it.second }
+        }
 
     fun copyForCreation(
         monitored: Boolean,

@@ -2,8 +2,12 @@ package com.dnfapps.arrmatey.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
@@ -36,6 +42,7 @@ import com.dnfapps.arrmatey.navigation.SettingsNavigation
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -47,6 +54,8 @@ fun EditInstanceScreen(
     settingsNav: SettingsNavigation = koinInject<SettingsNavigation>()
 ) {
     val scope = rememberCoroutineScope()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val instance by viewModel.instance.collectAsStateWithLifecycle()
 
@@ -66,8 +75,10 @@ fun EditInstanceScreen(
     }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehavior,
                 title = { Text(text = mokoString(MR.strings.edit_instance)) },
                 navigationIcon = {
                     IconButton(
@@ -109,15 +120,17 @@ fun EditInstanceScreen(
                     }
                 }
             )
-        }
+        },
+        contentWindowInsets = WindowInsets.statusBars
     ) { contentPadding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
                 .padding(contentPadding)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = navigationBarBottomInset() + 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             instance?.let { instance ->
                 ArrConfigurationScreen(
@@ -125,6 +138,7 @@ fun EditInstanceScreen(
                     uiState = uiState,
                     onApiEndpointChanged = { viewModel.setApiEndpoint(it) },
                     onApiKeyChanged = { viewModel.setApiKey(it) },
+                    onBasicAuthEnabledChanged = { viewModel.setBasicAuthEnabled(it) },
                     onInstanceLabelChanged = { viewModel.setInstanceLabel(it) },
                     onIsSlowInstanceChanged = { viewModel.setIsSlowInstance(it) },
                     onCustomTimeoutChanged = { viewModel.setCustomTimeout(it) },
@@ -132,8 +146,9 @@ fun EditInstanceScreen(
                     onTestConnection = { viewModel.testConnection() },
                     onLocalNetworkEnabledChanged = { viewModel.setLocalNetworkEnabled(it) },
                     onLocalNetworkUrlChanged = { viewModel.setLocalNetworkUrl(it) },
-                    onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsid(it) },
-                    onTestLocalConnection = { viewModel.testLocalConnection() }
+                    onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsids(it) },
+                    onTestLocalConnection = { viewModel.testLocalConnection() },
+                    onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() }
                 )
             }
 

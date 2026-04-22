@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 data class AddInstanceUiState(
     val apiEndpoint: String = "",
     val apiKey: String = "",
+    val basicAuthEnabled: Boolean = false,
     val instanceLabel: String = "",
     val isSlowInstance: Boolean = false,
     val customTimeout: Long? = null,
@@ -22,8 +23,12 @@ data class AddInstanceUiState(
     val headers: List<InstanceHeader> = emptyList(),
     val localNetworkEnabled: Boolean = false,
     val localNetworkUrl: String = "",
-    val localNetworkSsid: String = "",
-    val localNetworkUrlError: Boolean = false
+    val localNetworkSsids: List<String> = emptyList(),
+    val localNetworkUrlError: Boolean = false,
+    val notificationsEnabled: Boolean = false
 ) {
     constructor(): this("") // helper for iOS
+
+    val localNetworkConfigured: Boolean
+        get() = localNetworkEnabled && localNetworkUrl.isNotEmpty() && localNetworkSsids.isNotEmpty()
 }

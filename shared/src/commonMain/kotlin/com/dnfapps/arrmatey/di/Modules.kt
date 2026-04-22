@@ -97,6 +97,8 @@ import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
 import com.dnfapps.arrmatey.logging.FileSink
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.usecase.CloseIssueUseCase
+import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
+import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetIssueDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetIssuesUseCase
@@ -188,7 +190,7 @@ val repositoryModule = module {
 
 val serviceModule = module {
     single { ActivityQueueService(get(), get()) }
-    single { CalendarService(get()) }
+    single { CalendarService(get(), get(), get(), get()) }
     single { DownloadQueueService(get()) }
 }
 
@@ -264,6 +266,8 @@ val useCaseModule = module {
     factory { UpdateCustomWebpageUseCase(get()) }
     factory { DeleteCustomWebpageUseCase(get()) }
     factory { CloseIssueUseCase(get()) }
+    factory { NotificationCleanupUseCase(get()) }
+    factory { ScheduleNotificationUseCase(get(), get()) }
 }
 
 val viewModelModule = module {
@@ -295,7 +299,7 @@ val viewModelModule = module {
     factory { MoreScreenViewModel(get(), get(), get(), get(), get(), get()) }
     factory { AddInstanceViewModel(get(), get(), get(), get()) }
     factory { (instanceId: Long) ->
-        EditInstanceViewModel(instanceId, get(), get(), get(), get())
+        EditInstanceViewModel(instanceId, get(), get(), get(), get(), get())
     }
     factory { (instanceId: Long) ->
         ArrInstanceDashboardViewModel(instanceId, get())

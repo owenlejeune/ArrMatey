@@ -136,6 +136,7 @@ fun AddInstanceScreen(
                 uiState = uiState,
                 onApiEndpointChanged = { viewModel.setApiEndpoint(it) },
                 onApiKeyChanged = { viewModel.setApiKey(it) },
+                onBasicAuthEnabledChanged = { viewModel.setBasicAuthEnabled(it) },
                 onInstanceLabelChanged = { viewModel.setInstanceLabel(it) },
                 onIsSlowInstanceChanged = { viewModel.setIsSlowInstance(it) },
                 onCustomTimeoutChanged = { viewModel.setCustomTimeout(it) },
@@ -144,7 +145,8 @@ fun AddInstanceScreen(
                 onLocalNetworkEnabledChanged = { viewModel.setLocalNetworkEnabled(it) },
                 onLocalNetworkUrlChanged = { viewModel.setLocalNetworkUrl(it) },
                 onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsid(it) },
-                onTestLocalConnection = { viewModel.testLocalConnection(selectedInstanceType) }
+                onTestLocalConnection = { viewModel.testLocalConnection(selectedInstanceType) },
+                onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() }
             )
         }
     }

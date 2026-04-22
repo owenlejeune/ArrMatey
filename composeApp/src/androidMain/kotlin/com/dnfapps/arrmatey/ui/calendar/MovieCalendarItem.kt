@@ -27,11 +27,13 @@ import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.utils.mokoString
+import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 @Composable
 fun MovieCalendarItem(
+    date: LocalDate,
     movie: ArrMovie
 ) {
     Card(
@@ -62,15 +64,21 @@ fun MovieCalendarItem(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (movie.inCinemas != null) {
+                    if (movie.inCinemas == date) {
                         Text(
                             text = mokoString(MR.strings.in_cinemas),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
-                    if (movie.digitalRelease != null) {
+                    if (movie.digitalRelease == date) {
                         Text(
                             text = mokoString(MR.strings.digital_release),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    if (movie.physicalRelease == date) {
+                        Text(
+                            text = mokoString(MR.strings.physical_release),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }

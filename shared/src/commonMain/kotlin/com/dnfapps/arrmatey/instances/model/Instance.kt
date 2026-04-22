@@ -22,27 +22,29 @@ data class Instance(
     val label: String,
     val url: String,
     val apiKey: String,
+    val basicAuthEnabled: Boolean = false,
     val enabled: Boolean = true,
     val slowInstance: Boolean = false,
     val customTimeout: Long? = null,
     val selected: Boolean = false,
+    val notificationsEnabled: Boolean = false,
     val headers: List<InstanceHeader> = emptyList(),
 
     val localNetworkEnabled: Boolean = false,
-    val localNetworkSsid: String? = null,
+    val localNetworkSsids: List<String> = emptyList(),
     val localNetworkEndpoint: String? = null
 ) {
 
     fun getEffectiveBaseUrl(): String {
         if (!localNetworkEnabled ||
-            localNetworkSsid.isNullOrBlank() ||
+            localNetworkSsids.isEmpty() ||
             localNetworkEndpoint.isNullOrBlank()
-            ) {
+        ) {
             return url
         }
         return try {
             val currentSsid = getNetworkUtils().getCurrentWifiSsid()
-            if (currentSsid != null && currentSsid.equals(localNetworkSsid, ignoreCase = true)) {
+            if (currentSsid != null && localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }) {
                 localNetworkEndpoint
             } else {
                 url
@@ -58,7 +60,7 @@ data class Instance(
             localNetworkEnabled &&
                     !localNetworkEndpoint.isNullOrBlank() &&
                     currentSsid != null &&
-                    currentSsid.equals(localNetworkSsid, ignoreCase = true)
+                    localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
         } catch (e: Exception) {
             false
         }
@@ -76,7 +78,8 @@ enum class InstanceType(
     val apiBase: String,
     val testEndpoint: String,
     val includeTopLevelAutomaticSearchOption: Boolean,
-    val aspectRatio: AspectRatio
+    val aspectRatio: AspectRatio,
+    val supportsNotifications: Boolean
 ) {
     Sonarr(
         resource = MR.strings.sonarr_description,
@@ -89,7 +92,8 @@ enum class InstanceType(
         apiBase = "api/v3",
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = true,
-        aspectRatio = AspectRatio.Poster
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = true
     ),
     Radarr(
         resource = MR.strings.radarr_description,
@@ -102,7 +106,8 @@ enum class InstanceType(
         apiBase = "api/v3",
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = false,
-        aspectRatio = AspectRatio.Poster
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = true
     ),
     Lidarr(
         resource = MR.strings.lidarr_description,
@@ -115,7 +120,8 @@ enum class InstanceType(
         apiBase = "api/v1",
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = true,
-        aspectRatio = AspectRatio.Cover
+        aspectRatio = AspectRatio.Cover,
+        supportsNotifications = true
     ),
     Seerr(
         resource = MR.strings.seerr_description,
@@ -141,6 +147,7 @@ enum class InstanceType(
         apiBase = "api/v1",
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = false,
-        aspectRatio = AspectRatio.Cover
+        aspectRatio = AspectRatio.Cover,
+        supportsNotifications = false
     )
 }

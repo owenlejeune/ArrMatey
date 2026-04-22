@@ -46,7 +46,7 @@ fun AddSeriesSheet(
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     addInProgress: Boolean,
-    onAddItem: (ArrMedia) -> Unit,
+    onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     var monitor by remember { mutableStateOf(SeriesMonitorType.All) }
@@ -55,6 +55,7 @@ fun AddSeriesSheet(
     var seasonFolders by remember { mutableStateOf(true) }
     var rootFolder by remember { mutableStateOf(rootFolders.first()) }
     val selectedTags = remember { mutableStateListOf<Int>() }
+    var searchOnAdd by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -135,6 +136,12 @@ fun AddSeriesSheet(
                 )
             }
 
+            LabelledSwitch(
+                label = mokoString(MR.strings.search_on_add_label),
+                checked = searchOnAdd,
+                onCheckedChange = { searchOnAdd = it }
+            )
+
             Button(
                 onClick = {
                     val newItem = item.copyForCreation(
@@ -145,7 +152,7 @@ fun AddSeriesSheet(
                         rootFolderPath = rootFolder.path,
                         tags = selectedTags
                     )
-                    onAddItem(newItem)
+                    onAddItem(newItem, searchOnAdd)
                 },
                 enabled = !addInProgress
             ) {

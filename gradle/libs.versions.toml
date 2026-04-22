@@ -34,6 +34,7 @@ aboutLibraries = "13.2.1"
 reorderable = "3.0.0"
 composeMarkdown = "0.5.8"
 kmp-logger = "1.2.1"
+google-fonts = "1.10.6"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -85,6 +86,7 @@ aboutlibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", ve
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "composeMarkdown" }
 kmp-logger = { module = "io.github.shivathapaa:logger", version.ref = "kmp-logger" }
+google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "google-fonts" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

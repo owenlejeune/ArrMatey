@@ -57,6 +57,7 @@ kotlin {
             // Android-specific
             implementation(libs.ktor.client.okhttp)
             implementation(libs.koin.android)
+            implementation(libs.androidx.core.ktx)
 
             // Koin Compose
             implementation(libs.koin.compose)

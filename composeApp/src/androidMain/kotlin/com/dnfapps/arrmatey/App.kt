@@ -26,8 +26,9 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun App() {
-    val preferences: PreferencesStore = koinInject()
+fun App(
+    preferences: PreferencesStore = koinInject()
+) {
     val showReleaseNotesSheet by preferences.shouldShowReleaseNotes.collectAsStateWithLifecycle(false)
 
     LaunchedEffect(Unit) {

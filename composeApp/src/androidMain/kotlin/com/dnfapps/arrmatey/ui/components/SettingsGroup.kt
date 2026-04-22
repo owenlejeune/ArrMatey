@@ -122,6 +122,7 @@ fun SettingsRow(
                     }
                 }
                 item.trailingContent?.let {
+                    Spacer(modifier = Modifier.width(16.dp))
                     it()
                 }
             }

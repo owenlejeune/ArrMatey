@@ -34,6 +34,7 @@ fun ArrMateyTheme(
     }
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
-        content = content
+        content = content,
+        typography = typography()
     )
 }

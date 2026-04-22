@@ -1,0 +1,8 @@
+### Release Notifications
+You can now enable notifications for new releases on a per-instance basis. Supported for Sonarr, Radarr, and Lidarr
+
+### Custom Webpages
+Itching for an integration not yet supported by ArrMatey? Host a home lab dashboard page you want to access? Add a custom webpage to get quick access to anything on the web!
+
+
++ Various other bug fixes

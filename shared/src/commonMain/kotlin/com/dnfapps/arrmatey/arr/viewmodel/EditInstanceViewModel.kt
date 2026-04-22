@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.database.dao.InsertResult
+import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.state.AddInstanceUiState
@@ -10,6 +11,7 @@ import com.dnfapps.arrmatey.instances.usecase.DeleteInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestNewInstanceConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
+import com.dnfapps.arrmatey.notifications.NotificationManager
 import com.dnfapps.arrmatey.utils.isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +24,8 @@ class EditInstanceViewModel(
     private val testNewInstanceConnectionUseCase: TestNewInstanceConnectionUseCase,
     private val updateInstanceUseCase: UpdateInstanceUseCase,
     private val getInstanceByIdUseCase: GetInstanceByIdUseCase,
-    private val deleteInstanceUseCase: DeleteInstanceUseCase
+    private val deleteInstanceUseCase: DeleteInstanceUseCase,
+    private val notificationManager: NotificationManager
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(AddInstanceUiState())
@@ -43,13 +46,15 @@ class EditInstanceViewModel(
                     it.copy(
                         apiEndpoint = instance.url,
                         apiKey = instance.apiKey,
+                        basicAuthEnabled = instance.basicAuthEnabled,
                         isSlowInstance = instance.slowInstance,
                         customTimeout = instance.customTimeout,
                         instanceLabel = instance.label,
                         headers = instance.headers,
                         localNetworkEnabled = instance.localNetworkEnabled,
                         localNetworkUrl = instance.localNetworkEndpoint ?: "",
-                        localNetworkSsid = instance.localNetworkSsid ?: ""
+                        localNetworkSsids = instance.localNetworkSsids,
+                        notificationsEnabled = instance.notificationsEnabled
                     )
                 }
             }
@@ -58,54 +63,70 @@ class EditInstanceViewModel(
 
     fun setApiEndpoint(endpoint: String) {
         _uiState.update {
-            it.copy(apiEndpoint = endpoint)
+            it.copy(
+                apiEndpoint = endpoint,
+                testResult = null
+            ).validate()
         }
     }
 
     fun setApiKey(value: String) {
         _uiState.update {
             it.copy(
-                apiKey = value,
+                apiKey = if (it.basicAuthEnabled) "" else value,
                 testing = false,
-                testResult = null,
-                saveButtonEnabled = false
-            )
+                testResult = null
+            ).validate()
+        }
+    }
+
+    fun setBasicAuthEnabled(enabled: Boolean) {
+        _uiState.update {
+            it.copy(
+                basicAuthEnabled = enabled,
+                apiKey = if (enabled) "" else it.apiKey,
+                testing = false,
+                testResult = null
+            ).validate()
         }
     }
 
     fun setIsSlowInstance(value: Boolean) {
-        _uiState.update { it.copy(isSlowInstance = value) }
+        _uiState.update { it.copy(isSlowInstance = value).validate() }
     }
 
     fun setCustomTimeout(value: Long?) {
-        _uiState.update { it.copy(customTimeout = value?.takeIf { v -> v > 0L } ) }
+        _uiState.update { it.copy(customTimeout = value?.takeIf { v -> v > 0L } ).validate() }
     }
 
     fun setInstanceLabel(value: String) {
         _uiState.update {
-            it.copy(
-                instanceLabel = value,
-                saveButtonEnabled = it.saveButtonEnabled && value.isNotEmpty()
-            )
+            it.copy(instanceLabel = value).validate()
         }
     }
 
     fun updateHeaders(headers: List<InstanceHeader>) {
         _uiState.update {
-            it.copy(headers = headers)
+            it.copy(headers = headers).validate()
         }
     }
 
     fun setLocalNetworkEnabled(enabled: Boolean) {
-        _uiState.update { it.copy(localNetworkEnabled = enabled) }
+        _uiState.update { it.copy(localNetworkEnabled = enabled).validate() }
     }
 
     fun setLocalNetworkUrl(url: String) {
-        _uiState.update { it.copy(localNetworkUrl = url) }
+        _uiState.update { it.copy(localNetworkUrl = url).validate() }
     }
 
-    fun setLocalNetworkSsid(ssid: String) {
-        _uiState.update { it.copy(localNetworkSsid = ssid) }
+    fun setLocalNetworkSsids(ssids: List<String>) {
+        _uiState.update { it.copy(localNetworkSsids = ssids).validate() }
+    }
+
+    fun toggleNotificationsEnabled() {
+        _uiState.update {
+            it.copy(notificationsEnabled = !it.notificationsEnabled)
+        }
     }
 
     fun reset() {
@@ -125,17 +146,19 @@ class EditInstanceViewModel(
 
             _uiState.update { it.copy(testing = true, endpointError = false) }
 
-            val success = testNewInstanceConnectionUseCase(state.apiEndpoint, state.apiKey, type)
+            val success = testNewInstanceConnectionUseCase(
+                state.apiEndpoint,
+                state.apiKey,
+                type,
+                state.headers,
+                state.basicAuthEnabled
+            )
 
             _uiState.update {
                 it.copy(
                     testing = false,
-                    testResult = success,
-                    saveButtonEnabled = success &&
-                            it.apiEndpoint.isNotEmpty() &&
-                            it.apiKey.isNotEmpty() &&
-                            it.instanceLabel.isNotEmpty()
-                )
+                    testResult = success
+                ).validate()
             }
         }
     }
@@ -153,7 +176,13 @@ class EditInstanceViewModel(
 
             _uiState.update { it.copy(localTesting = true, localNetworkUrlError = false) }
 
-            val success = testNewInstanceConnectionUseCase(state.localNetworkUrl, state.apiKey, type)
+            val success = testNewInstanceConnectionUseCase(
+                state.localNetworkUrl,
+                state.apiKey,
+                type,
+                state.headers,
+                state.basicAuthEnabled
+            )
 
             _uiState.update {
                 it.copy(
@@ -166,24 +195,33 @@ class EditInstanceViewModel(
 
     fun updateInstance() {
         val s = _uiState.value
-        val updated = instance.value?.copy(
-            label = s.instanceLabel,
-            url = s.apiEndpoint,
-            apiKey = s.apiKey,
-            slowInstance = s.isSlowInstance,
-            customTimeout = if (s.isSlowInstance) s.customTimeout else null,
-            headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
-            localNetworkEnabled = s.localNetworkEnabled,
-            localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
-            localNetworkSsid = s.localNetworkSsid.takeIf { s.localNetworkEnabled && it.isNotBlank() }
-        ) ?: run {
+        val originalInstance = instance.value ?: run {
             _uiState.update { it.copy(
                 editResult = InsertResult.Error("Instance doesn't exist")
             ) }
             return
         }
 
+        val updated = originalInstance.copy(
+            label = s.instanceLabel,
+            url = s.apiEndpoint,
+            apiKey = s.apiKey,
+            basicAuthEnabled = s.basicAuthEnabled,
+            slowInstance = s.isSlowInstance,
+            customTimeout = if (s.isSlowInstance) s.customTimeout else null,
+            headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
+            localNetworkEnabled = s.localNetworkEnabled,
+            localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
+            localNetworkSsids = s.localNetworkSsids.filter { it.isNotBlank() },
+            notificationsEnabled = s.notificationsEnabled
+        )
+
         viewModelScope.launch {
+            if (originalInstance.notificationsEnabled && !updated.notificationsEnabled) {
+                instance.value?.label?.let { instanceName ->
+                    notificationManager.cancelNotificationsForInstance(instanceName)
+                }
+            }
             val result = updateInstanceUseCase(updated)
             _uiState.update { it.copy(editResult = result) }
         }
@@ -191,7 +229,20 @@ class EditInstanceViewModel(
 
     fun deleteInstance(instance: Instance) {
         viewModelScope.launch {
+            if (instance.notificationsEnabled) {
+                notificationManager.cancelNotificationsForInstance(instance.label)
+            }
             deleteInstanceUseCase(instance)
         }
+    }
+
+    private fun AddInstanceUiState.validate(): AddInstanceUiState {
+        val isValid = testResult == true &&
+                apiEndpoint.isNotEmpty() &&
+                (basicAuthEnabled || apiKey.isNotEmpty()) &&
+                instanceLabel.isNotEmpty() &&
+                (!localNetworkEnabled || (localNetworkUrl.isValidUrl() && localNetworkSsids.isNotEmpty())) &&
+                headers.all { it.restrictionType != HeaderRestrictionType.SpecificSsids || it.restrictedSsids.isNotEmpty() }
+        return copy(saveButtonEnabled = isValid)
     }
 }

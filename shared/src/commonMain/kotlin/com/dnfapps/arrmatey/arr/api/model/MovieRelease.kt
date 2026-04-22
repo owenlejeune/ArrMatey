@@ -49,8 +49,8 @@ data class MovieRelease(
     val movieTitles: List<String> = emptyList(),
     val language: List<String> = emptyList(),
     val mappedMovieId: Int? = null,
-    val movieRequested: Boolean,
-    val edition: String,
+    val movieRequested: Boolean = false,
+    val edition: String? = null,
     val magetUrl: String? = null,
     val movieId: Int? = null,
 ): ArrRelease

@@ -48,6 +48,6 @@ data class LidarrRelease(
     val artistName: String? = null,
     val albumTitle: String? = null,
     val discography: Boolean = false,
-    val artistId: Long,
-    val albumId: Long
+    val artistId: Long? = null,
+    val albumId: Long? = null
 ): ArrRelease

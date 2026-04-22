@@ -33,6 +33,7 @@ kotlin {
             implementation(libs.aboutlibraries.compose)
             implementation(libs.reorderable)
             implementation(libs.compose.markdown)
+            implementation(libs.google.fonts)
             
             implementation(libs.kmp.logger)
         }
@@ -72,12 +73,27 @@ android {
     namespace = "com.dnfapps.arrmatey"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    buildFeatures {
+        buildConfig = true
+    }
+
+    val bugReportFile = file("../.github/ISSUE_TEMPLATE/bug_report.md")
+    val bugReportContent = if (bugReportFile.exists()) {
+        bugReportFile.readText()
+            .replace(Regex("---[\\s\\S]*?---"), "")
+            .trim()
+            .replace("\n", "\\n")
+            .replace("\"", "\\\"")
+    } else {
+        ""
+    }
+
     defaultConfig {
         applicationId = "com.dnfapps.arrmatey"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 10
-        versionName = "0.2.0"
+        versionCode = 17
+        versionName = "0.3.6"
     }
     packaging {
         resources {

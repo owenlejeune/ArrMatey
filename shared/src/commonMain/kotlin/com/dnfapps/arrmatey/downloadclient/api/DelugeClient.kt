@@ -19,6 +19,8 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.jsonObject
 
 class DelugeClient(
     private val downloadClient: DownloadClient,
@@ -29,6 +31,8 @@ class DelugeClient(
     private var requestId: Int = 0
 
     override suspend fun testConnection(): NetworkResult<Unit> {
+        // Reset authentication state for test
+        authenticated = false
         return ensureAuthenticated()
     }
 
@@ -62,17 +66,14 @@ class DelugeClient(
                             }
                             is NetworkResult.Error -> rpcResult
                             is NetworkResult.Loading -> rpcResult
-                            else -> NetworkResult.Error(message = "Unexpected Deluge torrents state")
                         }
                     }
                     is NetworkResult.Error -> torrentsResult
                     is NetworkResult.Loading -> torrentsResult
-                    else -> NetworkResult.Error(message = "Unexpected Deluge request state")
                 }
             }
             is NetworkResult.Error -> authResult
             is NetworkResult.Loading -> NetworkResult.Loading
-            else -> NetworkResult.Error(message = "Unexpected authentication state")
         }
     }
 
@@ -86,7 +87,6 @@ class DelugeClient(
             }
             is NetworkResult.Error -> authResult
             is NetworkResult.Loading -> NetworkResult.Loading
-            else -> NetworkResult.Error(message = "Unexpected authentication state")
         }
     }
 
@@ -100,7 +100,6 @@ class DelugeClient(
             }
             is NetworkResult.Error -> authResult
             is NetworkResult.Loading -> NetworkResult.Loading
-            else -> NetworkResult.Error(message = "Unexpected authentication state")
         }
     }
 
@@ -116,12 +115,10 @@ class DelugeClient(
                     is NetworkResult.Success -> result.data.toUnitResult()
                     is NetworkResult.Error -> result
                     is NetworkResult.Loading -> result
-                    else -> NetworkResult.Error(message = "Unexpected Deluge delete state")
                 }
             }
             is NetworkResult.Error -> authResult
             is NetworkResult.Loading -> NetworkResult.Loading
-            else -> NetworkResult.Error(message = "Unexpected authentication state")
         }
     }
 
@@ -152,26 +149,26 @@ class DelugeClient(
                             }
                             is NetworkResult.Error -> rpcResult
                             is NetworkResult.Loading -> rpcResult
-                            else -> NetworkResult.Error(message = "Unexpected Deluge transfer state")
                         }
                     }
                     is NetworkResult.Error -> result
                     is NetworkResult.Loading -> result
-                    else -> NetworkResult.Error(message = "Unexpected Deluge transfer state")
                 }
             }
             is NetworkResult.Error -> authResult
             is NetworkResult.Loading -> NetworkResult.Loading
-            else -> NetworkResult.Error(message = "Unexpected authentication state")
         }
     }
 
     private suspend fun ensureAuthenticated(): NetworkResult<Unit> {
         if (authenticated) return NetworkResult.Success(Unit)
 
+        // Deluge requires an empty password string if no password is set
+        val password = downloadClient.password.ifBlank { "" }
+
         val loginResult = callDeluge<Boolean>(
             method = "auth.login",
-            params = listOf(JsonPrimitive(downloadClient.password))
+            params = listOf(JsonPrimitive(password))
         )
 
         return when (loginResult) {
@@ -183,23 +180,30 @@ class DelugeClient(
                             NetworkResult.Success(Unit)
                         } else {
                             authenticated = false
-                            NetworkResult.Error(message = "Deluge authentication failed")
+                            NetworkResult.Error(
+                                message = "Deluge authentication failed. Please check your password.",
+                                code = 401
+                            )
                         }
                     }
                     is NetworkResult.Error -> {
                         authenticated = false
-                        rpcResult
+                        NetworkResult.Error(
+                            message = "Deluge authentication error: ${rpcResult.message}",
+                            code = rpcResult.code
+                        )
                     }
                     is NetworkResult.Loading -> rpcResult
-                    else -> NetworkResult.Error(message = "Unexpected Deluge auth state")
                 }
             }
             is NetworkResult.Error -> {
                 authenticated = false
-                loginResult
+                NetworkResult.Error(
+                    message = "Failed to connect to Deluge: ${loginResult.message}",
+                    code = loginResult.code
+                )
             }
             is NetworkResult.Loading -> loginResult
-            else -> NetworkResult.Error(message = "Unexpected Deluge login state")
         }
     }
 
@@ -217,7 +221,6 @@ class DelugeClient(
             is NetworkResult.Success -> result.data.toUnitResult()
             is NetworkResult.Error -> result
             is NetworkResult.Loading -> result
-            else -> NetworkResult.Error(message = "Unexpected Deluge torrent action state")
         }
     }
 
@@ -225,21 +228,65 @@ class DelugeClient(
         method: String,
         params: List<JsonElement> = emptyList()
     ): NetworkResult<DelugeJsonRpcResponse<T>> {
-        return httpClient.safePost("json") {
-            contentType(ContentType.Application.Json)
-            setBody(
-                DelugeJsonRpcRequest(
-                    method = method,
-                    params = params,
-                    id = nextRequestId()
+        // Try multiple possible endpoints
+        val endpoints = listOf("json", "api/json", "/json")
+
+        var lastError: NetworkResult.Error? = null
+
+        for (endpoint in endpoints) {
+            val result = httpClient.safePost<DelugeJsonRpcResponse<T>>(endpoint) {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    DelugeJsonRpcRequest(
+                        method = method,
+                        params = params,
+                        id = nextRequestId()
+                    )
                 )
-            )
+            }
+
+            when (result) {
+                is NetworkResult.Success -> return result
+                is NetworkResult.Error -> {
+                    // If we get a 404, try the next endpoint
+                    if (result.code == 404) {
+                        lastError = result
+                        continue
+                    }
+                    // For other errors, return immediately
+                    return result
+                }
+                else -> return result
+            }
         }
+
+        // If all endpoints failed with 404, return the last error
+        return lastError ?: NetworkResult.Error(
+            message = "Could not find Deluge JSON-RPC endpoint"
+        )
     }
 
     private fun <T> DelugeJsonRpcResponse<T>.resultOrError(): NetworkResult<T> {
+        // Check for RPC error
         if (error != null && error != JsonNull) {
-            return NetworkResult.Error(message = "Deluge RPC error: $error")
+            val errorMessage = try {
+                when {
+                    error is JsonPrimitive && error.isString ->
+                        error.jsonPrimitive.content
+                    error is JsonPrimitive ->
+                        error.toString()
+                    error.jsonObject.containsKey("message") ->
+                        error.jsonObject["message"]?.jsonPrimitive?.content ?: "Unknown error"
+                    else ->
+                        error.toString()
+                }
+            } catch (e: Exception) {
+                error.toString()
+            }
+
+            return NetworkResult.Error(
+                message = "Deluge RPC error: $errorMessage"
+            )
         }
 
         val rpcResult = result
@@ -250,7 +297,18 @@ class DelugeClient(
 
     private fun DelugeJsonRpcResponse<JsonElement>.toUnitResult(): NetworkResult<Unit> {
         return if (error != null && error != JsonNull) {
-            NetworkResult.Error(message = "Deluge RPC error: $error")
+            val errorMessage = try {
+                when {
+                    error is JsonPrimitive && error.isString ->
+                        error.jsonPrimitive.content
+                    else ->
+                        error.toString()
+                }
+            } catch (e: Exception) {
+                error.toString()
+            }
+
+            NetworkResult.Error(message = "Deluge RPC error: $errorMessage")
         } else {
             NetworkResult.Success(Unit)
         }
@@ -282,6 +340,7 @@ class DelugeClient(
             contains("downloading", ignoreCase = true) -> DownloadItemStatus.Downloading
             contains("checking", ignoreCase = true) -> DownloadItemStatus.Queued
             contains("allocating", ignoreCase = true) -> DownloadItemStatus.Queued
+            contains("moving", ignoreCase = true) -> DownloadItemStatus.Queued
             else -> DownloadItemStatus.Queued
         }
     }

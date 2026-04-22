@@ -45,7 +45,7 @@ fun AddMovieSheet(
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     addInProgress: Boolean,
-    onAddItem: (ArrMedia) -> Unit,
+    onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     var monitored by remember { mutableStateOf(true) }
@@ -53,6 +53,7 @@ fun AddMovieSheet(
     var qualityProfile by remember { mutableStateOf(qualityProfiles.first()) }
     var rootFolder by remember { mutableStateOf(rootFolders.first()) }
     val selectedTags = remember { mutableStateListOf<Int>() }
+    var searchOnAdd by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -123,6 +124,12 @@ fun AddMovieSheet(
                 )
             }
 
+            LabelledSwitch(
+                label = mokoString(MR.strings.search_on_add_label),
+                checked = searchOnAdd,
+                onCheckedChange = { searchOnAdd = it }
+            )
+
             Button(
                 onClick = {
                     val newItem = item.copyForCreation(
@@ -132,7 +139,7 @@ fun AddMovieSheet(
                         rootFolderPath = rootFolder.path,
                         tags = selectedTags
                     )
-                    onAddItem(newItem)
+                    onAddItem(newItem, searchOnAdd)
                 },
                 enabled = !addInProgress
             ) {

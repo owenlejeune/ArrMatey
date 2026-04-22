@@ -42,7 +42,6 @@ fun LabelledSwitch(
     Row(
         modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
             .selectable(
                 selected = checked,
                 onClick = { onCheckedChange(!checked) },

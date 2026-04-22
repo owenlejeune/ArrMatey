@@ -59,6 +59,7 @@ class DownloadClientSettingsViewModel(
                             username = client.username,
                             password = client.password,
                             apiKey = client.apiKey,
+                            basicAuthEnabled = client.basicAuthEnabled,
                             headers = client.headers,
                             enabled = client.enabled,
                             isEditing = true
@@ -81,7 +82,7 @@ class DownloadClientSettingsViewModel(
         _uiState.update {
             it.copy(
                 url = url,
-                saveButtonEnabled = url.isNotEmpty()
+                saveButtonEnabled = url.isNotEmpty() && (it.basicAuthEnabled || it.apiKey.isNotEmpty())
             )
         }
     }
@@ -100,7 +101,22 @@ class DownloadClientSettingsViewModel(
 
     fun updateApiKey(apiKey: String) {
         _uiState.update {
-            it.copy(apiKey = apiKey)
+            val newApiKey = if (it.basicAuthEnabled) "" else apiKey
+            it.copy(
+                apiKey = newApiKey,
+                saveButtonEnabled = it.url.isNotEmpty() && (it.basicAuthEnabled || newApiKey.isNotEmpty())
+            )
+        }
+    }
+
+    fun updateBasicAuthEnabled(enabled: Boolean) {
+        _uiState.update {
+            val newApiKey = if (enabled) "" else it.apiKey
+            it.copy(
+                basicAuthEnabled = enabled,
+                apiKey = newApiKey,
+                saveButtonEnabled = it.url.isNotEmpty() && (enabled || newApiKey.isNotEmpty())
+            )
         }
     }
 
@@ -145,6 +161,7 @@ class DownloadClientSettingsViewModel(
             username = uiState.value.username,
             password = uiState.value.password,
             apiKey = uiState.value.apiKey,
+            basicAuthEnabled = uiState.value.basicAuthEnabled,
             headers = uiState.value.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
             enabled = uiState.value.enabled,
             selected = downloadClient.value?.selected ?: false

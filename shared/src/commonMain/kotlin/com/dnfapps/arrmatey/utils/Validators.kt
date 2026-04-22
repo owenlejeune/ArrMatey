@@ -1,28 +1,21 @@
 package com.dnfapps.arrmatey.utils
 
 fun String.isValidUrl(): Boolean {
-    // Check if URL starts with http:// or https://
-    if (!lowercase().startsWith("http://") && !lowercase().startsWith("https://")) {
-        return false
-    }
-
     // Regular expression pattern for URL validation
-    // Matches http(s)://domain(:port)?(/path)?
+    // Matches http(s)://(?:userinfo@)?host(:port)?(/path)?
+    // userinfo can contain anything except whitespace and @
+    // host can be anything except whitespace, / and :
+    // port is 1-5 digits
+    // path starts with /
     val urlPattern = Regex(
-        "^https?://([a-zA-Z0-9.-]+)(:[0-9]{1,5})?(/.*)?$"
+        "^https?://(?:[^\\s@]+@)?([^\\s/:]+)(?::([0-9]{1,5}))?(?:/.*)?$",
+        RegexOption.IGNORE_CASE
     )
 
-    // Check if URL matches the pattern
-    if (!urlPattern.matches(lowercase())) {
-        return false
-    }
+    val match = urlPattern.matchEntire(this) ?: return false
 
     // Extract and validate port if present
-    val portPattern = Regex(":([0-9]{1,5})")
-    val portMatch = portPattern.find(lowercase())
-
-    if (portMatch != null) {
-        val port = portMatch.groupValues[1].toInt()
+    match.groups[2]?.value?.toIntOrNull()?.let { port ->
         // Port must be between 1 and 65535
         if (port !in 1..65535) {
             return false

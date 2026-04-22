@@ -7,11 +7,13 @@
 
 import Shared
 import SwiftUI
+import UserNotifications
 
 struct ArrConfigurationView: View {
     let uiState: AddInstanceUiState
     let onApiEndpointChanged: (String) -> Void
     let onApiKeyChanged: (String) -> Void
+    let onBasicAuthChanged: (Bool) -> Void
     let onInstanceLabelChanged: (String) -> Void
     let onIsSlowInstanceChanged: (Bool) -> Void
     let onCustomTimeoutChanged: (Int64?) -> Void
@@ -19,8 +21,9 @@ struct ArrConfigurationView: View {
     let onTestConnection: () -> Void
     let onLocalNetworkEnabledChanged: (Bool) -> Void
     let onLocalNetworkUrlChanged: (String) -> Void
-    let onLocalNetworkSsidChanged: (String) -> Void
+    let onLocalNetworkSsidsChanged: ([String]) -> Void
     let onTestLocalConnection: () -> Void
+    let onToggleNotificationsEnabled: () -> Void
     let onDismissInfoCard: (InstanceType) -> Void
     let showInfoCard: Bool
     let showInstancePicker: Bool
@@ -28,7 +31,6 @@ struct ArrConfigurationView: View {
     @Binding var showError: Bool
     
     @State private var apiEndpoint: String = ""
-    @State private var apiKey: String = ""
     @State private var instanceLabel: String = ""
     @State private var customTimeoutText: String = ""
     @State private var headers: [InstanceHeader] = []
@@ -63,10 +65,11 @@ struct ArrConfigurationView: View {
             }
             
             instanceSection
-            testSection
+            notificationSection
             localNetworkArea
             slowInstanceSection
-            
+            headersSection
+            testSection
         }
         .onChange(of: instanceType, initial: true) { _, newValue in
             instanceLabel = newValue.name
@@ -201,13 +204,18 @@ struct ArrConfigurationView: View {
                 }
             }
             
+            Toggle(MR.strings().use_basic_auth.localized(), isOn: Binding(
+                get: { uiState.basicAuthEnabled },
+                set: { onBasicAuthChanged($0) }
+            ))
+            
             HStack(spacing: 24) {
                 Text(MR.strings().api_key.localized())
+                    .foregroundStyle(!uiState.basicAuthEnabled ? Color.primary.opacity(1.0) : Color.primary.opacity(0.3))
                 TextField(
                     text: Binding(
-                        get: { apiKey.isEmpty ? uiState.apiKey : apiKey },
+                        get: { uiState.apiKey },
                         set: { newValue in
-                            apiKey = newValue
                             onApiKeyChanged(newValue)
                         }
                     ),
@@ -215,6 +223,7 @@ struct ArrConfigurationView: View {
                 ) {
                     EmptyView()
                 }
+                .disabled(uiState.basicAuthEnabled)
                 .multilineTextAlignment(.trailing)
                 .textInputAutocapitalization(.never)
             }
@@ -243,6 +252,35 @@ struct ArrConfigurationView: View {
                     Text(testResult.boolValue ? MR.strings().success.localized() : MR.strings().failure.localized())
                         .foregroundColor(testResult.boolValue ? .green : .red)
                         .multilineTextAlignment(.trailing)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var notificationSection: some View {
+        Section {
+            Toggle(isOn: Binding(
+                get: { uiState.notificationsEnabled },
+                set: { newValue in
+                    if newValue {
+                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                            if granted {
+                                DispatchQueue.main.async {
+                                    onToggleNotificationsEnabled()
+                                }
+                            }
+                        }
+                    } else {
+                        onToggleNotificationsEnabled()
+                    }
+                }
+            )) {
+                VStack(alignment: .leading) {
+                    Text(MR.strings().enable_notifications.localized())
+                    Text(MR.strings().enable_notifications_description.localized())
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
@@ -297,7 +335,9 @@ struct ArrConfigurationView: View {
                             headers[index] = newValue
                             onHeadersChanged(headers)
                         }
-                    )
+                    ),
+                    availableSsids: uiState.localNetworkSsids,
+                    localNetworkConfigured: uiState.localNetworkConfigured
                 )
                 .swipeActions {
                     Button(MR.strings().delete.localized()) {
@@ -371,24 +411,33 @@ struct ArrConfigurationView: View {
                             
                     VStack {
                         HStack(spacing: 24) {
-                                Text(MR.strings().wifi_network_name.localized()).layoutPriority(2)
-                            TextField("MyHomeWiFi",
-                                      text: Binding(get: { uiState.localNetworkSsid }, set: onLocalNetworkSsidChanged))
+                            Text(MR.strings().wifi_network_name.localized()).layoutPriority(2)
+                            TextField("MyHomeWiFi, MyGuestWiFi",
+                                      text: Binding(
+                                        get: { uiState.localNetworkSsids.joined(separator: ", ") },
+                                        set: { newValue in
+                                            let ssids = newValue.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                                            onLocalNetworkSsidsChanged(ssids)
+                                        }
+                                      ))
                             .multilineTextAlignment(.trailing)
                         }
-                        
                     }
                             
                     Button(action: {
                         if let ssid = NetworkUtilsKt.getNetworkUtils().getCurrentWifiSsid() {
-                            onLocalNetworkSsidChanged(ssid)
+                            var currentSsids = uiState.localNetworkSsids
+                            if !currentSsids.contains(ssid) {
+                                currentSsids.append(ssid)
+                                onLocalNetworkSsidsChanged(currentSsids)
+                            }
                         }
                     }) {
                         Label(MR.strings().use_current_network.localized(), systemImage: "wifi")
                     }
                             
                     HStack {
-                        Button(action: onTestConnection) {
+                        Button(action: onTestLocalConnection) {
                             if uiState.localTesting {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle())
@@ -396,7 +445,7 @@ struct ArrConfigurationView: View {
                                 Text(MR.strings().test.localized())
                             }
                         }
-                        .disabled(uiState.localTesting || uiState.localNetworkUrl.isEmpty || uiState.localNetworkSsid.isEmpty)
+                        .disabled(uiState.localTesting || uiState.localNetworkUrl.isEmpty || uiState.localNetworkSsids.isEmpty)
                         
                         Spacer()
                         
@@ -439,4 +488,3 @@ struct ArrConfigurationView: View {
         }
     }
 }
-

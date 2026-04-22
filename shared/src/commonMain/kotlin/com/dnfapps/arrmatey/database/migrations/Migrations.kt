@@ -85,4 +85,33 @@ private val MIGRATION_5_6 = object: Migration(5, 6) {
     }
 }
 
-val migrations = listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+private val MIGRATION_6_7 = object: Migration(6, 7) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            ALTER TABLE instances ADD COLUMN notificationsEnabled INTEGER NOT NULL DEFAULT 0
+        """.trimIndent())
+    }
+}
+
+private val MIGRATION_7_8 = object: Migration(7, 8) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE instances ADD COLUMN localNetworkSsids TEXT NOT NULL DEFAULT '[]'")
+
+        // Migrate existing SSID to the new list format
+        connection.execSQL("UPDATE instances SET localNetworkSsids = '[\"' || localNetworkSsid || '\"]' WHERE localNetworkSsid IS NOT NULL AND localNetworkSsid != ''")
+
+        connection.execSQL("ALTER TABLE instances DROP COLUMN localNetworkSsid")
+    }
+}
+
+private val MIGRATION_8_9 = object: Migration(8, 9) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE instances ADD COLUMN basicAuthEnabled INTEGER NOT NULL DEFAULT 0")
+        connection.execSQL("ALTER TABLE download_clients ADD COLUMN basicAuthEnabled INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+val migrations = arrayOf(
+    MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
+    MIGRATION_7_8, MIGRATION_8_9
+)

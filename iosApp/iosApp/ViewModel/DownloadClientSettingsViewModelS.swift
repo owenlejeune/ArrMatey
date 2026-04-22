@@ -52,6 +52,10 @@ class DownloadClientSettingsViewModelS: ObservableObject {
         viewModel.updateApiKey(apiKey: apiKey)
     }
     
+    func updateBasicAuthEnabled(_ enabled: Bool) {
+        viewModel.updateBasicAuthEnabled(enabled: enabled)
+    }
+    
     func updateHeadrs(_ headers: [InstanceHeader]) {
         viewModel.updateHeaders(headers: headers)
     }

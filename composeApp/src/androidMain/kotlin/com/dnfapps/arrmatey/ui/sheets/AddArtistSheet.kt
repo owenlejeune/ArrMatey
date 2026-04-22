@@ -31,6 +31,7 @@ import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
+import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
@@ -43,7 +44,7 @@ fun AddArtistSheet(
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     addInProgress: Boolean,
-    onAddItem: (ArrMedia) -> Unit,
+    onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     var monitor by remember { mutableStateOf(ArtistMonitorType.All) }
@@ -51,6 +52,7 @@ fun AddArtistSheet(
     var monitorNew by remember { mutableStateOf(ArtistMonitorType.None) }
     var rootFolder by remember { mutableStateOf(rootFolders.first()) }
     val selectedTags = remember { mutableStateListOf<Int>() }
+    var searchOnAdd by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -125,6 +127,12 @@ fun AddArtistSheet(
                 )
             }
 
+            LabelledSwitch(
+                label = mokoString(MR.strings.search_on_add_label),
+                checked = searchOnAdd,
+                onCheckedChange = { searchOnAdd = it }
+            )
+
             Button(
                 onClick = {
                     val newItem = item.copyForCreation(
@@ -134,7 +142,7 @@ fun AddArtistSheet(
                         rootFolderPath = rootFolder.path,
                         tags = selectedTags
                     )
-                    onAddItem(newItem)
+                    onAddItem(newItem, searchOnAdd)
                 },
                 enabled = !addInProgress
             ) {

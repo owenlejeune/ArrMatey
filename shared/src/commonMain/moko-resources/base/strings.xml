@@ -197,6 +197,8 @@
     <string name="add_header">Add header</string>
     <string name="header_name">Header Name</string>
     <string name="header_value">Header Value</string>
+    <string name="local_only">Local only</string>
+    <string name="remote_only">Remote only</string>
     <string name="donate">Donate</string>
     <string name="libraries">Libraries</string>
     <string name="press_again_to_exit">Press back again to exit</string>
@@ -237,6 +239,8 @@
     <string name="comment">Comment</string>
     <string name="comments">Comments</string>
     <string name="description">Description</string>
+    <string name="search_on_add_label">Search for files immediately</string>
+    <string name="use_basic_auth">Use basic auth</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>
@@ -403,7 +407,7 @@
     <string name="local_network_description">Use a different URL when connected to your home WiFi</string>
     <string name="local_network_url">Local Network URL</string>
     <string name="wifi_network_name">WiFi Network Name (SSID)</string>
-    <string name="wifi_ssid_description">The name of your WiFi network</string>
+    <string name="wifi_ssid_description">The name of your WiFi network. If you have multiple SSIDs, separate them with commas</string>
     <string name="current_network">Currently connected to: %s</string>
     <string name="test_local_connection">Test Local Connection</string>
 
@@ -483,5 +487,14 @@
     <string name="audio">Audio</string>
     <string name="subtitle">Subtitle</string>
     <string name="other">Other</string>
+
+    <!-- Notifications -->
+    <string name="new_release">New Release</string>
+    <string name="new_episode">New Episode</string>
+    <string name="new_album">New Album</string>
+    <string name="instance_new_release">New Release - %1$s</string>
+    <string name="instance_notification_channel">%1$s Release Notifications</string>
+    <string name="enable_notifications">Enable notifications</string>
+    <string name="enable_notifications_description">Receive notifications for new releases</string>
 
 </resources>

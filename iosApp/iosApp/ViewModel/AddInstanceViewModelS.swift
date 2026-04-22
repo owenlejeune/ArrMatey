@@ -38,6 +38,10 @@ class AddInstanceViewModelS: ObservableObject {
         viewModel.setApiKey(value: key)
     }
     
+    func setBasicAuthEnabled(_ enabled: Bool) {
+        viewModel.setBasicAuthEnabled(enabled: enabled)
+    }
+    
     func setIsSlowInstance(_ isSlowInstance: Bool) {
         viewModel.setIsSlowInstance(value: isSlowInstance)
     }
@@ -62,8 +66,12 @@ class AddInstanceViewModelS: ObservableObject {
         viewModel.setLocalNetworkUrl(url: url)
     }
     
-    func setLocalNetworkSsid(_ ssid: String) {
-        viewModel.setLocalNetworkSsid(ssid: ssid)
+    func setLocalNetworkSsids(_ ssids: [String]) {
+        viewModel.setLocalNetworkSsid(ssids: ssids)
+    }
+    
+    func toggleNotificationsEnabled() {
+        viewModel.toggleNotificationsEnabled()
     }
     
     func reset() {

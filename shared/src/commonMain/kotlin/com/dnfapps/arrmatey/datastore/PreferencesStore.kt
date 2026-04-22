@@ -262,8 +262,12 @@ class PreferencesStore(
                 key !in trackedKeys && entry?.isDisabled == false
             }
 
+            if (migratedVisible.isEmpty() && migratedHidden.isEmpty() && missingKeys.isEmpty()) {
+                return TabPreferences()
+            }
+
             TabPreferences(
-                orderedVisibleKeys = migratedVisible,
+                orderedVisibleKeys = migratedVisible.ifEmpty { TabItem.defaultStandardKeys() },
                 orderedHiddenKeys = migratedHidden + missingKeys
             )
         } catch (e: Exception) {
@@ -277,9 +281,9 @@ class PreferencesStore(
         }
 
     val shouldShowReleaseNotes: Flow<Boolean> = dataStore.data
-        .combine(isFirstLaunch) { preferences, isFirst ->
+        .map { preferences ->
+            val isFirst = preferences[isFirstLaunchKey] ?: true
             if (isFirst) {
-                dataStore.edit { it[lastReleaseNotesKey] = ReleaseNotes.latestUpdate.buildCode }
                 false
             } else {
                 val lastCode = preferences[lastReleaseNotesKey] ?: -1
@@ -300,7 +304,7 @@ class PreferencesStore(
             dataStore.edit { preferences ->
                 val current = preferences[isFirstLaunchKey] ?: true
                 if (current) {
-                    markReleaseNotesAsSeen()
+                    preferences[lastReleaseNotesKey] = ReleaseNotes.latestUpdate.buildCode
                 }
                 preferences[isFirstLaunchKey] = false
             }

@@ -9,6 +9,10 @@ import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
+import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
+import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
+import com.dnfapps.arrmatey.utils.format
+import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,10 +21,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
@@ -28,7 +34,10 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 class CalendarService(
-    private val instanceManager: InstanceManager
+    private val instanceManager: InstanceManager,
+    private val notificationCleanupUseCase: NotificationCleanupUseCase,
+    private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
+    private val logger: Logger
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -113,27 +122,48 @@ class CalendarService(
         end: LocalDate
     ) {
         repository.client.getMovieCalendar(start, end)
-            .onSuccess { movies ->
-                val currentMovies = _movies.value.toMutableMap()
+            .onSuccess { fetchedMovies ->
+                val fetchedIds = fetchedMovies.map { it.tmdbId.toInt() }.toSet()
+                
+                // Offload notification work
+                val snapshot = _movies.value.values.flatten()
+                scope.launch {
+                    notificationCleanupUseCase.cleanup(
+                        instanceId = repository.instance.id,
+                        currentItems = snapshot,
+                        fetchedIds = fetchedIds,
+                        getId = { it.tmdbId.toInt() },
+                        getInstanceId = { it.instanceId }
+                    )
 
-                movies.forEach { movie ->
-                    movie.digitalRelease?.let { instant ->
-                        val date = instant.toLocalDate()
-                        upsertMovie(currentMovies, movie, date)
-                    }
-
-                    movie.physicalRelease?.let { instant ->
-                        val date = instant.toLocalDate()
-                        upsertMovie(currentMovies, movie, date)
-                    }
-
-                    movie.inCinemas?.let { instant ->
-                        val date = instant.toLocalDate()
-                        upsertMovie(currentMovies, movie, date)
+                    fetchedMovies.forEach { movie ->
+                        movie.closestFutureRelease?.let { (releaseType, instant) ->
+                            scheduleNotificationUseCase(
+                                instance = repository.instance,
+                                message = movie.title ?: "Unknown Movie",
+                                scheduledTime = instant,
+                                notificationId = movie.tmdbId.toInt(),
+                                releaseType = releaseType
+                            )
+                        }
                     }
                 }
 
-                _movies.value = currentMovies
+                _movies.update { current ->
+                    val next = current.toMutableMap()
+                    fetchedMovies.forEach { movie ->
+                        movie.digitalRelease?.let { instant ->
+                            upsertMovie(next, movie, instant.toLocalDate())
+                        }
+                        movie.physicalRelease?.let { instant ->
+                            upsertMovie(next, movie, instant.toLocalDate())
+                        }
+                        movie.inCinemas?.let { instant ->
+                            upsertMovie(next, movie, instant.toLocalDate())
+                        }
+                    }
+                    next
+                }
             }
             .onError { _, message, _ ->
                 _error.value = message
@@ -164,17 +194,40 @@ class CalendarService(
         end: LocalDate
     ) {
         repository.client.getEpisodeCalendar(start, end)
-            .onSuccess { episodes ->
-                val currentEpisodes = _episodes.value.toMutableMap()
+            .onSuccess { fetchedEpisodes ->
+                val fetchedIds = fetchedEpisodes.map { it.tvdbId?.toInt() ?: it.id.toInt() }.toSet()
+                
+                val snapshot = _episodes.value.values.flatten()
+                scope.launch {
+                    notificationCleanupUseCase.cleanup(
+                        instanceId = repository.instance.id,
+                        currentItems = snapshot,
+                        fetchedIds = fetchedIds,
+                        getId = { it.tvdbId?.toInt() ?: it.id.toInt() },
+                        getInstanceId = { it.instanceId }
+                    )
 
-                episodes.forEach { episode ->
-                    episode.airDateUtc?.let { instant ->
-                        val date = instant.toLocalDate()
-                        upsertEpisode(currentEpisodes, episode, date)
+                    fetchedEpisodes.forEach { episode ->
+                        episode.airDateUtc?.let { instant ->
+                            scheduleNotificationUseCase(
+                                instance = repository.instance,
+                                message = "${episode.series?.title ?: "Unknown Series"} - S${episode.seasonNumber}E${episode.episodeNumber} - ${instant.format("HH:mm")}",
+                                scheduledTime = instant,
+                                notificationId = episode.tvdbId?.toInt() ?: episode.id.toInt()
+                            )
+                        }
                     }
                 }
 
-                _episodes.value = currentEpisodes
+                _episodes.update { current ->
+                    val next = current.toMutableMap()
+                    fetchedEpisodes.forEach { episode ->
+                        episode.airDateUtc?.let { instant ->
+                            upsertEpisode(next, episode, instant.toLocalDate())
+                        }
+                    }
+                    next
+                }
                 updateEpisodeGroups()
             }
             .onError { _, message, cause ->
@@ -195,7 +248,7 @@ class CalendarService(
             when {
                 existing.tvdbId != null && episode.tvdbId != null -> existing.tvdbId == episode.tvdbId
                 existing.series?.tvdbId != null && episode.series?.tvdbId != null ->
-                    existing.series?.tvdbId == episode.series?.tvdbId &&
+                    existing.series.tvdbId == episode.series.tvdbId &&
                     existing.seasonNumber == episode.seasonNumber &&
                     existing.episodeNumber == episode.episodeNumber
                 else -> existing.id == episode.id && existing.instanceId == episode.instanceId
@@ -240,17 +293,40 @@ class CalendarService(
         end: LocalDate
     ) {
         repository.client.getAlbumCalendar(start, end)
-            .onSuccess { albums ->
-                val currentAlbums = _albums.value.toMutableMap()
+            .onSuccess { fetchedAlbums ->
+                val fetchedIds = fetchedAlbums.map { it.id.toInt() }.toSet()
+                
+                val snapshot = _albums.value.values.flatten()
+                scope.launch {
+                    notificationCleanupUseCase.cleanup(
+                        instanceId = repository.instance.id,
+                        currentItems = snapshot,
+                        fetchedIds = fetchedIds,
+                        getId = { it.id.toInt() },
+                        getInstanceId = { it.instanceId }
+                    )
 
-                albums.forEach { album ->
-                    album.releaseDate?.let { instant ->
-                        val date = instant.toLocalDate()
-                        upsertAlbum(currentAlbums, album, date)
+                    fetchedAlbums.forEach { album ->
+                        album.releaseDate?.let { instant ->
+                            scheduleNotificationUseCase(
+                                instance = repository.instance,
+                                message = "${album.artist?.title ?: "Unknown Artist"} - ${album.title ?: "Unknown Album"}",
+                                scheduledTime = instant,
+                                notificationId = album.id.toInt()
+                            )
+                        }
                     }
                 }
 
-                _albums.value = currentAlbums
+                _albums.update { current ->
+                    val next = current.toMutableMap()
+                    fetchedAlbums.forEach { album ->
+                        album.releaseDate?.let { instant ->
+                            upsertAlbum(next, album, instant.toLocalDate())
+                        }
+                    }
+                    next
+                }
             }
             .onError { _, message, cause ->
                 _error.value = message

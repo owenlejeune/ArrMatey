@@ -14,7 +14,7 @@ struct AddArtistForm: View {
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
-    let onAddItem: (Arrtist) -> Void
+    let onAddItem: (Arrtist, Bool) -> Void
     let onDismiss: () -> Void
     
     @State private var monitor: ArtistMonitorType = .all
@@ -22,6 +22,7 @@ struct AddArtistForm: View {
     @State private var selectedQualityProfileId: Int32? = nil
     @State private var selectedRootFolderId: Int32? = nil
     @State private var selectedTags: Set<Int> = Set()
+    @State private var searchOnAdd: Bool = false
     
     private let selectedStatuses: [ArtistMonitorType] = [.all, .none, .future]
     
@@ -90,6 +91,11 @@ struct AddArtistForm: View {
                     }
                 }
                 
+                
+                Toggle(MR.strings().search_on_add_label.localized(), isOn: $searchOnAdd)
+            }
+            
+            Section {
                 if selectedRootFolderId != nil {
                     Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolderId) {
                         ForEach(rootFolders, id: \.self) { rootFolder in
@@ -124,7 +130,7 @@ struct AddArtistForm: View {
                             rootFolderPath: path,
                             tags: Array(selectedTags.map { $0.asKotlinInt })
                         )
-                        onAddItem(newArtist)
+                        onAddItem(newArtist, searchOnAdd)
                     }
                 }
             } label: {

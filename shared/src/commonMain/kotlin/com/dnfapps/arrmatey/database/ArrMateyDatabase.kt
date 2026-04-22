@@ -18,7 +18,7 @@ import kotlinx.coroutines.IO
 
 @Database(
     entities = [Instance::class, DownloadClient::class, CustomWebpage::class],
-    version = 6,
+    version = 9,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -40,6 +40,6 @@ fun getRoomDatabase(
     return builder
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
-        .addMigrations(migrations = migrations.toTypedArray())
+        .addMigrations(*migrations)
         .build()
 }
