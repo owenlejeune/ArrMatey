@@ -13,6 +13,7 @@ class NavigationManager: ObservableObject {
     @Published var seriesPath = NavigationPath()
     @Published var moviePath = NavigationPath()
     @Published var musicPath = NavigationPath()
+    @Published var seerrPath = NavigationPath()
     @Published var launcherPath = NavigationPath()
     
     @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemSettings.shared)
@@ -32,6 +33,7 @@ class NavigationManager: ObservableObject {
         case .sonarr: seriesPath.append(route)
         case .radarr: moviePath.append(route)
         case .lidarr: musicPath.append(route)
+        case .seerr: break
         case .prowlarr: break // Prowlarr doesn't use media routes
         }
     }
@@ -53,6 +55,7 @@ class NavigationManager: ObservableObject {
         case .lidarr:
             if !musicPath.isEmpty { musicPath.removeLast() }
             musicPath.append(route)
+        case .seerr: break
         case .prowlarr: break // Prowlarr doesn't use media routes
         }
     }
@@ -103,6 +106,7 @@ class NavigationManager: ObservableObject {
         seriesPath = NavigationPath()
         moviePath = NavigationPath()
         musicPath = NavigationPath()
+        seerrPath = NavigationPath()
         launcherPath = NavigationPath()
     }
     
@@ -128,6 +132,8 @@ class NavigationManager: ObservableObject {
         self.seriesPath = NavigationPath()
         self.moviePath = NavigationPath()
         self.musicPath = NavigationPath()
+        
+        self.seerrPath = NavigationPath()
     }
     
     func goInLauncher(to route: SettingsRoute) {
