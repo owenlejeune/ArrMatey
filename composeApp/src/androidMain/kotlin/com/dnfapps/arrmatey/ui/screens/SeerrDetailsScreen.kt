@@ -42,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -88,6 +89,7 @@ import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.sheets.SeerrReportIssueSheet
+import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.format
@@ -112,6 +114,9 @@ fun SeerrDetailsScreen(
     val isViewRequestSheetVisible by viewModel.isViewRequestSheetVisible.collectAsStateWithLifecycle()
     val isReportIssueSheetVisible by viewModel.isReportIssueSheetVisible.collectAsStateWithLifecycle()
     val reportIssueState by viewModel.reportIssueState.collectAsStateWithLifecycle()
+
+    val radarrServices by viewModel.radarrServices.collectAsState()
+    val sonarrServices by viewModel.sonarrServices.collectAsState()
 
     val scrollState = rememberScrollState()
 
@@ -178,7 +183,7 @@ fun SeerrDetailsScreen(
                                     onRequest4kClicked = { },
                                     onWatchTrailerClicked = { context.openLink(it) },
                                     onViewRequestClicked = { viewModel.showViewRequestSheet() },
-                                    onApproveRequestClicked = { viewModel.approveRequest(it) },
+                                    onApproveRequestClicked = { viewModel.showViewRequestSheet() },
                                     onDeclineRequestClicked = { viewModel.declineRequest(it) },
                                 )
 
@@ -371,6 +376,25 @@ fun SeerrDetailsScreen(
                     onSubmit = { viewModel.submitIssue() },
                     onDismiss = { viewModel.hideReportIssueSheet() }
                 )
+            }
+
+            if (isViewRequestSheetVisible) {
+                (uiState as? SeerrDetailsState.Success)?.item?.let { details ->
+                    SeerrViewRequestSheet(
+                        details = details,
+                        radarrServices = radarrServices,
+                        sonarrServices = sonarrServices,
+                        onDismissRequest = { viewModel.hideViewRequestSheet() },
+                        onApproveRequest = { id, profileId, rootFolder, langId -> 
+                            viewModel.approveRequest(id, profileId, rootFolder, langId)
+                            viewModel.hideViewRequestSheet()
+                        },
+                        onDeclineRequest = { id: Long ->
+                            viewModel.declineRequest(id)
+                            viewModel.hideViewRequestSheet()
+                        }
+                    )
+                }
             }
         }
     }

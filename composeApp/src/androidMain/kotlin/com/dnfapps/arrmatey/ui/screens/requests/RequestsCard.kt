@@ -18,7 +18,9 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
+import com.dnfapps.arrmatey.seerr.api.model.RequestSeason
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
@@ -81,8 +83,11 @@ fun RequestCard(
                     request = request
                 )
 
-                (details as? TvDetails)?.let { tvDetails ->
-                    RequestCardSeasonInfo(tvDetails = tvDetails)
+//                (details as? TvDetails)?.let { tvDetails ->
+//                    RequestCardSeasonInfo(tvDetails = tvDetails)
+//                }
+                if (request.type == RequestType.Tv && request.seasons.isNotEmpty()) {
+                    RequestCardSeasonInfo(seasons = request.seasons)
                 }
 
                 Spacer(Modifier.height(12.dp))
@@ -181,9 +186,9 @@ private fun RequestMetadata(request: MediaRequest) {
 }
 
 @Composable
-private fun RequestCardSeasonInfo(tvDetails: TvDetails) {
+private fun RequestCardSeasonInfo(seasons: List<RequestSeason>) {
     Text(
-        text = mokoPlural(MR.plurals.seasons, tvDetails.numberOfSeasons),
+        text = mokoString(MR.strings.seasons_header),
         style = MaterialTheme.typography.labelSmall
     )
     FlowRow(
@@ -191,7 +196,7 @@ private fun RequestCardSeasonInfo(tvDetails: TvDetails) {
         verticalArrangement = Arrangement.spacedBy(2.dp),
         modifier = Modifier.padding(top = 2.dp)
     ) {
-        tvDetails.seasons.forEach {
+        seasons.forEach {
             Badge(
                 containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 contentColor = MaterialTheme.colorScheme.surfaceVariant

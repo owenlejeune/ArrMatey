@@ -89,9 +89,15 @@ class SeerrInstanceRepository(
         return client.getRequests(page = page, pageSize = pageSize)
     }
 
-    suspend fun setRequestStatus(requestId: Long, status: ApprovalStatus): NetworkResult<MediaRequest> {
+    suspend fun setRequestStatus(
+        requestId: Long,
+        status: ApprovalStatus,
+        profileId: Long? = null,
+        rootFolder: String? = null,
+        languageProfileId: Long? = null
+    ): NetworkResult<MediaRequest> {
         updateOperationsState(requestId, status, OperationStatus.InProgress)
-        return client.setRequestStatus(requestId, status)
+        return client.setRequestStatus(requestId, status, profileId, rootFolder, languageProfileId)
             .onSuccess {
                 updateOperationsState(requestId, status, OperationStatus.Success())
             }
@@ -207,6 +213,14 @@ class SeerrInstanceRepository(
 
     suspend fun getIssueDetails(issueId: Long): NetworkResult<Issue> {
         return client.getIssueDetails(issueId)
+    }
+
+    suspend fun getRadarrServices(): NetworkResult<List<Service>> {
+        return client.getRadarrServices().onSuccess { _radarrServices.value = it }
+    }
+
+    suspend fun getSonarrServices(): NetworkResult<List<Service>> {
+        return client.getSonarrServices().onSuccess { _sonarrServices.value = it }
     }
 
     suspend fun closeIssue(issueId: Long): NetworkResult<Unit> {

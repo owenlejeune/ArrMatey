@@ -14,6 +14,9 @@ class SetRequestApprovalStatusUseCase {
     suspend operator fun invoke(
         requestId: Long,
         approvalStatus: ApprovalStatus,
-        repository: SeerrInstanceRepository
-    ): NetworkResult<MediaRequest> = repository.setRequestStatus(requestId, approvalStatus)
+        repository: SeerrInstanceRepository,
+        profileId: Long? = null,
+        rootFolder: String? = null,
+        languageProfileId: Long? = null
+    ): NetworkResult<MediaRequest> = repository.setRequestStatus(requestId, approvalStatus, profileId, rootFolder, languageProfileId)
 }

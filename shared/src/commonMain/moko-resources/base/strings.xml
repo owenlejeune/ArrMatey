@@ -121,7 +121,7 @@
     <string name="airing_next">Next episode</string>
     <string name="next_album">Next album</string>
     <string name="continuing_unknown">Continuing - Unknown</string>
-    <string name="files">Files</string>
+    <string name="files">Files</string>\
     <string name="no_files">No files</string>
     <string name="history">History</string>
     <string name="added_on">Added on %1$s</string>
@@ -461,6 +461,12 @@
     <string name="approved_by">Approved by</string>
     <string name="opened_by">Opened by</string>
     <string name="open">Open</string>
+    <string name="pending_request">Pending Request</string>
+    <string name="season_label_short">Season</string>
+    <string name="episodes_label_short"># of Episodes</string>
+    <string name="not_requested">Not Requested</string>
+    <string name="advanced">Advanced</string>
+    <string name="default_label">Default</string>
 
     <!--- Download Status -->
     <string name="downloading">Downloading</string>

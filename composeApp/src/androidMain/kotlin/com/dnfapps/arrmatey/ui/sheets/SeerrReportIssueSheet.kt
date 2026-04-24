@@ -58,7 +58,7 @@ fun SeerrReportIssueSheet(
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Text(
-                    text = state.mediaTitle.takeUnless { it.isEmpty() } ?: "EMPTY TITLE",
+                    text = state.mediaTitle,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary
                 )

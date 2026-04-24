@@ -134,7 +134,8 @@ enum class InstanceType(
         apiBase = "api/v1",
         testEndpoint = "auth/me",
         includeTopLevelAutomaticSearchOption = false,
-        aspectRatio = AspectRatio.Poster
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = false
     ),
     Prowlarr(
         resource = MR.strings.prowlarr_description,

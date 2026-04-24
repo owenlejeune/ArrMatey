@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class RootFolder(
     val id: Int,
     val path: String,
-    val accessible: Boolean,
+    val accessible: Boolean = true,
     val freeSpace: Long,
     val unmappedFolders: List<UnmappedFolder> = emptyList()
 ) {

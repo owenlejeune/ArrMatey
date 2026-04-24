@@ -32,7 +32,8 @@ fun BadgeContent(
         TabItem.Standard.REQUESTS -> {
             val pagedData by requestsViewModel.requestsState.collectAsStateWithLifecycle()
             if (pagedData.totalItemCount > 0) {
-                Badge { Text(pagedData.totalItemCount.toString()) }
+                val badgeText = if (pagedData.totalItemCount > 9) "9+" else pagedData.totalItemCount.toString()
+                Badge { Text(badgeText) }
             }
         }
         else -> {}

@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
+import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
@@ -33,7 +34,13 @@ interface SeerrClient {
     suspend fun getRequests(page: Int = 1, pageSize: Int = 100): NetworkResult<RequestResponse>
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
-    suspend fun setRequestStatus(requestId: Long, status: ApprovalStatus): NetworkResult<MediaRequest>
+    suspend fun setRequestStatus(
+        requestId: Long,
+        status: ApprovalStatus,
+        profileId: Long? = null,
+        rootFolder: String? = null,
+        languageProfileId: Long? = null
+    ): NetworkResult<MediaRequest>
     suspend fun deleteRequest(requestId: Long): NetworkResult<Unit>
     suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit>
     suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings>
@@ -41,6 +48,8 @@ interface SeerrClient {
     suspend fun getSeasonDetails(mediaId: Long, seasonNumber: Int): NetworkResult<Season>
     suspend fun getRadarrServices(): NetworkResult<List<Service>>
     suspend fun getSonarrServices(): NetworkResult<List<Service>>
+    suspend fun getRadarrDetails(id: Long): NetworkResult<ServiceDetails>
+    suspend fun getSonarrDetails(id: Long): NetworkResult<ServiceDetails>
     suspend fun getIssues(page: Int = 1, pageSize: Int = 100): NetworkResult<IssuesResponse>
     suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue>
     suspend fun submitIssueComment(issueId: Long, comment: String): NetworkResult<Issue>
@@ -68,7 +77,8 @@ class SeerrClientImpl(
     ): NetworkResult<RequestResponse> =
         get("request", mapOf(
             "take" to pageSize,
-            "skip" to (page - 1) * pageSize
+            "skip" to (page - 1) * pageSize,
+            "filter" to "pending"
         ))
 
     override suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails> =
@@ -79,9 +89,16 @@ class SeerrClientImpl(
 
     override suspend fun setRequestStatus(
         requestId: Long,
-        status: ApprovalStatus
+        status: ApprovalStatus,
+        profileId: Long?,
+        rootFolder: String?,
+        languageProfileId: Long?
     ): NetworkResult<MediaRequest> =
-        post("request/$requestId/${status.name.lowercase()}")
+        post("request/$requestId/${status.name.lowercase()}", buildJsonObject {
+            profileId?.let { put("profileId", it) }
+            rootFolder?.let { put("rootFolder", it) }
+            languageProfileId?.let { put("languageProfileId", it) }
+        })
 
     override suspend fun deleteRequest(requestId: Long): NetworkResult<Unit> =
         delete("request/$requestId")
@@ -103,6 +120,12 @@ class SeerrClientImpl(
 
     override suspend fun getSonarrServices(): NetworkResult<List<Service>> =
         get("service/sonarr")
+
+    override suspend fun getRadarrDetails(id: Long): NetworkResult<ServiceDetails> =
+        get("service/sonarr/$id")
+
+    override suspend fun getSonarrDetails(id: Long): NetworkResult<ServiceDetails> =
+        get("service/radarr/$id")
 
     override suspend fun getIssues(page: Int, pageSize: Int): NetworkResult<IssuesResponse> =
         get("issue", mapOf(

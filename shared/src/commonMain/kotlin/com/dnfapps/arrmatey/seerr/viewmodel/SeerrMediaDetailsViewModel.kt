@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
+import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
@@ -108,6 +109,12 @@ class SeerrMediaDetailsViewModel(
     private val _currentUser = MutableStateFlow<SeerrUser?>(null)
     val currentUser: StateFlow<SeerrUser?> = _currentUser.asStateFlow()
 
+    private val _radarrServices = MutableStateFlow<List<Service>>(emptyList())
+    val radarrServices: StateFlow<List<Service>> = _radarrServices.asStateFlow()
+
+    private val _sonarrServices = MutableStateFlow<List<Service>>(emptyList())
+    val sonarrServices: StateFlow<List<Service>> = _sonarrServices.asStateFlow()
+
     val buttonState: StateFlow<MediaButtonState> = combine(
         _uiState,
         _currentUser,
@@ -154,6 +161,18 @@ class SeerrMediaDetailsViewModel(
                 }
         }
         viewModelScope.launch {
+            repository.getRadarrServices()
+        }
+        viewModelScope.launch {
+            repository.getSonarrServices()
+        }
+        viewModelScope.launch {
+            repository.radarrServices.collect { _radarrServices.value = it }
+        }
+        viewModelScope.launch {
+            repository.sonarrServices.collect { _sonarrServices.value = it }
+        }
+        viewModelScope.launch {
             getCurrentSeerrUserUseCase(repository)
                 .collect { state ->
                     _currentUser.value = state
@@ -175,10 +194,15 @@ class SeerrMediaDetailsViewModel(
         }
     }
 
-    fun approveRequest(requestId: Long) {
+    fun approveRequest(
+        requestId: Long,
+        profileId: Long? = null,
+        rootFolder: String? = null,
+        languageProfileId: Long? = null
+    ) {
         val repository = currentRepository ?: return
         viewModelScope.launch {
-            setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Approve, repository)
+            setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Approve, repository, profileId, rootFolder, languageProfileId)
                 .onSuccess { refreshDetails() }
         }
     }
