@@ -116,8 +116,10 @@
     <string name="cache_on_disk_description">Cache the contents of this library on device for offline access.</string>
     <string name="seasons_header">Seasons</string>
     <string name="season">Season</string>
+    <string name="all_seasons">All seasons</string>
     <string name="season_label">Season %d</string>
     <string name="specials">Specials</string>
+    <string name="all_episodes">All episodes</string>
     <string name="airing_next">Next episode</string>
     <string name="next_album">Next album</string>
     <string name="continuing_unknown">Continuing - Unknown</string>
@@ -241,6 +243,7 @@
     <string name="description">Description</string>
     <string name="search_on_add_label">Search for files immediately</string>
     <string name="use_basic_auth">Use basic auth</string>
+    <string name="message">Message</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>
@@ -451,6 +454,7 @@
     <string name="no_app_found">No playback app available</string>
     <string name="manage">Manage</string>
     <string name="report_issue">Report issue</string>
+    <string name="report_an_issue">Report an issue</string>
     <string name="watch_on_plex">Watch on Plex</string>
     <string name="watch_on_jellyfin">Watch on Jellyfin</string>
     <string name="watch">Watch</string>
@@ -465,6 +469,7 @@
     <string name="season_label_short">Season</string>
     <string name="episodes_label_short"># of Episodes</string>
     <string name="not_requested">Not Requested</string>
+    <string name="request_as">Request as</string>
     <string name="advanced">Advanced</string>
     <string name="default_label">Default</string>
 

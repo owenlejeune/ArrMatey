@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Service
+import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -115,6 +117,9 @@ class SeerrMediaDetailsViewModel(
     private val _sonarrServices = MutableStateFlow<List<Service>>(emptyList())
     val sonarrServices: StateFlow<List<Service>> = _sonarrServices.asStateFlow()
 
+    private val _serviceDetails = MutableStateFlow<ServiceDetails?>(null)
+    val serviceDetails: StateFlow<ServiceDetails?> = _serviceDetails.asStateFlow()
+
     val buttonState: StateFlow<MediaButtonState> = combine(
         _uiState,
         _currentUser,
@@ -173,9 +178,26 @@ class SeerrMediaDetailsViewModel(
             repository.sonarrServices.collect { _sonarrServices.value = it }
         }
         viewModelScope.launch {
-            getCurrentSeerrUserUseCase(repository)
-                .collect { state ->
-                    _currentUser.value = state
+            combine(_uiState, _radarrServices, _sonarrServices) { state, radarr, sonarr ->
+                if (state is SeerrDetailsState.Success) {
+                    val request = state.item.mediaInfo?.requests?.firstOrNull { it.status == 1 }
+                    val serverId = request?.serverId ?: when (state.item.requestType) {
+                        RequestType.Movie -> radarr.find { it.isDefault }?.id
+                        RequestType.Tv -> sonarr.find { it.isDefault }?.id
+                    }
+                    if (serverId != null) serverId to state.item.requestType else null
+                } else null
+            }
+                .filterNotNull()
+                .distinctUntilChanged()
+                .collectLatest { (serverId, type) ->
+                    val result = when (type) {
+                        RequestType.Movie -> repository.getRadarrDetails(serverId)
+                        RequestType.Tv -> repository.getSonarrDetails(serverId)
+                    }
+                    result.onSuccess { details ->
+                        _serviceDetails.value = details
+                    }
                 }
         }
         viewModelScope.launch {
@@ -198,12 +220,20 @@ class SeerrMediaDetailsViewModel(
         requestId: Long,
         profileId: Long? = null,
         rootFolder: String? = null,
-        languageProfileId: Long? = null
+        languageProfileId: Long? = null,
+        seasons: List<Int>? = null
     ) {
         val repository = currentRepository ?: return
         viewModelScope.launch {
-            setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Approve, repository, profileId, rootFolder, languageProfileId)
-                .onSuccess { refreshDetails() }
+            setRequestApprovalStatusUseCase(
+                requestId = requestId,
+                approvalStatus = ApprovalStatus.Approve,
+                repository = repository,
+                profileId = profileId,
+                rootFolder = rootFolder,
+                languageProfileId = languageProfileId,
+                seasons = seasons
+            ).onSuccess { refreshDetails() }
         }
     }
 

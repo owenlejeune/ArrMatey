@@ -17,6 +17,7 @@ class SetRequestApprovalStatusUseCase {
         repository: SeerrInstanceRepository,
         profileId: Long? = null,
         rootFolder: String? = null,
-        languageProfileId: Long? = null
-    ): NetworkResult<MediaRequest> = repository.setRequestStatus(requestId, approvalStatus, profileId, rootFolder, languageProfileId)
+        languageProfileId: Long? = null,
+        seasons: List<Int>? = null
+    ): NetworkResult<MediaRequest> = repository.setRequestStatus(requestId, approvalStatus, profileId, rootFolder, languageProfileId, seasons)
 }

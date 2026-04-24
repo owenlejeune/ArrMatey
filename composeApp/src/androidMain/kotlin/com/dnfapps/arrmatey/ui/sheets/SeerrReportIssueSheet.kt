@@ -54,7 +54,7 @@ fun SeerrReportIssueSheet(
         ) {
             Column {
                 Text(
-                    text = "Report an Issue",
+                    text = mokoString(MR.strings.report_an_issue),
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Text(
@@ -76,13 +76,13 @@ fun SeerrReportIssueSheet(
                         DropdownPicker(
                             options = state.availableSeasons.map { it.seasonNumber },
                             includeAllOption = true,
-                            allLabel = "All seasons",
+                            allLabel = mokoString(MR.strings.all_seasons),
                             selectedOption = state.problemSeason,
                             onOptionSelected = { updateProblemSeason(it) },
                             onAllSelected = { updateProblemSeason(null) },
                             allDivider = null,
                             getOptionLabel = { season ->
-                                "Season $season"
+                                mokoString(MR.strings.season_label, season)
                             }
                         )
 
@@ -98,7 +98,7 @@ fun SeerrReportIssueSheet(
                                 DropdownPicker(
                                     options = episodes.map { it.episodeNumber },
                                     includeAllOption = true,
-                                    allLabel = "All episodes",
+                                    allLabel = mokoString(MR.strings.all_episodes),
                                     selectedOption = state.problemEpisode,
                                     onOptionSelected = { updateProblemEpisode(it) },
                                     onAllSelected = { updateProblemEpisode(null) },
@@ -121,7 +121,7 @@ fun SeerrReportIssueSheet(
             )
 
             AMOutlinedTextField(
-                label = "Message",
+                label = mokoString(MR.strings.message),
                 modifier = Modifier.fillMaxWidth(),
                 value = state.message,
                 onValueChange = { updateMessage(it) },

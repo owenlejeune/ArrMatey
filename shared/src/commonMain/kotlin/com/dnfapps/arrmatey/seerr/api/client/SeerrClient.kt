@@ -24,6 +24,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.koin.core.component.KoinComponent
@@ -39,7 +41,8 @@ interface SeerrClient {
         status: ApprovalStatus,
         profileId: Long? = null,
         rootFolder: String? = null,
-        languageProfileId: Long? = null
+        languageProfileId: Long? = null,
+        seasons: List<Int>? = null
     ): NetworkResult<MediaRequest>
     suspend fun deleteRequest(requestId: Long): NetworkResult<Unit>
     suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit>
@@ -92,12 +95,14 @@ class SeerrClientImpl(
         status: ApprovalStatus,
         profileId: Long?,
         rootFolder: String?,
-        languageProfileId: Long?
+        languageProfileId: Long?,
+        seasons: List<Int>?
     ): NetworkResult<MediaRequest> =
         post("request/$requestId/${status.name.lowercase()}", buildJsonObject {
             profileId?.let { put("profileId", it) }
             rootFolder?.let { put("rootFolder", it) }
             languageProfileId?.let { put("languageProfileId", it) }
+            seasons?.let { put("seasons", JsonArray(it.map { s -> JsonPrimitive(s) })) }
         })
 
     override suspend fun deleteRequest(requestId: Long): NetworkResult<Unit> =
@@ -122,10 +127,10 @@ class SeerrClientImpl(
         get("service/sonarr")
 
     override suspend fun getRadarrDetails(id: Long): NetworkResult<ServiceDetails> =
-        get("service/sonarr/$id")
+        get("service/radarr/$id")
 
     override suspend fun getSonarrDetails(id: Long): NetworkResult<ServiceDetails> =
-        get("service/radarr/$id")
+        get("service/sonarr/$id")
 
     override suspend fun getIssues(page: Int, pageSize: Int): NetworkResult<IssuesResponse> =
         get("issue", mapOf(

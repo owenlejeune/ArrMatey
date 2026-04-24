@@ -24,6 +24,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
+import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.service.MediaIssuePackageService
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
@@ -57,6 +58,9 @@ class SeerrInstanceRepository(
 
     private val _sonarrServices = MutableStateFlow<List<Service>>(emptyList())
     val sonarrServices: StateFlow<List<Service>> = _sonarrServices.asStateFlow()
+
+    private val _users = MutableStateFlow<List<SeerrUser>>(emptyList())
+    val users: StateFlow<List<SeerrUser>> = _users.asStateFlow()
 
     override suspend fun testConnection(): NetworkResult<Unit> =
         client.testConnection()
@@ -94,10 +98,11 @@ class SeerrInstanceRepository(
         status: ApprovalStatus,
         profileId: Long? = null,
         rootFolder: String? = null,
-        languageProfileId: Long? = null
+        languageProfileId: Long? = null,
+        seasons: List<Int>? = null
     ): NetworkResult<MediaRequest> {
         updateOperationsState(requestId, status, OperationStatus.InProgress)
-        return client.setRequestStatus(requestId, status, profileId, rootFolder, languageProfileId)
+        return client.setRequestStatus(requestId, status, profileId, rootFolder, languageProfileId, seasons)
             .onSuccess {
                 updateOperationsState(requestId, status, OperationStatus.Success())
             }
@@ -221,6 +226,14 @@ class SeerrInstanceRepository(
 
     suspend fun getSonarrServices(): NetworkResult<List<Service>> {
         return client.getSonarrServices().onSuccess { _sonarrServices.value = it }
+    }
+
+    suspend fun getRadarrDetails(serverId: Long): NetworkResult<ServiceDetails> {
+        return client.getRadarrDetails(serverId)
+    }
+
+    suspend fun getSonarrDetails(serverId: Long): NetworkResult<ServiceDetails> {
+        return client.getSonarrDetails(serverId)
     }
 
     suspend fun closeIssue(issueId: Long): NetworkResult<Unit> {

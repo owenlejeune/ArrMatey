@@ -93,6 +93,7 @@ import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.format
+import com.dnfapps.arrmatey.utils.mokoPlural
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -115,8 +116,7 @@ fun SeerrDetailsScreen(
     val isReportIssueSheetVisible by viewModel.isReportIssueSheetVisible.collectAsStateWithLifecycle()
     val reportIssueState by viewModel.reportIssueState.collectAsStateWithLifecycle()
 
-    val radarrServices by viewModel.radarrServices.collectAsState()
-    val sonarrServices by viewModel.sonarrServices.collectAsState()
+    val serviceDetails by viewModel.serviceDetails.collectAsStateWithLifecycle()
 
     val scrollState = rememberScrollState()
 
@@ -232,7 +232,7 @@ fun SeerrDetailsScreen(
                                                     style = MaterialTheme.typography.titleLarge
                                                 )
                                                 Text(
-                                                    text = "${season.episodeCount} episodes",
+                                                    text = mokoPlural(MR.plurals.episodes, season.episodeCount),//"${season.episodeCount} episodes",
                                                     style = MaterialTheme.typography.bodyMedium
                                                 )
                                                 Spacer(modifier = Modifier.weight(1f))
@@ -382,11 +382,10 @@ fun SeerrDetailsScreen(
                 (uiState as? SeerrDetailsState.Success)?.item?.let { details ->
                     SeerrViewRequestSheet(
                         details = details,
-                        radarrServices = radarrServices,
-                        sonarrServices = sonarrServices,
+                        serviceDetails = serviceDetails,
                         onDismissRequest = { viewModel.hideViewRequestSheet() },
-                        onApproveRequest = { id, profileId, rootFolder, langId -> 
-                            viewModel.approveRequest(id, profileId, rootFolder, langId)
+                        onApproveRequest = { id, profileId, rootFolder, langId, seasons ->
+                            viewModel.approveRequest(id, profileId, rootFolder, langId, seasons)
                             viewModel.hideViewRequestSheet()
                         },
                         onDeclineRequest = { id: Long ->

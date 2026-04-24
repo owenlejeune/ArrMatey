@@ -110,13 +110,14 @@ fun <T> DropdownPicker(
                             style = MaterialTheme.typography.bodyLarge
                         )
                     },
-                    leadingIcon = getOptionIcon?.let {
-                        {
-                            Icon(
-                                imageVector = it(t),
-                                contentDescription = null
-                            )
+                    leadingIcon = when {
+                        selectedOption == t -> {
+                            { Icon(Icons.Default.Check, null) }
                         }
+                        getOptionIcon != null -> {
+                            { Icon(getOptionIcon(t), null) }
+                        }
+                        else -> null
                     },
                     onClick = {
                         isDropDownExpanded = false

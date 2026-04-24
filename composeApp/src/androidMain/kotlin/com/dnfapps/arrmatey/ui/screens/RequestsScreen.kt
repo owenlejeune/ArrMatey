@@ -75,7 +75,7 @@ fun RequestsScreen(
                             selected = selectedTab == SeerrTab.Issues,
                             onClick = { viewModel.setSelectedTab(SeerrTab.Issues) },
                             text = { Text(text = buildString {
-                                append("Issues")
+                                append(mokoString(MR.strings.issues))
                                 if (issuesData.totalItemCount > 0) {
                                     append(" (${issuesData.totalItemCount})")
                                 }
