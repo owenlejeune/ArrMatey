@@ -38,6 +38,7 @@ struct SeerrIssueCard: View {
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 16))
+            .contentShape(RoundedRectangle(cornerRadius: 16))
             .shadow(radius: 6)
         }
         .buttonStyle(.plain)
@@ -147,7 +148,7 @@ struct SeerrIssueCard: View {
         }()
         
         return HStack(spacing: 4) {
-            Text("Type")
+            Text(MR.strings().type.localized())
                 .font(.caption)
                 .fontWeight(.medium)
                 .foregroundColor(.white.opacity(0.7))

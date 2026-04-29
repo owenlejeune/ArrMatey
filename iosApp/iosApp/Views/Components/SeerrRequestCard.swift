@@ -51,6 +51,7 @@ struct SeerrRequestCard: View {
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 16))
+            .contentShape(RoundedRectangle(cornerRadius: 16))
             .shadow(radius: 6)
         }
         .buttonStyle(.plain)
@@ -229,7 +230,7 @@ struct RequestTypeChip: View {
     let type: RequestType
     
     var body: some View {
-        Text(type == .movie ? "Movie" : "TV")
+        Text(type.name)
             .font(.caption2.bold())
             .padding(.horizontal, 6)
             .padding(.vertical, 2)

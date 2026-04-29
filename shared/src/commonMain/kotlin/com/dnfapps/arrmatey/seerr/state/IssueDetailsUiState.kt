@@ -7,4 +7,6 @@ data class IssueDetailsUiState(
     val issuePackage: MediaIssuePackage,
     val commentSubmissionStatus: OperationStatus = OperationStatus.Idle,
     val issueCloseStatus: OperationStatus = OperationStatus.Idle
-)
+) {
+    constructor(issuePackage: MediaIssuePackage): this(issuePackage, OperationStatus.Idle) // ios overloads constructor
+}

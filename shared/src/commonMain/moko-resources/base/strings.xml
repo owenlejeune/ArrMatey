@@ -244,6 +244,7 @@
     <string name="search_on_add_label">Search for files immediately</string>
     <string name="use_basic_auth">Use basic auth</string>
     <string name="message">Message</string>
+    <string name="type">Type</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

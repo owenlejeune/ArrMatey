@@ -195,7 +195,7 @@ private fun IssueCardHeader(
             Text(
                 text = buildAnnotatedString {
                     withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                        append("Type")
+                        append(mokoString(MR.strings.type))
                     }
                     append(" ")
                     append(mokoString(issueType.label))
