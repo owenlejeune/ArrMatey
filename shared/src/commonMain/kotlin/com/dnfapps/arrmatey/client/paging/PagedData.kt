@@ -14,4 +14,6 @@ data class PagedData<T>(
 
     val canLoadMore: Boolean
         get() = hasMore && !isLoadingMore && !isLoading
+
+    constructor(): this(emptyList()) // empty ios constructor
 }

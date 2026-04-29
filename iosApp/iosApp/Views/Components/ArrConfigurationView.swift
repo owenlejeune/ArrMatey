@@ -65,7 +65,9 @@ struct ArrConfigurationView: View {
             }
             
             instanceSection
-            notificationSection
+            if instanceType.supportsNotifications {
+                notificationSection
+            }
             localNetworkArea
             slowInstanceSection
             headersSection

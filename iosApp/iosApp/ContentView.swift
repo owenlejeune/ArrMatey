@@ -116,6 +116,9 @@ struct AppLauncherGrid: View {
             .navigationDestination(for: MediaRoute.self) { route in
                 MediaRouteDestination(route: route)
             }
+            .navigationDestination(for: SeerrRoute.self) { route in
+                SeerrRouteDestination(route: route)
+            }
         }
     }
     
@@ -170,7 +173,7 @@ struct LauncherTabView: View {
                 case .activity: ActivityTab().environment(\.navigationContext, .launcher)
                 case .calendar: CalendarTab().environment(\.navigationContext, .launcher)
                 case .downloads: DownloadsTab().environment(\.navigationContext, .launcher)
-                case .requests: EmptyView()
+                case .requests: RequestsTab().environment(\.navigationContext, .launcher)
                 case .prowlarr: ProwlarrTab().environment(\.navigationContext, .launcher)
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {
@@ -180,6 +183,9 @@ struct LauncherTabView: View {
             }
         }
         .navigationTitle(tabItem is TabItemCustomWebpage ? (tabItem as! TabItemCustomWebpage).name : tabItem.resource.localized())
+        .navigationDestination(for: SeerrRoute.self) { route in
+            SeerrRouteDestination(route: route)
+        }
     }
 }
 

@@ -38,7 +38,9 @@ data class MediaButtonState(
     val showClearDataButton: Boolean = false,
 
     val mediaProvider: MediaProvider = MediaProvider.None
-)
+) {
+    constructor(): this(false) // empty ios constructor
+}
 
 enum class MediaProvider {
     None,

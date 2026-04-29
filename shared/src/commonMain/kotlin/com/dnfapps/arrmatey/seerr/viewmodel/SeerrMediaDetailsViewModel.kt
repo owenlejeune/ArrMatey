@@ -23,7 +23,6 @@ import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
 import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.state.toButtonState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
-import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
@@ -46,7 +45,6 @@ class SeerrMediaDetailsViewModel(
     private val mediaType: RequestType,
     private val getSeerrInstanceRepositoryUseCase: GetSeerrInstanceRepositoryUseCase,
     private val getSeerrMediaDetailsUseCase: GetSeerrMediaDetailsUseCase,
-    private val getCurrentSeerrUserUseCase: GetCurrentSeerrUserUseCase,
     private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase,
     private val cancelRequestUseCase: CancelRequestUseCase,
     private val getSeerrTvRatingsUseCase: GetSeerrTvRatingsUseCase,

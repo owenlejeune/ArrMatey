@@ -153,6 +153,15 @@ class NavigationManager: ObservableObject {
     func openSettings() {
         launcherPath.append(AnyTabItem(item: TabItemSettings.shared as TabItem))
     }
+    
+    func goToSeerrDetails(tmdbId: Int64, requestType: RequestType) {
+        let route = SeerrRoute.details(tmdbId: tmdbId, requestType: requestType)
+        if showLauncher {
+            launcherPath.append(route)
+        } else {
+            seerrPath.append(route)
+        }
+    }
 }
 
 enum MediaRoute: Hashable {
@@ -171,6 +180,10 @@ enum MediaRoute: Hashable {
         artistId: Int64? = nil
     )
     case episodeDetails(String, String)
+}
+
+enum SeerrRoute: Hashable {
+    case details(tmdbId: Int64, requestType: RequestType)
 }
 
 enum SettingsRoute : Hashable {

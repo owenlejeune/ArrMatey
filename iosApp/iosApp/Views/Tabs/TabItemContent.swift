@@ -22,7 +22,7 @@ struct TabItemContent: View {
                 case .activity: ActivityTab().environment(\.navigationContext, .launcher)
                 case .calendar: CalendarTab().environment(\.navigationContext, .launcher)
                 case .downloads: DownloadsTab().environment(\.navigationContext, .launcher)
-                case .requests: EmptyView()
+                case .requests: RequestsTab().environment(\.navigationContext, .launcher)
                 case .prowlarr: ProwlarrTab().environment(\.navigationContext, .launcher)
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {

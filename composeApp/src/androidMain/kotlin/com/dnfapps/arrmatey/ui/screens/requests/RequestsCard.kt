@@ -83,9 +83,6 @@ fun RequestCard(
                     request = request
                 )
 
-//                (details as? TvDetails)?.let { tvDetails ->
-//                    RequestCardSeasonInfo(tvDetails = tvDetails)
-//                }
                 if (request.type == RequestType.Tv && request.seasons.isNotEmpty()) {
                     RequestCardSeasonInfo(seasons = request.seasons)
                 }
