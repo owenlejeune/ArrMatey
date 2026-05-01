@@ -36,7 +36,10 @@ enum class SortBy(
     Name("textformat", MR.strings.name),
     Priority("star", MR.strings.priority),
     Protocol("arrow.down.circle", MR.strings.protocol),
-    Privacy("hand.raised", MR.strings.privacy);
+    Privacy("hand.raised", MR.strings.privacy),
+
+    // Readarr
+    TitleLastFirst("textformat", MR.strings.title_last_first);
 
     companion object {
 
@@ -53,11 +56,16 @@ enum class SortBy(
             listOf(Name, Added, Protocol, Priority, Privacy)
         }
 
+        private val readarrOps by lazy {
+            listOf(TitleLastFirst, Title, Added, Rating, FileSize)
+        }
+
         fun typeEntries(type: InstanceType) =
             when (type) {
                 InstanceType.Sonarr -> sonarrOps
                 InstanceType.Radarr -> radarrOps
                 InstanceType.Lidarr -> lidarrOps
+                InstanceType.Booksehelf -> readarrOps
                 InstanceType.Prowlarr -> prowlarrOps
                 else -> emptyList()
             }

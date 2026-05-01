@@ -1,7 +1,9 @@
 package com.dnfapps.arrmatey.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -12,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,8 +28,11 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.mokoString
+import com.skydoves.cloudy.cloudy
 
 @Composable
 fun PosterItem(
@@ -55,25 +61,47 @@ fun PosterItem(
         enabled = enabled && onItemClick != null
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            val model = rememberRemoteImageData(
+                url = url,
+                onError = { _, err ->
+                    println(err.throwable.message)
+                    imageLoadError = true
+                },
+                onSuccess = { _, _ -> imageLoaded = true }
+            )
             AsyncImage(
-                model = rememberRemoteImageData(
-                    url = url,
-                    onError = { _, err ->
-                        println(err.throwable.message)
-                        imageLoadError = true
-                    },
-                    onSuccess = { _, _ -> imageLoaded = true }
-                ),
+                model = model,
                 contentDescription = null,
-                contentScale = ContentScale.FillBounds
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .cloudy(20)
+                    .align(Alignment.Center)
+                    .fillMaxSize()
+            )
+            AsyncImage(
+                model = model,
+                contentDescription = null,
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier.align(Alignment.Center)
+                    .fillMaxSize()
             )
             if (imageLoadError) {
-                Icon(
-                    imageVector = Icons.Default.BrokenImage,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(64.dp).align(Alignment.Center)
-                )
+                Column (
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.BrokenImage,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(64.dp)
+                    )
+                    Text(
+                        text = item.title ?: mokoString(MR.strings.unknown),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
             }
             if (imageLoaded) {
                 additionalContent()

@@ -194,7 +194,7 @@ fun MediaDetailsScreen(
                             DetailsHeader(item, type)
 
                             Column(
-                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+                                modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
                                 UpcomingDateView(item)
@@ -251,7 +251,10 @@ fun MediaDetailsScreen(
                                         albumDeleteInProgress = albumDeleteStatus is OperationStatus.InProgress,
                                     )
                                     is Author -> BooksArea(
-
+                                        author = item,
+                                        series = state.bookSeries,
+                                        files = state.bookFiles,
+                                        searchIds = automaticSearchIds
                                     )
                                 }
 

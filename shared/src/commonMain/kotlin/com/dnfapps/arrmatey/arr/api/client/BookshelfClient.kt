@@ -4,10 +4,11 @@ import com.dnfapps.arrmatey.arr.api.model.ApplyTags
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorEditorBody
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.BookFile
+import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
@@ -19,7 +20,6 @@ import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
-import io.ktor.util.network.NetworkAddress
 import kotlinx.datetime.LocalDate
 
 class BookshelfClient(
@@ -107,6 +107,12 @@ class BookshelfClient(
             "bookId" to id
         )).map { it.records }
 
+    suspend fun getAuthorSeries(id: Long): NetworkResult<List<BookSeries>> =
+        get("series", mapOf("authorId" to id))
+
+    suspend fun getAuthorBookFiles(id: Long): NetworkResult<List<BookFile>> =
+        get("bookFile", mapOf("authorId" to id))
+
     override suspend fun getMovieCalendar(
         start: LocalDate,
         end: LocalDate
@@ -129,8 +135,7 @@ class BookshelfClient(
         get<List<Book>>("calendar", mapOf(
             "start" to start.toString(),
             "end" to end.toString(),
-            "unmonitored" to true,
-            "includeArtist" to true
+            "unmonitored" to false
         )).map { it.map { bk -> bk.copy(instanceId = instance.id) } }
 
 }

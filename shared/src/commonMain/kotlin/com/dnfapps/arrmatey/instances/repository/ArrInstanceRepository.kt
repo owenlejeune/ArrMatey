@@ -15,6 +15,8 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.BookFile
+import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -149,6 +151,13 @@ class ArrInstanceRepository(
 
     private val _artistTrackFiles = MutableStateFlow<Map<Long, Map<Long, List<LidarrTrackFile>>>>(emptyMap())
     val artistTrackFiles: StateFlow<Map<Long, Map<Long, List<LidarrTrackFile>>>> = _artistTrackFiles.asStateFlow()
+
+    // Readarr-specific
+    private val _authorSeries = MutableStateFlow<Map<Long, List<BookSeries>>>(emptyMap())
+    val authorSeries: StateFlow<Map<Long, List<BookSeries>>> = _authorSeries.asStateFlow()
+
+    private val _authorBookFiles = MutableStateFlow<Map<Long, List<BookFile>>>(emptyMap())
+    val authorBookFiles: StateFlow<Map<Long, List<BookFile>>> = _authorBookFiles.asStateFlow()
 
     override suspend fun testConnection(): NetworkResult<Unit> {
         return client.testConnection()
@@ -765,6 +774,27 @@ class ArrInstanceRepository(
                 }
         }
 
+    // Readarr-specific
+    suspend fun getAuthorSeries(authorId: Long): NetworkResult<List<BookSeries>> =
+        safePerformReadarr { client ->
+            client.getAuthorSeries(authorId)
+                .onSuccess { result ->
+                    val currentMap = _authorSeries.value.toMutableMap()
+                    currentMap[authorId] = result
+                    _authorSeries.value = currentMap
+                }
+        }
+
+    suspend fun getAuthorBookFiles(authorId: Long): NetworkResult<List<BookFile>> =
+        safePerformReadarr { client ->
+            client.getAuthorBookFiles(authorId)
+                .onSuccess { result ->
+                    val currentMap = _authorBookFiles.value.toMutableMap()
+                    currentMap[authorId] = result
+                    _authorBookFiles.value = currentMap
+                }
+        }
+
     // Helpers
     private suspend inline fun <reified T> safePerformSonarr(
         operation: suspend (SonarrClient) -> NetworkResult<T>
@@ -784,6 +814,13 @@ class ArrInstanceRepository(
         operation: suspend (LidarrClient) -> NetworkResult<T>
     ): NetworkResult<T> {
         val client = client as? LidarrClient ?: return NetworkResult.Error(message = "Not a Lidarr instance")
+        return operation(client)
+    }
+
+    private suspend inline fun <reified T> safePerformReadarr(
+        operation: suspend (BookshelfClient) -> NetworkResult<T>
+    ): NetworkResult<T> {
+        val client = client as? BookshelfClient ?: return NetworkResult.Error(message = "Not a Readarr instance")
         return operation(client)
     }
 

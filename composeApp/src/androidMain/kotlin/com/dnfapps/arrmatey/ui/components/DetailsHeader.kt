@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.extensions.formatAsRuntime
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -57,7 +58,7 @@ fun DetailsHeader(
             ) {
                 ClearLogo(item)
 
-                if (item !is Arrtist) {
+                if (item !is Arrtist && item !is Author) {
                     Text(
                         text = listOfNotNull(
                             item.year,

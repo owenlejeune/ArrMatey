@@ -63,6 +63,7 @@ val TabItem.androidIcon: ImageVector
 val SortBy.androidIcon: ImageVector
     get() = when(this) {
         SortBy.Title -> Icons.Default.SortByAlpha
+        SortBy.TitleLastFirst -> Icons.Default.SortByAlpha
         SortBy.Year -> Icons.Default.CalendarMonth
         SortBy.Added -> Icons.Default.Schedule
         SortBy.Rating -> Icons.Default.Star

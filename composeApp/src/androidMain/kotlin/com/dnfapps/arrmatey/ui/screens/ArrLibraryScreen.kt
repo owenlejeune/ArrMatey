@@ -232,6 +232,7 @@ private fun EmptySearchResultsView(
         InstanceType.Sonarr -> mokoString(MR.strings.type_series)
         InstanceType.Radarr -> mokoString(MR.strings.type_movie)
         InstanceType.Lidarr -> mokoString(MR.strings.type_artist)
+        InstanceType.Booksehelf -> mokoString(MR.strings.type_author)
         else -> mokoString(MR.strings.unknown)
     }
     Column(

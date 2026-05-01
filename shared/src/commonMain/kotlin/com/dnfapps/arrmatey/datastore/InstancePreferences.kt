@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.datastore
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.ui.theme.ViewType
 
 data class InstancePreferences(

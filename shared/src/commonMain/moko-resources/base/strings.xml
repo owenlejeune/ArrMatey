@@ -21,6 +21,7 @@
     <string name="type_series">series</string>
     <string name="type_movie">movie</string>
     <string name="type_artist">artist</string>
+    <string name="type_author">author</string>
 
     <!-- Titles -->
     <string name="add_instance">Add instance</string>
@@ -92,6 +93,7 @@
     <string name="filter">Filter</string>
     <string name="filter_by">Filter By</string>
     <string name="title">Title</string>
+    <string name="title_last_first">Name (Last, First)</string>
     <string name="year">Year</string>
     <string name="added">Added</string>
     <string name="rating">Rating</string>

@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.arr.usecase
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.client.ErrorType
 import com.dnfapps.arrmatey.client.NetworkResult
@@ -67,6 +68,8 @@ class GetLibraryUseCase(
     ): List<ArrMedia> {
         val comparator: Comparator<ArrMedia> = when (preferences.sortBy) {
             SortBy.Title -> compareBy { it.sortTitle }
+            SortBy.Name -> compareBy { it.sortTitle }
+            SortBy.TitleLastFirst -> compareBy { (it as? Author)?.sortNameLastFirst }
             SortBy.Year -> compareBy { it.year }
             SortBy.Added -> compareBy { it.added }
             SortBy.Rating -> compareBy { it.ratingScore() }

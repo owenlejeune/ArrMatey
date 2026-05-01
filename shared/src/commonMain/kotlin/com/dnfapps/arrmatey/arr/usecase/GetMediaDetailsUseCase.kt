@@ -48,7 +48,11 @@ class GetMediaDetailsUseCase(
                                 loadLidarrDetails(repository, mediaId, detailsResult.data)
                                     .collect { send(it) }
                             }
-                            else -> {}
+                            InstanceType.Booksehelf -> {
+                                loadReadarrDetails(repository, mediaId, detailsResult.data)
+                                    .collect { send(it) }
+                            }
+                            else -> throw IllegalStateException("Unsupported instance type ${repository.instance.type}")
                         }
                     }
                 }
@@ -120,6 +124,31 @@ class GetMediaDetailsUseCase(
                 albums = albums,
                 tracks = tracks,
                 trackFiles = files
+            )
+        }.collect { state ->
+            emit(state)
+        }
+    }
+
+    private fun loadReadarrDetails(
+        repository: ArrInstanceRepository,
+        authorId: Long,
+        author: ArrMedia
+    ): Flow<MediaDetailsUiState> = flow {
+        repository.getAuthorBookFiles(authorId)
+        repository.getAuthorBookFiles(authorId)
+
+        combine(
+            repository.authorBookFiles,
+            repository.authorSeries
+        ) { bookFilesMap, bookSeriesMap ->
+            val bookFiles = bookFilesMap[authorId] ?: emptyList()
+            val bookSeries = bookSeriesMap[authorId] ?: emptyList()
+
+            MediaDetailsUiState.Success(
+                item = author,
+                bookFiles = bookFiles,
+                bookSeries = bookSeries
             )
         }.collect { state ->
             emit(state)
