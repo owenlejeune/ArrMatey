@@ -147,6 +147,7 @@
     <string name="quality_profile">Quality profile</string>
     <string name="monitor">Monitor</string>
     <string name="monitor_new_albums">Monitor New Albums</string>
+    <string name="monitor_new_books">Monitor New Books</string>
     <string name="download_queue_success">Download queued successfully!</string>
     <string name="grab_release_title">Grab Release</string>
     <string name="grab_release_message">The release for this file could not be determined and may not be imported automatically. Do you want to download it anyway?</string>

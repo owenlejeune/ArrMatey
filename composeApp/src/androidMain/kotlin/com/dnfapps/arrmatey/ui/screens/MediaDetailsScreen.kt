@@ -525,7 +525,13 @@ private fun EditMediaSheet(
             onDismiss = onDismiss
         )
         is Author -> EditAuthorSheet(
-
+            item = item,
+            qualityProfiles = qualityProfiles,
+            rootFolders = rootFolders,
+            tags = tags,
+            editInProgress = editInProgress,
+            onEditItem = onEditItem,
+            onDismiss = onDismiss
         )
     }
 }
