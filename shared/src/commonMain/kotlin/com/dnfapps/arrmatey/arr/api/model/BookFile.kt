@@ -16,4 +16,7 @@ data class BookFile(
     val qualityWeight: Int? = null,
     val indexerFlags: Int? = null,
     val qualityCutoffNotMet: Boolean? = null
-)
+) {
+    val fileQualityName: String?
+        get() = quality?.qualityLabel
+}

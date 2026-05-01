@@ -136,19 +136,22 @@ class GetMediaDetailsUseCase(
         author: ArrMedia
     ): Flow<MediaDetailsUiState> = flow {
         repository.getAuthorBookFiles(authorId)
-        repository.getAuthorBookFiles(authorId)
+        repository.getAuthorSeries(authorId)
 
         combine(
             repository.authorBookFiles,
-            repository.authorSeries
-        ) { bookFilesMap, bookSeriesMap ->
+            repository.authorSeries,
+            repository.authorBooks
+        ) { bookFilesMap, bookSeriesMap, booksMap ->
             val bookFiles = bookFilesMap[authorId] ?: emptyList()
             val bookSeries = bookSeriesMap[authorId] ?: emptyList()
+            val books = booksMap[authorId] ?: emptyList()
 
             MediaDetailsUiState.Success(
                 item = author,
                 bookFiles = bookFiles,
-                bookSeries = bookSeries
+                bookSeries = bookSeries,
+                books = books
             )
         }.collect { state ->
             emit(state)

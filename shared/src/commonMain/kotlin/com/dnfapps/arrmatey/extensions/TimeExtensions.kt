@@ -6,6 +6,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 fun LocalDate.isToday(timeZone: TimeZone = TimeZone.currentSystemDefault()): Boolean {
     val today = Clock.System.todayIn(timeZone)
@@ -45,4 +46,16 @@ fun LocalDate.isBeforeToday(): Boolean = isBeforeToday(TimeZone.currentSystemDef
 @OptIn(ExperimentalTime::class)
 fun Clock.Companion.localToday(): LocalDate {
     return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+}
+
+fun Instant.isTodayOrAfter(): Boolean {
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val instantDate = this.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    return instantDate >= today
+}
+
+fun Instant.isToday(): Boolean {
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val instantDate = this.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    return instantDate == today
 }

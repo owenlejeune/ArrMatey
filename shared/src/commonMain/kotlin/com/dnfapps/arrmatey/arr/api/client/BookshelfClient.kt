@@ -113,6 +113,9 @@ class BookshelfClient(
     suspend fun getAuthorBookFiles(id: Long): NetworkResult<List<BookFile>> =
         get("bookFile", mapOf("authorId" to id))
 
+    suspend fun getBooks(): NetworkResult<List<Book>> =
+        get("book")
+
     override suspend fun getMovieCalendar(
         start: LocalDate,
         end: LocalDate

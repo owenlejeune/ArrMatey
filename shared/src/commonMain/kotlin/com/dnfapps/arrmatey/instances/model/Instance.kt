@@ -123,6 +123,20 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true
     ),
+    Booksehelf(
+        resource = MR.strings.bookshelf_description,
+        github = "https://github.com/pennydreadful/bookshelf",
+        website = "https://github.com/pennydreadful/bookshelf",
+        icon = MR.images.bookshelf,
+        tabIcon = MR.images.bookshelf_tab,
+        defaultPort = 8787,
+        supportsActivityQueue = true,
+        apiBase = "api/v1",
+        testEndpoint = "system/status",
+        includeTopLevelAutomaticSearchOption = true,
+        aspectRatio = AspectRatio.Cover,
+        supportsNotifications = true
+    ),
     Seerr(
         resource = MR.strings.seerr_description,
         github = "https://github.com/seerr-team/seerr",
@@ -135,20 +149,6 @@ enum class InstanceType(
         testEndpoint = "auth/me",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
-        supportsNotifications = false
-    ),
-    Booksehelf(
-      resource = MR.strings.bookshelf_description,
-        github = "https://github.com/pennydreadful/bookshelf",
-        website = "https://github.com/pennydreadful/bookshelf",
-        icon = MR.images.bookshelf,
-        tabIcon = MR.images.bookshelf_tab,
-        defaultPort = 8787,
-        supportsActivityQueue = true,
-        apiBase = "api/v1",
-        testEndpoint = "system/status",
-        includeTopLevelAutomaticSearchOption = false,
-        aspectRatio = AspectRatio.Cover,
         supportsNotifications = false
     ),
     Prowlarr(

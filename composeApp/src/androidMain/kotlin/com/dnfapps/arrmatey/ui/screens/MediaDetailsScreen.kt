@@ -163,7 +163,49 @@ fun MediaDetailsScreen(
         }
     }
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        topBar = {
+            OverlayTopAppBar(
+                scrollState = scrollState,
+                navigationIcon = {
+                    IconButton(
+                        onClick = { navigation.popBackStack() },
+                        colors = IconButtonDefaults.headerBarColors()
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = mokoString(MR.strings.back)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            mediaDetailsViewModel.toggleMonitored()
+                        },
+                        colors = IconButtonDefaults.headerBarColors()
+                    ) {
+                        Icon(
+                            imageVector = if (isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                            contentDescription = null
+                        )
+                    }
+                    MenuButton(
+                        onEdit = { showEditSheet = true },
+                        onDelete = { confirmDelete = true },
+                        onRefresh = {
+                            mediaDetailsViewModel.performRefresh()
+                        },
+                        showSearch = type.includeTopLevelAutomaticSearchOption,
+                        enableSearch = isMonitored,
+                        onSearchMonitored = {
+                            mediaDetailsViewModel.performAutomaticLookup()
+                        }
+                    )
+                }
+            )
+        }
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
@@ -254,6 +296,7 @@ fun MediaDetailsScreen(
                                         author = item,
                                         series = state.bookSeries,
                                         files = state.bookFiles,
+                                        books = state.books,
                                         searchIds = automaticSearchIds
                                     )
                                 }
@@ -270,47 +313,6 @@ fun MediaDetailsScreen(
                     }
                 }
             }
-
-            OverlayTopAppBar(
-                scrollState = scrollState,
-                modifier = Modifier.align(Alignment.TopCenter),
-                navigationIcon = {
-                    IconButton(
-                        onClick = { navigation.popBackStack() },
-                        colors = IconButtonDefaults.headerBarColors()
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(MR.strings.back)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            mediaDetailsViewModel.toggleMonitored()
-                        },
-                        colors = IconButtonDefaults.headerBarColors()
-                    ) {
-                        Icon(
-                            imageVector = if (isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                            contentDescription = null
-                        )
-                    }
-                    MenuButton(
-                        onEdit = { showEditSheet = true },
-                        onDelete = { confirmDelete = true },
-                        onRefresh = {
-                            mediaDetailsViewModel.performRefresh()
-                        },
-                        showSearch = type.includeTopLevelAutomaticSearchOption,
-                        enableSearch = isMonitored,
-                        onSearchMonitored = {
-                            mediaDetailsViewModel.performAutomaticLookup()
-                        }
-                    )
-                }
-            )
 
             if (confirmDelete) {
                 ConfirmDeleteAlert(
@@ -590,6 +592,7 @@ private fun MenuButton(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(1, 2),
                 interactionSource = interactionSource

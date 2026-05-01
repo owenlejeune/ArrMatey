@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.state
 
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.BookSeriesLink
@@ -24,6 +25,7 @@ sealed interface MediaDetailsUiState {
         val tracks: Map<Long, List<LidarrTrack>> = emptyMap(),
         val trackFiles: Map<Long, List<LidarrTrackFile>> = emptyMap(),
         val bookFiles: List<BookFile> = emptyList(),
-        val bookSeries: List<BookSeries> = emptyList()
+        val bookSeries: List<BookSeries> = emptyList(),
+        val books: List<Book> = emptyList()
     ): MediaDetailsUiState
 }

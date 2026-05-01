@@ -15,6 +15,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -159,6 +161,16 @@ class ArrInstanceRepository(
     private val _authorBookFiles = MutableStateFlow<Map<Long, List<BookFile>>>(emptyMap())
     val authorBookFiles: StateFlow<Map<Long, List<BookFile>>> = _authorBookFiles.asStateFlow()
 
+    private val _booksLibrary = MutableStateFlow<List<Book>>(emptyList())
+    val booksLibrary: StateFlow<List<Book>> = _booksLibrary.asStateFlow()
+
+    val authorBooks: Flow<Map<Long, List<Book>>> = booksLibrary
+        .map { books ->
+            books
+                .filter { it.authorId != null }
+                .groupBy { it.authorId!! }
+        }
+
     override suspend fun testConnection(): NetworkResult<Unit> {
         return client.testConnection()
     }
@@ -166,10 +178,12 @@ class ArrInstanceRepository(
     suspend fun refreshLibrary() {
         _library.value = NetworkResult.Loading
         _library.value = client.getLibrary()
-            .onSuccess { logger.info { "Library: $it" } }
-            .onError { code, message, cause ->
-                logger.error(cause) { "Error getting library: $message" }
-            }
+        safePerformReadarr { client ->
+            client.getBooks()
+                .onSuccess {
+                    _booksLibrary.value = it
+                }
+        }
     }
 
     suspend fun getMediaDetails(id: Long): NetworkResult<ArrMedia> {

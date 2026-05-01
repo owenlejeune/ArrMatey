@@ -8,7 +8,7 @@ data class BookshelfStatistics(
     override val releaseGroups: List<String> = emptyList(),
     val bookFileCount: Int,
     val bookCount: Int,
-    val availableBookCount: Int,
     val totalBookCount: Int,
-    val percentOfBooks: Float
+    val percentOfBooks: Float,
+    val availableBookCount: Int = 0,
 ): ArrStatistics
