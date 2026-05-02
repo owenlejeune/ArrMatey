@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.di
 
 import com.dnfapps.arrmatey.arr.api.client.GenericClient
+import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
@@ -8,6 +9,8 @@ import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
@@ -105,6 +108,12 @@ object KoinBridge: KoinComponent {
 
     fun getCustomWebpageViewerViewModel(webpageId: Long): CustomWebpageViewerViewModel =
         getKoin().get { parametersOf(webpageId) }
+
+    fun getBookDetailsViewModel(authorId: Long, book: Book): BookDetailsViewModel =
+        getKoin().get { parametersOf(authorId, book) }
+
+    fun getAuthorFilesViewModel(authorId: Long): AuthorFilesViewModel =
+        getKoin().get { parametersOf(authorId) }
 
     fun getGenericClient(): GenericClient =
         getKoin().get()

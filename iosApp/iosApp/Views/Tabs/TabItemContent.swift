@@ -19,6 +19,7 @@ struct TabItemContent: View {
                 case .shows: SeriesTab().environment(\.navigationContext, .launcher)
                 case .movies: MoviesTab().environment(\.navigationContext, .launcher)
                 case .music: MusicTab().environment(\.navigationContext, .launcher)
+                case .books: BooksTab().environment(\.navigationContext, .launcher)
                 case .activity: ActivityTab().environment(\.navigationContext, .launcher)
                 case .calendar: CalendarTab().environment(\.navigationContext, .launcher)
                 case .downloads: DownloadsTab().environment(\.navigationContext, .launcher)
