@@ -297,7 +297,16 @@ fun MediaDetailsScreen(
                                         series = state.bookSeries,
                                         files = state.bookFiles,
                                         books = state.books,
-                                        searchIds = automaticSearchIds
+                                        searchIds = automaticSearchIds,
+                                        onToggleMonitor = { book ->
+                                            mediaDetailsViewModel.toggleBookMonitored(book)
+                                        },
+                                        onToggleSeriesMonitor = { books ->
+                                            mediaDetailsViewModel.toggleBookSeriesMonitored(books)
+                                        },
+                                        onAutomaticSearch = { bookId ->
+                                            mediaDetailsViewModel.performBookAutomaticLookup(bookId)
+                                        }
                                     )
                                 }
 

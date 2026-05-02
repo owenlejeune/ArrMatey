@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -68,11 +70,15 @@ fun ClearLogo(
     } ?: run {
         Text(
             text = item.title ?: mokoString(MR.strings.unknown),
-            fontSize = 38.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 42.sp,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            lineHeight = 1.em,
+            maxLines = 6,
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 16.sp,
+                maxFontSize = 38.sp,
+                stepSize = 2.sp
+            )
         )
     }
 }

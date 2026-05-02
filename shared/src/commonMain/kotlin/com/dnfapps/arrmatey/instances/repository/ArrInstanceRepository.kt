@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.BookEdition
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
@@ -807,6 +808,60 @@ class ArrInstanceRepository(
                     currentMap[authorId] = result
                     _authorBookFiles.value = currentMap
                 }
+        }
+
+    suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
+        safePerformReadarr { client ->
+            client.deleteBookFiles(bookFilesIds)
+                .onSuccess { result ->
+
+                }
+        }
+
+
+
+    suspend fun toggleBookMonitor(book: Book): NetworkResult<Book> {
+        _monitorStatus.value = OperationStatus.InProgress
+
+        if (instance.type != InstanceType.Booksehelf) {
+            _monitorStatus.value = OperationStatus.Error(message = "Not a Readarr instance")
+            return NetworkResult.Error(message = "Not a Readarr instance")
+        }
+
+        val bookId = book.id
+        val updatedMonitored = !book.monitored
+
+        return (client as BookshelfClient).setBookMonitorStatus(listOf(bookId), updatedMonitored)
+            .onSuccess { responses ->
+                val response = responses.firstOrNull()
+                val isMonitored = response?.monitored ?: updatedMonitored
+                _monitorStatus.value = OperationStatus.Success(
+                    if (isMonitored) "Book monitored" else "Book unmonitored"
+                )
+                val updatedBook = book.copy(monitored = isMonitored)
+                updateBookInCache(updatedBook)
+            }
+            .onError { code, message, cause ->
+                _monitorStatus.value = OperationStatus.Error(code, message, cause)
+            }
+            .map { responses ->
+                val response = responses.firstOrNull()
+                book.copy(monitored = response?.monitored ?: updatedMonitored)
+            }
+            .also {
+                _monitorStatus.value = OperationStatus.Idle
+            }
+    }
+
+    private fun updateBookInCache(book: Book) {
+        _booksLibrary.update { currentList ->
+            currentList.map { if (it.id == book.id) book else it }
+        }
+    }
+
+    suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =
+        safePerformReadarr { client ->
+            client.getBookEditions(bookId)
         }
 
     // Helpers

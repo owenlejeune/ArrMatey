@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.autoSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -76,7 +77,12 @@ fun BooksArea(
     series: List<BookSeries>,
     files: List<BookFile>,
     books: List<Book>,
-    searchIds: Set<Long>
+    searchIds: Set<Long>,
+    onToggleMonitor: (Book) -> Unit,
+    onToggleSeriesMonitor: (List<Book>) -> Unit,
+    onAutomaticSearch: (Long) -> Unit,
+    navigationManager: NavigationManager = koinInject(),
+    navigation: Navigation<ArrScreen> = navigationManager.books()
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     Column(
@@ -109,7 +115,7 @@ fun BooksArea(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable {
-//                    navigation.navigateTo(ArrScreen.MovieFiles(movie))
+                    navigation.navigateTo(ArrScreen.AuthorFiles(author))
                 }
             )
         }
@@ -121,8 +127,24 @@ fun BooksArea(
             }
         ) { tabIndex ->
             when (tabIndex) {
-                0 -> BooksView(files, books)
-                1 -> SeriesView(author, series, files, books)
+                0 -> BooksView(
+                    author = author,
+                    files = files,
+                    books = books,
+                    searchIds = searchIds,
+                    onToggleMonitor = onToggleMonitor,
+                    onAutomaticSearch = onAutomaticSearch
+                )
+
+                1 -> SeriesView(
+                    series = series,
+                    files = files,
+                    books = books,
+                    searchIds = searchIds,
+                    onToggleMonitor = onToggleMonitor,
+                    onToggleSeriesMonitor = onToggleSeriesMonitor,
+                    onAutomaticSearch = onAutomaticSearch
+                )
             }
         }
     }
@@ -130,8 +152,14 @@ fun BooksArea(
 
 @Composable
 private fun BooksView(
+    author: Author,
     files: List<BookFile>,
     books: List<Book>,
+    searchIds: Set<Long>,
+    onToggleMonitor: (Book) -> Unit,
+    onAutomaticSearch: (Long) -> Unit,
+    navigationManager: NavigationManager = koinInject(),
+    navigation: Navigation<ArrScreen> = navigationManager.books()
 ) {
     Column {
         books.forEach { book ->
@@ -139,10 +167,12 @@ private fun BooksView(
                 book = book,
                 bookFile = files.firstOrNull { it.bookId == book.id },
                 isActive = false,
-                onAutomaticSearch = {},
-                onToggleMonitor = {},
-                searchInProgress = {false},
-                onClick = {}
+                onAutomaticSearch = onAutomaticSearch,
+                onToggleMonitor = onToggleMonitor,
+                searchInProgress = { searchIds.contains(it) },
+                onClick = {
+                    navigation.navigateTo(ArrScreen.BookDetails(author, book))
+                }
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
         }
@@ -211,8 +241,8 @@ fun BookRow(
 
         IconButton(
             onClick = {
-//                val destination = ArrScreen.SeriesRelease(episodeId = episode.id)
-//                navigation.navigateTo(destination)
+                val destination = ArrScreen.BookRelease(bookId = book.id)
+                navigation.navigateTo(destination)
             },
             modifier = Modifier.size(24.dp),
             enabled = book.monitored
@@ -261,10 +291,15 @@ fun BookRow(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SeriesView(
-    author: Author,
     series: List<BookSeries>,
     files: List<BookFile>,
     books: List<Book>,
+    searchIds: Set<Long>,
+    onToggleMonitor: (Book) -> Unit,
+    onToggleSeriesMonitor: (List<Book>) -> Unit,
+    onAutomaticSearch: (Long) -> Unit,
+    navigationManager: NavigationManager = koinInject(),
+    navigation: Navigation<ArrScreen> = navigationManager.books()
 ) {
     Column {
         series.forEach { bookSeries ->
@@ -323,7 +358,7 @@ private fun SeriesView(
                                 mokoString(MR.strings.unmonitored)
                             },
                             modifier = Modifier.clickable {
-//                            onToggleSeasonMonitor(season.seasonNumber)
+                                onToggleSeriesMonitor(seriesBooks)
                             }
                         )
                     }
@@ -341,10 +376,12 @@ private fun SeriesView(
                                     book = book,
                                     bookFile = files.firstOrNull { it.bookId == link.bookId },
                                     isActive = false,
-                                    onAutomaticSearch = { },
-                                    onToggleMonitor = { },
-                                    searchInProgress = { false },
-                                    onClick = { },
+                                    onAutomaticSearch = onAutomaticSearch,
+                                    onToggleMonitor = onToggleMonitor,
+                                    searchInProgress = { searchIds.contains(it) },
+                                    onClick = {
+                                        navigation.navigateTo(ArrScreen.BookRelease(book.id))
+                                    },
                                     seriesPosition = link.position
                                 )
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))

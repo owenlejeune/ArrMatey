@@ -13,6 +13,8 @@ import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.ui.screens.ArrLibraryScreen
 import com.dnfapps.arrmatey.ui.screens.ArrSearchScreen
+import com.dnfapps.arrmatey.ui.screens.AuthorFilesScreen
+import com.dnfapps.arrmatey.ui.screens.BookDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.EpisodeDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.InteractiveSearchScreen
 import com.dnfapps.arrmatey.ui.screens.MediaDetailsScreen
@@ -68,11 +70,23 @@ fun ArrTab(
                 )
                 InteractiveSearchScreen(type, releaseParams)
             }
+            entry<ArrScreen.BookRelease> { params ->
+                val releaseParams = ReleaseParams.Book(
+                    bookId = params.bookId
+                )
+                InteractiveSearchScreen(type, releaseParams)
+            }
             entry<ArrScreen.MovieFiles> { params ->
                 MovieFilesScreen(movie = params.movie)
             }
+            entry<ArrScreen.AuthorFiles> { params ->
+                AuthorFilesScreen(author = params.author)
+            }
             entry<ArrScreen.EpisodeDetails> { params ->
                 EpisodeDetailsScreen(params.series, params.episode)
+            }
+            entry<ArrScreen.BookDetails> { params ->
+                BookDetailsScreen(params.book, params.author)
             }
         }
     )

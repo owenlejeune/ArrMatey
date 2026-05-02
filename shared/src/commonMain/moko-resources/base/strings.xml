@@ -42,6 +42,7 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="confirm_close_issue">Are you sure you want to close this issue?</string>
     <string name="episode_delete_message">This episode file will be deleted permanently.</string>
+    <string name="book_delete_message">This book's files will be deleted permanently.</string>
     <string name="client_remove_title">Remove From Client</string>
     <string name="client_remove_message">Whether to ignore the download, or remove it and its file(s) from the download client.</string>
     <string name="blocklist_title">Blocklist Release</string>

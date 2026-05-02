@@ -3,17 +3,22 @@ package com.dnfapps.arrmatey.di
 import com.dnfapps.arrmatey.arr.api.client.DynamicLogger
 import com.dnfapps.arrmatey.arr.api.client.GenericClient
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
+import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.usecase.AddMediaItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
+import com.dnfapps.arrmatey.arr.usecase.DeleteBookFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteEpisodeFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DownloadReleaseUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetAuthorFilesUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetBookEditionUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetBookHistoryUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetCalendarUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetEpisodeHistoryUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
@@ -36,6 +41,8 @@ import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
@@ -268,6 +275,10 @@ val useCaseModule = module {
     factory { CloseIssueUseCase(get()) }
     factory { NotificationCleanupUseCase(get()) }
     factory { ScheduleNotificationUseCase(get(), get()) }
+    factory { DeleteBookFilesUseCase() }
+    factory { GetAuthorFilesUseCase(get()) }
+    factory { GetBookEditionUseCase() }
+    factory { GetBookHistoryUseCase() }
 }
 
 val viewModelModule = module {
@@ -323,6 +334,12 @@ val viewModelModule = module {
     }
     factory { (issuePackage: MediaIssuePackage) ->
         IssueDetailsViewModel(issuePackage, get(), get(), get())
+    }
+    factory { (authorId: Long, book: Book) ->
+        BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get())
+    }
+    factory { (authorId: Long) ->
+        AuthorFilesViewModel(authorId, get())
     }
 }
 

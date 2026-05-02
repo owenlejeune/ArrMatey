@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
@@ -208,6 +209,17 @@ class ArrMediaDetailsViewModel(
         }
     }
 
+    fun toggleBookMonitored(book: Book) {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            toggleMonitorUseCase.toggleBook(book, repository)
+        }
+    }
+
+    fun toggleBookSeriesMonitored(books: List<Book>) {
+        books.forEach { book -> toggleBookMonitored(book) }
+    }
+
     fun deleteMedia(deleteFiles: Boolean, addImportExclusion: Boolean) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
@@ -259,6 +271,10 @@ class ArrMediaDetailsViewModel(
 
     fun performAlbumAutomaticLookup(albumId: Long) {
         runSearch(albumId, albumId)
+    }
+
+    fun performBookAutomaticLookup(bookId: Long) {
+        runSearch(bookId, bookId)
     }
 
     private fun runSearch(

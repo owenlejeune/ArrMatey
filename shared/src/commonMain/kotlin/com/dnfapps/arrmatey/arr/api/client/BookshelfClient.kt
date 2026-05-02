@@ -7,7 +7,10 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorEditorBody
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.BookEdition
 import com.dnfapps.arrmatey.arr.api.model.BookFile
+import com.dnfapps.arrmatey.arr.api.model.BookFileBulkDeleteBody
+import com.dnfapps.arrmatey.arr.api.model.BookMonitorBody
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
@@ -19,6 +22,7 @@ import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.seerr.api.model.Network
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 
@@ -113,8 +117,26 @@ class BookshelfClient(
     suspend fun getAuthorBookFiles(id: Long): NetworkResult<List<BookFile>> =
         get("bookFile", mapOf("authorId" to id))
 
+    suspend fun getBookFiles(bookId: Long): NetworkResult<List<BookFile>> =
+        get("bookFile", mapOf("bookId" to bookId))
+
     suspend fun getBooks(): NetworkResult<List<Book>> =
         get("book")
+
+    suspend fun updateBook(book: Book): NetworkResult<Book> =
+        put("book/${book.id}", book)
+
+    suspend fun setBookMonitorStatus(
+        bookIds: List<Long>,
+        monitored: Boolean
+    ): NetworkResult<List<MonitoredResponse>> =
+        put<BookMonitorBody, List<MonitoredResponse>>("book/monitor", BookMonitorBody(bookIds, monitored))
+
+    suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =
+        get("edition", mapOf("bookId" to bookId))
+
+    suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
+        delete("bookFiles/bulk", body = BookFileBulkDeleteBody(bookFilesIds))
 
     override suspend fun getMovieCalendar(
         start: LocalDate,
