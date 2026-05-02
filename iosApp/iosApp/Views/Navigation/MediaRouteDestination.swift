@@ -47,6 +47,16 @@ struct MediaRouteDestination: View {
                 artistId: artistId?.asKotlinLong
             )
             InteractiveSearchScreen(type: .lidarr, releaseParams: releaseParams)
+            
+        case .bookReleases(let bookId):
+            let releaseParams = ReleaseParamsBook(bookId: bookId)
+            InteractiveSearchScreen(type: .booksehelf, releaseParams: releaseParams)
+            
+        case .authorFiles(let authorJson):
+            AuthorFilesScreen(authorJson: authorJson)
+            
+        case .bookDetails(let bookJson, let authorJson):
+            BookDetailsScreen(bookJson: bookJson, authorJson: authorJson)
         }
     }
 }

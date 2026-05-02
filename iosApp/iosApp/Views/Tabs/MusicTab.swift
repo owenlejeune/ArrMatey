@@ -50,13 +50,7 @@ struct MusicTabContent: View {
             InteractiveSearchScreen(type: .lidarr, releaseParams: releaseParams)
             
         // unused
-        case .movieFiles(_):
-            EmptyView()
-        case .movieRelease(_):
-            EmptyView()
-        case .seriesReleases(_, _, _):
-            EmptyView()
-        case .episodeDetails(_, _):
+        default:
             EmptyView()
         }
     }

@@ -49,7 +49,7 @@ struct PosterItem<Content: View>: View {
                             Image(systemName: "photo.badge.exclamationmark")
                                 .font(.largeTitle)
                                 .foregroundColor(.red)
-                            Text("Error Loading")
+                            Text(item.title ?? "")
                                 .font(.caption2)
                         }
                         .onAppear { loadError = true }
@@ -59,9 +59,16 @@ struct PosterItem<Content: View>: View {
                         EmptyView()
                     }
                 }
+                .aspectRatio(CGFloat(aspectRatio.ratio), contentMode: .fit)
             } else {
-                Image(systemName: "photo")
-                    .foregroundColor(.gray)
+                VStack {
+                    Image(systemName: "photo.badge.exclamationmark")
+                        .font(.largeTitle)
+                        .foregroundColor(.red)
+                    Text(item.title ?? "")
+                        .font(.caption2)
+                }
+                .aspectRatio(CGFloat(aspectRatio.ratio), contentMode: .fit)
             }
 
             if imageLoaded {

@@ -49,9 +49,4 @@ class BookDetailsViewModelS: ObservableObject {
     func deleteBook() {
         viewModel.deleteBook()
     }
-    
-    func resetMonitorStatus() {
-        viewModel.resetMonitorStatus()
-    }
-    
 }

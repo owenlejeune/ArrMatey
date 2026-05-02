@@ -53,11 +53,7 @@ struct MoviesTabContent: View {
             InteractiveSearchScreen(type: .radarr, releaseParams: releaseParams)
             
         // unused
-        case .seriesReleases(_, _, _):
-            EmptyView()
-        case .episodeDetails(_, _):
-            EmptyView()
-        case .albumReleases(_, _):
+        default:
             EmptyView()
         }
     }

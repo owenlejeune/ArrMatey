@@ -186,6 +186,9 @@ enum MediaRoute: Hashable {
         albumId: Int64,
         artistId: Int64? = nil
     )
+    case bookReleases(bookId: Int64)
+    case authorFiles(authorJson: String)
+    case bookDetails(bookJson: String, authorJson: String)
     case episodeDetails(String, String)
 }
 

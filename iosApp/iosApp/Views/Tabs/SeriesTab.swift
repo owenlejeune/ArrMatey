@@ -51,11 +51,7 @@ struct SeriesTabContent: View {
             EpisodeDetailsScreen(seriesJson: seriesJson, episodeJson: episodeJson)
             
         // unused
-        case .movieFiles(_):
-            EmptyView()
-        case .movieRelease(_):
-            EmptyView()
-        case .albumReleases(_, _):
+        default:
             EmptyView()
         }
     }

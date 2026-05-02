@@ -111,6 +111,14 @@ class ArrMediaDetailsViewModelS: ObservableObject {
         viewModel.toggleAlbumMonitored(album: album)
     }
     
+    func toggleBookMonitored(book: Book) {
+        viewModel.toggleBookMonitored(book: book)
+    }
+    
+    func toggleBookSeriesMonitored(books: [Book]) {
+        viewModel.toggleBookSeriesMonitored(books: books)
+    }
+    
     func deleteMedia(deleteFiles: Bool, addImportExclusion: Bool) {
         viewModel.deleteMedia(deleteFiles: deleteFiles, addImportExclusion: addImportExclusion)
     }
@@ -141,6 +149,10 @@ class ArrMediaDetailsViewModelS: ObservableObject {
     
     func performAlbumAutomaticLookup(albumId: Int64) {
         viewModel.performAlbumAutomaticLookup(albumId: albumId)
+    }
+    
+    func performBookAutomaticLookup(bookId: Int64) {
+        viewModel.performBookAutomaticLookup(bookId: bookId)
     }
     
     func delete(_ addExclusion: Bool, _ deleteFiles: Bool) {

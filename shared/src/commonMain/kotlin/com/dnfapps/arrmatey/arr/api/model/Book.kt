@@ -30,6 +30,16 @@ data class Book(
 
     val instanceId: Long? = null
 ) {
+    companion object {
+        fun fromJson(value: String): Book {
+            return ArrMedia.json.decodeFromString(value)
+        }
+    }
+
+    fun toJson(): String {
+        return ArrMedia.json.encodeToString(this)
+    }
+
     fun getCover() = images.firstOrNull {
         it.coverType == CoverType.Cover
     }

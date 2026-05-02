@@ -48,6 +48,12 @@ data class Author(
     val lastBook: Book? = null,
     val addOptions: AuthorAddOptions? = null
 ): ArrMedia, HasArrImages<Author> {
+    companion object {
+        fun fromJson(value: String): Author {
+            return ArrMedia.json.decodeFromString(value)
+        }
+    }
+
     override val guid: Long get() = id?: (Random.nextLong() + 200_000)
 
     override val isMissing: Boolean

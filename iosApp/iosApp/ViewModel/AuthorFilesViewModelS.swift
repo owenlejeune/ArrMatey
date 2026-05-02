@@ -12,12 +12,17 @@ import SwiftUI
 class AuthorFilesViewModelS: ObservableObject {
     private let viewModel: AuthorFilesViewModel
     
-    @Published private(set) var uiState: AuthorFilesState = AuthorFilesState()
+    @Published private(set) var uiState: AuthorFilesState = AuthorFilesState(files: [], history: [], isRefreshing: false)
     
     init(authorId: Int64) {
         self.viewModel = KoinBridge.shared.getAuthorFilesViewModel(authorId: authorId)
-        
-        viewModel.uiState.observeAsync { self.uiState = $0 }
+        startObserving()
+    }
+    
+    private func startObserving() {
+        viewModel.uiState.observeAsync {
+            self.uiState = $0
+        }
     }
     
     func refreshHistory() {

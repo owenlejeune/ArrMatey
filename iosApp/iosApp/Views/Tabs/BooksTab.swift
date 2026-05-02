@@ -45,17 +45,16 @@ struct BooksTabContent: View {
             MediaSearchScreen(query: query, type: .booksehelf)
         case .preview(let json, _):
             MediaPreviewScreen(json: json, type: .booksehelf)
+        case .bookReleases(let bookId):
+            let releaseParams = ReleaseParamsBook(bookId: bookId)
+            InteractiveSearchScreen(type: .booksehelf, releaseParams: releaseParams)
+        case .bookDetails(let bookJson, let authorJson):
+            BookDetailsScreen(bookJson: bookJson, authorJson: authorJson)
+        case .authorFiles(let authorJson):
+            AuthorFilesScreen(authorJson: authorJson)
             
             // unused
-        case .movieFiles(_):
-            EmptyView()
-        case .movieRelease(_):
-            EmptyView()
-        case .seriesReleases(_, _, _):
-            EmptyView()
-        case .episodeDetails(_, _):
-            EmptyView()
-        case .albumReleases(let albumId, let artistId):
+        default:
             EmptyView()
         }
     }

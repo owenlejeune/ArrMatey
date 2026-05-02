@@ -94,7 +94,7 @@ struct MediaDetailsScreen: View {
                         
                         ItemDescriptionCard(overview: item.overview)
                         
-                        filesArea(for: item, state.extraFiles, state.episodes, state.albums, state.tracks, state.trackFiles)
+                        filesArea(for: item, state.extraFiles, state.episodes, state.albums, state.tracks, state.trackFiles, state.bookFiles, state.bookSeries, state.books)
                         
                         MediaInfoArea(item: item, qualityProfiles: viewModel.qualityProfiles, tags: viewModel.tags)
                         
@@ -142,7 +142,10 @@ struct MediaDetailsScreen: View {
         _ episodes: [Episode],
         _ albums: [ArrAlbum],
         _ tracks: [KotlinLong: [LidarrTrack]],
-        _ trackFiles: [KotlinLong: [LidarrTrackFile]]
+        _ trackFiles: [KotlinLong: [LidarrTrackFile]],
+        _ bookFiles: [BookFile],
+        _ bookSeries: [BookSeries],
+        _ books: [Book]
     ) -> some View {
         if let series = item as? ArrSeries {
             SeriesFilesView(
@@ -194,6 +197,17 @@ struct MediaDetailsScreen: View {
                     confirmDeleteAlbum = $0
                 },
                 albumDeleteInProgress: viewModel.deleteAlbumInProgress
+            )
+        } else if let author = item as? Author {
+            BooksArea(
+                author: author,
+                series: bookSeries,
+                files: bookFiles,
+                books: books,
+                searchIds: viewModel.automaticSearchIds,
+                onToggleMonitor: { viewModel.toggleBookMonitored(book: $0) },
+                onToggleSeriesMonitor: { viewModel.toggleBookSeriesMonitored(books: $0) },
+                onAutomaticSearch: { viewModel.performBookAutomaticLookup(bookId: $0) }
             )
         } else {
             EmptyView()
@@ -255,6 +269,10 @@ struct MediaDetailsScreen: View {
             
         case let artist as Arrtist: EditArtistSheet(item: artist, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newSeries, moveFiles in
             viewModel.editItem(newSeries, moveFiles: moveFiles)
+        })
+            
+        case let author as Author: EditAuthorSheet(item: author, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newAuthor, moveFiles in
+            viewModel.editItem(newAuthor, moveFiles: moveFiles)
         })
             
         default: EmptyView()
