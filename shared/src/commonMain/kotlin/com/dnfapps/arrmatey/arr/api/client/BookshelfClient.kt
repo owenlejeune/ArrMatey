@@ -111,12 +111,6 @@ class BookshelfClient(
             put("authorId", id)
             altId?.let { put("bookId", it) }
         })
-//        get<BookshelfHistoryResponse>("history", buildMap {
-//            put("page", page)
-//            put("pageSize", pageSize)
-//            put("authorId", id)
-//            altId?.let { put("bookId", it) }
-//        }).map { it.records }
 
     suspend fun getAuthorSeries(id: Long): NetworkResult<List<BookSeries>> =
         get("series", mapOf("authorId" to id))
@@ -167,7 +161,7 @@ class BookshelfClient(
         get<List<Book>>("calendar", mapOf(
             "start" to start.toString(),
             "end" to end.toString(),
-            "unmonitored" to false
+            "unmonitored" to true
         )).map { it.map { bk -> bk.copy(instanceId = instance.id) } }
 
 }

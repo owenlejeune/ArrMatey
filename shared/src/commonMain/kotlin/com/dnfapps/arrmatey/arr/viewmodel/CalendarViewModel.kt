@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.state.CalendarFilterState
@@ -41,6 +42,7 @@ class CalendarViewModel(
             episodes = filterEpisodes(calendar.episodes, filter),
             groupedEpisodes = filterEpisodeGroups(calendar.groupedEpisodes, filter),
             albums = filterAlbums(calendar.albums, filter),
+            books = filterBooks(calendar.books, filter),
             dates = calendar.dates,
             isLoading = calendar.isLoading,
             isLoadingFuture = calendar.isLoadingFuture,
@@ -217,6 +219,22 @@ class CalendarViewModel(
             }
         }
 
+    private fun filterBooks(
+        booksMap: Map<LocalDate, List<Book>>,
+        filter: CalendarFilterState
+    ): Map<LocalDate, List<Book>> =
+        if (filter.contentFilter != ContentFilter.All &&
+            filter.contentFilter != ContentFilter.BooksOnly
+        ) {
+            emptyMap()
+        } else {
+            booksMap.mapValues { (_, books) ->
+                books.filter { book ->
+                    filterBook(book, filter)
+                }
+            }
+        }
+
     private fun filterMovie(movie: ArrMovie, filter: CalendarFilterState): Boolean {
         return (!filter.showMonitoredOnly || movie.monitored) &&
                 (filter.instanceId == null || movie.instanceId == filter.instanceId)
@@ -232,5 +250,10 @@ class CalendarViewModel(
     private fun filterAlbum(album: ArrAlbum, filter: CalendarFilterState): Boolean {
         return (!filter.showMonitoredOnly || album.monitored) &&
                 (filter.instanceId == null || album.instanceId == filter.instanceId)
+    }
+
+    private fun filterBook(book: Book, filter: CalendarFilterState): Boolean {
+        return (!filter.showMonitoredOnly || book.monitored) &&
+                (filter.instanceId == null || book.instanceId == filter.instanceId)
     }
 }

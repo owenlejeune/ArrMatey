@@ -26,5 +26,6 @@ enum class ContentFilter(
     All(MR.strings.all, "play.square.stack"),
     MoviesOnly(MR.strings.movies, "movieclapper"),
     EpisodesOnly(MR.strings.episodes, "tv"),
-    AlbumsOnly(MR.strings.albums_header, "music.note")
+    AlbumsOnly(MR.strings.albums_header, "music.note"),
+    BooksOnly(MR.strings.books, "book")
 }

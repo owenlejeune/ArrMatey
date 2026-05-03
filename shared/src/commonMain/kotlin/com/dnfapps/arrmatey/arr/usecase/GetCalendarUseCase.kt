@@ -15,6 +15,7 @@ class GetCalendarUseCase(
         combine(
             calendarService.dates,
             calendarService.albums,
+            calendarService.books,
             combine(
                 calendarService.movies,
                 calendarService.episodes,
@@ -29,12 +30,13 @@ class GetCalendarUseCase(
             ) { isLoading, isLoadingFuture, error ->
                 Triple(isLoading, isLoadingFuture, error)
             }
-        ) { dates, albums, (movies, episodes, groups), (isLoading, isLoadingFuture, error) ->
+        ) { dates, albums, books, (movies, episodes, groups), (isLoading, isLoadingFuture, error) ->
             CalendarState(
                 movies = movies,
                 episodes = episodes,
                 groupedEpisodes = groups,
                 albums = albums,
+                books = books,
                 dates = dates,
                 isLoading = isLoading,
                 isLoadingFuture = isLoadingFuture,
