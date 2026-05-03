@@ -115,7 +115,8 @@ class SonarrClient(
     override suspend fun getItemHistory(
         id: Long,
         page: Int,
-        pageSize: Int
+        pageSize: Int,
+        altId: Long?
     ): NetworkResult<List<SonarrHistoryItem>> =
         get<SonarrHistoryResponse>("history", mapOf(
             "page" to page,

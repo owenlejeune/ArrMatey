@@ -33,7 +33,7 @@ struct MediaDetailsHeader: View {
                 MediaHeaderBanner(bannerUrl: URL(string: item.getBanner()?.remoteUrl ?? ""))
                     .frame(width: geometry.size.width)
                 
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .bottom, spacing: 12) {
                     PosterItem(item: item, aspectRatio: type.aspectRatio)
                         .frame(height: 220)
                     
@@ -41,7 +41,7 @@ struct MediaDetailsHeader: View {
                         ClearLogoView(item: item)
                             .padding(.bottom, 12)
                         
-                        if !(item is Arrtist) {
+                        if !(item is Arrtist) && !(item is Author) {
                             Text(infoString)
                                 .font(.system(size: 16))
                             

@@ -106,7 +106,8 @@ class LidarrClient(
     override suspend fun getItemHistory(
         id: Long,
         page: Int,
-        pageSize: Int
+        pageSize: Int,
+        altId: Long?
     ): NetworkResult<List<HistoryItem>> =
         get<LidarrHistoryResponse>("history", mapOf(
             "page" to page,

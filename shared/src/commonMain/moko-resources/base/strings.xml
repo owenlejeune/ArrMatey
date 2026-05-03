@@ -265,6 +265,9 @@
     <string name="episode_file_renamed">Episode File Renamed</string>
     <string name="episode_file_deleted">Episode File Deleted</string>
     <string name="series_folder_imported">Series Folder Imported</string>
+    <string name="book_file_imported">Book File Imported</string>
+    <string name="book_file_deleted">Book File Deleted</string>
+    <string name="book_file_renamed">Book File Renamed</string>
 
     <!-- Errors -->
     <string name="error">Error</string>

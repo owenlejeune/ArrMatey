@@ -367,10 +367,15 @@ class ArrInstanceRepository(
         return client.command(payload)
     }
 
-    suspend fun getItemHistory(itemId: Long, page: Int = 1, pageSize: Int = 100): NetworkResult<List<HistoryItem>> {
+    suspend fun getItemHistory(
+        itemId: Long,
+        altIt: Long? = null,
+        page: Int = 1,
+        pageSize: Int = 100
+    ): NetworkResult<List<HistoryItem>> {
         _historyStatus.value = OperationStatus.InProgress
 
-        return client.getItemHistory(itemId, page, pageSize)
+        return client.getItemHistory(itemId, page, pageSize, altIt)
             .onSuccess { history ->
                 val currentCache = _historyCache.value.toMutableMap()
                 currentCache[itemId] = history
@@ -817,8 +822,6 @@ class ArrInstanceRepository(
 
                 }
         }
-
-
 
     suspend fun toggleBookMonitor(book: Book): NetworkResult<Book> {
         _monitorStatus.value = OperationStatus.InProgress

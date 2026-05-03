@@ -20,6 +20,8 @@ struct MediaInfoArea: View {
             movieInfo(movie)
         } else if let artist = item as? Arrtist {
             artistInfo(artist)
+        } else if let author = item as? Author {
+            authorInfo(author)
         } else { [] }
     }
     
@@ -142,6 +144,37 @@ struct MediaInfoArea: View {
             InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
             InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
             InfoItem(label: MR.strings().path.localized(), value: artist.path ?? unknown),
+            InfoItem(label: MR.strings().new_albums.localized(), value: monitorLabel),
+            InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
+            InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
+        ]
+    }
+    
+    private func authorInfo(_ author: Author) -> [InfoItem] {
+        let unknown = MR.strings().unknown.localized()
+        
+        let qualityProfile = qualityProfiles.first(where: { $0.id == author.qualityProfileId })
+        let qualityLabel = qualityProfile?.name ?? unknown
+        let tagsLabel = author.formatTags(availableTags: tags) ?? MR.strings().none.localized()
+        
+        let monitorLabel = if author.monitorNewItems == .all {
+            MR.strings().monitored.localized()
+        } else {
+            MR.strings().unmonitored.localized()
+        }
+        
+        let rootFolderValue = if let path = author.rootFolderPath, !path.isEmpty {
+            path
+        } else {
+            unknown
+        }
+        
+        let diskSize = author.fileSize.bytesAsFileSizeString()
+        
+        return [
+            InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
+            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
+            InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown),
             InfoItem(label: MR.strings().new_albums.localized(), value: monitorLabel),
             InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
             InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)

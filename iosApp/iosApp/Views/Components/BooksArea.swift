@@ -79,6 +79,7 @@ struct BooksArea: View {
                 }
                 
                 SeriesSection(
+                    author: author,
                     bookSeries: bookSeries,
                     seriesBooks: seriesBooks,
                     files: files,
@@ -171,6 +172,7 @@ struct BookRow: View {
 }
 
 struct SeriesSection: View {
+    let author: Author
     let bookSeries: BookSeries
     let seriesBooks: [Book]
     let files: [BookFile]
@@ -219,7 +221,9 @@ struct SeriesSection: View {
                                 onToggleMonitor: onToggleMonitor,
                                 searchInProgress: searchIds.contains(book.id),
                                 onClick: {
-                                    navigation.go(to: .bookReleases(bookId: book.id), of: .booksehelf)
+                                    let bookJson = book.toJson()
+                                    let authorJson = author.toJson()
+                                    navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson), of: .booksehelf)
                                 },
                                 seriesPosition: link.position
                             )

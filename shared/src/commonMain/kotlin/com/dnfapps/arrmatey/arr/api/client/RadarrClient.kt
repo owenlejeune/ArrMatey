@@ -103,7 +103,8 @@ class RadarrClient(
     override suspend fun getItemHistory(
         id: Long,
         page: Int,
-        pageSize: Int
+        pageSize: Int,
+        altId: Long?
     ): NetworkResult<List<RadarrHistoryItem>> =
         get("history/movie", mapOf(
             "page" to page,

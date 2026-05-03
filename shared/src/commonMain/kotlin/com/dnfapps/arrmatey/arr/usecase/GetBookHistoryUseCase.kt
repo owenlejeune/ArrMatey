@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.arr.usecase
 
-import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryItem
 import com.dnfapps.arrmatey.arr.state.HistoryState
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
@@ -15,12 +14,12 @@ class GetBookHistoryUseCase {
         repository: ArrInstanceRepository
     ): Flow<HistoryState> = flow {
         emit(HistoryState.Loading)
-        repository.getItemHistory(authorId)
+        repository.getItemHistory(authorId, altIt = bookId)
             .onSuccess { result ->
-                val filtered = result.filter {
-                    (it as? BookshelfHistoryItem)?.bookId == bookId
-                }
-                emit(HistoryState.Success(filtered))
+//                val filtered = result.filter {
+//                    (it as? BookshelfHistoryItem)?.bookId == bookId
+//                }
+                emit(HistoryState.Success(result))
             }
             .onError { _, message, _ ->
                 emit(HistoryState.Error(message))

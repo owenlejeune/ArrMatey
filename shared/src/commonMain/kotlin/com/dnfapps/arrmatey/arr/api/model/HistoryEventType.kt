@@ -35,5 +35,14 @@ enum class HistoryEventType(val resource: StringResource) {
     EpisodeFileDeleted(MR.strings.episode_file_deleted),
 
     @SerialName("seriesFolderImported")
-    SeriesFolderImported(MR.strings.series_folder_imported)
+    SeriesFolderImported(MR.strings.series_folder_imported),
+
+    @SerialName("bookFileImported")
+    BookFileImported(MR.strings.book_file_imported),
+
+    @SerialName("bookFileRenamed")
+    BookFileRenamed(MR.strings.book_file_renamed),
+
+    @SerialName("bokFileDeleted")
+    BookFileDelete(MR.strings.book_file_deleted)
 }

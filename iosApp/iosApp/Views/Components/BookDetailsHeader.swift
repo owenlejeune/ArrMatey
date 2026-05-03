@@ -15,7 +15,7 @@ struct BookDetailsHeader: View {
     var body: some View {
         ZStack {
             MediaHeaderBanner(bannerUrl: URL(string: book.getCover()?.remoteUrl ?? ""))
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: .bottom, spacing: 12) {
                 if let url = book.getCover()?.remoteUrl {
                     AsyncImage(url: URL(string: url)) { image in
                         image.image?
@@ -39,6 +39,7 @@ struct BookDetailsHeader: View {
                         .font(.system(size: 16))
                 }
                 .frame(alignment: .top)
+                .frame(maxWidth: .infinity)
             }
             .frame(maxWidth: .infinity)
             .padding(.top, 170)
