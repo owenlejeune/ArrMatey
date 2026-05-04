@@ -34,6 +34,9 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -62,6 +65,7 @@ import com.dnfapps.arrmatey.ui.components.MediaView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
+import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
@@ -86,6 +90,8 @@ fun ArrLibraryScreen(
     val preferences by arrMediaViewModel.preferences.collectAsStateWithLifecycle()
 
     val errorMessage by arrMediaViewModel.errorMessage.collectAsStateWithLifecycle()
+
+    var showViewCustomizationSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(errorMessage) {
         errorMessage?.takeUnless { it.isEmpty() }?.let { message ->
@@ -138,8 +144,7 @@ fun ArrLibraryScreen(
                         onSortByChanged = { arrMediaViewModel.updateSortBy(it) },
                         sortOrder = preferences.sortOrder,
                         onSortOrderChanged = { arrMediaViewModel.updateSortOrder(it) },
-                        viewType = preferences.viewType,
-                        onViewTypeChanged = { arrMediaViewModel.updateViewType(it) }
+                        onOpenViewCustomization = { showViewCustomizationSheet = true }
                     )
                 }
             )
@@ -218,6 +223,19 @@ fun ArrLibraryScreen(
                     }
                 }
             }
+        }
+
+        if (showViewCustomizationSheet) {
+            ArrViewCustomizationSheet(
+                onDismissRequest = { showViewCustomizationSheet = false },
+                preferences = preferences,
+                type = type,
+                onViewTypeChanged = { arrMediaViewModel.updateViewType(it) },
+                onShowFullDetailsChanged = { },
+                onShowOverlayChanged = { },
+                onShowBannerBackgroundChanged = { },
+                onIncludeOverviewChanged = { },
+            )
         }
     }
 }

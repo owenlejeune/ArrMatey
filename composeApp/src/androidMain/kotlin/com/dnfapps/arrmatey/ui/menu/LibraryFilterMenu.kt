@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.entensions.imageVector
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.ui.theme.ViewType
@@ -41,8 +43,7 @@ fun LibraryFilterMenu(
     onSortByChanged: (SortBy) -> Unit,
     sortOrder: SortOrder,
     onSortOrderChanged: (SortOrder) -> Unit,
-    viewType: ViewType,
-    onViewTypeChanged: (ViewType) -> Unit
+    onOpenViewCustomization: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val groupInteractionSource = remember { MutableInteractionSource() }
@@ -59,18 +60,16 @@ fun LibraryFilterMenu(
                 shapes = MenuDefaults.groupShape(0, 3),
                 interactionSource = groupInteractionSource
             ) {
-                ViewType.entries.forEachIndexed { index, type ->
-                    DropdownMenuItem(
-                        text = { Text(mokoString(type.resource)) },
-                        selected = type == viewType,
-                        onClick = { onViewTypeChanged(type) },
-                        shapes = MenuDefaults.itemShape(index, ViewType.entries.size),
-                        selectedLeadingIcon = {
-                            Icon(Icons.Default.Check, null)
-                        },
-                        leadingIcon = { Icon(type.imageVector, null) }
-                    )
-                }
+                DropdownMenuItem(
+                    text = { Text("View Customization") },
+                    selected = false,
+                    onClick = {
+                        onOpenViewCustomization()
+                        showMenu = false
+                    },
+                    shapes = MenuDefaults.itemShape(0, 1),
+                    leadingIcon = { Icon(Icons.Default.Palette, null) }
+                )
             }
             Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
 

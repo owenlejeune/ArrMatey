@@ -254,6 +254,10 @@
     <string name="type">Type</string>
     <string name="books_area_books_tab">Books (%1$d)</string>
     <string name="books_area_series_tab">Series (%1$d)</string>
+    <string name="show_banner_background">Show banner background</string>
+    <string name="include_overview">Include overview</string>
+    <string name="show_full_details">Show full details</string>
+    <string name="show_overlay_items">Show overlay items</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

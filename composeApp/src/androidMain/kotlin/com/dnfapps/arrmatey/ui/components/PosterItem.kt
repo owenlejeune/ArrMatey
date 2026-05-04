@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -22,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -49,43 +51,31 @@ fun PosterItem(
     var imageLoadError by remember { mutableStateOf(false) }
     var imageLoaded by remember { mutableStateOf(false) }
 
-    val url = item.getPoster()?.remoteUrl
+    val model = rememberRemoteImageData(
+        url = item.getPoster()?.remoteUrl,
+        onError = { _, err ->
+            println(err.throwable.message)
+            imageLoadError = true
+        },
+        onSuccess = { _, _ -> imageLoaded = true }
+    )
 
-    Card(
-        shape = RoundedCornerShape(radius),
-        elevation = CardDefaults.cardElevation(elevation),
-        modifier = modifier
-            .aspectRatio(aspectRatio.ratio, true),
+    BasePosterItem(
+        model = model,
+        modifier = modifier,
+        enabled = enabled,
+        elevation = elevation,
+        radius = radius,
+        aspectRatio = aspectRatio,
         onClick = {
             onItemClick?.invoke(item)
         },
-        enabled = enabled && onItemClick != null
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            val model = rememberRemoteImageData(
-                url = url,
-                onError = { _, err ->
-                    println(err.throwable.message)
-                    imageLoadError = true
-                },
-                onSuccess = { _, _ -> imageLoaded = true }
-            )
-            AsyncImage(
-                model = model,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .cloudy(20)
-                    .align(Alignment.Center)
-                    .fillMaxSize()
-            )
-            AsyncImage(
-                model = model,
-                contentDescription = null,
-                contentScale = ContentScale.FillHeight,
-                modifier = Modifier.align(Alignment.Center)
-                    .fillMaxSize()
-            )
+        additionalContent = {
+            if (imageLoaded) {
+                additionalContent()
+            }
+        },
+        errorContent = {
             if (imageLoadError) {
                 Column (
                     modifier = Modifier.align(Alignment.Center),
@@ -105,11 +95,8 @@ fun PosterItem(
                     )
                 }
             }
-            if (imageLoaded) {
-                additionalContent()
-            }
         }
-    }
+    )
 }
 
 @Composable
@@ -121,38 +108,107 @@ fun PosterItem(
     aspectRatio: AspectRatio = AspectRatio.Poster,
 ) {
     var imageLoadError by remember { mutableStateOf(false) }
-    var imageLoaded by remember { mutableStateOf(false) }
 
+    val model = rememberRemoteImageData(
+        url = item.fullPosterPath,
+        onError = { _, err ->
+            println(err.throwable.message)
+            imageLoadError = true
+        }
+    )
+
+    BasePosterItem(
+        model = model,
+        modifier = modifier,
+        elevation = elevation,
+        radius = radius,
+        aspectRatio = aspectRatio,
+        errorContent = {
+            if (imageLoadError) {
+                Column (
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.BrokenImage,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Text(
+                        text = item.displayTitle,
+                        style = MaterialTheme.typography.titleSmall,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun BasePosterItem(
+    model: Any,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    elevation: Dp = 12.dp,
+    radius: Dp = 10.dp,
+    aspectRatio: AspectRatio = AspectRatio.Poster,
+    onClick: (() -> Unit)? = null,
+    errorContent: @Composable BoxScope.() -> Unit = {},
+    additionalContent: @Composable BoxScope.() -> Unit = {}
+) {
     Card(
         shape = RoundedCornerShape(radius),
         elevation = CardDefaults.cardElevation(elevation),
         modifier = modifier
-            .aspectRatio(aspectRatio.ratio, true)
+            .aspectRatio(aspectRatio.ratio, true),
+        onClick = {
+            onClick?.invoke()
+        },
+        enabled = enabled && onClick != null
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            AsyncImage(
-                model = rememberRemoteImageData(
-                    url = item.fullPosterPath,
-                    onError = { _, err ->
-                        println(err.throwable.message)
-                        imageLoadError = true
-                    },
-                    onSuccess = { _, _ -> imageLoaded = true }
-                ),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds
-            )
-            if (imageLoadError) {
-                Icon(
-                    imageVector = Icons.Default.BrokenImage,
+        Box(modifier = Modifier.fillMaxSize()) {
+            when (model) {
+                is Painter -> Image(
+                    painter = model,
+                    contentScale = ContentScale.Crop,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier
+                        .cloudy(20)
+                        .align(Alignment.Center)
+                        .fillMaxSize()
+                )
+                else -> AsyncImage(
+                    model = model,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .cloudy(20)
+                        .align(Alignment.Center)
+                        .fillMaxSize()
                 )
             }
+            when (model) {
+                is Painter -> Image(
+                    painter = model,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillHeight,
+                    modifier = Modifier.align(Alignment.Center)
+                        .fillMaxSize()
+                )
+                else -> AsyncImage(
+                    model = model,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillHeight,
+                    modifier = Modifier.align(Alignment.Center)
+                        .fillMaxSize()
+                )
+            }
+
+            errorContent()
+            additionalContent()
         }
     }
 }
