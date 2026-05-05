@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val TranslucentBlack = Color(0x99000000)
+val TranslucentBlackDarker = Color(0xB3000000)
 
 val primaryLight = Color(0xFF006D34)
 val onPrimaryLight = Color(0xFFFFFFFF)

@@ -49,15 +49,13 @@ fun PosterItem(
     additionalContent: @Composable BoxScope.() -> Unit = {}
 ) {
     var imageLoadError by remember { mutableStateOf(false) }
-    var imageLoaded by remember { mutableStateOf(false) }
 
     val model = rememberRemoteImageData(
         url = item.getPoster()?.remoteUrl,
         onError = { _, err ->
             println(err.throwable.message)
             imageLoadError = true
-        },
-        onSuccess = { _, _ -> imageLoaded = true }
+        }
     )
 
     BasePosterItem(
@@ -71,9 +69,7 @@ fun PosterItem(
             onItemClick?.invoke(item)
         },
         additionalContent = {
-            if (imageLoaded) {
-                additionalContent()
-            }
+            additionalContent()
         },
         errorContent = {
             if (imageLoadError) {

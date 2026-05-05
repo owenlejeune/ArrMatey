@@ -18,9 +18,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -117,23 +121,35 @@ fun <T: ArrMedia> MediaItem(
                 Column(
                     modifier = Modifier.defaultMinSize(minHeight = defaultHeight)
                 ) {
-                    Text(
-                        text = buildString {
-                            append(item.title ?: mokoString(MR.strings.unknown))
-                            item.year?.let { year ->
-                                item.title?.contains("$year")?.let {
-                                    if (!it) {
-                                        append(" ($year)")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = buildString {
+                                append(item.title ?: mokoString(MR.strings.unknown))
+                                item.year?.let { year ->
+                                    item.title?.contains("$year")?.let {
+                                        if (!it) {
+                                            append(" ($year)")
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                            },
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        item.id?.let {
+                            Icon(
+                                imageVector = if (item.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                    }
                     MediaDetails(item, isActive)
                 }
             }
