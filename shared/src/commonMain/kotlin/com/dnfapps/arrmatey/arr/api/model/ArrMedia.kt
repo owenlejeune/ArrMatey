@@ -2,11 +2,11 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.extensions.formatAsRuntime
-import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
@@ -117,6 +117,7 @@ fun ArrMedia.toJson(): String {
         is ArrMovie  -> ArrMedia.json.encodeToJsonElement(ArrMovieSerializer, this)
         is Arrtist -> ArrMedia.json.encodeToJsonElement(ArrtistSerializer, this)
         is Author -> ArrMedia.json.encodeToJsonElement(AuthorSerializer, this)
+        is MockMedia -> ArrMedia.json.encodeToJsonElement(MockMedia.serializer(), this)
     }
 
     return ArrMedia.json.encodeToString(element)
@@ -195,6 +196,7 @@ object AnyArrMediaSerializer: KSerializer<ArrMedia> {
             is ArrMovie  -> json.encodeToJsonElement(ArrMovieSerializer, value)
             is Arrtist -> json.encodeToJsonElement(ArrtistSerializer, value)
             is Author -> json.encodeToJsonElement(AuthorSerializer, value)
+            is MockMedia -> json.encodeToJsonElement(MockMedia.serializer(), value)
         }
         encoder.encodeJsonElement(element)
     }

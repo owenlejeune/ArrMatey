@@ -155,6 +155,22 @@ class ArrMediaViewModel(
         safeSavePreference { it.copy(viewType = viewType) }
     }
 
+    fun updateShowFullDetails(show: Boolean) {
+        safeSavePreference { it.copy(showFullDetails = show) }
+    }
+
+    fun updateShowOverlay(show: Boolean) {
+        safeSavePreference { it.copy(showOverlay = show) }
+    }
+
+    fun updateShowBannerBackground(show: Boolean) {
+        safeSavePreference { it.copy(showBannerBackground = show) }
+    }
+
+    fun updateIncludeOverview(show: Boolean) {
+        safeSavePreference { it.copy(includeOverview = show) }
+    }
+
     fun updateSortBy(sortBy: SortBy) {
         safeSavePreference { it.copy(sortBy = sortBy) }
     }

@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
+import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
@@ -32,6 +33,7 @@ fun UpcomingDateView(item: ArrMedia) {
         is Author -> if (item.status == MediaStatus.Continuing) item.nextBook?.releaseDate?.format()?.let {
             "${mokoString(MR.strings.next_book)} $it"
         } ?: mokoString(MR.strings.continuing_unknown) else null
+        is MockMedia -> "Next Airing: Monday"
     }?.let { airingString ->
         Text(
             text = airingString,

@@ -6,22 +6,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.VideoLibrary
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
@@ -208,7 +201,7 @@ fun ArrLibraryScreen(
                                             )
                                         }
                                     },
-                                    viewType = preferences.viewType,
+                                    preferences = preferences,
                                     itemIsActive = { item ->
                                         queueItems.any { it.mediaId == item.id }
                                     }
@@ -231,10 +224,10 @@ fun ArrLibraryScreen(
                 preferences = preferences,
                 type = type,
                 onViewTypeChanged = { arrMediaViewModel.updateViewType(it) },
-                onShowFullDetailsChanged = { },
-                onShowOverlayChanged = { },
-                onShowBannerBackgroundChanged = { },
-                onIncludeOverviewChanged = { },
+                onShowFullDetailsChanged = { arrMediaViewModel.updateShowFullDetails(it) },
+                onShowOverlayChanged = { arrMediaViewModel.updateShowOverlay(it) },
+                onShowBannerBackgroundChanged = { arrMediaViewModel.updateShowBannerBackground(it) },
+                onIncludeOverviewChanged = { arrMediaViewModel.updateIncludeOverview(it) },
             )
         }
     }

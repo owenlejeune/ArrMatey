@@ -65,7 +65,9 @@ fun IssueCard(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BannerView(
-                bannerUrl = details?.fullPosterPath,
+                bannerModel = details?.fullPosterPath?.let {
+                    rememberRemoteImageData(it)
+                },
                 modifier = Modifier.matchParentSize()
             )
             Box(modifier = Modifier.matchParentSize().background(TranslucentBlack))

@@ -1,12 +1,19 @@
 package com.dnfapps.arrmatey.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,16 +48,19 @@ import com.skydoves.cloudy.cloudy
 fun PosterItem(
     item: ArrMedia,
     modifier: Modifier = Modifier,
+    showFooter: Boolean = false,
     onItemClick: ((ArrMedia) -> Unit)? = null,
     enabled: Boolean = true,
     elevation: Dp = 12.dp,
     radius: Dp = 10.dp,
+    posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
+    posterModel: Any? = null,
     additionalContent: @Composable BoxScope.() -> Unit = {}
 ) {
     var imageLoadError by remember { mutableStateOf(false) }
 
-    val model = rememberRemoteImageData(
+    val model = posterModel ?: rememberRemoteImageData(
         url = item.getPoster()?.remoteUrl,
         onError = { _, err ->
             println(err.throwable.message)
@@ -64,6 +74,7 @@ fun PosterItem(
         enabled = enabled,
         elevation = elevation,
         radius = radius,
+        posterHeight = posterHeight,
         aspectRatio = aspectRatio,
         onClick = {
             onItemClick?.invoke(item)
@@ -91,6 +102,22 @@ fun PosterItem(
                     )
                 }
             }
+        },
+        footerVisible = showFooter,
+        footerContent = {
+            Text(
+                text = item.title ?: mokoString(MR.strings.unknown),
+                style = MaterialTheme.typography.labelLarge,
+                minLines = 2,
+                maxLines = 2
+            )
+            item.year?.let { year ->
+                Text(
+                    text = year.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1
+                )
+            }
         }
     )
 }
@@ -101,6 +128,7 @@ fun PosterItem(
     modifier: Modifier = Modifier,
     elevation: Dp = 60.dp,
     radius: Dp = 10.dp,
+    posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
 ) {
     var imageLoadError by remember { mutableStateOf(false) }
@@ -118,6 +146,7 @@ fun PosterItem(
         modifier = modifier,
         elevation = elevation,
         radius = radius,
+        posterHeight = posterHeight,
         aspectRatio = aspectRatio,
         errorContent = {
             if (imageLoadError) {
@@ -150,61 +179,85 @@ fun BasePosterItem(
     enabled: Boolean = true,
     elevation: Dp = 12.dp,
     radius: Dp = 10.dp,
+    posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
     onClick: (() -> Unit)? = null,
     errorContent: @Composable BoxScope.() -> Unit = {},
-    additionalContent: @Composable BoxScope.() -> Unit = {}
+    additionalContent: @Composable BoxScope.() -> Unit = {},
+    footerContent: @Composable ColumnScope.() -> Unit = {},
+    footerVisible: Boolean = true
 ) {
     Card(
         shape = RoundedCornerShape(radius),
         elevation = CardDefaults.cardElevation(elevation),
-        modifier = modifier
-            .aspectRatio(aspectRatio.ratio, true),
+        modifier = modifier,
         onClick = {
             onClick?.invoke()
         },
         enabled = enabled && onClick != null
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            when (model) {
-                is Painter -> Image(
-                    painter = model,
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .cloudy(20)
-                        .align(Alignment.Center)
-                        .fillMaxSize()
-                )
-                else -> AsyncImage(
-                    model = model,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .cloudy(20)
-                        .align(Alignment.Center)
-                        .fillMaxSize()
-                )
-            }
-            when (model) {
-                is Painter -> Image(
-                    painter = model,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillHeight,
-                    modifier = Modifier.align(Alignment.Center)
-                        .fillMaxSize()
-                )
-                else -> AsyncImage(
-                    model = model,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillHeight,
-                    modifier = Modifier.align(Alignment.Center)
-                        .fillMaxSize()
-                )
-            }
+        Column {
+            Box(
+                modifier = Modifier
+                    .then(posterHeight?.let { Modifier.height(it) } ?: Modifier)
+                    .aspectRatio(aspectRatio.ratio, true)
+            ) {
+                when (model) {
+                    is Painter -> Image(
+                        painter = model,
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .cloudy(20)
+                            .align(Alignment.Center)
+                            .fillMaxSize()
+                    )
 
-            errorContent()
-            additionalContent()
+                    else -> AsyncImage(
+                        model = model,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .cloudy(20)
+                            .align(Alignment.Center)
+                            .fillMaxSize()
+                    )
+                }
+                when (model) {
+                    is Painter -> Image(
+                        painter = model,
+                        contentDescription = null,
+                        contentScale = ContentScale.FillHeight,
+                        modifier = Modifier.align(Alignment.Center)
+                            .fillMaxSize()
+                    )
+
+                    else -> AsyncImage(
+                        model = model,
+                        contentDescription = null,
+                        contentScale = ContentScale.FillHeight,
+                        modifier = Modifier.align(Alignment.Center)
+                            .fillMaxSize()
+                    )
+                }
+
+                errorContent()
+                additionalContent()
+            }
+            AnimatedVisibility(
+                visible = footerVisible,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp)
+                        .padding(top = 16.dp)
+                ) {
+                    footerContent()
+                }
+            }
         }
     }
 }

@@ -25,6 +25,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlackDarker
@@ -37,7 +41,9 @@ fun PosterGrid(
     onItemClick: (ArrMedia) -> Unit,
     itemIsActive: (ArrMedia) -> Boolean,
     modifier: Modifier = Modifier,
-    userScrollEnabled: Boolean = true
+    userScrollEnabled: Boolean = true,
+    showFullDetails: Boolean = false,
+    showOverlay: Boolean = true
 ) {
     val windowInfo = LocalWindowInfo.current
     val screenWidth = windowInfo.containerDpSize.width
@@ -59,7 +65,7 @@ fun PosterGrid(
                 onItemClick = onItemClick,
                 modifier = Modifier.padding(8.dp),
                 additionalContent = {
-                    if (item.id != null) {
+                    if (showOverlay && item.id != null) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -87,41 +93,8 @@ fun PosterGrid(
                             trackColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     }
-                }
-//                        additionalContent = {
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .fillMaxHeight(.5f)
-//                            .background(
-//                                brush = Brush.verticalGradient(
-//                                    listOf(TranslucentBlackDarker, Color.Transparent)
-//                                )
-//                            )
-//                    )
-//                    Icon(
-//                        imageVector = if (item.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-//                        contentDescription = null,
-//                        modifier = Modifier.padding(8.dp).align(Alignment.TopStart)
-//                    )
-//                    if (isInSelectionMode) {
-//                        CircularCheckbox(
-//                            checked = isSelected,
-//                            modifier = Modifier.padding(8.dp).align(Alignment.TopEnd)
-//                        )
-//                    } else if (item.id != null) {
-//                        LinearProgressIndicator(
-//                            progress = { item.statusProgress },
-//                            modifier = Modifier
-//                                .align(Alignment.BottomCenter)
-//                                .fillMaxWidth()
-//                                .padding(horizontal = 12.dp, vertical = 8.dp)
-//                                .height(6.dp),
-//                            color = if (isActive) ArrPurple else item.statusColor,
-//                            trackColor = MaterialTheme.colorScheme.surfaceVariant
-//                        )
-//                    }
-//                }
+                },
+                showFooter = showFullDetails
             )
         }
     }

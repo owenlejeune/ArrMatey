@@ -26,6 +26,7 @@ import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
+import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
@@ -48,7 +49,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -606,6 +606,7 @@ class ArrInstanceRepository(
                         is ArrMovie -> item.copy(monitored = status)
                         is Arrtist -> item.copy(monitored = status)
                         is Author -> item.copy(monitored = status)
+                        is MockMedia -> item
                     }
                 } else {
                     item
@@ -623,6 +624,7 @@ class ArrInstanceRepository(
                 is ArrMovie -> item.copy(monitored = status)
                 is Arrtist -> item.copy(monitored = status)
                 is Author -> item.copy(monitored = status)
+                is MockMedia -> item
             }
             val updatedCache = currentDetailsCache.toMutableMap()
             updatedCache[id] = updatedMedia

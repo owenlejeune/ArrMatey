@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.ui.screens.requests
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -10,19 +9,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestSeason
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
-import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
-import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.shared.MR
@@ -34,7 +27,6 @@ import com.dnfapps.arrmatey.ui.theme.inverseOnSurfaceLight
 import com.dnfapps.arrmatey.ui.theme.inverseSurfaceLight
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.format
-import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
 
@@ -66,7 +58,7 @@ fun RequestCard(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BannerView(
-                bannerUrl = details?.fullBackdropPath,
+                bannerModel = details?.fullBackdropPath?.let { rememberRemoteImageData(it) },
                 modifier = Modifier.matchParentSize()
             )
             Box(modifier = Modifier.matchParentSize().background(TranslucentBlack))

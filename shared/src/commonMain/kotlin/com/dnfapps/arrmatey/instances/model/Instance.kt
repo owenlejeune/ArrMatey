@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.instances.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.getNetworkUtils
@@ -80,7 +81,8 @@ enum class InstanceType(
     val includeTopLevelAutomaticSearchOption: Boolean,
     val aspectRatio: AspectRatio,
     val supportsNotifications: Boolean,
-    val mockCover: ImageResource? = null
+    val mockCover: ImageResource? = null,
+    val mockMedia: MockMedia = MockMedia.Default
 ) {
     Sonarr(
         resource = MR.strings.sonarr_description,
@@ -95,7 +97,8 @@ enum class InstanceType(
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = true,
-        mockCover = MR.images.sonarr_mock_poster
+        mockCover = MR.images.sonarr_mock_poster,
+        mockMedia = MockMedia.Sonarr
     ),
     Radarr(
         resource = MR.strings.radarr_description,
@@ -110,7 +113,8 @@ enum class InstanceType(
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = true,
-        mockCover = MR.images.radarr_mock_poster
+        mockCover = MR.images.radarr_mock_poster,
+        mockMedia = MockMedia.Radarr
     ),
     Lidarr(
         resource = MR.strings.lidarr_description,
@@ -125,7 +129,8 @@ enum class InstanceType(
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
-        mockCover = MR.images.lidarr_mock_cover
+        mockCover = MR.images.lidarr_mock_cover,
+        mockMedia = MockMedia.Lidarr
     ),
     Booksehelf(
         resource = MR.strings.bookshelf_description,
@@ -140,7 +145,8 @@ enum class InstanceType(
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
-        mockCover = MR.images.readarr_mock_cover
+        mockCover = MR.images.readarr_mock_cover,
+        mockMedia = MockMedia.Readarr
     ),
     Seerr(
         resource = MR.strings.seerr_description,

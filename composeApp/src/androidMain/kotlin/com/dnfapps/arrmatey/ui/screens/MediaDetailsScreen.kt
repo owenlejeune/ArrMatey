@@ -59,6 +59,7 @@ import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
@@ -308,6 +309,7 @@ fun MediaDetailsScreen(
                                             mediaDetailsViewModel.performBookAutomaticLookup(bookId)
                                         }
                                     )
+                                    is MockMedia -> {}
                                 }
 
                                 val infoItems = when (item) {
@@ -315,6 +317,7 @@ fun MediaDetailsScreen(
                                     is ArrMovie -> movieInfo(item, qualityProfiles, tags)
                                     is Arrtist -> artistInfo(item, qualityProfiles, tags)
                                     is Author -> authorInfo(item, qualityProfiles, tags)
+                                    is MockMedia -> emptyMap()
                                 }.toInfoList()
                                 InfoArea(infoItems)
                             }
@@ -542,6 +545,7 @@ private fun EditMediaSheet(
             onEditItem = onEditItem,
             onDismiss = onDismiss
         )
+        is MockMedia -> {}
     }
 }
 

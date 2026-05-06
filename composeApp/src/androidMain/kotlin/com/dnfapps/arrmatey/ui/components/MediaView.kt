@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.ui.theme.ViewType
 
@@ -16,14 +17,16 @@ fun MediaView(
     items: List<ArrMedia>,
     onItemClick: (ArrMedia) -> Unit,
     itemIsActive: (ArrMedia) -> Boolean,
-    viewType: ViewType
+    preferences: InstancePreferences
 ) {
-    when (viewType) {
+    when (preferences.viewType) {
         ViewType.List -> MediaList(
             aspectRatio = type.aspectRatio,
             items = items,
             onItemClick = onItemClick,
             itemIsActive = itemIsActive,
+            showBannerBackground = preferences.showBannerBackground,
+            includeOverview = preferences.includeOverview,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .fillMaxSize()
@@ -33,6 +36,8 @@ fun MediaView(
             items = items,
             onItemClick = onItemClick,
             itemIsActive = itemIsActive,
+            showFullDetails = preferences.showFullDetails,
+            showOverlay = preferences.showOverlay,
             modifier = Modifier
                 .fillMaxSize()
         )
