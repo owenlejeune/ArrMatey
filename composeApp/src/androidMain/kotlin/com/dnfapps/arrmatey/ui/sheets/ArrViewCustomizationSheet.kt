@@ -35,10 +35,16 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MediaItem
+import com.dnfapps.arrmatey.ui.components.PosterGridItemOverlay
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlackDarker
 import com.dnfapps.arrmatey.ui.theme.ViewType
+import com.dnfapps.arrmatey.utils.Blur
+import com.dnfapps.arrmatey.utils.GridDensity
+import com.dnfapps.arrmatey.utils.GridSpacing
+import com.dnfapps.arrmatey.utils.PosterElevation
+import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 
@@ -52,7 +58,12 @@ fun ArrViewCustomizationSheet(
     onShowFullDetailsChanged: (Boolean) -> Unit,
     onShowOverlayChanged: (Boolean) -> Unit,
     onShowBannerBackgroundChanged: (Boolean) -> Unit,
-    onIncludeOverviewChanged: (Boolean) -> Unit
+    onIncludeOverviewChanged: (Boolean) -> Unit,
+    onBannerBlurChanged: (Blur) -> Unit,
+    onGridDensityChanged: (GridDensity) -> Unit,
+    onGridSpacingChanged: (GridSpacing) -> Unit,
+    onPosterElevationChanged: (PosterElevation) -> Unit,
+    onPosterRadiusChanged: (PosterRadius) -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -77,7 +88,10 @@ fun ArrViewCustomizationSheet(
                             showBannerBackground = preferences.showBannerBackground,
                             includeOverview = preferences.includeOverview,
                             posterModel = model,
-                            bannerModel = model
+                            bannerModel = model,
+                            blur = preferences.bannerBlur,
+                            posterRadius = preferences.posterRadius,
+                            posterElevation = preferences.posterElevation
                         )
                     }
 
@@ -88,34 +102,11 @@ fun ArrViewCustomizationSheet(
                             posterModel = model,
                             aspectRatio = type.aspectRatio,
                             showFooter = preferences.showFullDetails,
+                            radius = preferences.posterRadius,
+                            elevation = preferences.posterElevation,
                             additionalContent = {
                                 if (preferences.showOverlay) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .fillMaxHeight(.5f)
-                                            .background(
-                                                brush = Brush.verticalGradient(
-                                                    listOf(TranslucentBlackDarker, Color.Transparent)
-                                                )
-                                            )
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Default.Bookmark,
-                                        contentDescription = null,
-                                        modifier = Modifier.padding(8.dp).align(Alignment.TopStart),
-                                        tint = Color.White
-                                    )
-                                    LinearProgressIndicator(
-                                        progress = { 0.6f },
-                                        modifier = Modifier
-                                            .align(Alignment.BottomCenter)
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                                            .height(6.dp),
-                                        color = ArrBlue,
-                                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                                    )
+                                    PosterGridItemOverlay()
                                 }
                             }
                         )
@@ -136,46 +127,202 @@ fun ArrViewCustomizationSheet(
                 }
             }
 
+            Text(
+                text = mokoString(MR.strings.customization_options),
+                style = MaterialTheme.typography.headlineSmall
+            )
+
             AnimatedContent(
                 targetState = preferences.viewType,
-                transitionSpec =  { fadeIn().togetherWith(fadeOut()) },
-                modifier = Modifier.padding(12.dp)
+                transitionSpec =  { fadeIn().togetherWith(fadeOut()) }
             ) { type ->
                 when (type) {
-                    ViewType.List -> {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            LabelledSwitch(
-                                label = mokoString(MR.strings.show_banner_background),
-                                checked = preferences.showBannerBackground,
-                                onCheckedChange = { onShowBannerBackgroundChanged(it) }
-                            )
-                            LabelledSwitch(
-                                label = mokoString(MR.strings.include_overview),
-                                checked = preferences.includeOverview,
-                                onCheckedChange = { onIncludeOverviewChanged(it) }
-                            )
-                        }
-                    }
+                    ViewType.List -> ListTypeOptions(
+                        preferences, onShowBannerBackgroundChanged, onIncludeOverviewChanged,
+                        onBannerBlurChanged, onPosterElevationChanged, onPosterRadiusChanged
+                    )
 
-                    ViewType.Grid -> {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            LabelledSwitch(
-                                label = mokoString(MR.strings.show_full_details),
-                                checked = preferences.showFullDetails,
-                                onCheckedChange = { onShowFullDetailsChanged(it) }
-                            )
-                            LabelledSwitch(
-                                label = mokoString(MR.strings.show_overlay_items),
-                                checked = preferences.showOverlay,
-                                onCheckedChange = { onShowOverlayChanged(it) }
-                            )
-                        }
-                    }
+                    ViewType.Grid -> GridTypeOptions(
+                        preferences, onShowFullDetailsChanged, onShowOverlayChanged,
+                        onGridDensityChanged, onGridSpacingChanged, onPosterElevationChanged,
+                        onPosterRadiusChanged
+                    )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ListTypeOptions(
+    preferences: InstancePreferences,
+    onShowBannerBackgroundChanged: (Boolean) -> Unit,
+    onIncludeOverviewChanged: (Boolean) -> Unit,
+    onBannerBlurChanged: (Blur) -> Unit,
+    onPosterElevationChanged: (PosterElevation) -> Unit,
+    onPosterRadiusChanged: (PosterRadius) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        LabelledSwitch(
+            label = mokoString(MR.strings.show_banner_background),
+            checked = preferences.showBannerBackground,
+            onCheckedChange = { onShowBannerBackgroundChanged(it) }
+        )
+        LabelledSwitch(
+            label = mokoString(MR.strings.include_overview),
+            checked = preferences.includeOverview,
+            onCheckedChange = { onIncludeOverviewChanged(it) }
+        )
+        Column {
+            Text(
+                text = mokoString(MR.strings.banner_blur),
+                style = MaterialTheme.typography.titleSmall
+            )
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Blur.entries.forEachIndexed { index, blur ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = Blur.entries.size
+                        ),
+                        onClick = { onBannerBlurChanged(blur) },
+                        selected = blur == preferences.bannerBlur,
+                        label = { Text(mokoString(blur.label)) },
+                        enabled = preferences.showBannerBackground
+                    )
+                }
+            }
+        }
+        PosterOptions(
+            preferences = preferences,
+            onPosterRadiusChanged = onPosterRadiusChanged,
+            onPosterElevationChanged = onPosterElevationChanged
+        )
+    }
+}
+
+@Composable
+fun GridTypeOptions(
+    preferences: InstancePreferences,
+    onShowFullDetailsChanged: (Boolean) -> Unit,
+    onShowOverlayChanged: (Boolean) -> Unit,
+    onGridDensityChanged: (GridDensity) -> Unit,
+    onGridSpacingChanged: (GridSpacing) -> Unit,
+    onPosterElevationChanged: (PosterElevation) -> Unit,
+    onPosterRadiusChanged: (PosterRadius) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        LabelledSwitch(
+            label = mokoString(MR.strings.show_full_details),
+            checked = preferences.showFullDetails,
+            onCheckedChange = { onShowFullDetailsChanged(it) }
+        )
+        LabelledSwitch(
+            label = mokoString(MR.strings.show_overlay_items),
+            checked = preferences.showOverlay,
+            onCheckedChange = { onShowOverlayChanged(it) }
+        )
+        Column {
+            Text(
+                text = mokoString(MR.strings.grid_density),
+                style = MaterialTheme.typography.titleSmall
+            )
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                GridDensity.entries.forEachIndexed { index, density ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = GridDensity.entries.size
+                        ),
+                        onClick = { onGridDensityChanged(density) },
+                        selected = density == preferences.gridDensity,
+                        label = { Text(mokoString(density.label)) }
+                    )
+                }
+            }
+        }
+        Column {
+            Text(
+                text = mokoString(MR.strings.grid_spacing),
+                style = MaterialTheme.typography.titleSmall
+            )
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                GridSpacing.entries.forEachIndexed { index, spacing ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = GridSpacing.entries.size
+                        ),
+                        onClick = { onGridSpacingChanged(spacing) },
+                        selected = spacing == preferences.gridSpacing,
+                        label = { Text(mokoString(spacing.label)) }
+                    )
+                }
+            }
+        }
+        PosterOptions(
+            preferences = preferences,
+            onPosterRadiusChanged = onPosterRadiusChanged,
+            onPosterElevationChanged = onPosterElevationChanged
+        )
+    }
+}
+
+@Composable
+fun PosterOptions(
+    preferences: InstancePreferences,
+    onPosterElevationChanged: (PosterElevation) -> Unit,
+    onPosterRadiusChanged: (PosterRadius) -> Unit
+) {
+    Column {
+        Text(
+            text = mokoString(MR.strings.poster_elevation),
+            style = MaterialTheme.typography.titleSmall
+        )
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            PosterElevation.entries.forEachIndexed { index, elevation ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = PosterElevation.entries.size
+                    ),
+                    onClick = { onPosterElevationChanged(elevation) },
+                    selected = elevation == preferences.posterElevation,
+                    label = { Text(mokoString(elevation.label)) }
+                )
+            }
+        }
+    }
+    Column {
+        Text(
+            text = mokoString(MR.strings.poster_radius),
+            style = MaterialTheme.typography.titleSmall
+        )
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            PosterRadius.entries.forEachIndexed { index, radius ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = PosterRadius.entries.size
+                    ),
+                    onClick = { onPosterRadiusChanged(radius) },
+                    selected = radius == preferences.posterRadius,
+                    label = { Text(mokoString(radius.label)) }
+                )
             }
         }
     }

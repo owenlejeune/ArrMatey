@@ -27,6 +27,9 @@ fun MediaView(
             itemIsActive = itemIsActive,
             showBannerBackground = preferences.showBannerBackground,
             includeOverview = preferences.includeOverview,
+            blur = preferences.bannerBlur,
+            posterElevation = preferences.posterElevation,
+            posterRadius = preferences.posterRadius,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .fillMaxSize()
@@ -38,6 +41,10 @@ fun MediaView(
             itemIsActive = itemIsActive,
             showFullDetails = preferences.showFullDetails,
             showOverlay = preferences.showOverlay,
+            gridDensity = preferences.gridDensity,
+            gridSpacing = preferences.gridSpacing,
+            posterElevation = preferences.posterElevation,
+            posterRadius = preferences.posterRadius,
             modifier = Modifier
                 .fillMaxSize()
         )

@@ -41,6 +41,8 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.PosterElevation
+import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.mokoString
 import com.skydoves.cloudy.cloudy
 
@@ -51,8 +53,8 @@ fun PosterItem(
     showFooter: Boolean = false,
     onItemClick: ((ArrMedia) -> Unit)? = null,
     enabled: Boolean = true,
-    elevation: Dp = 12.dp,
-    radius: Dp = 10.dp,
+    elevation: PosterElevation = PosterElevation.Medium,
+    radius: PosterRadius = PosterRadius.Medium,
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
     posterModel: Any? = null,
@@ -126,8 +128,8 @@ fun PosterItem(
 fun PosterItem(
     item: RequestMediaDetails,
     modifier: Modifier = Modifier,
-    elevation: Dp = 60.dp,
-    radius: Dp = 10.dp,
+    elevation: PosterElevation = PosterElevation.Medium,
+    radius: PosterRadius = PosterRadius.Medium,
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
 ) {
@@ -177,8 +179,8 @@ fun BasePosterItem(
     model: Any,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    elevation: Dp = 12.dp,
-    radius: Dp = 10.dp,
+    elevation: PosterElevation = PosterElevation.Medium,
+    radius: PosterRadius = PosterRadius.Medium,
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
     onClick: (() -> Unit)? = null,
@@ -188,8 +190,8 @@ fun BasePosterItem(
     footerVisible: Boolean = true
 ) {
     Card(
-        shape = RoundedCornerShape(radius),
-        elevation = CardDefaults.cardElevation(elevation),
+        shape = RoundedCornerShape(radius.radius),
+        elevation = CardDefaults.cardElevation(elevation.elevation),
         modifier = modifier,
         onClick = {
             onClick?.invoke()

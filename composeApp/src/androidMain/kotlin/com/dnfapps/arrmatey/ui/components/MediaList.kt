@@ -55,10 +55,14 @@ import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.Blur
+import com.dnfapps.arrmatey.utils.PosterElevation
+import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.skydoves.cloudy.cloudy
+import dev.icerock.moko.resources.StringResource
 import kotlin.time.ExperimentalTime
 
 private val defaultHeight = 100.dp
@@ -72,7 +76,10 @@ fun <T : ArrMedia> MediaList(
     modifier: Modifier = Modifier,
     userScrollEnabled: Boolean = true,
     showBannerBackground: Boolean = true,
-    includeOverview: Boolean = false
+    includeOverview: Boolean = false,
+    blur: Blur = Blur.Normal,
+    posterElevation: PosterElevation = PosterElevation.Medium,
+    posterRadius: PosterRadius = PosterRadius.Medium
 ) {
     LazyColumn(
         modifier = modifier,
@@ -88,7 +95,10 @@ fun <T : ArrMedia> MediaList(
                 onItemClick = onItemClick,
                 isActive = isActive,
                 showBannerBackground = showBannerBackground,
-                includeOverview = includeOverview
+                includeOverview = includeOverview,
+                blur = blur,
+                posterElevation = posterElevation,
+                posterRadius = posterRadius
             )
         }
     }
@@ -103,7 +113,10 @@ fun <T : ArrMedia> MediaItem(
     showBannerBackground: Boolean = true,
     includeOverview: Boolean = false,
     posterModel: Any? = null,
-    bannerModel: Any? = null
+    bannerModel: Any? = null,
+    blur: Blur = Blur.Normal,
+    posterElevation: PosterElevation = PosterElevation.Medium,
+    posterRadius: PosterRadius = PosterRadius.Medium
 ) {
     Card(
         modifier = Modifier
@@ -120,6 +133,7 @@ fun <T : ArrMedia> MediaItem(
         ) {
             if (showBannerBackground) {
                 BannerView(
+                    blur = blur,
                     bannerModel = bannerModel ?: item.getBanner()?.remoteUrl?.let {
                         rememberRemoteImageData(it)
                     },
@@ -149,7 +163,9 @@ fun <T : ArrMedia> MediaItem(
                         item = item,
                         aspectRatio = aspectRatio,
                         modifier = Modifier.height(defaultHeight),
-                        posterModel = posterModel
+                        posterModel = posterModel,
+                        elevation = posterElevation,
+                        radius = posterRadius
                     )
 
                     Column(
@@ -423,7 +439,8 @@ private fun AuthorDetails(
 @Composable
 fun BannerView(
     bannerModel: Any?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    blur: Blur = Blur.Normal
 ) {
     when (bannerModel) {
         null -> {}
@@ -435,7 +452,7 @@ fun BannerView(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
-                        .cloudy()
+                        .cloudy(radius = blur.radius)
                 )
             }
         }
@@ -447,7 +464,7 @@ fun BannerView(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
-                        .cloudy()
+                        .cloudy(radius = blur.radius)
                 )
             }
         }

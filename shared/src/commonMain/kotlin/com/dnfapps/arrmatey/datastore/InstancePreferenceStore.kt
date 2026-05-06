@@ -4,11 +4,17 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.preferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.ui.theme.ViewType
+import com.dnfapps.arrmatey.utils.Blur
+import com.dnfapps.arrmatey.utils.GridDensity
+import com.dnfapps.arrmatey.utils.GridSpacing
+import com.dnfapps.arrmatey.utils.PosterElevation
+import com.dnfapps.arrmatey.utils.PosterRadius
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -28,6 +34,11 @@ class InstancePreferenceStore(
     private val showOverlayKey = booleanPreferencesKey("showOverlay")
     private val showBannerBackgroundKey = booleanPreferencesKey("showBannerBackground")
     private val includeOverviewKey = booleanPreferencesKey("includeOverview")
+    private val bannerBlurKey = stringPreferencesKey("bannerBlur")
+    private val gridDensityKey = stringPreferencesKey("gridDensity")
+    private val gridSpacingKey = stringPreferencesKey("gridSpacing")
+    private val posterElevationKey = stringPreferencesKey("posterElevation")
+    private val posterRadiusKey = stringPreferencesKey("posterRadius")
 
     private val sortByFlow: Flow<SortBy> = dataStore.data
         .map { preferences ->
@@ -61,6 +72,31 @@ class InstancePreferenceStore(
     private val includeOverviewFlow: Flow<Boolean> = dataStore.data
         .map { preferences -> preferences[includeOverviewKey] ?: false }
 
+    private val bannerBlurFlow: Flow<Blur> = dataStore.data
+        .map { preferences ->
+            preferences[bannerBlurKey]?.let { Blur.valueOf(it) } ?: Blur.Normal
+        }
+
+    private val gridDensityFlow: Flow<GridDensity> = dataStore.data
+        .map { preferences ->
+            preferences[gridDensityKey]?.let { GridDensity.valueOf(it) } ?: GridDensity.Normal
+        }
+
+    private val gridSpacingFlow: Flow<GridSpacing> = dataStore.data
+        .map { preferences ->
+            preferences[gridSpacingKey]?.let { GridSpacing.valueOf(it) } ?: GridSpacing.Medium
+        }
+
+    private val posterElevationFlow: Flow<PosterElevation> = dataStore.data
+        .map { preferences ->
+            preferences[posterElevationKey]?.let { PosterElevation.valueOf(it) } ?: PosterElevation.Medium
+        }
+
+    private val posterRadiusFlow: Flow<PosterRadius> = dataStore.data
+        .map { preferences ->
+            preferences[posterRadiusKey]?.let { PosterRadius.valueOf(it) } ?: PosterRadius.Medium
+        }
+
     fun observePreferences(): Flow<InstancePreferences> = combine(
         sortByFlow,
         sortOrderFlow,
@@ -69,7 +105,12 @@ class InstancePreferenceStore(
         showFullDetailsFlow,
         showOverlayFlow,
         showBannerBackgroundFlow,
-        includeOverviewFlow
+        includeOverviewFlow,
+        bannerBlurFlow,
+        gridDensityFlow,
+        gridSpacingFlow,
+        posterElevationFlow,
+        posterRadiusFlow
     ) { args: Array<Any> ->
         InstancePreferences(
             sortBy = args[0] as SortBy,
@@ -79,7 +120,12 @@ class InstancePreferenceStore(
             showFullDetails = args[4] as Boolean,
             showOverlay = args[5] as Boolean,
             showBannerBackground = args[6] as Boolean,
-            includeOverview = args[7] as Boolean
+            includeOverview = args[7] as Boolean,
+            bannerBlur = args[8] as Blur,
+            gridDensity = args[9] as GridDensity,
+            gridSpacing = args[10] as GridSpacing,
+            posterElevation = args[11] as PosterElevation,
+            posterRadius = args[12] as PosterRadius
         )
     }
 
@@ -93,6 +139,11 @@ class InstancePreferenceStore(
             prefs[showOverlayKey] = preferences.showOverlay
             prefs[showBannerBackgroundKey] = preferences.showBannerBackground
             prefs[includeOverviewKey] = preferences.includeOverview
+            prefs[bannerBlurKey] = preferences.bannerBlur.name
+            prefs[gridDensityKey] = preferences.gridDensity.name
+            prefs[gridSpacingKey] = preferences.gridSpacing.name
+            prefs[posterElevationKey] = preferences.posterElevation.name
+            prefs[posterRadiusKey] = preferences.posterRadius.name
         }
     }
 }

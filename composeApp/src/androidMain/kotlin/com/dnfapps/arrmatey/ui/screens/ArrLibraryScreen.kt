@@ -228,6 +228,11 @@ fun ArrLibraryScreen(
                 onShowOverlayChanged = { arrMediaViewModel.updateShowOverlay(it) },
                 onShowBannerBackgroundChanged = { arrMediaViewModel.updateShowBannerBackground(it) },
                 onIncludeOverviewChanged = { arrMediaViewModel.updateIncludeOverview(it) },
+                onBannerBlurChanged = { arrMediaViewModel.updateBannerBlur(it) },
+                onGridDensityChanged = { arrMediaViewModel.updateGridDensity(it) },
+                onGridSpacingChanged = { arrMediaViewModel.updateGridSpacing(it) },
+                onPosterElevationChanged = { arrMediaViewModel.updatePosterElevation(it) },
+                onPosterRadiusChanged = { arrMediaViewModel.updatePosterRadius(it) }
             )
         }
     }

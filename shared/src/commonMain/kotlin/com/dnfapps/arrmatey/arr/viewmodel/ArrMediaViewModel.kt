@@ -16,6 +16,11 @@ import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.ui.theme.ViewType
+import com.dnfapps.arrmatey.utils.Blur
+import com.dnfapps.arrmatey.utils.GridDensity
+import com.dnfapps.arrmatey.utils.GridSpacing
+import com.dnfapps.arrmatey.utils.PosterElevation
+import com.dnfapps.arrmatey.utils.PosterRadius
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -181,6 +186,26 @@ class ArrMediaViewModel(
 
     fun updateFilterBy(filterBy: FilterBy) {
         safeSavePreference { it.copy(filterBy = filterBy) }
+    }
+
+    fun updateBannerBlur(blur: Blur) {
+        safeSavePreference { it.copy(bannerBlur = blur) }
+    }
+
+    fun updateGridDensity(density: GridDensity) {
+        safeSavePreference { it.copy(gridDensity = density) }
+    }
+
+    fun updateGridSpacing(spacing: GridSpacing) {
+        safeSavePreference { it.copy(gridSpacing = spacing) }
+    }
+
+    fun updatePosterElevation(elevation: PosterElevation) {
+        safeSavePreference { it.copy(posterElevation = elevation) }
+    }
+
+    fun updatePosterRadius(radius: PosterRadius) {
+        safeSavePreference { it.copy(posterRadius = radius) }
     }
 
     fun updateSearchQuery(query: String) {
