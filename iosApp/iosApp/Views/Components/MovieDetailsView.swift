@@ -87,18 +87,15 @@ struct MovieDetailsView: View {
             if let releaseDateString = releaseDateString {
                 Text(releaseDateString)
                     .font(.system(size: 14))
-                    .foregroundColor(.white)
                     .lineSpacing(4)
             }
             
             Text(firstLine)
                 .font(.system(size: 14))
-                .foregroundColor(.white)
                 .lineSpacing(4)
             
             Text(secondLine)
                 .font(.system(size: 14))
-                .foregroundColor(.white)
                 .lineSpacing(4)
             
             Spacer()

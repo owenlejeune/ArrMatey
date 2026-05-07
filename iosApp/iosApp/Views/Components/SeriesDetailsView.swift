@@ -67,28 +67,23 @@ struct SeriesDetailsView: View {
         VStack(alignment: .leading, spacing: 0) {
             Text(firstLine)
                 .font(.system(size: 14))
-                .foregroundColor(.white)
                 .lineSpacing(4)
             
             Text(statusString)
                 .font(.system(size: 14))
-                .foregroundColor(.white)
                 .lineSpacing(4)
-            
-            Spacer()
             
             HStack {
                 Text("\(item.episodeFileCount)")
                     .font(.system(size: 12))
-                    .foregroundColor(.white)
                 
                 Spacer()
                 
                 Text("/\(item.episodeCount)")
                     .font(.system(size: 12))
-                    .foregroundColor(.white)
             }
             .padding(.bottom, 1)
+            .padding(.top, 4)
             
             ProgressView(value: item.statusProgress)
                 .progressViewStyle(LinearProgressViewStyle(tint: progressColor))

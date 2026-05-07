@@ -62,12 +62,10 @@ struct ArtistDetailsView: View {
         VStack(alignment: .leading, spacing: 0) {
             Text(firstLine)
                 .font(.system(size: 14))
-                .foregroundColor(.white)
                 .lineSpacing(4)
             
             Text(statusString)
                 .font(.system(size: 14))
-                .foregroundColor(.white)
                 .lineSpacing(4)
             
             Spacer()
@@ -75,13 +73,11 @@ struct ArtistDetailsView: View {
             HStack {
                 Text("\(item.trackFileCount)")
                     .font(.system(size: 12))
-                    .foregroundColor(.white)
                 
                 Spacer()
                 
                 Text("/\(item.trackCount)")
                     .font(.system(size: 12))
-                    .foregroundColor(.white)
             }
             .padding(.bottom, 1)
             

@@ -20,6 +20,7 @@ struct ArrTab: View {
     @EnvironmentObject private var navigation: NavigationManager
     
     @State private var searchPresented: Bool = false
+    @State private var customizationSheetPresented: Bool = false
     
     private var uiState: ArrLibrary {
         arrMediaViewModel.uiState
@@ -62,6 +63,9 @@ struct ArrTab: View {
                 if instanceState.selectedInstance != nil && uiState is ArrLibraryInitial {
                     arrMediaViewModel.refresh()
                 }
+            }
+            .sheet(isPresented: $customizationSheetPresented) {
+                ArrViewCustomizationSheet(type: type, viewModel: arrMediaViewModel)
             }
     }
     
@@ -131,8 +135,12 @@ struct ArrTab: View {
             }
             
             Menu {
-                viewTypeToggle
-                
+                Button(action: {
+                    customizationSheetPresented = true
+                }) {
+                    Label(MR.strings().customization_options.localized(), systemImage: "paintpalette")
+                }
+
                 FilterByPickerMenu(
                     type: type,
                     filterBy: preferences.filterBy,

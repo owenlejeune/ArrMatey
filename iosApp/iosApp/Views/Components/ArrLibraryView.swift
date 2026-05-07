@@ -54,6 +54,7 @@ struct ArrLibraryView: View {
                     viewType: prefs.viewType,
                     aspectRatio: type.aspectRatio,
                     items: items,
+                    prefs: prefs,
                     onItemClicked: { media in
                         if let id = media.id as? Int64 {
                             navigation.go(to: .details(id: id, type: type), of: type)
@@ -73,27 +74,44 @@ struct ArrLibraryView: View {
         viewType: ViewType,
         aspectRatio: AspectRatio,
         items: [ArrMedia],
+        prefs: InstancePreferences,
         onItemClicked: @escaping (ArrMedia) -> Void,
         itemIsActive: @escaping (ArrMedia) -> Bool
     ) -> some View {
         ScrollView {
             if viewType == .grid {
-                let columns = [GridItem(.adaptive(minimum: 90), spacing: 16)]
+                let columns = [GridItem(.adaptive(minimum: prefs.gridDensity.iosSize), spacing: prefs.gridSpacing.iosSpacing)]
+
                 
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(items, id: \.id) { item in
-                        PosterItem(item: item, aspectRatio: aspectRatio) {
-                            VStack {
-                                Spacer()
-                                if item.id != nil {
-                                    ProgressView(value: Double(item.statusProgress))
-                                        .tint(itemIsActive(item) ? Color.blue : Color(argb: item.statusColor))
-                                        .padding(8)
+                        PosterItem(
+                            item: item,
+                            instanceType: type,
+                            aspectRatio: aspectRatio,
+                            elevation: prefs.posterElevation,
+                            radius: prefs.posterRadius,
+                            showFooter: prefs.showFullDetails,
+                            onItemClick: { item in onItemClicked(item) }
+                        ) {
+                            if prefs.showOverlay {
+                                VStack {
+                                    HStack {
+                                        if item.id != nil {
+                                            Image(systemName: item.monitored ? "bookmark.fill" : "bookmark")
+                                                .foregroundColor(.white)
+                                                .padding(8)
+                                        }
+                                        Spacer()
+                                    }
+                                    Spacer()
+                                    if item.id != nil {
+                                        ProgressView(value: Double(item.statusProgress))
+                                            .tint(itemIsActive(item) ? Color.blue : Color(argb: item.statusColor))
+                                            .padding(8)
+                                    }
                                 }
                             }
-                        }
-                        .onTapGesture {
-                            onItemClicked(item)
                         }
                     }
                 }
@@ -101,10 +119,20 @@ struct ArrLibraryView: View {
             } else {
                 LazyVStack(spacing: 12) {
                     ForEach(items, id: \.id) { item in
-                        MediaItemView(item: item, aspectRatio: aspectRatio, isActive: itemIsActive(item))
-                            .onTapGesture {
-                                onItemClicked(item)
-                            }
+                        MediaItemView(
+                            item: item,
+                            aspectRatio: aspectRatio,
+                            instanceType: type,
+                            isActive: itemIsActive(item),
+                            showBannerBackground: prefs.showBannerBackground,
+                            includeOverview: prefs.includeOverview,
+                            bannerBlur: prefs.bannerBlur,
+                            posterElevation: prefs.posterElevation,
+                            posterRadius: prefs.posterRadius
+                        )
+                        .onTapGesture {
+                            onItemClicked(item)
+                        }
                     }
                 }
                 .padding(16)

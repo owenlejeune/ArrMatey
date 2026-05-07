@@ -62,6 +62,42 @@ class ArrMediaViewModelS: ObservableObject {
     func updateFilterBy(_ filterBy: FilterBy) {
         viewModel.updateFilterBy(filterBy: filterBy)
     }
+
+    func updateShowFullDetails(_ show: Bool) {
+        viewModel.updateShowFullDetails(show: show)
+    }
+
+    func updateShowOverlay(_ show: Bool) {
+        viewModel.updateShowOverlay(show: show)
+    }
+
+    func updateShowBannerBackground(_ show: Bool) {
+        viewModel.updateShowBannerBackground(show: show)
+    }
+
+    func updateIncludeOverview(_ show: Bool) {
+        viewModel.updateIncludeOverview(show: show)
+    }
+
+    func updateBannerBlur(_ blur: Blur) {
+        viewModel.updateBannerBlur(blur: blur)
+    }
+
+    func updateGridDensity(_ density: GridDensity) {
+        viewModel.updateGridDensity(density: density)
+    }
+
+    func updateGridSpacing(_ spacing: GridSpacing) {
+        viewModel.updateGridSpacing(spacing: spacing)
+    }
+
+    func updatePosterElevation(_ elevation: PosterElevation) {
+        viewModel.updatePosterElevation(elevation: elevation)
+    }
+
+    func updatePosterRadius(_ radius: PosterRadius) {
+        viewModel.updatePosterRadius(radius: radius)
+    }
     
     func updateSearchQuery(_ query: String) {
         viewModel.updateSearchQuery(query: query)
