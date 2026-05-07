@@ -56,7 +56,7 @@ struct ArrLibraryView: View {
                     items: items,
                     prefs: prefs,
                     onItemClicked: { media in
-                        if let id = media.id as? Int64 {
+                        if let id = media.id?.int64Value {
                             navigation.go(to: .details(id: id, type: type), of: type)
                         }
                     },

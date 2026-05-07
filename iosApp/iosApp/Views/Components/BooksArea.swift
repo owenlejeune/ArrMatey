@@ -27,7 +27,7 @@ struct BooksArea: View {
             HStack {
                 Picker("", selection: $selectedTab) {
                     Text(MR.strings().books_area_books_tab.formatted(args: [books.count])).tag(0)
-                    Text(MR.strings().books_area_series_tab.formatted(args: [series.count])).tag(0)
+                    Text(MR.strings().books_area_series_tab.formatted(args: [series.count])).tag(1)
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
@@ -60,15 +60,17 @@ struct BooksArea: View {
                     onAutomaticSearch: onAutomaticSearch,
                     onToggleMonitor: onToggleMonitor,
                     searchInProgress: searchIds.contains(book.id),
-                    onClick: {
-                        let bookJson = book.toJson()
-                        let authorJson = author.toJson()
-                        navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson), of: .booksehelf)
-                    }
+                    onClick: { navigateToBook(book) }
                 )
                 Divider().padding(.vertical, 4)
             }
         }
+    }
+    
+    private func navigateToBook(_ book: Book) {
+        let bookJson = book.toJson()
+        let authorJson = author.toJson()
+        navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson), of: .booksehelf)
     }
     
     private var seriesView: some View {
@@ -212,7 +214,7 @@ struct SeriesSection: View {
             
             if expanded {
                 VStack(spacing: 0) {
-                    ForEach(bookSeries.links.sorted(by: { $0.position ?? "" < $1.position ?? "" }), id: \.bookId) { link in
+                    ForEach(bookSeries.links.sorted(by: { ($0.position ?? "") < ($1.position ?? "") }), id: \.bookId) { (link: BookSeriesLink) in
                         if let book = seriesBooks.first(where: { $0.id == link.bookId?.int64Value }) {
                             BookRow(
                                 book: book,
