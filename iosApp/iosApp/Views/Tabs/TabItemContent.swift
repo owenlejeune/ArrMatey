@@ -16,15 +16,15 @@ struct TabItemContent: View {
         Group {
             if let standard = tabItem as? TabItemStandard {
                 switch standard {
-                case .shows: SeriesTab().environment(\.navigationContext, .launcher)
-                case .movies: MoviesTab().environment(\.navigationContext, .launcher)
-                case .music: MusicTab().environment(\.navigationContext, .launcher)
-                case .books: BooksTab().environment(\.navigationContext, .launcher)
-                case .activity: ActivityTab().environment(\.navigationContext, .launcher)
-                case .calendar: CalendarTab().environment(\.navigationContext, .launcher)
-                case .downloads: DownloadsTab().environment(\.navigationContext, .launcher)
-                case .requests: RequestsTab().environment(\.navigationContext, .launcher)
-                case .prowlarr: ProwlarrTab().environment(\.navigationContext, .launcher)
+                case .shows: SeriesTab().environment(\.navigationContext, .mainTab)
+                case .movies: MoviesTab().environment(\.navigationContext, .mainTab)
+                case .music: MusicTab().environment(\.navigationContext, .mainTab)
+                case .books: BooksTab().environment(\.navigationContext, .mainTab)
+                case .activity: ActivityTab().environment(\.navigationContext, .mainTab)
+                case .calendar: CalendarTab().environment(\.navigationContext, .mainTab)
+                case .downloads: DownloadsTab().environment(\.navigationContext, .mainTab)
+                case .requests: RequestsTab().environment(\.navigationContext, .mainTab)
+                case .prowlarr: ProwlarrTab().environment(\.navigationContext, .mainTab)
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {
                 CustomWebpageViewerScreen(webpageId: custom.id)
