@@ -12,7 +12,7 @@ data class QBittorrentTorrent(
     @SerialName("dlspeed") val downloadSpeed: Long = 0,
     @SerialName("upspeed") val uploadSpeed: Long = 0,
     @SerialName("eta") val eta: Long = 0,
-    @SerialName("state") val state: String = "",
+    @SerialName("state") val state: QBittorrentTorrentState = QBittorrentTorrentState.Unknown,
     @SerialName("category") val category: String = "",
     @SerialName("added_on") val addedOn: Long = 0
 )

@@ -11,7 +11,7 @@ data class DelugeTorrentData(
     @SerialName("download_payload_rate") val downloadPayloadRate: Long = 0,
     @SerialName("upload_payload_rate") val uploadPayloadRate: Long = 0,
     @SerialName("eta") val eta: Long = 0,
-    @SerialName("state") val state: String = "",
+    @SerialName("state") val state: DelugeTorrentState = DelugeTorrentState.Unknown,
     @SerialName("label") val label: String = "",
     @SerialName("time_added") val timeAdded: Long = 0,
     @SerialName("hash") val hash: String = ""

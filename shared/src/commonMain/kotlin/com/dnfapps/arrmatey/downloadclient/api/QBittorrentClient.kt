@@ -147,32 +147,9 @@ class QBittorrentClient(
             downloadSpeed = downloadSpeed,
             uploadSpeed = uploadSpeed,
             eta = eta,
-            status = state.toDownloadStatus(),
+            status = DownloadItemStatus.from(state),
             category = category,
             addedOn = addedOn
         )
-    }
-
-    private fun String.toDownloadStatus(): DownloadItemStatus {
-        return when {
-            contains("paused", ignoreCase = true) -> DownloadItemStatus.Paused
-            contains("stopped", ignoreCase = true) -> DownloadItemStatus.Paused
-            contains("queued", ignoreCase = true) -> DownloadItemStatus.Queued
-            contains("error", ignoreCase = true) -> DownloadItemStatus.Failed
-            contains("missingfiles", ignoreCase = true) -> DownloadItemStatus.Failed
-            contains("stalled", ignoreCase = true) -> DownloadItemStatus.Stalled
-            contains("upload", ignoreCase = true) -> DownloadItemStatus.Seeding
-            contains("downloading", ignoreCase = true) -> DownloadItemStatus.Downloading
-            contains("metaDL", ignoreCase = true) -> DownloadItemStatus.Downloading
-            contains("checking", ignoreCase = true) -> DownloadItemStatus.Queued
-            contains("allocating", ignoreCase = true) -> DownloadItemStatus.Queued
-            contains("moving", ignoreCase = true) -> DownloadItemStatus.Queued
-            contains("queuedDL", ignoreCase = true) -> DownloadItemStatus.Queued
-            contains("queuedUP", ignoreCase = true) -> DownloadItemStatus.Queued
-            contains("forcedUP", ignoreCase = true) -> DownloadItemStatus.Seeding
-            contains("uploading", ignoreCase = true) -> DownloadItemStatus.Seeding
-            contains("completed", ignoreCase = true) -> DownloadItemStatus.Completed
-            else -> DownloadItemStatus.Queued
-        }
     }
 }

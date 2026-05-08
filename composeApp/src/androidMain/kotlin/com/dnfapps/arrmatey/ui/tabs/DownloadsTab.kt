@@ -236,7 +236,10 @@ private fun DownloadQueueItem(
                     modifier = Modifier.weight(1f)
                 )
                 Row {
-                    if (item.status == DownloadItemStatus.Paused) {
+                    if (
+                        item.status == DownloadItemStatus.DownloadingPaused ||
+                        item.status == DownloadItemStatus.UploadingPaused
+                    ) {
                         IconButton(
                             onClick = onResume,
                             enabled = !actionInProgress

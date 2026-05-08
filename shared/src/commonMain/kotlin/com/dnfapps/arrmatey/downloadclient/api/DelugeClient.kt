@@ -324,25 +324,10 @@ class DelugeClient(
             downloadSpeed = downloadPayloadRate,
             uploadSpeed = uploadPayloadRate,
             eta = eta,
-            status = state.toDownloadStatus(),
+            status = DownloadItemStatus.from(state),
             category = label,
             addedOn = timeAdded
         )
-    }
-
-    private fun String.toDownloadStatus(): DownloadItemStatus {
-        return when {
-            contains("paused", ignoreCase = true) -> DownloadItemStatus.Paused
-            contains("queued", ignoreCase = true) -> DownloadItemStatus.Queued
-            contains("error", ignoreCase = true) -> DownloadItemStatus.Failed
-            contains("seeding", ignoreCase = true) -> DownloadItemStatus.Seeding
-            contains("finished", ignoreCase = true) -> DownloadItemStatus.Completed
-            contains("downloading", ignoreCase = true) -> DownloadItemStatus.Downloading
-            contains("checking", ignoreCase = true) -> DownloadItemStatus.Queued
-            contains("allocating", ignoreCase = true) -> DownloadItemStatus.Queued
-            contains("moving", ignoreCase = true) -> DownloadItemStatus.Queued
-            else -> DownloadItemStatus.Queued
-        }
     }
 
     private fun nextRequestId(): Int {

@@ -10,7 +10,7 @@ data class SABnzbdQueueSlot(
     @SerialName("mb") val mb: String = "0",
     @SerialName("mbleft") val mbLeft: String = "0",
     @SerialName("percentage") val percentage: String = "0",
-    @SerialName("status") val status: String = "",
+    @SerialName("status") val status: SABnzbdQueueSlotStatus = SABnzbdQueueSlotStatus.Unknown,
     @SerialName("cat") val category: String = "",
     @SerialName("timeleft") val timeLeft: String = "",
     @SerialName("added") val added: Long = 0

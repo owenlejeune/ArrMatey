@@ -249,11 +249,7 @@ class ArrInstanceRepository(
     suspend fun refreshActivityTasks(page: Int = 1, pageSize: Int = 100) {
         client.fetchActivityTasks(page, pageSize)
             .onSuccess { queue ->
-                logger.info { "Activity tasks: $queue" }
                 _activityTasks.value = queue.records
-            }
-            .onError { code, message, cause ->
-                logger.error(cause) { "Error getting activity tasks: $message" }
             }
     }
 
