@@ -73,8 +73,13 @@ class DownloadQueueViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    val isPolling: StateFlow<Boolean> = downloadQueueService.isPolling
+    val hasLoaded: StateFlow<Boolean> = downloadQueueService.hasLoaded
+
     init {
         viewModelScope.launch {
+            downloadQueueService.manualRefresh()
+
             val clients = downloadQueueRepository.getAllDownloadClients()
             _clientIdsFilters.value = clients.map { it.id }
         }

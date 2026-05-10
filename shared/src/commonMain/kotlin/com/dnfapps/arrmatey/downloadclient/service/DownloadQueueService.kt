@@ -24,13 +24,16 @@ import kotlinx.coroutines.launch
 class DownloadQueueService(
     private val downloadClientManager: DownloadClientManager
 ) {
-    private val pollingDelay = 30_000L
+    private val pollingDelay = 5_000L
 
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var pollingJob: Job? = null
 
     private var _isPolling = MutableStateFlow(false)
     val isPolling: StateFlow<Boolean> = _isPolling
+
+    private var _hasLoaded = MutableStateFlow(false)
+    val hasLoaded: StateFlow<Boolean> = _hasLoaded.asStateFlow()
 
     private val _allTransfers = MutableStateFlow(DownloadQueueBundle())
     val allTransfers: StateFlow<DownloadQueueBundle> = _allTransfers.asStateFlow()
@@ -74,8 +77,14 @@ class DownloadQueueService(
         _isPolling.value = true
 
         fetchAllDownloadData()
-            .onSuccess { bundle -> _allTransfers.value = bundle }
-            .onError { _, message, _ -> _errorMessage.value = message }
+            .onSuccess { bundle ->
+                _allTransfers.value = bundle
+                _hasLoaded.value = true
+            }
+            .onError { _, message, _ ->
+                _errorMessage.value = message
+                _hasLoaded.value = true
+            }
 
         _isPolling.value = false
     }

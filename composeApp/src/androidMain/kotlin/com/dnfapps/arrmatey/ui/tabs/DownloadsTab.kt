@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.tabs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,6 +41,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
@@ -101,6 +103,7 @@ fun DownloadsTab(
     val queueState by viewModel.downloadQueueState.collectAsStateWithLifecycle()
     val commandState by viewModel.commandState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val hasLoaded by viewModel.hasLoaded.collectAsStateWithLifecycle()
     val sortState by viewModel.sortState.collectAsStateWithLifecycle()
     val clientFiltersIds by viewModel.clientIdsFilters.collectAsStateWithLifecycle()
 
@@ -150,71 +153,85 @@ fun DownloadsTab(
         },
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
-        PullToRefreshBox(
+        Box(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize(),
-            isRefreshing = isRefreshing,
-            onRefresh = { viewModel.refresh() },
             contentAlignment = Alignment.Center
         ) {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+            if (downloadClientState.downloadClients.isEmpty()) {
+                NoDownloadClientsView()
+            } else if (!hasLoaded) {
+                LoadingIndicator(
+                    modifier = Modifier.size(96.dp)
+                )
+            } else {
+                PullToRefreshBox(
+                    modifier = Modifier.fillMaxSize(),
+                    isRefreshing = isRefreshing,
+                    onRefresh = { viewModel.refresh() },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Spacer(Modifier.width(18.dp))
-                    downloadClientState.downloadClients.forEach { client ->
-                        val info = queueState.transferInfo.firstOrNull { it.client.id == client.id }
-                        FilterChip(
-                            selected = downloadClientState.downloadClients.size > 1
-                                    && clientFiltersIds.contains(client.id),
-                            onClick = { viewModel.toggleClientIdFilter(client.id) },
-                            leadingIcon = {
-                                Image(
-                                    painter = painterResource(client.type.icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  ↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(vertical = 2.dp)
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Spacer(Modifier.width(18.dp))
+                            downloadClientState.downloadClients.forEach { client ->
+                                val info =
+                                    queueState.transferInfo.firstOrNull { it.client.id == client.id }
+                                FilterChip(
+                                    selected = downloadClientState.downloadClients.size > 1
+                                            && clientFiltersIds.contains(client.id),
+                                    onClick = { viewModel.toggleClientIdFilter(client.id) },
+                                    leadingIcon = {
+                                        Image(
+                                            painter = painterResource(client.type.icon),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    },
+                                    label = {
+                                        Text(
+                                            text = "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  ↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(vertical = 2.dp)
+                                        )
+                                    }
                                 )
                             }
-                        )
-                    }
-                    Spacer(Modifier.width(18.dp))
-                }
-                if (queueState.queueItems.isEmpty()) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = mokoString(MR.strings.no_activity))
-                    }
-                } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        state = listState
-                    ) {
-                        items(items = queueState.queueItems, key = { it.id }) { item ->
-                            TorrentActionsCard(
-                                item = item,
-                                showClientInfo = clientFiltersIds.size > 1,
-                                onPause = { viewModel.pauseDownload(item.id) },
-                                onResume = { viewModel.resumeDownload(item.id) },
-                                onDelete = { deleteTarget = item }
-                            )
+                            Spacer(Modifier.width(18.dp))
+                        }
+                        if (queueState.queueItems.isEmpty()) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = mokoString(MR.strings.no_activity))
+                            }
+                        } else {
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(16.dp),
+                                state = listState
+                            ) {
+                                items(items = queueState.queueItems, key = { it.id }) { item ->
+                                    TorrentActionsCard(
+                                        item = item,
+                                        showClientInfo = clientFiltersIds.size > 1,
+                                        onPause = { viewModel.pauseDownload(item.id) },
+                                        onResume = { viewModel.resumeDownload(item.id) },
+                                        onDelete = { deleteTarget = item }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
