@@ -8,8 +8,8 @@ import Shared
 
 struct DownloadsTab: View {
 
-    @ObservedObject private var viewModel = DownloadQueueViewModelS()
-    @ObservedObject private var clientsViewModel = DownloadClientsViewModelS()
+    @StateObject private var viewModel = DownloadQueueViewModelS()
+    @StateObject private var clientsViewModel = DownloadClientsViewModelS()
 
     @State private var deleteTarget: DownloadItem? = nil
     @State private var deleteId: String? = nil
@@ -22,53 +22,62 @@ struct DownloadsTab: View {
     }
 
     var body: some View {
-        queueContent
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    DownloadClientQueueSortMenu(
-                        sortBy: Binding(
-                            get: { viewModel.sortState.sortBy },
-                            set: { viewModel.updateSortBy($0) }
-                        ),
-                        sortOrder: Binding(
-                            get: { viewModel.sortState.sortOrder },
-                            set: { viewModel.updateSortOrder($0) }
-                        )
+        ZStack {
+            if clientsViewModel.downloadClientsState.downloadClients.isEmpty {
+                NoDownloadClientsView()
+            } else if !viewModel.hasLoaded {
+                ProgressView()
+                    .scaleEffect(2)
+            } else {
+                queueContent
+            }
+        }
+        .navigationTitle(MR.strings().downloads.localized())
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                DownloadClientQueueSortMenu(
+                    sortBy: Binding(
+                        get: { viewModel.sortState.sortBy },
+                        set: { viewModel.updateSortBy($0) }
+                    ),
+                    sortOrder: Binding(
+                        get: { viewModel.sortState.sortOrder },
+                        set: { viewModel.updateSortOrder($0) }
                     )
+                )
+            }
+        }
+        .onChange(of: viewModel.isCommandSuccess) { _, isSuccess in
+            if isSuccess {
+                deleteTarget = nil
+                viewModel.resetCommandState()
+            }
+        }
+        .confirmationDialog(
+            MR.strings().delete_files.localized(),
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            if let id = deleteId {
+                Button(MR.strings().yes.localized(), role: .destructive) {
+                    viewModel.deleteDownload(id, deleteFiles: true)
+                }
+                Button(MR.strings().no.localized()) {
+                    viewModel.deleteDownload(id, deleteFiles: false)
                 }
             }
-            .navigationTitle(MR.strings().downloads.localized())
-            .onChange(of: viewModel.isCommandSuccess) { _, isSuccess in
-                if isSuccess {
-                    deleteTarget = nil
-                    viewModel.resetCommandState()
-                }
+            Button(MR.strings().cancel.localized(), role: .cancel) {
+                deleteTarget = nil
+                deleteId = nil
             }
-            .confirmationDialog(
-                MR.strings().delete_files.localized(),
-                isPresented: $showDeleteConfirm,
-                titleVisibility: .visible
-            ) {
-                if let id = deleteId {
-                    Button(MR.strings().yes.localized(), role: .destructive) {
-                        viewModel.deleteDownload(id, deleteFiles: true)
-                    }
-                    Button(MR.strings().no.localized()) {
-                        viewModel.deleteDownload(id, deleteFiles: false)
-                    }
-                }
-                Button(MR.strings().cancel.localized(), role: .cancel) {
-                    deleteTarget = nil
-                    deleteId = nil
-                }
-            } message: {
-                Text(deleteTarget?.name ?? "")
-            }
+        } message: {
+            Text(deleteTarget?.name ?? "")
+        }
     }
 
     @ViewBuilder
     private var queueContent: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             ClientFilterRow(
                 clients: clientsViewModel.downloadClientsState.downloadClients,
                 transferInfos: viewModel.downloadQueueState.transferInfo,
@@ -79,19 +88,47 @@ struct DownloadsTab: View {
                     }
                 }
             )
+            .padding(.top, 8)
+            .padding(.bottom, 4)
             
             if viewModel.downloadQueueState.queueItems.isEmpty {
                 emptyView
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(viewModel.downloadQueueState.queueItems, id: \.self) { item in
-                            downloadItemRow(item)
+                List {
+                    ForEach(viewModel.downloadQueueState.queueItems, id: \.id) { item in
+                        DownloadQueueItemView(
+                            item: item,
+                            showClientInfo: viewModel.clientIdsFilters.count > 1
+                        )
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                            Button {
+                                if item.status.isPaused {
+                                    viewModel.resumeDownload(item.id)
+                                } else {
+                                    viewModel.pauseDownload(item.id)
+                                }
+                            } label: {
+                                Label(item.status.isPaused ? "Resume" : "Pause", systemImage: item.status.isPaused ? "play.fill" : "pause.fill")
+                            }
+                            .tint(.blue)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                deleteTarget = item
+                                deleteId = item.id
+                                showDeleteConfirm = true
+                            } label: {
+                                Label("Delete", systemImage: "trash.fill")
+                            }
                         }
                     }
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 18)
+                }
+                .listStyle(.plain)
+                .refreshable {
+                    viewModel.refresh()
                 }
             }
         }
@@ -102,22 +139,6 @@ struct DownloadsTab: View {
         .onChange(of: searchQuery) { _, query in
             viewModel.updateSearchQuery(query)
         }
-    }
-    
-    @ViewBuilder
-    private func downloadItemRow(_ item: DownloadItem) -> some View {
-        DownloadQueueItemView(
-            item: item,
-            actionInProgress: viewModel.isCommandLoading,
-            onPause: { viewModel.pauseDownload(item.id) },
-            onResume: { viewModel.resumeDownload(item.id) },
-            onDelete: {
-                deleteTarget = item
-                deleteId = item.id
-                showDeleteConfirm = true
-            },
-            showClientInfo: viewModel.clientIdsFilters.count > 1
-        )
     }
 
     @ViewBuilder
@@ -130,6 +151,39 @@ struct DownloadsTab: View {
                 .font(.system(size: 20, weight: .bold))
         }
         .padding(.horizontal, 24)
+    }
+}
+
+struct NoDownloadClientsView: View {
+    @EnvironmentObject private var navigation: NavigationManager
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "cloud.rainbow.half")
+                .font(.system(size: 100))
+                .foregroundStyle(.secondary)
+            
+            Text(MR.strings().no_download_clients.localized())
+                .font(.title2)
+                .fontWeight(.medium)
+                .multilineTextAlignment(.center)
+            
+            Button(action: {
+                navigation.go(to: .newDownloadClient)
+            }) {
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                    Text(MR.strings().add_instance.localized())
+                        .fontWeight(.medium)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color.accentColor)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            }
+        }
+        .padding(32)
     }
 }
 
@@ -146,7 +200,7 @@ struct ClientFilterRow: View {
                     ClientFilterChip(client: client, info: transferInfos.first(where: { $0.client.id == client.id }), isSelected: selectedIds.contains(client.id), onClick: { onToggle(client.id) })
                 }
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, 16)
         }
     }
 }
