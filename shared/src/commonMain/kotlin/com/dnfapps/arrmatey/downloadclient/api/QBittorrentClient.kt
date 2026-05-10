@@ -143,13 +143,15 @@ class QBittorrentClient(
             id = hash,
             name = name,
             size = size,
+            downloaded = downloaded,
             progress = progress,
             downloadSpeed = downloadSpeed,
             uploadSpeed = uploadSpeed,
             eta = eta,
             status = DownloadItemStatus.from(state),
             category = category,
-            addedOn = addedOn
+            addedOn = addedOn,
+            tags = tags.split(",").map { it.trim() }.filter { it.isNotBlank() }
         )
     }
 }

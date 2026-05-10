@@ -22,17 +22,40 @@ fun Long.bytesAsFileSizeString(): String {
 fun Long.toFormattedDuration(): String {
     val qbInfinity = 8_640_000L
 
-    if (this == qbInfinity) return "∞"
+    if (this >= qbInfinity) return "∞"
     if (this <= 0) return "0s"
 
-    val hours = this / 3600
-    val minutes = (this % 3600) / 60
-    val seconds = this % 60
+    // Constants in seconds
+    val secondsInYear = 31_536_000L
+    val secondsInMonth = 2_592_000L
+    val secondsInDay = 86_400L
+    val secondsInHour = 3_600L
+    val secondsInMinute = 60L
+
+    var remainingSeconds = this
+
+    val years = remainingSeconds / secondsInYear
+    remainingSeconds %= secondsInYear
+
+    val months = remainingSeconds / secondsInMonth
+    remainingSeconds %= secondsInMonth
+
+    val days = remainingSeconds / secondsInDay
+    remainingSeconds %= secondsInDay
+
+    val hours = remainingSeconds / secondsInHour
+    remainingSeconds %= secondsInHour
+
+    val minutes = remainingSeconds / secondsInMinute
+    val seconds = remainingSeconds % secondsInMinute
 
     return buildString {
+        if (years > 0) append("${years}y ")
+        if (months > 0) append("${months}mo ")
+        if (days > 0) append("${days}d ")
         if (hours > 0) append("${hours}h ")
-        if (minutes > 0 || hours > 0) append("${minutes}m ")
-        if (seconds > 0 || (hours == 0L && minutes == 0L)) append("${seconds}s")
+        if (minutes > 0) append("${minutes}m ")
+        if (seconds > 0 || isEmpty()) append("${seconds}s")
     }.trim()
 }
 

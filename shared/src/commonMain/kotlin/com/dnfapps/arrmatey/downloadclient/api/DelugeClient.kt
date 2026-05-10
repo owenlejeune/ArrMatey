@@ -315,12 +315,14 @@ class DelugeClient(
     }
 
     private fun DelugeTorrentData.toDownloadItem(): DownloadItem {
+        val coercedProgress = (progress / 100.0).coerceIn(0.0, 1.0)
         return DownloadItem(
             client = downloadClient,
             id = hash,
             name = name,
             size = totalSize,
-            progress = (progress / 100.0).coerceIn(0.0, 1.0),
+            downloaded = (totalSize.toDouble() * coercedProgress).toLong(),
+            progress = coercedProgress,
             downloadSpeed = downloadPayloadRate,
             uploadSpeed = uploadPayloadRate,
             eta = eta,

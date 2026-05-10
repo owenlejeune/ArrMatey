@@ -7,6 +7,7 @@ data class DownloadItem(
     val id: String,
     val name: String,
     val size: Long,
+    val downloaded: Long,
     val progress: Double,
     val downloadSpeed: Long,
     val uploadSpeed: Long,
@@ -14,5 +15,6 @@ data class DownloadItem(
     val category: String,
     val addedOn: Long,
     val eta: Long,
-    val etaString: String = eta.toFormattedDuration()
+    val etaString: String = eta.toFormattedDuration(),
+    val tags: List<String> = emptyList()
 )

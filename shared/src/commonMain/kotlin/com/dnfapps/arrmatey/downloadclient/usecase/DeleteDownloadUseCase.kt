@@ -23,7 +23,6 @@ class DeleteDownloadUseCase(
             is NetworkResult.Success -> emit(OperationStatus.Success("Download deleted"))
             is NetworkResult.Error -> emit(OperationStatus.Error(result.code, result.message, result.cause))
             is NetworkResult.Loading -> emit(OperationStatus.InProgress)
-            else -> emit(OperationStatus.Error(message = "Unknown response"))
         }
     }
 }

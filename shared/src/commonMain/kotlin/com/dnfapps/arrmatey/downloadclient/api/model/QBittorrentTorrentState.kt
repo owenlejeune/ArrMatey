@@ -27,6 +27,9 @@ enum class QBittorrentTorrentState {
     @SerialName("forcedUP")
     UploadingForced,
 
+    @SerialName("stoppedUP")
+    UploadingStopped,
+
     @SerialName("allocating")
     Allocating,
 
@@ -50,6 +53,9 @@ enum class QBittorrentTorrentState {
 
     @SerialName("forcedDL")
     DownloadingForced,
+
+    @SerialName("stoppedDL")
+    DownloadingStopped,
 
     @SerialName("checkingResumeData")
     CheckingResumeData,

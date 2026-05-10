@@ -26,13 +26,17 @@ enum class DownloadItemStatus(val resource: StringResource) {
     Fetching(MR.strings.torrent_status_fetching),
     Unknown(MR.strings.torrent_status_unknown);
 
+    val isPaused: Boolean
+        get() = this == DownloadingPaused || this == UploadingPaused
+
     companion object {
         fun from(state: QBittorrentTorrentState) = when(state) {
             QBittorrentTorrentState.Error -> Error
             QBittorrentTorrentState.MissingFiles -> MissingFiles
             QBittorrentTorrentState.Uploading,
             QBittorrentTorrentState.UploadingStalled-> Uploading
-            QBittorrentTorrentState.UploadingPaused -> UploadingPaused
+            QBittorrentTorrentState.UploadingPaused,
+            QBittorrentTorrentState.UploadingStopped -> UploadingPaused
             QBittorrentTorrentState.UploadingQueued,
             QBittorrentTorrentState.DownloadingQueued -> Queued
             QBittorrentTorrentState.UploadingChecking,
@@ -40,7 +44,8 @@ enum class DownloadItemStatus(val resource: StringResource) {
             QBittorrentTorrentState.UploadingForced -> UploadingForced
             QBittorrentTorrentState.Downloading -> Downloading
             QBittorrentTorrentState.DownloadingMetadata -> DownloadingMetadataForced
-            QBittorrentTorrentState.DownloadingPaused -> DownloadingPaused
+            QBittorrentTorrentState.DownloadingPaused,
+            QBittorrentTorrentState.DownloadingStopped -> DownloadingPaused
             QBittorrentTorrentState.DownloadingStalled -> DownloadingStalled
             QBittorrentTorrentState.DownloadingForced -> DownloadingForced
             QBittorrentTorrentState.CheckingResumeData -> CheckingResumeData

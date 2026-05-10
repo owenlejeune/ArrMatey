@@ -232,12 +232,14 @@ class TransmissionClient(
     }
 
     private fun TransmissionTorrent.toDownloadItem(client: DownloadClient): DownloadItem {
+        val coercedProgress = percentDone.coerceIn(0.0, 1.0)
         return DownloadItem(
             client = client,
             id = id.toString(),
             name = name,
             size = totalSize,
-            progress = percentDone.coerceIn(0.0, 1.0),
+            downloaded = (totalSize.toDouble() * coercedProgress).toLong(),
+            progress = coercedProgress,
             downloadSpeed = rateDownload,
             uploadSpeed = rateUpload,
             eta = eta,

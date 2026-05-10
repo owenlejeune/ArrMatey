@@ -14,5 +14,7 @@ data class QBittorrentTorrent(
     @SerialName("eta") val eta: Long = 0,
     @SerialName("state") val state: QBittorrentTorrentState = QBittorrentTorrentState.Unknown,
     @SerialName("category") val category: String = "",
-    @SerialName("added_on") val addedOn: Long = 0
+    @SerialName("added_on") val addedOn: Long = 0,
+    @SerialName("downloaded") val downloaded: Long = 0,
+    @SerialName("tags") val tags: String = ""
 )

@@ -53,6 +53,7 @@ class SABnzbdClient(
                         name = slot.filename,
                         size = totalBytes,
                         progress = progress,
+                        downloaded = (totalBytes.toDouble() * progress).toLong(),
                         downloadSpeed = 0,
                         uploadSpeed = 0,
                         eta = slot.timeLeft.toSeconds(),

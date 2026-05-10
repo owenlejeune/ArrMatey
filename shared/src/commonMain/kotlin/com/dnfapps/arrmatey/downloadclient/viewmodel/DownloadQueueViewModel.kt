@@ -92,6 +92,7 @@ class DownloadQueueViewModel(
         viewModelScope.launch {
             pauseDownloadUseCase(id).collect { state ->
                 _commandState.value = state.toCommandState()
+                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
             }
         }
     }
@@ -100,6 +101,7 @@ class DownloadQueueViewModel(
         viewModelScope.launch {
             resumeDownloadUseCase(id).collect { state ->
                 _commandState.value = state.toCommandState()
+                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
             }
         }
     }
@@ -108,6 +110,7 @@ class DownloadQueueViewModel(
         viewModelScope.launch {
             deleteDownloadUseCase(id, deleteFiles).collect { state ->
                 _commandState.value = state.toCommandState()
+                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
             }
         }
     }
