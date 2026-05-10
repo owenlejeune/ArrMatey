@@ -76,6 +76,7 @@ import com.dnfapps.arrmatey.downloadclient.usecase.RefreshDownloadQueueUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.ResumeDownloadUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.SetDownloadClientActiveUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
+import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientPreferencesUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientUseCase
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
@@ -90,6 +91,7 @@ import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
+import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceScopedRepoUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
@@ -280,6 +282,8 @@ val useCaseModule = module {
     factory { GetAuthorFilesUseCase(get()) }
     factory { GetBookEditionUseCase() }
     factory { GetBookHistoryUseCase() }
+    factory { UpdateDownloadClientPreferencesUseCase(get()) }
+    factory { ObserveDownloadClientPreferencesUseCase(get()) }
 }
 
 val viewModelModule = module {
@@ -323,7 +327,7 @@ val viewModelModule = module {
     }
     factory { ProwlarrIndexersViewModel(get(), get(), get()) }
     factory { ProwlarrSearchViewModel(get(), get(), get()) }
-    factory { DownloadQueueViewModel(get(), get(), get(), get(), get()) }
+    factory { DownloadQueueViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { (clientId: Long?) ->
         DownloadClientSettingsViewModel(clientId, get(), get(), get(), get(), get(), get()) }
     factory { DownloadClientsViewModel(get(), get(), get(), get(), get()) }

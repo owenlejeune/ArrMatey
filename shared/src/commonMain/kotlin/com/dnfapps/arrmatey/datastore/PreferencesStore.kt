@@ -12,6 +12,10 @@ import com.dnfapps.arrmatey.arr.state.CalendarFilterState
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.state.ContentFilter
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.compose.utils.SortBy
+import com.dnfapps.arrmatey.compose.utils.SortOrder
+import com.dnfapps.arrmatey.downloadclient.state.DownloadClientConfigurationUiState
+import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueSortState
 import com.dnfapps.arrmatey.features.ReleaseNotes
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.CoroutineScope
@@ -54,6 +58,8 @@ class PreferencesStore(
     private val tabPreferencesKey = stringPreferencesKey("tabPreferences")
     private val lastReleaseNotesKey = intPreferencesKey("lastReleaseNotes")
     private val isFirstLaunchKey = booleanPreferencesKey("isFirstLaunch")
+    private val downloadClientSortByKey = stringPreferencesKey("downloadClientSortBy")
+    private val downloadClientSortOrderKey = stringPreferencesKey("downloadClientSortOrder")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> sonarrInfoCardKey
@@ -136,6 +142,22 @@ class PreferencesStore(
     private val calendarInstanceId: Flow<Long?> = dataStore.data
         .map { preferences ->
             preferences[calendarInstanceIdKey]?.takeIf { it > 0 }
+        }
+
+    private val downloadClientSortBy: Flow<SortBy> = dataStore.data
+        .map { preferences ->
+            val sortBy = preferences[downloadClientSortByKey]?.let {
+                SortBy.valueOf(it)
+            }
+            sortBy ?: SortBy.Title
+        }
+
+    private val downloadClientSortOrder: Flow<SortOrder> = dataStore.data
+        .map { preferences ->
+            val sortOrder = preferences[downloadClientSortOrderKey]?.let {
+                SortOrder.valueOf(it)
+            }
+            sortOrder ?: SortOrder.Asc
         }
 
     fun observeCalendarFilterState(): Flow<CalendarFilterState> = combine(
@@ -324,6 +346,20 @@ class PreferencesStore(
                 val current = preferences[useServiceNavLogosKey] ?: false
                 preferences[useServiceNavLogosKey] = !current
             }
+        }
+    }
+
+    fun observeDownloadClientUiState(): Flow<DownloadQueueSortState> = combine(
+        downloadClientSortBy,
+        downloadClientSortOrder
+    ) { sortBy, sortOrder ->
+        DownloadQueueSortState(sortBy, sortOrder)
+    }
+
+    suspend fun saveDownloadClientUiState(state: DownloadQueueSortState) {
+        dataStore.edit {
+            it[downloadClientSortByKey] = state.sortBy.name
+            it[downloadClientSortOrderKey] = state.sortOrder.name
         }
     }
 

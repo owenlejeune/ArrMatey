@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.downloadclient.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.arr.api.model.IndexerPrivacy
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -18,7 +19,10 @@ import com.dnfapps.arrmatey.downloadclient.usecase.ObserveDownloadQueueUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.PauseDownloadUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.RefreshDownloadQueueUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.ResumeDownloadUseCase
+import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientPreferencesUseCase
+import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientUseCase
 import com.dnfapps.arrmatey.extensions.orderedSortedWith
+import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
 import io.ktor.util.Hash.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,7 +39,9 @@ class DownloadQueueViewModel(
     private val downloadQueueService: DownloadQueueService,
     private val pauseDownloadUseCase: PauseDownloadUseCase,
     private val resumeDownloadUseCase: ResumeDownloadUseCase,
-    private val deleteDownloadUseCase: DeleteDownloadUseCase
+    private val deleteDownloadUseCase: DeleteDownloadUseCase,
+    private val updateDownloadClientPreferencesUseCase: UpdateDownloadClientPreferencesUseCase,
+    observeDownloadClientPreferencesUseCase: ObserveDownloadClientPreferencesUseCase
 ): ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -44,14 +50,18 @@ class DownloadQueueViewModel(
     val clientIdsFilters: StateFlow<List<Long>> = _clientIdsFilters.asStateFlow()
 
 
-    private val _sortState = MutableStateFlow(DownloadQueueSortState())
-    val sortState: StateFlow<DownloadQueueSortState> = _sortState.asStateFlow()
+    val sortState: StateFlow<DownloadQueueSortState> = observeDownloadClientPreferencesUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = DownloadQueueSortState()
+        )
 
     val downloadQueueState: StateFlow<DownloadQueueBundle> =
         combine(
             downloadQueueService.allTransfers,
             _searchQuery,
-            _sortState,
+            sortState,
             _clientIdsFilters
         ) { queueState, query, sorting, filterIds ->
             val filtered = queueState.queueItems.filter { item ->
@@ -141,13 +151,13 @@ class DownloadQueueViewModel(
     }
 
     fun updateSortBy(sortBy: SortBy) {
-        _sortState.update {
+        safeSavePreference {
             it.copy(sortBy = sortBy)
         }
     }
 
     fun updateSortOrder(sortOrder: SortOrder) {
-        _sortState.update {
+        safeSavePreference {
             it.copy(sortOrder = sortOrder)
         }
     }
@@ -177,5 +187,12 @@ class DownloadQueueViewModel(
             message = message,
             cause = cause
         )
+    }
+
+    private fun safeSavePreference(transform: (DownloadQueueSortState) -> DownloadQueueSortState) {
+        viewModelScope.launch {
+            val updated = transform(sortState.value)
+            updateDownloadClientPreferencesUseCase(updated)
+        }
     }
 }
