@@ -7,6 +7,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.AudioFile
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CloudDownload
@@ -52,6 +53,7 @@ val TabItem.androidIcon: ImageVector
             TabItem.Standard.MOVIES -> Icons.Default.Movie
             TabItem.Standard.MUSIC -> Icons.Default.MusicNote
             TabItem.Standard.BOOKS -> Icons.AutoMirrored.Default.MenuBook
+            TabItem.Standard.AUDIOBOOKS -> Icons.Default.AudioFile
             TabItem.Standard.ACTIVITY -> Icons.Default.Download
             TabItem.Standard.DOWNLOADS -> Icons.Default.CloudDownload
             TabItem.Standard.CALENDAR -> Icons.Default.CalendarMonth

@@ -44,6 +44,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
@@ -241,6 +242,7 @@ private fun MediaDetails(
         is ArrMovie -> MovieDetails(item, isActive, showBannerBackground)
         is Arrtist -> ArtistDetails(item, isActive, showBannerBackground)
         is Author -> AuthorDetails(item, isActive, showBannerBackground)
+        is Audiobook -> AudiobookDetails(item, isActive, showBannerBackground)
         is MockMedia -> MockDetails(item, showBannerBackground)
     }
 }
@@ -431,6 +433,44 @@ private fun AuthorDetails(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun AudiobookDetails(
+    item: Audiobook,
+    isActive: Boolean,
+    showBannerBackground: Boolean
+) {
+    val contentColor =
+        if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
+
+    val authorString = item.authors.joinToString(", ")
+    Text(authorString, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+
+    val seriesString = item.series?.let {
+        if (item.seriesNumber != null) "$it (#${item.seriesNumber})" else it
+    }
+    val fileSizeString = item.fileSize.bytesAsFileSizeString().takeIf { item.fileSize > 0 }
+
+    val secondLine = listOfNotNull(seriesString, fileSizeString, item.publisher).joinToString(Bullet)
+    if (secondLine.isNotEmpty()) {
+        Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    }
+
+    val statusStr = mokoString(item.status.resource)
+    Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+
+    if (item.id != null) {
+        LinearProgressIndicator(
+            progress = { if (isActive) 1f else item.statusProgress },
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth()
+                .height(6.dp),
+            color = if (isActive) ArrPurple else item.statusColor,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }

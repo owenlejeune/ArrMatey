@@ -38,7 +38,8 @@ class SettingsNavigation: Navigation<SettingsScreen>(SettingsScreen.Landing) {
             InstanceType.Sonarr,
             InstanceType.Radarr,
             InstanceType.Lidarr,
-            InstanceType.Booksehelf -> {
+            InstanceType.Booksehelf,
+            InstanceType.Listenarr -> {
                 navigateTo(SettingsScreen.ArrDashboard(id))
             }
             else -> navigateTo(SettingsScreen.EditInstance(id))
@@ -50,3 +51,4 @@ class MoviesTabNavigation: Navigation<ArrScreen>(ArrScreen.Library)
 class MusicTabNavigation: Navigation<ArrScreen>(ArrScreen.Library)
 class RequestsTabNavigation: Navigation<SeerrScreen>(SeerrScreen.Home)
 class BooksTabNavigation: Navigation<ArrScreen>(ArrScreen.Library)
+class AudiobooksTabNavigation: Navigation<ArrScreen>(ArrScreen.Library)

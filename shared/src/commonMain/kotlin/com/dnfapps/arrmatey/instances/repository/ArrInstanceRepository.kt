@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.instances.repository
 import com.dnfapps.arrmatey.arr.api.client.ArrClient
 import com.dnfapps.arrmatey.arr.api.client.BookshelfClient
 import com.dnfapps.arrmatey.arr.api.client.LidarrClient
+import com.dnfapps.arrmatey.arr.api.client.ListenarrClient
 import com.dnfapps.arrmatey.arr.api.client.RadarrClient
 import com.dnfapps.arrmatey.arr.api.client.SonarrClient
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
@@ -14,6 +15,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookEdition
@@ -606,6 +608,7 @@ class ArrInstanceRepository(
                         is ArrMovie -> item.copy(monitored = status)
                         is Arrtist -> item.copy(monitored = status)
                         is Author -> item.copy(monitored = status)
+                        is Audiobook -> item.copy(monitored = status)
                         is MockMedia -> item
                     }
                 } else {
@@ -624,6 +627,7 @@ class ArrInstanceRepository(
                 is ArrMovie -> item.copy(monitored = status)
                 is Arrtist -> item.copy(monitored = status)
                 is Author -> item.copy(monitored = status)
+                is Audiobook -> item.copy(monitored = status)
                 is MockMedia -> item
             }
             val updatedCache = currentDetailsCache.toMutableMap()
@@ -867,6 +871,20 @@ class ArrInstanceRepository(
         _booksLibrary.update { currentList ->
             currentList.map { if (it.id == book.id) book else it }
         }
+    }
+
+    suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> {
+        _monitorStatus.value = OperationStatus.InProgress
+
+        if (instance.type != InstanceType.Listenarr) {
+            _monitorStatus.value = OperationStatus.Error(message = "Not a Listenarr instance")
+            return NetworkResult.Error(message = "Not a Listenarr instance")
+        }
+
+        val updatedAudiobook = audiobook.copy(monitored = !audiobook.monitored)
+
+        return updateMediaItem(updatedAudiobook)
+            .map { it as Audiobook }
     }
 
     suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =

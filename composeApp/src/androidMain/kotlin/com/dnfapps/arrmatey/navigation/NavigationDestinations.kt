@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.navigation
 import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -23,11 +24,13 @@ sealed interface ArrScreen : NavKey {
     data class MovieReleases(val movieId: Long): ArrScreen
     data class MovieFiles(val movie: ArrMovie): ArrScreen
     data class AuthorFiles(val author: Author): ArrScreen
+    data class BookHistory(val audiobook: Audiobook): ArrScreen
     data class EpisodeDetails(val series: ArrSeries, val episode: Episode): ArrScreen
     data class BookDetails(val author: Author, val book: Book): ArrScreen
     data class SeriesRelease(val seriesId: Long? = null, val seasonNumber: Int? = null, val episodeId: Long? = null): ArrScreen
     data class AlbumRelease(val albumId: Long, val artistId: Long? = null): ArrScreen
     data class BookRelease(val bookId: Long): ArrScreen
+    data class BookReleases(val bookId: Long): ArrScreen
 }
 
 sealed interface SeerrScreen: NavKey {

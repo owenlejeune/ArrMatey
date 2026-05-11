@@ -249,6 +249,8 @@
     <string name="comment">Comment</string>
     <string name="comments">Comments</string>
     <string name="description">Description</string>
+    <string name="publisher">Publisher</string>
+    <string name="audiobooks">Audiobooks</string>
     <string name="search_on_add_label">Search for files immediately</string>
     <string name="no_api_key">This instance doesn't require an API key</string>
     <string name="no_auth_required">No authentication required</string>

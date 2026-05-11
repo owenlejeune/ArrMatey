@@ -57,6 +57,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
@@ -77,6 +78,7 @@ import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
+import com.dnfapps.arrmatey.ui.components.AudiobookFileView
 import com.dnfapps.arrmatey.ui.components.BooksArea
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.InfoArea
@@ -87,6 +89,7 @@ import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.UpcomingDateView
 import com.dnfapps.arrmatey.ui.sheets.EditArtistSheet
+import com.dnfapps.arrmatey.ui.sheets.EditAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
 import com.dnfapps.arrmatey.ui.sheets.EditMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
@@ -313,6 +316,13 @@ fun MediaDetailsScreen(
                                             mediaDetailsViewModel.performBookAutomaticLookup(bookId)
                                         }
                                     )
+                                    is Audiobook -> AudiobookFileView(
+                                        audiobook = item,
+                                        searchIds = automaticSearchIds,
+                                        onAutomaticSearch = {
+                                            mediaDetailsViewModel.performAutomaticLookup()
+                                        }
+                                    )
                                     is MockMedia -> {}
                                 }
 
@@ -321,6 +331,7 @@ fun MediaDetailsScreen(
                                     is ArrMovie -> movieInfo(item, qualityProfiles, tags)
                                     is Arrtist -> artistInfo(item, qualityProfiles, tags)
                                     is Author -> authorInfo(item, qualityProfiles, tags)
+                                    is Audiobook -> audiobookInfo(item, qualityProfiles, tags)
                                     is MockMedia -> emptyMap()
                                 }.toInfoList()
                                 InfoArea(infoItems)
@@ -570,6 +581,15 @@ private fun EditMediaSheet(
             onEditItem = onEditItem,
             onDismiss = onDismiss
         )
+        is Audiobook -> EditAudiobookSheet(
+            item = item,
+            qualityProfiles = qualityProfiles,
+            rootFolders = rootFolders,
+            tags = tags,
+            editInProgress = editInProgress,
+            onEditItem = onEditItem,
+            onDismiss = onDismiss
+        )
         is MockMedia -> {}
     }
 }
@@ -797,6 +817,32 @@ private fun authorInfo(
         put(mokoString(MR.strings.root_folder), rootFolderPathValue)
         put(mokoString(MR.strings.path), (author.path ?: unknown))
         put(mokoString(MR.strings.new_books), monitorLabel)
+        put(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown))
+        put(mokoString(MR.strings.tags), tagsLabel)
+    }
+}
+
+@Composable
+private fun audiobookInfo(
+    audiobook: Audiobook,
+    qualityProfiles: List<QualityProfile>,
+    tags: List<Tag>
+): Map<String, String> {
+    val qualityProfile = qualityProfiles.firstOrNull { it.id == audiobook.qualityProfileId }
+    val tagsLabel = audiobook.formatTags(tags) ?: mokoString(MR.strings.none)
+
+    val unknown = mokoString(MR.strings.unknown)
+
+    val rootFolderPathValue = audiobook.rootFolderPath?.takeUnless { it.isBlank() }
+        ?: mokoString(MR.strings.unknown)
+
+    val diskSize = audiobook.fileSize.bytesAsFileSizeString()
+
+    return buildMap {
+        put(mokoString(MR.strings.size_on_disk), diskSize)
+        put(mokoString(MR.strings.root_folder), rootFolderPathValue)
+        put(mokoString(MR.strings.path), (audiobook.path ?: unknown))
+        put(mokoString(MR.strings.publisher), (audiobook.publisher ?: unknown))
         put(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown))
         put(mokoString(MR.strings.tags), tagsLabel)
     }

@@ -44,6 +44,7 @@ class PreferencesStore(
     private val bookshelfInfoCardKey = booleanPreferencesKey("bookshelfInfoCard")
     private val prowlarrInfoCardKey = booleanPreferencesKey("prowlarrInfoCard")
     private val seerrInfoCardKey = booleanPreferencesKey("seerrInfoCard")
+    private val listenarrInfoCardKey = booleanPreferencesKey("listenarrIndoCard")
     private val calendarViewTypeKey = stringPreferencesKey("calendarViewType")
     private val calendarContentFilterKey = stringPreferencesKey("calendarContentFilter")
     private val calendarMonitorOnlyKey = booleanPreferencesKey("calendarMonitorOnly")
@@ -69,6 +70,7 @@ class PreferencesStore(
         InstanceType.Seerr -> seerrInfoCardKey
         InstanceType.Booksehelf -> bookshelfInfoCardKey
         InstanceType.Prowlarr -> prowlarrInfoCardKey
+        InstanceType.Listenarr -> listenarrInfoCardKey
     }
 
     private val scope = CoroutineScope(Dispatchers.IO)

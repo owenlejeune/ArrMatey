@@ -116,6 +116,7 @@ fun HomeScreen(
     DoubleBackToExit()
 
     ModalNavigationDrawer(
+        gesturesEnabled = overlayTab !is TabItem.CustomWebpage,
         drawerState = drawerState,
         gesturesEnabled = overlayTab !is TabItem.CustomWebpage,
         drawerContent = {
@@ -313,6 +314,7 @@ private fun StandardTabContent(tab: TabItem.Standard) {
         TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr)
         TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr)
         TabItem.Standard.BOOKS -> ArrTab(InstanceType.Booksehelf)
+        TabItem.Standard.AUDIOBOOKS -> ArrTab(InstanceType.Listenarr)
         TabItem.Standard.ACTIVITY -> ActivityTab()
         TabItem.Standard.DOWNLOADS -> DownloadsTab()
         TabItem.Standard.CALENDAR -> CalendarTab()

@@ -4,12 +4,12 @@ import com.dnfapps.arrmatey.shared.MR
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
@@ -33,6 +33,9 @@ fun UpcomingDateView(item: ArrMedia) {
         is Author -> if (item.status == MediaStatus.Continuing) item.nextBook?.releaseDate?.format()?.let {
             "${mokoString(MR.strings.next_book)} $it"
         } ?: mokoString(MR.strings.continuing_unknown) else null
+        is Audiobook -> item.publishedDate?.format()?.let {
+            "${mokoString(MR.strings.release_date)} $it"
+        }
         is MockMedia -> "Next Airing: Monday"
     }?.let { airingString ->
         Text(
