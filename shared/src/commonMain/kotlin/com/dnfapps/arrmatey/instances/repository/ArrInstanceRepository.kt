@@ -71,11 +71,15 @@ class ArrInstanceRepository(
     val bookshelfClient: BookshelfClient
         get() = client as? BookshelfClient ?: throw IllegalStateException("Client is not a BookshelfClient instance")
 
+    val listenarrClient: ListenarrClient
+        get() = client as? ListenarrClient ?: throw IllegalStateException("Client is not a ListenarrClient instance")
+
     private fun createClient(): ArrClient = when (instance.type) {
         InstanceType.Sonarr -> SonarrClient(instance, httpClient)
         InstanceType.Radarr -> RadarrClient(instance, httpClient)
         InstanceType.Lidarr -> LidarrClient(instance, httpClient)
         InstanceType.Booksehelf -> BookshelfClient(instance, httpClient)
+        InstanceType.Listenarr -> ListenarrClient(instance, httpClient)
         else -> TODO()
     }
 

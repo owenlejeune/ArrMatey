@@ -308,6 +308,7 @@
     <string name="bookshelf_description">This is a revival of Readarr. The images published are configured to use working Goodreads or Hardcover metadata out of the box.
 
         Bookshelf is an ebook and audiobook collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new books from your favorite authors and will grab, sort, and rename them. Note that only one type of a given book is supported. If you want both an audiobook and ebook of a given book you will need multiple instances.</string>
+    <string name="listenarr_description">Listenarr is a fast, feature-rich, cross-platform audiobook management server. Built with a focus on being a complete solution for all your audiobook downloading needs. Set up your own server and get ready to streamline your audiobook listening!</string>
     <string name="prowlarr_description">Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base stack to integrate with your various PVR apps. Prowlarr supports management of both Torrent Trackers and Usenet Indexers.</string>
     <string name="prowlarr">Prowlarr</string>
     <string name="no_indexers_configured">No indexers configured</string>

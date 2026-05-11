@@ -23,6 +23,7 @@ object ArrStatisticsSerializer : JsonContentPolymorphicSerializer<ArrStatistics>
             "movieFileCount" in jsonObject -> MovieStatistics.serializer()
             "albumCount" in jsonObject -> LidarrStatistics.serializer()
             "bookCount" in jsonObject -> BookshelfStatistics.serializer()
+            "fileCount" in jsonObject -> AudiobookStatistics.serializer()
             else -> throw SerializationException("Unknown MediaItem type")
         }
     }

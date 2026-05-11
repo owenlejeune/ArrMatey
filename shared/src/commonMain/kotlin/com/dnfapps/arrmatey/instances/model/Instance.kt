@@ -153,6 +153,22 @@ enum class InstanceType(
         mockCover = MR.images.readarr_mock_cover,
         mockMedia = MockMedia.Readarr
     ),
+    Listenarr(
+        resource = MR.strings.lidarr_description,
+        github = "https://github.com/Listenarrs/Listenarr",
+        website = "getlistenarr.com",
+        icon = MR.images.listenarr,
+        tabIcon = MR.images.listenarr_tab,
+        defaultPort = 4545,
+        supportsActivityQueue = true,
+        apiBase = "api/v1",
+        testEndpoint = "system/info",
+        includeTopLevelAutomaticSearchOption = true,
+        aspectRatio = AspectRatio.Cover,
+        supportsNotifications = true,
+        mockCover = MR.images.readarr_mock_cover,
+        mockMedia = MockMedia.Readarr
+    ),
     Seerr(
         resource = MR.strings.seerr_description,
         github = "https://github.com/seerr-team/seerr",

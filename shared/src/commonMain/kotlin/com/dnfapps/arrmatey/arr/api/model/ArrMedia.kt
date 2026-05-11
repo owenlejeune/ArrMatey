@@ -117,6 +117,7 @@ fun ArrMedia.toJson(): String {
         is ArrMovie  -> ArrMedia.json.encodeToJsonElement(ArrMovieSerializer, this)
         is Arrtist -> ArrMedia.json.encodeToJsonElement(ArrtistSerializer, this)
         is Author -> ArrMedia.json.encodeToJsonElement(AuthorSerializer, this)
+        is Audiobook -> ArrMedia.json.encodeToJsonElement(AudiobookSerializer, this)
         is MockMedia -> ArrMedia.json.encodeToJsonElement(MockMedia.serializer(), this)
     }
 
@@ -167,6 +168,17 @@ object AuthorSerializer:
     }
 }
 
+object AudiobookSerializer:
+    JsonTransformingSerializer<Audiobook>(Audiobook.serializer()) {
+    override fun transformSerialize(element: JsonElement): JsonElement {
+        val obj = element.jsonObject
+        return buildJsonObject {
+            obj.forEach { (k, v) -> put(k, v) }
+            put("mediaType", InstanceType.Listenarr.name)
+        }
+    }
+}
+
 
 object AnyArrMediaSerializer: KSerializer<ArrMedia> {
     override val descriptor: SerialDescriptor
@@ -184,6 +196,7 @@ object AnyArrMediaSerializer: KSerializer<ArrMedia> {
             InstanceType.Radarr.name -> decoder.json.decodeFromJsonElement(ArrMovie.serializer(), element)
             InstanceType.Lidarr.name -> decoder.json.decodeFromJsonElement(Arrtist.serializer(), element)
             InstanceType.Booksehelf.name -> decoder.json.decodeFromJsonElement(Author.serializer(), element)
+            InstanceType.Listenarr.name -> decoder.json.decodeFromJsonElement(Audiobook.serializer(), element)
             else -> error("Unknown mediaType: $mediaType")
         }
     }
@@ -196,6 +209,7 @@ object AnyArrMediaSerializer: KSerializer<ArrMedia> {
             is ArrMovie  -> json.encodeToJsonElement(ArrMovieSerializer, value)
             is Arrtist -> json.encodeToJsonElement(ArrtistSerializer, value)
             is Author -> json.encodeToJsonElement(AuthorSerializer, value)
+            is Audiobook -> json.encodeToJsonElement(AudiobookSerializer, value)
             is MockMedia -> json.encodeToJsonElement(MockMedia.serializer(), value)
         }
         encoder.encodeJsonElement(element)

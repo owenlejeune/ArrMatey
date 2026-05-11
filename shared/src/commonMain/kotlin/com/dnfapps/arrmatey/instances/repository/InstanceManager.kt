@@ -76,7 +76,8 @@ class InstanceManager(
             InstanceType.Sonarr,
             InstanceType.Radarr,
             InstanceType.Lidarr,
-            InstanceType.Booksehelf -> ArrInstanceRepository(instance, httpClient, logger)
+            InstanceType.Booksehelf,
+            InstanceType.Listenarr-> ArrInstanceRepository(instance, httpClient, logger)
         }
     }
 
