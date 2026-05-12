@@ -6,7 +6,7 @@ import com.dnfapps.arrmatey.utils.screenDensity
 
 fun Int.pxToDp(): Dp = (this / screenDensity).dp
 
-fun Int.formatAsRuntime(): String {
+fun Int.formatMinutesAsRuntime(): String {
     val hours = this / 60
     val minutes = this % 60
 
@@ -17,6 +17,26 @@ fun Int.formatAsRuntime(): String {
             append("$minutes${if (minutes == 1) "m" else "m"}")
         }
         if (hours == 0 && minutes == 0) append("0m")
+    }
+}
+
+fun Int.formatSecondsAsRuntime(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+    val seconds = this % 60
+
+    return buildString {
+        if (hours > 0) append("${hours}h")
+
+        if (minutes > 0) {
+            if (isNotEmpty()) append(" ")
+            append("${minutes}m")
+        }
+
+        if (seconds > 0 || (hours == 0 && minutes == 0)) {
+            if (isNotEmpty()) append(" ")
+            append("${seconds}s")
+        }
     }
 }
 

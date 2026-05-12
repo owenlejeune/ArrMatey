@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.ListenarrHistoryItem
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.compose.utils.singleLanguageLabel
 import com.dnfapps.arrmatey.entensions.bullet
@@ -45,17 +46,26 @@ fun HistoryItemView(
         )
 
         val subLabel = buildString {
-            append(item.quality.qualityLabel)
-            bullet()
-            append(item.languages.singleLanguageLabel())
+            item.quality?.let { quality ->
+                append(quality.qualityLabel)
+                bullet()
+            }
+            if (item !is ListenarrHistoryItem) {
+                append(item.languages.singleLanguageLabel())
+            }
             item.indexerLabel?.let { indexerLabel ->
                 bullet()
                 append(indexerLabel)
             }
+            if (item is ListenarrHistoryItem) {
+                append(item.message)
+            }
         }
-        Text(
-            text = subLabel,
-            fontSize = 12.sp
-        )
+        subLabel.takeUnless { it.isEmpty() }?.let { subLabel ->
+            Text(
+                text = subLabel,
+                fontSize = 12.sp
+            )
+        }
     }
 }

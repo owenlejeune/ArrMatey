@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
@@ -51,6 +52,9 @@ class GetMediaDetailsUseCase(
                             InstanceType.Booksehelf -> {
                                 loadReadarrDetails(repository, mediaId, detailsResult.data)
                                     .collect { send(it) }
+                            }
+                            InstanceType.Listenarr -> {
+                                send(MediaDetailsUiState.Success(item = detailsResult.data))
                             }
                             else -> throw IllegalStateException("Unsupported instance type ${repository.instance.type}")
                         }

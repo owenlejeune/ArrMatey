@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DownloadReleaseUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetAudiobookFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAuthorFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetBookEditionUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetBookHistoryUseCase
@@ -42,6 +43,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
@@ -288,6 +290,7 @@ val useCaseModule = module {
     factory { GetBookHistoryUseCase() }
     factory { UpdateDownloadClientPreferencesUseCase(get()) }
     factory { ObserveDownloadClientPreferencesUseCase(get()) }
+    factory { GetAudiobookFilesUseCase(get()) }
 }
 
 val viewModelModule = module {
@@ -349,6 +352,9 @@ val viewModelModule = module {
     }
     factory { (authorId: Long) ->
         AuthorFilesViewModel(authorId, get())
+    }
+    factory { (audiobookId: Long) ->
+        AudiobookFilesViewModel(audiobookId, get())
     }
 }
 

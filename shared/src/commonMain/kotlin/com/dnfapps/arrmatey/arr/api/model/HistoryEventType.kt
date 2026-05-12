@@ -44,5 +44,16 @@ enum class HistoryEventType(val resource: StringResource) {
     BookFileRenamed(MR.strings.book_file_renamed),
 
     @SerialName("bokFileDeleted")
-    BookFileDelete(MR.strings.book_file_deleted)
+    BookFileDelete(MR.strings.book_file_deleted),
+
+    // Listenarr
+
+    @SerialName("Added")
+    Added(MR.strings.added),
+
+    @SerialName("File Removed")
+    AudiobookFileRemoved(MR.strings.audiobook_file_deleted),
+
+    @SerialName("File Added")
+    AudiobookFileAdded(MR.strings.audiobook_file_added)
 }

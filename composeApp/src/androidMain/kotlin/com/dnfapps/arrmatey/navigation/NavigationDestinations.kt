@@ -24,7 +24,7 @@ sealed interface ArrScreen : NavKey {
     data class MovieReleases(val movieId: Long): ArrScreen
     data class MovieFiles(val movie: ArrMovie): ArrScreen
     data class AuthorFiles(val author: Author): ArrScreen
-    data class BookHistory(val audiobook: Audiobook): ArrScreen
+    data class AudiobookFiles(val audiobook: Audiobook): ArrScreen
     data class EpisodeDetails(val series: ArrSeries, val episode: Episode): ArrScreen
     data class BookDetails(val author: Author, val book: Book): ArrScreen
     data class SeriesRelease(val seriesId: Long? = null, val seasonNumber: Int? = null, val episodeId: Long? = null): ArrScreen

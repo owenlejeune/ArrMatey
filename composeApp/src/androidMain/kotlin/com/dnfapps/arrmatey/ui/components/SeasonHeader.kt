@@ -1,30 +1,17 @@
 package com.dnfapps.arrmatey.ui.components
 
 import com.dnfapps.arrmatey.shared.MR
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.Season
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
-import com.dnfapps.arrmatey.extensions.formatAsRuntime
+import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
@@ -57,7 +44,7 @@ fun SeasonHeader(
     val runtime = remember(episodes) {
         val items = episodes.mapNotNull { it.runtime?.takeIf { r -> r > 0 } }
         if (items.isEmpty()) null
-        else items.sorted()[items.size / 2].formatAsRuntime()
+        else items.sorted()[items.size / 2].formatMinutesAsRuntime()
     }
 
     val seasonInfo = listOfNotNull(

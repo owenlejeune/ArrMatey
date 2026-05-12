@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components
 
+import android.text.Html
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,9 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun ItemDescriptionCard(overview: String, modifier: Modifier = Modifier) {
     var expanded by remember { mutableStateOf(false) }
+    val parsed = remember(overview) {
+        Html.fromHtml(overview, Html.FROM_HTML_MODE_LEGACY).toString().trim()
+    }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -34,7 +38,7 @@ fun ItemDescriptionCard(overview: String, modifier: Modifier = Modifier) {
             modifier = Modifier.padding(vertical = 12.dp, horizontal = 18.dp)
         ) {
             Text(
-                text = overview,
+                text = parsed,
                 maxLines = if (expanded) Int.MAX_VALUE else 10,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 14.sp,

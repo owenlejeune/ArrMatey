@@ -2,6 +2,8 @@ package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
@@ -17,14 +19,15 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 
 @Composable
-fun DetailHeaderBanner(
+fun BoxScope.DetailHeaderBanner(
     bannerUrl: String?,
     height: Dp = 400.dp
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(height)
+//            .height(height)
+            .matchParentSize()
             .background(MaterialTheme.colorScheme.background)
             .clipToBounds()
     ) {

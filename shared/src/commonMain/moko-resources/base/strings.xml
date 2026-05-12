@@ -262,9 +262,10 @@
     <string name="instance_switcher_toggle_description">Automatically hide the switcher when only one instance is configured</string>
     <string name="open_in_browser">Open in Browser</string>
     <string name="replace_url_with_current">Replace saved URL with current</string>
-
     <string name="confirm_delete">Confirm delete</string>
     <string name="confirm_delete_movie">This file will be deleted</string>
+    <string name="audiobook_info_authors">Author(s)</string>
+    <string name="audiobook_info_narrators">Narrator(s)</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>
@@ -281,6 +282,8 @@
     <string name="book_file_imported">Book File Imported</string>
     <string name="book_file_deleted">Book File Deleted</string>
     <string name="book_file_renamed">Book File Renamed</string>
+    <string name="audiobook_file_deleted">File Delete</string>
+    <string name="audiobook_file_added">File Added</string>
 
     <!-- Errors -->
     <string name="error">Error</string>

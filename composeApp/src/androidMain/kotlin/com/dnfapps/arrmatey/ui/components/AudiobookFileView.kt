@@ -21,6 +21,7 @@ import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.ui.screens.AudiobookFileCard
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 
@@ -63,25 +64,26 @@ fun AudiobookFileView(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable {
-                    navigation.navigateTo(ArrScreen.BookHistory(audiobook))
+                    navigation.navigateTo(ArrScreen.AudiobookFiles(audiobook))
                 }
             )
         }
 
         audiobook.files.forEach { file ->
-            ContainerCard {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = file.path?.split("/")?.lastOrNull() ?: mokoString(MR.strings.unknown),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = file.size?.bytesAsFileSizeString() ?: "",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            AudiobookFileCard(file)
+//            ContainerCard(modifier = Modifier.fillMaxWidth()) {
+//                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+//                    Text(
+//                        text = file.path?.split("/")?.lastOrNull() ?: mokoString(MR.strings.unknown),
+//                        style = MaterialTheme.typography.titleMedium
+//                    )
+//                    Text(
+//                        text = file.size?.bytesAsFileSizeString() ?: "",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                }
+//            }
         }
 
         if (audiobook.files.isEmpty()) {

@@ -50,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -69,6 +70,7 @@ import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -97,6 +99,7 @@ import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
+import java.util.Locale
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -238,13 +241,18 @@ fun MediaDetailsScreen(
                             modifier = Modifier.verticalScroll(scrollState),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            DetailsHeader(item, type)
+                            DetailsHeader(item, type, topPadding = paddingValues.calculateTopPadding())
 
                             Column(
-                                modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp),
+                                modifier = Modifier
+                                    .padding(horizontal = 24.dp)
+                                    .padding(bottom = 24.dp)
+                                    .padding(top = 12.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
-                                UpcomingDateView(item)
+                                if (item !is Audiobook) {
+                                    UpcomingDateView(item)
+                                }
 
                                 item.overview?.let { overview ->
                                     ItemDescriptionCard(overview)
@@ -331,7 +339,7 @@ fun MediaDetailsScreen(
                                     is ArrMovie -> movieInfo(item, qualityProfiles, tags)
                                     is Arrtist -> artistInfo(item, qualityProfiles, tags)
                                     is Author -> authorInfo(item, qualityProfiles, tags)
-                                    is Audiobook -> audiobookInfo(item, qualityProfiles, tags)
+                                    is Audiobook -> audiobookInfo(item)
                                     is MockMedia -> emptyMap()
                                 }.toInfoList()
                                 InfoArea(infoItems)
@@ -824,26 +832,24 @@ private fun authorInfo(
 
 @Composable
 private fun audiobookInfo(
-    audiobook: Audiobook,
-    qualityProfiles: List<QualityProfile>,
-    tags: List<Tag>
+    audiobook: Audiobook
 ): Map<String, String> {
-    val qualityProfile = qualityProfiles.firstOrNull { it.id == audiobook.qualityProfileId }
-    val tagsLabel = audiobook.formatTags(tags) ?: mokoString(MR.strings.none)
-
     val unknown = mokoString(MR.strings.unknown)
-
-    val rootFolderPathValue = audiobook.rootFolderPath?.takeUnless { it.isBlank() }
-        ?: mokoString(MR.strings.unknown)
 
     val diskSize = audiobook.fileSize.bytesAsFileSizeString()
 
+    val authorString = audiobook.authors.takeUnless { it.isEmpty() }?.joinToString(Bullet) ?: unknown
+    val narratorsString = audiobook.narrators.takeUnless { it.isEmpty() }?.joinToString(Bullet) ?: unknown
+
     return buildMap {
-        put(mokoString(MR.strings.size_on_disk), diskSize)
-        put(mokoString(MR.strings.root_folder), rootFolderPathValue)
-        put(mokoString(MR.strings.path), (audiobook.path ?: unknown))
+        put(mokoString(MR.strings.audiobook_info_authors), authorString)
+        put(mokoString(MR.strings.audiobook_info_narrators), narratorsString)
         put(mokoString(MR.strings.publisher), (audiobook.publisher ?: unknown))
-        put(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown))
-        put(mokoString(MR.strings.tags), tagsLabel)
+        audiobook.language?.let { language ->
+            put(mokoString(MR.strings.language),
+                language.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() })
+        }
+        put(mokoString(MR.strings.size_on_disk), diskSize)
+        put(mokoString(MR.strings.path), (audiobook.path ?: unknown))
     }
 }

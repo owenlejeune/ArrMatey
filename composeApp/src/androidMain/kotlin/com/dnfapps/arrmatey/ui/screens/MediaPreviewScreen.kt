@@ -112,7 +112,7 @@ fun MediaPreviewScreen(
                 modifier = Modifier.verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                DetailsHeader(item, type)
+                DetailsHeader(item, type, topPadding = paddingValues.calculateTopPadding())
 
                 Column(
                     modifier = Modifier.padding(horizontal = 24.dp),

@@ -1,12 +1,11 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
-import com.dnfapps.arrmatey.extensions.formatAsRuntime
+import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
@@ -72,7 +71,7 @@ sealed interface ArrMedia {
     val fileSize: Long
         get() = statistics?.sizeOnDisk ?: 0L
     val runtimeString: String
-        get() = runtime?.formatAsRuntime() ?: ""
+        get() = runtime?.formatMinutesAsRuntime() ?: ""
 
     fun getPoster(): ArrImage?  {
         return images.firstOrNull { it.coverType == CoverType.Poster }

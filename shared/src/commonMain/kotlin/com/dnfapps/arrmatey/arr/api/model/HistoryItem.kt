@@ -14,7 +14,7 @@ sealed interface HistoryItem {
     val eventType: HistoryEventType
     val date: Instant
     val sourceTitle: String?
-    val quality: QualityInfo
+    val quality: QualityInfo?
     val languages: List<Language>
     val customFormats: List<CustomFormat>
     val customFormatScore: Int?
@@ -37,6 +37,7 @@ object HistoryItemSerializer : JsonContentPolymorphicSerializer<HistoryItem>(His
             "seriesId" in jsonObject -> SonarrHistoryItem.serializer()
             "artistId" in jsonObject || "albumId" in jsonObject || "trackId" in jsonObject -> LidarrHistoryItem.serializer()
             "authorId" in jsonObject || "bookId" in jsonObject -> BookshelfHistoryItem.serializer()
+            "audiobookId" in jsonObject -> ListenarrHistoryItem.serializer()
             else -> throw SerializationException("Unknown MediaItem type")
         }
     }

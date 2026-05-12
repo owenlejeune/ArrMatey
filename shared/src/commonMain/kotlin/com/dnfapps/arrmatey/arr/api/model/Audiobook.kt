@@ -2,42 +2,52 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
+import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
+import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
+import com.dnfapps.arrmatey.extensions.formatSecondsAsRuntime
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import kotlin.time.Instant
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 @Serializable
 data class Audiobook(
     override val id: Long? = null,
     override val title: String? = null,
-    val authors: List<String> = emptyList(),
-    val narrators: List<String> = emptyList(),
-    val publishYear: String? = null,
-    @Contextual val publishedDate: Instant? = null,
-    val series: String? = null,
-    val seriesNumber: String? = null,
     override val genres: List<String> = emptyList(),
-    val asin: String? = null,
-    val publisher: String? = null,
-    val language: String? = null,
-    override val runtime: Int? = null,
-    val imageUrl: String? = null,
     override val monitored: Boolean = false,
     override val qualityProfileId: Int = 0,
     override val tags: List<Int> = emptyList(),
+    override val runtime: Int? = null,
+    override val images: List<ArrImage> = emptyList(),
+    val authors: List<String> = emptyList(),
+    val narrators: List<String> = emptyList(),
+    val publishYear: String? = null,
+    val series: String? = null,
+    val seriesNumber: String? = null,
+    val asin: String? = null,
+    val publisher: String? = null,
+    val language: String? = null,
+    val imageUrl: String? = null,
     val basePath: String? = null,
     val filePath: String? = null,
-    override val fileSize: Long = 0,
     val fileCount: Int = 0,
     val authorAsins: List<String> = emptyList(),
     val wanted: Boolean = false,
     @SerialName("status") val statusStr: String? = null,
     val files: List<AudiobookFile> = emptyList(),
-    override val images: List<ArrImage> = emptyList(),
+    @SerialName("description") override val overview: String? = null,
+
+    @Serializable(with = ListenarrInstantSerializer::class)
+    val publishedDate: Instant? = null,
 
     val instanceId: Long? = null
 ) : ArrMedia, HasArrImages<Audiobook> {
@@ -46,10 +56,11 @@ data class Audiobook(
         val localImages = imageUrl?.let { path ->
             listOf(
                 ArrImage(CoverType.Poster, path, path)
+                    .rebuildWithLocalUrls(instanceUrl)
             )
         } ?: emptyList()
 
-        return copy(images = localImages.map { it.rebuildWithLocalUrls(instanceUrl) })
+        return copy(images = localImages)
     }
 
     override val year: Int?
@@ -60,9 +71,6 @@ data class Audiobook(
 
     override val sortTitle: String?
         get() = title
-
-    override val overview: String?
-        get() = null
 
     override val path: String?
         get() = basePath
@@ -127,6 +135,12 @@ data class Audiobook(
         get() = statusStr == "no-file"
     override val isWanted: Boolean
         get() = wanted
+
+    override val runtimeString: String
+        get() = runtime?.formatSecondsAsRuntime() ?: ""
+
+    override val fileSize: Long
+        get() = files.sumOf { it.size ?: 0 }
 
     fun copyForCreation(
         monitored: Boolean,

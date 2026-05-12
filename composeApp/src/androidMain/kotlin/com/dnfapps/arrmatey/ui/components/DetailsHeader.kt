@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,29 +15,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.entensions.Bullet
-import com.dnfapps.arrmatey.extensions.formatAsRuntime
+import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoPlural
-import com.dnfapps.arrmatey.utils.mokoString
-import kotlinx.datetime.format
 import java.util.Locale
 
 @Composable
 fun DetailsHeader(
     item: ArrMedia,
-    type: InstanceType
+    type: InstanceType,
+    topPadding: Dp
 ) {
     Box(
         modifier = Modifier.fillMaxWidth()
@@ -45,14 +46,15 @@ fun DetailsHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 170.dp)
-                .padding(horizontal = 12.dp),
+                .padding(top = topPadding)
+                .padding(horizontal = 12.dp)
+                .align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.Bottom
         ) {
             PosterItem(
                 item = item,
-                modifier = Modifier.height(220.dp),
+                modifier = Modifier.width(150.dp),
                 aspectRatio = type.aspectRatio
             )
             Column(
@@ -69,11 +71,13 @@ fun DetailsHeader(
                         ).joinToString(Bullet),
                         fontSize = 16.sp
                     )
-                    Text(
-                        text = listOf(item.releasedBy, item.statusString).joinToString(Bullet),
-                        fontSize = 14.sp,
-                        lineHeight = 16.sp
-                    )
+                    if (item !is Audiobook) {
+                        Text(
+                            text = listOf(item.releasedBy, item.statusString).joinToString(Bullet),
+                            fontSize = 14.sp,
+                            lineHeight = 16.sp
+                        )
+                    }
                 }
                 Text(
                     text = item.genres.joinToString(Bullet),
@@ -118,7 +122,7 @@ fun DetailsHeader(
                 Text(
                     text = listOfNotNull(
                         item.displayDate?.format("MMM d, yyyy"),
-                        (item as? MovieDetails)?.runtime?.formatAsRuntime(),
+                        (item as? MovieDetails)?.runtime?.formatMinutesAsRuntime(),
                         (item as? TvDetails)?.seasons?.let { mokoPlural(MR.plurals.seasons, it.size) },
                         item.getCertification(Locale.getDefault().country)
                     ).joinToString(Bullet),

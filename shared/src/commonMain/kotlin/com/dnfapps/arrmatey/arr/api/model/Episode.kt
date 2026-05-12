@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
-import com.dnfapps.arrmatey.extensions.formatAsRuntime
+import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.isBeforeToday
 import com.dnfapps.arrmatey.extensions.padStart
 import com.dnfapps.arrmatey.shared.MR
@@ -50,7 +50,7 @@ data class Episode(
         get() = title ?: "Unknown"
 
     val runtimeString: String?
-        get() = runtime?.formatAsRuntime()
+        get() = runtime?.formatMinutesAsRuntime()
 
     val seasonEpLabel: String
         get() = "${seasonNumber}x${episodeNumber.padStart(2, '0')}"

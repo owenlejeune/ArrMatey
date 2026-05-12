@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -7,7 +8,7 @@ import kotlin.time.Instant
 @Serializable
 data class AudiobookFile(
     val id: Long,
-    val audiobookId: Long,
+    val audiobookId: Long? = null,
     val path: String? = null,
     val size: Long? = null,
     val durationSeconds: Double? = null,
@@ -17,6 +18,6 @@ data class AudiobookFile(
     val bitrate: Int? = null,
     val sampleRate: Int? = null,
     val channels: Int? = null,
-    @Contextual val createdAt: Instant? = null,
+    @Serializable(with = ListenarrInstantSerializer::class) val createdAt: Instant? = null,
     val source: String? = null
 )

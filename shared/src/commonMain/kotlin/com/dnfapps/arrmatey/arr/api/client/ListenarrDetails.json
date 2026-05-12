@@ -1,0 +1,82 @@
+{
+  "id": 23,
+  "title": "A Brief History of Black Holes",
+  "subtitle": "And why nearly everything you know about them is wrong",
+  "authors": [
+    "Becky Smethurst"
+  ],
+  "narrators": [
+    "Becky Smethurst"
+  ],
+  "description": "<p><i><b>This audio edition is narrated with dazzling enthusiasm by the author, Dr Becky Smethurst.</b></i><br /><br /><b>Right now, you are orbiting a black hole.</b><br /><br />The Earth orbits the Sun, and the Sun orbits the centre of the Milky Way: a supermassive black hole, the strangest and most misunderstood phenomenon in the galaxy.<br /><br />In <i>A Brief History of Black Holes</i>, the award-winning University of Oxford researcher Dr Becky Smethurst charts five hundred years of scientific breakthroughs in astronomy and astrophysics. She takes us from the earliest observations of the universe and the collapse of massive stars, to the iconic first photographs of a black hole and her own published findings.<br /><br />A cosmic tale of discovery, Becky explains why black holes aren’t really ‘black’, that you never ever want to be ‘spaghettified’, how black holes are more like sofa cushions than hoovers and why, beyond the event horizon, the future is a direction in space rather than in time. Told with humour and wisdom, this captivating book describes the secrets behind the most profound questions about our universe, all hidden inside black holes.<br /><br /><b>'A jaunt through space history . . . with charming wit and many pop-culture references' –<i> BBC Sky At Night Magazine</i></b></p>",
+  "genres": [
+    "Science & Engineering",
+    "Science",
+    "Astronomy & Space Science",
+    "Astronomy",
+    "Cosmology",
+    "History & Philosophy",
+    "History",
+    "Physics"
+  ],
+  "isbns": [],
+  "asin": "B0B2X1WQ6Q",
+  "identifiers": [
+    {
+      "id": 23,
+      "type": "Asin",
+      "value": "B0B2X1WQ6Q",
+      "valueNormalized": "B0B2X1WQ6Q",
+      "isPrimary": true,
+      "source": "Imported",
+      "createdAt": "2026-05-06T13:55:15.4730731",
+      "updatedAt": "2026-05-06T13:55:15.4730731"
+    }
+  ],
+  "imageUrl": "/config/cache/images/library/B0B2X1WQ6Q.jpg",
+  "publishYear": "2022",
+  "publisher": "Macmillan",
+  "language": "english",
+  "filePath": "/audiobooks/Becky Smethurst/A Brief History of Black Holes B0B2X477Q4/A Brief History of Black Holes And Why Nearly Everything You Know About Them Is Wrong.mp3",
+  "fileSize": 408625685,
+  "basePath": "/audiobooks/Becky Smethurst/A Brief History of Black Holes B0B2X477Q4",
+  "runtime": 25500,
+  "explicit": false,
+  "abridged": false,
+  "monitored": true,
+  "authorAsins": [
+    "B07RGQWS7N"
+  ],
+  "seriesMemberships": [],
+  "files": [
+    {
+      "id": 145,
+      "path": "/audiobooks/Becky Smethurst/A Brief History of Black Holes B0B2X477Q4/A Brief History of Black Holes And Why Nearly Everything You Know About Them Is Wrong.m4b",
+      "size": 405331988,
+      "durationSeconds": 25536.61,
+      "format": "M4B",
+      "container": "M4B",
+      "codec": "aac",
+      "bitrate": 126980,
+      "sampleRate": 44100,
+      "channels": 2,
+      "source": "scan",
+      "createdAt": "2026-05-06T13:55:17.008462"
+    },
+    {
+      "id": 146,
+      "path": "/audiobooks/Becky Smethurst/A Brief History of Black Holes B0B2X477Q4/A Brief History of Black Holes And Why Nearly Everything You Know About Them Is Wrong.mp3",
+      "size": 408625685,
+      "durationSeconds": 25536.626939,
+      "format": "MP3",
+      "container": "MP3",
+      "codec": "mp3",
+      "bitrate": 128012,
+      "sampleRate": 44100,
+      "channels": 1,
+      "source": "scan",
+      "createdAt": "2026-05-06T13:55:17.1717577"
+    }
+  ],
+  "wanted": false
+}

@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.AudiobookFile
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookEdition
@@ -167,6 +168,10 @@ class ArrInstanceRepository(
 
     private val _authorBookFiles = MutableStateFlow<Map<Long, List<BookFile>>>(emptyMap())
     val authorBookFiles: StateFlow<Map<Long, List<BookFile>>> = _authorBookFiles.asStateFlow()
+
+    // Listenarr-specific
+    private val _audiobookFiles = MutableStateFlow<Map<Long, List<AudiobookFile>>>(emptyMap())
+    val audiobookFiles: StateFlow<Map<Long, List<AudiobookFile>>> = _audiobookFiles.asStateFlow()
 
     private val _booksLibrary = MutableStateFlow<List<Book>>(emptyList())
     val booksLibrary: StateFlow<List<Book>> = _booksLibrary.asStateFlow()
@@ -640,6 +645,11 @@ class ArrInstanceRepository(
         _releases.value = null
     }
 
+    fun observeCacheMediaDetails(id: Long): Flow<ArrMedia?> =
+        _mediaDetailsCache.map {
+            it[id]
+        }
+
     fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> = flow {
         emit(NetworkResult.Loading)
 
@@ -665,6 +675,20 @@ class ArrInstanceRepository(
                     ?: NetworkResult.Error(message = "Media not found in cache")
             }
             .collect { emit(it) }
+    }
+
+    suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> {
+        _monitorStatus.value = OperationStatus.InProgress
+
+        if (instance.type != InstanceType.Listenarr) {
+            _monitorStatus.value = OperationStatus.Error(message = "Not a Listenarr instance")
+            return NetworkResult.Error(message = "Not a Listenarr instance")
+        }
+
+        val updatedAudiobook = audiobook.copy(monitored = !audiobook.monitored)
+
+        return updateMediaItem(updatedAudiobook)
+            .map { it as Audiobook }
     }
 
     fun observeItemHistory(itemId: Long): Flow<List<HistoryItem>> {
@@ -873,24 +897,22 @@ class ArrInstanceRepository(
         }
     }
 
-    suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> {
-        _monitorStatus.value = OperationStatus.InProgress
-
-        if (instance.type != InstanceType.Listenarr) {
-            _monitorStatus.value = OperationStatus.Error(message = "Not a Listenarr instance")
-            return NetworkResult.Error(message = "Not a Listenarr instance")
-        }
-
-        val updatedAudiobook = audiobook.copy(monitored = !audiobook.monitored)
-
-        return updateMediaItem(updatedAudiobook)
-            .map { it as Audiobook }
-    }
-
     suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =
         safePerformReadarr { client ->
             client.getBookEditions(bookId)
         }
+
+    // Listenarr
+
+    suspend fun getAudiobookFiles(audiobookId: Long): NetworkResult<List<AudiobookFile>> =
+        safePerformListenarr { client ->
+            client.getDetail(audiobookId)
+                .onSuccess { result ->
+                    val currentMap = _audiobookFiles.value.toMutableMap()
+                    currentMap[audiobookId] = result.files
+                    _audiobookFiles.value = currentMap
+                }
+        }.map { it.files }
 
     // Helpers
     private suspend inline fun <reified T> safePerformSonarr(
@@ -918,6 +940,13 @@ class ArrInstanceRepository(
         operation: suspend (BookshelfClient) -> NetworkResult<T>
     ): NetworkResult<T> {
         val client = client as? BookshelfClient ?: return NetworkResult.Error(message = "Not a Readarr instance")
+        return operation(client)
+    }
+
+    private suspend inline fun <reified T> safePerformListenarr(
+        operation: suspend (ListenarrClient) -> NetworkResult<T>
+    ): NetworkResult<T> {
+        val client = client as? ListenarrClient ?: return NetworkResult.Error(message = "Not a Listenarr instance")
         return operation(client)
     }
 
