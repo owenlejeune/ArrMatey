@@ -103,4 +103,7 @@ sealed interface ReleaseParams {
     data class Book(
         val bookId: Long
     ): ReleaseParams
+    data class Audiobook(
+        val query: String
+    ): ReleaseParams
 }

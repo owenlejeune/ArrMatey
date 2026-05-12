@@ -154,4 +154,7 @@ data class Audiobook(
         basePath = rootFolderPath,
         tags = tags
     )
+
+    val releaseQuery: String
+        get() = "$title $${authors.joinToString(" ")}"
 }

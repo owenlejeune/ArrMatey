@@ -30,7 +30,7 @@ sealed interface ArrScreen : NavKey {
     data class SeriesRelease(val seriesId: Long? = null, val seasonNumber: Int? = null, val episodeId: Long? = null): ArrScreen
     data class AlbumRelease(val albumId: Long, val artistId: Long? = null): ArrScreen
     data class BookRelease(val bookId: Long): ArrScreen
-    data class BookReleases(val bookId: Long): ArrScreen
+    data class AudiobookRelease(val query: String): ArrScreen
 }
 
 sealed interface SeerrScreen: NavKey {

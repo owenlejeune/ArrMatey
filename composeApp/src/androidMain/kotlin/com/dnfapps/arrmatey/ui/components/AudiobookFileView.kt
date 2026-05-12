@@ -17,7 +17,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
@@ -38,7 +37,7 @@ fun AudiobookFileView(
     ) {
         ReleaseDownloadButtons(
             onInteractiveClicked = {
-                val destination = ArrScreen.BookReleases(audiobook.id!!)
+                val destination = ArrScreen.AudiobookRelease(audiobook.releaseQuery)
                 navigation.navigateTo(destination)
             },
             onAutomaticClicked = onAutomaticSearch,

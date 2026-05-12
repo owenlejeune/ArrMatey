@@ -279,7 +279,6 @@ fun <T: ArrRelease> ReleaseItem(
                 Text(
                     text = item.title,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
 

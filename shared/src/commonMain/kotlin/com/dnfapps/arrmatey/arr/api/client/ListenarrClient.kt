@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.ListenarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
@@ -74,18 +75,8 @@ class ListenarrClient(
         post("download/search-and-download", mapOf("audiobookId" to id))
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<ListenarrRelease>> {
-        val audiobookId = (params as? ReleaseParams.Book)?.bookId
-        val query = when (params) {
-            is ReleaseParams.Book -> {
-                val detail = getDetail(params.bookId)
-                if (detail is NetworkResult.Success) {
-                    "${detail.data.authors.firstOrNull() ?: ""} ${detail.data.title}"
-                } else ""
-            }
-            else -> ""
-        }
+        val query = (params as? ReleaseParams.Audiobook)?.query ?: return NetworkResult.Error(message = "Query can't be empty")
         return get<List<ListenarrRelease>>("search/indexers", mapOf("query" to query))
-            .map { releases -> releases.map { it.copy(audiobookId = audiobookId) } }
     }
 
     override suspend fun getItemHistory(
@@ -115,4 +106,7 @@ class ListenarrClient(
         start: LocalDate,
         end: LocalDate
     ): NetworkResult<List<Book>> = NetworkResult.Success(emptyList())
+
+    suspend fun getEnabledIndexers(): NetworkResult<List<ListenarrIndexer>> =
+        get("indexers/enabled")
 }

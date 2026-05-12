@@ -90,6 +90,12 @@ fun ArrTab(
             entry<ArrScreen.AudiobookFiles> { params ->
                 AudiobookFilesScreen(audiobook = params.audiobook)
             }
+            entry<ArrScreen.AudiobookRelease> { params ->
+                val releaseParams = ReleaseParams.Audiobook(
+                    query = params.query
+                )
+                InteractiveSearchScreen(type, releaseParams)
+            }
         }
     )
 }
