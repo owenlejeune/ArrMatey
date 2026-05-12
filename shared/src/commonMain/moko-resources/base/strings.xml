@@ -571,6 +571,7 @@
     <string name="enable_notifications_description">Receive notifications for new releases</string>
 
     <!-- View Customization -->
+    <string name="view_customization">View Customization</string>
     <string name="customization_options">Customization Options</string>
     <string name="banner_blur">Banner Blur</string>
     <string name="show_banner_background">Show banner background</string>

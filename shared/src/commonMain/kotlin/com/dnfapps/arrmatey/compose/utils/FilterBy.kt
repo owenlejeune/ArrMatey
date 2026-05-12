@@ -27,6 +27,7 @@ enum class FilterBy(
                 InstanceType.Radarr -> listOf(All, Monitored, Unmonitored, Missing, Wanted, Downloaded)
                 InstanceType.Lidarr -> listOf(All, Monitored, Unmonitored, Missing)
                 InstanceType.Booksehelf -> listOf(All, Monitored, Unmonitored, Missing)
+                InstanceType.Listenarr -> listOf(All, Monitored, Unmonitored, Missing)
                 else -> emptyList()
             }
     }

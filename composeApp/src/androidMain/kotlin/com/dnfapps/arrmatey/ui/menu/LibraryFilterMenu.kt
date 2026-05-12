@@ -30,6 +30,7 @@ import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.entensions.imageVector
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -61,7 +62,7 @@ fun LibraryFilterMenu(
                 interactionSource = groupInteractionSource
             ) {
                 DropdownMenuItem(
-                    text = { Text("View Customization") },
+                    text = { Text(mokoString(MR.strings.view_customization)) },
                     selected = false,
                     onClick = {
                         onOpenViewCustomization()
