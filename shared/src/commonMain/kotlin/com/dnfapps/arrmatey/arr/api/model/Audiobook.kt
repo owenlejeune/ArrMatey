@@ -137,7 +137,11 @@ data class Audiobook(
         get() = wanted
 
     override val runtimeString: String
-        get() = runtime?.formatSecondsAsRuntime() ?: ""
+        get() = when {
+            runtime == null -> ""
+            runtime > 20_000 -> runtime.formatSecondsAsRuntime()
+            else -> runtime.formatMinutesAsRuntime()
+        }
 
     override val fileSize: Long
         get() = files.sumOf { it.size ?: 0 }
