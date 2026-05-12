@@ -39,8 +39,8 @@ interface ArrClient {
     suspend fun getRootFolders(): NetworkResult<List<RootFolder>>
     suspend fun getTags(): NetworkResult<List<Tag>>
     suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrMedia>
-    suspend fun command(payload: CommandPayload): NetworkResult<CommandResponse>
-    suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse>
+    suspend fun command(payload: CommandPayload): NetworkResult<Any>
+    suspend fun performAutomaticSearch(id: Long): NetworkResult<Any>
     suspend fun getReleases(params: ReleaseParams): NetworkResult<List<ArrRelease>>
     suspend fun fetchActivityTasks(page: Int, pageSize: Int): NetworkResult<QueuePage>
     suspend fun deleteActivityTask(id: Int, removeFromClient: Boolean, blocklist: Boolean, skipRedownload: Boolean): NetworkResult<Unit>

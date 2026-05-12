@@ -37,6 +37,9 @@ class PerformAutomaticSearchUseCase {
                     else -> CommandPayload.Author(mediaId)
                 }
             }
+            InstanceType.Listenarr -> {
+                CommandPayload.Audiobook(mediaId)
+            }
             else -> throw UnsupportedOperationException("Cannot perform automatic search on instance of type $type")
         }
         return repository.executeCommand(payload)

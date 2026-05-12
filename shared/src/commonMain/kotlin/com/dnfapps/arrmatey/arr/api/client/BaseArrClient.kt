@@ -42,8 +42,8 @@ abstract class BaseArrClient(
     override suspend fun getTags(): NetworkResult<List<Tag>> =
         get("tag")
 
-    override suspend fun command(payload: CommandPayload): NetworkResult<CommandResponse> =
-        post("command", payload)
+    override suspend fun command(payload: CommandPayload): NetworkResult<Any> =
+        post<CommandPayload, CommandResponse>("command", payload)
 
     override suspend fun fetchActivityTasks(
         page: Int,

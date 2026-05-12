@@ -4,12 +4,15 @@ import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.AudiobookEditResponse
 import com.dnfapps.arrmatey.arr.api.model.Book
-import com.dnfapps.arrmatey.arr.api.model.CommandResponse
+import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.ListenarrCommandResponse
 import com.dnfapps.arrmatey.arr.api.model.ListenarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
+import com.dnfapps.arrmatey.arr.api.model.MonitorBody
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.client.NetworkResult
@@ -29,7 +32,9 @@ class ListenarrClient(
         get("library/$id")
 
     override suspend fun update(item: ArrMedia): NetworkResult<Audiobook> =
-        put<ArrMedia, Audiobook>("library/${item.id}", item)
+        put<MonitorBody, AudiobookEditResponse>("library/${item.id}", MonitorBody(item.monitored))
+            .map { it.audiobook }
+            .rebuild()
 
     override suspend fun edit(
         item: ArrMedia,
@@ -71,8 +76,9 @@ class ListenarrClient(
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Audiobook> =
         post("library/add", item)
 
-    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
-        post("download/search-and-download", mapOf("audiobookId" to id))
+
+    override suspend fun performAutomaticSearch(id: Long): NetworkResult<Any> =
+        post<Map<String, Long>, ListenarrCommandResponse>("download/search-and-download", mapOf("audiobookId" to id))
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<ListenarrRelease>> {
         val query = (params as? ReleaseParams.Audiobook)?.query ?: return NetworkResult.Error(message = "Query can't be empty")
@@ -106,6 +112,12 @@ class ListenarrClient(
         start: LocalDate,
         end: LocalDate
     ): NetworkResult<List<Book>> = NetworkResult.Success(emptyList())
+
+    override suspend fun command(payload: CommandPayload): NetworkResult<Any> =
+        when (payload) {
+            is CommandPayload.Audiobook -> post<CommandPayload.Audiobook, ListenarrCommandResponse>("download/search-and-download", payload)
+            else -> super.command(payload)
+        }
 
     suspend fun getEnabledIndexers(): NetworkResult<List<ListenarrIndexer>> =
         get("indexers/enabled")
