@@ -3,97 +3,70 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.QualityProfile
-import com.dnfapps.arrmatey.arr.api.model.RootFolder
-import com.dnfapps.arrmatey.arr.api.model.Tag
-import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
+import com.dnfapps.arrmatey.arr.state.MediaPreviewUiState
 import com.dnfapps.arrmatey.arr.usecase.AddMediaItemUseCase
-import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.arr.usecase.GetAudiobookPreviewPathUseCase
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MediaPreviewViewModel(
+    private val preview: ArrMedia,
     private val instanceType: InstanceType,
-    private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
-    private val addMediaUseCase: AddMediaItemUseCase
+    getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
+    private val addMediaUseCase: AddMediaItemUseCase,
+    private val getAudiobookPreviewPathUseCase: GetAudiobookPreviewPathUseCase
 ): ViewModel() {
 
-    private val _qualityProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
-    val qualityProfiles: StateFlow<List<QualityProfile>> = _qualityProfiles.asStateFlow()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<MediaPreviewUiState> = getArrInstanceRepositoryUseCase
+        .observeSelected(instanceType)
+        .filterNotNull()
+        .distinctUntilChanged { old, new -> old.instance.id == new.instance.id }
+        .flatMapLatest { repository ->
+            viewModelScope.launch {
+                repository.refreshAllMetadata()
+            }
 
-    private val _rootFolders = MutableStateFlow<List<RootFolder>>(emptyList())
-    val rootFolders: StateFlow<List<RootFolder>> = _rootFolders.asStateFlow()
-
-    private val _tags = MutableStateFlow<List<Tag>>(emptyList())
-    val tags: StateFlow<List<Tag>> = _tags.asStateFlow()
-
-    private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
-    val addItemStatus: StateFlow<OperationStatus> = _addItemStatus.asStateFlow()
-
-    private val _lastAddedItemId = MutableStateFlow<Long?>(null)
-    val lastAddedItemId: StateFlow<Long?> = _lastAddedItemId.asStateFlow()
-
-    private var currentRepository: ArrInstanceRepository? = null
-
-    init {
-        observeSelectedInstance()
-    }
-
-    private fun observeSelectedInstance() {
-        viewModelScope.launch {
-            getArrInstanceRepositoryUseCase.observeSelected(instanceType)
-                .filterNotNull()
-                .collectLatest { repository ->
-                    currentRepository = repository
-                    observeData(repository)
-                    repository.refreshAllMetadata()
-                }
-        }
-    }
-
-    private fun observeData(repository: ArrInstanceRepository) {
-        viewModelScope.launch {
-            repository.qualityProfiles.collect { profiles ->
-                _qualityProfiles.emit(profiles)
+            combine(
+                combine(
+                    repository.qualityProfiles,
+                    repository.rootFolders,
+                    repository.tags
+                ) { qualityProfiles, rootFolders, tags ->
+                    Triple(qualityProfiles, rootFolders, tags)
+                },
+                repository.addItemStatus,
+                repository.lastAddedItemId,
+                getAudiobookPreviewPathUseCase(preview)
+            ) { (qualityProfiles, rootFolders, tags), addItemStatus, lastAddedItemId, previewPath ->
+                MediaPreviewUiState(
+                    qualityProfiles = qualityProfiles,
+                    rootFolders = rootFolders,
+                    tags = tags,
+                    addItemStatus = addItemStatus,
+                    lastAddedItemId = lastAddedItemId,
+                    relativePath = previewPath
+                )
             }
         }
-        viewModelScope.launch {
-            repository.rootFolders.collect { rootFolders ->
-                _rootFolders.emit(rootFolders)
-            }
-        }
-        viewModelScope.launch {
-            repository.tags.collect { tags ->
-                _tags.emit(tags)
-            }
-        }
-
-        viewModelScope.launch {
-            repository.addItemStatus.collect { status ->
-                _addItemStatus.value = status
-            }
-        }
-
-        viewModelScope.launch {
-            repository.lastAddedItemId.collect { id ->
-                _lastAddedItemId.value = id
-            }
-        }
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = MediaPreviewUiState()
+        )
 
     fun addItem(item: ArrMedia, searchOnAdd: Boolean) {
         viewModelScope.launch {
-            _addItemStatus.value = OperationStatus.InProgress
             addMediaUseCase(instanceType, item, searchOnAdd)
-                .collect { state ->
-                    _addItemStatus.value = state
-                }
         }
     }
 }

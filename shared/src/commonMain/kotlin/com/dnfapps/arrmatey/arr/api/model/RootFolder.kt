@@ -8,7 +8,8 @@ data class RootFolder(
     val id: Int,
     val path: String,
     val accessible: Boolean = true,
-    val freeSpace: Long,
+    val freeSpace: Long = 0L,
+    val isDefault: Boolean = false,
     val unmappedFolders: List<UnmappedFolder> = emptyList()
 ) {
     val freeSpaceString: String

@@ -34,7 +34,7 @@ interface ArrClient {
     suspend fun edit(item: ArrMedia, moveFiles: Boolean = false): NetworkResult<Unit>
     suspend fun delete(id: Long, deleteFiles: Boolean, addImportListExclusion: Boolean): NetworkResult<Unit>
     suspend fun setMonitorStatus(id: Long, monitorStatus: Boolean): NetworkResult<List<MonitoredResponse>>
-    suspend fun lookup(query: String): NetworkResult<List<ArrMedia>>
+    suspend fun lookup(params: LookupParams): NetworkResult<List<ArrMedia>>
     suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>>
     suspend fun getRootFolders(): NetworkResult<List<RootFolder>>
     suspend fun getTags(): NetworkResult<List<Tag>>

@@ -141,6 +141,7 @@ fun ArrSearchScreen(
                                 navigation.navigateTo(destination)
                             },
                             itemIsActive = { item -> queueItems.any { it.mediaId == item.id } },
+                            includeOverview = true
                         )
                     }
                 }

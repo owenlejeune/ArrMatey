@@ -82,8 +82,8 @@ class SonarrClient(
             )
         )
 
-    override suspend fun lookup(query: String): NetworkResult<List<ArrSeries>> =
-        get("series/lookup", mapOf("term" to query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrSeries>> =
+        get("series/lookup", mapOf("term" to params.query))
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrSeries> =
         post<ArrMedia, ArrSeries>("series", item)

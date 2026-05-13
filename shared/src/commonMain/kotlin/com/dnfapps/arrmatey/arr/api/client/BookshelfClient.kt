@@ -84,8 +84,8 @@ class BookshelfClient(
             "authorIds" to listOf(id)
         ))
 
-    override suspend fun lookup(query: String): NetworkResult<List<Author>> =
-        get("author/lookup", mapOf("term" to query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<Author>> =
+        get("author/lookup", mapOf("term" to params.query))
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Author> =
         post<ArrMedia, Author>("author", item)

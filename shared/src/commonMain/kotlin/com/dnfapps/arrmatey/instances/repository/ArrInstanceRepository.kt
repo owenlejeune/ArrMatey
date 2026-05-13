@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.client.ArrClient
 import com.dnfapps.arrmatey.arr.api.client.BookshelfClient
 import com.dnfapps.arrmatey.arr.api.client.LidarrClient
 import com.dnfapps.arrmatey.arr.api.client.ListenarrClient
+import com.dnfapps.arrmatey.arr.api.client.LookupParams
 import com.dnfapps.arrmatey.arr.api.client.RadarrClient
 import com.dnfapps.arrmatey.arr.api.client.SonarrClient
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
@@ -29,12 +30,14 @@ import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
+import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.client.NetworkResult
@@ -169,10 +172,6 @@ class ArrInstanceRepository(
     private val _authorBookFiles = MutableStateFlow<Map<Long, List<BookFile>>>(emptyMap())
     val authorBookFiles: StateFlow<Map<Long, List<BookFile>>> = _authorBookFiles.asStateFlow()
 
-    // Listenarr-specific
-    private val _audiobookFiles = MutableStateFlow<Map<Long, List<AudiobookFile>>>(emptyMap())
-    val audiobookFiles: StateFlow<Map<Long, List<AudiobookFile>>> = _audiobookFiles.asStateFlow()
-
     private val _booksLibrary = MutableStateFlow<List<Book>>(emptyList())
     val booksLibrary: StateFlow<List<Book>> = _booksLibrary.asStateFlow()
 
@@ -182,6 +181,13 @@ class ArrInstanceRepository(
                 .filter { it.authorId != null }
                 .groupBy { it.authorId!! }
         }
+
+    // Listenarr-specific
+    private val _audiobookFiles = MutableStateFlow<Map<Long, List<AudiobookFile>>>(emptyMap())
+    val audiobookFiles: StateFlow<Map<Long, List<AudiobookFile>>> = _audiobookFiles.asStateFlow()
+
+    private val _listenarrConfiguration = MutableStateFlow(ListenarrConfiguration())
+    val listenarrConfiguration: StateFlow<ListenarrConfiguration> = _listenarrConfiguration.asStateFlow()
 
     override suspend fun testConnection(): NetworkResult<Unit> {
         return client.testConnection()
@@ -194,6 +200,12 @@ class ArrInstanceRepository(
             client.getBooks()
                 .onSuccess {
                     _booksLibrary.value = it
+                }
+        }
+        safePerformListenarr { client ->
+            client.getConfigurationSettings()
+                .onSuccess {
+                    _listenarrConfiguration.value = it
                 }
         }
     }
@@ -272,7 +284,10 @@ class ArrInstanceRepository(
 
         _lookupResults.value = NetworkResult.Loading
 
-        client.lookup(query)
+        val language = _listenarrConfiguration.value.defaultSearchLanguage
+        val region = _listenarrConfiguration.value.defaultSearchRegion
+        val queryParams = LookupParams(query, language, region)
+        client.lookup(queryParams)
             .onSuccess { results ->
                 logger.info { "Lookup results: $results" }
                 _lookupResults.value = NetworkResult.Success(results)
@@ -614,6 +629,7 @@ class ArrInstanceRepository(
                         is Arrtist -> item.copy(monitored = status)
                         is Author -> item.copy(monitored = status)
                         is Audiobook -> item.copy(monitored = status)
+                        is SearchAudiobook -> item
                         is MockMedia -> item
                     }
                 } else {
@@ -633,6 +649,7 @@ class ArrInstanceRepository(
                 is Arrtist -> item.copy(monitored = status)
                 is Author -> item.copy(monitored = status)
                 is Audiobook -> item.copy(monitored = status)
+                is SearchAudiobook -> item
                 is MockMedia -> item
             }
             val updatedCache = currentDetailsCache.toMutableMap()
@@ -913,6 +930,11 @@ class ArrInstanceRepository(
                     _audiobookFiles.value = currentMap
                 }
         }.map { it.files }
+
+    suspend fun getPreviewPath(preview: SearchAudiobook) =
+        safePerformListenarr { client ->
+            client.getPreviewPath(preview)
+        }
 
     // Helpers
     private suspend inline fun <reified T> safePerformSonarr(

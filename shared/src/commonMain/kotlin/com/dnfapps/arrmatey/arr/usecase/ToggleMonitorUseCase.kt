@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 
@@ -24,6 +25,7 @@ class ToggleMonitorUseCase {
             is Arrtist -> item.copy(monitored = !item.monitored)
             is Author -> item.copy(monitored = !item.monitored)
             is Audiobook -> item.copy(monitored = !item.monitored)
+            is SearchAudiobook -> item
             is MockMedia -> item
         }
         return repository.updateMediaItem(updatedItem)

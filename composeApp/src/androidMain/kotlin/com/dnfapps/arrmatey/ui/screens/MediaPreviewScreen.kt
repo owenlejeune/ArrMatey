@@ -32,12 +32,16 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.AudiobookPreviewPaths
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.state.MediaPreviewUiState
 import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
+import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
@@ -64,7 +68,7 @@ import org.koin.compose.koinInject
 fun MediaPreviewScreen(
     item: ArrMedia,
     type: InstanceType,
-    viewModel: MediaPreviewViewModel = koinInjectParams(type),
+    viewModel: MediaPreviewViewModel = koinInjectParams(item, type),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigation<ArrScreen> = navigationManager.arr(type)
 ) {
@@ -72,16 +76,17 @@ fun MediaPreviewScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    val lastAddedItemId by viewModel.lastAddedItemId.collectAsStateWithLifecycle()
-    val addItemStatus by viewModel.addItemStatus.collectAsStateWithLifecycle()
-    val qualityProfiles by viewModel.qualityProfiles.collectAsStateWithLifecycle()
-    val rootFolders by viewModel.rootFolders.collectAsStateWithLifecycle()
-    val tags by viewModel.tags.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+//    val lastAddedItemId by viewModel.lastAddedItemId.collectAsStateWithLifecycle()
+//    val addItemStatus by viewModel.addItemStatus.collectAsStateWithLifecycle()
+//    val qualityProfiles by viewModel.qualityProfiles.collectAsStateWithLifecycle()
+//    val rootFolders by viewModel.rootFolders.collectAsStateWithLifecycle()
+//    val tags by viewModel.tags.collectAsStateWithLifecycle()
 
     val successMessage = mokoString(MR.strings.success)
 
-    LaunchedEffect(addItemStatus) {
-        when (val status = addItemStatus) {
+    LaunchedEffect(uiState.addItemStatus) {
+        when (val status = uiState.addItemStatus) {
             is OperationStatus.Success -> {
                 showBottomSheet = false
                 Toast.makeText(context, status.message ?: successMessage, Toast.LENGTH_SHORT).show()
@@ -95,40 +100,18 @@ fun MediaPreviewScreen(
         }
     }
 
-    LaunchedEffect(lastAddedItemId) {
-        lastAddedItemId?.let { id ->
+    LaunchedEffect(uiState.lastAddedItemId) {
+        uiState.lastAddedItemId?.let { id ->
             showBottomSheet = false
             val newScreen = ArrScreen.Details(id)
             navigation.replaceCurrent(newScreen)
         }
     }
 
-    Scaffold { paddingValues ->
-        Box(modifier = Modifier
-            .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
-            .fillMaxSize()
-        ) {
-            Column(
-                modifier = Modifier.verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                DetailsHeader(item, type, topPadding = paddingValues.calculateTopPadding())
-
-                Column(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    UpcomingDateView(item)
-
-                    item.overview?.let { overview ->
-                        ItemDescriptionCard(overview)
-                    }
-                }
-            }
-
+    Scaffold(
+        topBar = {
             OverlayTopAppBar(
                 scrollState = scrollState,
-                modifier = Modifier.align(Alignment.TopCenter),
                 navigationIcon = {
                     IconButton(
                         onClick = { navigation.popBackStack() },
@@ -152,14 +135,37 @@ fun MediaPreviewScreen(
                     }
                 }
             )
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier
+            .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
+            .fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier.verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                DetailsHeader(item, type, topPadding = paddingValues.calculateTopPadding())
+
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 24.dp)
+                        .padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    UpcomingDateView(item)
+
+                    item.overview?.let { overview ->
+                        ItemDescriptionCard(overview)
+                    }
+                }
+            }
 
             if (showBottomSheet) {
                 AddMediaSheet(
                     item = item,
-                    qualityProfiles = qualityProfiles,
-                    rootFolders = rootFolders,
-                    tags = tags,
-                    addInProgress = addItemStatus is OperationStatus.InProgress,
+                    uiState = uiState,
                     onAddItem = { newItem, searchOnAdd ->
                         viewModel.addItem(newItem, searchOnAdd)
                     },
@@ -174,59 +180,57 @@ fun MediaPreviewScreen(
 @Composable
 private fun AddMediaSheet(
     item: ArrMedia,
-    qualityProfiles: List<QualityProfile>,
-    rootFolders: List<RootFolder>,
-    tags: List<Tag>,
-    addInProgress: Boolean,
+    uiState: MediaPreviewUiState,
     onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     when (item) {
         is ArrSeries -> AddSeriesSheet(
             item,
-            qualityProfiles,
-            rootFolders,
-            tags,
-            addInProgress,
+            uiState.qualityProfiles,
+            uiState.rootFolders,
+            uiState.tags,
+            uiState.addItemStatus == OperationStatus.InProgress,
             onAddItem,
             onDismiss
         )
         is ArrMovie -> AddMovieSheet(
             item,
-            qualityProfiles,
-            rootFolders,
-            tags,
-            addInProgress,
+            uiState.qualityProfiles,
+            uiState.rootFolders,
+            uiState.tags,
+            uiState.addItemStatus == OperationStatus.InProgress,
             onAddItem,
             onDismiss
         )
         is Arrtist -> AddArtistSheet(
             item,
-            qualityProfiles,
-            rootFolders,
-            tags,
-            addInProgress,
+            uiState.qualityProfiles,
+            uiState.rootFolders,
+            uiState.tags,
+            uiState.addItemStatus == OperationStatus.InProgress,
             onAddItem,
             onDismiss
         )
         is Author -> AddAuthorSheet(
             item,
-            qualityProfiles,
-            rootFolders,
-            tags,
-            addInProgress,
+            uiState.qualityProfiles,
+            uiState.rootFolders,
+            uiState.tags,
+            uiState.addItemStatus == OperationStatus.InProgress,
             onAddItem,
             onDismiss
         )
-        is Audiobook -> AddAudiobookSheet(
+        is SearchAudiobook -> AddAudiobookSheet(
             item,
-            qualityProfiles,
-            rootFolders,
-            tags,
-            addInProgress,
+            uiState.qualityProfiles,
+            uiState.rootFolders,
+            uiState.relativePath,
+            uiState.addItemStatus == OperationStatus.InProgress,
             onAddItem,
             onDismiss
         )
+        is Audiobook,
         is MockMedia -> {}
     }
 }

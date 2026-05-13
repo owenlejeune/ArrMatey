@@ -65,6 +65,7 @@ import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
@@ -250,9 +251,7 @@ fun MediaDetailsScreen(
                                     .padding(top = 12.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
-                                if (item !is Audiobook) {
-                                    UpcomingDateView(item)
-                                }
+                                UpcomingDateView(item)
 
                                 item.overview?.let { overview ->
                                     ItemDescriptionCard(overview)
@@ -331,6 +330,7 @@ fun MediaDetailsScreen(
                                             mediaDetailsViewModel.performAutomaticLookup()
                                         }
                                     )
+                                    is SearchAudiobook,
                                     is MockMedia -> {}
                                 }
 
@@ -340,6 +340,7 @@ fun MediaDetailsScreen(
                                     is Arrtist -> artistInfo(item, qualityProfiles, tags)
                                     is Author -> authorInfo(item, qualityProfiles, tags)
                                     is Audiobook -> audiobookInfo(item)
+                                    is SearchAudiobook,
                                     is MockMedia -> emptyMap()
                                 }.toInfoList()
                                 InfoArea(infoItems)
@@ -598,6 +599,7 @@ private fun EditMediaSheet(
             onEditItem = onEditItem,
             onDismiss = onDismiss
         )
+        is SearchAudiobook,
         is MockMedia -> {}
     }
 }

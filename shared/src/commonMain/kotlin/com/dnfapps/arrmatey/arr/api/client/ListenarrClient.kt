@@ -5,20 +5,26 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.AudiobookEditResponse
+import com.dnfapps.arrmatey.arr.api.model.AudiobookPreviewPaths
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ListenarrCommandResponse
+import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
 import com.dnfapps.arrmatey.arr.api.model.ListenarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
 import com.dnfapps.arrmatey.arr.api.model.MonitorBody
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
+import com.dnfapps.arrmatey.arr.api.model.RootFolder
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 class ListenarrClient(
     override val instance: Instance,
@@ -70,8 +76,17 @@ class ListenarrClient(
         return NetworkResult.Error(message = "Failed to update monitor status")
     }
 
-    override suspend fun lookup(query: String): NetworkResult<List<Audiobook>> =
-        get("search/intelligent", mapOf("query" to query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<SearchAudiobook>> =
+        post("search", buildJsonObject {
+            put("title", params.query)
+            put("language", params.language ?: "english")
+            put("region", params.region ?: "us")
+            put("mode", "Advanced")
+            put("pagination", buildJsonObject {
+                put("page", 1)
+                put("limit", 100)
+            })
+        })
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Audiobook> =
         post("library/add", item)
@@ -81,9 +96,13 @@ class ListenarrClient(
         post<Map<String, Long>, ListenarrCommandResponse>("download/search-and-download", mapOf("audiobookId" to id))
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<ListenarrRelease>> {
-        val query = (params as? ReleaseParams.Audiobook)?.query ?: return NetworkResult.Error(message = "Query can't be empty")
+        val query = (params as? ReleaseParams.Audiobook)?.query
+            ?: return NetworkResult.Error(message = "Query can't be empty")
         return get<List<ListenarrRelease>>("search/indexers", mapOf("query" to query))
     }
+
+    override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> =
+        get("rootfolders")
 
     override suspend fun getItemHistory(
         id: Long,
@@ -121,4 +140,10 @@ class ListenarrClient(
 
     suspend fun getEnabledIndexers(): NetworkResult<List<ListenarrIndexer>> =
         get("indexers/enabled")
+
+    suspend fun getConfigurationSettings(): NetworkResult<ListenarrConfiguration> =
+        get("configuration/settings")
+
+    suspend fun getPreviewPath(preview: SearchAudiobook): NetworkResult<AudiobookPreviewPaths> =
+        post("library/preview-path", preview)
 }

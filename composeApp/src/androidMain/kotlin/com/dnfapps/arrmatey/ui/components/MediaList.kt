@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components
 
+import android.text.Html
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -48,6 +49,7 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.shared.MR
@@ -215,7 +217,7 @@ fun <T : ArrMedia> MediaItem(
                     exit = shrinkVertically()
                 ) {
                     Text(
-                        text = item.overview!!,
+                        text = Html.fromHtml(item.overview!!, Html.FROM_HTML_MODE_COMPACT).toString(),
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
                             .padding(bottom = 12.dp),
@@ -223,7 +225,7 @@ fun <T : ArrMedia> MediaItem(
                         lineHeight = 16.sp,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
-                        color = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -243,6 +245,7 @@ private fun MediaDetails(
         is Arrtist -> ArtistDetails(item, isActive, showBannerBackground)
         is Author -> AuthorDetails(item, isActive, showBannerBackground)
         is Audiobook -> AudiobookDetails(item, isActive, showBannerBackground)
+        is SearchAudiobook -> SearchAudiobookDetails(item, showBannerBackground)
         is MockMedia -> MockDetails(item, showBannerBackground)
     }
 }
@@ -473,6 +476,31 @@ private fun AudiobookDetails(
             color = if (isActive) ArrPurple else item.statusColor,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
+    }
+}
+
+@Composable
+private fun SearchAudiobookDetails(
+    item: SearchAudiobook,
+    showBannerBackground: Boolean
+) {
+    val contentColor =
+        if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
+
+    val authorString = item.authors.joinToString(", ") { it.name }
+    Text(authorString, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+
+    val narratorString = item.narrators.joinToString(", ") { it.name }
+    Text(
+        text = mokoString(MR.strings.narrated_by, narratorString),
+        color = contentColor, fontSize = 14.sp, lineHeight = 18.sp
+    )
+
+    val seriesString = item.seriesList.joinToString(", ")
+    val secondLine = listOfNotNull(seriesString, item.publisher, item.runtimeString)
+        .joinToString(Bullet)
+    if (secondLine.isNotEmpty()) {
+        Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
     }
 }
 

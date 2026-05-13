@@ -145,6 +145,7 @@
     <string name="minimum_availability">Minimum Availability</string>
     <string name="genres">Genres</string>
     <string name="path">Path</string>
+    <string name="relative_path">Relative Path</string>
     <string name="error">Error</string>
     <string name="relevance">Relevance</string>
     <string name="quality_profile">Quality profile</string>
@@ -266,6 +267,7 @@
     <string name="confirm_delete_movie">This file will be deleted</string>
     <string name="audiobook_info_authors">Author(s)</string>
     <string name="audiobook_info_narrators">Narrator(s)</string>
+    <string name="narrated_by">Narrated by: %1$s</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

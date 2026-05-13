@@ -87,8 +87,8 @@ class RadarrClient(
             "movieIds" to listOf(id)
         ))
 
-    override suspend fun lookup(query: String): NetworkResult<List<ArrMovie>> =
-        get("movie/lookup", mapOf("term" to query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrMovie>> =
+        get("movie/lookup", mapOf("term" to params.query))
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrMovie> =
         post("movie", item)

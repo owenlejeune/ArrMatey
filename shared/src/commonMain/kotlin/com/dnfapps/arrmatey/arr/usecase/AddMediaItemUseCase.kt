@@ -12,25 +12,25 @@ import kotlinx.coroutines.flow.flow
 class AddMediaItemUseCase(
     private val instanceManager: InstanceManager
 ) {
-    operator fun invoke(
+    suspend operator fun invoke(
         instanceType: InstanceType,
         item: ArrMedia,
         searchOnAdd: Boolean
-    ): Flow<OperationStatus> = flow {
+    ) {//}: Flow<OperationStatus> = flow {
         val repository = instanceManager.getSelectedArrRepository(instanceType)
             .firstOrNull()
 
         if (repository == null) {
-            emit(OperationStatus.Error(message = "Instance not found"))
-            return@flow
+//            emit(OperationStatus.Error(message = "Instance not found"))
+            return//@flow
         }
 
         repository.addItem(item, searchOnAdd)
 
-        repository.addItemStatus.collect { status ->
-            emit(status)
-            delay(100)
-            emit(OperationStatus.Idle)
-        }
+//        repository.addItemStatus.collect { status ->
+//            emit(status)
+//            delay(100)
+//            emit(OperationStatus.Idle)
+//        }
     }
 }

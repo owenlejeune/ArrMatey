@@ -19,6 +19,7 @@ import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
+import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.mapValues
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -82,8 +83,8 @@ class LidarrClient(
             "artistIds" to listOf(id)
         ))
 
-    override suspend fun lookup(query: String): NetworkResult<List<Arrtist>> =
-        get<List<Arrtist>>("artist/lookup", mapOf("term" to query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<Arrtist>> =
+        get<List<Arrtist>>("artist/lookup", mapOf("term" to params.query))
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Arrtist> =
         post<ArrMedia, Arrtist>("artist", item)
@@ -114,6 +115,9 @@ class LidarrClient(
             "pageSize" to pageSize,
             "albumId" to id
         )).map { it.records }
+
+    override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> =
+        get("rootfolders")
 
     override suspend fun getMovieCalendar(
         start: LocalDate,

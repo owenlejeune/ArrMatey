@@ -43,7 +43,8 @@ fun <T> DropdownPicker(
     includeAllOption: Boolean = false,
     allLabel: String = mokoString(MR.strings.all),
     onAllSelected: () -> Unit = {},
-    allDivider: (@Composable () -> Unit)? = { HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp)) }
+    allDivider: (@Composable () -> Unit)? = { HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp)) },
+    unknownValueLabel: String = mokoString(MR.strings.unknown)
 ) {
     var isDropDownExpanded by remember { mutableStateOf(false) }
 
@@ -64,7 +65,7 @@ fun <T> DropdownPicker(
                 value = when {
                     selectedOption != null -> getOptionLabel(selectedOption)
                     includeAllOption -> allLabel
-                    else -> mokoString(MR.strings.unknown)
+                    else -> unknownValueLabel
                 },
                 onValueChange = {},
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
