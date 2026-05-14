@@ -18,14 +18,17 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.AudiobookFile
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadata
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataBody
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookEdition
+import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.SeriesMembership
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
-import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
@@ -231,6 +234,9 @@ class ArrInstanceRepository(
     suspend fun refreshRootFolders() {
         client.getRootFolders()
             .onSuccess { _rootFolders.value = it }
+            .onError { code, message, cause ->
+                print("$message - $code - ${cause?.printStackTrace()}")
+            }
     }
 
     suspend fun refreshTags() {
@@ -931,9 +937,14 @@ class ArrInstanceRepository(
                 }
         }.map { it.files }
 
-    suspend fun getPreviewPath(preview: SearchAudiobook) =
+    suspend fun getMetadata(asin: String, region: String) =
         safePerformListenarr { client ->
-            client.getPreviewPath(preview)
+            client.getMetadata(asin, region)
+        }
+
+    suspend fun getPreviewPath(rootPath: String, body: AudiobookMetadataBody) =
+        safePerformListenarr { client ->
+            client.getPreviewPath(rootPath, body)
         }
 
     // Helpers

@@ -16,21 +16,14 @@ class AddMediaItemUseCase(
         instanceType: InstanceType,
         item: ArrMedia,
         searchOnAdd: Boolean
-    ) {//}: Flow<OperationStatus> = flow {
+    ) {
         val repository = instanceManager.getSelectedArrRepository(instanceType)
             .firstOrNull()
 
         if (repository == null) {
-//            emit(OperationStatus.Error(message = "Instance not found"))
-            return//@flow
+            return
         }
 
         repository.addItem(item, searchOnAdd)
-
-//        repository.addItemStatus.collect { status ->
-//            emit(status)
-//            delay(100)
-//            emit(OperationStatus.Idle)
-//        }
     }
 }

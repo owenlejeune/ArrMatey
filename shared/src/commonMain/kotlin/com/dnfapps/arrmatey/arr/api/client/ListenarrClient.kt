@@ -5,6 +5,8 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.AudiobookEditResponse
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataBody
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
 import com.dnfapps.arrmatey.arr.api.model.AudiobookPreviewPaths
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
@@ -16,6 +18,7 @@ import com.dnfapps.arrmatey.arr.api.model.ListenarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
 import com.dnfapps.arrmatey.arr.api.model.MonitorBody
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
+import com.dnfapps.arrmatey.arr.api.model.PreviewPathBody
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
@@ -144,6 +147,9 @@ class ListenarrClient(
     suspend fun getConfigurationSettings(): NetworkResult<ListenarrConfiguration> =
         get("configuration/settings")
 
-    suspend fun getPreviewPath(preview: SearchAudiobook): NetworkResult<AudiobookPreviewPaths> =
-        post("library/preview-path", preview)
+    suspend fun getMetadata(asin: String, region: String): NetworkResult<AudiobookMetadataResponse> =
+        get("metadata/$asin", mapOf("region" to region))
+
+    suspend fun getPreviewPath(rootPath: String, metadata: AudiobookMetadataBody): NetworkResult<AudiobookPreviewPaths> =
+        post("library/preview-path", PreviewPathBody(rootPath, metadata))
 }

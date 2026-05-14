@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -26,11 +28,33 @@ class MediaPreviewViewModel(
     private val getAudiobookPreviewPathUseCase: GetAudiobookPreviewPathUseCase
 ): ViewModel() {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<MediaPreviewUiState> = getArrInstanceRepositoryUseCase
+    private val selectedRepository = getArrInstanceRepositoryUseCase
         .observeSelected(instanceType)
         .filterNotNull()
         .distinctUntilChanged { old, new -> old.instance.id == new.instance.id }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val previewPath = selectedRepository
+        .flatMapLatest { repository ->
+            repository?.rootFolders?.map { folders ->
+                folders.firstOrNull { it.isDefault }?.path
+            } ?: flowOf(null)
+        }
+        .filterNotNull()
+        .distinctUntilChanged()
+        .flatMapLatest { rootPath ->
+            getAudiobookPreviewPathUseCase(rootPath, preview)
+        }
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<MediaPreviewUiState> = selectedRepository
+        .filterNotNull()
         .flatMapLatest { repository ->
             viewModelScope.launch {
                 repository.refreshAllMetadata()
@@ -46,7 +70,7 @@ class MediaPreviewViewModel(
                 },
                 repository.addItemStatus,
                 repository.lastAddedItemId,
-                getAudiobookPreviewPathUseCase(preview)
+                previewPath
             ) { (qualityProfiles, rootFolders, tags), addItemStatus, lastAddedItemId, previewPath ->
                 MediaPreviewUiState(
                     qualityProfiles = qualityProfiles,

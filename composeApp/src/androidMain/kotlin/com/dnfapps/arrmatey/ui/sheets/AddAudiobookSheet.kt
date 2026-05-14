@@ -12,7 +12,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -27,6 +26,7 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.utils.mokoString
@@ -88,14 +88,13 @@ fun AddAudiobookSheet(
                         }
                     }
                 }
-//                getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" }
             )
 
-            OutlinedTextField(
+            AMOutlinedTextField(
                 value = relativePath,
                 onValueChange = { relativePath = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(mokoString(MR.strings.relative_path)) }
+                label = mokoString(MR.strings.relative_path)
             )
 
             LabelledSwitch(

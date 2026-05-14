@@ -22,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -32,16 +31,11 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.arr.api.model.AudiobookPreviewPaths
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
-import com.dnfapps.arrmatey.arr.api.model.QualityProfile
-import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
-import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.MediaPreviewUiState
 import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
-import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
@@ -77,11 +71,6 @@ fun MediaPreviewScreen(
     val scrollState = rememberScrollState()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-//    val lastAddedItemId by viewModel.lastAddedItemId.collectAsStateWithLifecycle()
-//    val addItemStatus by viewModel.addItemStatus.collectAsStateWithLifecycle()
-//    val qualityProfiles by viewModel.qualityProfiles.collectAsStateWithLifecycle()
-//    val rootFolders by viewModel.rootFolders.collectAsStateWithLifecycle()
-//    val tags by viewModel.tags.collectAsStateWithLifecycle()
 
     val successMessage = mokoString(MR.strings.success)
 

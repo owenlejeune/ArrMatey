@@ -1,9 +1,8 @@
 package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.AudiobookPreviewPaths
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
@@ -14,24 +13,45 @@ import kotlinx.coroutines.flow.firstOrNull
 class GetAudiobookPreviewPathUseCase(
     private val instanceManager: InstanceManager
 ) {
-    operator fun invoke(preview: ArrMedia): Flow<String> = channelFlow {
+    operator fun invoke(
+        rootPath: String,
+        preview: ArrMedia
+    ): Flow<String> = channelFlow {
         if (preview !is SearchAudiobook) {
             send("")
-        } else {
-            instanceManager.getSelectedArrRepository(InstanceType.Listenarr)
-                .firstOrNull()
-                ?.getPreviewPath(preview)
-                ?.onSuccess {
-                    send(it.relativePath)
-                }
+            return@channelFlow
         }
+
+        val instance = instanceManager.getSelectedArrRepository(InstanceType.Listenarr)
+            .firstOrNull()
+
+        val region = instance?.listenarrConfiguration?.value?.defaultSearchRegion ?: "us"
+        instance?.getMetadata(preview.asin, region)
+            ?.onSuccess { (source, _, metadata) ->
+                val body = metadata.toBody(source)
+                instance.getPreviewPath(rootPath, body)
+                    .onSuccess { (_, relativePath, _) ->
+                        send(relativePath)
+                    }
+                    .onError { _, _, _ ->
+                        send("")
+                    }
+            }
+            ?.onError { _, _, _ ->
+                send("")
+            }
+//        if (preview !is SearchAudiobook) {
+//            send("")
+//        } else {
+//            instanceManager.getSelectedArrRepository(InstanceType.Listenarr)
+//                .firstOrNull()
+//                ?.getPreviewPath(rootPath, preview)
+//                ?.onSuccess {
+//                    send(it.relativePath)
+//                }?.onError { code, message, cause ->
+//                    println("$code - $message - ${cause?.printStackTrace()}")
+//                }
+//        }
     }
-//    suspend operator fun invoke(preview: ArrMedia): NetworkResult<AudiobookPreviewPaths> {
-//        if (preview !is SearchAudiobook)
-//            return NetworkResult.Error(message = "Not a SearchAudiobook")
-//        return instanceManager.getSelectedArrRepository(InstanceType.Listenarr)
-//            .firstOrNull()
-//            ?.getPreviewPath(preview)
-//            ?: NetworkResult.Error(message = "Listenarr repository not found")
-//    }
+
 }
