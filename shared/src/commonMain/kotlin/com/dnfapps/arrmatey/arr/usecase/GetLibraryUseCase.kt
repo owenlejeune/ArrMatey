@@ -12,11 +12,15 @@ import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.extensions.orderedSortedWith
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import dev.shivathapaa.logger.api.Logger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlin.time.Instant
@@ -26,6 +30,14 @@ class GetLibraryUseCase(
     private val preferencesStoreRepository: InstancePreferenceStoreRepository,
     private val logger: Logger
 ) {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun byType(instanceType: InstanceType): Flow<ArrLibrary> =
+        instanceManager.getSelectedArrRepository(instanceType)
+            .filterNotNull()
+            .flatMapLatest {
+                invoke(it.instance.id)
+            }
+
     operator fun invoke(instanceId: Long): Flow<ArrLibrary> = flow {
         val repository = instanceManager.getArrRepository(instanceId)
         if (repository == null) {

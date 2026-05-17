@@ -308,7 +308,7 @@ val viewModelModule = module {
         InstancesViewModel(type, get(), get(), get())
     }
     factory { (type: InstanceType) ->
-        ArrSearchViewModel(type, get(), get())
+        ArrSearchViewModel(type, get(), get(), get())
     }
     factory { (preview: ArrMedia, type: InstanceType) ->
         MediaPreviewViewModel(preview, type, get(), get(), get())

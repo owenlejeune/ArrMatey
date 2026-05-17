@@ -32,7 +32,7 @@ data class AudiobookMetadata(
     val contentDeliveryType: String? = null,
     val sku: String? = null
 ) {
-    fun toBody(source: String = "audible"): AudiobookMetadataBody {
+    fun toBody(source: String): AudiobookMetadataBody {
         val primarySeries = series.firstOrNull()
 
         return AudiobookMetadataBody(
