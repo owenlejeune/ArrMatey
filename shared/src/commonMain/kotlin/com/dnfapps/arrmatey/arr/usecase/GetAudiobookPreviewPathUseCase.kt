@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.arr.usecase
 
-import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -15,43 +14,25 @@ class GetAudiobookPreviewPathUseCase(
 ) {
     operator fun invoke(
         rootPath: String,
-        preview: ArrMedia
+        metadataResponse: AudiobookMetadataResponse
     ): Flow<String> = channelFlow {
-        if (preview !is SearchAudiobook) {
+        val repository = instanceManager.getSelectedArrRepository(InstanceType.Listenarr)
+            .firstOrNull()
+
+        if (repository == null) {
             send("")
             return@channelFlow
         }
 
-        val instance = instanceManager.getSelectedArrRepository(InstanceType.Listenarr)
-            .firstOrNull()
-
-        val region = instance?.listenarrConfiguration?.value?.defaultSearchRegion ?: "us"
-        instance?.getMetadata(preview.asin, region)
-            ?.onSuccess { (source, _, metadata) ->
-                val body = metadata.toBody(source)
-                instance.getPreviewPath(rootPath, body)
-                    .onSuccess { (_, relativePath, _) ->
-                        send(relativePath)
-                    }
-                    .onError { _, _, _ ->
-                        send("")
-                    }
+        val (source, _, metadata) = metadataResponse
+        val body = metadata.toBody(source)
+        repository.getPreviewPath(rootPath, body)
+            .onSuccess { (_, relativePath, _) ->
+                send(relativePath)
             }
-            ?.onError { _, _, _ ->
+            .onError { _, _, _ ->
                 send("")
             }
-//        if (preview !is SearchAudiobook) {
-//            send("")
-//        } else {
-//            instanceManager.getSelectedArrRepository(InstanceType.Listenarr)
-//                .firstOrNull()
-//                ?.getPreviewPath(rootPath, preview)
-//                ?.onSuccess {
-//                    send(it.relativePath)
-//                }?.onError { code, message, cause ->
-//                    println("$code - $message - ${cause?.printStackTrace()}")
-//                }
-//        }
     }
 
 }

@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.arr.api.client
 
+import com.dnfapps.arrmatey.arr.api.model.AddAudiobookBody
+import com.dnfapps.arrmatey.arr.api.model.AddAudiobookResponse
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
@@ -92,7 +94,10 @@ class ListenarrClient(
         })
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Audiobook> =
-        post("library/add", item)
+        NetworkResult.Error(message = "Use addNewAudiobook instead")
+
+    suspend fun addNewAudiobook(body: AddAudiobookBody): NetworkResult<AddAudiobookResponse> =
+        post("library/add", body)
 
 
     override suspend fun performAutomaticSearch(id: Long): NetworkResult<Any> =

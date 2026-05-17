@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.client.ListenarrClient
 import com.dnfapps.arrmatey.arr.api.client.LookupParams
 import com.dnfapps.arrmatey.arr.api.client.RadarrClient
 import com.dnfapps.arrmatey.arr.api.client.SonarrClient
+import com.dnfapps.arrmatey.arr.api.model.AddAudiobookBody
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
@@ -311,21 +312,25 @@ class ArrInstanceRepository(
     suspend fun addItem(item: ArrMedia, searchOnAdd: Boolean) {
         _addItemStatus.value = OperationStatus.InProgress
 
-        client.addItemToLibrary(item)
-            .onSuccess { addedItem ->
-                _addItemStatus.value = OperationStatus.Success("Item added successfully")
-                addedItem.id?.let {
-                    val newMap = _mediaDetailsCache.value.toMutableMap()
-                    newMap[it] = addedItem
-                    _mediaDetailsCache.value = newMap
+        val result = client.addItemToLibrary(item)
+        processAddResult(result, searchOnAdd)
+    }
 
-                    if (searchOnAdd) {
-                        executeAutomaticSearch(it)
-                    }
+    private suspend fun processAddResult(result: NetworkResult<ArrMedia>, searchOnAdd: Boolean) {
+        result.onSuccess { addedItem ->
+            _addItemStatus.value = OperationStatus.Success("Item added successfully")
+            addedItem.id?.let {
+                val newMap = _mediaDetailsCache.value.toMutableMap()
+                newMap[it] = addedItem
+                _mediaDetailsCache.value = newMap
+
+                if (searchOnAdd) {
+                    executeAutomaticSearch(it)
                 }
-                _lastAddedItemId.value = addedItem.id
-                refreshLibrary()
             }
+            _lastAddedItemId.value = addedItem.id
+            refreshLibrary()
+        }
             .onError { code, error, cause ->
                 _addItemStatus.value = OperationStatus.Error(code, error, cause)
             }
@@ -946,6 +951,23 @@ class ArrInstanceRepository(
         safePerformListenarr { client ->
             client.getPreviewPath(rootPath, body)
         }
+
+    suspend fun addNewAudiobook(item: SearchAudiobook, metadata: AudiobookMetadataBody, searchOnAdd: Boolean) {
+        _addItemStatus.value = OperationStatus.InProgress
+
+        val result = safePerformListenarr { client ->
+            val path = item.rootFolderPath?.trimEnd('/')?.plus("/")?.plus(item.path?.trimStart('/')) ?: ""
+            val body = AddAudiobookBody(
+                autoSearch = searchOnAdd,
+                destinationPath = path,
+                monitored = item.monitored,
+                metadata = metadata
+            )
+            client.addNewAudiobook(body)
+                .map { it.audiobook }
+        }
+        processAddResult(result, false)
+    }
 
     // Helpers
     private suspend inline fun <reified T> safePerformSonarr(

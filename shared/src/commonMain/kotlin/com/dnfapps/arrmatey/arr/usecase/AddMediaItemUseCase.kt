@@ -1,6 +1,9 @@
 package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadata
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -15,6 +18,7 @@ class AddMediaItemUseCase(
     suspend operator fun invoke(
         instanceType: InstanceType,
         item: ArrMedia,
+        metadata: AudiobookMetadataResponse?,
         searchOnAdd: Boolean
     ) {
         val repository = instanceManager.getSelectedArrRepository(instanceType)
@@ -24,6 +28,14 @@ class AddMediaItemUseCase(
             return
         }
 
-        repository.addItem(item, searchOnAdd)
+        if (
+            instanceType == InstanceType.Listenarr &&
+            metadata != null && item is SearchAudiobook
+        ) {
+            val body = metadata.metadata.toBody(metadata.source)
+            repository.addNewAudiobook(item, body, searchOnAdd)
+        } else {
+            repository.addItem(item, searchOnAdd)
+        }
     }
 }

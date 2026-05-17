@@ -19,6 +19,7 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DownloadReleaseUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookFilesUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetAudiobookMetadataUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookPreviewPathUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAuthorFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetBookEditionUseCase
@@ -294,6 +295,7 @@ val useCaseModule = module {
     factory { ObserveDownloadClientPreferencesUseCase(get()) }
     factory { GetAudiobookFilesUseCase(get()) }
     factory { GetAudiobookPreviewPathUseCase(get()) }
+    factory { GetAudiobookMetadataUseCase() }
 }
 
 val viewModelModule = module {
@@ -311,7 +313,7 @@ val viewModelModule = module {
         ArrSearchViewModel(type, get(), get(), get())
     }
     factory { (preview: ArrMedia, type: InstanceType) ->
-        MediaPreviewViewModel(preview, type, get(), get(), get())
+        MediaPreviewViewModel(preview, type, get(), get(), get(), get())
     }
     factory { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
         InteractiveSearchViewModel(type, defaultFilter, get(), get(), get())
