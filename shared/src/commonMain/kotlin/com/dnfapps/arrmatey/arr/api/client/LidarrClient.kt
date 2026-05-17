@@ -119,22 +119,7 @@ class LidarrClient(
     override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> =
         get("rootfolders")
 
-    override suspend fun getMovieCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrMovie>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getEpisodeCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Episode>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getBookCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Book>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getAlbumCalendar(
+    override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate
     ): NetworkResult<List<ArrAlbum>> =

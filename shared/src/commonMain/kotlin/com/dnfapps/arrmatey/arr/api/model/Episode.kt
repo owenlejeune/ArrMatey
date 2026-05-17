@@ -45,7 +45,7 @@ data class Episode(
 
     val series: ArrSeries? = null,
     var instanceId: Long? = null
-) {
+): CalendarItem {
     val displayTitle: String
         get() = title ?: "Unknown"
 

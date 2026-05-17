@@ -127,7 +127,7 @@ class SonarrClient(
     override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
         post("command", CommandPayload.Series(id))
 
-    override suspend fun getEpisodeCalendar(
+    override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate
     ): NetworkResult<List<Episode>> =
@@ -137,21 +137,6 @@ class SonarrClient(
             "unmonitored" to true,
             "includeSeries" to true
         )).map { it.map { ep -> ep.copy(instanceId = instance.id) } }
-
-    override suspend fun getMovieCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrMovie>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getAlbumCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrAlbum>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getBookCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Book>> = NetworkResult.Success(emptyList())
 
     suspend fun updateEpisode(item: Episode): NetworkResult<Episode> =
         put("episode/${item.id}", item)

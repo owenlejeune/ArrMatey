@@ -139,22 +139,7 @@ class BookshelfClient(
     suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
         delete("bookFiles/bulk", body = BookFileBulkDeleteBody(bookFilesIds))
 
-    override suspend fun getMovieCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrMovie>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getEpisodeCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Episode>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getAlbumCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrAlbum>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getBookCalendar(
+    override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate
     ): NetworkResult<List<Book>> =

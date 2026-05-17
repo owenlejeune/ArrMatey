@@ -29,7 +29,7 @@ data class Book(
     val grabbed: Boolean = false,
 
     val instanceId: Long? = null
-) {
+): CalendarItem {
     companion object {
         fun fromJson(value: String): Book {
             return ArrMedia.json.decodeFromString(value)

@@ -32,6 +32,14 @@ fun <T, R> NetworkResult<List<T>>.mapValues(transform: (T) -> R): NetworkResult<
     }
 }
 
+fun <T> NetworkResult<List<T>>.filterValues(predicate: (T) -> Boolean): NetworkResult<List<T>> {
+    return when (this) {
+        is Loading -> Loading
+        is Error -> Error(code, message, cause, errorType)
+        is Success -> Success(data = data.filter(predicate))
+    }
+}
+
 suspend fun <T> NetworkResult<T>.onSuccess(action: suspend (T) -> Unit): NetworkResult<T> {
     if (this is NetworkResult.Success) action(data)
     return this

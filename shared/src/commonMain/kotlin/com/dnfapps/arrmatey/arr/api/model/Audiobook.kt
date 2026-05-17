@@ -50,7 +50,7 @@ data class Audiobook(
     val publishedDate: Instant? = null,
 
     val instanceId: Long? = null
-) : ArrMedia, HasArrImages<Audiobook> {
+) : ArrMedia, HasArrImages<Audiobook>, CalendarItem {
 
     override fun withLocalImages(instanceUrl: String): Audiobook {
         val localImages = imageUrl?.let { path ->

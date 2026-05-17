@@ -1,10 +1,13 @@
 package com.dnfapps.arrmatey.extensions
 
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -69,4 +72,16 @@ fun Instant.isToday(): Boolean {
 fun Instant.isEqual(date: LocalDate): Boolean {
     val timeZone: TimeZone = TimeZone.currentSystemDefault()
     return this.toLocalDateTime(timeZone).date == date
+}
+
+fun Instant?.isBetween(start: LocalDate, end: LocalDate): Boolean {
+    if (this == null) return false
+
+    val timeZone = TimeZone.currentSystemDefault()
+    val startInstant = start.atStartOfDayIn(timeZone)
+    val nextDay = LocalDate(end.year, end.month, end.day).run {
+        val instantOfEndDay = atStartOfDayIn(timeZone)
+        instantOfEndDay.plus(1.days)
+    }
+    return this in startInstant..<nextDay
 }

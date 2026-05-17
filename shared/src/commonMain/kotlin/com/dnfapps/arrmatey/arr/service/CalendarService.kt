@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.client.NetworkResult
@@ -132,8 +133,9 @@ class CalendarService(
         start: LocalDate,
         end: LocalDate
     ) {
-        repository.client.getMovieCalendar(start, end)
-            .onSuccess { fetchedMovies ->
+        repository.client.getCalendar(start, end)
+            .onSuccess{ result ->
+                val fetchedMovies = result.filterIsInstance<ArrMovie>()
                 val fetchedIds = fetchedMovies.map { it.tmdbId.toInt() }.toSet()
                 
                 // Offload notification work
@@ -204,8 +206,9 @@ class CalendarService(
         start: LocalDate,
         end: LocalDate
     ) {
-        repository.client.getEpisodeCalendar(start, end)
-            .onSuccess { fetchedEpisodes ->
+        repository.client.getCalendar(start, end)
+            .onSuccess { result ->
+                val fetchedEpisodes = result.filterIsInstance<Episode>()
                 val fetchedIds = fetchedEpisodes.map { it.tvdbId?.toInt() ?: it.id.toInt() }.toSet()
                 
                 val snapshot = _episodes.value.values.flatten()
@@ -303,8 +306,9 @@ class CalendarService(
         start: LocalDate,
         end: LocalDate
     ) {
-        repository.client.getAlbumCalendar(start, end)
-            .onSuccess { fetchedAlbums ->
+        repository.client.getCalendar(start, end)
+            .onSuccess { result ->
+                val fetchedAlbums = result.filterIsInstance<ArrAlbum>()
                 val fetchedIds = fetchedAlbums.map { it.id.toInt() }.toSet()
                 
                 val snapshot = _albums.value.values.flatten()
@@ -369,8 +373,9 @@ class CalendarService(
     ) {
         val authors = (repository.client.getLibrary() as? NetworkResult.Success)?.data?.filterIsInstance<Author>()?.associateBy { it.id } ?: emptyMap()
 
-        repository.client.getBookCalendar(start, end)
-            .onSuccess { fetchedBooks ->
+        repository.client.getCalendar(start, end)
+            .onSuccess { result ->
+                val fetchedBooks = result.filterIsInstance<Book>()
                 val updatedBooks = fetchedBooks.map { book ->
                     authors[book.authorId]?.let { author ->
                         book.copy(authorTitle = author.title)

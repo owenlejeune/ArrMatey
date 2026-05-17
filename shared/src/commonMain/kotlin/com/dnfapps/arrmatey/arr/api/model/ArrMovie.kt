@@ -66,7 +66,7 @@ data class ArrMovie(
     val lastSearchTime: String? = null,
 
     val instanceId: Long? = null
-): ArrMedia {
+): ArrMedia, CalendarItem {
 
     override val guid: Long
         get() = id ?: tmdbId.plus(100_000)

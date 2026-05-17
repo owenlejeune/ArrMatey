@@ -115,7 +115,7 @@ class RadarrClient(
     override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
         post("command", CommandPayload.Movie(listOf(id)))
 
-    override suspend fun getMovieCalendar(
+    override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate
     ): NetworkResult<List<ArrMovie>> =
@@ -124,21 +124,6 @@ class RadarrClient(
             "end" to end.toString(),
             "unmonitored" to true
         )).map { it.map { movie -> movie.copy(instanceId = instance.id) } }
-
-    override suspend fun getEpisodeCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Episode>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getAlbumCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrAlbum>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getBookCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Book>> = NetworkResult.Success(emptyList())
 
     suspend fun getMovieExtraFile(id: Long): NetworkResult<List<ExtraFile>> =
         get("extrafile", mapOf("movieId" to id))

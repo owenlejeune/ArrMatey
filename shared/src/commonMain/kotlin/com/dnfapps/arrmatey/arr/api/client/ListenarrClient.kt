@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataBody
 import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
 import com.dnfapps.arrmatey.arr.api.model.AudiobookPreviewPaths
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
@@ -27,6 +28,9 @@ import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.arrmatey.client.filterValues
+import com.dnfapps.arrmatey.client.mapValues
+import com.dnfapps.arrmatey.extensions.isBetween
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
@@ -122,25 +126,12 @@ class ListenarrClient(
     ): NetworkResult<List<HistoryItem>> =
         get("history/audiobook/$id")
 
-    override suspend fun getMovieCalendar(
+    override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate
-    ): NetworkResult<List<ArrMovie>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getEpisodeCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Episode>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getAlbumCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrAlbum>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getBookCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Book>> = NetworkResult.Success(emptyList())
+    ): NetworkResult<List<Audiobook>> =
+        get<List<Audiobook>>("library")
+            .filterValues { it.publishedDate.isBetween(start, end) }
 
     override suspend fun command(payload: CommandPayload): NetworkResult<Any> =
         when (payload) {

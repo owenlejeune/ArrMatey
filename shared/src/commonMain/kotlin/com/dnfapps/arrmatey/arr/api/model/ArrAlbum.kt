@@ -24,7 +24,7 @@ data class ArrAlbum(
     val ratings: LidarrRatings? = null,
 
     val instanceId: Long? = null
-) {
+): CalendarItem {
     fun getCover() = images.firstOrNull {
         it.coverType == CoverType.Cover
     }
