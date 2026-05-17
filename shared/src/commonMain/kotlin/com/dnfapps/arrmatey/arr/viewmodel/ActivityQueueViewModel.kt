@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.LidarrQueueItem
+import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.RadarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReadarrQueueItem
@@ -159,6 +160,7 @@ class ActivityQueueViewModel(
                         is RadarrQueueItem -> first.copy(taskGroupCount = size)
                         is LidarrQueueItem -> first.copy(taskGroupCount = size)
                         is ReadarrQueueItem -> first.copy(taskGroupCount = size)
+                        is ListenarrQueueItem -> first
                     }
                 } ?: first
             }

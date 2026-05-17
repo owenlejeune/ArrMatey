@@ -163,7 +163,7 @@ enum class InstanceType(
         supportsActivityQueue = true,
         apiBase = "api/v1",
         testEndpoint = "system/info",
-        includeTopLevelAutomaticSearchOption = true,
+        includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
         mockCover = MR.images.readarr_mock_cover,

@@ -17,10 +17,12 @@ import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ListenarrCommandResponse
 import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
 import com.dnfapps.arrmatey.arr.api.model.ListenarrIndexer
+import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueResponse
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
 import com.dnfapps.arrmatey.arr.api.model.MonitorBody
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.PreviewPathBody
+import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
@@ -145,6 +147,13 @@ class ListenarrClient(
             is CommandPayload.Audiobook -> post<CommandPayload.Audiobook, ListenarrCommandResponse>("download/search-and-download", payload)
             else -> super.command(payload)
         }
+
+    override suspend fun fetchActivityTasks(page: Int, pageSize: Int): NetworkResult<QueuePage> =
+        get<ListenarrQueueResponse>("download/queue")
+            .map {
+                QueuePage(page, pageSize, it.items.size, it.items)
+                    .setInstance(instance.id, instance.label)
+            }
 
     suspend fun getEnabledIndexers(): NetworkResult<List<ListenarrIndexer>> =
         get("indexers/enabled")

@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.LidarrQueueItem
+import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.QueueDownloadState
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.RadarrQueueItem
@@ -79,6 +80,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.utils.format
@@ -207,6 +209,9 @@ fun ActivityItem(
         )
         item is ReadarrQueueItem -> CardDefaults.cardColors(
             containerColor = ArrRed
+        )
+        item is ListenarrQueueItem -> CardDefaults.cardColors(
+            containerColor = ArrLightPurple
         )
         else -> CardDefaults.cardColors()
     }
