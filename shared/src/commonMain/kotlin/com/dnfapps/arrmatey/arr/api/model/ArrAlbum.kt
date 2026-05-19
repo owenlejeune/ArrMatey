@@ -23,8 +23,21 @@ data class ArrAlbum(
     val duration: Long,
     val ratings: LidarrRatings? = null,
 
-    val instanceId: Long? = null
+    override val instanceId: Long? = null
 ): CalendarItem {
+
+    override val calendarId: Long
+        get() = id
+
+    override fun getCalendarDates(): List<Instant> =
+        listOfNotNull(releaseDate)
+
+    override val notificationScheduledTime: Instant?
+        get() = releaseDate
+
+    override val notificationMessage: String
+        get() = "${artist?.title ?: "Unknown Artist"} - ${title ?: "Unknown Album"}"
+
     fun getCover() = images.firstOrNull {
         it.coverType == CoverType.Cover
     }

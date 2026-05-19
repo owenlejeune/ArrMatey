@@ -14,8 +14,13 @@ class GetCalendarUseCase(
     operator fun invoke(): Flow<CalendarState> =
         combine(
             calendarService.dates,
-            calendarService.albums,
-            calendarService.books,
+            combine(
+                calendarService.albums,
+                calendarService.books,
+                calendarService.audiobooks
+            ) { albums, books, audiobooks ->
+                Triple(albums, books, audiobooks)
+            },
             combine(
                 calendarService.movies,
                 calendarService.episodes,
@@ -30,13 +35,14 @@ class GetCalendarUseCase(
             ) { isLoading, isLoadingFuture, error ->
                 Triple(isLoading, isLoadingFuture, error)
             }
-        ) { dates, albums, books, (movies, episodes, groups), (isLoading, isLoadingFuture, error) ->
+        ) { dates, (albums, books, audiobooks), (movies, episodes, groups), (isLoading, isLoadingFuture, error) ->
             CalendarState(
                 movies = movies,
                 episodes = episodes,
                 groupedEpisodes = groups,
                 albums = albums,
                 books = books,
+                audiobooks = audiobooks,
                 dates = dates,
                 isLoading = isLoading,
                 isLoadingFuture = isLoadingFuture,

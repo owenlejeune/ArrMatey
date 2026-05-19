@@ -49,13 +49,25 @@ data class Audiobook(
     @Serializable(with = ListenarrInstantSerializer::class)
     val publishedDate: Instant? = null,
 
-    val instanceId: Long? = null
+    override val instanceId: Long? = null
 ) : ArrMedia, HasArrImages<Audiobook>, CalendarItem {
+
+    override val calendarId: Long
+        get() = id ?: (asin?.hashCode()?.toLong() ?: 0L)
+
+    override fun getCalendarDates(): List<Instant> =
+        listOfNotNull(publishedDate)
+
+    override val notificationScheduledTime: Instant?
+        get() = publishedDate
+
+    override val notificationMessage: String
+        get() = "$title - ${authors.joinToString(", ")}"
 
     override fun withLocalImages(instanceUrl: String): Audiobook {
         val localImages = imageUrl?.let { path ->
             listOf(
-                ArrImage(CoverType.Poster, path, path)
+                ArrImage(CoverType.Cover, path, path)
                     .rebuildWithLocalUrls(instanceUrl)
             )
         } ?: emptyList()
@@ -145,6 +157,10 @@ data class Audiobook(
 
     override val fileSize: Long
         get() = files.sumOf { it.size ?: 0 }
+
+    override fun getPoster(): ArrImage? =
+        images.firstOrNull()
+
 
     fun copyForCreation(
         monitored: Boolean,

@@ -28,8 +28,21 @@ data class Book(
     @Contextual val lastSearchTime: Instant? = null,
     val grabbed: Boolean = false,
 
-    val instanceId: Long? = null
+    override val instanceId: Long? = null
 ): CalendarItem {
+
+    override val calendarId: Long
+        get() = id
+
+    override fun getCalendarDates(): List<Instant> =
+        listOfNotNull(releaseDate)
+
+    override val notificationScheduledTime: Instant?
+        get() = releaseDate
+
+    override val notificationMessage: String
+        get() = "${authorTitle ?: "Unknown Author"} - $title"
+
     companion object {
         fun fromJson(value: String): Book {
             return ArrMedia.json.decodeFromString(value)

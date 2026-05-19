@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.extensions.localToday
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import kotlinx.datetime.LocalDate
@@ -38,6 +39,7 @@ fun CalendarDayCell(
     episodeCount: Int,
     albumCount: Int,
     bookCount: Int,
+    audiobooksCount: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -75,7 +77,7 @@ fun CalendarDayCell(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            if (movieCount > 0 || episodeCount > 0 || albumCount > 0 || bookCount > 0) {
+            if ((movieCount + episodeCount + albumCount + bookCount + audiobooksCount) > 0) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -99,6 +101,11 @@ fun CalendarDayCell(
                     if (bookCount > 0) {
                         item {
                             GridBadge(bookCount, ArrRed, Color.Black)
+                        }
+                    }
+                    if (audiobooksCount > 0) {
+                        item {
+                            GridBadge(audiobooksCount, ArrLightPurple, Color.White)
                         }
                     }
                 }

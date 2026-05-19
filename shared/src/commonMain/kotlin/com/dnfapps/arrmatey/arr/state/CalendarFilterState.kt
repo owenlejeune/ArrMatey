@@ -27,5 +27,6 @@ enum class ContentFilter(
     MoviesOnly(MR.strings.movies, "movieclapper"),
     EpisodesOnly(MR.strings.episodes, "tv"),
     AlbumsOnly(MR.strings.albums_header, "music.note"),
-    BooksOnly(MR.strings.books, "book")
+    BooksOnly(MR.strings.books, "book"),
+    AudiobooksOnly(MR.strings.audiobooks, "headphones")
 }

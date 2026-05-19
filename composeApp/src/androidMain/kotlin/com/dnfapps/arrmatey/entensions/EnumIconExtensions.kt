@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Language
@@ -44,6 +45,7 @@ val ContentFilter.imageVector: ImageVector
         ContentFilter.EpisodesOnly -> Icons.Default.Tv
         ContentFilter.AlbumsOnly -> Icons.Default.MusicNote
         ContentFilter.BooksOnly -> Icons.Default.Book
+        ContentFilter.AudiobooksOnly -> Icons.Default.Headphones
     }
 
 val TabItem.androidIcon: ImageVector

@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
@@ -37,7 +38,8 @@ fun CalendarDaySection(
     movies: List<ArrMovie>,
     episodeGroups: List<EpisodeGroup>,
     albums: List<ArrAlbum>,
-    books: List<Book>
+    books: List<Book>,
+    audiobooks: List<Audiobook>
 ) {
     val today = remember {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -104,6 +106,10 @@ fun CalendarDaySection(
 
         books.forEach { book ->
             BookCalendarItem(book)
+        }
+
+        audiobooks.forEach { audiobook ->
+            AudiobookCalendarItem(audiobook)
         }
     }
 }

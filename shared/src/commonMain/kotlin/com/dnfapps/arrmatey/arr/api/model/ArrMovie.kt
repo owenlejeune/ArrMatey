@@ -65,8 +65,23 @@ data class ArrMovie(
     val popularity: Double = 0.toDouble(),
     val lastSearchTime: String? = null,
 
-    val instanceId: Long? = null
+    override val instanceId: Long? = null
 ): ArrMedia, CalendarItem {
+
+    override val calendarId: Long
+        get() = tmdbId
+
+    override fun getCalendarDates(): List<Instant> =
+        listOfNotNull(digitalRelease, physicalRelease, inCinemas)
+
+    override val notificationScheduledTime: Instant?
+        get() = closestFutureRelease?.second
+
+    override val notificationMessage: String
+        get() = title ?: "Unknown Movie"
+
+    override val notificationReleaseType: StringResource?
+        get() = closestFutureRelease?.first
 
     override val guid: Long
         get() = id ?: tmdbId.plus(100_000)

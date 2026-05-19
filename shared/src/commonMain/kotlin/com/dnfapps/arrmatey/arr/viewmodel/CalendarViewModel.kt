@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
@@ -43,6 +44,7 @@ class CalendarViewModel(
             groupedEpisodes = filterEpisodeGroups(calendar.groupedEpisodes, filter),
             albums = filterAlbums(calendar.albums, filter),
             books = filterBooks(calendar.books, filter),
+            audiobooks = filterAudiobooks(calendar.audiobooks, filter),
             dates = calendar.dates,
             isLoading = calendar.isLoading,
             isLoadingFuture = calendar.isLoadingFuture,
@@ -235,6 +237,22 @@ class CalendarViewModel(
             }
         }
 
+    private fun filterAudiobooks(
+        audiobooksMap: Map<LocalDate, List<Audiobook>>,
+        filter: CalendarFilterState
+    ): Map<LocalDate, List<Audiobook>> =
+        if (filter.contentFilter != ContentFilter.All &&
+            filter.contentFilter != ContentFilter.AudiobooksOnly
+        ) {
+            emptyMap()
+        } else {
+            audiobooksMap.mapValues { (_, audiobooks) ->
+                audiobooks.filter { audiobook ->
+                    filterAudiobook(audiobook, filter)
+                }
+            }
+        }
+
     private fun filterMovie(movie: ArrMovie, filter: CalendarFilterState): Boolean {
         return (!filter.showMonitoredOnly || movie.monitored) &&
                 (filter.instanceId == null || movie.instanceId == filter.instanceId)
@@ -255,5 +273,10 @@ class CalendarViewModel(
     private fun filterBook(book: Book, filter: CalendarFilterState): Boolean {
         return (!filter.showMonitoredOnly || book.monitored) &&
                 (filter.instanceId == null || book.instanceId == filter.instanceId)
+    }
+
+    private fun filterAudiobook(audiobook: Audiobook, filter: CalendarFilterState): Boolean {
+        return (!filter.showMonitoredOnly || audiobook.monitored) &&
+                (filter.instanceId == null || audiobook.instanceId == filter.instanceId)
     }
 }

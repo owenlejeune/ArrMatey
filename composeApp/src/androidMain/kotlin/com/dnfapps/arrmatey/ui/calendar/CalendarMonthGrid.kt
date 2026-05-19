@@ -54,6 +54,7 @@ fun CalendarMonthGrid(
                         val dayEpisodes = state.episodes[date] ?: emptyList()
                         val dayAlbums = state.albums[date] ?: emptyList()
                         val dayBooks = state.books[date] ?: emptyList()
+                        val dayAudiobooks = state.audiobooks[date] ?: emptyList()
 
                         CalendarDayCell(
                             date = date,
@@ -62,6 +63,7 @@ fun CalendarMonthGrid(
                             episodeCount = dayEpisodes.size,
                             albumCount = dayAlbums.size,
                             bookCount = dayBooks.size,
+                            audiobooksCount = dayAudiobooks.size,
                             modifier = Modifier.weight(1f),
                             onClick = { onDateSelected(date) }
                         )
