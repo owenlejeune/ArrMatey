@@ -34,8 +34,7 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarTab(
-    viewModel: CalendarViewModel = koinInject(),
-    preferencesStore: PreferencesStore = koinInject()
+    viewModel: CalendarViewModel = koinInject()
 ) {
     val calendarState by viewModel.calendarState.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()

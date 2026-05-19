@@ -16,7 +16,6 @@ import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
 import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
-import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,23 +42,8 @@ class CalendarService(
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    private val _movies = MutableStateFlow<Map<LocalDate, List<ArrMovie>>>(emptyMap())
-    val movies: StateFlow<Map<LocalDate, List<ArrMovie>>> = _movies.asStateFlow()
-
-    private val _episodes = MutableStateFlow<Map<LocalDate, List<Episode>>>(emptyMap())
-    val episodes: StateFlow<Map<LocalDate, List<Episode>>> = _episodes.asStateFlow()
-
-    private val _episodeGroups = MutableStateFlow<Map<LocalDate, List<EpisodeGroup>>>(emptyMap())
-    val episodeGroups: StateFlow<Map<LocalDate, List<EpisodeGroup>>> = _episodeGroups.asStateFlow()
-
-    private val _albums = MutableStateFlow<Map<LocalDate, List<ArrAlbum>>>(emptyMap())
-    val albums: StateFlow<Map<LocalDate, List<ArrAlbum>>> = _albums.asStateFlow()
-
-    private val _books = MutableStateFlow<Map<LocalDate, List<Book>>>(emptyMap())
-    val books: StateFlow<Map<LocalDate, List<Book>>> = _books.asStateFlow()
-
-    private val _audiobooks = MutableStateFlow<Map<LocalDate, List<Audiobook>>>(emptyMap())
-    val audiobooks: StateFlow<Map<LocalDate, List<Audiobook>>> = _audiobooks.asStateFlow()
+    private val _items = MutableStateFlow<Map<LocalDate, List<CalendarItem>>>(emptyMap())
+    val items: StateFlow<Map<LocalDate, List<CalendarItem>>> = _items.asStateFlow()
 
     private val _dates = MutableStateFlow<List<LocalDate>>(emptyList())
     val dates: StateFlow<List<LocalDate>> = _dates.asStateFlow()
@@ -149,13 +133,8 @@ class CalendarService(
 
             val fetchedIds = enrichedItems.map { it.calendarId.toInt() }.toSet()
 
-            val snapshot: List<CalendarItem> = when (type) {
-                InstanceType.Radarr -> _movies.value.values.flatten()
-                InstanceType.Sonarr -> _episodes.value.values.flatten()
-                InstanceType.Lidarr -> _albums.value.values.flatten()
-                InstanceType.Booksehelf -> _books.value.values.flatten()
-                InstanceType.Listenarr-> _audiobooks.value.values.flatten()
-                else -> emptyList()
+            val snapshot: List<CalendarItem> = _items.value.values.flatten().filter {
+                isItemOfInstanceType(it, type)
             }
 
             notificationCleanupUseCase.cleanup(
@@ -179,193 +158,102 @@ class CalendarService(
             }
 
             // State updates
-            when (type) {
-                InstanceType.Radarr -> {
-                    val movies = enrichedItems.filterIsInstance<ArrMovie>()
-                    _movies.update { current ->
-                        val next = current.toMutableMap()
-                        movies.forEach { movie ->
-                            movie.getCalendarDates().forEach { date ->
-                                upsertMovie(next, movie, date.toLocalDate())
-                            }
-                        }
-                        next
+            _items.update { current ->
+                val next = current.toMutableMap()
+                enrichedItems.forEach { item ->
+                    item.getCalendarDates().forEach { date ->
+                        upsertItem(next, item, date.toLocalDate())
                     }
                 }
-                InstanceType.Sonarr -> {
-                    val episodes = enrichedItems.filterIsInstance<Episode>()
-                    _episodes.update { current ->
-                        val next = current.toMutableMap()
-                        episodes.forEach { episode ->
-                            episode.getCalendarDates().forEach { date ->
-                                upsertEpisode(next, episode, date.toLocalDate())
-                            }
-                        }
-                        next
-                    }
-                    updateEpisodeGroups()
+                if (type == InstanceType.Sonarr) {
+                    applyGrouping(next)
                 }
-                InstanceType.Lidarr -> {
-                    val albums = enrichedItems.filterIsInstance<ArrAlbum>()
-                    _albums.update { current ->
-                        val next = current.toMutableMap()
-                        albums.forEach { album ->
-                            album.getCalendarDates().forEach { date ->
-                                upsertAlbum(next, album, date.toLocalDate())
-                            }
-                        }
-                        next
-                    }
-                }
-                InstanceType.Booksehelf -> {
-                    val books = enrichedItems.filterIsInstance<Book>()
-                    _books.update { current ->
-                        val next = current.toMutableMap()
-                        books.forEach { book ->
-                            book.getCalendarDates().forEach { date ->
-                                upsertBook(next, book, date.toLocalDate())
-                            }
-                        }
-                        next
-                    }
-                }
-                InstanceType.Listenarr -> {
-                    val audiobooks = enrichedItems.filterIsInstance<Audiobook>()
-                    _audiobooks.update { current ->
-                        val next = current.toMutableMap()
-                        audiobooks.forEach { audiobook ->
-                            audiobook.getCalendarDates().forEach { date ->
-                                upsertAudiobook(next, audiobook, date.toLocalDate())
-                            }
-                        }
-                        next
-                    }
-                }
-                else -> {}
+                next
             }
         }
     }
 
-    private fun upsertMovie(
-        map: MutableMap<LocalDate, List<ArrMovie>>,
-        movie: ArrMovie,
-        date: LocalDate
-    ) {
-        val currentList = map[date]?.toMutableList() ?: mutableListOf()
-
-        // Use tmdbId for deduplication (same across Radarr instances)
-        val existingIndex = currentList.indexOfFirst { it.tmdbId == movie.tmdbId }
-        if (existingIndex >= 0) {
-            currentList[existingIndex] = movie
-        } else {
-            currentList.add(movie)
+    private fun isItemOfInstanceType(item: CalendarItem, type: InstanceType): Boolean {
+        return when (type) {
+            InstanceType.Radarr -> item is ArrMovie
+            InstanceType.Sonarr -> item is Episode || item is EpisodeGroup
+            InstanceType.Lidarr -> item is ArrAlbum
+            InstanceType.Booksehelf -> item is Book
+            InstanceType.Listenarr -> item is Audiobook
+            else -> false
         }
-
-        map[date] = currentList
     }
 
-    private fun upsertEpisode(
-        map: MutableMap<LocalDate, List<Episode>>,
-        episode: Episode,
+    private fun upsertItem(
+        map: MutableMap<LocalDate, List<CalendarItem>>,
+        item: CalendarItem,
         date: LocalDate
     ) {
         val currentList = map[date]?.toMutableList() ?: mutableListOf()
 
-        // Use tvdbId for deduplication (same across Sonarr instances)
-        // Fallback to series tvdbId + season + episode if tvdbId is null
         val existingIndex = currentList.indexOfFirst { existing ->
-            when {
-                existing.tvdbId != null && episode.tvdbId != null -> existing.tvdbId == episode.tvdbId
-                existing.series?.tvdbId != null && episode.series?.tvdbId != null ->
-                    existing.series.tvdbId == episode.series.tvdbId &&
-                    existing.seasonNumber == episode.seasonNumber &&
-                    existing.episodeNumber == episode.episodeNumber
-                else -> existing.id == episode.id && existing.instanceId == episode.instanceId
-            }
+            isSameItem(existing, item)
         }
         if (existingIndex >= 0) {
-            currentList[existingIndex] = episode
+            currentList[existingIndex] = item
         } else {
-            currentList.add(episode)
+            currentList.add(item)
         }
 
         map[date] = currentList
     }
 
-    private fun updateEpisodeGroups() {
-        val grouped = _episodes.value.mapValues { (_, episodes) ->
-            episodes
-                .groupBy { it.series?.id }
-                .mapNotNull { (_, episodeList) ->
-                    if (episodeList.isEmpty()) return@mapNotNull null
+    private fun isSameItem(a: CalendarItem, b: CalendarItem): Boolean {
+        if (a::class != b::class) return false
+        return when (a) {
+            is ArrMovie if b is ArrMovie -> a.tmdbId == b.tmdbId
+            is Episode if b is Episode -> {
+                when {
+                    a.tvdbId != null && b.tvdbId != null -> a.tvdbId == b.tvdbId
+                    a.series?.tvdbId != null && b.series?.tvdbId != null ->
+                        a.series.tvdbId == b.series.tvdbId &&
+                                a.seasonNumber == b.seasonNumber &&
+                                a.episodeNumber == b.episodeNumber
 
-                    val sorted = episodeList.sortedWith(
-                        compareBy<Episode> { it.seasonNumber }
-                            .thenBy { it.episodeNumber }
-                    )
-
-                    EpisodeGroup(
-                        first = sorted.first(),
-                        additional = sorted.drop(1),
-                        totalCount = sorted.size
-                    )
+                    else -> a.id == b.id && a.instanceId == b.instanceId
                 }
-                .sortedBy { it.first.series?.title }
-        }
+            }
 
-        _episodeGroups.value = grouped
+            is ArrAlbum if b is ArrAlbum -> a.foreignAlbumId == b.foreignAlbumId
+            is Book if b is Book -> a.foreignBookId == b.foreignBookId
+            is Audiobook if b is Audiobook -> a.asin == b.asin
+            else -> a.calendarId == b.calendarId && a.instanceId == b.instanceId
+        }
     }
 
-    private fun upsertAlbum(
-        map: MutableMap<LocalDate, List<ArrAlbum>>,
-        album: ArrAlbum,
-        date: LocalDate
-    ) {
-        val currentList = map[date]?.toMutableList() ?: mutableListOf()
+    private fun applyGrouping(map: MutableMap<LocalDate, List<CalendarItem>>) {
+        map.keys.forEach { date ->
+            val items = map[date] ?: return@forEach
+            val episodes = items.filterIsInstance<Episode>()
+            if (episodes.isEmpty()) return@forEach
 
-        // Use foreignAlbumId (MusicBrainz ID) for deduplication (same across Lidarr instances)
-        val existingIndex = currentList.indexOfFirst { it.foreignAlbumId == album.foreignAlbumId }
-        if (existingIndex >= 0) {
-            currentList[existingIndex] = album
-        } else {
-            currentList.add(album)
+            val nonEpisodes = items.filter { it !is Episode && it !is EpisodeGroup }
+
+            val grouped = episodes
+                .groupBy { it.series?.id }
+                .map { (_, episodeList) ->
+                    if (episodeList.size > 1) {
+                        val sorted = episodeList.sortedWith(
+                            compareBy<Episode> { it.seasonNumber }
+                                .thenBy { it.episodeNumber }
+                        )
+                        EpisodeGroup(
+                            first = sorted.first(),
+                            additional = sorted.drop(1),
+                            totalCount = sorted.size
+                        )
+                    } else {
+                        episodeList.first()
+                    }
+                }
+
+            map[date] = nonEpisodes + grouped
         }
-
-        map[date] = currentList
-    }
-
-    private fun upsertBook(
-        map: MutableMap<LocalDate, List<Book>>,
-        book: Book,
-        date: LocalDate
-    ) {
-        val currentList = map[date]?.toMutableList() ?: mutableListOf()
-
-        val existingIndex = currentList.indexOfFirst { it.foreignBookId == book.foreignBookId }
-        if (existingIndex >= 0) {
-            currentList[existingIndex] = book
-        } else {
-            currentList.add(book)
-        }
-
-        map[date] = currentList
-    }
-
-    private fun upsertAudiobook(
-        map: MutableMap<LocalDate, List<Audiobook>>,
-        audiobook: Audiobook,
-        date: LocalDate
-    ) {
-        val currentList = map[date]?.toMutableList() ?: mutableListOf()
-
-        val existingIndex = currentList.indexOfFirst { it.asin == audiobook.asin }
-        if (existingIndex >= 0) {
-            currentList[existingIndex] = audiobook
-        } else {
-            currentList.add(audiobook)
-        }
-
-        map[date] = currentList
     }
 
     private fun insertDates(start: LocalDate, end: LocalDate) {
@@ -387,10 +275,7 @@ class CalendarService(
     }
 
     fun reset() {
-        _movies.value = emptyMap()
-        _episodes.value = emptyMap()
-        _albums.value = emptyMap()
-        _books.value = emptyMap()
+        _items.value = emptyMap()
         _dates.value = emptyList()
         _error.value = null
     }

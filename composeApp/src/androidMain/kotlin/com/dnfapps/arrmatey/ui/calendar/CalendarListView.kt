@@ -85,19 +85,9 @@ fun CalendarListView(
                 items = state.dates,
                 key = { it.toString() }
             ) { date ->
-                val dayMovies = state.movies[date] ?: emptyList()
-                val dayEpisodeGroups = state.groupedEpisodes[date] ?: emptyList()
-                val dayAlbums = state.albums[date] ?: emptyList()
-                val dayBooks = state.books[date] ?: emptyList()
-                val dayAudiobooks = state.audiobooks[date] ?: emptyList()
-
                 CalendarDaySection(
                     date = date,
-                    movies = dayMovies,
-                    episodeGroups = dayEpisodeGroups,
-                    albums = dayAlbums,
-                    books = dayBooks,
-                    audiobooks = dayAudiobooks
+                    items = state.items[date] ?: emptyList()
                 )
             }
         }

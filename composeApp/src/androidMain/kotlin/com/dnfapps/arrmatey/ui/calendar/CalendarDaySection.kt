@@ -18,7 +18,8 @@ import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
-import com.dnfapps.arrmatey.arr.api.model.CommandPayload
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
+import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
@@ -35,11 +36,7 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun CalendarDaySection(
     date: LocalDate,
-    movies: List<ArrMovie>,
-    episodeGroups: List<EpisodeGroup>,
-    albums: List<ArrAlbum>,
-    books: List<Book>,
-    audiobooks: List<Audiobook>
+    items: List<CalendarItem>
 ) {
     val today = remember {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -75,15 +72,13 @@ fun CalendarDaySection(
                 )
             }
 
-            val totalEpisodes = episodeGroups.sumOf { it.totalCount }
-            val totalItems = movies.size + albums.size + totalEpisodes
-            if (totalItems > 0) {
+            if (items.isNotEmpty()) {
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Text(
-                        text = totalItems.toString(),
+                        text = items.size.toString(),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -92,24 +87,15 @@ fun CalendarDaySection(
             }
         }
 
-        movies.forEach { movie ->
-            MovieCalendarItem(date, movie)
-        }
-
-        episodeGroups.forEach { episode ->
-            EpisodeCalendarItem(episode)
-        }
-
-        albums.forEach { album ->
-            AlbumCalendarItem(album)
-        }
-
-        books.forEach { book ->
-            BookCalendarItem(book)
-        }
-
-        audiobooks.forEach { audiobook ->
-            AudiobookCalendarItem(audiobook)
+        items.forEach { item ->
+            when (item) {
+                is ArrMovie -> MovieCalendarItem(date, item)
+                is EpisodeGroup -> EpisodeCalendarItem(item)
+                is ArrAlbum -> AlbumCalendarItem(item)
+                is Book -> BookCalendarItem(item)
+                is Audiobook -> AudiobookCalendarItem(item)
+                is Episode -> {}
+            }
         }
     }
 }

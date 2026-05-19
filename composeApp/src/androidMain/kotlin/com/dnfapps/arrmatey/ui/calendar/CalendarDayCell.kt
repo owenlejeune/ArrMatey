@@ -20,6 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
+import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.extensions.localToday
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
@@ -35,11 +42,7 @@ import kotlin.time.ExperimentalTime
 fun CalendarDayCell(
     date: LocalDate,
     isSelected: Boolean,
-    movieCount: Int,
-    episodeCount: Int,
-    albumCount: Int,
-    bookCount: Int,
-    audiobooksCount: Int,
+    items: List<CalendarItem>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -77,32 +80,37 @@ fun CalendarDayCell(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            if ((movieCount + episodeCount + albumCount + bookCount + audiobooksCount) > 0) {
+            if (items.isNotEmpty()) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
+                    val movieCount = items.count { it is ArrMovie }
                     if (movieCount > 0) {
                         item {
                             GridBadge(movieCount, ArrOrange, Color.Black)
                         }
                     }
+                    val episodeCount = items.count { it is Episode }
                     if (episodeCount > 0) {
                         item {
                             GridBadge(episodeCount, ArrBlue, Color.Black)
                         }
                     }
+                    val albumCount = items.count { it is ArrAlbum }
                     if (albumCount > 0) {
                         item {
                             GridBadge(albumCount, ArrGreen, Color.White)
                         }
                     }
+                    val bookCount = items.count { it is Book }
                     if (bookCount > 0) {
                         item {
                             GridBadge(bookCount, ArrRed, Color.Black)
                         }
                     }
+                    val audiobooksCount = items.count { it is Audiobook }
                     if (audiobooksCount > 0) {
                         item {
                             GridBadge(audiobooksCount, ArrLightPurple, Color.White)
