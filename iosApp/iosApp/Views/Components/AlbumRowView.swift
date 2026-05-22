@@ -145,7 +145,7 @@ struct AlbumRowView: View {
     
     private var runtime: String {
         let totalMs = tracks.reduce(0) { $0 + $1.duration }
-        return (totalMs / 60_000).formatAsRuntime()
+        return (Int(totalMs) / 60_000).formatAsRuntime()
     }
     
     private var infoString: String {

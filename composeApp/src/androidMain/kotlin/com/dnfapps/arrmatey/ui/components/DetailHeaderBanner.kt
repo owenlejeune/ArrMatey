@@ -26,7 +26,6 @@ fun BoxScope.DetailHeaderBanner(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-//            .height(height)
             .matchParentSize()
             .background(MaterialTheme.colorScheme.background)
             .clipToBounds()

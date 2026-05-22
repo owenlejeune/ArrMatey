@@ -81,20 +81,12 @@ struct CalendarListView: View {
     
     @ViewBuilder
     private func daySectionView(for date: LocalDate, at index: Int) -> some View {
-        let dayMovies = state.movies[date] ?? []
-        let dayEpisodeGroups = state.groupedEpisodes[date] ?? []
-        let dayAlbums = state.albums[date] ?? []
-        let dayBooks = state.books[date] ?? []
-        
         let isToday = date.isEqual(state.today)
         let key = dateKey(date)
         
         CalendarDaySection(
             date: date,
-            movies: dayMovies,
-            episodeGroups: dayEpisodeGroups,
-            albums: dayAlbums,
-            books: dayBooks,
+            items: state.items[date] ?? [],
             isToday: isToday
         )
         .id(date)

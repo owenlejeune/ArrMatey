@@ -110,7 +110,6 @@ class ArrInstanceRepository(
 
     private val _mediaDetailsCache = MutableStateFlow<Map<Long, ArrMedia>>(emptyMap())
 
-
     private val _qualityProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
     val qualityProfiles: StateFlow<List<QualityProfile>> = _qualityProfiles.asStateFlow()
 
@@ -678,6 +677,9 @@ class ArrInstanceRepository(
             it[id]
         }
 
+    fun getCacheMediaDetails(id: Long): ArrMedia? =
+        _mediaDetailsCache.value[id]
+
     fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> = flow {
         emit(NetworkResult.Loading)
 
@@ -967,6 +969,10 @@ class ArrInstanceRepository(
                 .map { it.audiobook }
         }
         processAddResult(result, false)
+    }
+
+    suspend fun moveAudiobookFiles(item: Audiobook) {
+
     }
 
     // Helpers

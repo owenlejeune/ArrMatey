@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.di
 
 import com.dnfapps.arrmatey.arr.api.client.GenericClient
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
@@ -9,6 +10,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
@@ -55,8 +57,8 @@ object KoinBridge: KoinComponent {
     fun getArrSearchViewModel(type: InstanceType): ArrSearchViewModel =
         getKoin().get { parametersOf(type) }
 
-    fun getMediaPreviewViewModel(type: InstanceType): MediaPreviewViewModel =
-        getKoin().get { parametersOf(type) }
+    fun getMediaPreviewViewModel(preview: ArrMedia, type: InstanceType): MediaPreviewViewModel =
+        getKoin().get { parametersOf(preview, type) }
 
     fun getInteractiveSearchViewModel(type: InstanceType, defaultFilter: ReleaseFilterBy): InteractiveSearchViewModel =
         getKoin().get { parametersOf(type, defaultFilter) }
@@ -114,6 +116,9 @@ object KoinBridge: KoinComponent {
 
     fun getAuthorFilesViewModel(authorId: Long): AuthorFilesViewModel =
         getKoin().get { parametersOf(authorId) }
+
+    fun getAudiobookFilesViewModel(audiobookId: Long): AudiobookFilesViewModel =
+        getKoin().get { parametersOf(audiobookId) }
 
     fun getGenericClient(): GenericClient =
         getKoin().get()

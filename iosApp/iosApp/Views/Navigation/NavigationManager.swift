@@ -14,6 +14,7 @@ class NavigationManager: ObservableObject {
     @Published var moviePath = NavigationPath()
     @Published var musicPath = NavigationPath()
     @Published var bookPath = NavigationPath()
+    @Published var audiobookPath = NavigationPath()
     @Published var seerrPath = NavigationPath()
     @Published var launcherPath = NavigationPath()
     
@@ -35,8 +36,9 @@ class NavigationManager: ObservableObject {
         case .radarr: moviePath.append(route)
         case .lidarr: musicPath.append(route)
         case .booksehelf: bookPath.append(route)
+        case .listenarr: audiobookPath.append(route)
         case .seerr: break
-        case .prowlarr: break // Prowlarr doesn't use media routes
+        case .prowlarr: break
         }
     }
     
@@ -60,6 +62,9 @@ class NavigationManager: ObservableObject {
         case .booksehelf:
             if !bookPath.isEmpty { bookPath.removeLast() }
             bookPath.append(route)
+        case .listenarr:
+            if !audiobookPath.isEmpty { audiobookPath.removeLast() }
+            audiobookPath.append(route)
         case .seerr: break
         case .prowlarr: break // Prowlarr doesn't use media routes
         }
@@ -112,6 +117,7 @@ class NavigationManager: ObservableObject {
         moviePath = NavigationPath()
         musicPath = NavigationPath()
         bookPath = NavigationPath()
+        audiobookPath = NavigationPath()
         seerrPath = NavigationPath()
         launcherPath = NavigationPath()
     }
@@ -139,6 +145,7 @@ class NavigationManager: ObservableObject {
         self.moviePath = NavigationPath()
         self.musicPath = NavigationPath()
         self.bookPath = NavigationPath()
+        self.audiobookPath = NavigationPath()
         
         self.seerrPath = NavigationPath()
     }
@@ -187,7 +194,9 @@ enum MediaRoute: Hashable {
         artistId: Int64? = nil
     )
     case bookReleases(bookId: Int64)
+    case audiobookReleases(query: String)
     case authorFiles(authorJson: String)
+    case audiobookFiles(audiobookJson: String)
     case bookDetails(bookJson: String, authorJson: String)
     case episodeDetails(String, String)
 }

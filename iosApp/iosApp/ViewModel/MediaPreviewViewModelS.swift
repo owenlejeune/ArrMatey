@@ -12,23 +12,15 @@ import SwiftUI
 class MediaPreviewViewModelS: ObservableObject {
     private let viewModel: MediaPreviewViewModel
     
-    @Published private(set) var qualityProfiles: [QualityProfile] = []
-    @Published private(set) var rootFolders: [RootFolder] = []
-    @Published private(set) var tags: [Tag] = []
-    @Published private(set) var addItemStatus: OperationStatus = OperationStatusIdle()
-    @Published private(set) var lastAddedItemId: Int64? = nil
+    @Published private(set) var uiState: MediaPreviewUiState = MediaPreviewUiState()
     
-    init(type: InstanceType) {
-        self.viewModel = KoinBridge.shared.getMediaPreviewViewModel(type: type)
+    init(preview: ArrMedia, type: InstanceType) {
+        self.viewModel = KoinBridge.shared.getMediaPreviewViewModel(preview: preview, type: type)
         startObserving()
     }
     
     private func startObserving() {
-        viewModel.qualityProfiles.observeAsync { self.qualityProfiles = $0 }
-        viewModel.rootFolders.observeAsync { self.rootFolders = $0 }
-        viewModel.tags.observeAsync { self.tags = $0 }
-        viewModel.addItemStatus.observeAsync { self.addItemStatus = $0 }
-        viewModel.lastAddedItemId.observeAsync { self.lastAddedItemId = $0?.int64Value }
+        viewModel.uiState.observeAsync { self.uiState = $0 }
     }
     
     func addItem(_ item: ArrMedia, _ searchOnAdd: Bool) {

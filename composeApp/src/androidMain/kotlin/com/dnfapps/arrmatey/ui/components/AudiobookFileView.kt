@@ -75,19 +75,6 @@ fun AudiobookFileView(
 
         audiobook.files.forEach { file ->
             AudiobookFileCard(file)
-//            ContainerCard(modifier = Modifier.fillMaxWidth()) {
-//                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-//                    Text(
-//                        text = file.path?.split("/")?.lastOrNull() ?: mokoString(MR.strings.unknown),
-//                        style = MaterialTheme.typography.titleMedium
-//                    )
-//                    Text(
-//                        text = file.size?.bytesAsFileSizeString() ?: "",
-//                        style = MaterialTheme.typography.bodyMedium,
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant
-//                    )
-//                }
-//            }
         }
 
         if (audiobook.files.isEmpty()) {

@@ -134,7 +134,7 @@ fun AudiobookFileCard(file: AudiobookFile) {
         )
         file.createdAt?.format("MMM d, yyyy")?.let { formattedDate ->
             Text(
-                text = mokoString(MR.strings.add, formattedDate),
+                text = mokoString(MR.strings.added_on, formattedDate),
                 fontSize = 12.sp
             )
         }

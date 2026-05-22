@@ -78,7 +78,7 @@ fun CalendarDaySection(
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Text(
-                        text = items.size.toString(),
+                        text = items.count { it !is EpisodeGroup }.toString(),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer

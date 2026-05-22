@@ -105,7 +105,7 @@ fun AddAudiobookSheet(
 
             Button(
                 onClick = {
-                    val newItem = item.copy(
+                    val newItem = item.copyForCreation(
                         monitored = monitored,
                         qualityProfileId = qualityProfile?.id ?: 0,
                         rootFolderPath = rootFolder.path,

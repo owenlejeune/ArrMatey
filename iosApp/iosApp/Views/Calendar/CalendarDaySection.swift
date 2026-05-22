@@ -10,18 +10,11 @@ import SwiftUI
 
 struct CalendarDaySection: View {
     let date: LocalDate
-    let movies: [ArrMovie]
-    let episodeGroups: [EpisodeGroup]
-    let albums: [ArrAlbum]
-    let books: [Book]
+    let items: [CalendarItem]
     let isToday: Bool
     
-    private var totalEpisodes: Int {
-        episodeGroups.reduce(0) { $0 + Int($1.totalCount) }
-    }
-    
     private var totalItems: Int {
-        movies.count + totalEpisodes
+        items.count(where: { !($0 is EpisodeGroup) })
     }
     
     private var dateString: String {
@@ -60,20 +53,15 @@ struct CalendarDaySection: View {
                 }
             }
             
-            ForEach(movies, id: \.id) { movie in
-                MovieCalendarItem(movie: movie, date: date)
-            }
-            
-            ForEach(episodeGroups.indices, id: \.self) { index in
-                EpisodeCalendarItem(episodeGroup: episodeGroups[index])
-            }
-            
-            ForEach(albums, id: \.self) { album in
-                AlbumCalendarItem(album: album)
-            }
-            
-            ForEach(books, id: \.self) { book in
-                BookCalendarItem(book: book)
+            ForEach(items, id: \.calendarId) { item in
+                switch item {
+                case let movie as ArrMovie: MovieCalendarItem(movie: movie, date: date)
+                case let epGroup as EpisodeGroup: EpisodeCalendarItem(episodeGroup: epGroup)
+                case let album as ArrAlbum: AlbumCalendarItem(album: album)
+                case let book as Book: BookCalendarItem(book: book)
+                case let audiobook as Audiobook: AudiobookCalendarItem(audiobook: audiobook)
+                default: EmptyView()
+                }
             }
         }
     }

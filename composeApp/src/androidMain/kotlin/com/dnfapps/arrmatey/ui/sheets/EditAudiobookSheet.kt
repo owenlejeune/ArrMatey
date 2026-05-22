@@ -1,5 +1,8 @@
 package com.dnfapps.arrmatey.ui.sheets
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,18 +12,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
-import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
@@ -33,15 +37,14 @@ fun EditAudiobookSheet(
     item: Audiobook,
     qualityProfiles: List<QualityProfile>,
     rootFolders: List<RootFolder>,
-    tags: List<Tag>,
     editInProgress: Boolean,
     onEditItem: (Audiobook) -> Unit,
     onDismiss: () -> Unit
 ) {
     var monitored by remember { mutableStateOf(item.monitored) }
-    var selectedQualityProfileId by remember { mutableStateOf(item.qualityProfileId) }
-    var selectedRootFolderPath by remember { mutableStateOf(item.path ?: "") }
-    val selectedTags = remember { item.tags.toMutableStateList() }
+    var selectedQualityProfileId by remember { mutableIntStateOf(item.qualityProfileId) }
+    var selectedRootFolder by remember { mutableStateOf(rootFolders.first { item.path?.startsWith(it.path) == true }) }
+    var relativePath by remember { mutableStateOf(item.path?.removePrefix(selectedRootFolder.path) ?: "") }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
@@ -69,41 +72,28 @@ fun EditAudiobookSheet(
                 DropdownPicker(
                     options = rootFolders,
                     modifier = Modifier.fillMaxWidth(),
-                    selectedOption = rootFolders.firstOrNull { it.path == selectedRootFolderPath } ?: rootFolders.firstOrNull(),
-                    onOptionSelected = { selectedRootFolderPath = it.path },
+                    selectedOption = selectedRootFolder,
+                    onOptionSelected = { selectedRootFolder = it },
                     getOptionLabel = { it.path },
                     label = { Text(mokoString(MR.strings.root_folder)) }
                 )
             }
 
-            if (tags.isNotEmpty()) {
-                MultiSelectDropdownPicker(
-                    options = tags.map { it.id },
-                    selectedOptions = selectedTags,
-                    valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
-                    onOptionSelected = { tag, isSelected ->
-                        if (isSelected) {
-                            selectedTags.add(tag)
-                        } else {
-                            selectedTags.remove(tag)
-                        }
-                    },
-                    getOptionLabel = { tag ->
-                        tags.firstOrNull { tag == it.id }?.label
-                            ?: mokoString(MR.strings.unknown)
-                    },
-                    label = { Text(mokoString(MR.strings.tags)) }
-                )
-            }
+            AMOutlinedTextField(
+                value = relativePath,
+                onValueChange = { relativePath = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = mokoString(MR.strings.relative_path)
+            )
 
             Button(
                 onClick = {
                     onEditItem(
-                        item.copy(
+                        item.copyForEdit(
                             monitored = monitored,
                             qualityProfileId = selectedQualityProfileId,
-                            tags = selectedTags.toList(),
-                            basePath = selectedRootFolderPath
+                            rootFolderPath = selectedRootFolder.path,
+                            relativePath = relativePath
                         )
                     )
                 },

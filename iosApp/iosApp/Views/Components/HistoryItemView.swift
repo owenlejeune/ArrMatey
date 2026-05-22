@@ -39,7 +39,9 @@ struct HistoryItemView: View {
     private var subLabel: String {
         var components: [String] = []
         
-        components.append(item.quality.qualityLabel)
+        if let qualityLabel = item.quality?.qualityLabel {
+            components.append(qualityLabel)
+        }
         components.append(LabelUtilsKt.singleLanguageLabel(item.languages))
         
         if let indexer = item.indexerLabel {

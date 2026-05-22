@@ -2,21 +2,22 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
-import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
+import com.dnfapps.arrmatey.arr.api.client.ListenarrNullableInstantSerializer
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.formatSecondsAsRuntime
+import com.dnfapps.arrmatey.extensions.toJsonArray
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import com.dnfapps.arrmatey.ui.theme.ArrRed
-import kotlin.time.Instant
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlin.time.Instant
 
 @Serializable
 data class Audiobook(
@@ -33,6 +34,7 @@ data class Audiobook(
     val publishYear: String? = null,
     val series: String? = null,
     val seriesNumber: String? = null,
+    val seriesMemberships: List<SeriesMembership> = emptyList(),
     val asin: String? = null,
     val publisher: String? = null,
     val language: String? = null,
@@ -40,17 +42,27 @@ data class Audiobook(
     val basePath: String? = null,
     val filePath: String? = null,
     val fileCount: Int = 0,
-    val authorAsins: List<String> = emptyList(),
     val wanted: Boolean = false,
+    val subtitle: String? = null,
+    val edition: String? = null,
+    val abridged: Boolean = false,
+    val explicit: Boolean = false,
+    @SerialName("fileSize") val remoteFileSize: Long? = null,
     @SerialName("status") val statusStr: String? = null,
     val files: List<AudiobookFile> = emptyList(),
     @SerialName("description") override val overview: String? = null,
 
-    @Serializable(with = ListenarrInstantSerializer::class)
+    @Serializable(with =  ListenarrNullableInstantSerializer::class)
     val publishedDate: Instant? = null,
 
     override val instanceId: Long? = null
 ) : ArrMedia, HasArrImages<Audiobook>, CalendarItem {
+
+    companion object {
+        fun fromJson(value: String): Audiobook {
+            return ArrMedia.json.decodeFromString(value)
+        }
+    }
 
     override val calendarId: Long
         get() = id ?: (asin?.hashCode()?.toLong() ?: 0L)
@@ -126,7 +138,7 @@ data class Audiobook(
     override fun ratingScore(): Double = 0.0
 
     override val statusProgress: Float
-        get() = if (statusStr == "quality-match") 1.0f else 0.0f
+        get() = if (fileSize > 0) 1.0f else 0.0f
 
     override val statusColor: Color
         get() = when {
@@ -156,11 +168,10 @@ data class Audiobook(
         }
 
     override val fileSize: Long
-        get() = files.sumOf { it.size ?: 0 }
+        get() = remoteFileSize ?: files.sumOf { it.size ?: 0 }
 
     override fun getPoster(): ArrImage? =
         images.firstOrNull()
-
 
     fun copyForCreation(
         monitored: Boolean,
@@ -175,6 +186,42 @@ data class Audiobook(
         tags = tags
     )
 
+    fun copyForEdit(
+        monitored: Boolean,
+        qualityProfileId: Int,
+        rootFolderPath: String,
+        relativePath: String
+    ) = copy(
+        monitored = monitored,
+        qualityProfileId = qualityProfileId,
+        basePath = "${rootFolderPath}/${relativePath.trimStart('/')}"
+    )
+
     val releaseQuery: String
         get() = "$title $${authors.joinToString(" ")}"
+}
+
+fun Audiobook.toEditBody(): JsonElement = buildJsonObject {
+    put("monitored", monitored)
+    put("title", title)
+    put("subtitle", subtitle)
+    put("authors", authors.toJsonArray())
+    put("narrators", narrators.toJsonArray())
+    put("description", overview)
+    put("publisher", publisher)
+    put("language", language)
+    put("publishedDate", publishedDate?.toString() ?: "")
+    put("publishYear", publishYear)
+    put("edition", edition ?: "")
+    put("series", series)
+    put("seriesNumber", seriesNumber)
+    put("seriesMemberships", JsonArray(seriesMemberships.map { Json.encodeToJsonElement(SeriesMembership.serializer(), it) }))
+    put("genres", genres.toJsonArray())
+    put("imageUrl", imageUrl)
+    put("tags", JsonArray(tags.map { JsonPrimitive(it) }))
+    put("abridged", abridged)
+    put("explicit", explicit)
+    put("runtime", runtime)
+    put("basePath", basePath)
+    put("qualityProfileId", if (qualityProfileId > 0) qualityProfileId else -1)
 }

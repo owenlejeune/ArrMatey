@@ -12,4 +12,6 @@ data class MediaPreviewUiState(
     val addItemStatus: OperationStatus = OperationStatus.Idle,
     val lastAddedItemId: Long? = null,
     val relativePath: String = ""
-)
+) {
+    constructor(): this(emptyList())
+}

@@ -112,4 +112,16 @@ data class SearchAudiobook(
     override fun setMonitored(monitored: Boolean): ArrMedia = this
     override val isMissing: Boolean
         get() = true
+
+    fun copyForCreation(
+        monitored: Boolean,
+        qualityProfileId: Int,
+        rootFolderPath: String,
+        relativePath: String
+    ) = copy(
+        monitored = monitored,
+        qualityProfileId = qualityProfileId,
+        rootFolderPath = rootFolderPath,
+        relativePath = relativePath
+    )
 }

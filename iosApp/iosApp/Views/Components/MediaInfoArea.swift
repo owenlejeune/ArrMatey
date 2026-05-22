@@ -22,6 +22,8 @@ struct MediaInfoArea: View {
             artistInfo(artist)
         } else if let author = item as? Author {
             authorInfo(author)
+        } else if let audiobook = item as? Audiobook {
+            audiobookInfo(audiobook)
         } else { [] }
     }
     
@@ -178,6 +180,23 @@ struct MediaInfoArea: View {
             InfoItem(label: MR.strings().new_albums.localized(), value: monitorLabel),
             InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
             InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
+        ]
+    }
+    
+    private func audiobookInfo(_ audiobook: Audiobook) -> [InfoItem] {
+        let unknown = MR.strings().unknown.localized()
+        
+        let diskSize = audiobook.fileSize.bytesAsFileSizeString()
+        
+        let authorString = audiobook.authors.joined(separator: " • ")
+        let narratorsString = audiobook.narrators.joined(separator: " • ")
+        
+        return [
+            InfoItem(label: MR.strings().audiobook_info_authors.localized(), value: authorString),
+            InfoItem(label: MR.strings().audiobook_info_narrators.localized(), value: narratorsString),
+            InfoItem(label: MR.strings().publisher.localized(), value: audiobook.publisher ?? unknown),
+            InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
+            InfoItem(label: MR.strings().path.localized(), value: audiobook.path ?? unknown)
         ]
     }
 }

@@ -20,6 +20,7 @@ struct TabItemContent: View {
                 case .movies: MoviesTab().environment(\.navigationContext, .mainTab)
                 case .music: MusicTab().environment(\.navigationContext, .mainTab)
                 case .books: BooksTab().environment(\.navigationContext, .mainTab)
+                case .audiobooks: AudiobooksTab().environment(\.navigationContext, .mainTab)
                 case .activity: ActivityTab().environment(\.navigationContext, .mainTab)
                 case .calendar: CalendarTab().environment(\.navigationContext, .mainTab)
                 case .downloads: DownloadsTab().environment(\.navigationContext, .mainTab)

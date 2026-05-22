@@ -27,6 +27,7 @@ import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.arr.api.model.toEditBody
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.filterValues
 import com.dnfapps.arrmatey.client.mapValues
@@ -57,7 +58,9 @@ class ListenarrClient(
         item: ArrMedia,
         moveFiles: Boolean
     ): NetworkResult<Unit> =
-        put("library/${item.id}", item)
+        (item as? Audiobook)?.let { audiobook ->
+            put("library/${item.id}", audiobook.toEditBody())
+        } ?: NetworkResult.Error(message = "Item must be an Audiobook")
 
     override suspend fun delete(
         id: Long,
@@ -157,4 +160,17 @@ class ListenarrClient(
 
     suspend fun getPreviewPath(rootPath: String, metadata: AudiobookMetadataBody): NetworkResult<AudiobookPreviewPaths> =
         post("library/preview-path", PreviewPathBody(rootPath, metadata))
+
+    suspend fun moveFiles(
+        id: Long,
+        moveFiles: Boolean,
+        sourcePath: String,
+        destinationPath: String
+    ): NetworkResult<Unit> =
+        post("library/$id/move", buildJsonObject {
+            put("moveFiles", moveFiles)
+            put("deleteEmptySources", true)
+            put("sourcePath", sourcePath)
+            put("destinationPath", destinationPath)
+        })
 }

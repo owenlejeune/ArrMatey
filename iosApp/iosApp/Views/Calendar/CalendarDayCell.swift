@@ -11,10 +11,7 @@ import Shared
 struct CalendarDayCell: View {
     let date: LocalDate
     let isSelected: Bool
-    let movieCount: Int
-    let episodeCount: Int
-    let albumCount: Int
-    let bookCount: Int
+    let items: [CalendarItem]
     let onClick: () -> Void
     
     private var isToday: Bool {
@@ -34,19 +31,27 @@ struct CalendarDayCell: View {
                 
                 Spacer()
                 
-                if movieCount > 0 || episodeCount > 0 || albumCount > 0 || bookCount > 0 {
+                if items.count > 0 {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 2) {
+                        let movieCount = items.count(where: { $0 is ArrMovie })
                         if movieCount > 0 {
                             CountBadge(count: movieCount, color: .arrOrange)
                         }
+                        let episodeCount = items.count(where: { $0 is Episode })
                         if episodeCount > 0 {
                             CountBadge(count: episodeCount, color: .arrBlue)
                         }
+                        let albumCount = items.count(where: { $0 is ArrAlbum })
                         if albumCount > 0 {
                             CountBadge(count: albumCount, color: .arrGreen)
                         }
+                        let bookCount = items.count(where: { $0 is Book })
                         if bookCount > 0 {
                             CountBadge(count: bookCount, color: .arrRed)
+                        }
+                        let audiobookCount = items.count(where: { $0 is Audiobook })
+                        if audiobookCount > 0 {
+                            CountBadge(count: audiobookCount, color: .arrLightPurple)
                         }
                     }
                 } else {

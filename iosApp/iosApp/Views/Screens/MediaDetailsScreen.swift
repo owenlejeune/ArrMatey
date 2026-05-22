@@ -147,11 +147,33 @@ struct MediaDetailsScreen: View {
                 }
             } else { return nil }
         case let movie as ArrMovie:
-            if let inCinemas = movie.inCinemas?.format(pattern: "HH:mm MMMM d, yyyy"), movie.digitalRelease == nil, movie.physicalRelease == nil {
+            if let inCinemas = movie.inCinemas?.format(pattern: "MMMM d, yyyy"), movie.digitalRelease == nil, movie.physicalRelease == nil {
                 return "\(MR.strings().in_cinemas.localized()) \(inCinemas)"
             } else {
                 return nil
             }
+        case let artist as Arrtist:
+            if artist.status == .continuing {
+                if let release = artist.nextAlbum?.releaseDate?.format(pattern: "MMMM d, yyyy") {
+                    return "\(MR.strings().next_album.localized()) \(release)"
+                } else {
+                    return MR.strings().continuing_unknown.localized()
+                }
+            } else { return nil }
+        case let author as Author:
+            if author.status == .continuing {
+                if let release = author.nextBook?.releaseDate?.format(pattern: "MMMM d, yyyy") {
+                    return "\(MR.strings().next_book.localized()) \(release)"
+                } else {
+                    return MR.strings().continuing_unknown.localized()
+                }
+            } else { return nil }
+        case let audiobook as Audiobook:
+            if let published = audiobook.publishedDate?.ifTodayOrAfter()?.format(pattern: "MMMM d, yyyy") {
+                return "\(MR.strings().release_date.localized()) \(published)"
+            } else { return nil }
+        case let searchAudiobook as SearchAudiobook:
+            return searchAudiobook.releaseDate?.ifTodayOrAfter()?.format(pattern: "MMMM d, yyyy")
         default: return nil
         }
     }
@@ -233,6 +255,8 @@ struct MediaDetailsScreen: View {
                 onToggleSeriesMonitor: { viewModel.toggleBookSeriesMonitored(books: $0) },
                 onAutomaticSearch: { viewModel.performBookAutomaticLookup(bookId: $0) }
             )
+        } else if let audiobook = item as? Audiobook {
+            AudiobooksArea(audiobook: audiobook, searchIds: viewModel.automaticSearchIds, onAutomaticSearch: { viewModel.performAutomaticLookup() })
         } else {
             EmptyView()
         }
@@ -297,6 +321,10 @@ struct MediaDetailsScreen: View {
             
         case let author as Author: EditAuthorSheet(item: author, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newAuthor, moveFiles in
             viewModel.editItem(newAuthor, moveFiles: moveFiles)
+        })
+            
+        case let audiobook as Audiobook: EditAudiobookSheet(item: audiobook, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, editInProgress: viewModel.editInProgress, onEditItem: { newAudiobook in
+            viewModel.editItem(newAudiobook, moveFiles: false)
         })
             
         default: EmptyView()

@@ -52,8 +52,15 @@ struct MediaRouteDestination: View {
             let releaseParams = ReleaseParamsBook(bookId: bookId)
             InteractiveSearchScreen(type: .booksehelf, releaseParams: releaseParams)
             
+        case .audiobookReleases(let query):
+            let releaseParams = ReleaseParamsAudiobook(query: query)
+            InteractiveSearchScreen(type: .listenarr, releaseParams: releaseParams)
+            
         case .authorFiles(let authorJson):
             AuthorFilesScreen(authorJson: authorJson)
+            
+        case .audiobookFiles(let audiobookJson):
+            AudiobookFilesScreen(audiobookJson: audiobookJson)
             
         case .bookDetails(let bookJson, let authorJson):
             BookDetailsScreen(bookJson: bookJson, authorJson: authorJson)

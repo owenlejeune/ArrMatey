@@ -594,7 +594,6 @@ private fun EditMediaSheet(
             item = item,
             qualityProfiles = qualityProfiles,
             rootFolders = rootFolders,
-            tags = tags,
             editInProgress = editInProgress,
             onEditItem = onEditItem,
             onDismiss = onDismiss

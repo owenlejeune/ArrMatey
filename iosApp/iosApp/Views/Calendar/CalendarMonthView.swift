@@ -65,7 +65,11 @@ struct CalendarMonthView: View {
             
             if isDateInCurrentMonth(selectedDate) {
                 ScrollView {
-                    selectedDateContent
+                    CalendarDaySection(
+                        date: selectedDate,
+                        items: state.items[selectedDate] ?? [],
+                        isToday: selectedDate.isEqual(state.today)
+                    )
                         .padding()
                 }
             } else {
@@ -103,23 +107,6 @@ struct CalendarMonthView: View {
         if let lastLoadedDate = state.dates.last, kotlinLastDay.compareTo(other: lastLoadedDate) > 0 {
             onLoadMore()
         }
-    }
-    
-    @ViewBuilder
-    private var selectedDateContent: some View {
-        let dayMovies = state.movies[selectedDate] ?? []
-        let dayEpisodeGroups = state.groupedEpisodes[selectedDate] ?? []
-        let dayAlbums = state.albums[selectedDate] ?? []
-        let dayBooks = state.books[selectedDate] ?? []
-        
-        CalendarDaySection(
-            date: selectedDate,
-            movies: dayMovies,
-            episodeGroups: dayEpisodeGroups,
-            albums: dayAlbums,
-            books: dayBooks,
-            isToday: selectedDate.isEqual(state.today)
-        )
     }
 
     private var monthYearString: String {

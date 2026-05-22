@@ -25,7 +25,7 @@ struct AlbumHeaderView: View {
             ?? MR.strings().tba.localized()
         
         let totalDurationMs = tracks.reduce(0) { $0 + ($1.duration) }
-        let runtime = (totalDurationMs / 60_000).formatAsRuntime()
+        let runtime = (Int(totalDurationMs) / 60_000).formatAsRuntime()
         
         var parts = [release, runtime]
         

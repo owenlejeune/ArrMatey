@@ -80,6 +80,7 @@ sealed interface ArrMedia {
         return images.firstOrNull { it.coverType == CoverType.FanArt }
             ?: images.firstOrNull { it.coverType == CoverType.Banner }
             ?: images.firstOrNull { it.coverType == CoverType.Poster }
+            ?: images.firstOrNull { it.coverType == CoverType.Cover }
     }
 
     fun getClearLogo(): ArrImage? {
