@@ -122,12 +122,6 @@ android {
     buildFeatures {
         buildConfig = true
     }
-
-    sourceSets {
-        named("main") {
-            res.srcDirs("build/generated/moko/androidMain/res")
-        }
-    }
 }
 
 dependencies {
