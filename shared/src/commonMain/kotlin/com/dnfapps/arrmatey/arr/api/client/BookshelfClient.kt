@@ -1,9 +1,7 @@
 package com.dnfapps.arrmatey.arr.api.client
 
 import com.dnfapps.arrmatey.arr.api.model.ApplyTags
-import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorEditorBody
 import com.dnfapps.arrmatey.arr.api.model.Book
@@ -13,17 +11,13 @@ import com.dnfapps.arrmatey.arr.api.model.BookFileBulkDeleteBody
 import com.dnfapps.arrmatey.arr.api.model.BookMonitorBody
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryItem
-import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
-import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.instances.model.Instance
-import com.dnfapps.arrmatey.seerr.api.model.Network
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 
@@ -97,7 +91,7 @@ class BookshelfClient(
         if (params !is ReleaseParams.Book) {
             return NetworkResult.Error(message = "Non-bookshelf params type: $params")
         }
-        val params = mapOf("bookId" to params.bookId)
+        val params = mapOf("bookId" to params.mediaId)
         return get("release", params)
     }
 

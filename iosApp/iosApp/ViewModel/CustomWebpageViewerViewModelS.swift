@@ -20,7 +20,7 @@ class CustomWebpageViewerViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.webpage.observeAsync { self.webpage = $0 }
+        viewModel.webpage.observeAsync(on: self, to: \.webpage)
     }
     
     func updateUrl(newUrl: String) {

@@ -26,12 +26,12 @@ class BookDetailsViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.book.observeAsync { self.book = $0 }
-        viewModel.bookFiles.observeAsync { self.bookFiles = $0 }
-        viewModel.bookEdition.observeAsync { self.bookEdition = $0 }
-        viewModel.history.observeAsync { self.history = $0 }
-        viewModel.monitorStatus.observeAsync { self.monitorStatus = $0 }
-        viewModel.deleteStatus.observeAsync { self.deleteStatus = $0 }
+        viewModel.book.observeAsync(on: self, to: \.book)
+        viewModel.bookFiles.observeAsync(on: self, to: \.bookFiles)
+        viewModel.bookEdition.observeAsync(on: self, to: \.bookEdition)
+        viewModel.history.observeAsync(on: self, to: \.history)
+        viewModel.monitorStatus.observeAsync(on: self, to: \.monitorStatus)
+        viewModel.deleteStatus.observeAsync(on: self, to: \.deleteStatus)
     }
     
     func toggleMonitor() {

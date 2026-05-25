@@ -86,6 +86,12 @@ class TabManager(
             prefs.orderedHiddenKeys.mapNotNull { key -> allItems[key] }.forEach { add(it) }
 
             val tracked = (prefs.orderedVisibleKeys + prefs.orderedHiddenKeys + prefs.orderedRemovedKeys).toSet()
+
+            // Add untracked standard items (newly added to enum)
+            TabItem.Standard.entries.filter { it.key !in tracked && !it.isDisabled }.forEach {
+                add(it)
+            }
+
             webpages.filter { "webpage_${it.id}" !in tracked }.forEach {
                 add(TabItem.CustomWebpage(it.id, it.name, it.url, it.headers))
             }

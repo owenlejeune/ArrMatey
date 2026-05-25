@@ -22,11 +22,15 @@ class SeerrMediaDetailsViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.uiState.observeAsync { self.uiState = $0 }
-        viewModel.buttonState.observeAsync { self.buttonState = $0 }
-        viewModel.selectedInstance.observeAsync { self.selectedInstance = $0 }
-        viewModel.isReportIssueSheetVisible.observeAsync { self.isReportIssueSheetVisible = $0.boolValue }
-        viewModel.isViewRequestSheetVisible.observeAsync { self.isViewRequestSheetVisible = $0.boolValue }
+        viewModel.uiState.observeAsync(on: self, to: \.uiState)
+        viewModel.buttonState.observeAsync(on: self, to: \.buttonState)
+        viewModel.selectedInstance.observeAsync(on: self, to: \.selectedInstance)
+        viewModel.isReportIssueSheetVisible.observeAsync(on: self) { owner, visible in
+            owner.isReportIssueSheetVisible = visible.boolValue
+        }
+        viewModel.isViewRequestSheetVisible.observeAsync(on: self) { owner, visible in
+            owner.isViewRequestSheetVisible = visible.boolValue
+        }
     }
     
     func refreshDetails() {

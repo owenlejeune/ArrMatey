@@ -21,8 +21,8 @@ class CalendarViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.calendarState.observeAsync { self.calendarState = $0 }
-        viewModel.instances.observeAsync { self.instances = $0 }
+        viewModel.calendarState.observeAsync(on: self, to: \.calendarState)
+        viewModel.instances.observeAsync(on: self, to: \.instances)
     }
     
     func load() {

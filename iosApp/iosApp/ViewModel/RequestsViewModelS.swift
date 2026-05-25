@@ -22,11 +22,11 @@ class RequestsViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.requestsState.observeAsync { self.requestsState = $0 }
-        viewModel.issuesState.observeAsync { self.issuesState = $0 }
-        viewModel.operationsState.observeAsync { self.operationsState = $0 }
-        viewModel.userState.observeAsync { self.userState = $0 }
-        viewModel.selectedTab.observeAsync { self.selectedTab = $0 }
+        viewModel.requestsState.observeAsync(on: self, to: \.requestsState)
+        viewModel.issuesState.observeAsync(on: self, to: \.issuesState)
+        viewModel.operationsState.observeAsync(on: self, to: \.operationsState)
+        viewModel.userState.observeAsync(on: self, to: \.userState)
+        viewModel.selectedTab.observeAsync(on: self, to: \.selectedTab)
     }
     
     func setSelectedTab(_ tab: SeerrTab) {

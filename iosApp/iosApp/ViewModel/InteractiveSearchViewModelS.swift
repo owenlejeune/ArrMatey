@@ -29,11 +29,13 @@ class InteractiveSearchViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.releaseUiState.observeAsync { self.releaseUiState = $0 }
-        viewModel.downloadReleaseState.observeAsync { self.downloadReleaseState = $0 }
-        viewModel.filterUiState.observeAsync { self.filterUiState = $0 }
-        viewModel.downloadStatus.observeAsync { self.downloadStatus = $0?.boolValue }
-        viewModel.searchQuery.observeAsync { self.searchQuery = $0 }
+        viewModel.releaseUiState.observeAsync(on: self, to: \.releaseUiState)
+        viewModel.downloadReleaseState.observeAsync(on: self, to: \.downloadReleaseState)
+        viewModel.filterUiState.observeAsync(on: self, to: \.filterUiState)
+        viewModel.downloadStatus.observeAsync(on: self) { owner, status in
+            owner.downloadStatus = status?.boolValue
+        }
+        viewModel.searchQuery.observeAsync(on: self, to: \.searchQuery)
     }
     
     func getRelease(_ params: ReleaseParams) {

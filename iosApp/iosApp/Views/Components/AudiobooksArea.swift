@@ -21,9 +21,9 @@ struct AudiobooksArea: View {
         Section {
             ReleaseDownloadButtons(onInteractiveClicked: {
                 if let id = audiobook.id?.int64Value {
-                    navigation.go(to: .audiobookReleases(query: audiobook.releaseQuery), of: .listenarr)
+                    navigation.go(to: .audiobookReleases(id: id, query: audiobook.releaseQuery), of: .listenarr)
                 }
-            }, automaticSearchEnabled: audiobook.monitored, onAutomaticClicked: onAutomaticSearch, automaticSearchInProgress: searchIds.contains(audiobook.id as! Int64))
+            }, automaticSearchEnabled: audiobook.monitored, onAutomaticClicked: onAutomaticSearch, automaticSearchInProgress: audiobook.id.map { searchIds.contains($0.int64Value) } ?? false)
             
             ForEach(audiobook.files, id: \.id) { file in
                 AudiobookFileCard(file: file)

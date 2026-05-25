@@ -34,13 +34,15 @@ class ArrMediaViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.uiState.observeAsync { self.uiState = $0 }
-        viewModel.instanceData.observeAsync { self.instanceData = $0 }
-        viewModel.addItemStatus.observeAsync { self.addItemStatus = $0 }
-        viewModel.searchQuery.observeAsync {self.searchQuery = $0 }
-        viewModel.preferences.observeAsync { self.preferences = $0 }
-        viewModel.hasServerConnectivityError.observeAsync { self.hasServerConnectivityError = $0.boolValue }
-        viewModel.errorMessage.observeAsync { self.errorMessage = $0 }
+        viewModel.uiState.observeAsync(on: self, to: \.uiState)
+        viewModel.instanceData.observeAsync(on: self, to: \.instanceData)
+        viewModel.addItemStatus.observeAsync(on: self, to: \.addItemStatus)
+        viewModel.searchQuery.observeAsync(on: self, to: \.searchQuery)
+        viewModel.preferences.observeAsync(on: self, to: \.preferences)
+        viewModel.hasServerConnectivityError.observeAsync(on: self) { owner, error in
+            owner.hasServerConnectivityError = error.boolValue
+        }
+        viewModel.errorMessage.observeAsync(on: self, to: \.errorMessage)
     }
     
     func executeAutomaticSearch(_ seriesId: Int64) {

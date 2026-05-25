@@ -21,7 +21,8 @@ data class ListenarrRelease(
     val publishedDateStr: String? = null,
     @SerialName("seeders") val seedersVal: Int? = 0,
     @SerialName("leechers") val leechersVal: Int? = 0,
-    val audiobookId: Long? = null
+    val audiobookId: Long? = null,
+    override var mediaId: Long? = null
 ): ArrRelease {
     override val id: Int? get() = null
     override val guid: String get() = idStr ?: magnetLink ?: torrentUrl ?: nzbUrl ?: ""

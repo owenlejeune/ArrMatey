@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.arr.api.model.AudiobookPreviewPaths
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
+import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ListenarrCommandResponse
@@ -117,6 +118,9 @@ class ListenarrClient(
             ?: return NetworkResult.Error(message = "Query can't be empty")
         return get<List<ListenarrRelease>>("search/indexers", mapOf("query" to query))
     }
+
+    override suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> =
+        post("download/send", payload)
 
     override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> =
         get("rootfolders")

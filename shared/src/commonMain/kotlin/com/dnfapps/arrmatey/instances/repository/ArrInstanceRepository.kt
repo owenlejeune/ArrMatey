@@ -46,6 +46,7 @@ import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.client.mapValues
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -53,6 +54,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -316,24 +318,27 @@ class ArrInstanceRepository(
     }
 
     private suspend fun processAddResult(result: NetworkResult<ArrMedia>, searchOnAdd: Boolean) {
-        result.onSuccess { addedItem ->
-            _addItemStatus.value = OperationStatus.Success("Item added successfully")
-            addedItem.id?.let {
-                val newMap = _mediaDetailsCache.value.toMutableMap()
-                newMap[it] = addedItem
-                _mediaDetailsCache.value = newMap
+        result
+            .onSuccess { addedItem ->
+                _addItemStatus.value = OperationStatus.Success("Item added successfully")
+                addedItem.id?.let {
+                    val newMap = _mediaDetailsCache.value.toMutableMap()
+                    newMap[it] = addedItem
+                    _mediaDetailsCache.value = newMap
 
-                if (searchOnAdd) {
-                    executeAutomaticSearch(it)
+                    if (searchOnAdd) {
+                        executeAutomaticSearch(it)
+                    }
                 }
+                _lastAddedItemId.value = addedItem.id
+                delay(1000)
+                _addItemStatus.value = OperationStatus.Idle
+                _lastAddedItemId.value = null
+                refreshLibrary()
             }
-            _lastAddedItemId.value = addedItem.id
-            refreshLibrary()
-        }
             .onError { code, error, cause ->
                 _addItemStatus.value = OperationStatus.Error(code, error, cause)
-            }
-            .also {
+                delay(1000)
                 _addItemStatus.value = OperationStatus.Idle
                 _lastAddedItemId.value = null
             }
@@ -343,6 +348,7 @@ class ArrInstanceRepository(
         _releases.value = NetworkResult.Loading
 
         client.getReleases(params)
+            .mapValues { it.apply { mediaId = params.mediaId } }
             .onSuccess { releases ->
                 logger.info { "Got releases: $releases" }
                 _releases.value = NetworkResult.Success(releases)

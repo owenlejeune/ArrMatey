@@ -22,23 +22,9 @@ class ArrSearchViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.lookupUiState.observeAsync { self.uiState = $0 }
-        
-        Task {
-            for try await state in viewModel.lookupUiState {
-                self.uiState = state
-            }
-        }
-        Task {
-            for try await sortBy in viewModel.sortBy {
-                self.sortBy = sortBy
-            }
-        }
-        Task {
-            for try await sortOrder in viewModel.sortOrder {
-                self.sortOrder = sortOrder
-            }
-        }
+        viewModel.lookupUiState.observeAsync(on: self, to: \.uiState)
+        viewModel.sortBy.observeAsync(on: self, to: \.sortBy)
+        viewModel.sortOrder.observeAsync(on: self, to: \.sortOrder)
     }
     
     func performLookup(_ query: String) {

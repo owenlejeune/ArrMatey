@@ -74,7 +74,7 @@ class ArrMediaDetailsViewModel(
     val deleteStatus: StateFlow<OperationStatus> = _deleteStatus.asStateFlow()
 
     private val _deleteSeasonStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
-    val deleteSeasonStatus: StateFlow<OperationStatus> = _deleteStatus.asStateFlow()
+    val deleteSeasonStatus: StateFlow<OperationStatus> = _deleteSeasonStatus.asStateFlow()
 
     private val _deleteAlbumStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val deleteAlbumStatus: StateFlow<OperationStatus> = _deleteAlbumStatus.asStateFlow()

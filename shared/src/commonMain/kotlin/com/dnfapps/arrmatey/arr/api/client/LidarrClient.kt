@@ -4,14 +4,11 @@ import com.dnfapps.arrmatey.arr.api.model.AlbumMonitorBody
 import com.dnfapps.arrmatey.arr.api.model.ApplyTags
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistEditorBody
-import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteTrackBody
-import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.LidarrRelease
@@ -21,7 +18,6 @@ import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.mapValues
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
@@ -99,7 +95,7 @@ class LidarrClient(
 
         val params = buildMap<String, Any> {
             params.artistId?.let { put("artistId", it) }
-           put("albumId", params.albumId)
+           put("albumId", params.mediaId)
         }
         return get("release", params)
     }

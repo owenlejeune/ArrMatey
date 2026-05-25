@@ -65,13 +65,13 @@ fun ArrTab(
             entry<ArrScreen.AlbumRelease> { params ->
                 val releaseParams = ReleaseParams.Album(
                     artistId = params.artistId,
-                    albumId = params.albumId
+                    mediaId = params.albumId
                 )
                 InteractiveSearchScreen(type, releaseParams)
             }
             entry<ArrScreen.BookRelease> { params ->
                 val releaseParams = ReleaseParams.Book(
-                    bookId = params.bookId
+                    mediaId = params.bookId
                 )
                 InteractiveSearchScreen(type, releaseParams)
             }
@@ -92,6 +92,7 @@ fun ArrTab(
             }
             entry<ArrScreen.AudiobookRelease> { params ->
                 val releaseParams = ReleaseParams.Audiobook(
+                    mediaId = params.audiobookId,
                     query = params.query
                 )
                 InteractiveSearchScreen(type, releaseParams)

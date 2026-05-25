@@ -20,9 +20,9 @@ class IssueDetailsViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.uiState.observeAsync {
-            self.uiState = $0
-            print("comments: \($0.issuePackage.issue.comments.count)")
+        viewModel.uiState.observeAsync(on: self) { owner, state in
+            owner.uiState = state
+            print("comments: \(state.issuePackage.issue.comments.count)")
         }
     }
     

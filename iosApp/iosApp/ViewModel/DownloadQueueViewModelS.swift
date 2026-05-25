@@ -25,16 +25,22 @@ class DownloadQueueViewModelS: ObservableObject {
     }
 
     private func startObserving() {
-        viewModel.clientIdsFilters.observeAsync { self.clientIdsFilters = $0.map { $0.int64Value } }
-        viewModel.sortState.observeAsync { self.sortState = $0 }
-        viewModel.downloadQueueState.observeAsync { self.downloadQueueState = $0 }
-        viewModel.commandState.observeAsync {
-            self.commandState = $0
-            self.isCommandLoading = $0 is DownloadClientCommandStateLoading
-            self.isCommandSuccess = $0 is DownloadClientCommandStateSuccess
+        viewModel.clientIdsFilters.observeAsync(on: self) { owner, filters in
+            owner.clientIdsFilters = filters.map { $0.int64Value }
         }
-        viewModel.isRefreshing.observeAsync { self.isRefreshing = $0.boolValue }
-        viewModel.hasLoaded.observeAsync { self.hasLoaded = $0.boolValue }
+        viewModel.sortState.observeAsync(on: self, to: \.sortState)
+        viewModel.downloadQueueState.observeAsync(on: self, to: \.downloadQueueState)
+        viewModel.commandState.observeAsync(on: self) { owner, state in
+            owner.commandState = state
+            owner.isCommandLoading = state is DownloadClientCommandStateLoading
+            owner.isCommandSuccess = state is DownloadClientCommandStateSuccess
+        }
+        viewModel.isRefreshing.observeAsync(on: self) { owner, isRefreshing in
+            owner.isRefreshing = isRefreshing.boolValue
+        }
+        viewModel.hasLoaded.observeAsync(on: self) { owner, hasLoaded in
+            owner.hasLoaded = hasLoaded.boolValue
+        }
     }
     
     func refresh() {

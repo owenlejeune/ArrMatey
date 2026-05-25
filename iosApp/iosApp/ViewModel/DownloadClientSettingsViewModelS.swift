@@ -21,11 +21,11 @@ class DownloadClientSettingsViewModelS: ObservableObject {
     }
 
     private func startObserving() {
-        viewModel.uiState.observeAsync {
-            self.uiState = $0
-            self.mutationSuccess = $0.mutationState is DownloadClientMutationStateSuccess
+        viewModel.uiState.observeAsync(on: self) { owner, state in
+            owner.uiState = state
+            owner.mutationSuccess = state.mutationState is DownloadClientMutationStateSuccess
         }
-        viewModel.downloadClient.observeAsync { self.downloadClient = $0 }
+        viewModel.downloadClient.observeAsync(on: self, to: \.downloadClient)
     }
 
     func updateLabel(_ label: String) {

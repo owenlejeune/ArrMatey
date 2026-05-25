@@ -46,6 +46,8 @@ sealed interface ArrRelease {
     val downloadClient: String?
     val shouldOverride: Boolean?
 
+    var mediaId: Long?
+
     val typeLabel: String
         get() {
             if (protocol == ReleaseProtocol.Torrent) {
@@ -90,20 +92,26 @@ enum class ReleaseProtocol {
 }
 
 sealed interface ReleaseParams {
-    data class Movie(val movieId: Long): ReleaseParams
+    val mediaId: Long?
+
+    data class Movie(override val mediaId: Long): ReleaseParams
     data class Series(
         val seriesId: Long? = null,
         val seasonNumber: Int? = null,
         val episodeId: Long? = null
-    ): ReleaseParams
+    ): ReleaseParams {
+        override val mediaId: Long?
+            get() = seriesId ?: episodeId
+    }
     data class Album(
-        val albumId: Long,
+        override val mediaId: Long,
         val artistId: Long? = null,
     ): ReleaseParams
     data class Book(
-        val bookId: Long
+        override val mediaId: Long
     ): ReleaseParams
     data class Audiobook(
+        override val mediaId: Long?,
         val query: String
     ): ReleaseParams
 }

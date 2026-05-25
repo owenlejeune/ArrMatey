@@ -21,7 +21,7 @@ struct MediaDetailsScreen: View {
     @State private var showEditSheet: Bool = false
     @State private var confirmDeleteSeason: Int32? = nil
     @State private var confirmDeleteAlbum: ArrAlbum? = nil
-    @State private var confirmDeleteMovie: Bool = false
+    @State private var confirmDeleteFile: Bool = false
     
     init(id: Int64, type: InstanceType) {
         self.id = id
@@ -43,7 +43,11 @@ struct MediaDetailsScreen: View {
             .sheet(isPresented: $showEditSheet) {
                 sheetContent
             }
-            .onChange(of: viewModel.deleteSucceeded) { _, success in if success { dismiss() } }
+            .onChange(of: viewModel.deleteSucceeded) { old, success in 
+                if success && !old { 
+                    dismiss() 
+                } 
+            }
             .onChange(of: viewModel.editItemSucceeded) { _, success in
                 if success {
                     showEditSheet = false
@@ -64,13 +68,13 @@ struct MediaDetailsScreen: View {
                     action: { viewModel.deleteAlbumFiles(album.id) }
                 )
             }
-            .alert(MR.strings().confirm_delete.localized(), isPresented: $confirmDeleteMovie) {
+            .alert(MR.strings().confirm_delete.localized(), isPresented: $confirmDeleteFile) {
                 Button(MR.strings().cancel.localized(), role: .cancel) { }
                 Button(MR.strings().confirm.localized(), role: .destructive) {
                     viewModel.deleteMovieFile()
                 }
             } message: {
-                Text(MR.strings().confirm_delete_movie.localized())
+                Text(MR.strings().confirm_delete_file.localized())
             }
     }
     
@@ -223,7 +227,7 @@ struct MediaDetailsScreen: View {
                     viewModel.performAutomaticLookup()
                 },
                 onDeleteFile: {
-                    confirmDeleteMovie = true
+                    confirmDeleteFile = true
                 }
             )
         } else if let artist = item as? Arrtist {

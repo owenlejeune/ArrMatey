@@ -49,7 +49,7 @@ struct MoviesTabContent: View {
         case .movieFiles(let json):
             MovieFilesScreen(json: json)
         case .movieRelease(let id):
-            let releaseParams = ReleaseParamsMovie(movieId: id)
+            let releaseParams = ReleaseParamsMovie(mediaId: id)
             InteractiveSearchScreen(type: .radarr, releaseParams: releaseParams)
             
         // unused

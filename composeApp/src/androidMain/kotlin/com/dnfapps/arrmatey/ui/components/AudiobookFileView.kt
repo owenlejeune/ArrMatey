@@ -42,7 +42,7 @@ fun AudiobookFileView(
     ) {
         ReleaseDownloadButtons(
             onInteractiveClicked = {
-                val destination = ArrScreen.AudiobookRelease(audiobook.releaseQuery)
+                val destination = ArrScreen.AudiobookRelease(audiobook.id, audiobook.releaseQuery)
                 navigation.navigateTo(destination)
             },
             onAutomaticClicked = onAutomaticSearch,

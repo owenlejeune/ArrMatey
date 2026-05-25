@@ -24,10 +24,10 @@ class EpisodeDetailsViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.episode.observeAsync { self.episode = $0 }
-        viewModel.history.observeAsync { self.history = $0 }
-        viewModel.monitorStatus.observeAsync { self.monitorStatus = $0 }
-        viewModel.deleteStatus.observeAsync{ self.deleteStatus = $0 }
+        viewModel.episode.observeAsync(on: self, to: \.episode)
+        viewModel.history.observeAsync(on: self, to: \.history)
+        viewModel.monitorStatus.observeAsync(on: self, to: \.monitorStatus)
+        viewModel.deleteStatus.observeAsync(on: self, to: \.deleteStatus)
     }
     
     func toggleMonitor() {

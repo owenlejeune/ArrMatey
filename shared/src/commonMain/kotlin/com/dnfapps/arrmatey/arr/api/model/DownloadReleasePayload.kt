@@ -38,8 +38,9 @@ sealed interface DownloadReleasePayload {
 
     @Serializable
     data class AudioBook(
-        override val guid: String,
-        override val indexerId: Int,
-        val audiobookId: Long? = null
+        val audiobookId: Long,
+        val searchResult: ListenarrRelease,
+        override val guid: String = searchResult.torrentUrl ?: "",
+        override val indexerId: Int = -1,
     ): DownloadReleasePayload
 }

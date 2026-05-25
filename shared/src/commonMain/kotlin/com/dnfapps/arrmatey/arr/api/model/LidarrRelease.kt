@@ -45,6 +45,8 @@ data class LidarrRelease(
     override val languages: List<Language> = emptyList(),
     override val magnetUrl: String? = null,
 
+    override var mediaId: Long? = null,
+
     val artistName: String? = null,
     val albumTitle: String? = null,
     val discography: Boolean = false,

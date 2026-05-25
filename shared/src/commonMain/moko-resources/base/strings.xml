@@ -264,7 +264,7 @@
     <string name="open_in_browser">Open in Browser</string>
     <string name="replace_url_with_current">Replace saved URL with current</string>
     <string name="confirm_delete">Confirm delete</string>
-    <string name="confirm_delete_movie">This file will be deleted</string>
+    <string name="confirm_delete_file">This file will be deleted</string>
     <string name="audiobook_info_authors">Author(s)</string>
     <string name="audiobook_info_narrators">Narrator(s)</string>
     <string name="narrated_by">Narrated by: %1$s</string>

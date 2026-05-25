@@ -35,7 +35,7 @@ struct MediaDetailsHeader: View {
                 
                 HStack(alignment: .bottom, spacing: 12) {
                     PosterItem(item: item, aspectRatio: type.aspectRatio)
-                        .frame(height: 220)
+                        .frame(width: 145)
                     
                     VStack(alignment: .leading, spacing: 4) {
                         ClearLogoView(item: item)
@@ -49,7 +49,7 @@ struct MediaDetailsHeader: View {
                                 .font(.system(size: 14))
                         }
                         
-                        Text(item.genres.joined(separator: " • "))
+                        Text(item.genres.prefix(3).joined(separator: " • "))
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
                         

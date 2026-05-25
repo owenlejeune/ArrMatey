@@ -22,9 +22,11 @@ class ArrInstanceDashboardViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.state.observeAsync { self.state = $0 }
-        viewModel.isRefreshing.observeAsync { self.isRefreshing = $0.boolValue }
-        viewModel.instance.observeAsync { self.instance = $0 }
+        viewModel.state.observeAsync(on: self, to: \.state)
+        viewModel.isRefreshing.observeAsync(on: self) { owner, isRefreshing in
+            owner.isRefreshing = isRefreshing.boolValue
+        }
+        viewModel.instance.observeAsync(on: self, to: \.instance)
     }
     
     func refresh() {

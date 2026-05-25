@@ -25,8 +25,15 @@ struct MediaDetailsView: View {
                 AuthorDetailsView(item: author, isActive: isActive)
             } else if let mock = item as? MockMedia {
                 MockDetailsView(item: mock)
+            } else if let audiobook = item as? Audiobook {
+                AudiobookDetailsView(item: audiobook, isActive: isActive)
+            } else if let searchAudiobook = item as? SearchAudiobook {
+                SearchAudiobookDetailsView(item: searchAudiobook)
             }
         }
         .foregroundColor(showBannerBackground ? .white : .secondary)
     }
 }
+
+
+

@@ -15,14 +15,15 @@ struct MediaPreviewScreen: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var navigation: NavigationManager
 
-    @ObservedObject private var viewModel: MediaPreviewViewModelS
+    @StateObject private var viewModel: MediaPreviewViewModelS
 
     @State private var sheetPresented: Bool = false
     
     init(json: String, type: InstanceType) {
         self.type = type
-        self.media = ArrMediaCompanion().fromJson(value: json)
-        self.viewModel = MediaPreviewViewModelS(preview: media, type: type)
+        let media = ArrMediaCompanion().fromJson(value: json)
+        self.media = media
+        self._viewModel = StateObject(wrappedValue: MediaPreviewViewModelS(preview: media, type: type))
     }
     
     private var lastAddedItemId: Int64? {

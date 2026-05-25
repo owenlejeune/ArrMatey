@@ -24,6 +24,13 @@ struct AudiobookFileCard: View {
                     .font(.system(size: 14))
             }
         }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color(.systemGroupedBackground))
+        )
     }
     
     private var fileInfoLine: String {

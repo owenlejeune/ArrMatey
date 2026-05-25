@@ -74,7 +74,7 @@ struct MediaSearchScreen: View {
         ScrollView {
             LazyVStack(spacing: 12) {
                 ForEach(state.items, id: \.guid) { item in
-                    MediaItemView(item: item, aspectRatio: type.aspectRatio, isActive: queueItems.contains(where: { $0.mediaId == item.id }))
+                    MediaItemView(item: item, aspectRatio: type.aspectRatio, isActive: queueItems.contains(where: { $0.mediaId == item.id }), includeOverview: true)
                         .id(item.guid)
                         .onTapGesture {
                             if let id = item.id?.int64Value {

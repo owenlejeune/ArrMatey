@@ -32,22 +32,28 @@ class PreferencesViewModel: ObservableObject {
     }
     
     private func observeFlows() {
-        preferenceStore.showInfoCards.observeAsync {
-            self.showInfoCardMap = $0.mapValues(\.boolValue)
+        preferenceStore.showInfoCards.observeAsync(on: self) { owner, cards in
+            owner.showInfoCardMap = cards.mapValues(\.boolValue)
         }
-        preferenceStore.enableActivityPolling.observeAsync {
-            self.enableAcitivityPolling = $0.boolValue
+        preferenceStore.enableActivityPolling.observeAsync(on: self) { owner, polling in
+            owner.enableAcitivityPolling = polling.boolValue
         }
-        preferenceStore.httpLogLevel.observeAsync { self.logLevel = $0 }
-        preferenceStore.tabPreferences.observeAsync { self.tabPreferences = $0 }
-        preferenceStore.shouldShowReleaseNotes.observeAsync { self.shouldShowReleaseNotes = $0.boolValue }
-        preferenceStore.useServiceNavLogos.observeAsync { self.useServiceNavLogos = $0.boolValue }
-        preferenceStore.hideInstanceSwitcher.observeAsync { self.hideInstanceSwitcher = $0.boolValue }
+        preferenceStore.httpLogLevel.observeAsync(on: self, to: \.logLevel)
+        preferenceStore.tabPreferences.observeAsync(on: self, to: \.tabPreferences)
+        preferenceStore.shouldShowReleaseNotes.observeAsync(on: self) { owner, show in
+            owner.shouldShowReleaseNotes = show.boolValue
+        }
+        preferenceStore.useServiceNavLogos.observeAsync(on: self) { owner, useLogos in
+            owner.useServiceNavLogos = useLogos.boolValue
+        }
+        preferenceStore.hideInstanceSwitcher.observeAsync(on: self) { owner, hide in
+            owner.hideInstanceSwitcher = hide.boolValue
+        }
         
-        tabManager.tabConfiguration.observeAsync { [weak self] config in
-            self?.bottomTabItems = config.visibleTabs.map({ AnyTabItem(item: $0) })
-            self?.drawerTabs = config.drawerTabs.map({ AnyTabItem(item: $0) })
-            self?.removedTabs = config.hiddenTabs.map({ AnyTabItem(item: $0) })
+        tabManager.tabConfiguration.observeAsync(on: self) { owner, config in
+            owner.bottomTabItems = config.visibleTabs.map({ AnyTabItem(item: $0) })
+            owner.drawerTabs = config.drawerTabs.map({ AnyTabItem(item: $0) })
+            owner.removedTabs = config.hiddenTabs.map({ AnyTabItem(item: $0) })
         }
     }
     

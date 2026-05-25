@@ -21,6 +21,7 @@ struct ReleaseDownloadButtons: View {
                     title: { Text(MR.strings().interactive.localized()) },
                     icon: { Image(systemName: "person.fill") }
                 )
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -32,11 +33,13 @@ struct ReleaseDownloadButtons: View {
                     if automaticSearchInProgress {
                         ProgressView()
                             .controlSize(.small)
+                            .tint(.white)
                     } else {
                         Label(
                             title: { Text(MR.strings().automatic.localized()) },
                             icon: { Image(systemName: "magnifyingglass") }
                         )
+                        .foregroundStyle(.white)
                     }
                 }
                 .frame(maxWidth: .infinity)

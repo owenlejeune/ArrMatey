@@ -23,25 +23,32 @@ struct ReleaseItemView: View {
         .joined(separator: " • ")
     }
     
+    private var secondLine: String {
+        [
+            item.quality?.qualityLabel,
+            item.size.bytesAsFileSizeString()
+        ]
+            .compactMap { $0 }
+            .joined(separator: " • ")
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(item.title)
                 .font(.headline)
-                .lineLimit(1)
             
             HStack(spacing: 0) {
                 Text(item.typeLabel)
                     .foregroundColor(Color(hex: item.peerColorHex))
                 
-                Text(" • \(item.quality?.qualityLabel) • \(item.size.bytesAsFileSizeString())")
+                
+                Text(" • \(secondLine)")
             }
             .font(.subheadline)
-            .lineLimit(1)
             
             Text(thirdLine)
                 .font(.caption)
                 .foregroundColor(.secondary)
-                .lineLimit(1)
         }
         .opacity(animate ? 0.6 : 1.0)
         .onTapGesture {

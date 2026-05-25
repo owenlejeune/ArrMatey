@@ -46,41 +46,47 @@ class ArrMediaDetailsViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.uiState.observeAsync {
-            self.uiState = $0
-            if let success = $0 as? MediaDetailsUiStateSuccess {
-                self.item = success.item
+        viewModel.uiState.observeAsync(on: self) { owner, state in
+            owner.uiState = state
+            if let success = state as? MediaDetailsUiStateSuccess {
+                owner.item = success.item
             }
         }
-        viewModel.history.observeAsync { self.history = $0 }
-        viewModel.monitorStatus.observeAsync { self.monitorStatus = $0 }
-        viewModel.editItemStatus.observeAsync {
-            self.editItemStatus = $0
-            self.editItemSucceeded = $0 is OperationStatusSuccess
-            self.editInProgress = $0 is OperationStatusInProgress
+        viewModel.history.observeAsync(on: self, to: \.history)
+        viewModel.monitorStatus.observeAsync(on: self, to: \.monitorStatus)
+        viewModel.editItemStatus.observeAsync(on: self) { owner, status in
+            owner.editItemStatus = status
+            owner.editItemSucceeded = status is OperationStatusSuccess
+            owner.editInProgress = status is OperationStatusInProgress
         }
-        viewModel.isMonitored.observeAsync { self.isMonitored = $0.boolValue }
-        viewModel.automaticSearchIds.observeAsync { self.automaticSearchIds = Set($0.map { $0.int64Value }) }
-        viewModel.lastSearchResult.observeAsync { self.lastSearchResult = $0?.boolValue }
-        viewModel.deleteStatus.observeAsync {
-            self.deleteStatus = $0
-            self.deleteSucceeded = $0 is OperationStatusSuccess
-            self.deleteInProgress = $0 is OperationStatusInProgress
+        viewModel.isMonitored.observeAsync(on: self) { owner, monitored in
+            owner.isMonitored = monitored.boolValue
         }
-        viewModel.deleteSeasonStatus.observeAsync {
-            self.deleteSeasonStatus = $0
-            self.deleteSeasonSucceeded = $0 is OperationStatusSuccess
-            self.deleteSeasonInProgress = $0 is OperationStatusInProgress
+        viewModel.automaticSearchIds.observeAsync(on: self) { owner, ids in
+            owner.automaticSearchIds = Set(ids.map { $0.int64Value })
         }
-        viewModel.deleteAlbumStatus.observeAsync {
-            self.deleteAlbumStatus = $0
-            self.deleteAlbumSucceeded = $0 is OperationStatusSuccess
-            self.deleteAlbumInProgress = $0 is OperationStatusInProgress
+        viewModel.lastSearchResult.observeAsync(on: self) { owner, result in
+            owner.lastSearchResult = result?.boolValue
+        }
+        viewModel.deleteStatus.observeAsync(on: self) { owner, status in
+            owner.deleteStatus = status
+            owner.deleteSucceeded = status is OperationStatusSuccess
+            owner.deleteInProgress = status is OperationStatusInProgress
+        }
+        viewModel.deleteSeasonStatus.observeAsync(on: self) { owner, status in
+            owner.deleteSeasonStatus = status
+            owner.deleteSeasonSucceeded = status is OperationStatusSuccess
+            owner.deleteSeasonInProgress = status is OperationStatusInProgress
+        }
+        viewModel.deleteAlbumStatus.observeAsync(on: self) { owner, status in
+            owner.deleteAlbumStatus = status
+            owner.deleteAlbumSucceeded = status is OperationStatusSuccess
+            owner.deleteAlbumInProgress = status is OperationStatusInProgress
         }
         
-        viewModel.qualityProfiles.observeAsync { self.qualityProfiles = $0 }
-        viewModel.rootFolders.observeAsync { self.rootFolders = $0 }
-        viewModel.tags.observeAsync { self.tags = $0 }
+        viewModel.qualityProfiles.observeAsync(on: self, to: \.qualityProfiles)
+        viewModel.rootFolders.observeAsync(on: self, to: \.rootFolders)
+        viewModel.tags.observeAsync(on: self, to: \.tags)
     }
     
     func refreshDetails() {

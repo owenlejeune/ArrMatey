@@ -96,10 +96,9 @@ struct MediaItemView<T: ArrMedia>: View {
             }
             .frame(maxWidth: .infinity)
             .padding(12)
-//            .frame(height: 100)
             
             if includeOverview, let overview = item.overview {
-                Text(overview)
+                Text(overview.decodingHTMLEntities())
                     .font(.system(size: 14))
                     .lineLimit(3)
                     .padding(.horizontal, 12)

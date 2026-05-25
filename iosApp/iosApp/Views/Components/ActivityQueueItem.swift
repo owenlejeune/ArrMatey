@@ -49,7 +49,6 @@ struct ActivityQueueItem: View {
                     Text(item.titleLabel)
                         .font(.body)
                         .fontWeight(.medium)
-                        .lineLimit(1)
                         .foregroundColor(contentColor)
                     
                     Text(statusText)

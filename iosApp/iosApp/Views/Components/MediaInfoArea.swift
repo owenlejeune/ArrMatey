@@ -34,11 +34,11 @@ struct MediaInfoArea: View {
                     HStack(alignment: .center) {
                         Text(info.label)
                             .font(.system(size: 14))
-                        Spacer()
+                        Spacer(minLength: 2.0)
                         Text(info.value)
                             .font(.system(size: 14))
                             .foregroundColor(.themePrimary)
-                            .lineLimit(1)
+                            .lineLimit(2)
                             .truncationMode(.tail)
                             .multilineTextAlignment(.trailing)
                             .frame(maxWidth: .infinity, alignment: .trailing)

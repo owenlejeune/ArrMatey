@@ -50,7 +50,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -102,6 +101,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 import java.util.Locale
 import kotlin.time.ExperimentalTime
+import androidx.compose.ui.platform.LocalLocale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -287,7 +287,7 @@ fun MediaDetailsScreen(
                                             mediaDetailsViewModel.performAutomaticLookup()
                                         },
                                         onDeleteFile = {
-                                            mediaDetailsViewModel.deleteMovieFile()
+                                            confirmDeleteMovie = true
                                         }
                                     )
                                     is Arrtist -> AlbumsArea(
@@ -848,7 +848,7 @@ private fun audiobookInfo(
         put(mokoString(MR.strings.publisher), (audiobook.publisher ?: unknown))
         audiobook.language?.let { language ->
             put(mokoString(MR.strings.language),
-                language.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() })
+                language.replaceFirstChar { if (it.isLowerCase()) it.titlecase(LocalLocale.current.platformLocale) else it.toString() })
         }
         put(mokoString(MR.strings.size_on_disk), diskSize)
         put(mokoString(MR.strings.path), (audiobook.path ?: unknown))

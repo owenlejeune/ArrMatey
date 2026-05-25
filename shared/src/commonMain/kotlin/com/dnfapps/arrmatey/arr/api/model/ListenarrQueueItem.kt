@@ -12,7 +12,7 @@ data class ListenarrQueueItem(
     @SerialName("id")
     val idStr: String,
     override val title: String,
-    val author: String,
+    val author: String? = null,
     @SerialName("quality")
     val qualityStr: String,
     @SerialName("status")

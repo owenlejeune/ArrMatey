@@ -16,7 +16,7 @@ struct AudiobooksTab: View {
     var body: some View {
         switch context {
         case .mainTab:
-            NavigationStack(path: $navigationManager.bookPath) {
+            NavigationStack(path: $navigationManager.audiobookPath) {
                 AudiobooksTabContent(viewModel: booksViewModel)
             }
         case .launcher:
@@ -45,8 +45,8 @@ struct AudiobooksTabContent: View {
             MediaSearchScreen(query: query, type: .listenarr)
         case .preview(let json, _):
             MediaPreviewScreen(json: json, type: .listenarr)
-        case .audiobookReleases(let query):
-            let releaseParams = ReleaseParamsAudiobook(query: query)
+        case .audiobookReleases(let id, let query):
+            let releaseParams = ReleaseParamsAudiobook(mediaId: id?.asKotlinLong, query: query)
             InteractiveSearchScreen(type: .listenarr, releaseParams: releaseParams)
         case .audiobookFiles(let audiobookJson):
             AudiobookFilesScreen(audiobookJson: audiobookJson)

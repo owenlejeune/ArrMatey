@@ -22,12 +22,14 @@ class DownloadClientsViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.downloadClientsState.observeAsync { self.downloadClientsState = $0 }
-        viewModel.connectionStates.observeAsync { self.connectionStates = $0.reduce(into: [Int64: OperationStatus]()) { result, entry in
-            let key = Int64(truncating: entry.key)
-            result[key] = entry.value
-        } }
-        viewModel.mutationState.observeAsync { self.mutationState = $0 }
+        viewModel.downloadClientsState.observeAsync(on: self, to: \.downloadClientsState)
+        viewModel.connectionStates.observeAsync(on: self) { owner, states in
+            owner.connectionStates = states.reduce(into: [Int64: OperationStatus]()) { result, entry in
+                let key = Int64(truncating: entry.key)
+                result[key] = entry.value
+            }
+        }
+        viewModel.mutationState.observeAsync(on: self, to: \.mutationState)
     }
     
     func testConnection(_ id: Int64) {

@@ -19,9 +19,9 @@ class ProwlarrIndexersViewModelS: ObservableObject {
     init() {
         self.viewModel = KoinBridge.shared.getProwlarrIndexersViewModel()
         
-        viewModel.indexers.observeAsync { self.indexers = $0 }
-        viewModel.indexerSortState.observeAsync { self.indexerSortState = $0 }
-        viewModel.indexerStatus.observeAsync { self.indexersStatus = $0 }
+        viewModel.indexers.observeAsync(on: self, to: \.indexers)
+        viewModel.indexerSortState.observeAsync(on: self, to: \.indexerSortState)
+        viewModel.indexerStatus.observeAsync(on: self, to: \.indexersStatus)
     }
     
     func refresh() {

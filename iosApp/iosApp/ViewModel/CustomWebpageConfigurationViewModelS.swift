@@ -23,10 +23,10 @@ class CustomWebpageConfigurationViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.webpages.observeAsync { self.webpages = $0 }
-        viewModel.uiState.observeAsync {
-            self.uiState = $0
-            self.mutationSuccess = $0.saveResult is InsertResultSuccess
+        viewModel.webpages.observeAsync(on: self, to: \.webpages)
+        viewModel.uiState.observeAsync(on: self) { owner, state in
+            owner.uiState = state
+            owner.mutationSuccess = state.saveResult is InsertResultSuccess
         }
     }
     

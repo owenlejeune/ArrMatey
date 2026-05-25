@@ -37,7 +37,7 @@ struct ClearLogoView: View {
         } else {
             Text(item.title ?? MR.strings().unknown.localized())
                 .font(.system(size: 36, weight: .bold))
-                .lineLimit(3)
+                .lineLimit(4)
                 .truncationMode(.tail)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity, alignment: .center)

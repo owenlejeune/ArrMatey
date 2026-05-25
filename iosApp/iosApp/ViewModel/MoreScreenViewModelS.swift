@@ -22,12 +22,16 @@ class MoreScreenViewModelS: ObservableObject {
     init() {
         self.viewModel = KoinBridge.shared.getMoreScreenViewModel()
         
-        viewModel.instances.observeAsync { self.instances = $0 }
-        viewModel.downloadClients.observeAsync { self.downloadClients = $0 }
-        viewModel.customWebpages.observeAsync { self.customWebpages = $0 }
-        viewModel.testingStatus.observeAsync { self.connectionStatuses = $0 }
-        viewModel.useServiceNavLogos.observeAsync { self.useServiceNavLogos = $0.boolValue }
-        viewModel.hideInstanceSwitcher.observeAsync { self.hideInstanceSwitcher = $0.boolValue }
+        viewModel.instances.observeAsync(on: self, to: \.instances)
+        viewModel.downloadClients.observeAsync(on: self, to: \.downloadClients)
+        viewModel.customWebpages.observeAsync(on: self, to: \.customWebpages)
+        viewModel.testingStatus.observeAsync(on: self, to: \.connectionStatuses)
+        viewModel.useServiceNavLogos.observeAsync(on: self) { owner, useLogos in
+            owner.useServiceNavLogos = useLogos.boolValue
+        }
+        viewModel.hideInstanceSwitcher.observeAsync(on: self) { owner, hide in
+            owner.hideInstanceSwitcher = hide.boolValue
+        }
     }
     
     func toggleUseServiceNavLogos() {

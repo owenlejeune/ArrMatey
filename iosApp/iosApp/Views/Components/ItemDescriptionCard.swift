@@ -9,13 +9,19 @@ import SwiftUI
 
 struct ItemDescriptionCard: View {
     let overview: String?
+     private let decodedOverview: String?
     
     @State private var expanded = false
     
+     init(overview: String?) {
+         self.overview = overview
+         self.decodedOverview = overview?.decodingHTMLEntities()
+     }
+    
     var body: some View {
-        if let overview {
+        if let decodedOverview {
             VStack {
-                Text(overview)
+                Text(decodedOverview)
                     .font(.system(size: 14))
                     .lineLimit(expanded ? nil : 10)
                     .truncationMode(.tail)

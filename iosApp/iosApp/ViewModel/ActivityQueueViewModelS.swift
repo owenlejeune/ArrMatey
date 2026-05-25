@@ -27,15 +27,19 @@ class ActivityQueueViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.queueItems.observeAsync { self.queueItems = $0 }
-        viewModel.tasksWithIssues.observeAsync { self.tasksWithIssues = $0.intValue }
-        viewModel.isPolling.observeAsync { self.isPolling = $0.boolValue }
-        viewModel.instances.observeAsync { self.instances = $0 }
-        viewModel.activityQueueUiState.observeAsync { self.uiState = $0 }
-        viewModel.removeItemState.observeAsync {
-            self.removeItemStatus = $0
-            self.removeInProgress = $0 is OperationStatusInProgress
-            self.removeSuccesss = $0 is OperationStatusSuccess
+        viewModel.queueItems.observeAsync(on: self, to: \.queueItems)
+        viewModel.tasksWithIssues.observeAsync(on: self) { owner, tasks in
+            owner.tasksWithIssues = tasks.intValue
+        }
+        viewModel.isPolling.observeAsync(on: self) { owner, isPolling in
+            owner.isPolling = isPolling.boolValue
+        }
+        viewModel.instances.observeAsync(on: self, to: \.instances)
+        viewModel.activityQueueUiState.observeAsync(on: self, to: \.uiState)
+        viewModel.removeItemState.observeAsync(on: self) { owner, status in
+            owner.removeItemStatus = status
+            owner.removeInProgress = status is OperationStatusInProgress
+            owner.removeSuccesss = status is OperationStatusSuccess
         }
     }
     

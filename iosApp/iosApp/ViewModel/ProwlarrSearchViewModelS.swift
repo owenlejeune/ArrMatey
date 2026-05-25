@@ -19,9 +19,9 @@ class ProwlarrSearchViewModelS: ObservableObject {
     init() {
         self.viewModel = KoinBridge.shared.getProwlarrSearchViewModel()
         
-        viewModel.searchResults.observeAsync { self.searchResults = $0 }
-        viewModel.searchQuery.observeAsync { self.searchQuery = $0 }
-        viewModel.grabStatus.observeAsync { self.grabStatus = $0 }
+        viewModel.searchResults.observeAsync(on: self, to: \.searchResults)
+        viewModel.searchQuery.observeAsync(on: self, to: \.searchQuery)
+        viewModel.grabStatus.observeAsync(on: self, to: \.grabStatus)
     }
     
     func performSearch(_ query: String) {

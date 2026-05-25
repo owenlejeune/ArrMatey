@@ -46,7 +46,7 @@ struct BooksTabContent: View {
         case .preview(let json, _):
             MediaPreviewScreen(json: json, type: .booksehelf)
         case .bookReleases(let bookId):
-            let releaseParams = ReleaseParamsBook(bookId: bookId)
+            let releaseParams = ReleaseParamsBook(mediaId: bookId)
             InteractiveSearchScreen(type: .booksehelf, releaseParams: releaseParams)
         case .bookDetails(let bookJson, let authorJson):
             BookDetailsScreen(bookJson: bookJson, authorJson: authorJson)

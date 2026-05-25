@@ -43,6 +43,8 @@ data class SeriesRelease(
     override val languages: List<Language> = emptyList(),
     override val magnetUrl: String? = null,
 
+    override var mediaId: Long? = null,
+
     val tmdbId: Int? = null,
     val imdbId: String? = null,
     val indexerFlags: Int? = null,

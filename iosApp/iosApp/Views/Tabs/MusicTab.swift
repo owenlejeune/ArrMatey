@@ -46,7 +46,7 @@ struct MusicTabContent: View {
         case .preview(let json, _):
             MediaPreviewScreen(json: json, type: .lidarr)
         case .albumReleases(let albumId, let artistId):
-            let releaseParams = ReleaseParamsAlbum(albumId: albumId, artistId: artistId?.asKotlinLong)
+            let releaseParams = ReleaseParamsAlbum(mediaId: albumId, artistId: artistId?.asKotlinLong)
             InteractiveSearchScreen(type: .lidarr, releaseParams: releaseParams)
             
         // unused

@@ -1,13 +1,10 @@
 package com.dnfapps.arrmatey.arr.api.client
 
 import com.dnfapps.arrmatey.arr.api.model.ApplyTags
-import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
-import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.MovieEditorBody
@@ -97,7 +94,7 @@ class RadarrClient(
         if (params !is ReleaseParams.Movie) {
             return NetworkResult.Error(message = "Non-movie params type: $params")
         }
-        return get("release", mapOf("movieId" to params.movieId))
+        return get("release", mapOf("movieId" to params.mediaId))
     }
 
     override suspend fun getItemHistory(

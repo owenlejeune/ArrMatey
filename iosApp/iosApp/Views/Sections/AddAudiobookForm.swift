@@ -17,7 +17,7 @@ struct AddAudiobookForm: View {
     let onAddItem: (SearchAudiobook, Bool) -> Void
     let onDismiss: () -> Void
     
-    @State private var monitor: Bool = true
+    @State private var monitored: Bool = true
     @State private var selectedQualityProfileId: Int32? = nil
     @State private var selectedRootFolderId: Int32? = nil
     @State private var selectedRelativePath: String
@@ -64,7 +64,7 @@ struct AddAudiobookForm: View {
                 }
                 .onChange(of: rootFolders, initial: true) {
                     if !rootFolders.isEmpty && selectedRootFolderId == nil {
-                        selectedRootFolderId = rootFolders[0].id
+                        selectedRootFolderId = rootFolders.first(where: { $0.isDefault })?.id ?? rootFolders[0].id
                     }
                 }
         }
@@ -74,7 +74,7 @@ struct AddAudiobookForm: View {
     private var content: some View {
         Form {
             Section {
-                Toggle(MR.strings().monitor.localized(), isOn: $monitor)
+                Toggle(MR.strings().monitored.localized(), isOn: $monitored)
                 
                 if selectedQualityProfileId != nil {
                     Picker(MR.strings().quality_profile.localized(), selection: $selectedQualityProfileId) {
@@ -85,21 +85,21 @@ struct AddAudiobookForm: View {
                         }
                     }
                 }
+                
+                Toggle(MR.strings().search_on_add_label.localized(), isOn: $searchOnAdd)
             }
             
             Section {
-                Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolderId) {
-                    ForEach(rootFolders, id: \.self) { rootFolder in
-                        Text("\(rootFolder.path) (\(rootFolder.freeSpaceString))")
-                            .tag(rootFolder.id)
+                if selectedRootFolderId != nil {
+                    Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolderId) {
+                        ForEach(rootFolders, id: \.self) { rootFolder in
+                            Text("\(rootFolder.path)\(rootFolder.isDefault ? " (\(MR.strings().default_label.localized()))" : "")")
+                                .tag(rootFolder.id)
+                        }
                     }
                 }
                 
                 TextField(MR.strings().relative_path.localized(), text: $selectedRelativePath)
-            }
-            
-            Section {
-                Toggle(MR.strings().search_on_add_label.localized(), isOn: $searchOnAdd)
             }
         }
     }
@@ -118,12 +118,12 @@ struct AddAudiobookForm: View {
         ToolbarItem(placement: .primaryAction) {
             Button {
                 Task {
-                    if let profileId = selectedQualityProfileId, let path = selectedRootFolderPath {
+                    if let path = selectedRootFolderPath {
                         let newAudiobook = audiobook.doCopyForCreation(
-                            monitored: monitor,
-                            qualityProfileId: profileId,
+                            monitored: monitored,
+                            qualityProfileId: selectedQualityProfileId ?? 0,
                             rootFolderPath: path,
-                            relativePath: relativePath
+                            relativePath: selectedRelativePath
                         )
                         onAddItem(newAudiobook, searchOnAdd)
                     }

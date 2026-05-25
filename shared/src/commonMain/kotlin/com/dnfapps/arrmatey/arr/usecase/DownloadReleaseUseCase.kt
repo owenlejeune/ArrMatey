@@ -28,7 +28,7 @@ class DownloadReleaseUseCase(
             is MovieRelease -> buildRadarrPayload(release, force)
             is LidarrRelease -> buildLidarrPayload(release, force)
             is BookshelfRelease -> buildBookshelfPayload(release)
-            is ListenarrRelease -> buildListenarrPayload(release, force)
+            is ListenarrRelease -> buildListenarrPayload(release)
         }
         return repository.downloadRelease(payload)
     }
@@ -62,10 +62,9 @@ class DownloadReleaseUseCase(
             indexerId = release.indexerId
         )
     
-    private fun buildListenarrPayload(release: ListenarrRelease, force: Boolean): DownloadReleasePayload =
+    private fun buildListenarrPayload(release: ListenarrRelease): DownloadReleasePayload =
         DownloadReleasePayload.AudioBook(
-            guid = release.guid,
-            indexerId = release.indexerId,
-            audiobookId = if (force) release.audiobookId else null
+            audiobookId = release.mediaId ?: -1,
+            searchResult = release
         )
 }

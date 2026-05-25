@@ -20,7 +20,7 @@ class AudiobookFilesViewModelS: ObservableObject {
     }
     
     private func startObserving() {
-        viewModel.uiState.observeAsync { self.uiState = $0 }
+        viewModel.uiState.observeAsync(on: self, to: \.uiState)
     }
     
     func refreshHistory() {
