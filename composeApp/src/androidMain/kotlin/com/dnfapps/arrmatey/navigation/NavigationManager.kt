@@ -26,6 +26,16 @@ class NavigationManager(
     fun setDrawerOpen(isOpen: Boolean) = appState.setDrawerOpen(isOpen)
 
     fun setSelectedTab(tab: TabItem) = appState.setSelectedTab(tab)
+
+    fun navigateToTab(tab: TabItem) {
+        if (tab is TabItem.Standard && tab !in TabItem.defaultStandardEntries()) {
+            openOverlay(tab)
+        } else {
+            closeOverlay()
+            setSelectedTab(tab)
+        }
+    }
+
     fun openOverlay(tab: TabItem?) = appState.openOverlay(tab)
     fun closeOverlay() = appState.closeOverlay()
 
@@ -33,7 +43,11 @@ class NavigationManager(
      * Returns the [Navigator] for a specific [InstanceType].
      */
     fun arr(type: InstanceType): Navigator<ArrScreen> {
-        val tab = when (type) {
+        return navigatorFor(tabFor(type))
+    }
+
+    fun tabFor(type: InstanceType): TabItem.Standard {
+        return when (type) {
             InstanceType.Sonarr -> TabItem.Standard.SHOWS
             InstanceType.Radarr -> TabItem.Standard.MOVIES
             InstanceType.Lidarr -> TabItem.Standard.MUSIC
@@ -41,7 +55,6 @@ class NavigationManager(
             InstanceType.Listenarr -> TabItem.Standard.AUDIOBOOKS
             else -> throw IllegalStateException("Invalid arr type $type")
         }
-        return navigatorFor(tab)
     }
 
     /**

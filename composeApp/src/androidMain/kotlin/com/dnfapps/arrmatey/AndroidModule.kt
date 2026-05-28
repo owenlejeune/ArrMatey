@@ -15,10 +15,14 @@ import com.dnfapps.arrmatey.navigation.SettingsTabNavigator
 import com.dnfapps.arrmatey.ui.helpers.ArrImageLoader
 import com.dnfapps.arrmatey.utils.AndroidCrashManager
 import com.dnfapps.arrmatey.utils.CrashManager
+import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import org.koin.dsl.module
 
 val androidModule = module {
     single { AppState() }
+
+    // Shortcuts
+    single { AppShortcutManager(get(), get(), get()) }
 
     // Navigators
     single { SettingsTabNavigator() }

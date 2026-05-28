@@ -198,5 +198,9 @@ enum class InstanceType(
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = false
-    )
+    );
+
+    companion object {
+        fun arrs() = listOf(Sonarr, Radarr, Lidarr, Booksehelf, Listenarr)
+    }
 }

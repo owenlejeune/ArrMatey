@@ -38,6 +38,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -85,10 +86,14 @@ fun HomeScreen(
     val visibleTabs = tabConfig.visibleTabs
     val drawerTabs = tabConfig.drawerTabs
 
-    val pagerState = rememberPagerState { visibleTabs.size }
+    val pagerState = rememberPagerState(
+        initialPage = remember(visibleTabs, selectedTab) { 
+            visibleTabs.indexOf(selectedTab).coerceAtLeast(0) 
+        }
+    ) { visibleTabs.size }
 
     LaunchedEffect(visibleTabs, overlayTab) {
-        if (overlayTab == null) {
+        if (overlayTab == null && selectedTab !in visibleTabs) {
             visibleTabs.firstOrNull()?.let {
                 navigationManager.setSelectedTab(it)
             }
@@ -164,14 +169,16 @@ fun HomeScreen(
                 if (currentOverlay != null) {
                     TabItemContent(currentOverlay)
                 } else {
-                    MainNavigationContent(
-                        useServiceNavIcons = useServiceNavIcons,
-                        activityQueueIssuesCount = activityQueueIssuesCount,
-                        visibleTabs = visibleTabs,
-                        selectedTab = selectedTab,
-                        pagerState = pagerState,
-                        onTabSelected = { navigationManager.setSelectedTab(it) }
-                    )
+                    key(visibleTabs.isNotEmpty()) {
+                        MainNavigationContent(
+                            useServiceNavIcons = useServiceNavIcons,
+                            activityQueueIssuesCount = activityQueueIssuesCount,
+                            visibleTabs = visibleTabs,
+                            selectedTab = selectedTab,
+                            pagerState = pagerState,
+                            onTabSelected = { navigationManager.setSelectedTab(it) }
+                        )
+                    }
                 }
             }
         }

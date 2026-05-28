@@ -22,6 +22,7 @@ interface Navigator<T : NavKey> {
     fun replaceCurrent(screen: T)
     fun replaceBackStack(newStack: List<T>)
     fun clearAndStartWith(screen: T)
+    fun popToRoot()
 }
 
 /**
@@ -55,6 +56,14 @@ open class BaseNavigator<T : NavKey>(initialScreen: T) : Navigator<T> {
     override fun clearAndStartWith(screen: T) {
         backStack.clear()
         backStack.add(screen)
+    }
+
+    override fun popToRoot() {
+        if (backStack.size > 1) {
+            val root = backStack.first()
+            backStack.clear()
+            backStack.add(root)
+        }
     }
 }
 
