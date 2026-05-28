@@ -16,4 +16,8 @@ actual class DataStoreFactory: KoinComponent {
             context.filesDir.resolve(instanceDataStoreFileName(instanceId)).absolutePath
         }
     )
+
+    actual fun providePlatformDataStore() = createDataStore {
+        context.filesDir.resolve("android_$dataStoreFileName").absolutePath
+    }
 }

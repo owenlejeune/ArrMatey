@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey
 
 import coil3.ImageLoader
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.datastore.AndroidPreferencesStore
 import com.dnfapps.arrmatey.navigation.AppState
 import com.dnfapps.arrmatey.navigation.AudiobooksTabNavigator
 import com.dnfapps.arrmatey.navigation.BooksTabNavigator
@@ -21,8 +22,10 @@ import org.koin.dsl.module
 val androidModule = module {
     single { AppState() }
 
+    single { AndroidPreferencesStore(get()) }
+
     // Shortcuts
-    single { AppShortcutManager(get(), get(), get()) }
+    single { AppShortcutManager(get(), get(), get(), get(), get()) }
 
     // Navigators
     single { SettingsTabNavigator() }

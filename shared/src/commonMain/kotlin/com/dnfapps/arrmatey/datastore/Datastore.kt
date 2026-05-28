@@ -18,4 +18,5 @@ internal fun instanceDataStoreFileName(id: Long) = "arrmatey.instance_$id.prefer
 expect class DataStoreFactory() {
     fun provideDataStore(): DataStore<Preferences>
     fun provideInstanceDataStore(instanceId: Long): DataStore<Preferences>
+    fun providePlatformDataStore(): DataStore<Preferences>
 }

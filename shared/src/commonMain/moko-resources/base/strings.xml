@@ -419,6 +419,13 @@
     <string name="customize_navigation">Customize Navigation</string>
     <string name="customize_navigation_description">Drag items to reorder your navigation bar. Items moved to the 'Drawer' section will be accessible via the drawer menu. You can have at most five items in the navigation bar, and must have at least one item. If there is only one item in the navigation bar section, the navigation bar will be hidden.</string>
 
+    <!-- Shortcuts Configuration -->
+    <string name="shortcuts_configuration">App shortcuts configuration</string>
+    <string name="customize_shortcuts">Customize Shortcuts</string>
+    <string name="customize_shortcuts_description">Drag to reorder your app shortcuts. You can also toggle shortcuts on and off. Disabled shortcuts will not be available in the app launcher. The number of available shortcuts may be limited by your launcher.</string>
+    <string name="arr_search_shortcut">Search %1$s</string>
+    <string name="arr_library_shortcut">%1$s Library</string>
+
     <!-- Platform -->
     <string name="linux">Linux</string>
     <string name="macos">macOS</string>

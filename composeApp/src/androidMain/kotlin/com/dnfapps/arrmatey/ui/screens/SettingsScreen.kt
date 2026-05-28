@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Language
@@ -64,6 +65,7 @@ import com.dnfapps.arrmatey.navigation.toAddInstance
 import com.dnfapps.arrmatey.navigation.toDev
 import com.dnfapps.arrmatey.navigation.toEditCustomWebpage
 import com.dnfapps.arrmatey.navigation.toEditDownloadClient
+import com.dnfapps.arrmatey.navigation.toShortcutsPreferences
 import com.dnfapps.arrmatey.navigation.toTabPreferences
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
@@ -247,6 +249,13 @@ fun SettingsScreen(
                         title = mokoString(MR.strings.navigation_bar_configuration),
                         onClick = {
                             settingsNav.toTabPreferences()
+                        }
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.AutoMirrored.Default.Shortcut),
+                        title = mokoString(MR.strings.shortcuts_configuration),
+                        onClick = {
+                            settingsNav.toShortcutsPreferences()
                         }
                     ),
                     SettingItem(
