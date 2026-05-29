@@ -1,1 +1,1 @@
-A modern, all-in-one mobile client for managing your *arr stack.
+A modern, all-in-one mobile client for managing your *arr stack (Sonarr, Radarr, Lidarr, and more).

@@ -1,51 +1,58 @@
-ArrMatey is an all-in-one mobile companion for your home server media stack. Support for Sonarr, Radarr, and Lidar is included with many more coming!
+ArrMatey is an all-in-one mobile companion for your home server media stack. Seamlessly manage your library, search for new content, and monitor your downloads from anywhere.
 
-<b>Multi-Instance Support<b>
+<b>Comprehensive App Support</b>
 <li>
-<ul>Manage multiple Sonarr, Radarr, and Lidarr instances</ul>
-<ul>Quick instance switching</ul>
+<ul><b>Sonarr:</b> TV series management and monitoring</ul>
+<ul><b>Radarr:</b> Movie collection management</ul>
+<ul><b>Lidarr:</b> Music library management</ul>
+<ul><b>Readarr:</b> Ebook and audiobook collection manager</ul>
+<ul><b>Listenarr:</b> Feature-rich audiobook management</ul>
+<ul><b>Prowlarr:</b> Indexer management and proxying</ul>
+<ul><b>Seerr:</b> Manage requests and issues via Overseas or Jellyseerr</ul>
+</li>
+
+<b>Multi-Instance Support</b>
+<li>
+<ul>Manage multiple instances per service</ul>
+<ul>Quick instance switching and smart auto-hiding</ul>
 <ul>Custom instance labels and configurations</ul>
+<ul>Local network switching: Automatically use local URLs when on home Wi-Fi</ul>
 </li>
 
 <b>Library Management</b>
 <li>
-<ul>Browse your entire media library with list and grid views</ul>
-<ul>Search and filter by title, quality, monitored status</ul>
-<ul>Sort by name, date added, size, and more</ul>
-<ul>View detailed media information including:</ul>
-<li>
-<ul>Episode lists with file status</ul>
-<ul>Season management</ul>
-<ul>Quality profiles and custom formats</ul>
-<ul>Files sizes and storage information</ul>
-</li>
+<ul>Browse your library with customizable list and grid views</ul>
+<ul>Search and filter by title, quality, monitored status, and more</ul>
+<ul>View detailed media information, including episode lists, file status, and metadata</ul>
+<ul>Interactive season and album management</ul>
 </li>
 
-<b>Interactive Search</b>
+<b>Interactive & Automatic Search</b>
 <li>
-<ul>Manual search for releases</ul>
-<ul>Filter by quality, language, indexer, protocol</ul>
-<ul>View seeders, size, age, and custom format scores</ul>
+<ul>Manual search for releases across multiple indexers</ul>
+<ul>Filter results by quality, language, size, and protocol</ul>
 <ul>One-tap download with confirmation for rejected releases</ul>
+<ul>Perform automatic searches for missing or wanted items</ul>
 
-<b>Calendar View</b>
+<b>Activity & Download Clients</b>
 <li>
-<ul>View upcoming episodes, movie, and album releases</ul>
-<ul>Switch between list and month views</ul>
-<ul>Filter by content type, monitored status, premieres/finales</ul>
-<ul>Scroll-to-today for easy navigation</ul>
+<ul>Real-time download monitoring for qBittorrent, SABnzbd, Deluge, and Transmission</ul>
+<ul>View progress, ETA, speeds, and status</ul>
+<ul>Cancel or blocklist downloads directly from the app</ul>
+<ul>Manage your download queue with detailed item information</ul>
 </li>
 
-<b>Activity Queue</b>
+<b>Calendar & Upcoming Releases</b>
 <li>
-<ul>Real-time download monitoring</ul>
-<ul>View progress, ETA, and status</ul>
-<ul>Cancel downlaods with blocklist options</ul>
-<ul>Detaield queue item information</ul>
+<ul>View upcoming episodes, movies, books, and album releases</ul>
+<ul>Switch between list and monthly calendar views</ul>
+<ul>Filter by content type, premieres, and finales</ul>
 </li>
 
-<b>Advanced Features</b>
+<b>Advanced Customization</b>
 <li>
+<ul><b>UI Personalization:</b> Adjust grid density, poster radius, and banner blur</ul>
+<ul><b>Notifications:</b> Receive alerts for new releases and status updates</ul>
 <ul><b>Custom Headers:</b> Add custom HTTP headers per instance</ul>
-<ul><b>Slow Instance Mode:</b> Configurable timeout for remote instances</ul>
+<ul><b>Slow Instance Mode:</b> Configurable timeouts for remote or slow connections</ul>
 </li>
