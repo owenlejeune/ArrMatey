@@ -1,0 +1,35 @@
+DOES NOT VERIFY
+ERROR: APK Signature Scheme v2 signer #1: APK integrity check failed. CHUNKED_SHA256 digest mismatch. Expected: <b33a4c070e85ab9ff680abfe5247c5c2e0bba2a0190e34c8cf0fd0f29eee19b9>, actual: <806dc2957074c39660eff4fcf49ecbfb2c5cde02ef55162cca7ec9eebc8af31f>
+Error: failed to verify /tmp/tmpjm4aytht/output.apk.
+
+Not reproducible, going for the zipInfo diff of the APKs.
+If the following shows the signature files as the only difference, try the 'zipalignment' helper to look for alignment, padding etc.
+
+(perms: file permissions; ver: zipinfo create-version; tt: type (text/binary) and whether it's encrypted ('t-' = text, not encrypted; bx = binary, encrypted))
+
+  perms       ver FSys Size    tt CompSize Algo Timestamp           CRC      FileName
+  ----------+----+----+-------+--+--------+----+-------------------+--------+-----------
+@@ -1,10 +1,10 @@
+- Archive:  ./9f992fa5255e9784691ecc15ecd06f342ac9d29e83678392a8937a55be6ca292-com.dnfapps.arrmatey-v0.3.3-upstream.apk
+- Zip file size: 11093829 bytes, number of entries: 542
++ Archive:  ./00a7204aeab019bd6a429bd45723965717a6405b13fa5ef6553e2546326d2fb0-com.dnfapps.arrmatey-v0.3.3-unsigned.apk
++ Zip file size: 11089733 bytes, number of entries: 542
+  -rw-r--r--  0.0 unx       57 b-       53 defN 1981-01-01 01:01:02 c6cdc4ea META-INF/com/android/build/gradle/app-metadata.properties
+  -rw-r--r--  0.0 unx      120 b-      118 defN 1981-01-01 01:01:02 51eb1503 META-INF/version-control-info.textproto
+- -rw-r--r--  0.0 unx     7010 b-     7010 stor 1981-01-01 01:01:02 d1f1a07d assets/dexopt/baseline.prof
+- -rw-r--r--  0.0 unx      828 b-      828 stor 1981-01-01 01:01:02 d7114261 assets/dexopt/baseline.profm
+- -rw-r--r--  0.0 unx  6821744 b-  3033195 defN 1981-01-01 01:01:02 8272fbbd classes.dex
++ -rw-r--r--  0.0 unx     6992 b-     6992 stor 1981-01-01 01:01:02 e3e8131a assets/dexopt/baseline.prof
++ -rw-r--r--  0.0 unx      829 b-      829 stor 1981-01-01 01:01:02 2744f705 assets/dexopt/baseline.profm
++ -rw-r--r--  0.0 unx  6821648 b-  3033209 defN 1981-01-01 01:01:02 5a2445bc classes.dex
+  -rw-r--r--  0.0 unx    10096 b-    10096 stor 1981-01-01 01:01:02 9734baa0 lib/arm64-v8a/libandroidx.graphics.path.so
+  -rw-r--r--  0.0 unx    54304 b-    54304 stor 1981-01-01 01:01:02 1a7c1412 lib/arm64-v8a/libdatastore_shared_counter.so
+  -rw-r--r--  0.0 unx   427296 b-   427296 stor 1981-01-01 01:01:02 df3bd7e5 lib/arm64-v8a/librenderscript-toolkit.so
+@@ -542,4 +542,4 @@
+  -rw----     0.0 fat      448 b-      217 defN 1981-01-01 01:01:02 8eb84bbf res/zp.xml
+  -rw----     0.0 fat      464 b-      269 defN 1981-01-01 01:01:02 69b6fe6f res/zq.xml
+  -rw----     0.0 fat   869812 b-   869812 stor 1981-01-01 01:01:02 47e81b24 resources.arsc
+- 542 files, 15025185 bytes uncompressed, 10863899 bytes compressed:  27.7%
++ 542 files, 15025072 bytes uncompressed, 10863896 bytes compressed:  27.7%
+
+also see: [Debug & fix failed Reproducible Builds](https://izzyondroid.org/docs/reproducibleBuilds/DebugFailedRBs/)

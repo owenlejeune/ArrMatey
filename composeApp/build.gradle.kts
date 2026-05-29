@@ -77,17 +77,6 @@ android {
         buildConfig = true
     }
 
-    val bugReportFile = file("../.github/ISSUE_TEMPLATE/bug_report.md")
-    val bugReportContent = if (bugReportFile.exists()) {
-        bugReportFile.readText()
-            .replace(Regex("---[\\s\\S]*?---"), "")
-            .trim()
-            .replace("\n", "\\n")
-            .replace("\"", "\\\"")
-    } else {
-        ""
-    }
-
     defaultConfig {
         applicationId = "com.dnfapps.arrmatey"
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -98,6 +87,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "**/baseline.prof"
+            excludes += "**/baseline.profm"
         }
     }
     buildTypes {
@@ -128,7 +119,7 @@ dependencies {
 
 aboutLibraries {
     export {
-        outputFile = file(layout.projectDirectory.file("../shared/src/commonMain/resources/aboutLibraries.json"))
+        outputFile = layout.buildDirectory.file("generated/aboutLibraries/aboutLibraries.json")
         prettyPrint = true
     }
 }

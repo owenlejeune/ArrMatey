@@ -1,8 +1,12 @@
 # Prevent renaming of classes and members (Required for IzzyOnDroid/F-Droid)
 -dontobfuscate
 
-# Keeps the attributes that help keep the build deterministic
--keepattributes SourceFile,LineNumberTable
+# Keep the attributes that help keep the build deterministic
+-keepattributes SourceFile,LineNumberTable,Signature,InnerClasses,EnclosingMethod
+
+# Ensure deterministic synthetic class naming
+-dontusemixedcaseclassnames
+-dontpreverify
 
 # Keep the Moko Resources generated classes exactly as they are
 -keep class com.dnfapps.arrmatey.shared.MR** { *; }
