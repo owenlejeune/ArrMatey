@@ -124,3 +124,9 @@ aboutLibraries {
         prettyPrint = true
     }
 }
+
+tasks.configureEach {
+    if (name.contains("ArtProfile")) {
+        enabled = false
+    }
+}
