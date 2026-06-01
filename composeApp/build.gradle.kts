@@ -97,6 +97,11 @@ android {
             isMinifyEnabled = true
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+
+            configure<com.android.build.api.dsl.ApplicationExtension> {
+                @Suppress("UnstableApiUsage")
+                experimentalProperties["android.experimental.art-profile.clear-profile"] = true
+            }
         }
     }
     compileOptions {
