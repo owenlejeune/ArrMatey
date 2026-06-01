@@ -12,6 +12,7 @@ kotlin {
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
+            freeCompilerArgs.add("-Xno-param-names")
         }
     }
     
@@ -90,6 +91,11 @@ android {
             excludes += "**/baseline.prof"
             excludes += "**/baseline.profm"
             excludes += "/META-INF/version-control-info.textproto"
+            excludes += "**/META-INF/*.version"
+            excludes += "**/META-INF/com.android.tools/**"
+            excludes += "**/META-INF/androidx.**"
+            excludes += "**/META-INF/*.kotlin_module"
+            excludes += "**/META-INF/proguard/**"
         }
     }
     buildTypes {
@@ -102,9 +108,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        buildConfig = true
     }
     dependenciesInfo {
         // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
@@ -122,11 +125,5 @@ aboutLibraries {
     export {
         outputFile = layout.buildDirectory.file("generated/aboutLibraries/aboutLibraries.json")
         prettyPrint = true
-    }
-}
-
-tasks.configureEach {
-    if (name.contains("ArtProfile")) {
-        enabled = false
     }
 }

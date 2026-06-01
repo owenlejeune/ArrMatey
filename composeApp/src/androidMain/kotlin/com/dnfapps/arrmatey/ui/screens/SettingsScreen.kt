@@ -50,6 +50,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.BuildConfig
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.openLink
@@ -299,6 +300,7 @@ fun SettingsScreen(
                     context.openLink(moko.getString(MR.strings.bmac_link))
                 },
                 onLibrariesClick = { showLibrariesSheet = true },
+                versionName = BuildConfig.VERSION_NAME,
                 modifier = Modifier.padding(top = 12.dp)
             )
 

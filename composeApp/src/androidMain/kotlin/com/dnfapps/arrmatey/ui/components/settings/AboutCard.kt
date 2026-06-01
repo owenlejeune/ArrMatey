@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.BuildConfig
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AppIcon
 import com.dnfapps.arrmatey.utils.mokoString
@@ -37,6 +36,7 @@ fun AboutCard(
     onGitHubClick: () -> Unit,
     onDonateClick: () -> Unit,
     onLibrariesClick: () -> Unit,
+    versionName: String,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -67,7 +67,7 @@ fun AboutCard(
             )
 
             Text(
-                text = mokoString(MR.strings.version_label, BuildConfig.VERSION_NAME),
+                text = mokoString(MR.strings.version_label, versionName),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
