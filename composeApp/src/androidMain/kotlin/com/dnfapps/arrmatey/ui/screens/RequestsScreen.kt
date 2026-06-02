@@ -36,6 +36,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun RequestsScreen(
     viewModel: RequestsViewModel,
+    isExpanded: Boolean = false,
     instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr)
 ) {
     val navigation = seerrNavigator
@@ -50,7 +51,11 @@ fun RequestsScreen(
         topBar = {
             TopAppBar(
                 title = { Text(mokoString(MR.strings.seerr)) },
-                navigationIcon = { NavigationDrawerButton() }
+                navigationIcon = {
+                    if (!isExpanded) {
+                        NavigationDrawerButton()
+                    }
+                }
             )
         },
         contentWindowInsets = WindowInsets.statusBars

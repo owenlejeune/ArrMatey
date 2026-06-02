@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarViewDay
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -15,14 +14,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
-import com.dnfapps.arrmatey.datastore.PreferencesStore
-import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.calendar.CalendarListView
 import com.dnfapps.arrmatey.ui.calendar.CalendarMonthView
@@ -34,8 +33,10 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarTab(
+    windowSizeClass: WindowSizeClass,
     viewModel: CalendarViewModel = koinInject()
 ) {
+    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val calendarState by viewModel.calendarState.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
 
@@ -44,7 +45,9 @@ fun CalendarTab(
             TopAppBar(
                 title = { Text(mokoString(MR.strings.schedule)) },
                 navigationIcon = {
-                    NavigationDrawerButton()
+                    if (!isExpanded) {
+                        NavigationDrawerButton()
+                    }
                 },
                 actions = {
                     IconButton(onClick = {

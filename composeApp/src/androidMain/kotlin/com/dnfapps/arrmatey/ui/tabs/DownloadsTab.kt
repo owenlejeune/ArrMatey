@@ -50,6 +50,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,9 +99,11 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DownloadsTab(
+    windowSizeClass: WindowSizeClass,
     viewModel: DownloadQueueViewModel = koinInject(),
     clientsViewModel: DownloadClientsViewModel = koinInject()
 ) {
+    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val queueState by viewModel.downloadQueueState.collectAsStateWithLifecycle()
     val commandState by viewModel.commandState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
@@ -139,7 +143,9 @@ fun DownloadsTab(
                 textFieldState = textFieldState,
                 searchPlaceholder = placeholderLabel,
                 navigationIcon = {
-                    NavigationDrawerButton()
+                    if (!isExpanded) {
+                        NavigationDrawerButton()
+                    }
                 },
                 actions = {
                     DownloadClientQueueSortMenu(

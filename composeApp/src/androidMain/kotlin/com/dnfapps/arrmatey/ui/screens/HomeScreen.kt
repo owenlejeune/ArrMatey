@@ -8,31 +8,34 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,6 +55,7 @@ import com.dnfapps.arrmatey.entensions.TabItemIconView
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.LocalNavigationManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.toSearch
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.tabs.ActivityTab
@@ -67,6 +72,7 @@ import org.koin.compose.koinInject
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun HomeScreen(
+    windowSizeClass: WindowSizeClass,
     navigationManager: NavigationManager = koinInject(),
     preferencesStore: PreferencesStore = koinInject(),
     activityQueue: ActivityQueueViewModel = koinInject(),
@@ -125,8 +131,37 @@ fun HomeScreen(
     DoubleBackToExit()
 
     CompositionLocalProvider(LocalNavigationManager provides navigationManager) {
+        val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+
+        val mainContent = @Composable {
+            AnimatedContent(
+                targetState = overlayTab,
+                transitionSpec = {
+                    (fadeIn() + scaleIn(initialScale = 0.98f))
+                        .togetherWith(fadeOut())
+                },
+                label = "OverlayTransition"
+            ) { currentOverlay ->
+                if (currentOverlay != null) {
+                    TabItemContent(currentOverlay, windowSizeClass)
+                } else {
+                    key(visibleTabs.isNotEmpty()) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize(),
+                            userScrollEnabled = false,
+                            beyondViewportPageCount = visibleTabs.size,
+                            key = { page -> visibleTabs[page].key }
+                        ) { page ->
+                            TabItemContent(visibleTabs[page], windowSizeClass)
+                        }
+                    }
+                }
+            }
+        }
+
         ModalNavigationDrawer(
-            gesturesEnabled = overlayTab !is TabItem.CustomWebpage,
+            gesturesEnabled = overlayTab !is TabItem.CustomWebpage && windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact,
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet(drawerState = drawerState) {
@@ -158,27 +193,118 @@ fun HomeScreen(
                 }
             }
         ) {
-            AnimatedContent(
-                targetState = overlayTab,
-                transitionSpec = {
-                    (fadeIn() + scaleIn(initialScale = 0.98f))
-                        .togetherWith(fadeOut())
-                },
-                label = "OverlayTransition"
-            ) { currentOverlay ->
-                if (currentOverlay != null) {
-                    TabItemContent(currentOverlay)
-                } else {
-                    key(visibleTabs.isNotEmpty()) {
-                        MainNavigationContent(
-                            useServiceNavIcons = useServiceNavIcons,
-                            activityQueueIssuesCount = activityQueueIssuesCount,
-                            visibleTabs = visibleTabs,
-                            selectedTab = selectedTab,
-                            pagerState = pagerState,
-                            onTabSelected = { navigationManager.setSelectedTab(it) }
-                        )
+            if (isExpanded) {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    NavigationRail(
+                        header = {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                IconButton(
+                                    onClick = { navigationManager.openDrawer() }
+                                ) {
+                                    Icon(Icons.Default.Menu, contentDescription = null)
+                                }
+
+                                val currentTab = overlayTab ?: selectedTab
+                                if (currentTab.associatedType in InstanceType.arrs()) {
+                                    FloatingActionButton(
+                                        onClick = {
+                                            currentTab.associatedType?.let { type ->
+                                                navigationManager.arr(type).toSearch()
+                                            }
+                                        }
+                                    ) {
+                                        Icon(Icons.Default.Add, contentDescription = null)
+                                    }
+                                }
+                            }
+                        }
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            visibleTabs.forEach { entry ->
+                                NavigationRailItem(
+                                    selected = entry == selectedTab,
+                                    onClick = { navigationManager.setSelectedTab(entry) },
+                                    icon = {
+                                        when (entry) {
+                                            is TabItem.Standard -> {
+                                                TabItemIconView(
+                                                    tabItem = entry,
+                                                    useServiceNavIcons = useServiceNavIcons,
+                                                    activityQueueIssuesCount = activityQueueIssuesCount
+                                                )
+                                            }
+
+                                            is TabItem.CustomWebpage -> {
+                                                Icon(
+                                                    Icons.Default.Language,
+                                                    contentDescription = entry.name
+                                                )
+                                            }
+
+                                            else -> {}
+                                        }
+                                    },
+                                    label = {
+                                        when (entry) {
+                                            is TabItem.Standard -> Text(text = mokoString(entry.resource))
+                                            is TabItem.CustomWebpage -> Text(text = entry.name)
+                                            else -> {}
+                                        }
+                                    }
+                                )
+                            }
+                        }
                     }
+                    mainContent()
+                }
+            } else {
+                NavigationSuiteScaffold(
+                    navigationSuiteItems = {
+                        if (overlayTab == null) {
+                            visibleTabs.forEach { entry ->
+                                item(
+                                    selected = entry == selectedTab,
+                                    onClick = { navigationManager.setSelectedTab(entry) },
+                                    icon = {
+                                        when (entry) {
+                                            is TabItem.Standard -> {
+                                                TabItemIconView(
+                                                    tabItem = entry,
+                                                    useServiceNavIcons = useServiceNavIcons,
+                                                    activityQueueIssuesCount = activityQueueIssuesCount
+                                                )
+                                            }
+
+                                            is TabItem.CustomWebpage -> {
+                                                Icon(
+                                                    Icons.Default.Language,
+                                                    contentDescription = entry.name
+                                                )
+                                            }
+
+                                            else -> {}
+                                        }
+                                    },
+                                    label = {
+                                        when (entry) {
+                                            is TabItem.Standard -> Text(text = mokoString(entry.resource))
+                                            is TabItem.CustomWebpage -> Text(text = entry.name)
+                                            else -> {}
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                ) {
+                    mainContent()
                 }
             }
         }
@@ -245,92 +371,32 @@ private fun DrawerContent(
 }
 
 @Composable
-private fun MainNavigationContent(
-    useServiceNavIcons: Boolean,
-    activityQueueIssuesCount: Int,
-    visibleTabs: List<TabItem>,
-    selectedTab: TabItem,
-    pagerState: PagerState,
-    onTabSelected: (TabItem) -> Unit
-) {
-    Scaffold(
-        bottomBar = {
-            if (visibleTabs.size > 1) {
-                NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-                    visibleTabs.forEach { entry ->
-                        NavigationBarItem(
-                            selected = entry == selectedTab,
-                            onClick = { onTabSelected(entry) },
-                            icon = {
-                                when (entry) {
-                                    is TabItem.Standard -> {
-                                        TabItemIconView(
-                                            tabItem = entry,
-                                            useServiceNavIcons = useServiceNavIcons,
-                                            activityQueueIssuesCount = activityQueueIssuesCount
-                                        )
-                                    }
-                                    is TabItem.CustomWebpage -> {
-                                        Icon(Icons.Default.Language, contentDescription = entry.name)
-                                    }
-                                    else -> {}
-                                }
-                            },
-                            label = {
-                                when (entry) {
-                                    is TabItem.Standard -> Text(text = mokoString(entry.resource))
-                                    is TabItem.CustomWebpage -> Text(text = entry.name)
-                                    else -> {}
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-        },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Bottom)
-    ) { paddingValues ->
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            userScrollEnabled = false,
-            beyondViewportPageCount = visibleTabs.size, //0
-            key = { page -> visibleTabs[page].key }
-        ) { page ->
-            TabItemContent(visibleTabs[page])
-        }
-    }
-}
-
-@Composable
-private fun TabItemContent(tab: TabItem) {
+private fun TabItemContent(tab: TabItem, windowSizeClass: WindowSizeClass) {
     when (tab) {
         is TabItem.Standard -> {
-            StandardTabContent(tab)
+            StandardTabContent(tab, windowSizeClass)
         }
         is TabItem.CustomWebpage -> {
             key(tab.id) {
-                CustomWebpageViewerScreen(webpageId = tab.id)
+                CustomWebpageViewerScreen(webpageId = tab.id, windowSizeClass = windowSizeClass)
             }
         }
-        is TabItem.Settings -> SettingsTabNavHost()
+        is TabItem.Settings -> SettingsTabNavHost(windowSizeClass = windowSizeClass)
     }
 }
 
 @Composable
-private fun StandardTabContent(tab: TabItem.Standard) {
+private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSizeClass) {
     when (tab) {
-        TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr)
-        TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr)
-        TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr)
-        TabItem.Standard.BOOKS -> ArrTab(InstanceType.Booksehelf)
-        TabItem.Standard.AUDIOBOOKS -> ArrTab(InstanceType.Listenarr)
-        TabItem.Standard.ACTIVITY -> ActivityTab()
-        TabItem.Standard.DOWNLOADS -> DownloadsTab()
-        TabItem.Standard.CALENDAR -> CalendarTab()
-        TabItem.Standard.REQUESTS -> SeerrTab()
-        TabItem.Standard.PROWLARR -> ProwlarrTab()
+        TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr, windowSizeClass)
+        TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr, windowSizeClass)
+        TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr, windowSizeClass)
+        TabItem.Standard.BOOKS -> ArrTab(InstanceType.Booksehelf, windowSizeClass)
+        TabItem.Standard.AUDIOBOOKS -> ArrTab(InstanceType.Listenarr, windowSizeClass)
+        TabItem.Standard.ACTIVITY -> ActivityTab(windowSizeClass)
+        TabItem.Standard.DOWNLOADS -> DownloadsTab(windowSizeClass)
+        TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass)
+        TabItem.Standard.REQUESTS -> SeerrTab(windowSizeClass)
+        TabItem.Standard.PROWLARR -> ProwlarrTab(windowSizeClass)
     }
 }

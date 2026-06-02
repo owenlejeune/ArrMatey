@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
@@ -76,6 +77,7 @@ import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.toInfoList
+import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
@@ -107,9 +109,9 @@ import kotlin.time.ExperimentalTime
 fun MediaDetailsScreen(
     id: Long,
     type: InstanceType,
+    isExpanded: Boolean = false,
     mediaDetailsViewModel: ArrMediaDetailsViewModel = koinInjectParams(id, type),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigator<ArrScreen> = navigationManager.arr(type)
+    navigation: Navigator<ArrScreen> = arrNavigator
 ) {
     val context = LocalContext.current
     val uiState by mediaDetailsViewModel.uiState.collectAsStateWithLifecycle()
@@ -181,8 +183,8 @@ fun MediaDetailsScreen(
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(MR.strings.back)
+                            imageVector = if (isExpanded) Icons.Default.Close else Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = mokoString(if (isExpanded) MR.strings.close else MR.strings.back)
                         )
                     }
                 },

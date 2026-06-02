@@ -12,6 +12,7 @@ kotlin {
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
+            freeCompilerArgs.add("-Xno-param-names")
         }
     }
     
@@ -28,6 +29,8 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.coil.network)
             implementation(libs.androidx.compose.adaptive.navigation.suite)
+            implementation(libs.androidx.adaptive)
+            implementation(libs.androidx.adaptive.layout)
             implementation(libs.androidx.compose.window.size)
             implementation(libs.androidx.browser)
             implementation(libs.aboutlibraries.compose)
@@ -77,17 +80,6 @@ android {
         buildConfig = true
     }
 
-    val bugReportFile = file("../.github/ISSUE_TEMPLATE/bug_report.md")
-    val bugReportContent = if (bugReportFile.exists()) {
-        bugReportFile.readText()
-            .replace(Regex("---[\\s\\S]*?---"), "")
-            .trim()
-            .replace("\n", "\\n")
-            .replace("\"", "\\\"")
-    } else {
-        ""
-    }
-
     defaultConfig {
         applicationId = "com.dnfapps.arrmatey"
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -98,6 +90,14 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "**/baseline.prof"
+            excludes += "**/baseline.profm"
+            excludes += "/META-INF/version-control-info.textproto"
+            excludes += "**/META-INF/*.version"
+            excludes += "**/META-INF/com.android.tools/**"
+            excludes += "**/META-INF/androidx.**"
+            excludes += "**/META-INF/*.kotlin_module"
+            excludes += "**/META-INF/proguard/**"
         }
     }
     buildTypes {
@@ -110,9 +110,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        buildConfig = true
     }
     dependenciesInfo {
         // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
@@ -128,7 +125,7 @@ dependencies {
 
 aboutLibraries {
     export {
-        outputFile = file(layout.projectDirectory.file("../shared/src/commonMain/resources/aboutLibraries.json"))
+        outputFile = layout.buildDirectory.file("generated/aboutLibraries/aboutLibraries.json")
         prettyPrint = true
     }
 }

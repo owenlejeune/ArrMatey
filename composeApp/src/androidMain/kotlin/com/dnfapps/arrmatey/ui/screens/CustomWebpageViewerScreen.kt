@@ -37,6 +37,8 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -64,8 +66,10 @@ import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
 @Composable
 fun CustomWebpageViewerScreen(
     webpageId: Long,
+    windowSizeClass: WindowSizeClass,
     customWebpageViewModel: CustomWebpageViewerViewModel = koinInjectParams(webpageId)
 ) {
+    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val webpage by customWebpageViewModel.webpage.collectAsStateWithLifecycle()
     var webView by remember { mutableStateOf<WebView?>(null) }
     var canGoBack by remember { mutableStateOf(false) }
@@ -148,7 +152,11 @@ fun CustomWebpageViewerScreen(
                         }
                     }
                 },
-                navigationIcon = { NavigationDrawerButton() },
+                navigationIcon = {
+                    if (!isExpanded) {
+                        NavigationDrawerButton()
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = { webView?.goBack() },

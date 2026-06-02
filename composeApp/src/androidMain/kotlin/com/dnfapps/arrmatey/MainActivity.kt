@@ -5,15 +5,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.lifecycle.lifecycleScope
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
-import com.dnfapps.arrmatey.compose.SeerrTab
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.toSearch
-import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
     private val shortcutManager: AppShortcutManager by inject()
     private val navigationManager: NavigationManager by inject()
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -35,7 +36,8 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            App()
+            val windowSizeClass = calculateWindowSizeClass(this)
+            App(windowSizeClass)
         }
     }
 

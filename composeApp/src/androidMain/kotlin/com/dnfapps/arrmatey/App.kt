@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +29,7 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun App(
+    windowSizeClass: WindowSizeClass,
     preferences: PreferencesStore = koinInject()
 ) {
     val showReleaseNotesSheet by preferences.shouldShowReleaseNotes.collectAsStateWithLifecycle(false)
@@ -37,7 +39,7 @@ fun App(
     }
 
     ArrMateyTheme {
-        HomeScreen()
+        HomeScreen(windowSizeClass = windowSizeClass)
 
         if (showReleaseNotesSheet) {
             ModalBottomSheet(

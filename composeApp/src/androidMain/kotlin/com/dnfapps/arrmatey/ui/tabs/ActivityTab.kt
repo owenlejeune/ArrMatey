@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,7 +34,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -44,6 +42,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,7 +73,6 @@ import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.isDebug
-import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -91,8 +90,10 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun ActivityTab(
+    windowSizeClass: WindowSizeClass,
     viewModel: ActivityQueueViewModel = koinInject()
 ) {
+    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
     val uiState by viewModel.activityQueueUiState.collectAsStateWithLifecycle()
@@ -131,7 +132,9 @@ fun ActivityTab(
                     }
                 },
                 navigationIcon = {
-                    NavigationDrawerButton()
+                    if (!isExpanded) {
+                        NavigationDrawerButton()
+                    }
                 }
             )
         },
