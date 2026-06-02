@@ -96,6 +96,8 @@ android {
             excludes += "**/META-INF/androidx.**"
             excludes += "**/META-INF/*.kotlin_module"
             excludes += "**/META-INF/proguard/**"
+            excludes += "/*.prof"
+            excludes += "assets/dexopt/*"
         }
     }
     buildTypes {
@@ -103,6 +105,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+
+            @Suppress("UnstableApiUsage")
+            experimentalProperties["android.experimental.art-profile.clear-profile"] = true
         }
     }
     compileOptions {
