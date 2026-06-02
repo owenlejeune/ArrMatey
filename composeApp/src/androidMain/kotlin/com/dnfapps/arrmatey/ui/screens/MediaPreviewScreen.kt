@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +41,7 @@ import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
@@ -59,6 +61,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun MediaPreviewScreen(
     item: ArrMedia,
     type: InstanceType,
+    isExpanded: Boolean = false,
     viewModel: MediaPreviewViewModel = koinInjectParams(item, type)
 ) {
     val navigation = arrNavigator
@@ -88,7 +91,7 @@ fun MediaPreviewScreen(
     LaunchedEffect(uiState.lastAddedItemId) {
         uiState.lastAddedItemId?.let { id ->
             showBottomSheet = false
-            navigation.replaceCurrent(com.dnfapps.arrmatey.navigation.ArrScreen.Details(id))
+            navigation.replaceBackStack(listOf(ArrScreen.Library, ArrScreen.Details(id)))
         }
     }
 
@@ -102,8 +105,8 @@ fun MediaPreviewScreen(
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(MR.strings.back)
+                            imageVector = if (isExpanded) Icons.Default.Close else Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = mokoString(if (isExpanded) MR.strings.close else MR.strings.back)
                         )
                     }
                 },

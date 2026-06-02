@@ -53,6 +53,7 @@ import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.entensions.TabItemIconView
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.LocalNavigationManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.toSearch
@@ -208,13 +209,13 @@ fun HomeScreen(
                                 }
 
                                 val currentTab = overlayTab ?: selectedTab
-                                if (currentTab.associatedType in InstanceType.arrs()) {
+                                val associatedType = currentTab.associatedType
+                                val navigator = associatedType?.takeIf { it in InstanceType.arrs() }
+                                    ?.let { navigationManager.arr(it) }
+
+                                if (navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
                                     FloatingActionButton(
-                                        onClick = {
-                                            currentTab.associatedType?.let { type ->
-                                                navigationManager.arr(type).toSearch()
-                                            }
-                                        }
+                                        onClick = { navigator.toSearch() }
                                     ) {
                                         Icon(Icons.Default.Add, contentDescription = null)
                                     }
@@ -229,7 +230,7 @@ fun HomeScreen(
                         ) {
                             visibleTabs.forEach { entry ->
                                 NavigationRailItem(
-                                    selected = entry == selectedTab,
+                                    selected = entry == selectedTab && overlayTab == null,
                                     onClick = { navigationManager.setSelectedTab(entry) },
                                     icon = {
                                         when (entry) {

@@ -51,6 +51,7 @@ import org.koin.compose.koinInject
 fun ArrSearchScreen(
     initialQuery: String,
     type: InstanceType,
+    isExpanded: Boolean = false,
     viewModel: ArrSearchViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject()
 ) {

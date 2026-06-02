@@ -1,16 +1,12 @@
 package com.dnfapps.arrmatey.ui.tabs
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -18,7 +14,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -50,7 +45,11 @@ fun ArrTab(
     navigation: Navigator<ArrScreen> = navigationManager.arr(type)
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
-    val detailBackStack = navigation.backStack.filter { it !is ArrScreen.Library }
+
+    val baseIndex = navigation.backStack.indexOfLast { it is ArrScreen.Library || it is ArrScreen.Search }.coerceAtLeast(0)
+    val baseScreen = navigation.backStack[baseIndex]
+
+    val detailBackStack = navigation.backStack.filterIndexed { index, _ -> index > baseIndex }
     val showDetails = isExpanded && detailBackStack.isNotEmpty()
 
     val detailsWeight by animateFloatAsState(
@@ -62,14 +61,12 @@ fun ArrTab(
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(1f)) {
                 NavDisplay(
-                    backStack = if (showDetails) listOf(ArrScreen.Library) else navigation.backStack,
+                    backStack = if (showDetails) listOf(baseScreen) else navigation.backStack,
                     onBack = { navigation.popBackStack() },
                     entryProvider = arrEntryProvider(type, isExpanded)
                 )
             }
 
-            // We need to keep the last valid backstack for the details pane 
-            // to avoid a crash during the exit animation of AnimatedVisibility.
             val lastValidDetailBackStack = remember { mutableStateOf<List<ArrScreen>>(emptyList()) }
             if (detailBackStack.isNotEmpty()) {
                 lastValidDetailBackStack.value = detailBackStack
@@ -95,21 +92,6 @@ fun ArrTab(
     }
 }
 
-@Composable
-private fun EmptyDetailView() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Info,
-            contentDescription = null,
-            modifier = Modifier.align(Alignment.Center),
-            tint = MaterialTheme.colorScheme.outline
-        )
-    }
-}
-
 private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean) = entryProvider {
     entry<ArrScreen.Library> {
         ArrLibraryScreen(type, isExpanded = isExpanded)
@@ -118,10 +100,10 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean) = entryPro
         MediaDetailsScreen(details.id, type, isExpanded = isExpanded)
     }
     entry<ArrScreen.Search> { search ->
-        ArrSearchScreen(search.query, type)
+        ArrSearchScreen(search.query, type, isExpanded = isExpanded)
     }
     entry<ArrScreen.Preview<ArrMedia>> { preview ->
-        MediaPreviewScreen(preview.item, type)
+        MediaPreviewScreen(preview.item, type, isExpanded = isExpanded)
     }
     entry<ArrScreen.MovieReleases> { params ->
         val releaseParams = ReleaseParams.Movie(params.movieId)
