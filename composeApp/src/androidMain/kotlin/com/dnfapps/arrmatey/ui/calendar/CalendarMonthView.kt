@@ -72,34 +72,13 @@ fun CalendarMonthView(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = {
-                currentMonth = currentMonth.minus(1, DateTimeUnit.MONTH)
-            }) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = null)
-            }
-
-            Text(
-                text = "${currentMonth.month.name} ${currentMonth.year}",
-                style = MaterialTheme.typography.titleLarge,
-                color = if (isCurrentMonth) MaterialTheme.colorScheme.primary else Color.Unspecified,
-                modifier = Modifier.clickable {
-                    if (!isCurrentMonth) currentMonth = today
-                }
-            )
-
-            IconButton(onClick = {
-                currentMonth = currentMonth.plus(1, DateTimeUnit.MONTH)
-            }) {
-                Icon(Icons.Default.ChevronRight, contentDescription = null)
-            }
-        }
+        MonthHeader(
+            currentMonth = currentMonth,
+            isCurrentMonth = isCurrentMonth,
+            onPreviousMonth = { currentMonth = currentMonth.minus(1, DateTimeUnit.MONTH) },
+            onNextMonth = { currentMonth = currentMonth.plus(1, DateTimeUnit.MONTH) },
+            onTitleClick = { if (!isCurrentMonth) currentMonth = today }
+        )
 
         CalendarMonthGrid(
             currentMonth = currentMonth,
@@ -107,6 +86,7 @@ fun CalendarMonthView(
             onDateSelected = { selectedDate = it },
             state = state
         )
+
         HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
 
         if (selectedDate.month == currentMonth.month && selectedDate.year == currentMonth.year) {
@@ -121,6 +101,38 @@ fun CalendarMonthView(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun MonthHeader(
+    currentMonth: LocalDate,
+    isCurrentMonth: Boolean,
+    onPreviousMonth: () -> Unit,
+    onNextMonth: () -> Unit,
+    onTitleClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onPreviousMonth) {
+            Icon(Icons.Default.ChevronLeft, contentDescription = null)
+        }
+
+        Text(
+            text = "${currentMonth.month.name} ${currentMonth.year}",
+            style = MaterialTheme.typography.titleLarge,
+            color = if (isCurrentMonth) MaterialTheme.colorScheme.primary else Color.Unspecified,
+            modifier = Modifier.clickable { onTitleClick() }
+        )
+
+        IconButton(onClick = onNextMonth) {
+            Icon(Icons.Default.ChevronRight, contentDescription = null)
         }
     }
 }
