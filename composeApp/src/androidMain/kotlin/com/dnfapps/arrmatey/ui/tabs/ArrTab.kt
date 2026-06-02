@@ -54,7 +54,7 @@ fun ArrTab(
     val showDetails = isExpanded && detailBackStack.isNotEmpty()
 
     val detailsWeight by animateFloatAsState(
-        targetValue = if (showDetails) 1.25f else 0.001f,
+        targetValue = if (showDetails) 1f else 0.001f,
         label = "DetailsWeight"
     )
 

@@ -78,7 +78,7 @@ fun CalendarDaySection(
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Text(
-                        text = items.count { it !is EpisodeGroup }.toString(),
+                        text = items.size.toString(),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -90,11 +90,11 @@ fun CalendarDaySection(
         items.forEach { item ->
             when (item) {
                 is ArrMovie -> MovieCalendarItem(date, item)
-                is EpisodeGroup -> EpisodeCalendarItem(item)
+                is EpisodeGroup -> EpisodeCalendarItem(item.first, item.additional)
                 is ArrAlbum -> AlbumCalendarItem(item)
                 is Book -> BookCalendarItem(item)
                 is Audiobook -> AudiobookCalendarItem(item)
-                is Episode -> {}
+                is Episode -> EpisodeCalendarItem(item)
             }
         }
     }

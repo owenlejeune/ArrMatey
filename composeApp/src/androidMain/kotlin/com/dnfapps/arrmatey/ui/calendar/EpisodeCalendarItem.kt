@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.navigation.ArrScreen
@@ -39,9 +40,9 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 @Composable
 fun EpisodeCalendarItem(
-    episodeGroup: EpisodeGroup
+    episode: Episode,
+    additional: List<Episode> = emptyList()
 ) {
-    val episode = episodeGroup.first
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -110,9 +111,9 @@ fun EpisodeCalendarItem(
                         }
                     }
 
-                    if (episodeGroup.additional.isNotEmpty()) {
+                    if (additional.isNotEmpty()) {
                         Text(
-                            text = mokoString(MR.strings.additional_episodes_count, episodeGroup.additional.size),
+                            text = mokoString(MR.strings.additional_episodes_count, additional.size),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
