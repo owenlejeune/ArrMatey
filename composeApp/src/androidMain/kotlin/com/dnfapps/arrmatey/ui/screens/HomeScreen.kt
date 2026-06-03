@@ -50,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
+import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.entensions.TabItemIconView
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -78,11 +79,14 @@ fun HomeScreen(
     preferencesStore: PreferencesStore = koinInject(),
     activityQueue: ActivityQueueViewModel = koinInject(),
     tabManager: TabManager = koinInject(),
+    instanceRepository: InstanceRepository = koinInject(),
 ) {
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     val activityQueueIssuesCount by activityQueue.tasksWithIssues.collectAsStateWithLifecycle()
+
+    val allInstances by instanceRepository.allInstancesFlow.collectAsStateWithLifecycle()
 
     val drawerExtendedState by navigationManager.drawerExpandedState.collectAsStateWithLifecycle()
     val overlayTab by navigationManager.overlayTab.collectAsStateWithLifecycle()
@@ -196,70 +200,77 @@ fun HomeScreen(
         ) {
             if (isExpanded) {
                 Row(modifier = Modifier.fillMaxSize()) {
-                    NavigationRail(
-                        header = {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                IconButton(
-                                    onClick = { navigationManager.openDrawer() }
+                    if (overlayTab == null) {
+                        NavigationRail(
+                            header = {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    Icon(Icons.Default.Menu, contentDescription = null)
-                                }
-
-                                val currentTab = overlayTab ?: selectedTab
-                                val associatedType = currentTab.associatedType
-                                val navigator = associatedType?.takeIf { it in InstanceType.arrs() }
-                                    ?.let { navigationManager.arr(it) }
-
-                                if (navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
-                                    FloatingActionButton(
-                                        onClick = { navigator.toSearch() }
+                                    IconButton(
+                                        onClick = { navigationManager.openDrawer() }
                                     ) {
-                                        Icon(Icons.Default.Add, contentDescription = null)
+                                        Icon(Icons.Default.Menu, contentDescription = null)
+                                    }
+
+                                    val currentTab = overlayTab ?: selectedTab
+                                    val associatedType = currentTab.associatedType
+                                    val navigator =
+                                        associatedType?.takeIf { it in InstanceType.arrs() }
+                                            ?.let { navigationManager.arr(it) }
+
+                                    val hasInstances = associatedType?.let { type ->
+                                        allInstances.any { it.type == type }
+                                    } ?: false
+
+                                    if (hasInstances && navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
+                                        FloatingActionButton(
+                                            onClick = { navigator.toSearch() }
+                                        ) {
+                                            Icon(Icons.Default.Add, contentDescription = null)
+                                        }
                                     }
                                 }
                             }
-                        }
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxHeight(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            visibleTabs.forEach { entry ->
-                                NavigationRailItem(
-                                    selected = entry == selectedTab && overlayTab == null,
-                                    onClick = { navigationManager.setSelectedTab(entry) },
-                                    icon = {
-                                        when (entry) {
-                                            is TabItem.Standard -> {
-                                                TabItemIconView(
-                                                    tabItem = entry,
-                                                    useServiceNavIcons = useServiceNavIcons,
-                                                    activityQueueIssuesCount = activityQueueIssuesCount
-                                                )
-                                            }
+                            Column(
+                                modifier = Modifier.fillMaxHeight(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                visibleTabs.forEach { entry ->
+                                    NavigationRailItem(
+                                        selected = entry == selectedTab,
+                                        onClick = { navigationManager.setSelectedTab(entry) },
+                                        icon = {
+                                            when (entry) {
+                                                is TabItem.Standard -> {
+                                                    TabItemIconView(
+                                                        tabItem = entry,
+                                                        useServiceNavIcons = useServiceNavIcons,
+                                                        activityQueueIssuesCount = activityQueueIssuesCount
+                                                    )
+                                                }
 
-                                            is TabItem.CustomWebpage -> {
-                                                Icon(
-                                                    Icons.Default.Language,
-                                                    contentDescription = entry.name
-                                                )
-                                            }
+                                                is TabItem.CustomWebpage -> {
+                                                    Icon(
+                                                        Icons.Default.Language,
+                                                        contentDescription = entry.name
+                                                    )
+                                                }
 
-                                            else -> {}
+                                                else -> {}
+                                            }
+                                        },
+                                        label = {
+                                            when (entry) {
+                                                is TabItem.Standard -> Text(text = mokoString(entry.resource))
+                                                is TabItem.CustomWebpage -> Text(text = entry.name)
+                                                else -> {}
+                                            }
                                         }
-                                    },
-                                    label = {
-                                        when (entry) {
-                                            is TabItem.Standard -> Text(text = mokoString(entry.resource))
-                                            is TabItem.CustomWebpage -> Text(text = entry.name)
-                                            else -> {}
-                                        }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     }
