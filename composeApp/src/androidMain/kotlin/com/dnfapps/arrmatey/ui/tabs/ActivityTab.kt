@@ -90,10 +90,9 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun ActivityTab(
-    windowSizeClass: WindowSizeClass,
+    wideRailIsVisible: Boolean,
     viewModel: ActivityQueueViewModel = koinInject()
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
     val uiState by viewModel.activityQueueUiState.collectAsStateWithLifecycle()
@@ -112,6 +111,7 @@ fun ActivityTab(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
@@ -132,7 +132,7 @@ fun ActivityTab(
                     }
                 },
                 navigationIcon = {
-                    if (!isExpanded) {
+                    if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 }

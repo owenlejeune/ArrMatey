@@ -27,12 +27,10 @@ import org.koin.compose.koinInject
 
 @Composable
 fun SettingsTabNavHost(
-    windowSizeClass: WindowSizeClass,
     navigationManager: NavigationManager = koinInject(),
     instanceRepository: InstanceRepository = koinInject(),
     navigation: SettingsTabNavigator = navigationManager.settings
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val instances by instanceRepository.allInstancesFlow.collectAsStateWithLifecycle()
 
     BackHandler(enabled = navigation.backStack.size <= 1 && instances.isNotEmpty()) {
@@ -45,7 +43,7 @@ fun SettingsTabNavHost(
             backStack = navigation.backStack,
             onBack = { navigation.popBackStack() },
             entryProvider = entryProvider {
-                entry<SettingsScreen.Landing> { SettingsScreen(isExpanded = isExpanded) }
+                entry<SettingsScreen.Landing> { SettingsScreen() }
                 entry<SettingsScreen.AddInstance> { AddInstanceScreen(it.type) }
                 entry<SettingsScreen.EditInstance> { EditInstanceScreen(it.id) }
                 entry<SettingsScreen.Dev> { DevSettingsScreen() }

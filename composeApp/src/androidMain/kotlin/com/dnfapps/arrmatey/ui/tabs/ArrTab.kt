@@ -41,6 +41,7 @@ import org.koin.compose.koinInject
 fun ArrTab(
     type: InstanceType,
     windowSizeClass: WindowSizeClass,
+    wideRailIsVisible: Boolean,
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<ArrScreen> = navigationManager.arr(type)
 ) {
@@ -63,7 +64,7 @@ fun ArrTab(
                 NavDisplay(
                     backStack = if (showDetails) listOf(baseScreen) else navigation.backStack,
                     onBack = { navigation.popBackStack() },
-                    entryProvider = arrEntryProvider(type, isExpanded)
+                    entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible)
                 )
             }
 
@@ -83,7 +84,7 @@ fun ArrTab(
                         NavDisplay(
                             backStack = lastValidDetailBackStack.value,
                             onBack = { navigation.popBackStack() },
-                            entryProvider = arrEntryProvider(type, isExpanded)
+                            entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible)
                         )
                     }
                 }
@@ -92,15 +93,15 @@ fun ArrTab(
     }
 }
 
-private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean) = entryProvider {
+private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIsVisible: Boolean) = entryProvider {
     entry<ArrScreen.Library> {
-        ArrLibraryScreen(type, isExpanded = isExpanded)
+        ArrLibraryScreen(type, isExpanded, wideRailIsVisible)
     }
     entry<ArrScreen.Details> { details ->
-        MediaDetailsScreen(details.id, type, isExpanded = isExpanded)
+        MediaDetailsScreen(details.id, type, isExpanded)
     }
     entry<ArrScreen.Search> { search ->
-        ArrSearchScreen(search.query, type, isExpanded = isExpanded)
+        ArrSearchScreen(search.query, type)
     }
     entry<ArrScreen.Preview<ArrMedia>> { preview ->
         MediaPreviewScreen(preview.item, type, isExpanded = isExpanded)

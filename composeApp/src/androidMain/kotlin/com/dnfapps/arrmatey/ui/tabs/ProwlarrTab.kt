@@ -28,11 +28,10 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProwlarrTab(
-    windowSizeClass: WindowSizeClass,
+    wideRailIsVisible: Boolean,
     indexersViewModel: ProwlarrIndexersViewModel = koinInject(),
     searchViewModel: ProwlarrSearchViewModel = koinInject()
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val textFieldState = rememberTextFieldState()
 
     LaunchedEffect(textFieldState.text) {
@@ -42,12 +41,13 @@ fun ProwlarrTab(
     val sortingState by indexersViewModel.indexerSortState.collectAsStateWithLifecycle()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             FullScreenSearchAppBar(
                 textFieldState = textFieldState,
                 searchPlaceholder = mokoString(MR.strings.prowlarr_search_hint),
                 navigationIcon = {
-                    if (!isExpanded) {
+                    if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },

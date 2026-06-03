@@ -99,11 +99,10 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DownloadsTab(
-    windowSizeClass: WindowSizeClass,
+    wideRailIsVisible: Boolean,
     viewModel: DownloadQueueViewModel = koinInject(),
     clientsViewModel: DownloadClientsViewModel = koinInject()
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val queueState by viewModel.downloadQueueState.collectAsStateWithLifecycle()
     val commandState by viewModel.commandState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
@@ -135,6 +134,7 @@ fun DownloadsTab(
     val listState = rememberLazyListState()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             val count = queueState.queueItems.size
             val placeholderLabel = mokoString(MR.strings.search_downloads, count)
@@ -143,7 +143,7 @@ fun DownloadsTab(
                 textFieldState = textFieldState,
                 searchPlaceholder = placeholderLabel,
                 navigationIcon = {
-                    if (!isExpanded) {
+                    if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },

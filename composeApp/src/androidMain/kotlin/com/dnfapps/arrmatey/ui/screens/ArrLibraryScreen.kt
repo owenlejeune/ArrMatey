@@ -72,6 +72,7 @@ import org.koin.compose.koinInject
 fun ArrLibraryScreen(
     type: InstanceType,
     isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     arrMediaViewModel: ArrMediaViewModel = koinInjectParams(type),
     instancesViewModel: InstancesViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject(),
@@ -106,6 +107,7 @@ fun ArrLibraryScreen(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             if (!isExpanded) {
                 instancesState.selectedInstance?.let {
@@ -130,7 +132,7 @@ fun ArrLibraryScreen(
                     )
                 },
                 navigationIcon = {
-                    if (!isExpanded) {
+                    if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },

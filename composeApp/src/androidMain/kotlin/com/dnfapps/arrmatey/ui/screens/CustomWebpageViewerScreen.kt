@@ -66,10 +66,9 @@ import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
 @Composable
 fun CustomWebpageViewerScreen(
     webpageId: Long,
-    windowSizeClass: WindowSizeClass,
+    wideRailIsVisible: Boolean,
     customWebpageViewModel: CustomWebpageViewerViewModel = koinInjectParams(webpageId)
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val webpage by customWebpageViewModel.webpage.collectAsStateWithLifecycle()
     var webView by remember { mutableStateOf<WebView?>(null) }
     var canGoBack by remember { mutableStateOf(false) }
@@ -131,6 +130,7 @@ fun CustomWebpageViewerScreen(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
@@ -153,7 +153,7 @@ fun CustomWebpageViewerScreen(
                     }
                 },
                 navigationIcon = {
-                    if (!isExpanded) {
+                    if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },

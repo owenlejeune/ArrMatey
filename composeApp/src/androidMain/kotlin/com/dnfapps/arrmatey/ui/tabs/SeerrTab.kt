@@ -20,20 +20,18 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SeerrTab(
-    windowSizeClass: WindowSizeClass,
+    wideRailIsVisible: Boolean,
     viewModel: RequestsViewModel = koinInject(),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<SeerrScreen> = navigationManager.requests
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
-
     CompositionLocalProvider(LocalSeerrNavigator provides navigation) {
         NavDisplay(
             backStack = navigation.backStack,
             onBack = { navigation.popBackStack() },
             entryProvider = entryProvider {
                 entry<SeerrScreen.Home> {
-                    RequestsScreen(viewModel = viewModel, isExpanded = isExpanded)
+                    RequestsScreen(viewModel = viewModel, wideRailIsVisible = wideRailIsVisible)
                 }
                 entry<SeerrScreen.Details> { details ->
                     SeerrDetailsScreen(details.tmdbId, details.requestType)

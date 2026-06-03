@@ -32,7 +32,10 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -141,14 +144,14 @@ fun HomeScreen(
         val mainContent = @Composable {
             AnimatedContent(
                 targetState = overlayTab,
+                modifier = Modifier.fillMaxSize(),
                 transitionSpec = {
-                    (fadeIn() + scaleIn(initialScale = 0.98f))
-                        .togetherWith(fadeOut())
+                    fadeIn().togetherWith(fadeOut())
                 },
                 label = "OverlayTransition"
             ) { currentOverlay ->
                 if (currentOverlay != null) {
-                    TabItemContent(currentOverlay, windowSizeClass)
+                    TabItemContent(currentOverlay, windowSizeClass, false)
                 } else {
                     key(visibleTabs.isNotEmpty()) {
                         HorizontalPager(
@@ -158,7 +161,7 @@ fun HomeScreen(
                             beyondViewportPageCount = visibleTabs.size,
                             key = { page -> visibleTabs[page].key }
                         ) { page ->
-                            TabItemContent(visibleTabs[page], windowSizeClass)
+                            TabItemContent(visibleTabs[page], windowSizeClass, isExpanded)
                         }
                     }
                 }
@@ -278,6 +281,11 @@ fun HomeScreen(
                 }
             } else {
                 NavigationSuiteScaffold(
+                    layoutType = if (overlayTab != null) {
+                        NavigationSuiteType.None
+                    } else {
+                        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
+                    },
                     navigationSuiteItems = {
                         if (overlayTab == null) {
                             visibleTabs.forEach { entry ->
@@ -383,32 +391,32 @@ private fun DrawerContent(
 }
 
 @Composable
-private fun TabItemContent(tab: TabItem, windowSizeClass: WindowSizeClass) {
+private fun TabItemContent(tab: TabItem, windowSizeClass: WindowSizeClass, wideRailIsVisible: Boolean) {
     when (tab) {
         is TabItem.Standard -> {
-            StandardTabContent(tab, windowSizeClass)
+            StandardTabContent(tab, windowSizeClass, wideRailIsVisible)
         }
         is TabItem.CustomWebpage -> {
             key(tab.id) {
-                CustomWebpageViewerScreen(webpageId = tab.id, windowSizeClass = windowSizeClass)
+                CustomWebpageViewerScreen(webpageId = tab.id, wideRailIsVisible = wideRailIsVisible)
             }
         }
-        is TabItem.Settings -> SettingsTabNavHost(windowSizeClass = windowSizeClass)
+        is TabItem.Settings -> SettingsTabNavHost()
     }
 }
 
 @Composable
-private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSizeClass) {
+private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSizeClass, wideRailIsVisible: Boolean) {
     when (tab) {
-        TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr, windowSizeClass)
-        TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr, windowSizeClass)
-        TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr, windowSizeClass)
-        TabItem.Standard.BOOKS -> ArrTab(InstanceType.Booksehelf, windowSizeClass)
-        TabItem.Standard.AUDIOBOOKS -> ArrTab(InstanceType.Listenarr, windowSizeClass)
-        TabItem.Standard.ACTIVITY -> ActivityTab(windowSizeClass)
-        TabItem.Standard.DOWNLOADS -> DownloadsTab(windowSizeClass)
-        TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass)
-        TabItem.Standard.REQUESTS -> SeerrTab(windowSizeClass)
-        TabItem.Standard.PROWLARR -> ProwlarrTab(windowSizeClass)
+        TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr, windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr, windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr, windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.BOOKS -> ArrTab(InstanceType.Booksehelf, windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.AUDIOBOOKS -> ArrTab(InstanceType.Listenarr, windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.ACTIVITY -> ActivityTab(wideRailIsVisible)
+        TabItem.Standard.DOWNLOADS -> DownloadsTab(wideRailIsVisible)
+        TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.REQUESTS -> SeerrTab(wideRailIsVisible)
+        TabItem.Standard.PROWLARR -> ProwlarrTab(wideRailIsVisible)
     }
 }

@@ -87,7 +87,6 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    isExpanded: Boolean = false,
     viewModel: MoreScreenViewModel = koinInject(),
     moko: MokoStrings = koinInject()
 ) {
@@ -116,9 +115,7 @@ fun SettingsScreen(
             LargeTopAppBar(
                 title = { Text(text = mokoString(MR.strings.settings)) },
                 navigationIcon = {
-                    if (!isExpanded) {
-                        NavigationDrawerButton()
-                    }
+                    NavigationDrawerButton()
                 },
                 scrollBehavior = scrollBehavior
             )

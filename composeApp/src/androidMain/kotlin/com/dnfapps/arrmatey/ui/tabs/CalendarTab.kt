@@ -39,6 +39,7 @@ import org.koin.compose.koinInject
 @Composable
 fun CalendarTab(
     windowSizeClass: WindowSizeClass,
+    wideRailIsVisible: Boolean,
     viewModel: CalendarViewModel = koinInject()
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
@@ -46,11 +47,12 @@ fun CalendarTab(
     val instances by viewModel.instances.collectAsStateWithLifecycle()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text(mokoString(MR.strings.schedule)) },
                 navigationIcon = {
-                    if (!isExpanded) {
+                    if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },
