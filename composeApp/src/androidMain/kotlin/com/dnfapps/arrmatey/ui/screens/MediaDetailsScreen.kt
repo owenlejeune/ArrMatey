@@ -81,6 +81,7 @@ import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.model.toInfoList
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.Navigator
@@ -739,6 +740,7 @@ private fun seriesInfo(
     val diskSize = series.fileSize.bytesAsFileSizeString()
 
     return mapOf(
+        mokoString(MR.strings.status) to mokoString(series.status.resource),
         mokoString(MR.strings.series_type) to series.seriesType.name,
         mokoString(MR.strings.size_on_disk) to diskSize,
         mokoString(MR.strings.root_folder) to (series.rootFolderPath ?: unknown),
@@ -766,6 +768,7 @@ private fun movieInfo(
         ?: mokoString(MR.strings.unknown)
 
     return buildMap {
+        put(mokoString(MR.strings.status), mokoString(movie.status.resource))
         put(mokoString(MR.strings.minimum_availability), movie.minimumAvailability.name)
         put(mokoString(MR.strings.root_folder), rootFolderPathValue)
         put(mokoString(MR.strings.path), (movie.path ?: unknown))
@@ -804,6 +807,7 @@ private fun artistInfo(
     val diskSize = artist.fileSize.bytesAsFileSizeString()
 
     return buildMap {
+        put(mokoString(MR.strings.status), mokoString(artist.status.resource))
         put(mokoString(MR.strings.size_on_disk), diskSize)
         put(mokoString(MR.strings.root_folder), rootFolderPathValue)
         put(mokoString(MR.strings.path), (artist.path ?: unknown))
@@ -833,6 +837,7 @@ private fun authorInfo(
     val diskSize = author.fileSize.bytesAsFileSizeString()
 
     return buildMap {
+        put(mokoString(MR.strings.status), mokoString(author.status.resource))
         put(mokoString(MR.strings.size_on_disk), diskSize)
         put(mokoString(MR.strings.root_folder), rootFolderPathValue)
         put(mokoString(MR.strings.path), (author.path ?: unknown))

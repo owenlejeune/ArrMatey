@@ -13,6 +13,7 @@ struct MediaDetailsHeader: View {
     let type: InstanceType
     
     @Environment(\.colorScheme) var colorScheme
+    @State private var detailsHeight: CGFloat = 0
     
     private var infoString: String {
         var result = ""
@@ -32,9 +33,21 @@ struct MediaDetailsHeader: View {
         ZStack(alignment: .bottom) {
             MediaHeaderBanner(bannerUrl: URL(string: item.getBanner()?.remoteUrl ?? ""))
             
+            // Dynamic Gradient Overlay
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    .clear,
+                    Color(.systemBackground).opacity(0.8),
+                    Color(.systemBackground)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: detailsHeight * 2)
+            
             HStack(alignment: .bottom, spacing: 24) {
                 PosterItem(item: item, aspectRatio: type.aspectRatio)
-                    .frame(width: 150)
+                    .frame(width: 125)
                 
                 VStack(alignment: .leading, spacing: 8) {
                     ClearLogoView(item: item)
@@ -42,7 +55,7 @@ struct MediaDetailsHeader: View {
                     VStack(alignment: .leading, spacing: 4) {
                         let ratings = item.ratings?.toRatingItems() ?? []
                         if !ratings.isEmpty {
-                            HStack(spacing: 12) {
+                            FlowLayout(spacing: 12) {
                                 ForEach(ratings, id: \.self) { rating in
                                     HStack(spacing: 4) {
                                         if let icon = rating.icon {
@@ -55,7 +68,8 @@ struct MediaDetailsHeader: View {
                                                 .font(.system(size: 14))
                                         }
                                         Text(rating.score)
-                                            .font(.system(size: 16, weight: .bold))
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .fixedSize(horizontal: true, vertical: false)
                                     }
                                 }
                             }
@@ -67,8 +81,8 @@ struct MediaDetailsHeader: View {
                                     .font(.system(size: 16))
                             }
                             
-                            if !(item is Audiobook) {
-                                Text([item.releasedBy ?? "", item.statusString].filter { !$0.isEmpty }.joined(separator: " • "))
+                            if let releasedBy = item.releasedBy {
+                                Text(releasedBy)
                                     .font(.system(size: 14))
                             }
                         }
@@ -76,7 +90,16 @@ struct MediaDetailsHeader: View {
                         Text(item.genres.joined(separator: " • "))
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
+                            .lineLimit(2)
                     }
+                    .background(GeometryReader { geometry in
+                        Color.clear.onAppear {
+                            detailsHeight = geometry.size.height
+                        }
+                        .onChange(of: geometry.size.height) { _, newHeight in
+                            detailsHeight = newHeight
+                        }
+                    })
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }

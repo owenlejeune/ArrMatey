@@ -77,6 +77,7 @@ struct MediaInfoArea: View {
         let diskSize = series.fileSize.bytesAsFileSizeString()
         
         return [
+            InfoItem(label: MR.strings().status.localized(), value: series.status.resource.localized()),
             InfoItem(label: MR.strings().series_type.localized(), value: series.seriesType.name),
             InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
             InfoItem(label: MR.strings().root_folder.localized(), value: series.rootFolderPath ?? unknown),
@@ -98,6 +99,7 @@ struct MediaInfoArea: View {
         let rootFolderValue = movie.rootFolderPath.isEmpty ? unknown : movie.rootFolderPath
         
         var info: [InfoItem] = [
+            InfoItem(label: MR.strings().status.localized(), value: movie.status.resource.localized()),
             InfoItem(label: MR.strings().minimum_availability.localized(), value: movie.minimumAvailability.name),
             InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
             InfoItem(label: MR.strings().path.localized(), value: movie.path ?? unknown)
@@ -143,6 +145,7 @@ struct MediaInfoArea: View {
         let diskSize = artist.fileSize.bytesAsFileSizeString()
         
         return [
+            InfoItem(label: MR.strings().status.localized(), value: artist.status.resource.localized()),
             InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
             InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
             InfoItem(label: MR.strings().path.localized(), value: artist.path ?? unknown),
@@ -174,6 +177,7 @@ struct MediaInfoArea: View {
         let diskSize = author.fileSize.bytesAsFileSizeString()
         
         return [
+            InfoItem(label: MR.strings().status.localized(), value: author.status.resource.localized()),
             InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
             InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
             InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown),

@@ -122,12 +122,12 @@ struct MediaDetailsScreen: View {
                 .listRowBackground(Color.clear)
                 
                 filesArea(for: item, state.extraFiles, state.episodes, state.albums, state.tracks, state.trackFiles, state.bookFiles, state.bookSeries, state.books)
-                    .listRowInsets(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
+                    .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 0, trailing: 24))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
                 
                 MediaInfoArea(item: item, qualityProfiles: viewModel.qualityProfiles, tags: viewModel.tags)
-                    .listRowInsets(EdgeInsets(top: 24, leading: 24, bottom: 24, trailing: 24))
+                    .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 24, trailing: 24))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
             }
@@ -146,23 +146,23 @@ struct MediaDetailsScreen: View {
     }
     
     private func makeAiringString(for item: ArrMedia) -> String? {
-        let pattern = "HH:mm MMMM d, yyyy"
+        let pattern = "MMMM d, yyyy"
         switch item {
         case let series as ArrSeries:
             if series.status == .continuing {
-                if let airing = series.nextAiring?.format(pattern: pattern) {
-                    return "\(MR.strings().airing_next.localized()) \(airing)"
+                if let airing = series.nextAiring?.format(pattern: MR.strings().airing_next_format.localized()) {
+                    return MR.strings().airing_next.formatted(args: [airing])
                 } else {
                     return nil
                 }
             } else { return nil }
         case let movie as ArrMovie:
             if let digitalRelease = movie.digitalRelease, digitalRelease.isTodayOrAfter() {
-                return MR.strings().digital_release.formatted(args: [digitalRelease.format(pattern: pattern)])
+                return MR.strings().digital_release_on.formatted(args: [digitalRelease.format(pattern: pattern)])
             } else if let physicalRelease = movie.physicalRelease, physicalRelease.isTodayOrAfter() {
-                return MR.strings().physical_release.formatted(args: [physicalRelease.format(pattern: pattern)])
+                return MR.strings().physical_release_on.formatted(args: [physicalRelease.format(pattern: pattern)])
             } else if let inCinemas = movie.inCinemas, inCinemas.isTodayOrAfter() {
-                return MR.strings().in_cinemas.formatted(args: [inCinemas.format(pattern: pattern)])
+                return MR.strings().in_cinemas_on.formatted(args: [inCinemas.format(pattern: pattern)])
             } else {
                 return nil
             }
@@ -188,6 +188,8 @@ struct MediaDetailsScreen: View {
             } else { return nil }
         case let searchAudiobook as SearchAudiobook:
             return searchAudiobook.releaseDate?.ifTodayOrAfter()?.format(pattern: "MMM d, yyyy")
+        case is MockMedia:
+            return "Next Airing: Monday"
         default: return nil
         }
     }

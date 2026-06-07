@@ -38,16 +38,6 @@ struct MediaHeaderBanner: View {
                         }
                     }
                 }
-                
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        .clear,
-                        Color(.systemBackground).opacity(0.8),
-                        Color(.systemBackground)
-                    ]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
