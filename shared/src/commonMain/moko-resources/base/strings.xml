@@ -103,6 +103,9 @@
     <string name="file_size">File Size</string>
     <string name="digital_release">Digital Release</string>
     <string name="physical_release">Physical Release</string>
+    <string name="digital_release_on">Digital Release on %1$s</string>
+    <string name="physical_release_on">Physical Release on %1$s</string>
+    <string name="in_cinemas_on">In cinemas on %1$s</string>
     <string name="next_airing">Next Airing</string>
     <string name="previous_airing">Previous Airing</string>
     <string name="sort_ascending">Ascending</string>
@@ -126,7 +129,8 @@
     <string name="season_label">Season %d</string>
     <string name="specials">Specials</string>
     <string name="all_episodes">All episodes</string>
-    <string name="airing_next">Next episode</string>
+    <string name="airing_next">Next episode %1$s</string>
+    <string name="airing_next_format">MMMM d, yyyy 'at' HH:mm</string>
     <string name="next_album">Next album</string>
     <string name="next_book">Next book</string>
     <string name="continuing_unknown">Continuing - Unknown</string>

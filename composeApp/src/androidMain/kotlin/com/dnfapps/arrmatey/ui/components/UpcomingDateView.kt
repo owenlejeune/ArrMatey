@@ -24,33 +24,33 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun UpcomingDateView(item: ArrMedia) {
     when (item) {
-        is ArrSeries -> if (item.status == MediaStatus.Continuing) item.nextAiring?.format()?.let {
-            "${mokoString(MR.strings.airing_next)} $it"
-        } else null
+        is ArrSeries -> if (item.status == MediaStatus.Continuing) item.nextAiring?.format(
+            mokoString(MR.strings.airing_next_format)
+        )?.let { mokoString(MR.strings.airing_next, it) } else null
         is ArrMovie -> when {
             item.digitalRelease?.isTodayOrAfter() == true ->
-                mokoString(MR.strings.digital_release, item.digitalRelease?.format() ?: "")
+                mokoString(MR.strings.digital_release_on, item.digitalRelease?.format("MMMM d, yyyy") ?: "")
             item.physicalRelease?.isTodayOrAfter() == true ->
-                mokoString(MR.strings.physical_release, item.physicalRelease?.format() ?: "")
+                mokoString(MR.strings.physical_release_on, item.physicalRelease?.format("MMMM d, yyyy") ?: "")
             item.inCinemas?.isTodayOrAfter()  == true ->
-                mokoString(MR.strings.in_cinemas, item.inCinemas?.format() ?: "")
+                mokoString(MR.strings.in_cinemas_on, item.inCinemas?.format("MMMM d, yyyy") ?: "")
             else -> null
         }
-        is Arrtist -> if (item.status == MediaStatus.Continuing) item.nextAlbum?.releaseDate?.format()?.let {
+        is Arrtist -> if (item.status == MediaStatus.Continuing) item.nextAlbum?.releaseDate?.format("MMMM d, yyyy")?.let {
             "${mokoString(MR.strings.next_album)} $it"
         } else null
-        is Author -> if (item.status == MediaStatus.Continuing) item.nextBook?.releaseDate?.format()?.let {
+        is Author -> if (item.status == MediaStatus.Continuing) item.nextBook?.releaseDate?.format("MMMM d, yyyy")?.let {
             "${mokoString(MR.strings.next_book)} $it"
         } else null
-        is Audiobook -> item.publishedDate?.ifTodayOrAfter()?.format()?.let {
+        is Audiobook -> item.publishedDate?.ifTodayOrAfter()?.format("MMMM d, yyyy")?.let {
             "${mokoString(MR.strings.release_date)} $it"
         }
-        is SearchAudiobook -> item.releaseDate?.ifTodayOrAfter()?.format("MMM d, yyyy")
+        is SearchAudiobook -> item.releaseDate?.ifTodayOrAfter()?.format("MMMM d, yyyy")
         is MockMedia -> "Next Airing: Monday"
     }?.let { airingString ->
         Text(
             text = airingString,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary
         )
     }

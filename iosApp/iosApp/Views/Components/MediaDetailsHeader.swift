@@ -40,6 +40,27 @@ struct MediaDetailsHeader: View {
                     ClearLogoView(item: item)
                     
                     VStack(alignment: .leading, spacing: 4) {
+                        let ratings = item.ratings?.toRatingItems() ?? []
+                        if !ratings.isEmpty {
+                            HStack(spacing: 12) {
+                                ForEach(ratings, id: \.self) { rating in
+                                    HStack(spacing: 4) {
+                                        if let icon = rating.icon {
+                                            Image(resource: icon)
+                                                .resizable()
+                                                .frame(width: 14, height: 14)
+                                        } else {
+                                            Image(systemName: "star.fill")
+                                                .foregroundColor(.yellow)
+                                                .font(.system(size: 14))
+                                        }
+                                        Text(rating.score)
+                                            .font(.system(size: 16, weight: .bold))
+                                    }
+                                }
+                            }
+                        }
+
                         if !(item is Arrtist) && !(item is Author) {
                             if !infoString.isEmpty {
                                 Text(infoString)

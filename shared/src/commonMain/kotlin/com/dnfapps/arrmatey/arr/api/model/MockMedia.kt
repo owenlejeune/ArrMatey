@@ -33,7 +33,7 @@ sealed class MockMedia(
     override val status: MediaStatus = MediaStatus.Continuing
 ): ArrMedia {
     @Transient override val guid: Long = 1L
-    override fun ratingScore(): Double = 0.0
+    override fun ratingScore(): Double = 4.5
     @Transient override val statusProgress: Float = 0.5f
     @Transient override val statusColor: Color = Color.Green
     @Transient override val releasedBy: String? = null

@@ -4,17 +4,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -22,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -31,20 +36,20 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.RatingItem
+import com.dnfapps.arrmatey.arr.api.model.toRatingItems
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
-import com.dnfapps.arrmatey.extensions.pxToDp
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.dp
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoPlural
-import com.skydoves.cloudy.sky
-import java.util.Locale
-import androidx.compose.ui.platform.LocalLocale
+import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
 fun DetailsHeader(
@@ -101,6 +106,9 @@ fun DetailsHeader(
                         detailHeight = it.size.height
                     }
                 ) {
+                    val ratings = item.ratings?.toRatingItems() ?: emptyList()
+                    RatingsSection(ratings)
+
                     if (item !is Arrtist && item !is Author) {
                         Text(
                             text = listOfNotNull(
@@ -108,24 +116,59 @@ fun DetailsHeader(
                                 item.runtimeString,
                                 item.certification
                             ).joinToString(Bullet),
-                            fontSize = 16.sp
+                            style = MaterialTheme.typography.bodyLarge
                         )
-                        if (item !is Audiobook) {
+                        item.releasedBy?.let { releasedBy ->
                             Text(
-                                text = listOf(item.releasedBy, item.statusString).joinToString(
-                                    Bullet
-                                ),
-                                fontSize = 14.sp,
-                                lineHeight = 16.sp
+                                text = releasedBy,
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
                     Text(
                         text = item.genres.joinToString(Bullet),
-                        fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.secondary,
-                        overflow = TextOverflow.Ellipsis,
-                        lineHeight = 16.sp
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RatingsSection(
+    ratings: List<RatingItem>
+) {
+    if (ratings.isNotEmpty()) {
+        FlowRow(
+            verticalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ratings.forEach { rating ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    rating.icon?.let { icon ->
+                        Icon(
+                            painter = painterResource(icon),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    } ?: Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = ArrOrange,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = rating.score,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }

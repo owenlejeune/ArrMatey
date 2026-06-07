@@ -105,6 +105,7 @@ struct MediaDetailsScreen: View {
                     VStack(alignment: .leading, spacing: 24) {
                         Text(item.title ?? MR.strings().unknown.localized())
                             .font(.system(size: 28, weight: .bold))
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         
                         if let airingString = makeAiringString(for: item) {
                             Text(airingString)
