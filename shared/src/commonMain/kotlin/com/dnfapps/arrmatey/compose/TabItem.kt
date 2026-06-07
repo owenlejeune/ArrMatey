@@ -40,7 +40,8 @@ sealed interface TabItem {
         DOWNLOADS("arrow.down.circle", MR.strings.downloads),
         CALENDAR("calendar", MR.strings.schedule),
         REQUESTS("tray.fill", MR.strings.requests),
-        PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr);
+        PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr),
+        DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard);
 
         override val key: String get() = "standard_${name}"
     }

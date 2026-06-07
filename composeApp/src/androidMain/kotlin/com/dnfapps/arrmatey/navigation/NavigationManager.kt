@@ -77,6 +77,11 @@ class NavigationManager(
         settings.toEditInstance(id)
     }
 
+    fun openArrInstanceDashboard(id: Long) {
+        openOverlay(TabItem.Settings)
+        settings.toArrDashboard(id)
+    }
+
     fun openNewDownloadClientScreen() {
         openOverlay(TabItem.Settings)
         settings.toAddDownloadClient()

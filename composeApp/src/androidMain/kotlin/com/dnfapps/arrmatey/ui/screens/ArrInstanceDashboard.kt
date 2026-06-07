@@ -49,6 +49,7 @@ import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.navigation.toEditInstance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrHealthCard
+import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -196,81 +197,6 @@ fun ArrInstanceDashboard(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun DiskSpaceSection(diskSpaces: List<ArrDiskSpace>) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            diskSpaces.forEachIndexed { index, disk ->
-                DiskSpaceItem(disk = disk)
-                if (index < diskSpaces.size - 1) {
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun DiskSpaceItem(disk: ArrDiskSpace) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = disk.path ?: mokoString(MR.strings.unknown),
-                style = MaterialTheme.typography.titleMediumEmphasized
-            )
-            Text(
-                text = "${disk.freeSpace.bytesAsFileSizeString()} ${mokoString(MR.strings.free_space_lowercase)}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val progressColor = if (disk.usedPercentage > 0.9f) Color.Red else MaterialTheme.colorScheme.primary
-
-        LinearProgressIndicator(
-            progress = { disk.usedPercentage },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
-            color = progressColor,
-            trackColor = progressColor.copy(alpha = 0.2f)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "${mokoString(MR.strings.total_space)}: ${disk.totalSpace.bytesAsFileSizeString()}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "${(disk.usedPercentage * 100).toInt()}%",
-                style = MaterialTheme.typography.labelMedium
-            )
         }
     }
 }

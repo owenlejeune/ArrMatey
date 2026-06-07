@@ -526,6 +526,7 @@
     <string name="request_as">Request as</string>
     <string name="advanced">Advanced</string>
     <string name="default_label">Default</string>
+    <string name="dashboard">Dashboard</string>
 
     <!--- Download Status -->
     <string name="downloading">Downloading</string>
