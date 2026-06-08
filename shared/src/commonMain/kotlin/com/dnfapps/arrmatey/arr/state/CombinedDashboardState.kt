@@ -13,6 +13,7 @@ sealed interface CombinedDashboardState {
     data object Loading : CombinedDashboardState
     data class Success(
         val instances: List<ArrInstanceDashboardState>,
+        val seerrInstances: List<SeerrDashboardState> = emptyList(),
         val downloadTransfers: List<DownloadTransferInfo> = emptyList(),
         val activeDownloads: List<DownloadItem> = emptyList(),
         val calendarItems: List<CalendarItem> = emptyList(),
@@ -28,4 +29,10 @@ data class ArrInstanceDashboardState(
     val activeCount: Int = 0,
     val totalItems: Int = 0,
     val sizeOnDisk: Long = 0
+)
+
+data class SeerrDashboardState(
+    val instance: Instance,
+    val pendingRequestsCount: Int = 0,
+    val openIssuesCount: Int = 0
 )

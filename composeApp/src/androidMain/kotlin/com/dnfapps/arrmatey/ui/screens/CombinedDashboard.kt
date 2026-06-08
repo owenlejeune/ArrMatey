@@ -21,8 +21,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.ExpandLess
@@ -67,6 +69,7 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
@@ -126,6 +129,10 @@ fun CombinedDashboard(
 
                         if (currentState.calendarItems.isNotEmpty()) {
                             TodaySection(currentState)
+                        }
+
+                        if (currentState.seerrInstances.isNotEmpty()) {
+                            SeerrSection(currentState.seerrInstances)
                         }
 
                         Text(
@@ -404,6 +411,100 @@ private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SeerrSection(seerrInstances: List<SeerrDashboardState>) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        seerrInstances.forEach { state ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(state.instance.type.icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = state.instance.label,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        SeerrStatItem(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.ConfirmationNumber,
+                            label = mokoString(MR.strings.pending),
+                            count = state.pendingRequestsCount,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        SeerrStatItem(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.BugReport,
+                            label = mokoString(MR.strings.issues),
+                            count = state.openIssuesCount,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SeerrStatItem(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    label: String,
+    count: Int,
+    color: Color
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(color.copy(alpha = 0.1f))
+            .padding(12.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(20.dp)
+        )
+        Column {
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

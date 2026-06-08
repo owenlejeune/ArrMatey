@@ -62,12 +62,27 @@ class SeerrInstanceRepository(
     private val _users = MutableStateFlow<List<SeerrUser>>(emptyList())
     val users: StateFlow<List<SeerrUser>> = _users.asStateFlow()
 
+    private val _pendingRequestsCount = MutableStateFlow(0)
+    val pendingRequestsCount: StateFlow<Int> = _pendingRequestsCount.asStateFlow()
+
+    private val _openIssuesCount = MutableStateFlow(0)
+    val openIssuesCount: StateFlow<Int> = _openIssuesCount.asStateFlow()
+
     override suspend fun testConnection(): NetworkResult<Unit> =
         client.testConnection()
 
     suspend fun getLoggedInUser() {
         client.getUserInfo()
             .onSuccess { _loggedInUser.value = it }
+    }
+
+    suspend fun refreshCounts() {
+        client.getRequests(page = 1, pageSize = 1).onSuccess {
+            _pendingRequestsCount.value = it.pageInfo.results
+        }
+        client.getIssues(page = 1, pageSize = 1).onSuccess {
+            _openIssuesCount.value = it.pageInfo.results
+        }
     }
 
     fun getRequestsPaging(): PagingSource<MediaRequestPackage> {

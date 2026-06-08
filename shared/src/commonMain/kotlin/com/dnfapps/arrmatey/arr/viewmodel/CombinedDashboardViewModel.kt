@@ -9,10 +9,12 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,15 +90,36 @@ class CombinedDashboardViewModel(
                         combine(flows) { it.toList() }
                     }
                 },
+                instanceManager.instanceRepositories.flatMapLatest { repoMap ->
+                    val seerrRepos = repoMap.values.filterIsInstance<SeerrInstanceRepository>()
+                    if (seerrRepos.isEmpty()) {
+                        flowOf(emptyList<SeerrDashboardState>())
+                    } else {
+                        val flows = seerrRepos.map { repo ->
+                            combine(
+                                repo.pendingRequestsCount,
+                                repo.openIssuesCount
+                            ) { pending, issues ->
+                                SeerrDashboardState(
+                                    instance = repo.instance,
+                                    pendingRequestsCount = pending,
+                                    openIssuesCount = issues
+                                )
+                            }
+                        }
+                        combine(flows) { it.toList() }
+                    }
+                },
                 downloadQueueService.allTransfers,
                 calendarService.items.map { itemsByDate ->
                     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
                     itemsByDate[today] ?: emptyList()
                 },
                 _isRefreshing
-            ) { instances, downloads, todayCalendar, refreshing ->
+            ) { instances, seerrInstances, downloads, todayCalendar, refreshing ->
                 CombinedDashboardState.Success(
                     instances = instances,
+                    seerrInstances = seerrInstances,
                     downloadTransfers = downloads.transferInfo,
                     activeDownloads = downloads.queueItems,
                     calendarItems = todayCalendar,
@@ -125,6 +148,16 @@ class CombinedDashboardViewModel(
                     // Log error but continue with other instances
                 }
             }
+
+            val seerrRepos = instanceManager.getAllSeerrRepositories()
+            seerrRepos.forEach { repo ->
+                try {
+                    repo.refreshCounts()
+                } catch (e: Exception) {
+                    // Log error
+                }
+            }
+
             calendarService.load()
             _isRefreshing.value = false
         }
