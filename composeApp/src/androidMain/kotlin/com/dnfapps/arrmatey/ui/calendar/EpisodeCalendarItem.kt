@@ -113,7 +113,7 @@ fun EpisodeCalendarItem(
 
                     if (additional.isNotEmpty()) {
                         Text(
-                            text = mokoString(MR.strings.additional_episodes_count, additional.size),
+                            text = mokoString(MR.strings.additional_items_count, additional.size),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )

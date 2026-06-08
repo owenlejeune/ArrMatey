@@ -402,7 +402,7 @@
     <string name="premier">Premiere</string>
     <string name="premiers_only">Premieres</string>
     <string name="finales_only">Finales</string>
-    <string name="additional_episodes_count">+%1$d more</string>
+    <string name="additional_items_count">+%1$d more</string>
     <string name="schedule">Schedule</string>
     <string name="release_schedule">Release Schedule</string>
 

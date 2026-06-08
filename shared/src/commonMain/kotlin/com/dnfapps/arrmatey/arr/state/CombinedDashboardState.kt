@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
@@ -16,6 +17,7 @@ sealed interface CombinedDashboardState {
         val instances: List<ArrInstanceDashboardState>,
         val seerrInstances: List<SeerrDashboardState> = emptyList(),
         val downloadClients: List<DownloadClientDashboardState> = emptyList(),
+        val recentActivity: List<QueueItem> = emptyList(),
         val downloadTransfers: List<DownloadTransferInfo> = emptyList(),
         val activeDownloads: List<DownloadItem> = emptyList(),
         val calendarItems: List<CalendarItem> = emptyList(),
@@ -28,6 +30,7 @@ data class ArrInstanceDashboardState(
     val softwareStatus: ArrSoftwareStatus?,
     val disks: List<ArrDiskSpace>,
     val healthItems: List<ArrHealth>,
+    val activityTasks: List<QueueItem> = emptyList(),
     val activeCount: Int = 0,
     val totalItems: Int = 0,
     val sizeOnDisk: Long = 0

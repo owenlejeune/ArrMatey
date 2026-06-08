@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CombinedDashboardViewModel(
@@ -86,6 +87,7 @@ class CombinedDashboardViewModel(
                                     softwareStatus = software,
                                     disks = disks,
                                     healthItems = health,
+                                    activityTasks = activity,
                                     activeCount = activity.size,
                                     totalItems = totalItems,
                                     sizeOnDisk = sizeOnDisk
@@ -123,10 +125,14 @@ class CombinedDashboardViewModel(
                 },
                 _isRefreshing
             ) { args ->
+                @Suppress("UNCHECKED_CAST")
                 val instances = args[0] as List<ArrInstanceDashboardState>
+                @Suppress("UNCHECKED_CAST")
                 val seerrInstances = args[1] as List<SeerrDashboardState>
                 val downloads = args[2] as DownloadQueueBundle
+                @Suppress("UNCHECKED_CAST")
                 val clientApis = args[3] as Map<Long, *>
+                @Suppress("UNCHECKED_CAST")
                 val todayCalendar = args[4] as List<CalendarItem>
                 val refreshing = args[5] as Boolean
 
@@ -154,10 +160,14 @@ class CombinedDashboardViewModel(
                     }
                 }
 
+                val recentActivity = instances.flatMap { it.activityTasks }
+                    .sortedByDescending { it.added }
+
                 CombinedDashboardState.Success(
                     instances = instances,
                     seerrInstances = seerrInstances,
                     downloadClients = downloadClients,
+                    recentActivity = recentActivity,
                     downloadTransfers = downloads.transferInfo,
                     activeDownloads = downloads.queueItems.sortedByDescending { it.progress },
                     calendarItems = todayCalendar,

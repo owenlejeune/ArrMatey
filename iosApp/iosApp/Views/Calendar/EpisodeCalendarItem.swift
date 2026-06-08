@@ -78,7 +78,7 @@ struct EpisodeCalendarItem: View {
                     }
                     
                     if !episodeGroup.additional.isEmpty {
-                        Text(MR.strings().additional_episodes_count.formatted(args: [episodeGroup.additional.count]))
+                        Text(MR.strings().additional_items_count.formatted(args: [episodeGroup.additional.count]))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }

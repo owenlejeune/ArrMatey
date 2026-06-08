@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
@@ -68,6 +69,7 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.state.DownloadClientDashboardState
@@ -130,6 +132,10 @@ fun CombinedDashboard(
 
                         if (currentState.downloadClients.isNotEmpty()) {
                             DownloadClientsSection(currentState)
+                        }
+
+                        if (currentState.recentActivity.isNotEmpty()) {
+                            RecentActivitySection(currentState.recentActivity)
                         }
 
                         if (currentState.calendarItems.isNotEmpty()) {
@@ -606,13 +612,101 @@ private fun DownloadClientsSection(
                 if (state.activeDownloads.size > 3) {
                     Text(
                         mokoString(
-                            MR.strings.additional_episodes_count,
+                            MR.strings.additional_items_count,
                             state.activeDownloads.size - 3
                         ),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.align(Alignment.End)
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentActivitySection(activity: List<QueueItem>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.History, null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = mokoString(MR.strings.activity),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            activity.take(5).forEach { item ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        Modifier
+                            .size(4.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (item.hasIssue) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.primary
+                            )
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            item.title ?: item.titleLabel,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            item.instanceName?.let {
+                                Text(
+                                    it,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            Text(
+                                item.statusLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (item.hasIssue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    if (item.sizeleft > 0) {
+                        Text(
+                            item.progressLabel,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            if (activity.size > 5) {
+                Text(
+                    mokoString(
+                        MR.strings.additional_items_count,
+                        activity.size - 5
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.align(Alignment.End)
+                )
             }
         }
     }
