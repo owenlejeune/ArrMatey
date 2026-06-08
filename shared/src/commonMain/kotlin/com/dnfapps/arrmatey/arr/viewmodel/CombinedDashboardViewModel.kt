@@ -71,22 +71,14 @@ class CombinedDashboardViewModel(
                             ) { software, disks, health, activity, library ->
                                 val libraryData = (library as? NetworkResult.Success)?.data ?: emptyList()
                                 val totalItems = libraryData.size
-                                val sizeOnDisk = libraryData.sumOf { item ->
-                                    when (item) {
-                                        is ArrSeries -> item.statistics?.sizeOnDisk ?: 0L
-                                        is ArrMovie -> item.statistics?.sizeOnDisk ?: 0L
-                                        is Arrtist -> item.statistics?.sizeOnDisk ?: 0L
-                                        is Author -> item.statistics?.sizeOnDisk ?: 0L
-                                        is Audiobook -> item.remoteFileSize ?: 0L
-                                        else -> 0L
-                                    }
-                                }
+                                val sizeOnDisk = libraryData.sumOf { it.fileSize }
 
                                 ArrInstanceDashboardState(
                                     instance = repo.instance,
                                     softwareStatus = software,
                                     disks = disks,
                                     healthItems = health,
+                                    library = libraryData,
                                     activityTasks = activity,
                                     activeCount = activity.size,
                                     totalItems = totalItems,
@@ -163,11 +155,17 @@ class CombinedDashboardViewModel(
                 val recentActivity = instances.flatMap { it.activityTasks }
                     .sortedByDescending { it.added }
 
+                val recentlyAdded = instances.flatMap { it.library }
+                    .filter { it.added != null }
+                    .sortedByDescending { it.added }
+                    .take(10)
+
                 CombinedDashboardState.Success(
                     instances = instances,
                     seerrInstances = seerrInstances,
                     downloadClients = downloadClients,
                     recentActivity = recentActivity,
+                    recentlyAdded = recentlyAdded,
                     downloadTransfers = downloads.transferInfo,
                     activeDownloads = downloads.queueItems.sortedByDescending { it.progress },
                     calendarItems = todayCalendar,

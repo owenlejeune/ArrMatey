@@ -526,6 +526,7 @@
     <string name="request_as">Request as</string>
     <string name="advanced">Advanced</string>
     <string name="default_label">Default</string>
+    <string name="recently_added">Recently Added</string>
     <string name="dashboard">Dashboard</string>
     <string name="offline">Offline</string>
     <string name="nothing_on_today">Nothing on Today</string>

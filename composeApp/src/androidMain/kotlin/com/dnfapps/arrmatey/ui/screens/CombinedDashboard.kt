@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,21 +67,29 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrHealthType
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
-import com.dnfapps.arrmatey.arr.state.DownloadClientDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrHealthCard
 import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
+import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
@@ -93,6 +104,7 @@ import org.koin.compose.koinInject
 fun CombinedDashboard(
     viewModel: CombinedDashboardViewModel = koinInject()
 ) {
+    val navManager = navigationManager
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -129,6 +141,26 @@ fun CombinedDashboard(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         OverviewHeader(currentState)
+
+                        if (currentState.recentlyAdded.isNotEmpty()) {
+                            RecentlyAddedSection(
+                                items = currentState.recentlyAdded,
+                                onItemClick = { media ->
+                                    val type = when (media) {
+                                        is ArrSeries -> InstanceType.Sonarr
+                                        is ArrMovie -> InstanceType.Radarr
+                                        is Arrtist -> InstanceType.Lidarr
+                                        is Author -> InstanceType.Booksehelf
+                                        is Audiobook -> InstanceType.Listenarr
+                                        else -> null
+                                    }
+                                    type?.let {
+                                        navManager.arr(type).toDetails(media.id ?: 0)
+                                        navManager.navigateToTab(navManager.tabFor(it))
+                                    }
+                                }
+                            )
+                        }
 
                         if (currentState.downloadClients.isNotEmpty()) {
                             DownloadClientsSection(currentState)
@@ -192,6 +224,55 @@ private fun OverviewHeader(state: CombinedDashboardState.Success) {
                 else -> MaterialTheme.colorScheme.secondaryContainer
             }
         )
+    }
+}
+
+@Composable
+private fun RecentlyAddedSection(
+    items: List<ArrMedia>,
+    onItemClick: (ArrMedia) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                Icon(
+                    Icons.Default.History, null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = mokoString(MR.strings.recently_added),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(items) { item ->
+                    PosterItem(
+                        item = item,
+                        modifier = Modifier.width(120.dp),
+                        onItemClick = onItemClick,
+                        showFooter = true
+                    )
+                }
+            }
+        }
     }
 }
 
