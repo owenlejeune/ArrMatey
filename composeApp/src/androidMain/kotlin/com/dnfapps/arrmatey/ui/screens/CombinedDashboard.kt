@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -69,6 +70,7 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.arr.state.DownloadClientDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
@@ -76,6 +78,9 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrHealthCard
 import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.theme.ArrBlue
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import dev.icerock.moko.resources.compose.painterResource
@@ -123,8 +128,8 @@ fun CombinedDashboard(
                     ) {
                         OverviewHeader(currentState)
 
-                        if (currentState.activeDownloads.isNotEmpty() || currentState.downloadTransfers.isNotEmpty()) {
-                            DownloadsSection(currentState)
+                        if (currentState.downloadClients.isNotEmpty()) {
+                            DownloadClientsSection(currentState)
                         }
 
                         if (currentState.calendarItems.isNotEmpty()) {
@@ -211,70 +216,36 @@ private fun StatCard(
 }
 
 @Composable
-private fun DownloadsSection(state: CombinedDashboardState.Success) {
-    val totalDownloadSpeed = state.downloadTransfers.sumOf { it.downloadSpeed }
-    
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Download, null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(mokoString(MR.strings.downloads), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.weight(1f))
-                if (totalDownloadSpeed > 0) {
-                    Text(
-                        "${totalDownloadSpeed.bytesAsFileSizeString()}/s",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            state.activeDownloads.take(3).forEach { download ->
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            download.name,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text("${(download.progress * 100).toInt()}%", style = MaterialTheme.typography.labelMedium)
-                    }
-                    LinearProgressIndicator(
-                        progress = { download.progress.toFloat() },
-                        modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
-                    )
-                }
-            }
-            
-            if (state.activeDownloads.size > 3) {
-                Text(
-                    mokoString(MR.strings.additional_episodes_count, state.activeDownloads.size - 3),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.align(Alignment.End)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun TodaySection(state: CombinedDashboardState.Success) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.CalendarToday, null, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Default.CalendarToday, null,
+                    modifier = Modifier.size(20.dp)
+                )
                 Spacer(Modifier.width(8.dp))
-                Text(mokoString(MR.strings.today), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    text = mokoString(MR.strings.today),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            if (state.calendarItems.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.nothing_on_today),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 2.dp, bottom = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
             }
 
             state.calendarItems.forEach { item ->
@@ -306,7 +277,7 @@ private fun TodaySection(state: CombinedDashboardState.Success) {
                         }
                         else -> ""
                     }
-                    
+
                     Box(Modifier.size(4.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
                     Column {
                         Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
@@ -329,7 +300,7 @@ private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
         onClick = { expanded = !expanded },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     ) {
         Column(
@@ -453,16 +424,19 @@ private fun SeerrSection(seerrInstances: List<SeerrDashboardState>) {
                         SeerrStatItem(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.ConfirmationNumber,
-                            label = mokoString(MR.strings.pending),
+                            label = mokoString(MR.strings.requests),
                             count = state.pendingRequestsCount,
-                            color = MaterialTheme.colorScheme.primary
+                            color = ArrPurple
                         )
                         SeerrStatItem(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.BugReport,
                             label = mokoString(MR.strings.issues),
                             count = state.openIssuesCount,
-                            color = MaterialTheme.colorScheme.error
+                            color = when {
+                                state.openIssuesCount > 0 -> MaterialTheme.colorScheme.errorContainer
+                                else -> MaterialTheme.colorScheme.secondaryContainer
+                            }
                         )
                     }
                 }
@@ -479,32 +453,167 @@ private fun SeerrStatItem(
     count: Int,
     color: Color
 ) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(color.copy(alpha = 0.1f))
-            .padding(12.dp),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = color),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = color,
-            modifier = Modifier.size(20.dp)
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(icon, null, modifier = Modifier.size(24.dp))
+                Text(count.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            Text(label, style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+@Composable
+private fun DownloadClientsSection(
+    state: CombinedDashboardState.Success
+) {
+    val clients = state.downloadClients
+    val totalDownloadSpeed = state.downloadTransfers.sumOf { it.downloadSpeed }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
-        Column {
-            Text(
-                text = count.toString(),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = color
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(16.dp)
+        ) {
+            clients.forEach { state ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Image(
+                        painter = painterResource(state.client.type.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = state.client.label,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = "${state.activeDownloadsCount} ${mokoString(MR.strings.downloads)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            if (!state.isOnline) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(4.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.error)
+                                )
+                                Text(
+                                    text = mokoString(MR.strings.offline),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
+
+                    val transferInfo = state.transferInfo
+                    if (state.isOnline && transferInfo != null) {
+                        Column(horizontalAlignment = Alignment.End) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Icon(
+                                    Icons.Default.ExpandMore, null,
+                                    tint = ArrGreen, modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "${transferInfo.downloadSpeed.bytesAsFileSizeString()}/s",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Icon(
+                                    Icons.Default.ExpandLess, null,
+                                    tint = ArrBlue, modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "${transferInfo.uploadSpeed.bytesAsFileSizeString()}/s",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (state.activeDownloads.isNotEmpty() || state.downloadTransfers.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Download, null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        mokoString(MR.strings.downloads),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.weight(1f))
+                    if (totalDownloadSpeed > 0) {
+                        Text(
+                            "${totalDownloadSpeed.bytesAsFileSizeString()}/s",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                state.activeDownloads.take(3).forEach { download ->
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                download.name,
+                                style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                "${(download.progress * 100).toInt()}%",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                        LinearProgressIndicator(
+                            progress = { download.progress.toFloat() },
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+                        )
+                    }
+                }
+
+                if (state.activeDownloads.size > 3) {
+                    Text(
+                        mokoString(
+                            MR.strings.additional_episodes_count,
+                            state.activeDownloads.size - 3
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
+            }
         }
     }
 }

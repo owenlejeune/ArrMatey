@@ -527,6 +527,8 @@
     <string name="advanced">Advanced</string>
     <string name="default_label">Default</string>
     <string name="dashboard">Dashboard</string>
+    <string name="offline">Offline</string>
+    <string name="nothing_on_today">Nothing on Today</string>
 
     <!--- Download Status -->
     <string name="downloading">Downloading</string>
