@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -88,6 +90,7 @@ import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrHealthCard
+import com.dnfapps.arrmatey.ui.components.DiskSpaceItem
 import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -105,7 +108,7 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CombinedDashboard(
-    viewModel: CombinedDashboardViewModel = koinInject()
+    viewModel: CombinedDashboardViewModel = koinInject(),
 ) {
     val navManager = navigationManager
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -118,7 +121,7 @@ fun CombinedDashboard(
             TopAppBar(
                 title = { Text(mokoString(MR.strings.dashboard)) },
                 scrollBehavior = scrollBehavior,
-                navigationIcon = { NavigationDrawerButton() }
+                navigationIcon = { NavigationDrawerButton() },
             )
         }
     ) { contentPadding ->
@@ -148,21 +151,20 @@ fun CombinedDashboard(
                         if (currentState.recentlyAdded.isNotEmpty()) {
                             RecentlyAddedSection(
                                 items = currentState.recentlyAdded,
-                                onItemClick = { media ->
-                                    val type = when (media) {
-                                        is ArrSeries -> InstanceType.Sonarr
-                                        is ArrMovie -> InstanceType.Radarr
-                                        is Arrtist -> InstanceType.Lidarr
-                                        is Author -> InstanceType.Booksehelf
-                                        is Audiobook -> InstanceType.Listenarr
-                                        else -> null
-                                    }
-                                    type?.let {
-                                        navManager.arr(type).toDetails(media.id ?: 0)
-                                        navManager.navigateToTab(navManager.tabFor(it))
-                                    }
+                            ) { media ->
+                                val type = when (media) {
+                                    is ArrSeries -> InstanceType.Sonarr
+                                    is ArrMovie -> InstanceType.Radarr
+                                    is Arrtist -> InstanceType.Lidarr
+                                    is Author -> InstanceType.Booksehelf
+                                    is Audiobook -> InstanceType.Listenarr
+                                    else -> null
                                 }
-                            )
+                                type?.let {
+                                    navManager.arr(it).toDetails(media.id ?: 0)
+                                    navManager.navigateToTab(navManager.tabFor(it))
+                                }
+                            }
                         }
 
                         if (currentState.downloadClients.isNotEmpty()) {
@@ -184,6 +186,8 @@ fun CombinedDashboard(
                         if (currentState.seerrInstances.isNotEmpty()) {
                             SeerrSection(currentState.seerrInstances)
                         }
+
+                        StorageSection(currentState.instances)
 
                         Text(
                             text = mokoString(MR.strings.instances),
@@ -277,6 +281,165 @@ private fun RecentlyAddedSection(
                         onItemClick = onItemClick,
                         showFooter = true
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StorageSection(instances: List<ArrInstanceDashboardState>) {
+    val allDisks = instances.asSequence().flatMap { it.disks }.distinctBy { it.path }.toList()
+    val warnings = allDisks.filter { it.usedPercentage >= 0.9f }
+    val totalInstanceUsage = instances.sumOf { it.sizeOnDisk }
+
+    if (totalInstanceUsage > 0 || warnings.isNotEmpty()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Storage, null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = mokoString(MR.strings.storage_breakdown),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                if (warnings.isNotEmpty()) {
+                    warnings.forEachIndexed { index, disk ->
+                        DiskSpaceItem(disk = disk)
+                        if ((index < warnings.size - 1) || (totalInstanceUsage > 0)) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 12.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
+                }
+
+                if (totalInstanceUsage > 0) {
+                    val activeInstances = instances.filter { it.sizeOnDisk > 0 }
+                        .sortedByDescending { it.sizeOnDisk }
+
+                    activeInstances.forEachIndexed { index, instanceState ->
+                        InstanceStorageItem(instanceState, totalInstanceUsage)
+                        if (index < activeInstances.size - 1) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 12.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun InstanceStorageItem(state: ArrInstanceDashboardState, totalUsage: Long) {
+    val completion = if (state.library.isNotEmpty()) {
+        state.library.asSequence().map { it.statusProgress }.average().toFloat()
+    } else 0f
+
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable { expanded = !expanded },
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(state.instance.type.icon),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = state.instance.label,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${state.totalItems} Items • ${(completion * 100).toInt()}% Downloaded",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = state.sizeOnDisk.bytesAsFileSizeString(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        LinearProgressIndicator(
+            progress = { if (totalUsage > 0) state.sizeOnDisk.toFloat() / totalUsage.toFloat() else 0f },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(CircleShape),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.background
+        )
+
+        AnimatedVisibility(
+            visible = expanded && state.disks.isNotEmpty(),
+            exit = shrinkVertically(),
+            enter = expandVertically()
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                state.disks.forEach { disk ->
+                    val usedSpace = disk.totalSpace - disk.freeSpace
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = disk.path ?: mokoString(MR.strings.unknown),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            text = "${(disk.usedPercentage * 100).toInt()}% full",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (disk.usedPercentage > 0.9f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -433,7 +596,7 @@ private fun CalendarItemRow(item: CalendarItem, showDate: Boolean = false) {
 
 @Composable
 private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(value = false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -670,7 +833,7 @@ private fun DownloadClientsSection(
                     }
 
                     val transferInfo = state.transferInfo
-                    if (state.isOnline && transferInfo != null) {
+                    if (state.isOnline && (transferInfo != null)) {
                         Column(horizontalAlignment = Alignment.End) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Icon(

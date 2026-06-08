@@ -527,6 +527,9 @@
     <string name="advanced">Advanced</string>
     <string name="default_label">Default</string>
     <string name="recently_added">Recently Added</string>
+    <string name="storage_breakdown">Storage Breakdown</string>
+    <string name="storage_warnings">Storage Warnings</string>
+    <string name="disk_almost_full">%1$s is %2$d%% full</string>
     <string name="dashboard">Dashboard</string>
     <string name="offline">Offline</string>
     <string name="nothing_on_today">Nothing on Today</string>

@@ -88,8 +88,9 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val usedSpace = disk.totalSpace - disk.freeSpace
             Text(
-                text = "${mokoString(MR.strings.total_space)}: ${disk.totalSpace.bytesAsFileSizeString()}",
+                text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
