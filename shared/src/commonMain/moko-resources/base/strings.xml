@@ -533,8 +533,13 @@
     <string name="indexer_health">Indexer Health</string>
     <string name="healthy_indexers">Healthy Indexers</string>
     <string name="failing_indexers">Failing Indexers</string>
+    <string name="network_status">Network Status</string>
+    <string name="local_network">Local Network</string>
+    <string name="remote_vpn">Remote / VPN</string>
+    <string name="connected_to_ssid">Connected to %s</string>
     <string name="dashboard">Dashboard</string>
     <string name="offline">Offline</string>
+    <string name="online">Online</string>
     <string name="nothing_on_today">Nothing on Today</string>
 
     <!--- Download Status -->

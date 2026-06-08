@@ -7,6 +7,8 @@ import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.state.DownloadClientDashboardState
+import com.dnfapps.arrmatey.arr.state.InstanceNetworkStatus
+import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.client.NetworkResult
@@ -17,6 +19,7 @@ import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
+import com.dnfapps.arrmatey.utils.getNetworkUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -203,12 +206,70 @@ class CombinedDashboardViewModel(
                     calendarItems = todayCalendar,
                     upcomingCalendarItems = upcomingCalendar,
                     prowlarrStats = prowlarrStats,
+                    networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats),
                     isRefreshing = refreshing
                 )
             }.collect { newState ->
                 _state.value = newState
             }
         }
+    }
+
+    private fun resolveNetworkStatus(
+        arrInstances: List<ArrInstanceDashboardState>,
+        seerrInstances: List<SeerrDashboardState>,
+        prowlarrInstances: List<ProwlarrDashboardState>
+    ): NetworkStatusState {
+        val networkUtils = getNetworkUtils()
+        val currentSsid = try { networkUtils.getCurrentWifiSsid() } catch (e: Exception) { null }
+        val isWifi = try { networkUtils.isConnectedToWifi() } catch (e: Exception) { false }
+        
+        val instanceStatuses = mutableListOf<InstanceNetworkStatus>()
+        
+        arrInstances.forEach { state ->
+            instanceStatuses.add(
+                InstanceNetworkStatus(
+                    instanceName = state.instance.label,
+                    isLocal = state.instance.isUsingLocalNetwork(),
+                    currentEndpoint = state.instance.getEffectiveBaseUrl(),
+                    type = state.instance.type,
+                    isOnline = state.softwareStatus != null,
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled
+                )
+            )
+        }
+        
+        seerrInstances.forEach { state ->
+            instanceStatuses.add(
+                InstanceNetworkStatus(
+                    instanceName = state.instance.label,
+                    isLocal = state.instance.isUsingLocalNetwork(),
+                    currentEndpoint = state.instance.getEffectiveBaseUrl(),
+                    type = state.instance.type,
+                    isOnline = true, // Assume online if we have state
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled
+                )
+            )
+        }
+        
+        prowlarrInstances.forEach { state ->
+            instanceStatuses.add(
+                InstanceNetworkStatus(
+                    instanceName = state.instance.label,
+                    isLocal = state.instance.isUsingLocalNetwork(),
+                    currentEndpoint = state.instance.getEffectiveBaseUrl(),
+                    type = state.instance.type,
+                    isOnline = state.totalIndexers > 0 || state.failingIndexers > 0,
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled
+                )
+            )
+        }
+
+        return NetworkStatusState(
+            ssid = currentSsid,
+            isWifi = isWifi,
+            instanceStatuses = instanceStatuses.sortedBy { it.instanceName }
+        )
     }
 
     fun refresh() {

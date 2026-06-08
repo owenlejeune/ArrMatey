@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 
 sealed interface CombinedDashboardState {
     data object Initial : CombinedDashboardState
@@ -25,9 +26,25 @@ sealed interface CombinedDashboardState {
         val calendarItems: List<CalendarItem> = emptyList(),
         val upcomingCalendarItems: List<CalendarItem> = emptyList(),
         val prowlarrStats: List<ProwlarrDashboardState> = emptyList(),
+        val networkStatus: NetworkStatusState? = null,
         val isRefreshing: Boolean = false
     ) : CombinedDashboardState
 }
+
+data class NetworkStatusState(
+    val ssid: String? = null,
+    val isWifi: Boolean,
+    val instanceStatuses: List<InstanceNetworkStatus>
+)
+
+data class InstanceNetworkStatus(
+    val instanceName: String,
+    val isLocal: Boolean,
+    val currentEndpoint: String,
+    val type: InstanceType,
+    val isOnline: Boolean,
+    val isLocalSwitchingEnabled: Boolean
+)
 
 data class ArrInstanceDashboardState(
     val instance: Instance,
