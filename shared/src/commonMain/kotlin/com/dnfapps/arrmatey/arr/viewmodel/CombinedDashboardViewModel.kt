@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.state.DownloadClientDashboardState
+import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
@@ -14,6 +15,7 @@ import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,7 +57,7 @@ class CombinedDashboardViewModel(
                 instanceManager.instanceRepositories.flatMapLatest { repoMap ->
                     val arrRepos = repoMap.values.filterIsInstance<ArrInstanceRepository>()
                     if (arrRepos.isEmpty()) {
-                        flowOf(emptyList<ArrInstanceDashboardState>())
+                        flowOf(emptyList())
                     } else {
                         val flows = arrRepos.map { repo ->
                             combine(
@@ -88,7 +90,7 @@ class CombinedDashboardViewModel(
                 instanceManager.instanceRepositories.flatMapLatest { repoMap ->
                     val seerrRepos = repoMap.values.filterIsInstance<SeerrInstanceRepository>()
                     if (seerrRepos.isEmpty()) {
-                        flowOf(emptyList<SeerrDashboardState>())
+                        flowOf(emptyList())
                     } else {
                         val flows = seerrRepos.map { repo ->
                             combine(
@@ -99,6 +101,33 @@ class CombinedDashboardViewModel(
                                     instance = repo.instance,
                                     pendingRequestsCount = pending,
                                     openIssuesCount = issues
+                                )
+                            }
+                        }
+                        combine(flows) { it.toList() }
+                    }
+                },
+                instanceManager.instanceRepositories.flatMapLatest { repoMap ->
+                    val prowlarrRepos = repoMap.values.filterIsInstance<ProwlarrInstanceRepository>()
+                    if (prowlarrRepos.isEmpty()) {
+                        flowOf(emptyList())
+                    } else {
+                        val flows = prowlarrRepos.map { repo ->
+                            combine(repo.indexerStatus, repo.indexers) { status, indexers ->
+                                val failingIndexerIds = status
+                                    .filter { it.hasFailure }
+                                    .map { it.indexerId }
+                                    .toSet()
+                                val failingNames = indexers
+                                    .filter { it.id in failingIndexerIds }
+                                    .mapNotNull { it.name }
+                                val failureCount = status.count { it.hasFailure }
+                                ProwlarrDashboardState(
+                                    instance = repo.instance,
+                                    totalIndexers = status.size,
+                                    healthyIndexers = indexers.size - failureCount,
+                                    failingIndexers = failureCount,
+                                    failingIndexerNames = failingNames
                                 )
                             }
                         }
@@ -121,14 +150,16 @@ class CombinedDashboardViewModel(
                 val instances = args[0] as List<ArrInstanceDashboardState>
                 @Suppress("UNCHECKED_CAST")
                 val seerrInstances = args[1] as List<SeerrDashboardState>
-                val downloads = args[2] as DownloadQueueBundle
                 @Suppress("UNCHECKED_CAST")
-                val clientApis = args[3] as Map<Long, *>
+                val prowlarrStats = args[2] as List<ProwlarrDashboardState>
+                val downloads = args[3] as DownloadQueueBundle
                 @Suppress("UNCHECKED_CAST")
-                val calendarPair = args[4] as Pair<List<CalendarItem>, List<CalendarItem>>
+                val clientApis = args[4] as Map<Long, *>
+                @Suppress("UNCHECKED_CAST")
+                val calendarPair = args[5] as Pair<List<CalendarItem>, List<CalendarItem>>
                 val todayCalendar = calendarPair.first
                 val upcomingCalendar = calendarPair.second
-                val refreshing = args[5] as Boolean
+                val refreshing = args[6] as Boolean
 
                 val downloadClients = downloads.transferInfo.map { transfer ->
                     DownloadClientDashboardState(
@@ -139,7 +170,6 @@ class CombinedDashboardViewModel(
                     )
                 }.toMutableList()
 
-                // Add clients that might be offline (not in transferInfo)
                 clientApis.keys.forEach { clientId ->
                     if (downloadClients.none { it.client.id == clientId }) {
                         downloadClientManager.getDownloadClientById(clientId)?.let { client ->
@@ -172,6 +202,7 @@ class CombinedDashboardViewModel(
                     activeDownloads = downloads.queueItems.sortedByDescending { it.progress },
                     calendarItems = todayCalendar,
                     upcomingCalendarItems = upcomingCalendar,
+                    prowlarrStats = prowlarrStats,
                     isRefreshing = refreshing
                 )
             }.collect { newState ->
@@ -202,6 +233,16 @@ class CombinedDashboardViewModel(
             seerrRepos.forEach { repo ->
                 try {
                     repo.refreshCounts()
+                } catch (e: Exception) {
+                    // Log error
+                }
+            }
+
+            val prowlarrRepos = instanceManager.instanceRepositories.value.values.filterIsInstance<ProwlarrInstanceRepository>()
+            prowlarrRepos.forEach { repo ->
+                try {
+                    repo.getIndexerStatus()
+                    repo.getIndexers()
                 } catch (e: Exception) {
                     // Log error
                 }

@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Warning
@@ -82,6 +83,7 @@ import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
@@ -97,6 +99,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
+import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
@@ -185,6 +188,10 @@ fun CombinedDashboard(
 
                         if (currentState.seerrInstances.isNotEmpty()) {
                             SeerrSection(currentState.seerrInstances)
+                        }
+
+                        if (currentState.prowlarrStats.isNotEmpty()) {
+                            ProwlarrSection(currentState.prowlarrStats)
                         }
 
                         StorageSection(currentState.instances)
@@ -293,7 +300,7 @@ private fun StorageSection(instances: List<ArrInstanceDashboardState>) {
     val warnings = allDisks.filter { it.usedPercentage >= 0.9f }
     val totalInstanceUsage = instances.sumOf { it.sizeOnDisk }
 
-    if (totalInstanceUsage > 0 || warnings.isNotEmpty()) {
+    if ((totalInstanceUsage > 0) || warnings.isNotEmpty()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -690,6 +697,120 @@ private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
 }
 
 @Composable
+private fun ProwlarrSection(
+    prowlarrStats: List<ProwlarrDashboardState>
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            prowlarrStats.forEach { state ->
+                var expanded by remember { mutableStateOf(false) }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.clickable { expanded = !expanded }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(state.instance.type.icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = state.instance.label,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CountStatItem(
+                            icon = Icons.Default.Favorite,
+                            modifier = Modifier.weight(1f),
+                            label = mokoString(MR.strings.healthy_indexers),
+                            count = state.healthyIndexers,
+                            color = ArrGreen,
+                        )
+                        CountStatItem(
+                            icon = Icons.Default.Error,
+                            modifier = Modifier.weight(1f),
+                            label = mokoString(MR.strings.failing_indexers),
+                            count = state.failingIndexers,
+                            color = MaterialTheme.colorScheme.errorContainer
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = expanded && state.failingIndexerNames.isNotEmpty(),
+                        enter = expandVertically(),
+                        exit = shrinkVertically()
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            state.failingIndexerNames.forEach { name ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        Modifier.size(4.dp).clip(CircleShape).background(ArrRed)
+                                    )
+                                    Text(
+                                        text = name,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+//@Composable
+//private fun IndexerStatItem(
+//    modifier: Modifier = Modifier,
+//    icon: ImageVector,
+//    label: String,
+//    count: Int,
+//    color: Color
+//) {
+//    Box(
+//        modifier = modifier
+//            .clip(RoundedCornerShape(12.dp))
+//            .background(color)
+//            .padding(vertical = 8.dp, horizontal = 12.dp),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        Text(
+//            text = label,
+//            style = MaterialTheme.typography.labelLarge,
+//            fontWeight = FontWeight.Bold,
+//            color = textColor
+//        )
+//    }
+//}
+
+@Composable
 private fun SeerrSection(seerrInstances: List<SeerrDashboardState>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         seerrInstances.forEach { state ->
@@ -724,14 +845,14 @@ private fun SeerrSection(seerrInstances: List<SeerrDashboardState>) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        SeerrStatItem(
+                        CountStatItem(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.ConfirmationNumber,
                             label = mokoString(MR.strings.requests),
                             count = state.pendingRequestsCount,
                             color = ArrPurple
                         )
-                        SeerrStatItem(
+                        CountStatItem(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.BugReport,
                             label = mokoString(MR.strings.issues),
@@ -749,7 +870,7 @@ private fun SeerrSection(seerrInstances: List<SeerrDashboardState>) {
 }
 
 @Composable
-private fun SeerrStatItem(
+private fun CountStatItem(
     modifier: Modifier = Modifier,
     icon: ImageVector,
     label: String,
@@ -762,7 +883,8 @@ private fun SeerrStatItem(
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

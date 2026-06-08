@@ -530,6 +530,9 @@
     <string name="storage_breakdown">Storage Breakdown</string>
     <string name="storage_warnings">Storage Warnings</string>
     <string name="disk_almost_full">%1$s is %2$d%% full</string>
+    <string name="indexer_health">Indexer Health</string>
+    <string name="healthy_indexers">Healthy Indexers</string>
+    <string name="failing_indexers">Failing Indexers</string>
     <string name="dashboard">Dashboard</string>
     <string name="offline">Offline</string>
     <string name="nothing_on_today">Nothing on Today</string>

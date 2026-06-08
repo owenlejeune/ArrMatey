@@ -24,6 +24,7 @@ sealed interface CombinedDashboardState {
         val activeDownloads: List<DownloadItem> = emptyList(),
         val calendarItems: List<CalendarItem> = emptyList(),
         val upcomingCalendarItems: List<CalendarItem> = emptyList(),
+        val prowlarrStats: List<ProwlarrDashboardState> = emptyList(),
         val isRefreshing: Boolean = false
     ) : CombinedDashboardState
 }
@@ -51,4 +52,12 @@ data class DownloadClientDashboardState(
     val transferInfo: DownloadTransferInfo? = null,
     val isOnline: Boolean = true,
     val activeDownloadsCount: Int = 0
+)
+
+data class ProwlarrDashboardState(
+    val instance: Instance,
+    val totalIndexers: Int,
+    val healthyIndexers: Int,
+    val failingIndexers: Int,
+    val failingIndexerNames: List<String> = emptyList()
 )

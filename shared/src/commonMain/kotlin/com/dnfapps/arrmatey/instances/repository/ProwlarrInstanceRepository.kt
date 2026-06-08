@@ -24,11 +24,14 @@ class ProwlarrInstanceRepository(
     private val _indexerStatus = MutableStateFlow<List<IndexerStatus>>(emptyList())
     val indexerStatus: StateFlow<List<IndexerStatus>> = _indexerStatus.asStateFlow()
 
+    private val _indexers = MutableStateFlow<List<ProwlarrIndexer>>(emptyList())
+    val indexers: StateFlow<List<ProwlarrIndexer>> = _indexers.asStateFlow()
+
     override suspend fun testConnection(): NetworkResult<Unit> =
         prowlarrClient.testConnection()
 
     suspend fun getIndexers(): NetworkResult<List<ProwlarrIndexer>> =
-        prowlarrClient.getIndexers()
+        prowlarrClient.getIndexers().onSuccess { _indexers.value = it }
 
     suspend fun getIndexerStatus() {
         prowlarrClient.getIndexerStatus()
