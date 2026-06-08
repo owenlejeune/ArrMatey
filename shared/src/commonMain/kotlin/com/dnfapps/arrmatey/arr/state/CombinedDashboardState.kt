@@ -23,6 +23,7 @@ sealed interface CombinedDashboardState {
         val downloadTransfers: List<DownloadTransferInfo> = emptyList(),
         val activeDownloads: List<DownloadItem> = emptyList(),
         val calendarItems: List<CalendarItem> = emptyList(),
+        val upcomingCalendarItems: List<CalendarItem> = emptyList(),
         val isRefreshing: Boolean = false
     ) : CombinedDashboardState
 }

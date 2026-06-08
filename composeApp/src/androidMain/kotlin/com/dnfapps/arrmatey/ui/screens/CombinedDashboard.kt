@@ -74,6 +74,7 @@ import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
@@ -83,7 +84,6 @@ import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.shared.MR
@@ -94,9 +94,12 @@ import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
+import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import dev.icerock.moko.resources.compose.painterResource
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -172,6 +175,10 @@ fun CombinedDashboard(
 
                         if (currentState.calendarItems.isNotEmpty()) {
                             TodaySection(currentState)
+                        }
+
+                        if (currentState.upcomingCalendarItems.isNotEmpty()) {
+                            UpcomingSection(currentState)
                         }
 
                         if (currentState.seerrInstances.isNotEmpty()) {
@@ -336,42 +343,88 @@ private fun TodaySection(state: CombinedDashboardState.Success) {
             }
 
             state.calendarItems.forEach { item ->
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    val title = when (item) {
-                        is Episode -> item.series?.title ?: ""
-                        is EpisodeGroup -> item.first.series?.title ?: ""
-                        is ArrAlbum -> item.artist?.title ?: ""
-                        is ArrMovie -> item.title ?: ""
-                        is Audiobook -> item.title ?: ""
-                        is Book -> item.title
-                    }
-                    val sub = when (item) {
-                        is Episode -> "${item.seasonEpLabel}: ${item.title ?: ""}"
-                        is EpisodeGroup -> {
-                            val episodes = listOf(item.first) + item.additional
-                            episodes.joinToString(", ") { "${it.seasonEpLabel}: ${it.title ?: ""}" }
-                        }
-                        is ArrAlbum -> item.title ?: ""
-                        is ArrMovie -> {
-                            val date = item.releaseDate ?: item.digitalRelease ?: item.physicalRelease ?: item.inCinemas
-                            val label = when (date) {
-                                item.physicalRelease -> mokoString(MR.strings.physical_release)
-                                item.digitalRelease -> mokoString(MR.strings.digital_release)
-                                item.inCinemas -> mokoString(MR.strings.in_cinemas)
-                                else -> mokoString(MR.strings.release_date)
-                            }
-                            label
-                        }
-                        else -> ""
-                    }
+                CalendarItemRow(item)
+            }
+        }
+    }
+}
 
-                    Box(Modifier.size(4.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-                    Column {
-                        Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                        if (sub.isNotBlank()) {
-                            Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
+@Composable
+private fun UpcomingSection(state: CombinedDashboardState.Success) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.CalendarToday, null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = mokoString(MR.strings.upcoming),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            state.upcomingCalendarItems.take(5).forEach { item ->
+                CalendarItemRow(item, showDate = true)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalendarItemRow(item: CalendarItem, showDate: Boolean = false) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        val title = when (item) {
+            is Episode -> item.series?.title ?: ""
+            is EpisodeGroup -> item.first.series?.title ?: ""
+            is ArrAlbum -> item.artist?.title ?: ""
+            is ArrMovie -> item.title ?: ""
+            is Audiobook -> item.title ?: ""
+            is Book -> item.title
+        }
+        val sub = when (item) {
+            is Episode -> "${item.seasonEpLabel}: ${item.title ?: ""}"
+            is EpisodeGroup -> {
+                val episodes = listOf(item.first) + item.additional
+                episodes.joinToString(", ") { "${it.seasonEpLabel}: ${it.title ?: ""}" }
+            }
+            is ArrAlbum -> item.title ?: ""
+            is ArrMovie -> {
+                val date = item.releaseDate ?: item.digitalRelease ?: item.physicalRelease ?: item.inCinemas
+                val label = when (date) {
+                    item.physicalRelease -> mokoString(MR.strings.physical_release)
+                    item.digitalRelease -> mokoString(MR.strings.digital_release)
+                    item.inCinemas -> mokoString(MR.strings.in_cinemas)
+                    else -> mokoString(MR.strings.release_date)
+                }
+                label
+            }
+            else -> ""
+        }
+
+        Box(Modifier.size(4.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
+        Column {
+            Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+            if (sub.isNotBlank()) {
+                Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (showDate) {
+                val firstDate = item.getCalendarDates().firstOrNull()
+                firstDate?.let {
+                    val date = it.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    Text(
+                        text = date.format("EEE, MMM d"),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         }

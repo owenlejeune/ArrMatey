@@ -2,11 +2,6 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Arrtist
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
@@ -29,10 +24,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
-import com.dnfapps.arrmatey.arr.api.model.QueueItem
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CombinedDashboardViewModel(
@@ -113,7 +109,11 @@ class CombinedDashboardViewModel(
                 downloadClientManager.downloadClientApis,
                 calendarService.items.map { itemsByDate ->
                     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-                    itemsByDate[today] ?: emptyList()
+                    val todayItems = itemsByDate[today] ?: emptyList()
+                    val upcomingItems = (1..7).flatMap {
+                        itemsByDate[today.plus(it, DateTimeUnit.DAY)] ?: emptyList()
+                    }
+                    todayItems to upcomingItems
                 },
                 _isRefreshing
             ) { args ->
@@ -125,7 +125,9 @@ class CombinedDashboardViewModel(
                 @Suppress("UNCHECKED_CAST")
                 val clientApis = args[3] as Map<Long, *>
                 @Suppress("UNCHECKED_CAST")
-                val todayCalendar = args[4] as List<CalendarItem>
+                val calendarPair = args[4] as Pair<List<CalendarItem>, List<CalendarItem>>
+                val todayCalendar = calendarPair.first
+                val upcomingCalendar = calendarPair.second
                 val refreshing = args[5] as Boolean
 
                 val downloadClients = downloads.transferInfo.map { transfer ->
@@ -169,6 +171,7 @@ class CombinedDashboardViewModel(
                     downloadTransfers = downloads.transferInfo,
                     activeDownloads = downloads.queueItems.sortedByDescending { it.progress },
                     calendarItems = todayCalendar,
+                    upcomingCalendarItems = upcomingCalendar,
                     isRefreshing = refreshing
                 )
             }.collect { newState ->
