@@ -419,6 +419,6 @@ private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSiz
         TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.REQUESTS -> SeerrTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.PROWLARR -> ProwlarrTab(wideRailIsVisible)
-        TabItem.Standard.DASHBOARD -> DashboardTab()
+        TabItem.Standard.DASHBOARD -> DashboardTab(windowSizeClass)
     }
 }

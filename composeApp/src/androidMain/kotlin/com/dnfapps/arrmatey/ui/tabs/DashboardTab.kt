@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.tabs
 
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation3.runtime.entryProvider
@@ -14,6 +15,7 @@ import org.koin.compose.koinInject
 
 @Composable
 fun DashboardTab(
+    windowSizeClass: WindowSizeClass,
     navigationManager: NavigationManager = koinInject(),
     navigation: DashboardTabNavigator = navigationManager.dashboard
 ) {
@@ -22,7 +24,7 @@ fun DashboardTab(
             backStack = navigation.backStack,
             onBack = { navigation.popBackStack() },
             entryProvider = entryProvider { 
-                entry<DashboardScreen.Main> { CombinedDashboard() }
+                entry<DashboardScreen.Main> { CombinedDashboard(windowSizeClass) }
                 entry<DashboardScreen.ArrDashboard> { ArrInstanceDashboard(it.id, navigation) }
             }
         )

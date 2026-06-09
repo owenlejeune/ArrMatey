@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,10 +21,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CalendarToday
@@ -53,6 +56,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,14 +89,14 @@ import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.arr.state.DashboardCards
 import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.DashboardScreen
-import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.dashboardNavigator
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.openArrDashboard
@@ -114,8 +119,11 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CombinedDashboard(
+    windowSizeClass: WindowSizeClass,
     viewModel: CombinedDashboardViewModel = koinInject()
 ) {
+    val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+
     val navManager = navigationManager
     val navigator = dashboardNavigator
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -123,14 +131,21 @@ fun CombinedDashboard(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = if (isCompact) {
+            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+        } else Modifier,
         topBar = {
             TopAppBar(
                 title = { Text(mokoString(MR.strings.dashboard)) },
                 scrollBehavior = scrollBehavior,
-                navigationIcon = { NavigationDrawerButton() },
+                navigationIcon = { if (isCompact) NavigationDrawerButton() },
+                windowInsets = TopAppBarDefaults.windowInsets,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                )
             )
-        }
+        },
+        contentWindowInsets = WindowInsets(0.dp)
     ) { contentPadding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -145,66 +160,75 @@ fun CombinedDashboard(
                     LoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is CombinedDashboardState.Success -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp)
-                            .padding(bottom = navigationBarBottomInset()),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    val state = rememberLazyStaggeredGridState()
+                    LazyVerticalStaggeredGrid (
+                        state = state,
+                        columns = StaggeredGridCells.Fixed(count = if (isCompact) 1 else 2),
+                        verticalItemSpacing = 16.dp,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(all = 16.dp, bottom = 16.dp + navigationBarBottomInset()),
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        OverviewHeader(currentState)
-
-                        if (currentState.seerrInstances.isNotEmpty()) {
-                            SeerrSection(currentState.seerrInstances)
-                        }
-
-                        if (currentState.prowlarrStats.isNotEmpty()) {
-                            ProwlarrSection(currentState.prowlarrStats)
-                        }
-
-                        currentState.networkStatus?.let {
-                            NetworkSection(it)
-                        }
-
-                        if (currentState.recentlyAdded.isNotEmpty()) {
-                            RecentlyAddedSection(
-                                items = currentState.recentlyAdded,
-                            ) { media ->
-                                val type = when (media) {
-                                    is ArrSeries -> InstanceType.Sonarr
-                                    is ArrMovie -> InstanceType.Radarr
-                                    is Arrtist -> InstanceType.Lidarr
-                                    is Author -> InstanceType.Booksehelf
-                                    is Audiobook -> InstanceType.Listenarr
-                                    else -> null
-                                }
-                                type?.let {
-                                    navManager.arr(it).toDetails(media.id ?: 0)
-                                    navManager.navigateToTab(navManager.tabFor(it))
-                                }
+                        items(DashboardCards.entries) { dashboardCard ->
+                            when (dashboardCard) {
+                                DashboardCards.ArrOverview ->
+                                    OverviewHeader(currentState)
+                                DashboardCards.SeerrOverview ->
+                                    if (currentState.seerrInstances.isNotEmpty()) {
+                                        SeerrSection(currentState.seerrInstances)
+                                    }
+                                DashboardCards.ProwlarrOverview ->
+                                    if (currentState.prowlarrStats.isNotEmpty()) {
+                                        ProwlarrSection(currentState.prowlarrStats)
+                                    }
+                                DashboardCards.Network ->
+                                    currentState.networkStatus?.let {
+                                        NetworkSection(it)
+                                    }
+                                DashboardCards.RecentlyAdded ->
+                                    if (currentState.recentlyAdded.isNotEmpty()) {
+                                        RecentlyAddedSection(
+                                            items = currentState.recentlyAdded,
+                                        ) { media ->
+                                            val type = when (media) {
+                                                is ArrSeries -> InstanceType.Sonarr
+                                                is ArrMovie -> InstanceType.Radarr
+                                                is Arrtist -> InstanceType.Lidarr
+                                                is Author -> InstanceType.Booksehelf
+                                                is Audiobook -> InstanceType.Listenarr
+                                                else -> null
+                                            }
+                                            type?.let {
+                                                navManager.arr(it).toDetails(media.id ?: 0)
+                                                navManager.navigateToTab(navManager.tabFor(it))
+                                            }
+                                        }
+                                    }
+                                DashboardCards.DownloadClients ->
+                                    if (currentState.downloadClients.isNotEmpty()) {
+                                        DownloadClientsSection(currentState)
+                                    }
+                                DashboardCards.RecentActivity ->
+                                    if (currentState.recentActivity.isNotEmpty()) {
+                                        RecentActivitySection(currentState.recentActivity)
+                                    }
+                                DashboardCards.OnToday ->
+                                    if (currentState.calendarItems.isNotEmpty()) {
+                                        TodaySection(currentState)
+                                    }
+                                DashboardCards.UpcomingReleases ->
+                                    if (currentState.upcomingCalendarItems.isNotEmpty()) {
+                                        UpcomingSection(currentState)
+                                    }
+                                DashboardCards.InstanceDashboard ->
+                                    InstanceDashboardSection(
+                                        state = currentState,
+                                        onInstanceClicked = { id ->
+                                            navigator.openArrDashboard(id)
+                                        }
+                                    )
                             }
                         }
-
-                        if (currentState.downloadClients.isNotEmpty()) {
-                            DownloadClientsSection(currentState)
-                        }
-
-                        if (currentState.recentActivity.isNotEmpty()) {
-                            RecentActivitySection(currentState.recentActivity)
-                        }
-
-                        if (currentState.calendarItems.isNotEmpty()) {
-                            TodaySection(currentState)
-                        }
-
-                        if (currentState.upcomingCalendarItems.isNotEmpty()) {
-                            UpcomingSection(currentState)
-                        }
-
-                        InstanceDashboardSection(currentState, onInstanceClicked = { id ->
-                            navigator.openArrDashboard(id)
-                        })
                     }
                 }
             }

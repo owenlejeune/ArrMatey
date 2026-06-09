@@ -70,3 +70,16 @@ fun SearchBarState.isExpanded() =
 @OptIn(ExperimentalMaterial3Api::class)
 fun SearchBarState.isCollapsed() =
     currentValue == SearchBarValue.Collapsed
+
+fun PaddingValues(
+    all: Dp,
+    start: Dp? = null,
+    end: Dp? = null,
+    top: Dp? = null,
+    bottom: Dp? = null
+): PaddingValues = PaddingValues(
+    start = start ?: all,
+    end = end ?: all,
+    top = top ?: all,
+    bottom = bottom ?: all
+)

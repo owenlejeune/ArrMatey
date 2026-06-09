@@ -78,3 +78,16 @@ data class ProwlarrDashboardState(
     val failingIndexers: Int,
     val failingIndexerNames: List<String> = emptyList()
 )
+
+enum class DashboardCards {
+    ArrOverview,
+    SeerrOverview,
+    ProwlarrOverview,
+    Network,
+    RecentlyAdded,
+    DownloadClients,
+    RecentActivity,
+    OnToday,
+    UpcomingReleases,
+    InstanceDashboard
+}
