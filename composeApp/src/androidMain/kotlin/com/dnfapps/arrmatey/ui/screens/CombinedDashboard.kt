@@ -7,6 +7,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,9 +29,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Download
@@ -47,6 +50,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -100,12 +104,10 @@ import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.DashboardCards
-import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.DashboardScreen
-import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.dashboardNavigator
@@ -134,8 +136,7 @@ import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
 @Composable
 fun CombinedDashboard(
     windowSizeClass: WindowSizeClass,
-    viewModel: CombinedDashboardViewModel = koinInject(),
-    dashboardManager: DashboardManager = koinInject()
+    viewModel: CombinedDashboardViewModel = koinInject()
 ) {
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
     val hapticFeedback = LocalHapticFeedback.current
@@ -144,8 +145,8 @@ fun CombinedDashboard(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
-    val cards by dashboardManager.cardsOrder.collectAsStateWithLifecycle(emptyList())
+    val cards by viewModel.cards.collectAsStateWithLifecycle()
+    val isEditing by viewModel.isEditing.collectAsStateWithLifecycle()
 
     val gridState = rememberLazyStaggeredGridState()
 
@@ -157,22 +158,39 @@ fun CombinedDashboard(
             TopAppBar(
                 title = { Text(mokoString(MR.strings.dashboard)) },
                 scrollBehavior = scrollBehavior,
-                navigationIcon = { if (isCompact) NavigationDrawerButton() },
+                navigationIcon = {
+                    if (isEditing) {
+                        IconButton(onClick = { viewModel.toggleEditing() }) {
+                            Icon(Icons.Default.Close, null)
+                        }
+                    } else if (isCompact) NavigationDrawerButton()
+                },
                 windowInsets = TopAppBarDefaults.windowInsets,
                 colors = TopAppBarDefaults.topAppBarColors(
                     scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
                 actions = {
-                    IconButton(onClick = {
-                        dashboardManager.reset()
-                        scope.launch {
-                            gridState.animateScrollToItem(0)
+                    if (isEditing) {
+                        IconButton(onClick = {
+                            viewModel.resetCardsOrder()
+                            scope.launch {
+                                gridState.animateScrollToItem(0)
+                            }
+                        }) {
+                            Icon(Icons.Default.Restore, null)
                         }
-                    }) {
-                        Icon(Icons.Default.Restore, null)
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            if (isEditing) {
+                ExtendedFloatingActionButton(
+                    onClick = { },
+                    icon = { Icon(Icons.Default.Add, null) },
+                    text = { Text(mokoString(MR.strings.add)) }
+                )
+            }
         },
         contentWindowInsets = WindowInsets(0.dp)
     ) { contentPadding ->
@@ -195,7 +213,7 @@ fun CombinedDashboard(
                                 this[from.index] = this[to.index]
                             }
                         }
-                        dashboardManager.saveCardOrder(newOrder)
+                        viewModel.saveCardOrder(newOrder)
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                     }
                     LazyVerticalStaggeredGrid (
@@ -209,21 +227,57 @@ fun CombinedDashboard(
                         items(cards, key = { it }) { dashboardCard ->
                             ReorderableItem(reorderableGridState, key = dashboardCard) { isDragging ->
                                 val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                                val innerPadding by animateDpAsState(if (isEditing) 4.dp else 0.dp)
 
-                                Surface(
-                                    shadowElevation = elevation,
-                                    modifier = Modifier
-                                        .clip(MaterialTheme.shapes.large)
-                                        .draggableHandle(
-                                            onDragStarted = {
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
-                                            },
-                                            onDragStopped = {
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                            }
-                                        )
-                                ) {
-                                    DashboardCardContent(dashboardCard, currentState)
+                                Box(contentAlignment = Alignment.Center) {
+                                    Surface(
+                                        shadowElevation = elevation,
+                                        modifier = Modifier
+                                            .padding(innerPadding)
+                                            .clip(MaterialTheme.shapes.large)
+                                            .combinedClickable(
+                                                onClick = {},
+                                                onLongClick = {
+                                                    if (!isEditing) {
+                                                        viewModel.toggleEditing()
+                                                    }
+                                                }
+                                            )
+                                            .longPressDraggableHandle(
+                                                onDragStarted = {
+                                                    hapticFeedback.performHapticFeedback(
+                                                        HapticFeedbackType.GestureThresholdActivate
+                                                    )
+                                                },
+                                                onDragStopped = {
+                                                    hapticFeedback.performHapticFeedback(
+                                                        HapticFeedbackType.GestureEnd
+                                                    )
+                                                },
+                                                enabled = isEditing
+                                            )
+                                    ) {
+                                        DashboardCardContent(dashboardCard, currentState)
+                                    }
+                                    if (isEditing) {
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .clip(CircleShape)
+                                                .clickable {
+                                                    viewModel.removeCard(dashboardCard)
+                                                }
+                                                .size(24.dp)
+                                                .background(ArrRed),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Close, null,
+                                                tint = Color.Black,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

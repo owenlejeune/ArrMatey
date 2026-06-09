@@ -12,6 +12,8 @@ import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.arrmatey.compose.DashboardCards
+import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
@@ -23,12 +25,15 @@ import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
@@ -41,7 +46,8 @@ class CombinedDashboardViewModel(
     private val instanceManager: InstanceManager,
     private val downloadClientManager: DownloadClientManager,
     private val downloadQueueService: DownloadQueueService,
-    private val calendarService: CalendarService
+    private val calendarService: CalendarService,
+    private val dashboardManager: DashboardManager
 ) : ViewModel() {
 
     private val _isRefreshing = MutableStateFlow(false)
@@ -49,6 +55,16 @@ class CombinedDashboardViewModel(
 
     private val _state = MutableStateFlow<CombinedDashboardState>(CombinedDashboardState.Initial)
     val state: StateFlow<CombinedDashboardState> = _state.asStateFlow()
+
+    private val _isEditing = MutableStateFlow(false)
+    val isEditing: StateFlow<Boolean> = _isEditing.asStateFlow()
+
+    val cards = dashboardManager.cardsOrder
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     init {
         observeDashboard()
@@ -334,5 +350,21 @@ class CombinedDashboardViewModel(
             calendarService.load()
             _isRefreshing.value = false
         }
+    }
+
+    fun toggleEditing() {
+        _isEditing.update { !it }
+    }
+
+    fun resetCardsOrder() {
+        dashboardManager.reset()
+    }
+
+    fun saveCardOrder(cards: List<DashboardCards>) {
+        dashboardManager.saveCardOrder(cards)
+    }
+
+    fun removeCard(card: DashboardCards) {
+        dashboardManager.removeCard(card)
     }
 }

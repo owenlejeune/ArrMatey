@@ -336,7 +336,6 @@ val viewModelModule = module {
         ArrInstanceDashboardViewModel(instanceId, get())
     }
     factory { CalendarViewModel(get(), get(), get(), get()) }
-    factory { CombinedDashboardViewModel(get(), get(), get(), get()) }
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { (tmdbId: Long, mediaType: RequestType) ->
         SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get())
@@ -365,6 +364,7 @@ val viewModelModule = module {
     factory { (audiobookId: Long) ->
         AudiobookFilesViewModel(audiobookId, get())
     }
+    factory { CombinedDashboardViewModel(get(), get(), get(), get(), get()) }
 }
 
 val resourcesModule = module {
