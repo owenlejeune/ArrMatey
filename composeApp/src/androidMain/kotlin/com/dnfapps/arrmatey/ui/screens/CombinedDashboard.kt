@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
@@ -26,7 +27,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CalendarToday
@@ -52,6 +52,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -68,7 +69,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -89,11 +92,12 @@ import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
-import com.dnfapps.arrmatey.arr.state.DashboardCards
 import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
+import com.dnfapps.arrmatey.compose.DashboardCards
+import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -115,20 +119,26 @@ import dev.icerock.moko.resources.compose.painterResource
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.koinInject
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CombinedDashboard(
     windowSizeClass: WindowSizeClass,
-    viewModel: CombinedDashboardViewModel = koinInject()
+    viewModel: CombinedDashboardViewModel = koinInject(),
+    dashboardManager: DashboardManager = koinInject()
 ) {
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+    val hapticFeedback = LocalHapticFeedback.current
 
     val navManager = navigationManager
     val navigator = dashboardNavigator
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    val cards by dashboardManager.cardsOrder.collectAsStateWithLifecycle(emptyList())
 
     Scaffold(
         modifier = if (isCompact) {
@@ -160,73 +170,113 @@ fun CombinedDashboard(
                     LoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is CombinedDashboardState.Success -> {
-                    val state = rememberLazyStaggeredGridState()
+                    val gridState = rememberLazyStaggeredGridState()
+                    val reorderableGridState = rememberReorderableLazyStaggeredGridState(gridState) { from, to ->
+                        val newOrder = cards.toMutableList().apply {
+                            this[to.index] = this[from.index].also {
+                                this[from.index] = this[to.index]
+                            }
+                        }
+                        dashboardManager.saveCardsOrder(newOrder)
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+                    }
                     LazyVerticalStaggeredGrid (
-                        state = state,
+                        state = gridState,
                         columns = StaggeredGridCells.Fixed(count = if (isCompact) 1 else 2),
                         verticalItemSpacing = 16.dp,
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         contentPadding = PaddingValues(all = 16.dp, bottom = 16.dp + navigationBarBottomInset()),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(DashboardCards.entries) { dashboardCard ->
-                            when (dashboardCard) {
-                                DashboardCards.ArrOverview ->
-                                    OverviewHeader(currentState)
-                                DashboardCards.SeerrOverview ->
-                                    if (currentState.seerrInstances.isNotEmpty()) {
-                                        SeerrSection(currentState.seerrInstances)
-                                    }
-                                DashboardCards.ProwlarrOverview ->
-                                    if (currentState.prowlarrStats.isNotEmpty()) {
-                                        ProwlarrSection(currentState.prowlarrStats)
-                                    }
-                                DashboardCards.Network ->
-                                    currentState.networkStatus?.let {
-                                        NetworkSection(it)
-                                    }
-                                DashboardCards.RecentlyAdded ->
-                                    if (currentState.recentlyAdded.isNotEmpty()) {
-                                        RecentlyAddedSection(
-                                            items = currentState.recentlyAdded,
-                                        ) { media ->
-                                            val type = when (media) {
-                                                is ArrSeries -> InstanceType.Sonarr
-                                                is ArrMovie -> InstanceType.Radarr
-                                                is Arrtist -> InstanceType.Lidarr
-                                                is Author -> InstanceType.Booksehelf
-                                                is Audiobook -> InstanceType.Listenarr
-                                                else -> null
+                        items(cards, key = { it }) { dashboardCard ->
+                            ReorderableItem(reorderableGridState, key = dashboardCard) { isDragging ->
+                                val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+
+                                Surface(
+                                    shadowElevation = elevation,
+                                    modifier = Modifier
+                                        .clip(MaterialTheme.shapes.large)
+                                        .draggableHandle(
+                                            onDragStarted = {
+                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                                            },
+                                            onDragStopped = {
+                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
                                             }
-                                            type?.let {
-                                                navManager.arr(it).toDetails(media.id ?: 0)
-                                                navManager.navigateToTab(navManager.tabFor(it))
+                                        )
+                                ) {
+                                    when (dashboardCard) {
+                                        DashboardCards.ArrOverview ->
+                                            OverviewHeader(currentState)
+
+                                        DashboardCards.SeerrOverview ->
+                                            if (currentState.seerrInstances.isNotEmpty()) {
+                                                SeerrSection(currentState.seerrInstances)
                                             }
-                                        }
+
+                                        DashboardCards.ProwlarrOverview ->
+                                            if (currentState.prowlarrStats.isNotEmpty()) {
+                                                ProwlarrSection(currentState.prowlarrStats)
+                                            }
+
+                                        DashboardCards.Network ->
+                                            currentState.networkStatus?.let {
+                                                NetworkSection(it)
+                                            }
+
+                                        DashboardCards.RecentlyAdded ->
+                                            if (currentState.recentlyAdded.isNotEmpty()) {
+                                                RecentlyAddedSection(
+                                                    items = currentState.recentlyAdded,
+                                                ) { media ->
+                                                    val type = when (media) {
+                                                        is ArrSeries -> InstanceType.Sonarr
+                                                        is ArrMovie -> InstanceType.Radarr
+                                                        is Arrtist -> InstanceType.Lidarr
+                                                        is Author -> InstanceType.Booksehelf
+                                                        is Audiobook -> InstanceType.Listenarr
+                                                        else -> null
+                                                    }
+                                                    type?.let {
+                                                        navManager.arr(it).toDetails(media.id ?: 0)
+                                                        navManager.navigateToTab(
+                                                            navManager.tabFor(
+                                                                it
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                        DashboardCards.DownloadClients ->
+                                            if (currentState.downloadClients.isNotEmpty()) {
+                                                DownloadClientsSection(currentState)
+                                            }
+
+                                        DashboardCards.RecentActivity ->
+                                            if (currentState.recentActivity.isNotEmpty()) {
+                                                RecentActivitySection(currentState.recentActivity)
+                                            }
+
+                                        DashboardCards.OnToday ->
+                                            if (currentState.calendarItems.isNotEmpty()) {
+                                                TodaySection(currentState)
+                                            }
+
+                                        DashboardCards.UpcomingReleases ->
+                                            if (currentState.upcomingCalendarItems.isNotEmpty()) {
+                                                UpcomingSection(currentState)
+                                            }
+
+                                        DashboardCards.InstanceDashboard ->
+                                            InstanceDashboardSection(
+                                                state = currentState,
+                                                onInstanceClicked = { id ->
+                                                    navigator.openArrDashboard(id)
+                                                }
+                                            )
                                     }
-                                DashboardCards.DownloadClients ->
-                                    if (currentState.downloadClients.isNotEmpty()) {
-                                        DownloadClientsSection(currentState)
-                                    }
-                                DashboardCards.RecentActivity ->
-                                    if (currentState.recentActivity.isNotEmpty()) {
-                                        RecentActivitySection(currentState.recentActivity)
-                                    }
-                                DashboardCards.OnToday ->
-                                    if (currentState.calendarItems.isNotEmpty()) {
-                                        TodaySection(currentState)
-                                    }
-                                DashboardCards.UpcomingReleases ->
-                                    if (currentState.upcomingCalendarItems.isNotEmpty()) {
-                                        UpcomingSection(currentState)
-                                    }
-                                DashboardCards.InstanceDashboard ->
-                                    InstanceDashboardSection(
-                                        state = currentState,
-                                        onInstanceClicked = { id ->
-                                            navigator.openArrDashboard(id)
-                                        }
-                                    )
+                                }
                             }
                         }
                     }
@@ -242,7 +292,7 @@ private fun NetworkSection(state: NetworkStatusState) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
@@ -283,7 +333,7 @@ private fun NetworkSection(state: NetworkStatusState) {
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(MaterialTheme.shapes.small)
                             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -324,7 +374,7 @@ private fun NetworkSection(state: NetworkStatusState) {
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
+                                        .clip(MaterialTheme.shapes.small)
                                         .background(
                                             if (status.isOnline) ArrGreen.copy(alpha = 0.1f)
                                             else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
@@ -343,7 +393,7 @@ private fun NetworkSection(state: NetworkStatusState) {
                                 if (status.isLocalSwitchingEnabled) {
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
+                                            .clip(MaterialTheme.shapes.small)
                                             .background(
                                                 if (status.isLocal) ArrBlue.copy(alpha = 0.1f)
                                                 else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
@@ -407,7 +457,7 @@ private fun RecentlyAddedSection(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
@@ -460,7 +510,7 @@ private fun StatCard(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = color),
-        shape = RoundedCornerShape(16.dp)
+        shape = MaterialTheme.shapes.large
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -479,7 +529,7 @@ private fun StatCard(
 private fun TodaySection(state: CombinedDashboardState.Success) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
@@ -519,7 +569,7 @@ private fun TodaySection(state: CombinedDashboardState.Success) {
 private fun UpcomingSection(state: CombinedDashboardState.Success) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
@@ -607,7 +657,7 @@ private fun InstanceDashboardSection(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
@@ -728,7 +778,7 @@ private fun ProwlarrSection(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
@@ -818,7 +868,7 @@ private fun SeerrSection(seerrInstances: List<SeerrDashboardState>) {
         seerrInstances.forEach { state ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
@@ -882,7 +932,7 @@ private fun CountStatItem(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = color),
-        shape = RoundedCornerShape(16.dp)
+        shape = MaterialTheme.shapes.large
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -909,7 +959,7 @@ private fun DownloadClientsSection(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
@@ -1070,7 +1120,7 @@ private fun DownloadClientsSection(
 private fun RecentActivitySection(activity: List<QueueItem>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )

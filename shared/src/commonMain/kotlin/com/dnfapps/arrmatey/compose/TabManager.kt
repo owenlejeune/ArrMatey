@@ -24,7 +24,8 @@ class TabManager(
     data class TabConfiguration(
         val visibleTabs: List<TabItem> = TabItem.defaultStandardEntries(),
         val drawerTabs: List<TabItem> = TabItem.defaultHiddenStandard(),
-        val hiddenTabs: List<TabItem> = emptyList()
+        val hiddenTabs: List<TabItem> = emptyList(),
+        val isInitialValue: Boolean = false
     ) {
         constructor(): this(TabItem.defaultStandardEntries()) // empty ios constructor
     }
@@ -36,13 +37,14 @@ class TabManager(
         TabConfiguration(
             visibleTabs = buildVisibleTabs(prefs, webpages),
             drawerTabs = buildDrawerTabs(prefs, webpages),
-            hiddenTabs = buildHiddenTabs(prefs, webpages)
+            hiddenTabs = buildHiddenTabs(prefs, webpages),
+            isInitialValue = false
         )
     }
         .stateIn(
             scope = CoroutineScope(Dispatchers.IO),
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = TabConfiguration()
+            initialValue = TabConfiguration(isInitialValue = true)
         )
 
     fun getVisibleTabs(): Flow<List<TabItem>> {

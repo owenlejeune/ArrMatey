@@ -107,10 +107,14 @@ fun HomeScreen(
         }
     ) { visibleTabs.size }
 
-    LaunchedEffect(visibleTabs, overlayTab) {
-        if (overlayTab == null && selectedTab !in visibleTabs) {
-            visibleTabs.firstOrNull()?.let {
-                navigationManager.setSelectedTab(it)
+    LaunchedEffect(visibleTabs, overlayTab, tabConfig.isInitialValue) {
+        if (tabConfig.isInitialValue) return@LaunchedEffect
+
+        if (overlayTab == null) {
+            if (selectedTab == null || selectedTab !in visibleTabs) {
+                visibleTabs.firstOrNull()?.let {
+                    navigationManager.setSelectedTab(it)
+                }
             }
         }
     }
@@ -218,7 +222,7 @@ fun HomeScreen(
                                     }
 
                                     val currentTab = overlayTab ?: selectedTab
-                                    val associatedType = currentTab.associatedType
+                                    val associatedType = currentTab?.associatedType
                                     val navigator =
                                         associatedType?.takeIf { it in InstanceType.arrs() }
                                             ?.let { navigationManager.arr(it) }

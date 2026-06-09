@@ -12,8 +12,8 @@ class AppState {
     private val _drawerExpanded = MutableStateFlow(false)
     val drawerExpanded: StateFlow<Boolean> = _drawerExpanded.asStateFlow()
 
-    private val _selectedTab = MutableStateFlow<TabItem>(TabItem.Standard.SHOWS)
-    val selectedTab: StateFlow<TabItem> = _selectedTab.asStateFlow()
+    private val _selectedTab = MutableStateFlow<TabItem?>(null)
+    val selectedTab: StateFlow<TabItem?> = _selectedTab.asStateFlow()
 
     private val _overlayTab = MutableStateFlow<TabItem?>(null)
     val overlayTab: StateFlow<TabItem?> = _overlayTab.asStateFlow()

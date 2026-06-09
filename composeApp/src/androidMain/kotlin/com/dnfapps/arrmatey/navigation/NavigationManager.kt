@@ -18,7 +18,7 @@ class NavigationManager(
 ) {
     // Reactive UI state properties
     val drawerExpandedState: StateFlow<Boolean> = appState.drawerExpanded
-    val selectedTab: StateFlow<TabItem> = appState.selectedTab
+    val selectedTab: StateFlow<TabItem?> = appState.selectedTab
     val overlayTab: StateFlow<TabItem?> = appState.overlayTab
 
     // UI state actions
