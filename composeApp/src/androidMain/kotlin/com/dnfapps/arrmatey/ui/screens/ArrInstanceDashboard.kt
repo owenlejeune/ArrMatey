@@ -44,6 +44,7 @@ import com.dnfapps.arrmatey.arr.state.ArrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.model.InfoItem
+import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.navigation.toEditInstance
@@ -63,11 +64,12 @@ import org.koin.compose.koinInject
 @Composable
 fun ArrInstanceDashboard(
     id: Long,
+    navigation: Navigator<*>,
     viewModel: ArrInstanceDashboardViewModel = koinInjectParams(id),
     moko: MokoStrings = koinInject()
 ) {
     val navManager = navigationManager
-    val navigation = settingsNavigator
+//    val navigation = settingsNavigator
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -87,7 +89,8 @@ fun ArrInstanceDashboard(
                 actions = {
                     IconButton(
                         onClick = {
-                            navigation.toEditInstance(id)
+                            navManager.openEditInstanceScreen(id)
+//                            navigation.toEditInstance(id)
                         }
                     ) {
                         Icon(Icons.Default.Edit, null)

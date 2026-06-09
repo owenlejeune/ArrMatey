@@ -54,3 +54,8 @@ sealed interface SettingsScreen : NavKey {
     data object AddCustomWebpage : SettingsScreen
     data class EditCustomWebpage(val id: Long) : SettingsScreen
 }
+
+sealed interface DashboardScreen: NavKey {
+    data object Main: DashboardScreen
+    data class ArrDashboard(val id: Long): DashboardScreen
+}

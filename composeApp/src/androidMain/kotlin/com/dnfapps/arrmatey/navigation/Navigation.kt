@@ -76,6 +76,7 @@ class RequestsTabNavigator : BaseNavigator<SeerrScreen>(SeerrScreen.Home)
 class BooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class AudiobooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
+class DashboardTabNavigator : BaseNavigator<DashboardScreen>(DashboardScreen.Main)
 
 /**
  * Domain-specific navigation extensions for Arr feature set.
@@ -124,3 +125,5 @@ fun Navigator<SettingsScreen>.onInstanceTap(id: Long, type: InstanceType) =
         InstanceType.Listenarr -> toArrDashboard(id)
         else -> toEditInstance(id)
     }
+
+fun Navigator<DashboardScreen>.openArrDashboard(id: Long) = navigateTo(DashboardScreen.ArrDashboard(id))

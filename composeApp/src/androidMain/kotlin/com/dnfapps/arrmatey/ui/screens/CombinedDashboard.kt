@@ -90,7 +90,11 @@ import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.DashboardScreen
+import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.dashboardNavigator
 import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.navigation.openArrDashboard
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
@@ -110,9 +114,10 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CombinedDashboard(
-    viewModel: CombinedDashboardViewModel = koinInject(),
+    viewModel: CombinedDashboardViewModel = koinInject()
 ) {
     val navManager = navigationManager
+    val navigator = dashboardNavigator
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -149,6 +154,14 @@ fun CombinedDashboard(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         OverviewHeader(currentState)
+
+                        if (currentState.seerrInstances.isNotEmpty()) {
+                            SeerrSection(currentState.seerrInstances)
+                        }
+
+                        if (currentState.prowlarrStats.isNotEmpty()) {
+                            ProwlarrSection(currentState.prowlarrStats)
+                        }
 
                         currentState.networkStatus?.let {
                             NetworkSection(it)
@@ -189,15 +202,9 @@ fun CombinedDashboard(
                             UpcomingSection(currentState)
                         }
 
-                        if (currentState.seerrInstances.isNotEmpty()) {
-                            SeerrSection(currentState.seerrInstances)
-                        }
-
-                        if (currentState.prowlarrStats.isNotEmpty()) {
-                            ProwlarrSection(currentState.prowlarrStats)
-                        }
-
-                        InstanceDashboardSection(currentState)
+                        InstanceDashboardSection(currentState, onInstanceClicked = { id ->
+                            navigator.openArrDashboard(id)
+                        })
                     }
                 }
             }
@@ -568,7 +575,8 @@ private fun CalendarItemRow(item: CalendarItem, showDate: Boolean = false) {
 
 @Composable
 private fun InstanceDashboardSection(
-    state: CombinedDashboardState.Success
+    state: CombinedDashboardState.Success,
+    onInstanceClicked: (Long) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -590,14 +598,16 @@ private fun InstanceDashboardSection(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = mokoString(MR.strings.instances),
+                    text = mokoString(MR.strings.overview),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             state.instances.forEachIndexed { index, instanceState ->
-                InstanceDashboardCard(instanceState)
+                InstanceDashboardCard(instanceState, onClick = {
+                    onInstanceClicked(instanceState.instance.id)
+                })
                 if (index < state.instances.size - 1) {
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 6.dp),
@@ -610,13 +620,17 @@ private fun InstanceDashboardSection(
 }
 
 @Composable
-private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
+private fun InstanceDashboardCard(
+    state: ArrInstanceDashboardState,
+    onClick: () -> Unit
+) {
     val completion = if (state.library.isNotEmpty()) {
         state.library.asSequence().map { it.statusProgress }.average().toFloat()
     } else 0f
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.clickable(onClick = onClick)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -770,30 +784,6 @@ private fun ProwlarrSection(
         }
     }
 }
-
-//@Composable
-//private fun IndexerStatItem(
-//    modifier: Modifier = Modifier,
-//    icon: ImageVector,
-//    label: String,
-//    count: Int,
-//    color: Color
-//) {
-//    Box(
-//        modifier = modifier
-//            .clip(RoundedCornerShape(12.dp))
-//            .background(color)
-//            .padding(vertical = 8.dp, horizontal = 12.dp),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Text(
-//            text = label,
-//            style = MaterialTheme.typography.labelLarge,
-//            fontWeight = FontWeight.Bold,
-//            color = textColor
-//        )
-//    }
-//}
 
 @Composable
 private fun SeerrSection(seerrInstances: List<SeerrDashboardState>) {

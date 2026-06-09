@@ -66,6 +66,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.tabs.ActivityTab
 import com.dnfapps.arrmatey.ui.tabs.ArrTab
 import com.dnfapps.arrmatey.ui.tabs.CalendarTab
+import com.dnfapps.arrmatey.ui.tabs.DashboardTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
@@ -418,6 +419,6 @@ private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSiz
         TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.REQUESTS -> SeerrTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.PROWLARR -> ProwlarrTab(wideRailIsVisible)
-        TabItem.Standard.DASHBOARD -> CombinedDashboard()
+        TabItem.Standard.DASHBOARD -> DashboardTab()
     }
 }

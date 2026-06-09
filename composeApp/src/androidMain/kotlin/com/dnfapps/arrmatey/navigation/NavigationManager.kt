@@ -13,6 +13,7 @@ class NavigationManager(
     private val tabNavigators: Map<TabItem, Navigator<*>>,
     val settings: SettingsTabNavigator,
     val requests: RequestsTabNavigator,
+    val dashboard: DashboardTabNavigator,
     private val appState: AppState
 ) {
     // Reactive UI state properties

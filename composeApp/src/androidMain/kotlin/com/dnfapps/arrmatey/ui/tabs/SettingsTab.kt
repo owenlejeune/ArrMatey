@@ -49,7 +49,7 @@ fun SettingsTabNavHost(
                 entry<SettingsScreen.Dev> { DevSettingsScreen() }
                 entry<SettingsScreen.TabPreferences> { TabCustomizationScreen() }
                 entry<SettingsScreen.ShortcutPreferences> { ShortcutsCustomizationScreen() }
-                entry<SettingsScreen.ArrDashboard> { ArrInstanceDashboard(it.id) }
+                entry<SettingsScreen.ArrDashboard> { ArrInstanceDashboard(it.id, navigation) }
                 entry<SettingsScreen.AddDownloadClient> { AddEditDownloadClientScreen() }
                 entry<SettingsScreen.EditDownloadClient> { AddEditDownloadClientScreen(clientId = it.id) }
                 entry<SettingsScreen.AddCustomWebpage> { AddEditCustomWebpageScreen() }

@@ -23,30 +23,30 @@ val LocalSettingsNavigator = staticCompositionLocalOf<Navigator<SettingsScreen>>
     error("No SettingsNavigator provided")
 }
 
+val LocalDashboardNavigator = staticCompositionLocalOf<Navigator<DashboardScreen>> {
+    error("No DashboardNavigator provided")
+}
+
 /**
- * Helper to easily access the current navigation manager.
+ * Composable helpers for navigators
  */
+
 val navigationManager: NavigationManager
     @Composable
     get() = LocalNavigationManager.current
 
-/**
- * Helper to easily access the current Arr navigator.
- */
 val arrNavigator: Navigator<ArrScreen>
     @Composable
     get() = LocalArrNavigator.current
 
-/**
- * Helper to easily access the current Seerr navigator.
- */
 val seerrNavigator: Navigator<SeerrScreen>
     @Composable
     get() = LocalSeerrNavigator.current
 
-/**
- * Helper to easily access the current Settings navigator.
- */
 val settingsNavigator: Navigator<SettingsScreen>
     @Composable
     get() = LocalSettingsNavigator.current
+
+val dashboardNavigator: Navigator<DashboardScreen>
+    @Composable
+    get() = LocalDashboardNavigator.current
