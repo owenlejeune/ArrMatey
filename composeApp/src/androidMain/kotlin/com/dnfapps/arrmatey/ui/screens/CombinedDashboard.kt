@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
@@ -202,16 +203,7 @@ fun CombinedDashboard(
 
                         StorageSection(currentState.instances)
 
-                        Text(
-                            text = mokoString(MR.strings.instances),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-
-                        currentState.instances.forEach { instanceState ->
-                            InstanceDashboardCard(instanceState)
-                        }
+                        InstanceDashboardSection(currentState)
                     }
                 }
             }
@@ -740,12 +732,11 @@ private fun CalendarItemRow(item: CalendarItem, showDate: Boolean = false) {
 }
 
 @Composable
-private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
-    var expanded by rememberSaveable { mutableStateOf(value = false) }
-
+private fun InstanceDashboardSection(
+    state: CombinedDashboardState.Success
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = { expanded = !expanded },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -756,79 +747,64 @@ private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(state.instance.type.icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp)
-                )
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = state.instance.label,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "${state.totalItems} Items • ${state.sizeOnDisk.bytesAsFileSizeString()}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                if (state.healthItems.any { it.type == ArrHealthType.Error }) {
-                    Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
-                } else if (state.healthItems.isNotEmpty()) {
-                    Icon(Icons.Default.Warning, null, tint = Color(0xffffc653), modifier = Modifier.size(20.dp))
-                }
-
                 Icon(
-                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    Icons.Default.Cloud, null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = mokoString(MR.strings.instances),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    if (state.healthItems.isNotEmpty()) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        Text(
-                            text = mokoString(MR.strings.health),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            state.healthItems.forEach {
-                                ArrHealthCard(it)
-                            }
-                        }
-                    }
-
-                    if (state.disks.isNotEmpty()) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        Text(
-                            text = mokoString(MR.strings.disk_space),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        DiskSpaceSection(state.disks)
-                    }
-                    
-                    state.softwareStatus?.version?.let { version ->
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        Row {
-                            Text(mokoString(MR.strings.version), style = MaterialTheme.typography.labelMedium)
-                            Spacer(Modifier.weight(1f))
-                            Text(version, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
+            state.instances.forEachIndexed { index, instanceState ->
+                InstanceDashboardCard(instanceState)
+                if (index < state.instances.size - 1) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 6.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Image(
+                painter = painterResource(state.instance.type.icon),
+                contentDescription = null,
+                modifier = Modifier.size(32.dp)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = state.instance.label,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${state.totalItems} Items • ${state.sizeOnDisk.bytesAsFileSizeString()}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (state.healthItems.any { it.type == ArrHealthType.Error }) {
+                Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+            } else if (state.healthItems.isNotEmpty()) {
+                Icon(Icons.Default.Warning, null, tint = Color(0xffffc653), modifier = Modifier.size(20.dp))
             }
         }
     }
