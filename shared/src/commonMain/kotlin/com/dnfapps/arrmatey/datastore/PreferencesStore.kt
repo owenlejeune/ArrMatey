@@ -390,11 +390,9 @@ class PreferencesStore(
                 ?: DashboardCards.entries.toList()
         }
 
-    fun updateDashboardCardsOrder(cards: List<DashboardCards>) {
-        scope.launch {
-            dataStore.edit {
-                it[dashboardCardsOrderKey] = cards.joinToString("~")
-            }
+    suspend fun updateDashboardCardsOrder(cards: List<DashboardCards>) {
+        dataStore.edit {
+            it[dashboardCardsOrderKey] = cards.joinToString("~")
         }
     }
 

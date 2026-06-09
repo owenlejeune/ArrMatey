@@ -101,6 +101,10 @@ import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.DashboardScreen
+import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
+import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.dashboardNavigator
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.openArrDashboard
@@ -177,7 +181,7 @@ fun CombinedDashboard(
                                 this[from.index] = this[to.index]
                             }
                         }
-                        dashboardManager.saveCardsOrder(newOrder)
+                        dashboardManager.saveCardOrder(newOrder)
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                     }
                     LazyVerticalStaggeredGrid (
@@ -205,77 +209,7 @@ fun CombinedDashboard(
                                             }
                                         )
                                 ) {
-                                    when (dashboardCard) {
-                                        DashboardCards.ArrOverview ->
-                                            OverviewHeader(currentState)
-
-                                        DashboardCards.SeerrOverview ->
-                                            if (currentState.seerrInstances.isNotEmpty()) {
-                                                SeerrSection(currentState.seerrInstances)
-                                            }
-
-                                        DashboardCards.ProwlarrOverview ->
-                                            if (currentState.prowlarrStats.isNotEmpty()) {
-                                                ProwlarrSection(currentState.prowlarrStats)
-                                            }
-
-                                        DashboardCards.Network ->
-                                            currentState.networkStatus?.let {
-                                                NetworkSection(it)
-                                            }
-
-                                        DashboardCards.RecentlyAdded ->
-                                            if (currentState.recentlyAdded.isNotEmpty()) {
-                                                RecentlyAddedSection(
-                                                    items = currentState.recentlyAdded,
-                                                ) { media ->
-                                                    val type = when (media) {
-                                                        is ArrSeries -> InstanceType.Sonarr
-                                                        is ArrMovie -> InstanceType.Radarr
-                                                        is Arrtist -> InstanceType.Lidarr
-                                                        is Author -> InstanceType.Booksehelf
-                                                        is Audiobook -> InstanceType.Listenarr
-                                                        else -> null
-                                                    }
-                                                    type?.let {
-                                                        navManager.arr(it).toDetails(media.id ?: 0)
-                                                        navManager.navigateToTab(
-                                                            navManager.tabFor(
-                                                                it
-                                                            )
-                                                        )
-                                                    }
-                                                }
-                                            }
-
-                                        DashboardCards.DownloadClients ->
-                                            if (currentState.downloadClients.isNotEmpty()) {
-                                                DownloadClientsSection(currentState)
-                                            }
-
-                                        DashboardCards.RecentActivity ->
-                                            if (currentState.recentActivity.isNotEmpty()) {
-                                                RecentActivitySection(currentState.recentActivity)
-                                            }
-
-                                        DashboardCards.OnToday ->
-                                            if (currentState.calendarItems.isNotEmpty()) {
-                                                TodaySection(currentState)
-                                            }
-
-                                        DashboardCards.UpcomingReleases ->
-                                            if (currentState.upcomingCalendarItems.isNotEmpty()) {
-                                                UpcomingSection(currentState)
-                                            }
-
-                                        DashboardCards.InstanceDashboard ->
-                                            InstanceDashboardSection(
-                                                state = currentState,
-                                                onInstanceClicked = { id ->
-                                                    navigator.openArrDashboard(id)
-                                                }
-                                            )
-                                    }
+                                    DashboardCardContent(dashboardCard, currentState)
                                 }
                             }
                         }
@@ -283,6 +217,86 @@ fun CombinedDashboard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DashboardCardContent(
+    cardType: DashboardCards,
+    currentState: CombinedDashboardState.Success,
+    navManager: NavigationManager = navigationManager,
+    navigator: Navigator<DashboardScreen> = dashboardNavigator
+) {
+    when (cardType) {
+        DashboardCards.ArrOverview ->
+            OverviewHeader(currentState)
+
+        DashboardCards.SeerrOverview ->
+            if (currentState.seerrInstances.isNotEmpty()) {
+                SeerrSection(currentState.seerrInstances)
+            }
+
+        DashboardCards.ProwlarrOverview ->
+            if (currentState.prowlarrStats.isNotEmpty()) {
+                ProwlarrSection(currentState.prowlarrStats)
+            }
+
+        DashboardCards.Network ->
+            currentState.networkStatus?.let {
+                NetworkSection(it)
+            }
+
+        DashboardCards.RecentlyAdded ->
+            if (currentState.recentlyAdded.isNotEmpty()) {
+                RecentlyAddedSection(
+                    items = currentState.recentlyAdded,
+                ) { media ->
+                    val type = when (media) {
+                        is ArrSeries -> InstanceType.Sonarr
+                        is ArrMovie -> InstanceType.Radarr
+                        is Arrtist -> InstanceType.Lidarr
+                        is Author -> InstanceType.Booksehelf
+                        is Audiobook -> InstanceType.Listenarr
+                        else -> null
+                    }
+                    type?.let {
+                        navManager.arr(it).toDetails(media.id ?: 0)
+                        navManager.navigateToTab(
+                            navManager.tabFor(
+                                it
+                            )
+                        )
+                    }
+                }
+            }
+
+        DashboardCards.DownloadClients ->
+            if (currentState.downloadClients.isNotEmpty()) {
+                DownloadClientsSection(currentState)
+            }
+
+        DashboardCards.RecentActivity ->
+            if (currentState.recentActivity.isNotEmpty()) {
+                RecentActivitySection(currentState.recentActivity)
+            }
+
+        DashboardCards.OnToday ->
+            if (currentState.calendarItems.isNotEmpty()) {
+                TodaySection(currentState)
+            }
+
+        DashboardCards.UpcomingReleases ->
+            if (currentState.upcomingCalendarItems.isNotEmpty()) {
+                UpcomingSection(currentState)
+            }
+
+        DashboardCards.InstanceDashboard ->
+            InstanceDashboardSection(
+                state = currentState,
+                onInstanceClicked = { id ->
+                    navigator.openArrDashboard(id)
+                }
+            )
     }
 }
 

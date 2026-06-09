@@ -1,14 +1,38 @@
 package com.dnfapps.arrmatey.compose
 
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 
 class DashboardManager(
     private val preferencesStore: PreferencesStore
 ) {
-    val cardsOrder = preferencesStore.dashboardCardsOrder
+    private val _cardsOrder = MutableStateFlow<List<DashboardCards>>(emptyList())
+    val cardsOrder: StateFlow<List<DashboardCards>> = _cardsOrder.asStateFlow()
 
-    fun saveCardsOrder(cards: List<DashboardCards>) {
-        preferencesStore.updateDashboardCardsOrder(cards)
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    init {
+        scope.launch {
+            preferencesStore.dashboardCardsOrder
+                .take(1)
+                .collect { savedOrder ->
+                    _cardsOrder.value = savedOrder
+                }
+        }
+    }
+    fun saveCardOrder(cards: List<DashboardCards>) {
+        _cardsOrder.value = cards
+        scope.launch {
+            preferencesStore.updateDashboardCardsOrder(cards)
+        }
     }
 }
 
