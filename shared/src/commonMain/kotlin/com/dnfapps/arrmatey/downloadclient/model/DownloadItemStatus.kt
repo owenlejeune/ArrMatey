@@ -40,10 +40,11 @@ enum class DownloadItemStatus(val resource: StringResource) {
             QBittorrentTorrentState.UploadingQueued,
             QBittorrentTorrentState.DownloadingQueued -> Queued
             QBittorrentTorrentState.UploadingChecking,
-            QBittorrentTorrentState.DownloadingChecking-> Checking
+            QBittorrentTorrentState.DownloadingChecking -> Checking
             QBittorrentTorrentState.UploadingForced -> UploadingForced
             QBittorrentTorrentState.Downloading -> Downloading
-            QBittorrentTorrentState.DownloadingMetadata -> DownloadingMetadataForced
+            QBittorrentTorrentState.DownloadingMetadata,
+            QBittorrentTorrentState.DownloadingMetadataForced -> DownloadingMetadataForced
             QBittorrentTorrentState.DownloadingPaused,
             QBittorrentTorrentState.DownloadingStopped -> DownloadingPaused
             QBittorrentTorrentState.DownloadingStalled -> DownloadingStalled

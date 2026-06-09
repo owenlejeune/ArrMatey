@@ -221,7 +221,7 @@ fun CombinedDashboard(
 
 @Composable
 private fun NetworkSection(state: NetworkStatusState) {
-    if (state.instanceStatuses.isEmpty() && state.ssid == null) return
+    if ((state.instanceStatuses.isEmpty()) && (state.ssid == null)) return
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -284,7 +284,7 @@ private fun NetworkSection(state: NetworkStatusState) {
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Image(
-                                painter = painterResource(status.type.icon),
+                                painter = painterResource(status.icon),
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -478,8 +478,8 @@ private fun StorageSection(instances: List<ArrInstanceDashboardState>) {
                 }
 
                 if (totalInstanceUsage > 0) {
-                    val activeInstances = instances.filter { it.sizeOnDisk > 0 }
-                        .sortedByDescending { it.sizeOnDisk }
+                    val activeInstances = instances.asSequence().filter { it.sizeOnDisk > 0 }
+                        .sortedByDescending { it.sizeOnDisk }.toList()
 
                     activeInstances.forEachIndexed { index, instanceState ->
                         InstanceStorageItem(instanceState, totalInstanceUsage)
@@ -1122,7 +1122,7 @@ private fun DownloadClientsSection(
                 }
             }
 
-            if (state.activeDownloads.isNotEmpty() || state.downloadTransfers.isNotEmpty()) {
+            if (state.activeDownloads.isNotEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.Download, null,
@@ -1144,7 +1144,7 @@ private fun DownloadClientsSection(
                     }
                 }
 
-                state.activeDownloads.take(3).forEach { download ->
+                state.activeDownloads.take(5).forEach { download ->
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
@@ -1156,9 +1156,30 @@ private fun DownloadClientsSection(
                             )
                             Text(
                                 "${(download.progress * 100).toInt()}%",
-                                style = MaterialTheme.typography.labelMedium
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold
                             )
                         }
+                        
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${download.downloaded.bytesAsFileSizeString()} / ${download.size.bytesAsFileSizeString()}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.weight(1f))
+                            if (download.downloadSpeed > 0) {
+                                Text(
+                                    text = "${download.downloadSpeed.bytesAsFileSizeString()}/s",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = ArrGreen
+                                )
+                            }
+                        }
+
                         LinearProgressIndicator(
                             progress = { download.progress.toFloat() },
                             modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
@@ -1166,11 +1187,11 @@ private fun DownloadClientsSection(
                     }
                 }
 
-                if (state.activeDownloads.size > 3) {
+                if (state.activeDownloads.size > 5) {
                     Text(
                         mokoString(
                             MR.strings.additional_items_count,
-                            state.activeDownloads.size - 3
+                            state.activeDownloads.size - 5
                         ),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.align(Alignment.End)

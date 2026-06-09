@@ -39,6 +39,9 @@ enum class QBittorrentTorrentState {
     @SerialName("metaDL")
     DownloadingMetadata,
 
+    @SerialName("forcedMetaDL")
+    DownloadingMetadataForced,
+
     @SerialName("pausedDL")
     DownloadingPaused,
 

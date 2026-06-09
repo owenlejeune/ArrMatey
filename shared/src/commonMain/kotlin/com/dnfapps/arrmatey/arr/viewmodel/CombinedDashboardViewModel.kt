@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
@@ -165,22 +166,24 @@ class CombinedDashboardViewModel(
                 val refreshing = args[6] as Boolean
 
                 val downloadClients = downloads.transferInfo.map { transfer ->
+                    val clientItems = downloads.queueItems.filter { it.client.id == transfer.client.id }
                     DownloadClientDashboardState(
                         client = transfer.client,
                         transferInfo = transfer,
                         isOnline = true,
-                        activeDownloadsCount = downloads.queueItems.count { it.client.id == transfer.client.id }
+                        activeDownloadsCount = clientItems.count { it.downloadSpeed > 0 || it.uploadSpeed > 0 || it.progress < 1.0 }
                     )
                 }.toMutableList()
 
                 clientApis.keys.forEach { clientId ->
                     if (downloadClients.none { it.client.id == clientId }) {
                         downloadClientManager.getDownloadClientById(clientId)?.let { client ->
+                            val clientItems = downloads.queueItems.filter { it.client.id == clientId }
                             downloadClients.add(
                                 DownloadClientDashboardState(
                                     client = client,
                                     isOnline = false,
-                                    activeDownloadsCount = downloads.queueItems.count { it.client.id == clientId }
+                                    activeDownloadsCount = clientItems.count { it.downloadSpeed > 0 || it.uploadSpeed > 0 || it.progress < 1.0 }
                                 )
                             )
                         }
@@ -195,6 +198,9 @@ class CombinedDashboardViewModel(
                     .sortedByDescending { it.added }
                     .take(10)
 
+                val activeDownloads = downloads.queueItems
+                    .sortedByDescending { it.progress }
+
                 CombinedDashboardState.Success(
                     instances = instances,
                     seerrInstances = seerrInstances,
@@ -202,11 +208,11 @@ class CombinedDashboardViewModel(
                     recentActivity = recentActivity,
                     recentlyAdded = recentlyAdded,
                     downloadTransfers = downloads.transferInfo,
-                    activeDownloads = downloads.queueItems.sortedByDescending { it.progress },
+                    activeDownloads = activeDownloads,
                     calendarItems = todayCalendar,
                     upcomingCalendarItems = upcomingCalendar,
                     prowlarrStats = prowlarrStats,
-                    networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats),
+                    networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats, downloadClients),
                     isRefreshing = refreshing
                 )
             }.collect { newState ->
@@ -218,7 +224,8 @@ class CombinedDashboardViewModel(
     private fun resolveNetworkStatus(
         arrInstances: List<ArrInstanceDashboardState>,
         seerrInstances: List<SeerrDashboardState>,
-        prowlarrInstances: List<ProwlarrDashboardState>
+        prowlarrInstances: List<ProwlarrDashboardState>,
+        downloadClients: List<DownloadClientDashboardState>
     ): NetworkStatusState {
         val networkUtils = getNetworkUtils()
         val currentSsid = try { networkUtils.getCurrentWifiSsid() } catch (e: Exception) { null }
@@ -232,7 +239,7 @@ class CombinedDashboardViewModel(
                     instanceName = state.instance.label,
                     isLocal = state.instance.isUsingLocalNetwork(),
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
-                    type = state.instance.type,
+                    icon = state.instance.type.icon,
                     isOnline = state.softwareStatus != null,
                     isLocalSwitchingEnabled = state.instance.localNetworkEnabled
                 )
@@ -245,7 +252,7 @@ class CombinedDashboardViewModel(
                     instanceName = state.instance.label,
                     isLocal = state.instance.isUsingLocalNetwork(),
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
-                    type = state.instance.type,
+                    icon = state.instance.type.icon,
                     isOnline = true, // Assume online if we have state
                     isLocalSwitchingEnabled = state.instance.localNetworkEnabled
                 )
@@ -258,9 +265,22 @@ class CombinedDashboardViewModel(
                     instanceName = state.instance.label,
                     isLocal = state.instance.isUsingLocalNetwork(),
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
-                    type = state.instance.type,
+                    icon = state.instance.type.icon,
                     isOnline = state.totalIndexers > 0 || state.failingIndexers > 0,
                     isLocalSwitchingEnabled = state.instance.localNetworkEnabled
+                )
+            )
+        }
+
+        downloadClients.forEach { state ->
+            instanceStatuses.add(
+                InstanceNetworkStatus(
+                    instanceName = state.client.label,
+                    isLocal = state.client.isUsingLocalNetwork(),
+                    currentEndpoint = state.client.getEffectiveBaseUrl(),
+                    icon = state.client.type.icon,
+                    isOnline = state.isOnline,
+                    isLocalSwitchingEnabled = state.client.localNetworkEnabled
                 )
             )
         }

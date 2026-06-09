@@ -10,7 +10,7 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.instances.model.Instance
-import com.dnfapps.arrmatey.instances.model.InstanceType
+import dev.icerock.moko.resources.ImageResource
 
 sealed interface CombinedDashboardState {
     data object Initial : CombinedDashboardState
@@ -41,7 +41,7 @@ data class InstanceNetworkStatus(
     val instanceName: String,
     val isLocal: Boolean,
     val currentEndpoint: String,
-    val type: InstanceType,
+    val icon: ImageResource,
     val isOnline: Boolean,
     val isLocalSwitchingEnabled: Boolean
 )
