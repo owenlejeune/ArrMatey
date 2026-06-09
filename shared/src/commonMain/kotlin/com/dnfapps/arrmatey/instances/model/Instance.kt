@@ -1,10 +1,17 @@
 package com.dnfapps.arrmatey.instances.model
 
+import androidx.compose.ui.graphics.Color
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrBlue
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
+import com.dnfapps.arrmatey.ui.theme.ArrOrange
+import com.dnfapps.arrmatey.ui.theme.ArrPurple
+import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import dev.icerock.moko.resources.ImageResource
@@ -83,7 +90,8 @@ enum class InstanceType(
     val supportsNotifications: Boolean,
     val getApiKeyEndpoint: String? = null,
     val mockCover: ImageResource? = null,
-    val mockMedia: MockMedia = MockMedia.Default
+    val mockMedia: MockMedia = MockMedia.Default,
+    val associatedColor: Color
 ) {
     Sonarr(
         resource = MR.strings.sonarr_description,
@@ -100,7 +108,8 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = true,
         mockCover = MR.images.sonarr_mock_poster,
-        mockMedia = MockMedia.Sonarr
+        mockMedia = MockMedia.Sonarr,
+        associatedColor = ArrBlue
     ),
     Radarr(
         resource = MR.strings.radarr_description,
@@ -117,7 +126,8 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = true,
         mockCover = MR.images.radarr_mock_poster,
-        mockMedia = MockMedia.Radarr
+        mockMedia = MockMedia.Radarr,
+        associatedColor = ArrOrange
     ),
     Lidarr(
         resource = MR.strings.lidarr_description,
@@ -134,7 +144,8 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
         mockCover = MR.images.lidarr_mock_cover,
-        mockMedia = MockMedia.Lidarr
+        mockMedia = MockMedia.Lidarr,
+        associatedColor = ArrGreen
     ),
     Booksehelf(
         resource = MR.strings.bookshelf_description,
@@ -151,7 +162,8 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
         mockCover = MR.images.readarr_mock_cover,
-        mockMedia = MockMedia.Readarr
+        mockMedia = MockMedia.Readarr,
+        associatedColor = ArrRed
     ),
     Listenarr(
         resource = MR.strings.lidarr_description,
@@ -167,7 +179,8 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
         mockCover = MR.images.readarr_mock_cover,
-        mockMedia = MockMedia.Readarr
+        mockMedia = MockMedia.Readarr,
+        associatedColor = ArrLightPurple
     ),
     Seerr(
         resource = MR.strings.seerr_description,
@@ -182,7 +195,8 @@ enum class InstanceType(
         getApiKeyEndpoint = "settings/main",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
-        supportsNotifications = false
+        supportsNotifications = false,
+        associatedColor = ArrPurple
     ),
     Prowlarr(
         resource = MR.strings.prowlarr_description,
@@ -197,7 +211,8 @@ enum class InstanceType(
         getApiKeyEndpoint = "settings/general",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Cover,
-        supportsNotifications = false
+        supportsNotifications = false,
+        associatedColor = ArrOrange
     );
 
     companion object {

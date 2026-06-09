@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.formatToOneDecimal
 import kotlinx.serialization.DeserializationStrategy
@@ -111,6 +112,8 @@ sealed interface QueueItem {
 
     val titleLabel: String
     val mediaId: Long?
+
+    val type: InstanceType
 }
 
 object QueueItemSerializer : JsonContentPolymorphicSerializer<QueueItem>(QueueItem::class) {

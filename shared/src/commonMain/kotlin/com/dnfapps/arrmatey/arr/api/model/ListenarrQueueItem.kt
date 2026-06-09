@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
@@ -44,6 +45,7 @@ data class ListenarrQueueItem(
     override var instanceId: Long? = null,
     override var instanceName: String? = null
 ) : QueueItem {
+    override val type = InstanceType.Listenarr
 
     override val id: Int
         get() = idStr.hashCode()

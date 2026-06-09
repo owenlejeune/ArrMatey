@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -37,6 +38,9 @@ data class ReadarrQueueItem(
     val bookId: Long? = null,
     val book: Book? = null
 ): QueueItem {
+
+    override val type = InstanceType.Booksehelf
+
     override val taskGroup: String
         get() = super.taskGroup + id
 

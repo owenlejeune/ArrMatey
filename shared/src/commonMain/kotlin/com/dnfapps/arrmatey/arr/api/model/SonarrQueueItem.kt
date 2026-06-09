@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -39,6 +40,7 @@ data class SonarrQueueItem(
     val episodeHasFile: Boolean? = null,
     val seasonNumber: Int? = null
 ): QueueItem {
+    override val type = InstanceType.Sonarr
     val calcSeriesId: Long?
         get() = seriesId ?: series?.id
 

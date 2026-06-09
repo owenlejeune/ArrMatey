@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -35,6 +36,9 @@ data class RadarrQueueItem(
     val movieId: Long? = null,
     val movie: ArrMovie? = null
 ): QueueItem {
+
+    override val type = InstanceType.Radarr
+
     override val taskGroup: String
         get() = super.taskGroup + id
 

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -25,6 +26,8 @@ data class ArrAlbum(
 
     override val instanceId: Long? = null
 ): CalendarItem {
+
+    override val type = InstanceType.Lidarr
 
     override val calendarId: Long
         get() = id

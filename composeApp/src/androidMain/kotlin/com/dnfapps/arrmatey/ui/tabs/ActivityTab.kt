@@ -201,22 +201,9 @@ fun ActivityItem(
             containerColor = MaterialTheme.colorScheme.errorContainer,
             contentColor = MaterialTheme.colorScheme.onErrorContainer
         )
-        item is SonarrQueueItem -> CardDefaults.cardColors(
-            containerColor = ArrBlue
+        else -> CardDefaults.cardColors(
+            containerColor = item.type.associatedColor
         )
-        item is RadarrQueueItem -> CardDefaults.cardColors(
-            containerColor = ArrOrange
-        )
-        item is LidarrQueueItem -> CardDefaults.cardColors(
-            containerColor = ArrGreen
-        )
-        item is ReadarrQueueItem -> CardDefaults.cardColors(
-            containerColor = ArrRed
-        )
-        item is ListenarrQueueItem -> CardDefaults.cardColors(
-            containerColor = ArrLightPurple
-        )
-        else -> CardDefaults.cardColors()
     }
 
     Card(

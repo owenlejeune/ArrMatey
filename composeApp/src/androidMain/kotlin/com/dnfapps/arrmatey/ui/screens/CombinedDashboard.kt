@@ -523,7 +523,10 @@ private fun UpcomingSection(state: CombinedDashboardState.Success) {
 
 @Composable
 private fun CalendarItemRow(item: CalendarItem, showDate: Boolean = false) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         val title = when (item) {
             is Episode -> item.series?.title ?: ""
             is EpisodeGroup -> item.first.series?.title ?: ""
@@ -552,7 +555,7 @@ private fun CalendarItemRow(item: CalendarItem, showDate: Boolean = false) {
             else -> ""
         }
 
-        Box(Modifier.size(4.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
+        Box(Modifier.size(4.dp).clip(CircleShape).background(item.type.associatedColor))
         Column {
             Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
             if (sub.isNotBlank()) {
@@ -1076,7 +1079,7 @@ private fun RecentActivitySection(activity: List<QueueItem>) {
                             .clip(CircleShape)
                             .background(
                                 if (item.hasIssue) MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.primary
+                                else item.type.associatedColor
                             )
                     )
                     Column(modifier = Modifier.weight(1f)) {
