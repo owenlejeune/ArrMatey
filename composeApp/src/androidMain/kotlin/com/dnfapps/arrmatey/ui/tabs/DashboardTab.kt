@@ -10,7 +10,7 @@ import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
 import com.dnfapps.arrmatey.navigation.LocalDashboardNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.ui.screens.ArrInstanceDashboard
-import com.dnfapps.arrmatey.ui.screens.CombinedDashboard
+import com.dnfapps.arrmatey.ui.screens.dashboard.CombinedDashboard
 import org.koin.compose.koinInject
 
 @Composable

@@ -179,7 +179,7 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
         mockCover = MR.images.readarr_mock_cover,
-        mockMedia = MockMedia.Readarr,
+        mockMedia = MockMedia.Listenarr,
         associatedColor = ArrLightPurple
     ),
     Seerr(

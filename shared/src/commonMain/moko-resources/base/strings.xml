@@ -541,6 +541,7 @@
     <string name="offline">Offline</string>
     <string name="online">Online</string>
     <string name="nothing_on_today">Nothing on Today</string>
+    <string name="nothing_upcoming">Nothing Upcoming</string>
     <string name="overview">Overview</string>
 
     <!--- Download Status -->
