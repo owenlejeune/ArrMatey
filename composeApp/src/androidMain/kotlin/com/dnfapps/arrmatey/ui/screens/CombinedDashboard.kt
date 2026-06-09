@@ -57,7 +57,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,9 +93,6 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.components.ArrHealthCard
-import com.dnfapps.arrmatey.ui.components.DiskSpaceItem
-import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
@@ -200,8 +196,6 @@ fun CombinedDashboard(
                         if (currentState.prowlarrStats.isNotEmpty()) {
                             ProwlarrSection(currentState.prowlarrStats)
                         }
-
-                        StorageSection(currentState.instances)
 
                         InstanceDashboardSection(currentState)
                     }
@@ -425,165 +419,6 @@ private fun RecentlyAddedSection(
 }
 
 @Composable
-private fun StorageSection(instances: List<ArrInstanceDashboardState>) {
-    val allDisks = instances.asSequence().flatMap { it.disks }.distinctBy { it.path }.toList()
-    val warnings = allDisks.filter { it.usedPercentage >= 0.9f }
-    val totalInstanceUsage = instances.sumOf { it.sizeOnDisk }
-
-    if ((totalInstanceUsage > 0) || warnings.isNotEmpty()) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Storage, null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = mokoString(MR.strings.storage_breakdown),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                if (warnings.isNotEmpty()) {
-                    warnings.forEachIndexed { index, disk ->
-                        DiskSpaceItem(disk = disk)
-                        if ((index < warnings.size - 1) || (totalInstanceUsage > 0)) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 12.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-                }
-
-                if (totalInstanceUsage > 0) {
-                    val activeInstances = instances.asSequence().filter { it.sizeOnDisk > 0 }
-                        .sortedByDescending { it.sizeOnDisk }.toList()
-
-                    activeInstances.forEachIndexed { index, instanceState ->
-                        InstanceStorageItem(instanceState, totalInstanceUsage)
-                        if (index < activeInstances.size - 1) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 12.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun InstanceStorageItem(state: ArrInstanceDashboardState, totalUsage: Long) {
-    val completion = if (state.library.isNotEmpty()) {
-        state.library.asSequence().map { it.statusProgress }.average().toFloat()
-    } else 0f
-
-    var expanded by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable { expanded = !expanded },
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(state.instance.type.icon),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = state.instance.label,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "${state.totalItems} Items • ${(completion * 100).toInt()}% Downloaded",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Text(
-                text = state.sizeOnDisk.bytesAsFileSizeString(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        LinearProgressIndicator(
-            progress = { if (totalUsage > 0) state.sizeOnDisk.toFloat() / totalUsage.toFloat() else 0f },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(CircleShape),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.background
-        )
-
-        AnimatedVisibility(
-            visible = expanded && state.disks.isNotEmpty(),
-            exit = shrinkVertically(),
-            enter = expandVertically()
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                state.disks.forEach { disk ->
-                    val usedSpace = disk.totalSpace - disk.freeSpace
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = disk.path ?: mokoString(MR.strings.unknown),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
-                        Spacer(Modifier.weight(1f))
-                        Text(
-                            text = "${(disk.usedPercentage * 100).toInt()}% full",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (disk.usedPercentage > 0.9f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun StatCard(
     modifier: Modifier = Modifier,
     icon: ImageVector,
@@ -776,6 +611,10 @@ private fun InstanceDashboardSection(
 
 @Composable
 private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
+    val completion = if (state.library.isNotEmpty()) {
+        state.library.asSequence().map { it.statusProgress }.average().toFloat()
+    } else 0f
+
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -795,7 +634,7 @@ private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${state.totalItems} Items • ${state.sizeOnDisk.bytesAsFileSizeString()}",
+                    text = "${state.totalItems} Items • ${state.sizeOnDisk.bytesAsFileSizeString()} • ${(completion * 100).toInt()}% Downloaded",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -805,6 +644,38 @@ private fun InstanceDashboardCard(state: ArrInstanceDashboardState) {
                 Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
             } else if (state.healthItems.isNotEmpty()) {
                 Icon(Icons.Default.Warning, null, tint = Color(0xffffc653), modifier = Modifier.size(20.dp))
+            }
+        }
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            state.disks.forEach { disk ->
+                val usedSpace = disk.totalSpace - disk.freeSpace
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = disk.path ?: mokoString(MR.strings.unknown),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "${(disk.usedPercentage * 100).toInt()}% full",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (disk.usedPercentage > 0.9f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
