@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class DashboardManager(
@@ -28,11 +29,23 @@ class DashboardManager(
                 }
         }
     }
+
     fun saveCardOrder(cards: List<DashboardCards>) {
         _cardsOrder.value = cards
         scope.launch {
             preferencesStore.updateDashboardCardsOrder(cards)
         }
+    }
+
+    fun removeCard(card: DashboardCards) {
+        val newCards = _cardsOrder.value.toMutableList().apply {
+            remove(card)
+        }
+        saveCardOrder(newCards)
+    }
+
+    fun reset() {
+        saveCardOrder(DashboardCards.entries)
     }
 }
 

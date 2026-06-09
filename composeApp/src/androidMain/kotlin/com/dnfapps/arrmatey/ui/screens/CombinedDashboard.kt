@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Wifi
@@ -48,6 +49,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +65,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -120,6 +123,7 @@ import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import dev.icerock.moko.resources.compose.painterResource
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.koinInject
@@ -135,14 +139,15 @@ fun CombinedDashboard(
 ) {
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
     val hapticFeedback = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
 
-    val navManager = navigationManager
-    val navigator = dashboardNavigator
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val cards by dashboardManager.cardsOrder.collectAsStateWithLifecycle(emptyList())
+
+    val gridState = rememberLazyStaggeredGridState()
 
     Scaffold(
         modifier = if (isCompact) {
@@ -156,7 +161,17 @@ fun CombinedDashboard(
                 windowInsets = TopAppBarDefaults.windowInsets,
                 colors = TopAppBarDefaults.topAppBarColors(
                     scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                )
+                ),
+                actions = {
+                    IconButton(onClick = {
+                        dashboardManager.reset()
+                        scope.launch {
+                            gridState.animateScrollToItem(0)
+                        }
+                    }) {
+                        Icon(Icons.Default.Restore, null)
+                    }
+                }
             )
         },
         contentWindowInsets = WindowInsets(0.dp)
@@ -174,7 +189,6 @@ fun CombinedDashboard(
                     LoadingIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is CombinedDashboardState.Success -> {
-                    val gridState = rememberLazyStaggeredGridState()
                     val reorderableGridState = rememberReorderableLazyStaggeredGridState(gridState) { from, to ->
                         val newOrder = cards.toMutableList().apply {
                             this[to.index] = this[from.index].also {
