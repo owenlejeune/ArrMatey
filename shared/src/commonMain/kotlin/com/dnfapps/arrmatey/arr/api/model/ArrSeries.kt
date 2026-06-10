@@ -56,7 +56,7 @@ data class ArrSeries(
     val firstAired: String? = null,
     val lastAired: String? = null,
     val episodesChanged: String? = null
-): ArrMedia {
+): ArrMedia, InstanceTypeIdentifiable {
 
     override val guid: Long
         get() = id ?: tvdbId.plus(100_000)

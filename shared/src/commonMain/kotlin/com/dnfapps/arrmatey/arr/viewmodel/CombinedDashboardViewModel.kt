@@ -14,7 +14,6 @@ import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
-import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
@@ -221,7 +220,7 @@ class CombinedDashboardViewModel(
                     instances = instances,
                     seerrInstances = seerrInstances,
                     downloadClients = downloadClients,
-                    recentActivity = recentActivity,
+                    activityQueue = recentActivity,
                     recentlyAdded = recentlyAdded,
                     downloadTransfers = downloads.transferInfo,
                     activeDownloads = activeDownloads,

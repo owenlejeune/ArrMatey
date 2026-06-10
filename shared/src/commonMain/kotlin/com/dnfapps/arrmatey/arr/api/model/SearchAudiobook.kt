@@ -48,7 +48,7 @@ data class SearchAudiobook(
     override val qualityProfileId: Int = 0,
     override val rootFolderPath: String? = null,
     val relativePath: String? = null
-) : ArrMedia, HasArrImages<SearchAudiobook> {
+) : ArrMedia, HasArrImages<SearchAudiobook>, InstanceTypeIdentifiable {
 
     override fun withLocalImages(instanceUrl: String): SearchAudiobook {
         val localImages = imageUrl?.let { path ->

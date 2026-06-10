@@ -56,7 +56,7 @@ enum class DashboardCards {
     Network,
     RecentlyAdded,
     DownloadClients,
-    RecentActivity,
+    ActivityQueue,
     OnToday,
     UpcomingReleases,
     InstanceDashboard

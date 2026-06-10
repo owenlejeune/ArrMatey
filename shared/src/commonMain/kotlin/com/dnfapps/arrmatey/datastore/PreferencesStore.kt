@@ -386,7 +386,6 @@ class PreferencesStore(
         .map { preferences ->
             preferences[dashboardCardsOrderKey]?.split("~")
                 ?.map { DashboardCards.valueOf(it) }
-//                ?: emptyList()
                 ?: DashboardCards.entries.toList()
         }
 

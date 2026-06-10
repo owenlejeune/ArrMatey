@@ -56,7 +56,7 @@ data class Audiobook(
     val publishedDate: Instant? = null,
 
     override val instanceId: Long? = null
-) : ArrMedia, HasArrImages<Audiobook>, CalendarItem {
+) : ArrMedia, HasArrImages<Audiobook>, CalendarItem, InstanceTypeIdentifiable {
 
     companion object {
         fun fromJson(value: String): Audiobook {

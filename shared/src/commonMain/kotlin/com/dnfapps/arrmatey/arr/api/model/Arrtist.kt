@@ -50,7 +50,7 @@ data class Arrtist(
     val lastAlbum: ArrAlbum? = null,
     val members: List<ArtistMember> = emptyList(),
     val addOptions: ArtistAddOptions? = null
-): ArrMedia, HasArrImages<Arrtist> {
+): ArrMedia, HasArrImages<Arrtist>, InstanceTypeIdentifiable {
     override val guid: Long get() = id ?: (tadbId + 100_000)
 
     override val isMissing: Boolean

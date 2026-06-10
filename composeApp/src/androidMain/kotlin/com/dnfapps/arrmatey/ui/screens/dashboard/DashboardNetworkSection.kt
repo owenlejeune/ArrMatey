@@ -36,134 +36,127 @@ import dev.icerock.moko.resources.compose.painterResource
 fun DashboardNetworkSection(
     state: CombinedDashboardState.Success
 ) {
-    state.networkStatus?.let { networkState ->
-        if (networkState.instanceStatuses.isEmpty() && networkState.ssid == null) {
-            return
-        }
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            )
+    val networkState = state.networkStatus
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Wifi,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    Text(
-                        text = mokoString(MR.strings.network_status),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f)
+                    Icon(
+                        imageVector = Icons.Default.Wifi,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
-
-                    networkState.ssid?.let { ssid ->
-                        Text(
-                            text = ssid,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .clip(MaterialTheme.shapes.small)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
                 }
 
-                if (networkState.instanceStatuses.isNotEmpty()) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Text(
+                    text = mokoString(MR.strings.network_status),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
 
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        networkState.instanceStatuses.forEach { status ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Image(
-                                    painter = painterResource(status.icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                networkState?.ssid?.let { ssid ->
+                    Text(
+                        text = ssid,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.small)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
 
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = status.instanceName,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = status.currentEndpoint,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
-                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(MaterialTheme.shapes.small)
-                                            .background(
-                                                if (status.isOnline) ArrGreen.copy(alpha = 0.1f)
-                                                else MaterialTheme.colorScheme.errorContainer.copy(
-                                                    alpha = 0.5f
-                                                )
-                                            )
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = if (status.isOnline) mokoString(MR.strings.online)
-                                            else mokoString(MR.strings.offline),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (status.isOnline) ArrGreen else MaterialTheme.colorScheme.error
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                networkState?.instanceStatuses?.forEach { status ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(status.icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = status.instanceName,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = status.currentEndpoint,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(MaterialTheme.shapes.small)
+                                    .background(
+                                        if (status.isOnline) ArrGreen.copy(alpha = 0.1f)
+                                        else MaterialTheme.colorScheme.errorContainer.copy(
+                                            alpha = 0.5f
                                         )
-                                    }
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = if (status.isOnline) mokoString(MR.strings.online)
+                                    else mokoString(MR.strings.offline),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (status.isOnline) ArrGreen else MaterialTheme.colorScheme.error
+                                )
+                            }
 
-                                    if (status.isLocalSwitchingEnabled) {
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(MaterialTheme.shapes.small)
-                                                .background(
-                                                    if (status.isLocal) ArrBlue.copy(alpha = 0.1f)
-                                                    else MaterialTheme.colorScheme.secondaryContainer.copy(
-                                                        alpha = 0.5f
-                                                    )
-                                                )
-                                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        ) {
-                                            Text(
-                                                text = if (status.isLocal) mokoString(MR.strings.local_network)
-                                                else mokoString(MR.strings.remote_vpn),
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (status.isLocal) ArrBlue else MaterialTheme.colorScheme.primary
+                            if (status.isLocalSwitchingEnabled) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(MaterialTheme.shapes.small)
+                                        .background(
+                                            if (status.isLocal) ArrBlue.copy(alpha = 0.1f)
+                                            else MaterialTheme.colorScheme.secondaryContainer.copy(
+                                                alpha = 0.5f
                                             )
-                                        }
-                                    }
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = if (status.isLocal) mokoString(MR.strings.local_network)
+                                        else mokoString(MR.strings.remote_vpn),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (status.isLocal) ArrBlue else MaterialTheme.colorScheme.primary
+                                    )
                                 }
                             }
                         }

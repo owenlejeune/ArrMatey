@@ -97,22 +97,6 @@ sealed interface ArrMedia {
         }
     }
 
-    val type: InstanceType
-        get() = when(this) {
-            is ArrSeries,
-                is MockMedia.Sonarr,
-                is MockMedia.Default -> InstanceType.Sonarr
-            is ArrMovie,
-                is MockMedia.Radarr -> InstanceType.Radarr
-            is Arrtist,
-                 is MockMedia.Lidarr -> InstanceType.Lidarr
-            is Author,
-                 is MockMedia.Readarr -> InstanceType.Booksehelf
-            is Audiobook,
-                is SearchAudiobook,
-                is MockMedia.Listenarr -> InstanceType.Listenarr
-        }
-
     /**
      * Filtering props
      */

@@ -192,7 +192,7 @@ fun CombinedDashboard(
                                                 enabled = isEditing
                                             )
                                     ) {
-                                        DashboardCardContent(dashboardCard, currentState)
+                                        DashboardCardContent(dashboardCard, currentState, isEditing)
                                     }
                                     if (isEditing) {
                                         Box(
@@ -227,18 +227,19 @@ fun CombinedDashboard(
 private fun DashboardCardContent(
     cardType: DashboardCards,
     currentState: CombinedDashboardState.Success,
+    isEditing: Boolean,
     navManager: NavigationManager = navigationManager,
     navigator: Navigator<DashboardScreen> = dashboardNavigator
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
-            OverviewHeader(currentState)
+            DashboardOverviewCards(currentState, isEditing)
 
         DashboardCards.SeerrOverview ->
-            SeerrSection(currentState)
+            SeerrSection(currentState, isEditing)
 
         DashboardCards.ProwlarrOverview ->
-            DashboardProwlarrSection(currentState)
+            DashboardProwlarrSection(currentState, isEditing)
 
         DashboardCards.Network ->
             DashboardNetworkSection(currentState)
@@ -254,8 +255,8 @@ private fun DashboardCardContent(
         DashboardCards.DownloadClients ->
             DashboardDownloadClientsSection(currentState)
 
-        DashboardCards.RecentActivity ->
-            RecentActivitySection(currentState)
+        DashboardCards.ActivityQueue ->
+            DashboardActivityQueueSection(currentState)
 
         DashboardCards.OnToday ->
             DashboardTodaySection(currentState)

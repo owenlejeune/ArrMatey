@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.ui.screens.dashboard
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,33 +25,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.model.ArrHealthType
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
-import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.theme.ArrPurple
+import com.dnfapps.arrmatey.ui.icons.Hard_drive
+import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.utils.mokoString
-import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
-fun SeerrSection(
+fun DashboardOverviewCards(
     state: CombinedDashboardState.Success,
     isEditing: Boolean
 ) {
-    val seerrInstances = state.seerrInstances
-
-    val totalRequests = seerrInstances.sumOf { it.pendingRequestsCount }
-    val totalIssues = seerrInstances.sumOf { it.openIssuesCount }
+    val totalSize = state.instances.sumOf { it.sizeOnDisk }
+    val totalIssues = state.instances.sumOf { it.healthItems.size }
+    val criticalIssues =
+        state.instances.sumOf { it.healthItems.count { h -> h.type == ArrHealthType.Error } }
 
     val containerColor by animateColorAsState(
         targetValue = if (isEditing) {
             MaterialTheme.colorScheme.surfaceContainerHigh
         } else Color.Transparent,
-        label = "SeerrCardBackgroundAnimation"
+        label = "ArrOverviewCardBackgroundAnimation"
     )
 
     val internalPadding by animateDpAsState(
         targetValue = if (isEditing) 16.dp else 0.dp,
-        label = "SeerrCardPaddingAnimation"
+        label = "ArrOverviewCardPaddingAnimation"
     )
 
     Card(
@@ -71,13 +73,13 @@ fun SeerrSection(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Image(
-                        painter = painterResource(InstanceType.Seerr.icon),
+                    Icon(
+                        imageVector = Hard_drive,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
-                        text = InstanceType.Seerr.name,
+                        text = mokoString(MR.strings.instances_overview),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -87,20 +89,22 @@ fun SeerrSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                CountStatItem(
+                StatCard(
                     modifier = Modifier.weight(1f),
-                    icon = Icons.Default.ConfirmationNumber,
-                    label = mokoString(MR.strings.requests),
-                    count = totalRequests,
-                    color = ArrPurple
+                    icon = Icons.Default.Storage,
+                    label = mokoString(MR.strings.total_space),
+                    value = totalSize.bytesAsFileSizeString(),
+                    color = MaterialTheme.colorScheme.primaryContainer
                 )
-                CountStatItem(
+
+                StatCard(
                     modifier = Modifier.weight(1f),
-                    icon = Icons.Default.BugReport,
-                    label = mokoString(MR.strings.issues),
-                    count = totalIssues,
+                    icon = if (totalIssues > 0) Icons.Default.Warning else Icons.Default.CheckCircle,
+                    label = mokoString(MR.strings.health),
+                    value = if (totalIssues == 0) mokoString(MR.strings.no_issues) else "$totalIssues Issues",
                     color = when {
-                        totalIssues > 0 -> MaterialTheme.colorScheme.errorContainer
+                        criticalIssues > 0 -> MaterialTheme.colorScheme.errorContainer
+                        totalIssues > 0 -> ArrYellow.copy(alpha = 0.2f)
                         else -> MaterialTheme.colorScheme.secondaryContainer
                     }
                 )

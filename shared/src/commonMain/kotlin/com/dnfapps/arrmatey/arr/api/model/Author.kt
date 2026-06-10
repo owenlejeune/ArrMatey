@@ -47,7 +47,7 @@ data class Author(
     val nextBook: Book? = null,
     val lastBook: Book? = null,
     val addOptions: AuthorAddOptions? = null
-): ArrMedia, HasArrImages<Author> {
+): ArrMedia, HasArrImages<Author>, InstanceTypeIdentifiable {
     companion object {
         fun fromJson(value: String): Author {
             return ArrMedia.json.decodeFromString(value)

@@ -19,7 +19,7 @@ sealed interface CombinedDashboardState {
         val instances: List<ArrInstanceDashboardState>,
         val seerrInstances: List<SeerrDashboardState> = emptyList(),
         val downloadClients: List<DownloadClientDashboardState> = emptyList(),
-        val recentActivity: List<QueueItem> = emptyList(),
+        val activityQueue: List<QueueItem> = emptyList(),
         val recentlyAdded: List<ArrMedia> = emptyList(),
         val downloadTransfers: List<DownloadTransferInfo> = emptyList(),
         val activeDownloads: List<DownloadItem> = emptyList(),

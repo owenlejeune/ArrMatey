@@ -31,7 +31,7 @@ sealed class MockMedia(
     override val statistics: ArrStatistics? = null,
     override val added: Instant? = null,
     override val status: MediaStatus = MediaStatus.Continuing
-): ArrMedia {
+): ArrMedia, InstanceTypeIdentifiable {
     @Transient override val guid: Long = 1L
     override fun ratingScore(): Double = 4.5
     @Transient override val statusProgress: Float = 0.5f

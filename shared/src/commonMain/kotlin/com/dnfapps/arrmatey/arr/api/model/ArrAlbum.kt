@@ -25,9 +25,7 @@ data class ArrAlbum(
     val ratings: LidarrRatings? = null,
 
     override val instanceId: Long? = null
-): CalendarItem {
-
-    override val type = InstanceType.Lidarr
+): CalendarItem, InstanceTypeIdentifiable {
 
     override val calendarId: Long
         get() = id

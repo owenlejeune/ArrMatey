@@ -22,6 +22,7 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
+import com.dnfapps.arrmatey.arr.api.model.InstanceTypeIdentifiable
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -65,7 +66,10 @@ fun DashboardCalendarItemRow(
             else -> ""
         }
 
-        Box(Modifier.size(4.dp).clip(CircleShape).background(item.type.associatedColor))
+        val color = (item as? InstanceTypeIdentifiable)?.instanceType?.associatedColor
+            ?: MaterialTheme.colorScheme.primary
+
+        Box(Modifier.size(4.dp).clip(CircleShape).background(color))
         Column {
             Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
             if (sub.isNotBlank()) {

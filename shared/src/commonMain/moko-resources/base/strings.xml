@@ -543,6 +543,9 @@
     <string name="nothing_on_today">Nothing on Today</string>
     <string name="nothing_upcoming">Nothing Upcoming</string>
     <string name="overview">Overview</string>
+    <string name="instances_overview">Arr Instances Overview</string>
+    <string name="no_activity">No Activity</string>
+    <string name="nothing_recently_added">Nothing Added Recently</string>
 
     <!--- Download Status -->
     <string name="downloading">Downloading</string>
