@@ -123,7 +123,7 @@ struct DashboardCardWrapper: View {
         ZStack(alignment: .topTrailing) {
             DashboardCardView(card: card, state: state, isEditing: isEditing)
                 .padding(12)
-                .background(Color(UIColor.secondarySystemBackground))
+                .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
                 .cornerRadius(12)
             
             if isEditing {
@@ -388,12 +388,16 @@ struct DashboardRecentlyAddedSection: View {
                         ForEach(state.recentlyAdded, id: \.id) { item in
                             let identifiable = item as? InstanceTypeIdentifiable
                             let type = identifiable?.instanceType
-                            let ratio: Shared.AspectRatio = (type == .lidarr || type == .booksehelf || type == .listenarr) ? .cover : .poster
-                            PosterItem(item: item, instanceType: type, aspectRatio: ratio, posterHeight: 150, showFooter: true) { clickedItem in
+                            let isWide = (type == .lidarr || type == .booksehelf || type == .listenarr)
+                            let ratio: Shared.AspectRatio = isWide ? .cover : .poster
+                            let width: CGFloat = isWide ? 150 : 100
+                            
+                            PosterItem(item: item, instanceType: type, aspectRatio: ratio, elevation: .none, posterHeight: 150, showFooter: true) { clickedItem in
                                 if let type = type, let id = clickedItem.id {
                                     navigationManager.go(to: .details(id: id.int64Value, type: type), of: type)
                                 }
                             }
+                            .frame(width: width)
                         }
                     }
                 }
@@ -613,33 +617,39 @@ struct CalendarItemRow: View {
     var showDate: Bool = false
     
     var body: some View {
-        HStack {
-            let color: Color = if let hexValue = item.associatedType?.associatedColor {
-                Color(hex: hexValue)
-            } else {
-                .arrBlue
-            }
+        HStack(spacing: 12) {
+            let color: Color = {
+                if let type = item.associatedType {
+                    // Extract color from Compose Color object
+                    return Color(hex: type.associatedColor)
+                }
+                return .accentColor
+            }()
+            
             Circle()
                 .fill(color)
                 .frame(width: 4, height: 4)
             
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline)
                     .bold()
-                Text(subTitle)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                
+                if !subTitle.isEmpty {
+                    Text(subTitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+                
+                if showDate, let firstDate = item.getCalendarDates().first {
+                    Text(formatDate(firstDate))
+                        .font(.system(size: 10))
+                        .foregroundColor(.accentColor)
+                }
             }
             Spacer()
-            VStack(alignment: .trailing) {
-                if showDate {
-                    Text(item.notificationMessage) // using this as proxy for date label if available or similar
-                        .font(.caption)
-                        .bold()
-                }
-                // Text(item.timeLabel) // item might not have timeLabel directly in Swift if it's a Kotlin property not exposed
-            }
         }
         .padding(12)
         .background(Color(UIColor.tertiarySystemBackground))
@@ -649,10 +659,14 @@ struct CalendarItemRow: View {
     private var title: String {
         if let episode = item as? Episode {
             return episode.series?.title ?? ""
+        } else if let group = item as? EpisodeGroup {
+            return group.first.series?.title ?? ""
+        } else if let album = item as? ArrAlbum {
+            return album.artist?.title ?? ""
         } else if let movie = item as? ArrMovie {
             return movie.title ?? ""
-        } else if let album = item as? ArrAlbum {
-            return album.title ?? ""
+        } else if let audiobook = item as? Audiobook {
+            return audiobook.title ?? ""
         } else if let book = item as? Book {
             return book.title
         }
@@ -662,8 +676,31 @@ struct CalendarItemRow: View {
     private var subTitle: String {
         if let episode = item as? Episode {
             return "\(episode.seasonEpLabel): \(episode.title ?? "")"
+        } else if let group = item as? EpisodeGroup {
+            let episodes = [group.first] + group.additional
+            return episodes.map { "\($0.seasonEpLabel): \($0.title ?? "")" }.joined(separator: ", ")
+        } else if let album = item as? ArrAlbum {
+            return album.title ?? ""
+        } else if let movie = item as? ArrMovie {
+            let date = movie.releaseDate ?? movie.digitalRelease ?? movie.physicalRelease ?? movie.inCinemas
+            if date != nil && date == movie.physicalRelease {
+                return MR.strings().physical_release.localized()
+            } else if date != nil && date == movie.digitalRelease {
+                return MR.strings().digital_release.localized()
+            } else if date != nil && date == movie.inCinemas {
+                return MR.strings().in_cinemas.localized()
+            } else {
+                return MR.strings().release_date.localized()
+            }
         }
         return ""
+    }
+    
+    private func formatDate(_ instant: KotlinInstant) -> String {
+        let date = Date(timeIntervalSince1970: Double(instant.epochSeconds))
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE, MMM d"
+        return formatter.string(from: date)
     }
 }
 
