@@ -10,11 +10,12 @@ import SwiftUI
 
 struct DashboardTab: View {
     @Environment(\.navigationContext) private var context
+    @EnvironmentObject private var navigationManager: NavigationManager
     
     var body: some View {
         switch context {
         case .mainTab:
-            NavigationStack {
+            NavigationStack(path: $navigationManager.dashboardPath) {
                 DashboardTabContent()
             }
         case .launcher:
@@ -94,6 +95,13 @@ struct DashboardTabContent: View {
                     DashboardCardWrapper(card: card, state: state, isEditing: viewModel.isEditing) {
                         viewModel.removeCard(card: card)
                     }
+                    .onTapGesture {
+                        if !viewModel.isEditing {
+                            Task { @MainActor in
+                                handleCardClick(card)
+                            }
+                        }
+                    }
                     .onLongPressGesture {
                         if !viewModel.isEditing {
                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -117,6 +125,26 @@ struct DashboardTabContent: View {
         }
         .refreshable {
             viewModel.refresh()
+        }
+        .navigationDestination(for: SettingsRoute.self) { route in
+            if case .arrDashboard(let id) = route {
+                ArrInstanceDashboard(id: id)
+            }
+        }
+        .navigationDestination(for: MediaRoute.self) { route in
+            MediaRouteDestination(route: route)
+        }
+    }
+    
+    private func handleCardClick(_ card: DashboardCards) {
+        switch card {
+        case .arrOverview: navigationManager.openSettings()
+        case .seerrOverview: navigationManager.openRequestsTab()
+        case .prowlarrOverview: navigationManager.openProwlarrTab()
+        case .downloadClients: navigationManager.openDownloadsTab()
+        case .activityQueue: navigationManager.openActivityTab()
+        case .onToday, .upcomingReleases: navigationManager.openScheduleTab()
+        default: break
         }
     }
     
@@ -768,7 +796,7 @@ struct DashboardInstanceDashboardSection: View {
             
             ForEach(state.instances, id: \.instance.id) { instanceState in
                 Button {
-                    navigationManager.go(to: .arrDashboard(instanceState.instance.id))
+                    navigationManager.openArrDashboard(id: instanceState.instance.id)
                 } label: {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack(spacing: 12) {

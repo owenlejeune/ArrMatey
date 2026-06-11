@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.navigation
 
 import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.StateFlow
 
@@ -14,7 +15,8 @@ class NavigationManager(
     val settings: SettingsTabNavigator,
     val requests: RequestsTabNavigator,
     val dashboard: DashboardTabNavigator,
-    private val appState: AppState
+    private val appState: AppState,
+    private val tabManager: TabManager
 ) {
     // Reactive UI state properties
     val drawerExpandedState: StateFlow<Boolean> = appState.drawerExpanded
@@ -29,11 +31,12 @@ class NavigationManager(
     fun setSelectedTab(tab: TabItem) = appState.setSelectedTab(tab)
 
     fun navigateToTab(tab: TabItem) {
-        if (tab is TabItem.Standard && tab !in TabItem.defaultStandardEntries()) {
-            openOverlay(tab)
-        } else {
+        val visibleTabs = tabManager.tabConfiguration.value.visibleTabs
+        if (tab in visibleTabs) {
             closeOverlay()
             setSelectedTab(tab)
+        } else {
+            openOverlay(tab)
         }
     }
 

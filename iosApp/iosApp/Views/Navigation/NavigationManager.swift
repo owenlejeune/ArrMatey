@@ -9,6 +9,8 @@ import SwiftUI
 import Shared
 
 class NavigationManager: ObservableObject {
+    private let tabManager: TabManager = KoinBridge.shared.getTabManager()
+
     @Published var settingsPath = NavigationPath()
     @Published var seriesPath = NavigationPath()
     @Published var moviePath = NavigationPath()
@@ -17,6 +19,7 @@ class NavigationManager: ObservableObject {
     @Published var audiobookPath = NavigationPath()
     @Published var seerrPath = NavigationPath()
     @Published var launcherPath = NavigationPath()
+    @Published var dashboardPath = NavigationPath()
     
     @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemSettings.shared)
     @Published var selectedDrawerTab: AnyTabItem? = nil
@@ -30,6 +33,8 @@ class NavigationManager: ObservableObject {
             launcherPath.append(route)
             return
         }
+
+        navigateToTab(tabFor(type))
 
         switch type {
         case .sonarr: seriesPath.append(route)
@@ -48,6 +53,8 @@ class NavigationManager: ObservableObject {
             launcherPath.append(route)
             return
         }
+
+        navigateToTab(tabFor(type))
 
         switch type {
         case .sonarr:
@@ -165,7 +172,7 @@ class NavigationManager: ObservableObject {
     }
     
     func openSettings() {
-        launcherPath.append(AnyTabItem(item: TabItemSettings.shared as TabItem))
+        openOverlay(TabItemSettings.shared)
     }
     
     func goToSeerrDetails(tmdbId: Int64, requestType: RequestType) {
@@ -174,6 +181,71 @@ class NavigationManager: ObservableObject {
             launcherPath.append(route)
         } else {
             seerrPath.append(route)
+        }
+    }
+    
+    func navigateToTab(_ tab: TabItem) {
+        let visibleTabs = tabManager.tabConfiguration.value.visibleTabs
+        let visibleKeys = visibleTabs.map { $0.key }
+        
+        DispatchQueue.main.async {
+            if visibleKeys.contains(tab.key) {
+                self.closeOverlay()
+                self.selectedTab = AnyTabItem(item: tab)
+            } else {
+                self.openOverlay(tab)
+            }
+        }
+    }
+
+    func openOverlay(_ tab: TabItem) {
+        clearLauncherPath()
+        launcherPath.append(AnyTabItem(item: tab))
+        showLauncher = true
+    }
+
+    func closeOverlay() {
+        showLauncher = false
+        clearLauncherPath()
+    }
+    
+    func openRequestsTab() {
+        navigateToTab(TabItemStandard.requests as TabItem)
+    }
+
+    func openProwlarrTab() {
+        navigateToTab(TabItemStandard.prowlarr as TabItem)
+    }
+
+    func openDownloadsTab() {
+        navigateToTab(TabItemStandard.downloads as TabItem)
+    }
+
+    func openActivityTab() {
+        navigateToTab(TabItemStandard.activity as TabItem)
+    }
+
+    func openScheduleTab() {
+        navigateToTab(TabItemStandard.calendar as TabItem)
+    }
+    
+    func openArrDashboard(id: Int64) {
+        if showLauncher {
+            launcherPath.append(SettingsRoute.arrDashboard(id))
+        } else {
+            dashboardPath.append(SettingsRoute.arrDashboard(id))
+        }
+    }
+
+    private func tabFor(_ type: InstanceType) -> TabItem {
+        switch type {
+        case .sonarr: return TabItemStandard.shows as TabItem
+        case .radarr: return TabItemStandard.movies as TabItem
+        case .lidarr: return TabItemStandard.music as TabItem
+        case .booksehelf: return TabItemStandard.books as TabItem
+        case .listenarr: return TabItemStandard.audiobooks as TabItem
+        case .seerr: return TabItemStandard.requests as TabItem
+        case .prowlarr: return TabItemStandard.prowlarr as TabItem
         }
     }
 }
