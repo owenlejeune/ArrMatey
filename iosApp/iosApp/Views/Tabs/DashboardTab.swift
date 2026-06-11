@@ -27,10 +27,17 @@ struct DashboardTabContent: View {
     @ObservedObject private var viewModel = DashboardViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var showAddCardSheet = false
+    @State private var draggedCard: DashboardCards?
     
     private let columns = [
         GridItem(.adaptive(minimum: 300, maximum: .infinity), spacing: 16)
     ]
+    
+    private var availableCards: [DashboardCards] {
+        DashboardCards.allCases.filter { card in
+            !viewModel.cards.contains(where: { $0.name == card.name })
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -46,33 +53,32 @@ struct DashboardTabContent: View {
         }
         .navigationTitle(MR.strings().dashboard.localized())
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { viewModel.toggleEditing() }) {
-                    Text(viewModel.isEditing ? MR.strings().close.localized() : MR.strings().edit.localized())
-                }
-            }
-            
             if viewModel.isEditing {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { viewModel.resetCardsOrder() }) {
-                        Image(systemName: "arrow.counterclockwise")
+                    Button(MR.strings().close.localized()) {
+                        viewModel.toggleEditing()
                     }
                 }
-            }
-        }
-        .overlay(alignment: .bottomTrailing) {
-            if viewModel.isEditing {
-                Button {
-                    showAddCardSheet = true
-                } label: {
-                    Label(MR.strings().add.localized(), systemImage: "plus")
-                        .padding()
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
-                        .clipShape(Capsule())
-                        .shadow(radius: 4)
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack(spacing: 16) {
+                        Button(action: { viewModel.resetCardsOrder() }) {
+                            Image(systemName: "arrow.counterclockwise")
+                        }
+                        
+                        if !availableCards.isEmpty {
+                            Button(action: { showAddCardSheet = true }) {
+                                Image(systemName: "plus")
+                            }
+                        }
+                    }
                 }
-                .padding()
+            } else {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(MR.strings().edit.localized()) {
+                        viewModel.toggleEditing()
+                    }
+                }
             }
         }
         .sheet(isPresented: $showAddCardSheet) {
@@ -88,6 +94,23 @@ struct DashboardTabContent: View {
                     DashboardCardWrapper(card: card, state: state, isEditing: viewModel.isEditing) {
                         viewModel.removeCard(card: card)
                     }
+                    .onLongPressGesture {
+                        if !viewModel.isEditing {
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                            viewModel.toggleEditing()
+                        }
+                    }
+                    .onDrag {
+                        if !viewModel.isEditing {
+                            viewModel.toggleEditing()
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        }
+                        self.draggedCard = card
+                        return NSItemProvider(object: card.name as NSString)
+                    }
+                    .onDrop(of: [.text], delegate: DashboardDropDelegate(item: card, items: $viewModel.cards, draggedItem: $draggedCard) { newOrder in
+                        viewModel.saveCardOrder(cards: newOrder)
+                    })
                 }
             }
             .padding()
@@ -110,6 +133,31 @@ struct DashboardTabContent: View {
             .buttonStyle(.borderedProminent)
         }
         .padding()
+    }
+}
+
+struct DashboardDropDelegate: DropDelegate {
+    let item: DashboardCards
+    @Binding var items: [DashboardCards]
+    @Binding var draggedItem: DashboardCards?
+    let onOrderChanged: ([DashboardCards]) -> Void
+    
+    func performDrop(info: DropInfo) -> Bool {
+        onOrderChanged(items)
+        draggedItem = nil
+        return true
+    }
+    
+    func dropEntered(info: DropInfo) {
+        guard let draggedItem = draggedItem else { return }
+        if draggedItem != item {
+            let from = items.firstIndex(of: draggedItem)!
+            let to = items.firstIndex(of: item)!
+            
+            if items[to] != draggedItem {
+                items.move(fromOffsets: IndexSet(integer: from), toOffset: to > from ? to + 1 : to)
+            }
+        }
     }
 }
 

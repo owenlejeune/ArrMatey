@@ -15,7 +15,7 @@ class DashboardViewModelS: ObservableObject {
     @Published private(set) var isRefreshing: Bool = false
     @Published private(set) var state: CombinedDashboardState = CombinedDashboardStateInitial()
     @Published private(set) var isEditing: Bool = false
-    @Published private(set) var cards: [DashboardCards] = []
+    @Published var cards: [DashboardCards] = []
     
     init() {
         self.viewModel = KoinBridge.shared.getDashboardViewModel()
@@ -57,6 +57,11 @@ class DashboardViewModelS: ObservableObject {
     
     func addCard(card: DashboardCards) {
         viewModel.addCard(card: card)
+    }
+    
+    func moveCard(from source: IndexSet, to destination: Int) {
+        cards.move(fromOffsets: source, toOffset: destination)
+        saveCardOrder(cards: cards)
     }
     
 }
