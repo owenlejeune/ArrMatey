@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,8 +34,7 @@ import dev.icerock.moko.resources.compose.painterResource
 @Composable
 fun SeerrSection(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean,
-    onClick: () -> Unit
+    isEditing: Boolean
 ) {
     val seerrInstances = state.seerrInstances
 
@@ -63,8 +61,7 @@ fun SeerrSection(
         )
     ) {
         Column(
-            modifier = Modifier.padding(internalPadding)
-                .clickable(enabled = !isEditing, onClick = onClick),
+            modifier = Modifier.padding(internalPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             AnimatedVisibility(

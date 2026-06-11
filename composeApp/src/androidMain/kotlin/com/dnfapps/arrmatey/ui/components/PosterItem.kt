@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -55,6 +56,7 @@ fun PosterItem(
     modifier: Modifier = Modifier,
     showFooter: Boolean = false,
     onItemClick: ((ArrMedia) -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     elevation: PosterElevation = PosterElevation.Medium,
     radius: PosterRadius = PosterRadius.Medium,
@@ -87,6 +89,7 @@ fun PosterItem(
         onClick = {
             onItemClick?.invoke(item)
         },
+        onLongClick = onLongClick,
         additionalContent = {
             additionalContent()
         },
@@ -134,6 +137,8 @@ fun PosterItem(
 fun PosterItem(
     item: RequestMediaDetails,
     modifier: Modifier = Modifier,
+    onItemClick: ((RequestMediaDetails) -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     elevation: PosterElevation = PosterElevation.Medium,
     radius: PosterRadius = PosterRadius.Medium,
     posterHeight: Dp? = null,
@@ -156,6 +161,10 @@ fun PosterItem(
         radius = radius,
         posterHeight = posterHeight,
         aspectRatio = aspectRatio,
+        onClick = {
+            onItemClick?.invoke(item)
+        },
+        onLongClick = onLongClick,
         errorContent = {
             if (imageLoadError) {
                 Column (
@@ -180,6 +189,7 @@ fun PosterItem(
     )
 }
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun BasePosterItem(
     model: Any,
@@ -190,6 +200,7 @@ fun BasePosterItem(
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
     onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     errorContent: @Composable BoxScope.() -> Unit = {},
     additionalContent: @Composable BoxScope.() -> Unit = {},
     footerContent: @Composable ColumnScope.() -> Unit = {},
@@ -198,11 +209,15 @@ fun BasePosterItem(
     Card(
         shape = RoundedCornerShape(radius.radius),
         elevation = CardDefaults.cardElevation(elevation.elevation),
-        modifier = modifier,
-        onClick = {
-            onClick?.invoke()
-        },
-        enabled = enabled && (onClick != null)
+        modifier = modifier.then(
+            if (onClick != null || onLongClick != null) {
+                Modifier.combinedClickable(
+                    enabled = enabled,
+                    onClick = { onClick?.invoke() },
+                    onLongClick = onLongClick
+                )
+            } else Modifier
+        )
     ) {
         val isFixedSize = posterHeight != null
         Column(modifier = if (isFixedSize) Modifier.width(IntrinsicSize.Min) else Modifier) {

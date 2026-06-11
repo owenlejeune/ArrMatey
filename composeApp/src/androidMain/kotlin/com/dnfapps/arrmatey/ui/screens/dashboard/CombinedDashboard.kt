@@ -209,18 +209,35 @@ fun CombinedDashboard(
                                     val innerPadding by animateDpAsState(if (isEditing) 4.dp else 0.dp)
 
                                     Box(contentAlignment = Alignment.Center) {
+                                        val navManager = navigationManager
+
+                                        val onLongClick = {
+                                            if (!isEditing) {
+                                                viewModel.toggleEditing()
+                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            }
+                                        }
+
+                                        val cardOnClick: (() -> Unit)? = when (dashboardCard) {
+                                            DashboardCards.ArrOverview -> { { navManager.openSettings() } }
+                                            DashboardCards.SeerrOverview -> { { navManager.openRequestsTab() } }
+                                            DashboardCards.ProwlarrOverview -> { { navManager.openProwlarrTab() } }
+                                            DashboardCards.DownloadClients -> { { navManager.openDownloadClientsTab() } }
+                                            DashboardCards.ActivityQueue -> { { navManager.openActivityTab() } }
+                                            DashboardCards.OnToday -> { { navManager.openScheduleTab() } }
+                                            DashboardCards.UpcomingReleases -> { { navManager.openScheduleTab() } }
+                                            else -> null
+                                        }
+
                                         Surface(
                                             shadowElevation = elevation,
                                             modifier = Modifier
                                                 .padding(innerPadding)
                                                 .clip(MaterialTheme.shapes.large)
                                                 .combinedClickable(
-                                                    onClick = {},
-                                                    onLongClick = {
-                                                        if (!isEditing) {
-                                                            viewModel.toggleEditing()
-                                                        }
-                                                    }
+                                                    enabled = !isEditing,
+                                                    onClick = { cardOnClick?.invoke() },
+                                                    onLongClick = onLongClick
                                                 )
                                                 .longPressDraggableHandle(
                                                     onDragStarted = {
@@ -236,7 +253,12 @@ fun CombinedDashboard(
                                                     enabled = isEditing
                                                 )
                                         ) {
-                                            DashboardCardContent(dashboardCard, currentState, isEditing)
+                                            DashboardCardContent(
+                                                cardType = dashboardCard,
+                                                currentState = currentState,
+                                                isEditing = isEditing,
+                                                onLongClick = onLongClick
+                                            )
                                         }
                                         if (isEditing) {
                                             Box(
@@ -309,7 +331,8 @@ fun CombinedDashboard(
                                     enabled = false,
                                     cardType = card,
                                     currentState = CombinedDashboardState.Mock,
-                                    isEditing = false
+                                    isEditing = false,
+                                    onLongClick = {}
                                 )
                             }
                         }
@@ -325,6 +348,7 @@ private fun DashboardCardContent(
     cardType: DashboardCards,
     currentState: CombinedDashboardState.Success,
     isEditing: Boolean,
+    onLongClick: () -> Unit,
     enabled: Boolean = true,
     navManager: NavigationManager = navigationManager,
     navigator: Navigator<DashboardScreen> = dashboardNavigator
@@ -333,29 +357,19 @@ private fun DashboardCardContent(
         DashboardCards.ArrOverview ->
             DashboardOverviewCards(
                 state = currentState,
-                isEditing = isEditing,
-                enabled = !isEditing && enabled,
-                onClick = {
-                    navManager.openSettings()
-                }
+                isEditing = isEditing
             )
 
         DashboardCards.SeerrOverview ->
             SeerrSection(
                 state = currentState,
-                isEditing = isEditing,
-                onClick = {
-                    navManager.openRequestsTab()
-                }
+                isEditing = isEditing
             )
 
         DashboardCards.ProwlarrOverview ->
             DashboardProwlarrSection(
                 state = currentState,
-                isEditing = isEditing,
-                onClick = {
-                    navManager.openProwlarrTab()
-                }
+                isEditing = isEditing
             )
 
         DashboardCards.Network ->
@@ -367,43 +381,32 @@ private fun DashboardCardContent(
                 state = currentState,
                 onOpenItem = { id, type ->
                     navManager.arr(type).toDetails(id)
-                }
+                },
+                onLongClick = onLongClick
             )
 
         DashboardCards.DownloadClients ->
             DashboardDownloadClientsSection(
                 state = currentState,
-                isEditing = isEditing,
-                onClick = {
-                    navManager.openDownloadClientsTab()
-                }
+                isEditing = isEditing
             )
 
         DashboardCards.ActivityQueue ->
             DashboardActivityQueueSection(
                 state = currentState,
-                isEditing = isEditing,
-                onClick = {
-                    navManager.openActivityTab()
-                }
+                isEditing = isEditing
             )
 
         DashboardCards.OnToday ->
             DashboardTodaySection(
                 state = currentState,
-                isEditing = isEditing,
-                onClick = {
-                    navManager.openScheduleTab()
-                }
+                isEditing = isEditing
             )
 
         DashboardCards.UpcomingReleases ->
             DashboardUpcomingSection(
                 state = currentState,
-                isEditing = isEditing,
-                onClick = {
-                    navManager.openScheduleTab()
-                }
+                isEditing = isEditing
             )
 
         DashboardCards.InstanceDashboard ->
@@ -412,7 +415,8 @@ private fun DashboardCardContent(
                 enabled = !isEditing && enabled,
                 onInstanceClicked = { id ->
                     navigator.openArrDashboard(id)
-                }
+                },
+                onLongClick = onLongClick
             )
     }
 }

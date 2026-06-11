@@ -37,9 +37,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun DashboardOverviewCards(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean,
-    enabled: Boolean,
-    onClick: () -> Unit
+    isEditing: Boolean
 ) {
     val totalSize = state.instances.sumOf { it.sizeOnDisk }
     val totalIssues = state.instances.sumOf { it.healthItems.size }
@@ -59,8 +57,7 @@ fun DashboardOverviewCards(
     )
 
     Card(
-        modifier = Modifier.fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onClick),
+        modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = containerColor

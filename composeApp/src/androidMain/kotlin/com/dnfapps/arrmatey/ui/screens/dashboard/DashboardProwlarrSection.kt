@@ -46,8 +46,7 @@ import dev.icerock.moko.resources.compose.painterResource
 @Composable
 fun DashboardProwlarrSection(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean,
-    onClick: () -> Unit
+    isEditing: Boolean
 ) {
     val prowlarrStats = state.prowlarrStats
 
@@ -74,8 +73,7 @@ fun DashboardProwlarrSection(
         )
     ) {
         Column(
-            modifier = Modifier.padding(internalPadding)
-                .clickable(enabled = !isEditing, onClick = onClick),
+            modifier = Modifier.padding(internalPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             AnimatedVisibility(

@@ -37,6 +37,7 @@ import dev.icerock.moko.resources.compose.painterResource
 fun RecentlyAddedSection(
     state: CombinedDashboardState.Success,
     onOpenItem: (Long, InstanceType) -> Unit,
+    onLongClick: () -> Unit,
     enabled: Boolean
 ) {
     val items = state.recentlyAdded
@@ -95,6 +96,7 @@ fun RecentlyAddedSection(
                         onItemClick = {
                             onOpenItem(item.id ?: 0, type)
                         },
+                        onLongClick = onLongClick,
                         showFooter = true
                     )
                 }
