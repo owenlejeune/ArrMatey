@@ -722,19 +722,59 @@ struct DashboardInstanceDashboardSection: View {
                 Button {
                     navigationManager.go(to: .arrDashboard(instanceState.instance.id))
                 } label: {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(instanceState.instance.label)
-                                .font(.subheadline)
-                                .bold()
-                            Text("\(instanceState.totalItems) Items • \(instanceState.sizeOnDisk.bytesAsFileSizeString())")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 12) {
+                            Image(resource: instanceState.instance.type.icon)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 32, height: 32)
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(instanceState.instance.label)
+                                    .font(.subheadline)
+                                    .bold()
+                                
+                                let completion = instanceState.library.isEmpty ? 0 : instanceState.library.map { $0.statusProgress }.reduce(0, +) / Float(instanceState.library.count)
+                                
+                                Text("\(instanceState.totalItems) Items • \(instanceState.sizeOnDisk.bytesAsFileSizeString()) • \(Int(completion * 100))% Downloaded")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            if instanceState.healthItems.contains(where: { $0.type == .error }) {
+                                Image(systemName: "exclamationmark.octagon.fill")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 14))
+                            } else if !instanceState.healthItems.isEmpty {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.yellow)
+                                    .font(.system(size: 14))
+                            }
                         }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        
+                        VStack(spacing: 4) {
+                            ForEach(instanceState.disks, id: \.path) { disk in
+                                HStack(spacing: 8) {
+                                    Text(disk.path ?? MR.strings().unknown.localized())
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                    
+                                    let usedSpace = disk.totalSpace - disk.freeSpace
+                                    Text("\(usedSpace.bytesAsFileSizeString()) / \(disk.totalSpace.bytesAsFileSizeString())")
+                                        .font(.system(size: 8))
+                                        .foregroundColor(.secondary.opacity(0.7))
+                                    
+                                    Spacer()
+                                    
+                                    Text("\(Int(disk.usedPercentage * 100))% full")
+                                        .font(.system(size: 8))
+                                        .foregroundColor(disk.usedPercentage > 0.9 ? .red : .secondary)
+                                }
+                            }
+                        }
                     }
                     .padding(12)
                     .background(Color(UIColor.tertiarySystemBackground))
