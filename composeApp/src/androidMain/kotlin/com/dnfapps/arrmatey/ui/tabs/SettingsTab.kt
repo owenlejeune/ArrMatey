@@ -27,6 +27,7 @@ import org.koin.compose.koinInject
 
 @Composable
 fun SettingsTabNavHost(
+    windowSizeClass: WindowSizeClass,
     navigationManager: NavigationManager = koinInject(),
     instanceRepository: InstanceRepository = koinInject(),
     navigation: SettingsTabNavigator = navigationManager.settings
@@ -49,7 +50,7 @@ fun SettingsTabNavHost(
                 entry<SettingsScreen.Dev> { DevSettingsScreen() }
                 entry<SettingsScreen.TabPreferences> { TabCustomizationScreen() }
                 entry<SettingsScreen.ShortcutPreferences> { ShortcutsCustomizationScreen() }
-                entry<SettingsScreen.ArrDashboard> { ArrInstanceDashboard(it.id, navigation) }
+                entry<SettingsScreen.ArrDashboard> { ArrInstanceDashboard(it.id, navigation, windowSizeClass) }
                 entry<SettingsScreen.AddDownloadClient> { AddEditDownloadClientScreen() }
                 entry<SettingsScreen.EditDownloadClient> { AddEditDownloadClientScreen(clientId = it.id) }
                 entry<SettingsScreen.AddCustomWebpage> { AddEditCustomWebpageScreen() }

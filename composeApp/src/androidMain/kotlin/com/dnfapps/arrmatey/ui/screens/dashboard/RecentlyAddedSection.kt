@@ -24,24 +24,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Arrtist
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.InstanceTypeIdentifiable
+import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
 fun RecentlyAddedSection(
     state: CombinedDashboardState.Success,
-    onOpenItem: (Long, InstanceType) -> Unit
+    onOpenItem: (Long, InstanceType) -> Unit,
+    enabled: Boolean
 ) {
     val items = state.recentlyAdded
 
@@ -66,7 +62,7 @@ fun RecentlyAddedSection(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = mokoString(MR.strings.nothing_recently_added),
+                    text = mokoString(MR.strings.recently_added),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -74,7 +70,7 @@ fun RecentlyAddedSection(
 
             if (items.isEmpty()) {
                 Text(
-                    text = mokoString(MR.strings.nothing_on_today),
+                    text = mokoString(MR.strings.nothing_recently_added),
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
@@ -84,14 +80,20 @@ fun RecentlyAddedSection(
 
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                userScrollEnabled = enabled
             ) {
                 items(items) { item ->
+                    val type = (item as InstanceTypeIdentifiable).instanceType
+                    val posterModel = if (item is MockMedia) {
+                        type.mockCover?.let { painterResource(it) }
+                    } else null
                     PosterItem(
                         item = item,
                         modifier = Modifier.width(120.dp),
+                        posterModel = posterModel,
                         onItemClick = {
-                            onOpenItem(item.id ?: 0, (item as InstanceTypeIdentifiable).instanceType)
+                            onOpenItem(item.id ?: 0, type)
                         },
                         showFooter = true
                     )

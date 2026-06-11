@@ -1,6 +1,9 @@
 package com.dnfapps.arrmatey.compose
 
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.utils.StringResolver
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -44,20 +47,29 @@ class DashboardManager(
         saveCardOrder(newCards)
     }
 
+    fun addCard(card: DashboardCards) {
+        val newCards = _cardsOrder.value.toMutableList().apply {
+            if (card !in this) {
+                add(card)
+            }
+        }
+        saveCardOrder(newCards)
+    }
+
     fun reset() {
         saveCardOrder(DashboardCards.entries)
     }
 }
 
-enum class DashboardCards {
-    ArrOverview,
-    SeerrOverview,
-    ProwlarrOverview,
-    Network,
-    RecentlyAdded,
-    DownloadClients,
-    ActivityQueue,
-    OnToday,
-    UpcomingReleases,
-    InstanceDashboard
+enum class DashboardCards(val title: StringResource) {
+    ArrOverview(MR.strings.dashboard_arr_overview),
+    SeerrOverview(MR.strings.dashboard_seerr_overview),
+    ProwlarrOverview(MR.strings.dashboard_prowlarr_overview),
+    Network(MR.strings.dashboard_network_monitor),
+    RecentlyAdded(MR.strings.dashboard_recently_added),
+    DownloadClients(MR.strings.dashboard_download_clients_overview),
+    ActivityQueue(MR.strings.dashboard_activity_queue_overview),
+    OnToday(MR.strings.dashboard_todays_releases),
+    UpcomingReleases(MR.strings.dashboard_upcoming_releases),
+    InstanceDashboard(MR.strings.dashboard_instance_dashboards)
 }

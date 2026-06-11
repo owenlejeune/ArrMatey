@@ -93,7 +93,7 @@ fun PosterItem(
         errorContent = {
             if (imageLoadError) {
                 Column (
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier = Modifier.align(Alignment.Center).padding(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {

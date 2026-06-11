@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,7 +35,8 @@ import dev.icerock.moko.resources.compose.painterResource
 @Composable
 fun SeerrSection(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean
+    isEditing: Boolean,
+    onClick: () -> Unit
 ) {
     val seerrInstances = state.seerrInstances
 
@@ -61,7 +63,8 @@ fun SeerrSection(
         )
     ) {
         Column(
-            modifier = Modifier.padding(internalPadding),
+            modifier = Modifier.padding(internalPadding)
+                .clickable(enabled = !isEditing, onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             AnimatedVisibility(
@@ -77,7 +80,7 @@ fun SeerrSection(
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
-                        text = InstanceType.Seerr.name,
+                        text = mokoString(MR.strings.dashboard_seerr_overview),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

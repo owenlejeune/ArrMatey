@@ -29,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -65,11 +67,13 @@ import org.koin.compose.koinInject
 fun ArrInstanceDashboard(
     id: Long,
     navigation: Navigator<*>,
+    windowSizeClass: WindowSizeClass,
     viewModel: ArrInstanceDashboardViewModel = koinInjectParams(id),
     moko: MokoStrings = koinInject()
 ) {
+    val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+
     val navManager = navigationManager
-//    val navigation = settingsNavigator
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -77,7 +81,9 @@ fun ArrInstanceDashboard(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = if (isCompact) {
+            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+        } else Modifier,
         topBar = {
             TopAppBar(
                 title = { instance?.let { instance ->
@@ -90,7 +96,6 @@ fun ArrInstanceDashboard(
                     IconButton(
                         onClick = {
                             navManager.openEditInstanceScreen(id)
-//                            navigation.toEditInstance(id)
                         }
                     ) {
                         Icon(Icons.Default.Edit, null)

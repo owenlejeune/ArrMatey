@@ -32,14 +32,19 @@ import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun DashboardActivityQueueSection(
-    state: CombinedDashboardState.Success
+    state: CombinedDashboardState.Success,
+    isEditing: Boolean,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        ),
+        onClick = {
+            if (!isEditing) onClick()
+        }
     ) {
         val activity = state.activityQueue
         Column(

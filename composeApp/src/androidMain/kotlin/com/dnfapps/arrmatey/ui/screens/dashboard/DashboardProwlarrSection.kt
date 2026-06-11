@@ -46,13 +46,13 @@ import dev.icerock.moko.resources.compose.painterResource
 @Composable
 fun DashboardProwlarrSection(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean
+    isEditing: Boolean,
+    onClick: () -> Unit
 ) {
     val prowlarrStats = state.prowlarrStats
 
     val totalHealthyIndexers = prowlarrStats.sumOf { it.healthyIndexers }
     val totalFailingIndexers = prowlarrStats.sumOf { it.failingIndexers }
-    val allFailingIndexers = state.prowlarrStats.flatMap { it.failingIndexerNames }
 
     val containerColor by animateColorAsState(
         targetValue = if (isEditing) {
@@ -66,21 +66,16 @@ fun DashboardProwlarrSection(
         label = "ProwlarrCardPaddingAnimation"
     )
 
-    var expanded by remember { mutableStateOf(false) }
-
     Card(
-        modifier = Modifier.fillMaxWidth()
-            .clickable(
-                enabled = !isEditing,
-                onClick = { expanded = !expanded }
-            ),
+        modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = containerColor
         )
     ) {
         Column(
-            modifier = Modifier.padding(internalPadding),
+            modifier = Modifier.padding(internalPadding)
+                .clickable(enabled = !isEditing, onClick = onClick),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             AnimatedVisibility(
@@ -96,69 +91,33 @@ fun DashboardProwlarrSection(
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
-                        text = InstanceType.Prowlarr.name,
+                        text = mokoString(MR.strings.dashboard_prowlarr_overview),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    CountStatItem(
-                        icon = Icons.Default.Favorite,
-                        modifier = Modifier.weight(1f),
-                        label = mokoString(MR.strings.healthy_indexers),
-                        count = totalHealthyIndexers,
-                        color = ArrGreen,
-                    )
-                    CountStatItem(
-                        icon = Icons.Default.Error,
-                        modifier = Modifier.weight(1f),
-                        label = mokoString(MR.strings.failing_indexers),
-                        count = totalFailingIndexers,
-                        color = when {
-                            totalFailingIndexers > 0 -> MaterialTheme.colorScheme.errorContainer
-                            else -> MaterialTheme.colorScheme.secondaryContainer
-                        }
-                    )
-                }
-
-                AnimatedVisibility(
-                    visible = expanded && allFailingIndexers.isNotEmpty(),
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(
-                                alpha = 0.5f
-                            )
-                        )
-                        allFailingIndexers.forEach { name ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Box(
-                                    Modifier.size(4.dp).clip(CircleShape).background(ArrRed)
-                                )
-                                Text(
-                                    text = name,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
+                CountStatItem(
+                    icon = Icons.Default.Favorite,
+                    modifier = Modifier.weight(1f),
+                    label = mokoString(MR.strings.healthy_indexers),
+                    count = totalHealthyIndexers,
+                    color = ArrGreen,
+                )
+                CountStatItem(
+                    icon = Icons.Default.Error,
+                    modifier = Modifier.weight(1f),
+                    label = mokoString(MR.strings.failing_indexers),
+                    count = totalFailingIndexers,
+                    color = when {
+                        totalFailingIndexers > 0 -> MaterialTheme.colorScheme.errorContainer
+                        else -> MaterialTheme.colorScheme.secondaryContainer
                     }
-                }
+                )
             }
         }
     }

@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlin.time.Instant

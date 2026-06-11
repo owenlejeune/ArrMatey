@@ -20,11 +20,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CountStatItem(
-    modifier: Modifier = Modifier,
     icon: ImageVector,
     label: String,
     count: Int,
-    color: Color
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier,

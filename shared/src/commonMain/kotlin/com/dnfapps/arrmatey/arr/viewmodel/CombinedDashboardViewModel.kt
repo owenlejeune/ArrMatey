@@ -133,20 +133,12 @@ class CombinedDashboardViewModel(
                     } else {
                         val flows = prowlarrRepos.map { repo ->
                             combine(repo.indexerStatus, repo.indexers) { status, indexers ->
-                                val failingIndexerIds = status
-                                    .filter { it.hasFailure }
-                                    .map { it.indexerId }
-                                    .toSet()
-                                val failingNames = indexers
-                                    .filter { it.id in failingIndexerIds }
-                                    .mapNotNull { it.name }
                                 val failureCount = status.count { it.hasFailure }
                                 ProwlarrDashboardState(
                                     instance = repo.instance,
                                     totalIndexers = status.size,
                                     healthyIndexers = indexers.size - failureCount,
-                                    failingIndexers = failureCount,
-                                    failingIndexerNames = failingNames
+                                    failingIndexers = failureCount
                                 )
                             }
                         }
@@ -365,5 +357,9 @@ class CombinedDashboardViewModel(
 
     fun removeCard(card: DashboardCards) {
         dashboardManager.removeCard(card)
+    }
+
+    fun addCard(card: DashboardCards) {
+        dashboardManager.addCard(card)
     }
 }

@@ -32,6 +32,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.collections.emptyList
 
 class PreferencesStore(
     dataStoreFactory: DataStoreFactory
@@ -384,9 +385,13 @@ class PreferencesStore(
 
     val dashboardCardsOrder: Flow<List<DashboardCards>> = dataStore.data
         .map { preferences ->
-            preferences[dashboardCardsOrderKey]?.split("~")
-                ?.map { DashboardCards.valueOf(it) }
-                ?: DashboardCards.entries.toList()
+            val cardOrderPrefs = preferences[dashboardCardsOrderKey]
+            cardOrderPrefs?.let { cardOrderPrefs ->
+                cardOrderPrefs.takeUnless { it.isEmpty() }
+                    ?.split("~")
+                    ?.map { DashboardCards.valueOf(it) }
+                    ?: emptyList()
+            } ?: DashboardCards.entries.toList()
         }
 
     suspend fun updateDashboardCardsOrder(cards: List<DashboardCards>) {

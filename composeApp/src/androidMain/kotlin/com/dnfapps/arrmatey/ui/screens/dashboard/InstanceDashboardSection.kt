@@ -38,7 +38,8 @@ import dev.icerock.moko.resources.compose.painterResource
 @Composable
 fun InstanceDashboardSection(
     state: CombinedDashboardState.Success,
-    onInstanceClicked: (Long) -> Unit
+    onInstanceClicked: (Long) -> Unit,
+    enabled: Boolean
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -67,9 +68,13 @@ fun InstanceDashboardSection(
             }
 
             state.instances.forEachIndexed { index, instanceState ->
-                InstanceDashboardCard(instanceState, onClick = {
-                    onInstanceClicked(instanceState.instance.id)
-                })
+                InstanceDashboardCard(
+                    instanceState,
+                    enabled = enabled,
+                    onClick = {
+                        onInstanceClicked(instanceState.instance.id)
+                    }
+                )
                 if (index < state.instances.size - 1) {
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 6.dp),
@@ -84,6 +89,7 @@ fun InstanceDashboardSection(
 @Composable
 private fun InstanceDashboardCard(
     state: ArrInstanceDashboardState,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     val completion = if (state.library.isNotEmpty()) {
@@ -92,7 +98,7 @@ private fun InstanceDashboardCard(
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.clickable(onClick = onClick)
+        modifier = Modifier.clickable(onClick = onClick, enabled = enabled)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

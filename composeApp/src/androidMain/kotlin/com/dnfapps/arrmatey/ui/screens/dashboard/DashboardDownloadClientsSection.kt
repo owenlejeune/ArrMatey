@@ -40,7 +40,9 @@ import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
 fun DashboardDownloadClientsSection(
-    state: CombinedDashboardState.Success
+    state: CombinedDashboardState.Success,
+    isEditing: Boolean,
+    onClick: () -> Unit
 ) {
     val clients = state.downloadClients
     val totalDownloadSpeed = state.downloadTransfers.sumOf { it.downloadSpeed }
@@ -50,7 +52,10 @@ fun DashboardDownloadClientsSection(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        ),
+        onClick = {
+            if (!isEditing) onClick()
+        }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),

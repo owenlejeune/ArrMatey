@@ -27,14 +27,19 @@ import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun DashboardTodaySection(
-    state: CombinedDashboardState.Success
+    state: CombinedDashboardState.Success,
+    isEditing: Boolean,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        ),
+        onClick = {
+            if (!isEditing) onClick()
+        }
     ) {
         Column(
             modifier = Modifier.padding(16.dp),

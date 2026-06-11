@@ -25,7 +25,7 @@ fun DashboardTab(
             onBack = { navigation.popBackStack() },
             entryProvider = entryProvider { 
                 entry<DashboardScreen.Main> { CombinedDashboard(windowSizeClass) }
-                entry<DashboardScreen.ArrDashboard> { ArrInstanceDashboard(it.id, navigation) }
+                entry<DashboardScreen.ArrDashboard> { ArrInstanceDashboard(it.id, navigation, windowSizeClass) }
             }
         )
     }

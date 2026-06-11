@@ -406,7 +406,7 @@ private fun TabItemContent(tab: TabItem, windowSizeClass: WindowSizeClass, wideR
                 CustomWebpageViewerScreen(webpageId = tab.id, wideRailIsVisible = wideRailIsVisible)
             }
         }
-        is TabItem.Settings -> SettingsTabNavHost()
+        is TabItem.Settings -> SettingsTabNavHost(windowSizeClass)
     }
 }
 

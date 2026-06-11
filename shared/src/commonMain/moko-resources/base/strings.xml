@@ -546,6 +546,7 @@
     <string name="instances_overview">Arr Instances Overview</string>
     <string name="no_activity">No Activity</string>
     <string name="nothing_recently_added">Nothing Added Recently</string>
+    <string name="empty_dashboard_message">Try adding something to your dashboard</string>
 
     <!--- Download Status -->
     <string name="downloading">Downloading</string>
@@ -646,6 +647,19 @@
     <string name="poster_radius_small">Small</string>
     <string name="poster_radius_medium">Medium</string>
     <string name="poster_radius_large">Large</string>
+
+    <!-- Dashboard Cards -->
+    <string name="add_dashboard_cards">Add Cards</string>
+    <string name="dashboard_arr_overview">Arr Software</string>
+    <string name="dashboard_seerr_overview">Requests &amp; Issues</string>
+    <string name="dashboard_prowlarr_overview">Indexers</string>
+    <string name="dashboard_network_monitor">Network Status</string>
+    <string name="dashboard_recently_added">Recently Added Media</string>
+    <string name="dashboard_download_clients_overview">Download Clients</string>
+    <string name="dashboard_activity_queue_overview">Activity Queue</string>
+    <string name="dashboard_todays_releases">Today's Releases</string>
+    <string name="dashboard_upcoming_releases">Upcoming Releases</string>
+    <string name="dashboard_instance_dashboards">Instance Dashboards</string>
 
     <!-- Release Notes -->
     <string name="v1_title">Announcements</string>

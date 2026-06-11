@@ -68,6 +68,10 @@ class NavigationManager(
     }
 
     // Convenience methods for specific feature transitions
+    fun openSettings() {
+        openOverlay(TabItem.Settings)
+    }
+
     fun openNewInstanceScreen(type: InstanceType) {
         openOverlay(TabItem.Settings)
         settings.toAddInstance(type)
@@ -86,5 +90,33 @@ class NavigationManager(
     fun openNewDownloadClientScreen() {
         openOverlay(TabItem.Settings)
         settings.toAddDownloadClient()
+    }
+
+    fun openArrTab(type: InstanceType) {
+        when (type) {
+            InstanceType.Seerr -> openRequestsTab()
+            InstanceType.Prowlarr -> openProwlarrTab()
+            else -> navigateToTab(tabFor(type))
+        }
+    }
+
+    fun openRequestsTab() {
+        navigateToTab(TabItem.Standard.REQUESTS)
+    }
+
+    fun openProwlarrTab() {
+        navigateToTab(TabItem.Standard.PROWLARR)
+    }
+
+    fun openDownloadClientsTab() {
+        navigateToTab(TabItem.Standard.DOWNLOADS)
+    }
+
+    fun openActivityTab() {
+        navigateToTab(TabItem.Standard.ACTIVITY)
+    }
+
+    fun openScheduleTab() {
+        navigateToTab(TabItem.Standard.CALENDAR)
     }
 }

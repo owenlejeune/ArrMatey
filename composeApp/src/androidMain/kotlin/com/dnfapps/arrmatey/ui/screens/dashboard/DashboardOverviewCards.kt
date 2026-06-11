@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.screens.dashboard
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,7 +37,9 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun DashboardOverviewCards(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean
+    isEditing: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
 ) {
     val totalSize = state.instances.sumOf { it.sizeOnDisk }
     val totalIssues = state.instances.sumOf { it.healthItems.size }
@@ -56,7 +59,8 @@ fun DashboardOverviewCards(
     )
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .clickable(enabled = enabled, onClick = onClick),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = containerColor
@@ -79,7 +83,7 @@ fun DashboardOverviewCards(
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
-                        text = mokoString(MR.strings.instances_overview),
+                        text = mokoString(MR.strings.dashboard_arr_overview),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
