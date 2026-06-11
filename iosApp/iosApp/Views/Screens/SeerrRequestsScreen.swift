@@ -58,6 +58,7 @@ struct SeerrTabContent: View {
             }
         }
         .navigationTitle(MR.strings().seerr.localized())
+        .navigationBarTitleDisplayMode(.inline)
         .refreshable {
             viewModel.refresh()
         }

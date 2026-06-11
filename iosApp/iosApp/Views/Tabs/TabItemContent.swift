@@ -34,7 +34,6 @@ struct TabItemContent: View {
                 SettingsScreen()
             }
         }
-        .navigationTitle(LocalizedStringKey(tabItem.resource.localized()))
         .navigationDestination(for: SettingsRoute.self) { route in
             SettingsRouteView(route: route)
         }

@@ -53,6 +53,7 @@ struct DashboardTabContent: View {
             }
         }
         .navigationTitle(MR.strings().dashboard.localized())
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if viewModel.isEditing {
                 ToolbarItem(placement: .navigationBarLeading) {

@@ -137,6 +137,7 @@ struct SettingsScreen: View {
             }
         }
         .navigationTitle(MR.strings().settings.localized())
+        .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showLibrariesSheet) {
             LibrariesSheet()
         }

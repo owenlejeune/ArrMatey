@@ -192,7 +192,6 @@ struct LauncherTabView: View {
                 SettingsScreen()
             }
         }
-        .navigationTitle(tabItem is TabItemCustomWebpage ? (tabItem as! TabItemCustomWebpage).name : tabItem.resource.localized())
         .navigationDestination(for: SeerrRoute.self) { route in
             SeerrRouteDestination(route: route)
         }

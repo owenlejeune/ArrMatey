@@ -37,6 +37,7 @@ struct ActivityTabContent: View {
     var body: some View {
         queueItemContent
             .navigationTitle(titleText)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     ActivityFilterMenu(

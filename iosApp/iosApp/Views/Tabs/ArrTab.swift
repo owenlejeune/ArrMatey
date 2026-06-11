@@ -49,6 +49,7 @@ struct ArrTab: View {
     var body: some View {
         contentForState
             .navigationTitle(instanceState.selectedInstance?.label ?? type.name)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 toolbarContent
             }
