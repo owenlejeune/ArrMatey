@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
@@ -119,6 +120,9 @@ object KoinBridge: KoinComponent {
 
     fun getAudiobookFilesViewModel(audiobookId: Long): AudiobookFilesViewModel =
         getKoin().get { parametersOf(audiobookId) }
+
+    fun getDashboardViewModel(): CombinedDashboardViewModel =
+        getKoin().get()
 
     fun getGenericClient(): GenericClient =
         getKoin().get()
