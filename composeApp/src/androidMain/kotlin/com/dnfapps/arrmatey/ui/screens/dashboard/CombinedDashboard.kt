@@ -236,11 +236,13 @@ fun CombinedDashboard(
                                                 .clip(MaterialTheme.shapes.large)
                                                 .combinedClickable(
                                                     enabled = !isEditing,
-                                                    onClick = { cardOnClick?.invoke() },
-                                                    onLongClick = onLongClick
+                                                    onClick = { cardOnClick?.invoke() }
                                                 )
                                                 .longPressDraggableHandle(
                                                     onDragStarted = {
+                                                        if (!isEditing) {
+                                                            viewModel.toggleEditing()
+                                                        }
                                                         hapticFeedback.performHapticFeedback(
                                                             HapticFeedbackType.GestureThresholdActivate
                                                         )
@@ -250,14 +252,13 @@ fun CombinedDashboard(
                                                             HapticFeedbackType.GestureEnd
                                                         )
                                                     },
-                                                    enabled = isEditing
+                                                    enabled = true
                                                 )
                                         ) {
                                             DashboardCardContent(
                                                 cardType = dashboardCard,
                                                 currentState = currentState,
-                                                isEditing = isEditing,
-                                                onLongClick = onLongClick
+                                                isEditing = isEditing
                                             )
                                         }
                                         if (isEditing) {
@@ -331,8 +332,7 @@ fun CombinedDashboard(
                                     enabled = false,
                                     cardType = card,
                                     currentState = CombinedDashboardState.Mock,
-                                    isEditing = false,
-                                    onLongClick = {}
+                                    isEditing = false
                                 )
                             }
                         }
@@ -348,7 +348,6 @@ private fun DashboardCardContent(
     cardType: DashboardCards,
     currentState: CombinedDashboardState.Success,
     isEditing: Boolean,
-    onLongClick: () -> Unit,
     enabled: Boolean = true,
     navManager: NavigationManager = navigationManager,
     navigator: Navigator<DashboardScreen> = dashboardNavigator
@@ -381,8 +380,7 @@ private fun DashboardCardContent(
                 state = currentState,
                 onOpenItem = { id, type ->
                     navManager.arr(type).toDetails(id)
-                },
-                onLongClick = onLongClick
+                }
             )
 
         DashboardCards.DownloadClients ->
@@ -415,8 +413,7 @@ private fun DashboardCardContent(
                 enabled = !isEditing && enabled,
                 onInstanceClicked = { id ->
                     navigator.openArrDashboard(id)
-                },
-                onLongClick = onLongClick
+                }
             )
     }
 }

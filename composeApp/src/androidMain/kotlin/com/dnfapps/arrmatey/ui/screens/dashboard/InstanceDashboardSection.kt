@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,7 +39,6 @@ import dev.icerock.moko.resources.compose.painterResource
 fun InstanceDashboardSection(
     state: CombinedDashboardState.Success,
     onInstanceClicked: (Long) -> Unit,
-    onLongClick: () -> Unit,
     enabled: Boolean
 ) {
     Card(
@@ -74,8 +73,7 @@ fun InstanceDashboardSection(
                     enabled = enabled,
                     onClick = {
                         onInstanceClicked(instanceState.instance.id)
-                    },
-                    onLongClick = onLongClick
+                    }
                 )
                 if (index < state.instances.size - 1) {
                     HorizontalDivider(
@@ -88,13 +86,11 @@ fun InstanceDashboardSection(
     }
 }
 
-@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 private fun InstanceDashboardCard(
     state: ArrInstanceDashboardState,
     enabled: Boolean,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onClick: () -> Unit
 ) {
     val completion = if (state.library.isNotEmpty()) {
         state.library.asSequence().map { it.statusProgress }.average().toFloat()
@@ -102,11 +98,7 @@ private fun InstanceDashboardCard(
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.combinedClickable(
-            onClick = onClick,
-            onLongClick = onLongClick,
-            enabled = enabled
-        )
+        modifier = Modifier.clickable(onClick = onClick, enabled = enabled)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
