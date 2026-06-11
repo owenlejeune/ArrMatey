@@ -24,7 +24,7 @@ struct DashboardTab: View {
 }
 
 struct DashboardTabContent: View {
-    @ObservedObject private var viewModel = DashboardViewModelS()
+    @StateObject private var viewModel = DashboardViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var showAddCardSheet = false
     @State private var draggedCard: DashboardCards?
@@ -838,24 +838,46 @@ struct AddDashboardCardSheet: View {
     @ObservedObject var viewModel: DashboardViewModelS
     @Environment(\.dismiss) var dismiss
     
+    private let columns = [
+        GridItem(.adaptive(minimum: 300, maximum: .infinity), spacing: 16)
+    ]
+    
     var body: some View {
         NavigationView {
-            List {
+            ScrollView {
                 let available = DashboardCards.allCases.filter { card in
                     !viewModel.cards.contains(where: { $0.name == card.name })
                 }
-                ForEach(available, id: \.self) { card in
-                    Button {
-                        viewModel.addCard(card: card)
-                        dismiss()
-                    } label: {
-                        HStack {
-                            Text(card.title.localized())
-                            Spacer()
-                            Image(systemName: "plus.circle")
+                
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(available, id: \.self) { card in
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text(card.title.localized())
+                                    .font(.headline)
+                                    .bold()
+                                Spacer()
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.accentColor)
+                            }
+                            
+                            let mockSuccess = CombinedDashboardStateCompanion.shared.Mock
+                            DashboardCardView(card: card, state: mockSuccess, isEditing: false)
+                                .disabled(true)
+                                .padding(12)
+                                .background(Color(UIColor.systemBackground).opacity(0.5))
+                                .cornerRadius(12)
+                        }
+                        .padding()
+                        .background(Color(UIColor.secondarySystemBackground))
+                        .cornerRadius(16)
+                        .onTapGesture {
+                            viewModel.addCard(card: card)
                         }
                     }
                 }
+                .padding()
             }
             .navigationTitle(MR.strings().add_dashboard_cards.localized())
             .toolbar {
