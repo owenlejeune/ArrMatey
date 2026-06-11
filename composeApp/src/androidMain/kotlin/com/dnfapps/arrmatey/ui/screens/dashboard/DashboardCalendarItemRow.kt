@@ -66,7 +66,7 @@ fun DashboardCalendarItemRow(
             else -> ""
         }
 
-        val color = (item as? InstanceTypeIdentifiable)?.instanceType?.associatedColor
+        val color = item.associatedType?.associatedColor
             ?: MaterialTheme.colorScheme.primary
 
         Box(Modifier.size(4.dp).clip(CircleShape).background(color))

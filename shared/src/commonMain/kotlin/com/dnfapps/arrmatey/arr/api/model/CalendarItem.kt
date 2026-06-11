@@ -11,4 +11,7 @@ sealed interface CalendarItem {
     val notificationScheduledTime: Instant?
     val notificationMessage: String
     val notificationReleaseType: StringResource? get() = null
+
+    val associatedType: InstanceType?
+        get() = (this as? InstanceTypeIdentifiable)?.instanceType
 }

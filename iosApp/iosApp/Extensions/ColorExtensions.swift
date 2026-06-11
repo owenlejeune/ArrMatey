@@ -34,6 +34,21 @@ extension Color {
         )
     }
     
+    init(hex: UInt64) {
+        if hex > 0xFFFFFF {
+            let r = Double((hex >> 24) & 0xFF) / 255.0
+            let g = Double((hex >> 16) & 0xFF) / 255.0
+            let b = Double((hex >> 8) & 0xFF) / 255.0
+            let a = Double(hex & 0xFF) / 255.0
+            self.init(.sRGB, red: r, green: g, blue: b, opacity: a)
+        } else {
+            let r = Double((hex >> 16) & 0xFF) / 255.0
+            let g = Double((hex >> 8) & 0xFF) / 255.0
+            let b = Double(hex & 0xFF) / 255.0
+            self.init(.sRGB, red: r, green: g, blue: b, opacity: 1.0)
+        }
+    }
+    
     init(argb: UInt64) {
         let a = Double((argb >> 56) & 0xFF) / 255.0
         let r = Double((argb >> 48) & 0xFF) / 255.0
