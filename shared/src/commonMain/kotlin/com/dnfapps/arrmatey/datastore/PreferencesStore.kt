@@ -391,7 +391,7 @@ class PreferencesStore(
                     ?.split("~")
                     ?.map { DashboardCards.valueOf(it) }
                     ?: emptyList()
-            } ?: DashboardCards.entries.toList()
+            } ?: DashboardCards.defaultEntries.toList()
         }
 
     suspend fun updateDashboardCardsOrder(cards: List<DashboardCards>) {

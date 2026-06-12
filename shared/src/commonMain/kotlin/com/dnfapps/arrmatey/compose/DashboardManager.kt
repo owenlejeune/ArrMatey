@@ -57,7 +57,7 @@ class DashboardManager(
     }
 
     fun reset() {
-        saveCardOrder(DashboardCards.entries)
+        saveCardOrder(DashboardCards.defaultEntries)
     }
 }
 
@@ -71,5 +71,13 @@ enum class DashboardCards(val title: StringResource) {
     ActivityQueue(MR.strings.dashboard_activity_queue_overview),
     OnToday(MR.strings.dashboard_todays_releases),
     UpcomingReleases(MR.strings.dashboard_upcoming_releases),
-    InstanceDashboard(MR.strings.dashboard_instance_dashboards)
+    InstanceDashboard(MR.strings.dashboard_instance_dashboards);
+
+    companion object {
+        val defaultEntries: List<DashboardCards>
+            get() = listOf(
+                ArrOverview, SeerrOverview, ProwlarrOverview, ActivityQueue,
+                RecentlyAdded, OnToday, UpcomingReleases, Network, InstanceDashboard
+            )
+    }
 }
