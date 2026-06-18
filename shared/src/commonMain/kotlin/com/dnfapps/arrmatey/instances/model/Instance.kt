@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
@@ -178,6 +179,7 @@ enum class InstanceType(
         supportsActivityQueue = true,
         apiBase = "api/v1",
         testEndpoint = "system/info",
+        getApiKeyEndpoint = "settings#general",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
@@ -216,6 +218,22 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = false,
         associatedColor = ArrOrange
+    ),
+    Bazarr(
+        resource = MR.strings.bazarr_description,
+        github = "https://github.com/morpheus65535/bazarr",
+        website = "https://www.bazarr.media/",
+        icon = MR.images.bazarr,
+        tabIcon = MR.images.bazarr_tab,
+        defaultPort = 6767,
+        supportsActivityQueue = false,
+        apiBase = "api",
+        testEndpoint = "system/status",
+        getApiKeyEndpoint = "settings/general",
+        includeTopLevelAutomaticSearchOption = true,
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = false,
+        associatedColor = ArrGrey
     );
 
     companion object {

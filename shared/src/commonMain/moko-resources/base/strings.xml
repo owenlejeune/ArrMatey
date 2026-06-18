@@ -340,6 +340,7 @@
         • A Qt-based Windows-compatible GUI application
         • A headless daemon for servers and routers
         • A web UI for remote controlling any of the above</string>
+    <string name="bazarr_description">Bazarr is a companion application to Sonarr and Radarr. It manages and downloads subtitles based on your requirements. You define your preferences by TV show or movie and Bazarr takes care of everything for you.</string>
 
     <!-- Movie Statuses -->
     <string name="tba">TBA</string>

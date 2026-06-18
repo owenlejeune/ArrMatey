@@ -80,6 +80,8 @@ class InstanceManager(
 
             InstanceType.Prowlarr -> ProwlarrInstanceRepository(instance, httpClient)
 
+            InstanceType.Bazarr -> BazarrInstanceRepository(instance, httpClient)
+
             InstanceType.Sonarr,
             InstanceType.Radarr,
             InstanceType.Lidarr,
@@ -118,6 +120,13 @@ class InstanceManager(
             .flatMapLatest { instance ->
                 if (instance == null) flowOf(null)
                 else _instanceRepositories.map { repos -> repos[instance.id] as? ProwlarrInstanceRepository }
+            }
+
+    fun getSelectedBazarrRepository(): Flow<BazarrInstanceRepository?> =
+        instanceRepository.observeSelectedInstance(InstanceType.Bazarr)
+            .flatMapLatest { instance ->
+                if (instance == null) flowOf(null)
+                else _instanceRepositories.map { repos -> repos[instance.id] as? BazarrInstanceRepository }
             }
 
     fun getAllRepositories(): List<InstanceScopedRepository> {
