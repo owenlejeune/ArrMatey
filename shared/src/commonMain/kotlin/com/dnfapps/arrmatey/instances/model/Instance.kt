@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
+import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
@@ -29,7 +30,7 @@ data class Instance(
     val type: InstanceType,
     val label: String,
     val url: String,
-    val apiKey: String,
+    val apiKey: EncryptedString,
     val noApiKeyRequired: Boolean = false,
     val enabled: Boolean = true,
     val slowInstance: Boolean = false,

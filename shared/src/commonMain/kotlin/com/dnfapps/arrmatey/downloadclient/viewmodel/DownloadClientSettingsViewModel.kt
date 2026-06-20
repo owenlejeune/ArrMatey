@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.downloadclient.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
@@ -56,9 +57,9 @@ class DownloadClientSettingsViewModel(
                             label = client.label,
                             selectedType = client.type,
                             url = client.url,
-                            username = client.username,
-                            password = client.password,
-                            apiKey = client.apiKey,
+                            username = client.username.value,
+                            password = client.password.value,
+                            apiKey = client.apiKey.value,
                             noApiKeyRequired = client.noApiKeyRequired,
                             headers = client.headers,
                             isEditing = true,
@@ -208,9 +209,9 @@ class DownloadClientSettingsViewModel(
             label = uiState.value.label.takeUnless { it.isEmpty() }
                 ?: uiState.value.selectedType.displayName,
             url = uiState.value.url,
-            username = uiState.value.username,
-            password = uiState.value.password,
-            apiKey = uiState.value.apiKey,
+            username = EncryptedString(uiState.value.username),
+            password = EncryptedString(uiState.value.password),
+            apiKey = EncryptedString(uiState.value.apiKey),
             noApiKeyRequired = uiState.value.noApiKeyRequired,
             headers = uiState.value.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
             selected = downloadClient.value?.selected ?: false,

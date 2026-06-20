@@ -23,6 +23,9 @@ interface InstanceDao {
     @Update
     suspend fun update(instance: Instance): Int
 
+    @Update
+    suspend fun updateAll(instances: List<Instance>)
+
     @Query("SELECT * FROM instances")
     fun observeAllInstances(): Flow<List<Instance>>
 

@@ -22,6 +22,9 @@ interface DownloadClientDao {
     @Update
     suspend fun update(downloadClient: DownloadClient): Int
 
+    @Update
+    suspend fun updateAll(downloadClients: List<DownloadClient>)
+
     @Query("SELECT * FROM download_clients")
     fun observeAllDownloadClients(): Flow<List<DownloadClient>>
 

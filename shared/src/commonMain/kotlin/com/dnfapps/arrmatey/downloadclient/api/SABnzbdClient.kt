@@ -23,7 +23,7 @@ class SABnzbdClient(
     override suspend fun testConnection(): NetworkResult<Unit> {
         return httpClient.safeGet<SABnzbdQueueResponse>("api") {
             parameter("mode", "queue")
-            parameter("apikey", downloadClient.apiKey)
+            parameter("apikey", downloadClient.apiKey.value)
             parameter("output", "json")
         }.map { }
     }
@@ -31,7 +31,7 @@ class SABnzbdClient(
     override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> {
         val queueResult = httpClient.safeGet<SABnzbdQueueResponse>("api") {
             parameter("mode", "queue")
-            parameter("apikey", downloadClient.apiKey)
+            parameter("apikey", downloadClient.apiKey.value)
             parameter("output", "json")
         }
 
@@ -74,7 +74,7 @@ class SABnzbdClient(
         return httpClient.safePost<SABnzbdStatusResponse>("api") {
             parameter("mode", "pause")
             parameter("value", id)
-            parameter("apikey", downloadClient.apiKey)
+            parameter("apikey", downloadClient.apiKey.value)
             parameter("output", "json")
         }.map { }
     }
@@ -83,7 +83,7 @@ class SABnzbdClient(
         return httpClient.safePost<SABnzbdStatusResponse>("api") {
             parameter("mode", "resume")
             parameter("value", id)
-            parameter("apikey", downloadClient.apiKey)
+            parameter("apikey", downloadClient.apiKey.value)
             parameter("output", "json")
         }.map { }
     }
@@ -94,7 +94,7 @@ class SABnzbdClient(
             parameter("name", "delete")
             parameter("value", id)
             parameter("del_files", if (deleteFiles) "1" else "0")
-            parameter("apikey", downloadClient.apiKey)
+            parameter("apikey", downloadClient.apiKey.value)
             parameter("output", "json")
         }.map { Unit }
     }
@@ -102,7 +102,7 @@ class SABnzbdClient(
     override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> {
         val queueResult = httpClient.safeGet<SABnzbdQueueResponse>("api") {
             parameter("mode", "queue")
-            parameter("apikey", downloadClient.apiKey)
+            parameter("apikey", downloadClient.apiKey.value)
             parameter("output", "json")
         }
 
@@ -125,7 +125,7 @@ class SABnzbdClient(
     suspend fun getHistory(): NetworkResult<SABnzbdHistoryResponse> {
         return httpClient.safeGet("api") {
             parameter("mode", "history")
-            parameter("apikey", downloadClient.apiKey)
+            parameter("apikey", downloadClient.apiKey.value)
             parameter("output", "json")
         }
     }

@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.downloadclient.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 
@@ -18,9 +19,9 @@ data class DownloadClient(
     val type: DownloadClientType,
     val label: String,
     val url: String,
-    val username: String = "",
-    val password: String = "",
-    val apiKey: String = "",
+    val username: EncryptedString = EncryptedString(""),
+    val password: EncryptedString = EncryptedString(""),
+    val apiKey: EncryptedString = EncryptedString(""),
     val noApiKeyRequired: Boolean = false,
     val selected: Boolean = false,
     val headers: List<InstanceHeader> = emptyList(),

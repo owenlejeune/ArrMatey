@@ -24,12 +24,12 @@ class ArrImageLoader(
 
         val newRequest = if (instance != null && !url.contains("apikey=")) {
             val separator = if (url.contains("?")) "&" else "?"
-            val authenticatedUrl = "$url${separator}apikey=${instance.apiKey}"
+            val authenticatedUrl = "$url${separator}apikey=${instance.apiKey.value}"
 
             request.newBuilder()
                 .data(authenticatedUrl)
                 .httpHeaders(NetworkHeaders.Builder()
-                    .set("X-Api-Key", instance.apiKey)
+                    .set("X-Api-Key", instance.apiKey.value)
                     .set("Accept", "image/*")
                     .build())
                 .build()

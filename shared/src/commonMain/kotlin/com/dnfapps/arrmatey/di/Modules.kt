@@ -64,6 +64,7 @@ import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.database.ArrMateyDatabase
+import com.dnfapps.arrmatey.database.CredentialMigrationUseCase
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.database.getRoomDatabase
 import com.dnfapps.arrmatey.datastore.DataStoreFactory
@@ -130,9 +131,11 @@ import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
+import com.dnfapps.arrmatey.utils.EncryptionManager
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.NetworkConnectivityObserverFactory
 import com.dnfapps.arrmatey.utils.NetworkConnectivityRepository
+import com.dnfapps.arrmatey.utils.SimpleEncryptionManager
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import com.dnfapps.arrmatey.webpage.usecase.AddCustomWebpageUseCase
 import com.dnfapps.arrmatey.webpage.usecase.DeleteCustomWebpageUseCase
@@ -197,7 +200,7 @@ val preferencesModule = module {
 val repositoryModule = module {
     single { InstanceRepository(get()) }
     single { InstancePreferenceStoreRepository(get()) }
-    single { InstanceManager(get(), get(), get()) }
+    single { InstanceManager(get(), get(), get(), get()) }
 
     single { DownloadClientRepository(get()) }
     single { DownloadClientManager(get(), get()) }
@@ -299,6 +302,7 @@ val useCaseModule = module {
     factory { GetAudiobookFilesUseCase(get()) }
     factory { GetAudiobookPreviewPathUseCase(get()) }
     factory { GetAudiobookMetadataUseCase() }
+    factory { CredentialMigrationUseCase(get(), get(), get()) }
 }
 
 val viewModelModule = module {

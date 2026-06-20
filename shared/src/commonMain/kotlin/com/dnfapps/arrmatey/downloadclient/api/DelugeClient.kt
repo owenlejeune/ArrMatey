@@ -164,7 +164,7 @@ class DelugeClient(
         if (authenticated) return NetworkResult.Success(Unit)
 
         // Deluge requires an empty password string if no password is set
-        val password = downloadClient.password.ifBlank { "" }
+        val password = downloadClient.password.value.ifBlank { "" }
 
         val loginResult = callDeluge<Boolean>(
             method = "auth.login",

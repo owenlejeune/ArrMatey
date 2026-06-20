@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -45,7 +46,7 @@ class EditInstanceViewModel(
                 _uiState.update {
                     it.copy(
                         apiEndpoint = instance.url,
-                        apiKey = instance.apiKey,
+                        apiKey = instance.apiKey.value,
                         noApiKeyRequired = instance.noApiKeyRequired,
                         isSlowInstance = instance.slowInstance,
                         customTimeout = instance.customTimeout,
@@ -205,7 +206,7 @@ class EditInstanceViewModel(
         val updated = originalInstance.copy(
             label = s.instanceLabel,
             url = s.apiEndpoint,
-            apiKey = s.apiKey,
+            apiKey = EncryptedString(s.apiKey),
             noApiKeyRequired = s.noApiKeyRequired,
             slowInstance = s.isSlowInstance,
             customTimeout = if (s.isSlowInstance) s.customTimeout else null,

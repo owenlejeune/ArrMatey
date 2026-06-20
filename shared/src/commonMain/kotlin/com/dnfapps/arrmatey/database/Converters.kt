@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.arr.api.model.SeriesAddOptions
 import com.dnfapps.arrmatey.arr.api.model.SeriesRatings
 import com.dnfapps.arrmatey.arr.api.model.SeriesStatistics
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
+import com.dnfapps.arrmatey.utils.EncryptionManager
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -21,6 +22,17 @@ import kotlin.time.Instant
 class Converters: KoinComponent {
 
     private val json: Json by inject()
+    private val encryptionManager: EncryptionManager by inject()
+
+    @TypeConverter
+    fun storeEncryptedString(encryptedString: EncryptedString): String {
+        return encryptionManager.encrypt(encryptedString.value)
+    }
+
+    @TypeConverter
+    fun retrieveEncryptedString(value: String): EncryptedString {
+        return EncryptedString(encryptionManager.decrypt(value))
+    }
 
     @TypeConverter
     fun storeLanguage(language: Language): String {

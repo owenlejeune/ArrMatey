@@ -73,7 +73,7 @@ fun createInstanceClient(
 
             instance?.let { instance ->
                 if (!instance.noApiKeyRequired) {
-                    header(HEADER_X_API_KEY, instance.apiKey)
+                    header(HEADER_X_API_KEY, instance.apiKey.value)
                 }
                 instance.headers.forEach { header ->
                     val shouldSend = when (header.restrictionType) {
@@ -129,8 +129,8 @@ class HttpClientFactory(private val json: Json, private val logger: Logger) {
                     url.user = null
                     url.password = null
                 }
-                if (!downloadClient.noApiKeyRequired && downloadClient.apiKey.isNotEmpty()) {
-                    header(HEADER_X_API_KEY, downloadClient.apiKey)
+                if (!downloadClient.noApiKeyRequired && downloadClient.apiKey.value.isNotEmpty()) {
+                    header(HEADER_X_API_KEY, downloadClient.apiKey.value)
                 }
                 downloadClient.headers.forEach { header ->
                     val shouldSend = when (header.restrictionType) {

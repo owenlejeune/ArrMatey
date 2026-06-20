@@ -178,7 +178,7 @@ class TransmissionClient(
         return httpClient.safeCall {
             val firstResponse = post("transmission/rpc") {
                 contentType(ContentType.Application.Json)
-                basicAuth(downloadClient.username, downloadClient.password)
+                basicAuth(downloadClient.username.value, downloadClient.password.value)
                 if (sessionId.isNotEmpty()) {
                     header(HEADER_SESSION_ID, sessionId)
                 }
@@ -189,7 +189,7 @@ class TransmissionClient(
                 sessionId = firstResponse.headers[HEADER_SESSION_ID].orEmpty()
                 post("transmission/rpc") {
                     contentType(ContentType.Application.Json)
-                    basicAuth(downloadClient.username, downloadClient.password)
+                    basicAuth(downloadClient.username.value, downloadClient.password.value)
                     if (sessionId.isNotEmpty()) {
                         header(HEADER_SESSION_ID, sessionId)
                     }

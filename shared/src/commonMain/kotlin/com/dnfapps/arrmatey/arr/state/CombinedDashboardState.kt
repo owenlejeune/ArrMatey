@@ -20,6 +20,7 @@ import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
 import com.dnfapps.arrmatey.arr.api.model.Revision
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
+import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
@@ -58,7 +59,7 @@ sealed interface CombinedDashboardState {
                     type = type,
                     label = type.name,
                     url = "http://localhost:${type.defaultPort}",
-                    apiKey = "mock"
+                    apiKey = EncryptedString("mock")
                 )
             }
 

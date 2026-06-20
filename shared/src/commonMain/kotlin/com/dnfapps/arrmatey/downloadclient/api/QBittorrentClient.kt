@@ -100,8 +100,8 @@ class QBittorrentClient(
                 setBody(
                     FormDataContent(
                         Parameters.build {
-                            append("username", downloadClient.username)
-                            append("password", downloadClient.password)
+                            append("username", downloadClient.username.value)
+                            append("password", downloadClient.password.value)
                         }
                     )
                 )

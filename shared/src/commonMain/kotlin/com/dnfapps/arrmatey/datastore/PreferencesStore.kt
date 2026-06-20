@@ -66,6 +66,7 @@ class PreferencesStore(
     private val downloadClientSortOrderKey = stringPreferencesKey("downloadClientSortOrder")
     private val dashboardCardsOrderKey = stringPreferencesKey("dashboardCardsOrderKey")
     private val dashboardFirstLaunchKey = booleanPreferencesKey("dashboardFirstLaunchKey")
+    private val credentialsMigratedKey = booleanPreferencesKey("credentialsMigrated")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> sonarrInfoCardKey
@@ -410,6 +411,17 @@ class PreferencesStore(
         scope.launch {
             dataStore.edit {
                 it[dashboardFirstLaunchKey] = false
+            }
+        }
+    }
+
+    val credentialsMigrated: Flow<Boolean> = dataStore.data
+        .map { it[credentialsMigratedKey] ?: false }
+
+    fun markCredentialsMigrated() {
+        scope.launch {
+            dataStore.edit {
+                it[credentialsMigratedKey] = true
             }
         }
     }

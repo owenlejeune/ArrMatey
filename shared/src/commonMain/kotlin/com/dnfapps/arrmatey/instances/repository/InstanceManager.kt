@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
+import com.dnfapps.arrmatey.database.CredentialMigrationUseCase
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 class InstanceManager(
     private val instanceRepository: InstanceRepository,
     private val httpClientFactory: HttpClientFactory,
+    private val credentialMigrationUseCase: CredentialMigrationUseCase,
     private val logger: Logger
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -31,6 +33,9 @@ class InstanceManager(
     val instanceRepositories: StateFlow<Map<Long, InstanceScopedRepository>> = _instanceRepositories
 
     init {
+        scope.launch {
+            credentialMigrationUseCase()
+        }
         observeInstances()
     }
 

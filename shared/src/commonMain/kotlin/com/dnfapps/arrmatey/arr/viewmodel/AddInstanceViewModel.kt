@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.instances.state.AddInstanceUiState
 import com.dnfapps.arrmatey.instances.usecase.CreateInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.DismissInfoCardUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestNewInstanceConnectionUseCase
+import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -173,7 +174,7 @@ class AddInstanceViewModel(
             type = type,
             label = s.instanceLabel,
             url = s.apiEndpoint.trimEnd('/'),
-            apiKey = s.apiKey,
+            apiKey = EncryptedString(s.apiKey),
             noApiKeyRequired = s.noApiKeyRequired,
             slowInstance = s.isSlowInstance,
             customTimeout = if (s.isSlowInstance) s.customTimeout else null,
