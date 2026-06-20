@@ -1,6 +1,9 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,12 +18,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
@@ -53,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
+import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.isDebug
@@ -74,6 +78,8 @@ import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.settings.AboutCard
 import com.dnfapps.arrmatey.ui.icons.Hard_drive
+import com.dnfapps.arrmatey.ui.screens.settings.ExportDialog
+import com.dnfapps.arrmatey.ui.screens.settings.ImportDialog
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
@@ -90,11 +96,13 @@ import org.koin.compose.koinInject
 @Composable
 fun SettingsScreen(
     viewModel: MoreScreenViewModel = koinInject(),
+    backupViewModel: BackupViewModel = koinInject(),
     moko: MokoStrings = koinInject()
 ) {
     val navManager = navigationManager
     val settingsNav = settingsNavigator
     val context = LocalContext.current
+
     val allInstances by viewModel.instances.collectAsStateWithLifecycle()
     val allDownloadClients by viewModel.downloadClients.collectAsStateWithLifecycle()
     val allCustomWebPages by viewModel.customWebpages.collectAsStateWithLifecycle()
@@ -103,6 +111,39 @@ fun SettingsScreen(
 
     var showLibrariesSheet by remember { mutableStateOf(false) }
     var confirmShareLastLog by remember { mutableStateOf(false) }
+
+    var showExportDialog by remember { mutableStateOf(false) }
+    var showImportDialog by remember { mutableStateOf(false) }
+    var pendingImportData by remember { mutableStateOf<String?>(null) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+        onResult = { uri ->
+            uri?.let {
+                backupViewModel.exportData { encryptedData ->
+                    context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                        outputStream.write(encryptedData.toByteArray())
+                    }
+                    Toast.makeText(context, moko.getString(MR.strings.export_ready), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    )
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+        onResult = { uri ->
+            uri?.let {
+                val encryptedData = context.contentResolver.openInputStream(it)?.use { inputStream ->
+                    inputStream.readBytes().decodeToString()
+                }
+                if (encryptedData != null) {
+                    pendingImportData = encryptedData
+                    showImportDialog = true
+                }
+            }
+        }
+    )
 
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
@@ -288,17 +329,19 @@ fun SettingsScreen(
             )
 
             SettingsGroup(
-                title = "Backup & Restore",
+                title = mokoString(MR.strings.backup_restore),
                 items = listOf(
                     SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Backup),
-                        title = "Export data",
-                        onClick = {}
+                        icon = IconSource.Vector(Icons.Default.Upload),
+                        title = mokoString(MR.strings.backup),
+                        subtitle = mokoString(MR.strings.backup_description),
+                        onClick = { showExportDialog = true }
                     ),
                     SettingItem(
                         icon = IconSource.Vector(Icons.Default.Download),
-                        title = "Import data",
-                        onClick = {}
+                        title = mokoString(MR.strings.restore),
+                        subtitle = mokoString(MR.strings.restore_description),
+                        onClick = { importLauncher.launch(arrayOf("application/json")) }
                     )
                 )
             )
@@ -401,6 +444,50 @@ fun SettingsScreen(
                 title = { Text(mokoString(MR.strings.share_crash_log)) },
                 text = {
                     Text(mokoString(MR.strings.share_crash_log_message))
+                }
+            )
+        }
+
+        if (showExportDialog) {
+            val exportState by backupViewModel.exportUiState.collectAsStateWithLifecycle()
+
+            ExportDialog(
+                exportState = exportState,
+                onDismiss = { showImportDialog = false },
+                onConfirm = {
+                    showExportDialog = false
+                    exportLauncher.launch("ArrMatey_Backup.json")
+                },
+                onPasswordChanged = { backupViewModel.setExportPassword(it) },
+                onToggleIncludePreferences = { backupViewModel.toggleIncludePreferences() },
+                onToggleInstanceSelection = { backupViewModel.toggleInstanceSelection(it) },
+                onToggleDownloadClientSelection = { backupViewModel.toggleDownloadClientSelection(it) }
+            )
+        }
+
+        if (showImportDialog) {
+            val importState by backupViewModel.importUiState.collectAsStateWithLifecycle()
+
+            ImportDialog(
+                importState = importState,
+                onDismiss = {
+                    showImportDialog = false
+                    pendingImportData = null
+                },
+                onPasswordChanged = { backupViewModel.setImportPassword(it) },
+                onToggleInstanceSelection = { backupViewModel.toggleImportInstanceSelection(it) },
+                onToggleDownloadClientSelection = { backupViewModel.toggleImportDownloadClientSelection(it) },
+                onConfirmDecrypt = {
+                    pendingImportData?.let { data ->
+                        backupViewModel.prepareImport(data)
+                    }
+                },
+                onConfirmImport = {
+                    backupViewModel.executeImport {
+                        showImportDialog = false
+                        pendingImportData = null
+                        Toast.makeText(context, moko.getString(MR.strings.import_complete), Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
         }

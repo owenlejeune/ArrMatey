@@ -665,14 +665,18 @@
 
     <!-- Release Notes -->
     <string name="v1_title">Announcements</string>
-    <string name="v2_title">We\'re out of alpha!</string>
+    <string name="v2_title">We're out of alpha!</string>
     <string name="v3_title">New in 0.3.0</string>
-    <string name="v4_title">It\'s a Big One!</string>
+    <string name="v4_title">It's a Big One!</string>
     <string name="v5_title">v0.4.2</string>
     <string name="v6_title">Dashboard, Shortcuts, and Audiobooks</string>
 
     <!-- Backup & Restore -->
     <string name="backup_restore">Backup &amp; Restore</string>
+    <string name="backup">Backup</string>
+    <string name="backup_description">Export data for backup or sharing with another device</string>
+    <string name="restore">Restore</string>
+    <string name="restore_description">Restore data from a backup file</string>
     <string name="export_data">Export Data</string>
     <string name="import_data">Import Data</string>
     <string name="export_password_prompt">Enter a password to encrypt your backup. You will need this password to import the data on another device.</string>
