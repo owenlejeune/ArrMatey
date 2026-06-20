@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.StringResource
+import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "instances",
@@ -76,6 +77,7 @@ data class Instance(
     }
 }
 
+@Serializable
 enum class InstanceType(
     val resource: StringResource,
     val icon: ImageResource,

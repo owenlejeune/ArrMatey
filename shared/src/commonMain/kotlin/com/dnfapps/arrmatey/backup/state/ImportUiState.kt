@@ -1,0 +1,12 @@
+package com.dnfapps.arrmatey.backup.state
+
+import com.dnfapps.arrmatey.backup.model.BackupExport
+
+data class ImportUiState(
+    val password: String = "",
+    val decryptedBackup: BackupExport? = null,
+    val selectedInstanceIndices: Set<Int> = emptySet(),
+    val selectedDownloadClientIndices: Set<Int> = emptySet(),
+    val isImporting: Boolean = false,
+    val error: String? = null
+)

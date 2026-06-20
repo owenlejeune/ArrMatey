@@ -4,19 +4,20 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class GridDensity(
     val label: StringResource,
     val minSize: Dp,
     val iosSize: Double
 ) {
-//    Compact(MR.strings.grid_density_compact, 60.dp),
     Small(MR.strings.grid_density_small, 90.dp, 60.toDouble()),
     Normal(MR.strings.grid_density_normal, 120.dp, 90.toDouble()),
-    Large(MR.strings.grid_density_large, 150.dp, 120.toDouble()),
-//    XLarge(MR.strings.grid_density_xlarge, 180.dp)
+    Large(MR.strings.grid_density_large, 150.dp, 120.toDouble())
 }
 
+@Serializable
 enum class GridSpacing(
     val label: StringResource,
     val spacing: Dp,
@@ -28,6 +29,7 @@ enum class GridSpacing(
     Large(MR.strings.grid_spacing_large, 12.dp, 24.toDouble()),
 }
 
+@Serializable
 enum class PosterElevation(
     val label: StringResource,
     val elevation: Dp
@@ -38,6 +40,7 @@ enum class PosterElevation(
     High(MR.strings.poster_elevation_high, 18.dp)
 }
 
+@Serializable
 enum class PosterRadius(
     val label: StringResource,
     val radius: Dp
@@ -48,6 +51,7 @@ enum class PosterRadius(
     Large(MR.strings.poster_radius_large, 12.dp)
 }
 
+@Serializable
 enum class Blur(
     val label: StringResource,
     val radius: Int,

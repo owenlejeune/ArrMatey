@@ -15,7 +15,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
@@ -281,6 +283,22 @@ fun SettingsScreen(
                             )
                         },
                         onClick = { viewModel.toggleInstanceSwitcher() }
+                    )
+                )
+            )
+
+            SettingsGroup(
+                title = "Backup & Restore",
+                items = listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Backup),
+                        title = "Export data",
+                        onClick = {}
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Download),
+                        title = "Import data",
+                        onClick = {}
                     )
                 )
             )

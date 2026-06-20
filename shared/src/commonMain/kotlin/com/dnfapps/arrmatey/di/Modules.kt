@@ -60,6 +60,11 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
+import com.dnfapps.arrmatey.backup.AesTransportEncryptor
+import com.dnfapps.arrmatey.backup.TransportEncryptor
+import com.dnfapps.arrmatey.backup.usecase.ExportDataUseCase
+import com.dnfapps.arrmatey.backup.usecase.ImportDataUseCase
+import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
@@ -131,11 +136,9 @@ import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
-import com.dnfapps.arrmatey.utils.EncryptionManager
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.NetworkConnectivityObserverFactory
 import com.dnfapps.arrmatey.utils.NetworkConnectivityRepository
-import com.dnfapps.arrmatey.utils.SimpleEncryptionManager
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import com.dnfapps.arrmatey.webpage.usecase.AddCustomWebpageUseCase
 import com.dnfapps.arrmatey.webpage.usecase.DeleteCustomWebpageUseCase
@@ -187,6 +190,8 @@ val networkModule = module {
 
     single { HttpClientFactory(get(), get()) }
     single { GenericClient(get()) }
+
+    single<TransportEncryptor> { AesTransportEncryptor() }
 
     single { NetworkConnectivityObserverFactory().create() }
     single { NetworkConnectivityRepository() }
@@ -303,6 +308,8 @@ val useCaseModule = module {
     factory { GetAudiobookPreviewPathUseCase(get()) }
     factory { GetAudiobookMetadataUseCase() }
     factory { CredentialMigrationUseCase(get(), get(), get()) }
+    factory { ExportDataUseCase(get(), get(), get(), get(), get()) }
+    factory { ImportDataUseCase(get(), get(), get(), get(), get()) }
 }
 
 val viewModelModule = module {
@@ -369,6 +376,7 @@ val viewModelModule = module {
         AudiobookFilesViewModel(audiobookId, get())
     }
     factory { CombinedDashboardViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { BackupViewModel(get(), get(), get(), get()) }
 }
 
 val resourcesModule = module {

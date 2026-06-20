@@ -10,7 +10,9 @@ import com.dnfapps.arrmatey.utils.GridDensity
 import com.dnfapps.arrmatey.utils.GridSpacing
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class InstancePreferences(
     val sortBy: SortBy = SortBy.Title,
     val sortOrder: SortOrder = SortOrder.Asc,

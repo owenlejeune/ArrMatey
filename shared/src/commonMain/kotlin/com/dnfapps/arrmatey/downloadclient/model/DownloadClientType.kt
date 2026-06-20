@@ -3,7 +3,9 @@ package com.dnfapps.arrmatey.downloadclient.model
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.StringResource
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class DownloadClientType(
     val displayName: String,
     val description: StringResource,

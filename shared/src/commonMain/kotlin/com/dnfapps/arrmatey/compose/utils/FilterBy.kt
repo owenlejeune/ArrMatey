@@ -3,7 +3,9 @@ package com.dnfapps.arrmatey.compose.utils
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class FilterBy(
     val resource: StringResource
 ) {
