@@ -9,4 +9,6 @@ data class ImportUiState(
     val selectedDownloadClientIndices: Set<Int> = emptySet(),
     val isImporting: Boolean = false,
     val error: String? = null
-)
+) {
+    constructor(): this("") // empty ios constructor
+}

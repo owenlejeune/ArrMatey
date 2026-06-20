@@ -16,27 +16,32 @@ actual class AesTransportEncryptor : TransportEncryptor {
     @OptIn(BetaInteropApi::class)
     override fun encrypt(data: String, password: String): String = memScoped {
         val salt = ByteArray(saltLength)
-        SecRandomCopyBytes(kSecRandomDefault, saltLength.toULong(), salt.toCValues().ptr)
+        val saltPtr = allocArray<UByteVar>(saltLength)
+        if (SecRandomCopyBytes(kSecRandomDefault, saltLength.toULong(), saltPtr) != 0) return ""
+        for (i in 0 until saltLength) salt[i] = saltPtr[i].toByte()
         
         val derivedKey = deriveKey(password, salt) ?: return ""
         
         val iv = ByteArray(ivLength)
-        SecRandomCopyBytes(kSecRandomDefault, ivLength.toULong(), iv.toCValues().ptr)
+        val ivPtr = allocArray<UByteVar>(ivLength)
+        if (SecRandomCopyBytes(kSecRandomDefault, ivLength.toULong(), ivPtr) != 0) return ""
+        for (i in 0 until ivLength) iv[i] = ivPtr[i].toByte()
         
         val dataBytes = data.encodeToByteArray()
         val encryptedBytes = crypt(kCCEncrypt, dataBytes, derivedKey, iv) ?: return ""
         
-        val combined = NSMutableData.create(length = (saltLength + ivLength + encryptedBytes.size).toULong())!!
-        combined.appendBytes(salt.toCValues().ptr, saltLength.toULong())
-        combined.appendBytes(iv.toCValues().ptr, ivLength.toULong())
-        combined.appendBytes(encryptedBytes.toCValues().ptr, encryptedBytes.size.toULong())
+        val combined = NSMutableData.create(capacity = (saltLength + ivLength + encryptedBytes.size).toULong())!!
+        
+        salt.usePinned { combined.appendBytes(it.addressOf(0), saltLength.toULong()) }
+        iv.usePinned { combined.appendBytes(it.addressOf(0), ivLength.toULong()) }
+        encryptedBytes.usePinned { combined.appendBytes(it.addressOf(0), encryptedBytes.size.toULong()) }
         
         combined.base64EncodedStringWithOptions(0u)
     }
 
     @OptIn(BetaInteropApi::class)
     override fun decrypt(encryptedData: String, password: String): String = memScoped {
-        val data = NSData.create(base64EncodedString = encryptedData, options = 0u) ?: return ""
+        val data = NSData.create(base64EncodedString = encryptedData, options = 1u) ?: return "" // 1u = NSDataBase64DecodingIgnoreUnknownCharacters
         if (data.length < (saltLength + ivLength).toULong()) return ""
         
         val salt = data.subdataWithRange(NSMakeRange(0u, saltLength.toULong())).toByteArray()
@@ -51,53 +56,67 @@ actual class AesTransportEncryptor : TransportEncryptor {
 
     @OptIn(BetaInteropApi::class)
     private fun deriveKey(password: String, salt: ByteArray): ByteArray? = memScoped {
-        val derivedKey = ByteArray(keyLength.toInt())
-        val result = CCKeyDerivationPBKDF(
-            kCCPBKDF2,
-            password, password.length.toULong(),
-            salt.toCValues().ptr.reinterpret<UByteVar>(), salt.size.toULong(),
-            kCCPRFHmacAlgSHA256,
-            iterations,
-            derivedKey.toCValues().ptr.reinterpret<UByteVar>(), keyLength.toULong()
-        )
-        if (result == kCCSuccess) derivedKey else null
+        val derivedKeyPtr = allocArray<UByteVar>(keyLength.toInt())
+        val passwordBytes = password.encodeToByteArray()
+        
+        val result = salt.usePinned { saltPinned ->
+            CCKeyDerivationPBKDF(
+                kCCPBKDF2,
+                password,
+                passwordBytes.size.toULong(),
+                saltPinned.addressOf(0).reinterpret<UByteVar>(),
+                salt.size.toULong(),
+                kCCPRFHmacAlgSHA256,
+                iterations,
+                derivedKeyPtr,
+                keyLength.toULong()
+            )
+        }
+        
+        if (result == kCCSuccess) {
+            derivedKeyPtr.readBytes(keyLength.toInt())
+        } else null
     }
 
     @OptIn(BetaInteropApi::class)
     private fun crypt(op: CCOperation, data: ByteArray, key: ByteArray, iv: ByteArray): ByteArray? = memScoped {
         val dataOutLength = data.size + kCCBlockSizeAES128.toInt()
-        val dataOut = ByteArray(dataOutLength)
+        val dataOutPtr = allocArray<ByteVar>(dataOutLength)
         val movedBytes = alloc<ULongVar>()
         
-        val status = CCCrypt(
-            op,
-            kCCAlgorithmAES,
-            kCCOptionPKCS7Padding,
-            key.toCValues().ptr,
-            keyLength.toULong(),
-            iv.toCValues().ptr,
-            data.toCValues().ptr,
-            data.size.toULong(),
-            dataOut.toCValues().ptr,
-            dataOutLength.toULong(),
-            movedBytes.ptr
-        )
+        val status = key.usePinned { keyPinned ->
+            iv.usePinned { ivPinned ->
+                data.usePinned { dataPinned ->
+                    CCCrypt(
+                        op,
+                        kCCAlgorithmAES,
+                        kCCOptionPKCS7Padding,
+                        keyPinned.addressOf(0),
+                        keyLength.toULong(),
+                        ivPinned.addressOf(0),
+                        dataPinned.addressOf(0),
+                        data.size.toULong(),
+                        dataOutPtr,
+                        dataOutLength.toULong(),
+                        movedBytes.ptr
+                    )
+                }
+            }
+        }
         
         if (status == kCCSuccess) {
-            dataOut.sliceArray(0 until movedBytes.value.toInt())
+            dataOutPtr.readBytes(movedBytes.value.toInt())
         } else {
             null
         }
     }
 
-    private fun NSData.toByteArray(): ByteArray {
-        val length = this.length.toInt()
-        val bytes = ByteArray(length)
-        if (length > 0) {
-            bytes.usePinned { pinned ->
-                memcpy(pinned.addressOf(0), this.bytes, this.length.toULong())
+    private fun NSData.toByteArray(): ByteArray = ByteArray(this.length.toInt()).apply {
+        if (isNotEmpty()) {
+            val src = this@toByteArray.bytes
+            this.usePinned { pinned ->
+                memcpy(pinned.addressOf(0), src, this@toByteArray.length)
             }
         }
-        return bytes
     }
 }

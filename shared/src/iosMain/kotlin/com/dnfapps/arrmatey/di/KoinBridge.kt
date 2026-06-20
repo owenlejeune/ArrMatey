@@ -24,6 +24,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
+import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.datastore.PreferencesStore
@@ -122,6 +123,9 @@ object KoinBridge: KoinComponent {
         getKoin().get { parametersOf(audiobookId) }
 
     fun getDashboardViewModel(): CombinedDashboardViewModel =
+        getKoin().get()
+
+    fun getBackupViewModel(): BackupViewModel =
         getKoin().get()
 
     fun getGenericClient(): GenericClient =

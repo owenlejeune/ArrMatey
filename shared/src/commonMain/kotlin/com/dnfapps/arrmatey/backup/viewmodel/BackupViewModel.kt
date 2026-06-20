@@ -104,7 +104,7 @@ class BackupViewModel(
                     error = null
                 ) }
             } catch (e: Exception) {
-                _importUiState.update { it.copy(error = "Invalid password or corrupted backup file") }
+                _importUiState.update { it.copy(error = "Invalid password or corrupted backup file\n${e.message}") }
             }
         }
     }

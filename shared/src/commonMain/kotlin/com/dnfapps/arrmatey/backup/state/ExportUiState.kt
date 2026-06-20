@@ -11,4 +11,6 @@ data class ExportUiState(
     val password: String = "",
     val includePreferences: Boolean = true,
     val isExporting: Boolean = false
-)
+) {
+    constructor(): this(emptyList()) // default ios constructor
+}

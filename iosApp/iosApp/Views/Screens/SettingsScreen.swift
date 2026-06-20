@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Shared
+import UniformTypeIdentifiers
 
 struct SettingsScreen: View {
     
@@ -14,9 +15,19 @@ struct SettingsScreen: View {
     @EnvironmentObject private var navigationManager: NavigationManager
     
     @ObservedObject private var viewModel = MoreScreenViewModelS()
+    @StateObject private var backupViewModel = BackupViewModelS()
     
     @State private var showLibrariesSheet: Bool = false
     @State private var showShareLogAlert: Bool = false
+    
+    @State private var showExportSheet: Bool = false
+    @State private var showImportSheet: Bool = false
+    @State private var showFileExporter: Bool = false
+    @State private var showFileImporter: Bool = false
+    @State private var exportData: String = ""
+    @State private var importData: String = ""
+    @State private var showExportSuccess: Bool = false
+    @State private var showImportSuccess: Bool = false
     
     private let crashManager = IOSCrashManager.shared
     
@@ -105,6 +116,48 @@ struct SettingsScreen: View {
                 }
             }
             
+            Section {
+                Button {
+                    showExportSheet = true
+                } label: {
+                    HStack(spacing: 24) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundColor(.themePrimary)
+                            .frame(width: 32, height: 32)
+                        
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(MR.strings().backup.localized())
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.primary)
+                            Text(MR.strings().backup_description.localized())
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
+                Button {
+                    showFileImporter = true
+                } label: {
+                    HStack(spacing: 24) {
+                        Image(systemName: "square.and.arrow.down")
+                            .foregroundColor(.themePrimary)
+                            .frame(width: 32, height: 32)
+                        
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(MR.strings().import_data.localized())
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.primary)
+                            Text(MR.strings().restore_description.localized())
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            } header: {
+                Text(MR.strings().backup_restore.localized())
+            }
+            
             AboutCard(
                 onFeatureRequestClick: { if let url = URL(string: MR.strings().feature_request_link.localized()) {
                     openURL(url)
@@ -141,6 +194,41 @@ struct SettingsScreen: View {
         .sheet(isPresented: $showLibrariesSheet) {
             LibrariesSheet()
         }
+        .sheet(isPresented: $showExportSheet) {
+            ExportSheet(viewModel: backupViewModel, isPresented: $showExportSheet) { data in
+                self.exportData = data
+                self.showFileExporter = true
+            }
+        }
+        .sheet(isPresented: $showImportSheet) {
+            ImportSheet(viewModel: backupViewModel, isPresented: $showImportSheet, encryptedData: importData) {
+                self.importData = ""
+                self.showImportSuccess = true
+            }
+        }
+        .fileExporter(isPresented: $showFileExporter, document: BackupFile(data: exportData), contentType: .json, defaultFilename: "ArrMatey_Backup.json") { result in
+            switch result {
+            case .success:
+                self.exportData = ""
+                self.showExportSuccess = true
+            case .failure(let error):
+                print("Export failed: \(error.localizedDescription)")
+            }
+        }
+        .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.json]) { result in
+            switch result {
+            case .success(let url):
+                if url.startAccessingSecurityScopedResource() {
+                    defer { url.stopAccessingSecurityScopedResource() }
+                    if let data = try? Data(contentsOf: url), let string = String(data: data, encoding: .utf8) {
+                        self.importData = string
+                        self.showImportSheet = true
+                    }
+                }
+            case .failure(let error):
+                print("Import failed: \(error.localizedDescription)")
+            }
+        }
         .alert(MR.strings().share_crash_log.localized(), isPresented: $showShareLogAlert) {
             Button(MR.strings().yes.localized()) {
                 shareLogs()
@@ -155,6 +243,16 @@ struct SettingsScreen: View {
             }
         } message: {
             Text(MR.strings().share_crash_log_message.localized())
+        }
+        .alert(MR.strings().success.localized(), isPresented: $showExportSuccess) {
+            Button(MR.strings().ok.localized(), role: .cancel) { }
+        } message: {
+            Text(MR.strings().export_ready.localized())
+        }
+        .alert(MR.strings().success.localized(), isPresented: $showImportSuccess) {
+            Button(MR.strings().ok.localized(), role: .cancel) { }
+        } message: {
+            Text(MR.strings().import_complete.localized())
         }
     }
     
