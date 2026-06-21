@@ -29,24 +29,47 @@ struct ExportSheet: View {
                 
                 Section {
                     Toggle(MR.strings().include_preferences.localized(), isOn: Binding(
-                        get: { viewModel.exportState.includePreferences },
+                        get: { viewModel.exportState.includeInstancePreferences },
                         set: { _ in viewModel.toggleIncludePreferences() }
+                    ))
+                    
+                    Toggle(MR.strings().navigation_bar_configuration.localized(), isOn: Binding(
+                        get: { viewModel.exportState.includeTabPreferences },
+                        set: { _ in viewModel.toggleIncludeTabPreferences() }
+                    ))
+                    
+                    Toggle(MR.strings().user_interface.localized(), isOn: Binding(
+                        get: { viewModel.exportState.includeUiPreferences },
+                        set: { _ in viewModel.toggleIncludeUiPreferences() }
                     ))
                 }
                 
                 Section(header: Text(MR.strings().select_items_to_export.localized())) {
-                    ForEach(viewModel.exportState.instances, id: \.id) { instance in
-                        Toggle(instance.label, isOn: Binding(
-                            get: { viewModel.exportState.selectedInstanceIds.contains(instance.id.asKotlinLong) },
-                            set: { _ in viewModel.toggleInstanceSelection(id: instance.id) }
-                        ))
+                    if !viewModel.exportState.instances.isEmpty {
+                        Text(MR.strings().instances.localized())
+                            .font(.caption)
+                            .foregroundColor(.themePrimary)
+                        
+                        ForEach(viewModel.exportState.instances, id: \.id) { instance in
+                            Toggle(instance.label, isOn: Binding(
+                                get: { viewModel.exportState.selectedInstanceIds.contains(instance.id.asKotlinLong) },
+                                set: { _ in viewModel.toggleInstanceSelection(id: instance.id) }
+                            ))
+                        }
                     }
                     
-                    ForEach(viewModel.exportState.downloadClients, id: \.id) { client in
-                        Toggle(client.label, isOn: Binding(
-                            get: { viewModel.exportState.selectedDownloadClientIds.contains(client.id.asKotlinLong) },
-                            set: { _ in viewModel.toggleDownloadClientSelection(id: client.id) }
-                        ))
+                    if !viewModel.exportState.downloadClients.isEmpty {
+                        Text(MR.strings().download_clients.localized())
+                            .font(.caption)
+                            .foregroundColor(.themePrimary)
+                            .padding(.top, 8)
+                        
+                        ForEach(viewModel.exportState.downloadClients, id: \.id) { client in
+                            Toggle(client.label, isOn: Binding(
+                                get: { viewModel.exportState.selectedDownloadClientIds.contains(client.id.asKotlinLong) },
+                                set: { _ in viewModel.toggleDownloadClientSelection(id: client.id) }
+                            ))
+                        }
                     }
                 }
             }
@@ -100,18 +123,52 @@ struct ImportSheet: View {
                 } else {
                     Section(header: Text(MR.strings().select_items_to_import.localized())) {
                         if let backup = viewModel.importState.decryptedBackup {
-                            ForEach(Array(backup.instances.enumerated()), id: \.offset) { index, instance in
-                                Toggle(instance.label, isOn: Binding(
-                                    get: { viewModel.importState.selectedInstanceIndices.contains(Int32(index).asKotlinInt) },
-                                    set: { _ in viewModel.toggleImportInstanceSelection(index: Int32(index)) }
-                                ))
+                            if !backup.instances.isEmpty {
+                                Text(MR.strings().instances.localized())
+                                    .font(.caption)
+                                    .foregroundColor(.themePrimary)
+                                
+                                ForEach(Array(backup.instances.enumerated()), id: \.offset) { index, instance in
+                                    Toggle(instance.label, isOn: Binding(
+                                        get: { viewModel.importState.selectedInstanceIndices.contains(Int32(index).asKotlinInt) },
+                                        set: { _ in viewModel.toggleImportInstanceSelection(index: Int32(index)) }
+                                    ))
+                                }
                             }
                             
-                            ForEach(Array(backup.downloadClients.enumerated()), id: \.offset) { index, client in
-                                Toggle(client.label, isOn: Binding(
-                                    get: { viewModel.importState.selectedDownloadClientIndices.contains(Int32(index).asKotlinInt) },
-                                    set: { _ in viewModel.toggleImportDownloadClientSelection(index: Int32(index)) }
-                                ))
+                            if !backup.downloadClients.isEmpty {
+                                Text(MR.strings().download_clients.localized())
+                                    .font(.caption)
+                                    .foregroundColor(.themePrimary)
+                                    .padding(.top, 8)
+                                
+                                ForEach(Array(backup.downloadClients.enumerated()), id: \.offset) { index, client in
+                                    Toggle(client.label, isOn: Binding(
+                                        get: { viewModel.importState.selectedDownloadClientIndices.contains(Int32(index).asKotlinInt) },
+                                        set: { _ in viewModel.toggleImportDownloadClientSelection(index: Int32(index)) }
+                                    ))
+                                }
+                            }
+                            
+                            if backup.globalPreferences != nil {
+                                Text(MR.strings().backup_restore.localized())
+                                    .font(.caption)
+                                    .foregroundColor(.themePrimary)
+                                    .padding(.top, 8)
+                                
+                                if backup.globalPreferences?.tabPreferences != nil {
+                                    Toggle(MR.strings().navigation_bar_configuration.localized(), isOn: Binding(
+                                        get: { viewModel.importState.importTabPreferences },
+                                        set: { _ in viewModel.toggleImportTabPreferences() }
+                                    ))
+                                }
+                                
+                                if backup.globalPreferences?.useServiceNavLogos != nil || backup.globalPreferences?.hideInstanceSwitcher != nil {
+                                    Toggle(MR.strings().user_interface.localized(), isOn: Binding(
+                                        get: { viewModel.importState.importUiPreferences },
+                                        set: { _ in viewModel.toggleImportUiPreferences() }
+                                    ))
+                                }
                             }
                         }
                     }

@@ -357,6 +357,12 @@ class PreferencesStore(
         }
     }
 
+    fun setUseServiceNavLogos(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[useServiceNavLogosKey] = value }
+        }
+    }
+
     val hideInstanceSwitcher: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[hideInstanceSwitcherKey] ?: false
@@ -368,6 +374,12 @@ class PreferencesStore(
                 val current = preferences[hideInstanceSwitcherKey] ?: false
                 preferences[hideInstanceSwitcherKey] = !current
             }
+        }
+    }
+
+    fun setHideInstanceSwitcher(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[hideInstanceSwitcherKey] = value }
         }
     }
 

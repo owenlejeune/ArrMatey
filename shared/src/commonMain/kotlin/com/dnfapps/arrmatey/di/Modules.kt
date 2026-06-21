@@ -308,8 +308,8 @@ val useCaseModule = module {
     factory { GetAudiobookPreviewPathUseCase(get()) }
     factory { GetAudiobookMetadataUseCase() }
     factory { CredentialMigrationUseCase(get(), get(), get()) }
-    factory { ExportDataUseCase(get(), get(), get(), get(), get()) }
-    factory { ImportDataUseCase(get(), get(), get(), get(), get()) }
+    factory { ExportDataUseCase(get(), get(), get(), get(), get(), get()) }
+    factory { ImportDataUseCase(get(), get(), get(), get(), get(), get()) }
 }
 
 val viewModelModule = module {

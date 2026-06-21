@@ -38,6 +38,14 @@ class BackupViewModelS: ObservableObject {
         viewModel.toggleIncludePreferences()
     }
     
+    func toggleIncludeTabPreferences() {
+        viewModel.toggleIncludeTabPreferences()
+    }
+    
+    func toggleIncludeUiPreferences() {
+        viewModel.toggleIncludeUiPreferences()
+    }
+    
     func exportData(onExportReady: @escaping (String) -> Void) {
         viewModel.exportData(onExportReady: onExportReady)
     }
@@ -56,6 +64,14 @@ class BackupViewModelS: ObservableObject {
     
     func toggleImportDownloadClientSelection(index: Int32) {
         viewModel.toggleImportDownloadClientSelection(index: index)
+    }
+    
+    func toggleImportTabPreferences() {
+        viewModel.toggleImportTabPreferences()
+    }
+    
+    func toggleImportUiPreferences() {
+        viewModel.toggleImportUiPreferences()
     }
     
     func executeImport(onComplete: @escaping () -> Void) {

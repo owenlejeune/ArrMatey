@@ -65,7 +65,15 @@ class BackupViewModel(
     }
 
     fun toggleIncludePreferences() {
-        _exportUiState.update { it.copy(includePreferences = !it.includePreferences) }
+        _exportUiState.update { it.copy(includeInstancePreferences = !it.includeInstancePreferences) }
+    }
+
+    fun toggleIncludeTabPreferences() {
+        _exportUiState.update { it.copy(includeTabPreferences = !it.includeTabPreferences) }
+    }
+
+    fun toggleIncludeUiPreferences() {
+        _exportUiState.update { it.copy(includeUiPreferences = !it.includeUiPreferences) }
     }
 
     fun exportData(onExportReady: (String) -> Unit) {
@@ -78,7 +86,9 @@ class BackupViewModel(
                 password = state.password,
                 selectedInstanceIds = state.selectedInstanceIds,
                 selectedDownloadClientIds = state.selectedDownloadClientIds,
-                includePreferences = state.includePreferences
+                includeInstancePreferences = state.includeInstancePreferences,
+                includeTabPreferences = state.includeTabPreferences,
+                includeUiPreferences = state.includeUiPreferences
             )
             _exportUiState.update { it.copy(isExporting = false) }
             onExportReady(encryptedData)
@@ -125,6 +135,14 @@ class BackupViewModel(
         }
     }
 
+    fun toggleImportTabPreferences() {
+        _importUiState.update { it.copy(importTabPreferences = !it.importTabPreferences) }
+    }
+
+    fun toggleImportUiPreferences() {
+        _importUiState.update { it.copy(importUiPreferences = !it.importUiPreferences) }
+    }
+
     fun executeImport(onComplete: () -> Unit) {
         val state = _importUiState.value
         val backup = state.decryptedBackup ?: return
@@ -134,7 +152,9 @@ class BackupViewModel(
             importDataUseCase.importSelected(
                 backup = backup,
                 selectedInstanceIndices = state.selectedInstanceIndices,
-                selectedDownloadClientIndices = state.selectedDownloadClientIndices
+                selectedDownloadClientIndices = state.selectedDownloadClientIndices,
+                importTabPreferences = state.importTabPreferences,
+                importUiPreferences = state.importUiPreferences
             )
             _importUiState.update { it.copy(isImporting = false) }
             onComplete()

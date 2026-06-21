@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -16,6 +17,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.backup.state.ExportUiState
@@ -28,7 +30,9 @@ fun ExportDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     onPasswordChanged: (String) -> Unit,
-    onToggleIncludePreferences: () -> Unit,
+    onToggleIncludeInstancePreferences: () -> Unit,
+    onToggleIncludeTabPreferences: () -> Unit,
+    onToggleIncludeUiPreferences: () -> Unit,
     onToggleInstanceSelection: (Long) -> Unit,
     onToggleDownloadClientSelection: (Long) -> Unit
 ) {
@@ -51,51 +55,92 @@ fun ExportDialog(
                     singleLine = true
                 )
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Checkbox(
-                        checked = exportState.includePreferences,
-                        onCheckedChange = { onToggleIncludePreferences() }
+                        checked = exportState.includeInstancePreferences,
+                        onCheckedChange = { onToggleIncludeInstancePreferences() }
                     )
                     Text(mokoString(MR.strings.include_preferences))
                 }
 
-                HorizontalDivider()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = exportState.includeTabPreferences,
+                        onCheckedChange = { onToggleIncludeTabPreferences() }
+                    )
+                    Text(mokoString(MR.strings.navigation_bar_configuration))
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = exportState.includeUiPreferences,
+                        onCheckedChange = { onToggleIncludeUiPreferences() }
+                    )
+                    Text(mokoString(MR.strings.user_interface))
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
                 Text(
                     text = mokoString(MR.strings.select_items_to_export),
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
                 )
 
-                exportState.instances.forEach { instance ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Checkbox(
-                            checked = exportState.selectedInstanceIds.contains(instance.id),
-                            onCheckedChange = { onToggleInstanceSelection(instance.id) }
-                        )
-                        Text(text = instance.label)
+                if (exportState.instances.isNotEmpty()) {
+                    Text(
+                        text = mokoString(MR.strings.instances),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    exportState.instances.forEach { instance ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Checkbox(
+                                checked = exportState.selectedInstanceIds.contains(instance.id),
+                                onCheckedChange = { onToggleInstanceSelection(instance.id) }
+                            )
+                            Text(text = instance.label)
+                        }
                     }
                 }
 
-                exportState.downloadClients.forEach { client ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Checkbox(
-                            checked = exportState.selectedDownloadClientIds.contains(client.id),
-                            onCheckedChange = { onToggleDownloadClientSelection(client.id) }
-                        )
-                        Text(text = client.label)
+                if (exportState.downloadClients.isNotEmpty()) {
+                    Text(
+                        text = mokoString(MR.strings.download_clients),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    exportState.downloadClients.forEach { client ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Checkbox(
+                                checked = exportState.selectedDownloadClientIds.contains(client.id),
+                                onCheckedChange = { onToggleDownloadClientSelection(client.id) }
+                            )
+                            Text(text = client.label)
+                        }
                     }
                 }
             }
         },
         confirmButton = {
             TextButton(
-                enabled = exportState.password.isNotBlank() && (exportState.selectedInstanceIds.isNotEmpty() || exportState.selectedDownloadClientIds.isNotEmpty()),
+                enabled = exportState.password.isNotBlank() && 
+                        (exportState.selectedInstanceIds.isNotEmpty() || exportState.selectedDownloadClientIds.isNotEmpty()),
                 onClick = onConfirm
             ) {
                 Text(mokoString(MR.strings.save))

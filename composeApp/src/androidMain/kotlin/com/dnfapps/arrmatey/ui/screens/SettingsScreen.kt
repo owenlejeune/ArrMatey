@@ -453,13 +453,15 @@ fun SettingsScreen(
 
             ExportDialog(
                 exportState = exportState,
-                onDismiss = { showImportDialog = false },
+                onDismiss = { showExportDialog = false },
                 onConfirm = {
                     showExportDialog = false
                     exportLauncher.launch("ArrMatey_Backup.json")
                 },
                 onPasswordChanged = { backupViewModel.setExportPassword(it) },
-                onToggleIncludePreferences = { backupViewModel.toggleIncludePreferences() },
+                onToggleIncludeInstancePreferences = { backupViewModel.toggleIncludePreferences() },
+                onToggleIncludeTabPreferences = { backupViewModel.toggleIncludeTabPreferences() },
+                onToggleIncludeUiPreferences = { backupViewModel.toggleIncludeUiPreferences() },
                 onToggleInstanceSelection = { backupViewModel.toggleInstanceSelection(it) },
                 onToggleDownloadClientSelection = { backupViewModel.toggleDownloadClientSelection(it) }
             )
@@ -477,6 +479,8 @@ fun SettingsScreen(
                 onPasswordChanged = { backupViewModel.setImportPassword(it) },
                 onToggleInstanceSelection = { backupViewModel.toggleImportInstanceSelection(it) },
                 onToggleDownloadClientSelection = { backupViewModel.toggleImportDownloadClientSelection(it) },
+                onToggleImportTabPreferences = { backupViewModel.toggleImportTabPreferences() },
+                onToggleImportUiPreferences = { backupViewModel.toggleImportUiPreferences() },
                 onConfirmDecrypt = {
                     pendingImportData?.let { data ->
                         backupViewModel.prepareImport(data)

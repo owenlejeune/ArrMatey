@@ -3,18 +3,20 @@ package com.dnfapps.arrmatey.backup.usecase
 import com.dnfapps.arrmatey.backup.TransportEncryptor
 import com.dnfapps.arrmatey.backup.model.BackupExport
 import com.dnfapps.arrmatey.backup.model.DownloadClientExport
+import com.dnfapps.arrmatey.backup.model.GlobalPreferencesExport
 import com.dnfapps.arrmatey.backup.model.InstanceExport
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class ExportDataUseCase(
     private val instanceDao: InstanceDao,
     private val downloadClientDao: DownloadClientDao,
     private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository,
+    private val preferencesStore: PreferencesStore,
     private val transportEncryptor: TransportEncryptor,
     private val json: Json
 ) {
@@ -22,13 +24,15 @@ class ExportDataUseCase(
         password: String,
         selectedInstanceIds: Set<Long>,
         selectedDownloadClientIds: Set<Long>,
-        includePreferences: Boolean
+        includeInstancePreferences: Boolean,
+        includeTabPreferences: Boolean,
+        includeUiPreferences: Boolean
     ): String {
         val instances = instanceDao.getAllInstances()
             .filter { it.id in selectedInstanceIds }
         
         val instanceExports = instances.map { instance ->
-            val preferences = if (includePreferences) {
+            val preferences = if (includeInstancePreferences) {
                 instancePreferenceStoreRepository.getInstancePreferences(instance.id)
                     .observePreferences().first()
             } else null
@@ -70,9 +74,18 @@ class ExportDataUseCase(
             )
         }
 
+        val globalPreferences = if (includeTabPreferences || includeUiPreferences) {
+            GlobalPreferencesExport(
+                tabPreferences = if (includeTabPreferences) preferencesStore.tabPreferences.first() else null,
+                useServiceNavLogos = if (includeUiPreferences) preferencesStore.useServiceNavLogos.first() else null,
+                hideInstanceSwitcher = if (includeUiPreferences) preferencesStore.hideInstanceSwitcher.first() else null
+            )
+        } else null
+
         val backup = BackupExport(
             instances = instanceExports,
-            downloadClients = downloadClientExports
+            downloadClients = downloadClientExports,
+            globalPreferences = globalPreferences
         )
 
         val jsonString = json.encodeToString(backup)

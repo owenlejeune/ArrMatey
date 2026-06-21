@@ -5,15 +5,18 @@ import com.dnfapps.arrmatey.backup.model.BackupExport
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.json.Json
 
 class ImportDataUseCase(
     private val instanceDao: InstanceDao,
     private val downloadClientDao: DownloadClientDao,
     private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository,
+    private val preferencesStore: PreferencesStore,
     private val transportEncryptor: TransportEncryptor,
     private val json: Json
 ) {
@@ -25,7 +28,9 @@ class ImportDataUseCase(
     suspend fun importSelected(
         backup: BackupExport,
         selectedInstanceIndices: Set<Int>,
-        selectedDownloadClientIndices: Set<Int>
+        selectedDownloadClientIndices: Set<Int>,
+        importTabPreferences: Boolean,
+        importUiPreferences: Boolean
     ) {
         backup.instances.forEachIndexed { index, export ->
             if (index in selectedInstanceIndices) {
@@ -45,18 +50,23 @@ class ImportDataUseCase(
                     localNetworkEndpoint = export.localNetworkEndpoint
                 )
                 
-                // Handling conflicts by using a unique label/url check if needed,
-                // but for now let's just try to insert. 
-                // The Dao might need an UPSERT or we handle it here.
                 val existingByUrl = instanceDao.findByUrl(instance.url)
                 val existingByLabel = instanceDao.findByLabel(instance.label)
                 
-                val finalInstance = if (existingByUrl != null) {
-                    instance.copy(id = existingByUrl)
-                } else if (existingByLabel != null) {
-                    instance.copy(id = existingByLabel)
-                } else {
-                    instance
+                val finalInstance = when {
+                    existingByUrl != null -> {
+                        var uniqueLabel = instance.label
+                        if (existingByLabel != null && existingByLabel != existingByUrl) {
+                            uniqueLabel = "${instance.label} (Imported)"
+                        }
+                        instance.copy(id = existingByUrl, label = uniqueLabel)
+                    }
+                    existingByLabel != null -> {
+                        instance.copy(id = existingByLabel)
+                    }
+                    else -> {
+                        instance
+                    }
                 }
 
                 val id = if (finalInstance.id != 0L) {
@@ -71,6 +81,10 @@ class ImportDataUseCase(
                     prefStore.savePreferences(export.preferences)
                 }
             }
+        }
+
+        InstanceType.entries.forEach { type ->
+            instanceDao.ensureFirstSelectedIfNone(type)
         }
 
         backup.downloadClients.forEachIndexed { index, export ->
@@ -92,12 +106,20 @@ class ImportDataUseCase(
                 val existingByUrl = downloadClientDao.findByUrl(client.url)
                 val existingByLabel = downloadClientDao.findByLabel(client.label)
 
-                val finalClient = if (existingByUrl != null) {
-                    client.copy(id = existingByUrl)
-                } else if (existingByLabel != null) {
-                    client.copy(id = existingByLabel)
-                } else {
-                    client
+                val finalClient = when {
+                    existingByUrl != null -> {
+                        var uniqueLabel = client.label
+                        if (existingByLabel != null && existingByLabel != existingByUrl) {
+                            uniqueLabel = "${client.label} (Imported)"
+                        }
+                        client.copy(id = existingByUrl, label = uniqueLabel)
+                    }
+                    existingByLabel != null -> {
+                        client.copy(id = existingByLabel)
+                    }
+                    else -> {
+                        client
+                    }
                 }
 
                 if (finalClient.id != 0L) {
@@ -105,6 +127,16 @@ class ImportDataUseCase(
                 } else {
                     downloadClientDao.insert(finalClient)
                 }
+            }
+        }
+
+        backup.globalPreferences?.let { global ->
+            if (importTabPreferences) {
+                global.tabPreferences?.let { preferencesStore.saveTabPreferences(it) }
+            }
+            if (importUiPreferences) {
+                global.useServiceNavLogos?.let { preferencesStore.setUseServiceNavLogos(it) }
+                global.hideInstanceSwitcher?.let { preferencesStore.setHideInstanceSwitcher(it) }
             }
         }
     }

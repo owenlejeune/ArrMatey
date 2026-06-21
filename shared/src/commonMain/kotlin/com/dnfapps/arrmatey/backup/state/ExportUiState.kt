@@ -9,7 +9,9 @@ data class ExportUiState(
     val selectedInstanceIds: Set<Long> = emptySet(),
     val selectedDownloadClientIds: Set<Long> = emptySet(),
     val password: String = "",
-    val includePreferences: Boolean = true,
+    val includeInstancePreferences: Boolean = true,
+    val includeTabPreferences: Boolean = true,
+    val includeUiPreferences: Boolean = true,
     val isExporting: Boolean = false
 ) {
     constructor(): this(emptyList()) // default ios constructor
