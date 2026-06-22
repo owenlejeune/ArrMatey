@@ -99,6 +99,9 @@ class InstanceManager(
     fun getProwlarrRepository(instanceId: Long): ProwlarrInstanceRepository? =
         _instanceRepositories.value[instanceId] as? ProwlarrInstanceRepository
 
+    fun getBazarrRepository(instanceId: Long): BazarrInstanceRepository? =
+        _instanceRepositories.value[instanceId] as? BazarrInstanceRepository
+
     fun getRepository(instanceId: Long): InstanceScopedRepository? =
         _instanceRepositories.value[instanceId]
 

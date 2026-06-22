@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSystem
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSystemStatus
 import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.arrmatey.client.mapValues
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
@@ -45,8 +46,15 @@ class BazarrInstanceRepository(
 
     suspend fun getSeries(): NetworkResult<List<BazarrSeries>> =
         bazarrClient.getSeries()
+            .mapValues { it.withLocalImages(instance.url) }
 
     suspend fun getMovies(): NetworkResult<List<BazarrMovie>> =
         bazarrClient.getMovies()
+            .mapValues { it.withLocalImages(instance.url) }
+
+    suspend fun refresh() {
+        getSeries()
+        getMovies()
+    }
 
 }

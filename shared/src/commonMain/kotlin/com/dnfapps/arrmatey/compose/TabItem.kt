@@ -41,6 +41,7 @@ sealed interface TabItem {
         CALENDAR("calendar", MR.strings.schedule),
         REQUESTS("tray.fill", MR.strings.requests),
         PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr),
+        BAZARR("captions.bubble", MR.strings.bazarr, associatedType = InstanceType.Bazarr),
         DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard);
 
         override val key: String get() = "standard_${name}"

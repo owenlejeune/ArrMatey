@@ -17,7 +17,7 @@ class ArrImageLoader(
         val request = chain.request
         val url = request.data.toString()
 
-        val repository = instanceManager.getAllArrRepositories().find { repository ->
+        val repository = instanceManager.getAllRepositories().find { repository ->
             url.startsWith(repository.instance.url)
         }
         val instance = repository?.instance

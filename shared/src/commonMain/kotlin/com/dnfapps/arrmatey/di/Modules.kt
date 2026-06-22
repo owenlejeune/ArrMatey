@@ -65,6 +65,8 @@ import com.dnfapps.arrmatey.backup.TransportEncryptor
 import com.dnfapps.arrmatey.backup.usecase.ExportDataUseCase
 import com.dnfapps.arrmatey.backup.usecase.ImportDataUseCase
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
+import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrLibraryUseCase
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrLibraryViewModel
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
@@ -101,6 +103,7 @@ import com.dnfapps.arrmatey.instances.usecase.CreateInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.DeleteInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.DismissInfoCardUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
@@ -136,11 +139,9 @@ import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
-import com.dnfapps.arrmatey.utils.EncryptionManager
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.NetworkConnectivityObserverFactory
 import com.dnfapps.arrmatey.utils.NetworkConnectivityRepository
-import com.dnfapps.arrmatey.utils.SimpleEncryptionManager
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import com.dnfapps.arrmatey.webpage.usecase.AddCustomWebpageUseCase
 import com.dnfapps.arrmatey.webpage.usecase.DeleteCustomWebpageUseCase
@@ -309,9 +310,11 @@ val useCaseModule = module {
     factory { GetAudiobookFilesUseCase(get()) }
     factory { GetAudiobookPreviewPathUseCase(get()) }
     factory { GetAudiobookMetadataUseCase() }
+    factory { GetBazarrLibraryUseCase(get()) }
     factory { CredentialMigrationUseCase(get(), get(), get()) }
     factory { ExportDataUseCase(get(), get(), get(), get(), get(), get()) }
     factory { ImportDataUseCase(get(), get(), get(), get(), get(), get()) }
+    factory { GetBazarrInstanceRepositoryUseCase(get()) }
 }
 
 val viewModelModule = module {
@@ -377,6 +380,7 @@ val viewModelModule = module {
     factory { (audiobookId: Long) ->
         AudiobookFilesViewModel(audiobookId, get())
     }
+    factory { BazarrLibraryViewModel(get(), get()) }
     factory { CombinedDashboardViewModel(get(), get(), get(), get(), get(), get()) }
     factory { BackupViewModel(get(), get(), get(), get()) }
 }
