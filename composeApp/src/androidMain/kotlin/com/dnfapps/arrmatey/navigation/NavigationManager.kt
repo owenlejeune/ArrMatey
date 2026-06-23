@@ -15,6 +15,7 @@ class NavigationManager(
     val settings: SettingsTabNavigator,
     val requests: RequestsTabNavigator,
     val dashboard: DashboardTabNavigator,
+    val bazarr: BazarrTabNavigator,
     private val appState: AppState,
     private val tabManager: TabManager
 ) {

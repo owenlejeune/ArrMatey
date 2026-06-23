@@ -27,6 +27,10 @@ val LocalDashboardNavigator = staticCompositionLocalOf<Navigator<DashboardScreen
     error("No DashboardNavigator provided")
 }
 
+val LocalBazarrNavigator = staticCompositionLocalOf<Navigator<BazarrScreen>> {
+    error("No BazarrNavigator provided")
+}
+
 /**
  * Composable helpers for navigators
  */
@@ -50,3 +54,7 @@ val settingsNavigator: Navigator<SettingsScreen>
 val dashboardNavigator: Navigator<DashboardScreen>
     @Composable
     get() = LocalDashboardNavigator.current
+
+val bazarrNavigator: Navigator<BazarrScreen>
+    @Composable
+    get() = LocalBazarrNavigator.current

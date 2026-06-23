@@ -59,3 +59,9 @@ sealed interface DashboardScreen: NavKey {
     data object Main: DashboardScreen
     data class ArrDashboard(val id: Long): DashboardScreen
 }
+
+sealed interface BazarrScreen: NavKey {
+    data object Library: BazarrScreen
+    data class MovieDetails(val id: Long): BazarrScreen
+    data class SeriesDetails(val id: Long): BazarrScreen
+}

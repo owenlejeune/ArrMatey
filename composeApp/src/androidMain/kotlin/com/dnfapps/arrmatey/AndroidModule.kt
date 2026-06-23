@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.datastore.AndroidPreferencesStore
 import com.dnfapps.arrmatey.navigation.AppState
 import com.dnfapps.arrmatey.navigation.AudiobooksTabNavigator
+import com.dnfapps.arrmatey.navigation.BazarrTabNavigator
 import com.dnfapps.arrmatey.navigation.BooksTabNavigator
 import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
 import com.dnfapps.arrmatey.navigation.MoviesTabNavigator
@@ -37,6 +38,7 @@ val androidModule = module {
     single { BooksTabNavigator() }
     single { AudiobooksTabNavigator() }
     single { DashboardTabNavigator() }
+    single { BazarrTabNavigator() }
 
     // Navigation Manager
     single {
@@ -46,9 +48,9 @@ val androidModule = module {
             TabItem.Standard.MUSIC to get<MusicTabNavigator>(),
             TabItem.Standard.REQUESTS to get<RequestsTabNavigator>(),
             TabItem.Standard.BOOKS to get<BooksTabNavigator>(),
-            TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>()
+            TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>(),
         )
-        NavigationManager(registry, get(), get(), get(), get(), get())
+        NavigationManager(registry, get(), get(), get(), get(), get(), get())
     }
 
     // Others

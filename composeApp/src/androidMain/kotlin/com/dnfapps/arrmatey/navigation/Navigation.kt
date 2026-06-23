@@ -77,6 +77,7 @@ class BooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class AudiobooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
 class DashboardTabNavigator : BaseNavigator<DashboardScreen>(DashboardScreen.Main)
+class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
 
 /**
  * Domain-specific navigation extensions for Arr feature set.
@@ -127,3 +128,6 @@ fun Navigator<SettingsScreen>.onInstanceTap(id: Long, type: InstanceType) =
     }
 
 fun Navigator<DashboardScreen>.openArrDashboard(id: Long) = navigateTo(DashboardScreen.ArrDashboard(id))
+
+fun Navigator<BazarrScreen>.openMovieDetails(id: Long) = navigateTo(BazarrScreen.MovieDetails(id))
+fun Navigator<BazarrScreen>.openSeriesDetails(id: Long) = navigateTo(BazarrScreen.SeriesDetails(id))
