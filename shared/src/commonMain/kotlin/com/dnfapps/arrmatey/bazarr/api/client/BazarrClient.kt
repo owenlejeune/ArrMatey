@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.bazarr.api.client
 
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisodesResponse
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMoviesResponse
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
@@ -40,5 +42,10 @@ class BazarrClient(
     suspend fun getMovies(): NetworkResult<List<BazarrMovie>> =
         httpClient.safeGet<BazarrMoviesResponse>("$baseUrl/movies")
             .map { it.data }
+
+    suspend fun getEpisodes(seriesId: Long): NetworkResult<List<BazarrEpisode>> =
+        httpClient.safeGet<BazarrEpisodesResponse>("$baseUrl/episodes") {
+            url { parameters.append("seriesid[]", seriesId.toString()) }
+        }.map { it.data }
 
 }

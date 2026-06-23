@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.bazarr.api.client.BazarrClient
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSystem
@@ -33,6 +34,9 @@ class BazarrInstanceRepository(
     private val _movies = MutableStateFlow<NetworkResult<List<BazarrMovie>>?>(null)
     val movies: StateFlow<NetworkResult<List<BazarrMovie>>?> = _movies.asStateFlow()
 
+    private val _episodes = MutableStateFlow<Map<Long, List<BazarrEpisode>>>(emptyMap())
+    val episodes: StateFlow<Map<Long, List<BazarrEpisode>>> = _episodes.asStateFlow()
+
     override suspend fun testConnection(): NetworkResult<Unit> =
         bazarrClient.testConnection()
 
@@ -46,11 +50,21 @@ class BazarrInstanceRepository(
 
     suspend fun getSeries(): NetworkResult<List<BazarrSeries>> =
         bazarrClient.getSeries()
-            .mapValues { it.withLocalImages(instance.url) }
+            .mapValues { it.withLocalImages(instance.url) as BazarrSeries }
+            .onSuccess { _series.value = NetworkResult.Success(it) }
 
     suspend fun getMovies(): NetworkResult<List<BazarrMovie>> =
         bazarrClient.getMovies()
-            .mapValues { it.withLocalImages(instance.url) }
+            .mapValues { it.withLocalImages(instance.url) as BazarrMovie }
+            .onSuccess { _movies.value = NetworkResult.Success(it) }
+
+    suspend fun getEpisodes(seriesId: Long): NetworkResult<List<BazarrEpisode>> =
+        bazarrClient.getEpisodes(seriesId)
+            .onSuccess {
+                val current = _episodes.value.toMutableMap()
+                current[seriesId] = it
+                _episodes.value = current
+            }
 
     suspend fun refresh() {
         getSeries()

@@ -425,6 +425,6 @@ private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSiz
         TabItem.Standard.REQUESTS -> SeerrTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.PROWLARR -> ProwlarrTab(wideRailIsVisible)
         TabItem.Standard.DASHBOARD -> DashboardTab(windowSizeClass)
-        TabItem.Standard.BAZARR -> BazarrTab(wideRailIsVisible)
+        TabItem.Standard.BAZARR -> BazarrTab(windowSizeClass, wideRailIsVisible)
     }
 }

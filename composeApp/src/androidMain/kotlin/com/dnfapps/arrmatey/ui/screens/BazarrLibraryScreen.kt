@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,10 +47,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
 import com.dnfapps.arrmatey.bazarr.state.BazarrLibrary
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrLibraryViewModel
+import com.dnfapps.arrmatey.navigation.LocalBazarrNavigator
+import com.dnfapps.arrmatey.navigation.openDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.BasePosterItem
@@ -66,6 +70,8 @@ fun BazarrLibraryScreen(
     wideRailIsVisible: Boolean,
     viewModel: BazarrLibraryViewModel = koinInject(),
 ) {
+    val navigator = LocalBazarrNavigator.current
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf(mokoString(MR.strings.series), mokoString(MR.strings.movies))
@@ -125,14 +131,34 @@ fun BazarrLibraryScreen(
                         when {
                             hasSeries && hasMovies -> {
                                 if (selectedTabIndex == 0) {
-                                    BazarrSeriesList(state.series)
+                                    BazarrSeriesList(
+                                        series = state.series,
+                                        onClick = { series ->
+                                            navigator.openDetails(series.serviceId, BazarrMediaType.Series)
+                                        }
+                                    )
                                 } else {
-                                    BazarrMoviesList(state.movies)
+                                    BazarrMoviesList(
+                                        movies = state.movies,
+                                        onClick = { movie ->
+                                            navigator.openDetails(movie.serviceId, BazarrMediaType.Movie)
+                                        }
+                                    )
                                 }
                             }
 
-                            hasSeries -> BazarrSeriesList(state.series)
-                            hasMovies -> BazarrMoviesList(state.movies)
+                            hasSeries -> BazarrSeriesList(
+                                series = state.series,
+                                onClick = { series ->
+                                    navigator.openDetails(series.serviceId, BazarrMediaType.Series)
+                                }
+                            )
+                            hasMovies -> BazarrMoviesList(
+                                movies = state.movies,
+                                onClick = { movie ->
+                                    navigator.openDetails(movie.serviceId, BazarrMediaType.Movie)
+                                }
+                            )
                             else -> {
                                 // Both empty
                             }
@@ -152,7 +178,10 @@ fun BazarrLibraryScreen(
 }
 
 @Composable
-private fun BazarrSeriesList(series: List<BazarrSeries>) {
+private fun BazarrSeriesList(
+    series: List<BazarrSeries>,
+    onClick: (BazarrSeries) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -165,7 +194,8 @@ private fun BazarrSeriesList(series: List<BazarrSeries>) {
                 overview = item.overview,
                 poster = item.poster,
                 fanart = item.fanart,
-                monitored = item.monitored
+                monitored = item.monitored,
+                onClick = { onClick(item) }
             ) {
                 Text(
                     text = "${item.episodeFileCount} / ${item.episodeFileCount + item.episodeMissingCount} Episodes",
@@ -178,7 +208,10 @@ private fun BazarrSeriesList(series: List<BazarrSeries>) {
 }
 
 @Composable
-private fun BazarrMoviesList(movies: List<BazarrMovie>) {
+private fun BazarrMoviesList(
+    movies: List<BazarrMovie>,
+    onClick: (BazarrMovie) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -191,7 +224,8 @@ private fun BazarrMoviesList(movies: List<BazarrMovie>) {
                 overview = item.overview,
                 poster = item.poster,
                 fanart = item.fanart,
-                monitored = item.monitored
+                monitored = item.monitored,
+                onClick = { onClick(item) }
             ) {
                 val subtitleCount = item.subtitles.size
                 val missingCount = item.missingSubtitles.size
@@ -214,12 +248,14 @@ private fun BazarrItem(
     fanart: String?,
     monitored: Boolean,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
     details: @Composable () -> Unit = {}
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight(),
+            .wrapContentHeight()
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {

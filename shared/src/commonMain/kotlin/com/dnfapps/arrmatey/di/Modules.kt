@@ -65,7 +65,11 @@ import com.dnfapps.arrmatey.backup.TransportEncryptor
 import com.dnfapps.arrmatey.backup.usecase.ExportDataUseCase
 import com.dnfapps.arrmatey.backup.usecase.ImportDataUseCase
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
+import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrEpisodesUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrLibraryUseCase
+import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrMediaDetailsUseCase
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrLibraryViewModel
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.TabManager
@@ -310,7 +314,9 @@ val useCaseModule = module {
     factory { GetAudiobookFilesUseCase(get()) }
     factory { GetAudiobookPreviewPathUseCase(get()) }
     factory { GetAudiobookMetadataUseCase() }
-    factory { GetBazarrLibraryUseCase(get()) }
+    factory { GetBazarrLibraryUseCase() }
+    factory { GetBazarrMediaDetailsUseCase(get()) }
+    factory { GetBazarrEpisodesUseCase(get()) }
     factory { CredentialMigrationUseCase(get(), get(), get()) }
     factory { ExportDataUseCase(get(), get(), get(), get(), get(), get()) }
     factory { ImportDataUseCase(get(), get(), get(), get(), get(), get()) }
@@ -381,6 +387,9 @@ val viewModelModule = module {
         AudiobookFilesViewModel(audiobookId, get())
     }
     factory { BazarrLibraryViewModel(get(), get()) }
+    factory { (id: Long, type: BazarrMediaType) ->
+        BazarrDetailsViewModel(id, type, get(), get())
+    }
     factory { CombinedDashboardViewModel(get(), get(), get(), get(), get(), get()) }
     factory { BackupViewModel(get(), get(), get(), get()) }
 }

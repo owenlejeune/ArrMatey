@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.navigation.BazarrScreen
 import com.dnfapps.arrmatey.navigation.LocalBazarrNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.ui.screens.BazarrDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.BazarrLibraryScreen
 import org.koin.compose.koinInject
 
@@ -29,11 +30,8 @@ fun BazarrTab(
                 entry<BazarrScreen.Library> {
                     BazarrLibraryScreen(wideRailIsVisible = wideRailIsVisible)
                 }
-                entry<BazarrScreen.MovieDetails> {
-
-                }
-                entry<BazarrScreen.SeriesDetails> {
-
+                entry<BazarrScreen.Details> { details ->
+                    BazarrDetailsScreen(details.id, details.type)
                 }
             }
         )

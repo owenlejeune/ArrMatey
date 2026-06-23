@@ -3,24 +3,14 @@ package com.dnfapps.arrmatey.bazarr.usecase
 import com.dnfapps.arrmatey.bazarr.state.BazarrLibrary
 import com.dnfapps.arrmatey.client.ErrorType
 import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 
-class GetBazarrLibraryUseCase(
-    private val instanceManager: InstanceManager
-) {
-    operator fun invoke(): Flow<BazarrLibrary> = flow {
-        val repository = instanceManager.getSelectedBazarrRepository()
-            .first()
-        if (repository == null) {
-            emit(BazarrLibrary.Error("Instance not found", ErrorType.Unexpected))
-            return@flow
-        }
-
+class GetBazarrLibraryUseCase() {
+    operator fun invoke(repository: BazarrInstanceRepository): Flow<BazarrLibrary> = flow {
         emit(BazarrLibrary.Loading)
 
         coroutineScope {
