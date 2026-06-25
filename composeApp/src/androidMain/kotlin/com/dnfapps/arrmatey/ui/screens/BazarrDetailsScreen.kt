@@ -77,7 +77,6 @@ import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
-import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -102,6 +101,21 @@ fun BazarrDetailsScreen(
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(imageVector = Icons.AutoMirrored.Default.ArrowBack, contentDescription = null)
+                    }
+                },
+                actions = {
+                    if (type == BazarrMediaType.Movie) {
+                        IconButton(
+                            onClick = { }
+                        ) {
+                            Icon(Icons.Default.Person, null)
+                        }
+                    }
+                    IconButton(
+                        onClick = { },
+                        colors = IconButtonDefaults.headerBarColors()
+                    ) {
+                        Icon(Icons.Default.Search, null)
                     }
                 }
             )
@@ -136,12 +150,6 @@ fun BazarrDetailsScreen(
 
                 when (val details = uiState.details) {
                     is BazarrMovie -> {
-                        ReleaseDownloadButtons(
-                            onInteractiveClicked = { /* TODO */ },
-                            onAutomaticClicked = { /* TODO */ },
-                            automaticSearchEnabled = details.monitored,
-                            modifier = Modifier.fillMaxWidth()
-                        )
                         SubtitlesSection(details.subtitles, details.missingSubtitles)
                     }
                     is BazarrSeries -> {
