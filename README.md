@@ -33,7 +33,7 @@
 
 ### Multi-Instance Support
 - Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, and Listenarr instances
-- Seamless integration with Prowlarr for indexer management and Seerr for requests and issues
+- Seamless integration with Prowlarr for indexer management, Seerr for requests and issues, and Bazarr for subtitles
 - Quick instance switching and custom instance labels
 
 ### Library Management
@@ -48,6 +48,12 @@
 - Filter by quality, language, indexer, and protocol
 - View seeders, size, age, and custom format scores
 - One-tap download with confirmation for rejected releases
+
+### Subtitle Management (Bazarr)
+- Connect a Bazarr instance and manage subtitles for both Sonarr and Radarr libraries
+- Browse episodes and movies that are missing subtitles, with provider status at a glance
+- Manually search providers and download a specific subtitle, or trigger Bazarr's automatic search
+- View, search, and delete subtitles directly from the series episode and movie detail screens
 
 ### Calendar View
 - View upcoming episodes, movies, albums, books, and audiobooks
@@ -77,7 +83,8 @@
 - [ ] Home screen widgets
 - [ ] Schedule notifications
 - [ ] Bulk library actions
-- [ ] Additional instance types (eg. Bazarr, Tracearr, nzbget)
+- [x] Bazarr subtitle management (Sonarr + Radarr)
+- [ ] Additional instance types (eg. Tracearr, nzbget)
 - and more to come
 
 ## Screenshots
@@ -252,6 +259,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Listenarr](https://github.com/Listenarrs/Listenarr) - Audiobook management server
 - [Prowlarr](https://prowlarr.com/) - Indexer manager
 - [Seerr](https://docs.seerr.dev/) - Request management
+- [Bazarr](https://www.bazarr.media/) - Subtitle management for Sonarr and Radarr
 - [Material Design 3](https://m3.material.io/) - Design system
 - [Jetpack Compose](https://developer.android.com/jetpack/compose) - Modern UI toolkit
 - [SwiftUI](https://developer.apple.com/xcode/swiftui/) - Apple's declarative framework for building user interfaces

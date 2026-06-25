@@ -242,6 +242,9 @@ struct MediaDetailsScreen: View {
                     confirmDeleteFile = true
                 }
             )
+            BazarrSubtitlesSection(
+                target: BazarrMediaTargetMovie(radarrId: id)
+            )
         } else if let artist = item as? Arrtist {
             ArtistFilesView(
                 artist: artist,

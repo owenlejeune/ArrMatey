@@ -73,7 +73,14 @@ struct EpisodeDetailsScreen: View {
                     if let file = episode.episodeFile {
                         MediaFileCard(file: file)
                     }
-                    
+
+                    BazarrSubtitlesSection(
+                        target: BazarrMediaTargetEpisode(
+                            seriesId: series.id as! Int64,
+                            episodeId: episode.id
+                        )
+                    )
+
                     switch viewModel.history {
                     case is HistoryStateLoading:
                         ProgressView()

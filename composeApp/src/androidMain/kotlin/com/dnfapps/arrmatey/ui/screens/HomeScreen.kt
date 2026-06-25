@@ -68,6 +68,7 @@ import com.dnfapps.arrmatey.ui.tabs.ArrTab
 import com.dnfapps.arrmatey.ui.tabs.CalendarTab
 import com.dnfapps.arrmatey.ui.tabs.DashboardTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
+import com.dnfapps.arrmatey.ui.tabs.BazarrTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost
@@ -423,6 +424,7 @@ private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSiz
         TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.REQUESTS -> SeerrTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.PROWLARR -> ProwlarrTab(wideRailIsVisible)
+        TabItem.Standard.BAZARR -> BazarrTab(wideRailIsVisible)
         TabItem.Standard.DASHBOARD -> DashboardTab(windowSizeClass)
     }
 }

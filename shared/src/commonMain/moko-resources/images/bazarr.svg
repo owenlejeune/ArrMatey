@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <title>Bazarr SVG Icon</title>
+  <defs>
+    <linearGradient id="bazarrGrad" x1="8" y1="8" x2="88" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1FB9C9"/>
+      <stop offset="1" stop-color="#0A7C8A"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="88" height="88" rx="20" fill="url(#bazarrGrad)"/>
+  <rect x="22" y="27" width="52" height="42" rx="7" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+  <rect x="30" y="48" width="26" height="5" rx="2.5" fill="#FFFFFF"/>
+  <rect x="60" y="48" width="6" height="5" rx="2.5" fill="#FFFFFF"/>
+  <rect x="30" y="57" width="12" height="5" rx="2.5" fill="#FFFFFF"/>
+  <rect x="46" y="57" width="20" height="5" rx="2.5" fill="#FFFFFF"/>
+</svg>

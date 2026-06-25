@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrBazarr
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
@@ -216,6 +217,22 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = false,
         associatedColor = ArrOrange
+    ),
+    Bazarr(
+        resource = MR.strings.bazarr_description,
+        github = "https://github.com/morpheus65535/bazarr",
+        website = "https://www.bazarr.media/",
+        icon = MR.images.bazarr,
+        tabIcon = MR.images.bazarr_tab,
+        defaultPort = 6767,
+        supportsActivityQueue = false,
+        apiBase = "api",
+        testEndpoint = "system/status",
+        getApiKeyEndpoint = "settings/general",
+        includeTopLevelAutomaticSearchOption = false,
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = false,
+        associatedColor = ArrBazarr
     );
 
     companion object {

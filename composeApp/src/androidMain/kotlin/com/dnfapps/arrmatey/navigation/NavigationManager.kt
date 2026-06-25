@@ -99,6 +99,7 @@ class NavigationManager(
         when (type) {
             InstanceType.Seerr -> openRequestsTab()
             InstanceType.Prowlarr -> openProwlarrTab()
+            InstanceType.Bazarr -> openBazarrTab()
             else -> navigateToTab(tabFor(type))
         }
     }
@@ -109,6 +110,10 @@ class NavigationManager(
 
     fun openProwlarrTab() {
         navigateToTab(TabItem.Standard.PROWLARR)
+    }
+
+    fun openBazarrTab() {
+        navigateToTab(TabItem.Standard.BAZARR)
     }
 
     fun openDownloadClientsTab() {

@@ -8,6 +8,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 
@@ -35,6 +36,15 @@ suspend inline fun <reified T> HttpClient.safePut(
 ): NetworkResult<T> {
     return safeCall {
         put(url, builder).body()
+    }
+}
+
+suspend inline fun <reified T> HttpClient.safePatch(
+    url: String,
+    crossinline builder: HttpRequestBuilder.() -> Unit = {}
+): NetworkResult<T> {
+    return safeCall {
+        patch(url, builder).body()
     }
 }
 

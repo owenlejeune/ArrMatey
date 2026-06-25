@@ -80,6 +80,8 @@ class InstanceManager(
 
             InstanceType.Prowlarr -> ProwlarrInstanceRepository(instance, httpClient)
 
+            InstanceType.Bazarr -> BazarrInstanceRepository(instance, httpClient)
+
             InstanceType.Sonarr,
             InstanceType.Radarr,
             InstanceType.Lidarr,
@@ -96,6 +98,9 @@ class InstanceManager(
 
     fun getProwlarrRepository(instanceId: Long): ProwlarrInstanceRepository? =
         _instanceRepositories.value[instanceId] as? ProwlarrInstanceRepository
+
+    fun getBazarrRepository(instanceId: Long): BazarrInstanceRepository? =
+        _instanceRepositories.value[instanceId] as? BazarrInstanceRepository
 
     fun getRepository(instanceId: Long): InstanceScopedRepository? =
         _instanceRepositories.value[instanceId]
@@ -120,6 +125,13 @@ class InstanceManager(
                 else _instanceRepositories.map { repos -> repos[instance.id] as? ProwlarrInstanceRepository }
             }
 
+    fun getSelectedBazarrRepository(): Flow<BazarrInstanceRepository?> =
+        instanceRepository.observeSelectedInstance(InstanceType.Bazarr)
+            .flatMapLatest { instance ->
+                if (instance == null) flowOf(null)
+                else _instanceRepositories.map { repos -> repos[instance.id] as? BazarrInstanceRepository }
+            }
+
     fun getAllRepositories(): List<InstanceScopedRepository> {
         return _instanceRepositories.value.values.toList()
     }
@@ -130,6 +142,10 @@ class InstanceManager(
 
     fun getAllSeerrRepositories(): List<SeerrInstanceRepository> {
         return _instanceRepositories.value.values.filterIsInstance<SeerrInstanceRepository>()
+    }
+
+    fun getAllBazarrRepositories(): List<BazarrInstanceRepository> {
+        return _instanceRepositories.value.values.filterIsInstance<BazarrInstanceRepository>()
     }
 
     fun repositoriesByType(type: InstanceType): Flow<List<InstanceScopedRepository>> =

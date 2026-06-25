@@ -100,7 +100,12 @@ import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.usecase.CreateInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.DeleteInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.DismissInfoCardUseCase
+import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
@@ -185,6 +190,10 @@ val networkModule = module {
             ignoreUnknownKeys = true
             encodeDefaults = true
             explicitNulls = false
+            // Coerce nulls/invalid values to declared defaults instead of throwing. Some APIs
+            // (e.g. Bazarr's language fields, which can be null for unrecognised codes) return
+            // null for properties our models treat as non-null with a default.
+            coerceInputValues = true
         }
     }
 
@@ -265,6 +274,7 @@ val useCaseModule = module {
     factory { GrabProwlarrReleaseUseCase(get()) }
     factory { UpdateCalendarFilterPreferenceUseCase(get()) }
     factory { GetSeerrInstanceRepositoryUseCase(get()) }
+    factory { GetBazarrInstanceRepositoryUseCase(get()) }
     factory { GetCurrentSeerrUserUseCase() }
     factory { GetRequestsUseCase() }
     factory { GetIssuesUseCase() }
@@ -352,6 +362,13 @@ val viewModelModule = module {
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { (tmdbId: Long, mediaType: RequestType) ->
         SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get())
+    }
+    factory { BazarrViewModel(get()) }
+    factory { (target: BazarrMediaTarget) ->
+        BazarrSubtitleSearchViewModel(target, get())
+    }
+    factory { (target: BazarrMediaTarget) ->
+        BazarrMediaSubtitlesViewModel(target, get())
     }
     factory { ProwlarrIndexersViewModel(get(), get(), get()) }
     factory { ProwlarrSearchViewModel(get(), get(), get()) }

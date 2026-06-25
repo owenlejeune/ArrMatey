@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.FileDownload
@@ -62,6 +63,7 @@ val TabItem.androidIcon: ImageVector
             TabItem.Standard.CALENDAR -> Icons.Default.CalendarMonth
             TabItem.Standard.REQUESTS -> Icons.Default.Inbox
             TabItem.Standard.PROWLARR -> Icons.AutoMirrored.Filled.ManageSearch
+            TabItem.Standard.BAZARR -> Icons.Default.Subtitles
             TabItem.Standard.DASHBOARD -> Icons.Default.Dashboard
         }
         is TabItem.CustomWebpage -> Icons.Default.Language
