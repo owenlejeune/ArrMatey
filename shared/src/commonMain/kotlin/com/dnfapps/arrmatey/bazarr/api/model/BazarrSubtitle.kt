@@ -19,6 +19,8 @@ data class BazarrSubtitle(
 ) {
     /** Whether this subtitle is an external (downloadable / deletable) file rather than embedded. */
     val isExternal: Boolean get() = !path.isNullOrBlank()
+
+    val isEmbedded: Boolean get() = path.isNullOrBlank() && fileSize == 0L
 }
 
 /**

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,9 +38,13 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.BazarrSubtitlesUiState
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.compose.utils.breakable
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.compose.painterResource
 
 /**
  * "Subtitles" section embedded in a Sonarr episode or Radarr movie detail screen, backed by
@@ -63,13 +68,32 @@ fun BazarrSubtitlesSection(
 
     var showSearch by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = mokoString(MR.strings.bazarr_subtitles),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(8.dp))
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = mokoString(MR.strings.bazarr_subtitles),
+                style = MaterialTheme.typography.titleLarge
+            )
+            InstanceType.Bazarr.tabIcon?.let { icon ->
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Button(onClick = { showSearch = true }) {
+                Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(mokoString(MR.strings.bazarr_search_subtitles))
+            }
+        }
 
         when (val s = state) {
             BazarrSubtitlesUiState.Loading -> {
@@ -83,38 +107,37 @@ fun BazarrSubtitlesSection(
             }
 
             is BazarrSubtitlesUiState.Success -> {
-                if (s.present.isEmpty()) {
-                    Text(mokoString(MR.strings.bazarr_no_subtitles), style = MaterialTheme.typography.bodyMedium)
-                } else {
-                    s.present.forEach { subtitle ->
-                        PresentSubtitleRow(
-                            subtitle = subtitle,
-                            onDelete = { viewModel.delete(subtitle) }
-                        )
-                    }
+                if (s.embedded.isNotEmpty()) {
+                    EmbeddedSubtitlesCard(s.embedded)
+                }
+                s.present.forEach { subtitle ->
+                    PresentSubtitleRow(
+                        subtitle = subtitle,
+                        onDelete = { viewModel.delete(subtitle) }
+                    )
                 }
 
-                if (s.missing.isNotEmpty()) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(mokoString(MR.strings.bazarr_missing_subtitles), style = MaterialTheme.typography.bodyMedium)
-                    Spacer(Modifier.height(4.dp))
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        s.missing.forEach { language ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                SubtitleLanguageChip(language)
-                                TextButton(onClick = { viewModel.autoSearch(language) }) {
-                                    Text(mokoString(MR.strings.bazarr_auto_search))
-                                }
-                            }
+                s.missing.forEach { language ->
+                    ContainerCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            viewModel.autoSearch(language)
+                        }
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            SubtitleLanguageChip(language)
+                            Text(
+                                text = mokoString(MR.strings.missing),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(Modifier.weight(1f))
+                            Icon(Icons.Default.Search, null)
                         }
                     }
-                }
-
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(onClick = { showSearch = true }) {
-                    Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(mokoString(MR.strings.bazarr_search_subtitles))
                 }
             }
 
@@ -143,34 +166,70 @@ fun BazarrSubtitlesSection(
 }
 
 @Composable
+private fun EmbeddedSubtitlesCard(
+    embedded: List<BazarrSubtitle>
+) {
+    ContainerCard(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "${embedded.count()} Embedded Subtitles",
+            fontWeight = FontWeight.SemiBold
+        )
+        FlowRow(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            embedded.forEach { subtitle ->
+                SubtitleLanguageChip(
+                    label = buildString {
+                        append(subtitle.code2.uppercase().ifBlank { subtitle.name })
+                        if (subtitle.forced) append(" · Forced")
+                        if (subtitle.hi) append(" · HI")
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun PresentSubtitleRow(
     subtitle: BazarrSubtitle,
     onDelete: () -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        SubtitleLanguageChip(
-            label = buildString {
-                append(subtitle.code2.uppercase().ifBlank { subtitle.name })
-                if (subtitle.forced) append(" · Forced")
-                if (subtitle.hi) append(" · HI")
-            }
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = subtitle.name,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
-        )
-        if (subtitle.isExternal) {
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = mokoString(MR.strings.bazarr_delete_subtitle),
-                    tint = MaterialTheme.colorScheme.error
-                )
+    ContainerCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = buildString {
+                    append(subtitle.name)
+                    subtitle.path?.let { path ->
+                        append(" • ${path.breakable()}")
+                    }
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+            SubtitleLanguageChip(
+                label = buildString {
+                    append(subtitle.code2.uppercase().ifBlank { subtitle.name })
+                    if (subtitle.forced) append(" · Forced")
+                    if (subtitle.hi) append(" · HI")
+                }
+            )
+            if (subtitle.isExternal) {
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = mokoString(MR.strings.bazarr_delete_subtitle),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -64,6 +65,7 @@ import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitleSearchSheet
 import com.dnfapps.arrmatey.ui.components.bazarr.SubtitleLanguageChip
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -254,33 +256,21 @@ private fun <T> WantedList(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(items, key = { key(it) }) { item ->
-            Surface(
-                tonalElevation = 2.dp,
+            ContainerCard(
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { onSearch(item) }
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(title(item), fontWeight = FontWeight.SemiBold)
-                        subtitle(item)?.let {
-                            Text(it, style = MaterialTheme.typography.bodyMedium)
-                        }
-                        Spacer(Modifier.height(6.dp))
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            missing(item).forEach { lang ->
-                                SubtitleLanguageChip(lang)
-                            }
-                        }
+                Column(modifier = Modifier.fillMaxWidth(1f)) {
+                    Text(title(item), fontWeight = FontWeight.SemiBold)
+                    subtitle(item)?.let {
+                        Text(it, style = MaterialTheme.typography.bodyMedium)
                     }
-                    OutlinedButton(onClick = { onSearch(item) }) {
-                        Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text(mokoString(MR.strings.bazarr_search_subtitles))
+                    Spacer(Modifier.height(6.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        missing(item).forEach { lang ->
+                            SubtitleLanguageChip(lang)
+                        }
                     }
                 }
             }

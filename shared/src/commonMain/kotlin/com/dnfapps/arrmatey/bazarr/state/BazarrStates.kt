@@ -43,6 +43,7 @@ sealed interface BazarrSubtitlesUiState {
     data class Error(val message: String) : BazarrSubtitlesUiState
     data class Success(
         val present: List<BazarrSubtitle>,
+        val embedded: List<BazarrSubtitle>,
         val missing: List<BazarrSubtitleLanguage>
     ) : BazarrSubtitlesUiState
 }

@@ -27,8 +27,8 @@ fun SubtitleLanguageChip(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
+        contentColor = MaterialTheme.colorScheme.secondaryContainer,
         shape = MaterialTheme.shapes.small,
         modifier = modifier
     ) {

@@ -55,7 +55,12 @@ class BazarrMediaSubtitlesViewModel(
                             _state.value = if (episode == null) {
                                 BazarrSubtitlesUiState.NotTracked
                             } else {
-                                BazarrSubtitlesUiState.Success(episode.subtitles, episode.missingSubtitles)
+                                val grouped = episode.subtitles.groupBy { it.isEmbedded }
+                                BazarrSubtitlesUiState.Success(
+                                    present = grouped[false] ?: emptyList(),
+                                    embedded = grouped[true] ?: emptyList(),
+                                    missing = episode.missingSubtitles
+                                )
                             }
                         }
                         .onError { _, message, _ ->
@@ -68,7 +73,12 @@ class BazarrMediaSubtitlesViewModel(
                             _state.value = if (movie == null) {
                                 BazarrSubtitlesUiState.NotTracked
                             } else {
-                                BazarrSubtitlesUiState.Success(movie.subtitles, movie.missingSubtitles)
+                                val grouped = movie.subtitles.groupBy { it.isEmbedded }
+                                BazarrSubtitlesUiState.Success(
+                                    present = grouped[false] ?: emptyList(),
+                                    embedded = grouped[true] ?: emptyList(),
+                                    missing = movie.missingSubtitles
+                                )
                             }
                         }
                         .onError { _, message, _ ->
