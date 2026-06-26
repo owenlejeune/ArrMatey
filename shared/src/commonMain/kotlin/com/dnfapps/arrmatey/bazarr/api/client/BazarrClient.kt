@@ -45,8 +45,8 @@ interface BazarrClient {
     suspend fun getSystemSettings(): NetworkResult<BazarrSystem>
     suspend fun getBadges(): NetworkResult<BazarrBadges>
 
-    suspend fun getWantedEpisodes(start: Int = 0, length: Int = -1): NetworkResult<WantedEpisodesResponse>
-    suspend fun getWantedMovies(start: Int = 0, length: Int = -1): NetworkResult<WantedMoviesResponse>
+    suspend fun getWantedEpisodes(): NetworkResult<WantedEpisodesResponse>
+    suspend fun getWantedMovies(): NetworkResult<WantedMoviesResponse>
 
     suspend fun getEpisodes(seriesId: Long): NetworkResult<BazarrEpisodesResponse>
     suspend fun getMovie(radarrId: Long): NetworkResult<BazarrMoviesResponse>
@@ -139,11 +139,11 @@ class BazarrClientImpl(
     override suspend fun getBadges(): NetworkResult<BazarrBadges> =
         get("badges")
 
-    override suspend fun getWantedEpisodes(start: Int, length: Int): NetworkResult<WantedEpisodesResponse> =
-        get("episodes/wanted", mapOf("start" to start, "length" to length))
+    override suspend fun getWantedEpisodes(): NetworkResult<WantedEpisodesResponse> =
+        get("episodes/wanted")
 
-    override suspend fun getWantedMovies(start: Int, length: Int): NetworkResult<WantedMoviesResponse> =
-        get("movies/wanted", mapOf("start" to start, "length" to length))
+    override suspend fun getWantedMovies(): NetworkResult<WantedMoviesResponse> =
+        get("movies/wanted")
 
     override suspend fun getEpisodes(seriesId: Long): NetworkResult<BazarrEpisodesResponse> =
         get("episodes", mapOf("seriesid[]" to seriesId))

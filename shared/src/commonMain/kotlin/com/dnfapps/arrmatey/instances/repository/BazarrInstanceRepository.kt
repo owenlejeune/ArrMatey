@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.instances.repository
 
-import com.dnfapps.arrmatey.bazarr.api.client.BazarrClient
 import com.dnfapps.arrmatey.bazarr.api.client.BazarrClientImpl
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
@@ -14,9 +13,6 @@ import com.dnfapps.arrmatey.bazarr.api.model.WantedMovie
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.mapValues
 import com.dnfapps.arrmatey.client.onSuccess
-import com.dnfapps.arrmatey.client.paging.BasePagingSource
-import com.dnfapps.arrmatey.client.paging.PageResult
-import com.dnfapps.arrmatey.client.paging.PagingSource
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -77,33 +73,11 @@ class BazarrInstanceRepository(
         }
     }
 
-    fun getWantedEpisodesPaging(): PagingSource<WantedEpisode> =
-        BasePagingSource(
-            fetcher = { page ->
-                bazarrClient.getWantedEpisodes(start = (page - 1) * PAGE_SIZE, length = PAGE_SIZE)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.data,
-                    totalItemCount = response.total,
-                    hasNextPage = response.data.size >= PAGE_SIZE
-                )
-            }
-        )
+    suspend fun getWantedEpisodes(): NetworkResult<List<WantedEpisode>> =
+        bazarrClient.getWantedEpisodes().map { it.data }
 
-    fun getWantedMoviesPaging(): PagingSource<WantedMovie> =
-        BasePagingSource(
-            fetcher = { page ->
-                bazarrClient.getWantedMovies(start = (page - 1) * PAGE_SIZE, length = PAGE_SIZE)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.data,
-                    totalItemCount = response.total,
-                    hasNextPage = response.data.size >= PAGE_SIZE
-                )
-            }
-        )
+    suspend fun getWantedMovies(): NetworkResult<List<WantedMovie>> =
+        bazarrClient.getWantedMovies().map { it.data }
 
     suspend fun getProviders(): NetworkResult<List<ProviderStatus>> =
         bazarrClient.getProviders().map { it.data }
@@ -111,11 +85,6 @@ class BazarrInstanceRepository(
     suspend fun resetProviders(): NetworkResult<Unit> =
         bazarrClient.resetProviders()
 
-    /** All Bazarr-tracked episodes for a Sonarr series id (carries current + missing subs). */
-//    suspend fun getEpisodes(seriesId: Long): NetworkResult<List<BazarrEpisode>> =
-//        bazarrClient.getEpisodes(seriesId).map { it.data }
-
-    /** The Bazarr-tracked movie for a Radarr movie id, or null if Bazarr isn't tracking it. */
     suspend fun getMovie(radarrId: Long): NetworkResult<BazarrMovie?> =
         bazarrClient.getMovie(radarrId).map { it.data.firstOrNull() }
 

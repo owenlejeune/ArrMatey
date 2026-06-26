@@ -16,18 +16,45 @@ class GetBazarrLibraryUseCase() {
         coroutineScope {
             val seriesDeferred = async { repository.getSeries() }
             val moviesDeferred = async { repository.getMovies() }
+            val wantedEpisodesDeferred = async { repository.getWantedEpisodes() }
+            val wantedMoviesDeferred = async { repository.getWantedMovies() }
+            val providersDeferred = async { repository.getProviders() }
 
             val seriesResult = seriesDeferred.await()
             val moviesResult = moviesDeferred.await()
+            val wantedEpisodesResult = wantedEpisodesDeferred.await()
+            val wantedMoviesResult = wantedMoviesDeferred.await()
+            val providersResult = providersDeferred.await()
 
-            if (seriesResult is NetworkResult.Success && moviesResult is NetworkResult.Success) {
-                emit(BazarrLibrary.Success(seriesResult.data, moviesResult.data))
-            } else if (seriesResult is NetworkResult.Error) {
-                emit(BazarrLibrary.Error(seriesResult.message ?: "Failed to get series", seriesResult.errorType))
-            } else if (moviesResult is NetworkResult.Error) {
-                emit(BazarrLibrary.Error(moviesResult.message ?: "Failed to get movies", moviesResult.errorType))
+            if (seriesResult is NetworkResult.Success &&
+                moviesResult is NetworkResult.Success &&
+                wantedEpisodesResult is NetworkResult.Success &&
+                wantedMoviesResult is NetworkResult.Success &&
+                providersResult is NetworkResult.Success
+            ) {
+                emit(
+                    BazarrLibrary.Success(
+                        series = seriesResult.data,
+                        movies = moviesResult.data,
+                        wantedEpisodes = wantedEpisodesResult.data,
+                        wantedMovies = wantedMoviesResult.data,
+                        providers = providersResult.data
+                    )
+                )
             } else {
-                emit(BazarrLibrary.Error("An unknown error occurred", ErrorType.Unexpected))
+                val error = listOf(
+                    seriesResult,
+                    moviesResult,
+                    wantedEpisodesResult,
+                    wantedMoviesResult,
+                    providersResult
+                ).filterIsInstance<NetworkResult.Error>().firstOrNull()
+
+                if (error != null) {
+                    emit(BazarrLibrary.Error(error.message ?: "An error occurred", error.errorType))
+                } else {
+                    emit(BazarrLibrary.Error("An unknown error occurred", ErrorType.Unexpected))
+                }
             }
         }
     }

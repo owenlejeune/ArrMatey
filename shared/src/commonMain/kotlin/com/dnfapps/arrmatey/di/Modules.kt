@@ -69,8 +69,9 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrEpisodesUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrLibraryUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrMediaDetailsUseCase
+import com.dnfapps.arrmatey.bazarr.usecase.RefreshBazarrBadgesUseCase
+import com.dnfapps.arrmatey.bazarr.usecase.ResetBazarrProvidersUseCase
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
-import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrLibraryViewModel
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
@@ -324,6 +325,8 @@ val useCaseModule = module {
     factory { GetAudiobookPreviewPathUseCase(get()) }
     factory { GetAudiobookMetadataUseCase() }
     factory { GetBazarrLibraryUseCase() }
+    factory { RefreshBazarrBadgesUseCase() }
+    factory { ResetBazarrProvidersUseCase() }
     factory { GetBazarrMediaDetailsUseCase(get()) }
     factory { GetBazarrEpisodesUseCase(get()) }
     factory { CredentialMigrationUseCase(get(), get(), get()) }
@@ -371,7 +374,7 @@ val viewModelModule = module {
     factory { (tmdbId: Long, mediaType: RequestType) ->
         SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get())
     }
-    factory { BazarrViewModel(get()) }
+    factory { BazarrViewModel(get(), get(), get(), get()) }
     factory { (target: BazarrMediaTarget) ->
         BazarrSubtitleSearchViewModel(target, get())
     }
@@ -402,7 +405,6 @@ val viewModelModule = module {
     factory { (audiobookId: Long) ->
         AudiobookFilesViewModel(audiobookId, get())
     }
-    factory { BazarrLibraryViewModel(get(), get()) }
     factory { (id: Long, type: BazarrMediaType) ->
         BazarrDetailsViewModel(id, type, get(), get())
     }

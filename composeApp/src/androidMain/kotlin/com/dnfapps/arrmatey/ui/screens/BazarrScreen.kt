@@ -1,10 +1,12 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,21 +18,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -38,34 +42,44 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitleLanguage
 import com.dnfapps.arrmatey.bazarr.api.model.ProviderStatus
 import com.dnfapps.arrmatey.bazarr.api.model.WantedEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.WantedMovie
+import com.dnfapps.arrmatey.bazarr.state.BazarrLibrary
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.BazarrSection
-import com.dnfapps.arrmatey.bazarr.state.ProvidersUiState
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
-import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.LocalBazarrNavigator
+import com.dnfapps.arrmatey.navigation.openDetails
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.BannerView
+import com.dnfapps.arrmatey.ui.components.BasePosterItem
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitleSearchSheet
 import com.dnfapps.arrmatey.ui.components.bazarr.SubtitleLanguageChip
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
-import com.dnfapps.arrmatey.ui.components.ContainerCard
+import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
+import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
+import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
@@ -77,11 +91,11 @@ fun BazarrScreen(
     viewModel: BazarrViewModel = koinInject(),
     instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Bazarr)
 ) {
+    val navigator = LocalBazarrNavigator.current
+
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val section by viewModel.selectedSection.collectAsStateWithLifecycle()
-    val episodes by viewModel.wantedEpisodesState.collectAsStateWithLifecycle()
-    val movies by viewModel.wantedMoviesState.collectAsStateWithLifecycle()
-    val providers by viewModel.providersState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var searchTarget by remember { mutableStateOf<BazarrMediaTarget?>(null) }
 
@@ -114,44 +128,100 @@ fun BazarrScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                SecondaryTabRow(selectedTabIndex = section.ordinal) {
-                    Tab(
-                        selected = section == BazarrSection.Episodes,
-                        onClick = { viewModel.selectSection(BazarrSection.Episodes) },
-                        text = { Text(sectionLabel(mokoString(MR.strings.bazarr_wanted_episodes), episodes.totalItemCount)) }
-                    )
-                    Tab(
-                        selected = section == BazarrSection.Movies,
-                        onClick = { viewModel.selectSection(BazarrSection.Movies) },
-                        text = { Text(sectionLabel(mokoString(MR.strings.bazarr_wanted_movies), movies.totalItemCount)) }
-                    )
-                    Tab(
-                        selected = section == BazarrSection.Providers,
-                        onClick = { viewModel.selectSection(BazarrSection.Providers) },
-                        text = { Text(mokoString(MR.strings.bazarr_providers)) }
-                    )
+                SecondaryScrollableTabRow(
+                    selectedTabIndex = section.ordinal,
+                    edgePadding = 16.dp,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    divider = {}
+                ) {
+                    BazarrSection.entries.forEach { entry ->
+                        Tab(
+                            selected = section == entry,
+                            onClick = { viewModel.selectSection(entry) },
+                            text = {
+                                val label = when (entry) {
+                                    BazarrSection.Series -> mokoString(MR.strings.series)
+                                    BazarrSection.Movies -> mokoString(MR.strings.movies)
+                                    BazarrSection.WantedEpisodes -> mokoString(MR.strings.bazarr_wanted_episodes)
+                                    BazarrSection.WantedMovies -> mokoString(MR.strings.bazarr_wanted_movies)
+                                    BazarrSection.Providers -> mokoString(MR.strings.bazarr_providers)
+                                }
+                                val count = (uiState as? BazarrLibrary.Success)?.let { state ->
+                                    when (entry) {
+                                        BazarrSection.Series -> state.series.size
+                                        BazarrSection.Movies -> state.movies.size
+                                        BazarrSection.WantedEpisodes -> state.wantedEpisodes.size
+                                        BazarrSection.WantedMovies -> state.wantedMovies.size
+                                        else -> 0
+                                    }
+                                } ?: 0
+                                Text(sectionLabel(label, count))
+                            }
+                        )
+                    }
                 }
 
-                when (section) {
-                    BazarrSection.Episodes -> WantedEpisodesContent(
-                        pagedData = episodes,
-                        onLoadMore = viewModel::loadMoreEpisodes,
-                        onRefresh = viewModel::refresh,
-                        onSearch = { searchTarget = BazarrMediaTarget.Episode(it.sonarrSeriesId, it.sonarrEpisodeId) }
-                    )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when (val state = uiState) {
+                        is BazarrLibrary.Initial, is BazarrLibrary.Loading -> {
+                            LoadingIndicator(
+                                modifier = Modifier.size(96.dp)
+                            )
+                        }
 
-                    BazarrSection.Movies -> WantedMoviesContent(
-                        pagedData = movies,
-                        onLoadMore = viewModel::loadMoreMovies,
-                        onRefresh = viewModel::refresh,
-                        onSearch = { searchTarget = BazarrMediaTarget.Movie(it.radarrId) }
-                    )
+                        is BazarrLibrary.Error -> {
+                            Text(
+                                text = state.message,
+                                modifier = Modifier.align(Alignment.Center),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
 
-                    BazarrSection.Providers -> ProvidersContent(
-                        state = providers,
-                        onRefresh = viewModel::loadProviders,
-                        onReset = viewModel::resetProviders
-                    )
+                        is BazarrLibrary.Success -> {
+                            PullToRefreshBox(
+                                isRefreshing = false,
+                                onRefresh = viewModel::refresh,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                when (section) {
+                                    BazarrSection.Series -> BazarrSeriesList(
+                                        series = state.series,
+                                        onClick = { series ->
+                                            navigator.openDetails(series.serviceId, BazarrMediaType.Series)
+                                        }
+                                    )
+
+                                    BazarrSection.Movies -> BazarrMoviesList(
+                                        movies = state.movies,
+                                        onClick = { movie ->
+                                            navigator.openDetails(movie.serviceId, BazarrMediaType.Movie)
+                                        }
+                                    )
+
+                                    BazarrSection.WantedEpisodes -> WantedEpisodesContent(
+                                        items = state.wantedEpisodes,
+                                        onSearch = {
+                                            searchTarget = BazarrMediaTarget.Episode(it.sonarrSeriesId, it.sonarrEpisodeId)
+                                        }
+                                    )
+
+                                    BazarrSection.WantedMovies -> WantedMoviesContent(
+                                        items = state.wantedMovies,
+                                        onSearch = { searchTarget = BazarrMediaTarget.Movie(it.radarrId) }
+                                    )
+
+                                    BazarrSection.Providers -> ProvidersContent(
+                                        providers = state.providers,
+                                        onReset = viewModel::resetProviders
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -168,26 +238,18 @@ fun BazarrScreen(
 private fun sectionLabel(base: String, count: Int): String =
     if (count > 0) "$base ($count)" else base
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WantedEpisodesContent(
-    pagedData: PagedData<WantedEpisode>,
-    onLoadMore: () -> Unit,
-    onRefresh: () -> Unit,
+    items: List<WantedEpisode>,
     onSearch: (WantedEpisode) -> Unit
 ) {
-    PagedListContainer(
-        isLoading = pagedData.isLoading && pagedData.items.isEmpty(),
-        isEmpty = pagedData.isEmpty,
-        emptyMessage = mokoString(MR.strings.bazarr_no_wanted_episodes),
-        isRefreshing = pagedData.isLoading && pagedData.items.isNotEmpty(),
-        onRefresh = onRefresh
-    ) {
+    if (items.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(mokoString(MR.strings.bazarr_no_wanted_episodes))
+        }
+    } else {
         WantedList(
-            items = pagedData.items,
-            hasMore = pagedData.hasMore,
-            isLoadingMore = pagedData.isLoadingMore,
-            onLoadMore = onLoadMore,
+            items = items,
             key = { it.sonarrEpisodeId },
             title = { it.seriesTitle },
             subtitle = { "${it.episodeNumber} · ${it.episodeTitle}" },
@@ -197,26 +259,18 @@ private fun WantedEpisodesContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WantedMoviesContent(
-    pagedData: PagedData<WantedMovie>,
-    onLoadMore: () -> Unit,
-    onRefresh: () -> Unit,
+    items: List<WantedMovie>,
     onSearch: (WantedMovie) -> Unit
 ) {
-    PagedListContainer(
-        isLoading = pagedData.isLoading && pagedData.items.isEmpty(),
-        isEmpty = pagedData.isEmpty,
-        emptyMessage = mokoString(MR.strings.bazarr_no_wanted_movies),
-        isRefreshing = pagedData.isLoading && pagedData.items.isNotEmpty(),
-        onRefresh = onRefresh
-    ) {
+    if (items.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(mokoString(MR.strings.bazarr_no_wanted_movies))
+        }
+    } else {
         WantedList(
-            items = pagedData.items,
-            hasMore = pagedData.hasMore,
-            isLoadingMore = pagedData.isLoadingMore,
-            onLoadMore = onLoadMore,
+            items = items,
             key = { it.radarrId },
             title = { it.title },
             subtitle = { null },
@@ -230,28 +284,13 @@ private fun WantedMoviesContent(
 @Composable
 private fun <T> WantedList(
     items: List<T>,
-    hasMore: Boolean,
-    isLoadingMore: Boolean,
-    onLoadMore: () -> Unit,
     key: (T) -> Any,
     title: (T) -> String,
     subtitle: (T) -> String?,
     missing: (T) -> List<BazarrSubtitleLanguage>,
     onSearch: (T) -> Unit
 ) {
-    val listState = rememberLazyListState()
-
-    LaunchedEffect(listState, items.size, hasMore) {
-        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
-            .collect { lastVisible ->
-                if (hasMore && !isLoadingMore && lastVisible != null && lastVisible >= items.size - 3) {
-                    onLoadMore()
-                }
-            }
-    }
-
     LazyColumn(
-        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -276,48 +315,32 @@ private fun <T> WantedList(
                 }
             }
         }
-
-        if (isLoadingMore) {
-            item {
-                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(modifier = Modifier.size(28.dp))
-                }
-            }
-        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProvidersContent(
-    state: ProvidersUiState,
-    onRefresh: () -> Unit,
+    providers: List<ProviderStatus>,
     onReset: () -> Unit
 ) {
-    PullToRefreshBox(
-        isRefreshing = state.isLoading,
-        onRefresh = onRefresh,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(onClick = onReset) {
-                    Text(mokoString(MR.strings.bazarr_reset_providers))
-                }
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(onClick = onReset) {
+                Text(mokoString(MR.strings.bazarr_reset_providers))
             }
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(state.providers, key = { it.name }) { provider ->
-                    ProviderRow(provider)
-                }
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(providers, key = { it.name }) { provider ->
+                ProviderRow(provider)
             }
         }
     }
@@ -358,26 +381,163 @@ private fun ProviderRow(provider: ProviderStatus) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PagedListContainer(
-    isLoading: Boolean,
-    isEmpty: Boolean,
-    emptyMessage: String,
-    isRefreshing: Boolean,
-    onRefresh: () -> Unit,
-    content: @Composable () -> Unit
+private fun BazarrSeriesList(
+    series: List<BazarrSeries>,
+    onClick: (BazarrSeries) -> Unit
 ) {
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = onRefresh,
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        when {
-            isLoading -> CircularProgressIndicator(modifier = Modifier.size(56.dp))
-            isEmpty -> Text(emptyMessage, style = MaterialTheme.typography.bodyLarge)
-            else -> content()
+        items(series) { item ->
+            BazarrItem(
+                title = item.title,
+                year = item.year,
+                overview = item.overview,
+                poster = item.poster,
+                fanart = item.fanart,
+                monitored = item.monitored,
+                onClick = { onClick(item) }
+            ) {
+                Text(
+                    text = "${item.episodeFileCount} / ${item.episodeFileCount + item.episodeMissingCount} Episodes",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BazarrMoviesList(
+    movies: List<BazarrMovie>,
+    onClick: (BazarrMovie) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(movies) { item ->
+            BazarrItem(
+                title = item.title,
+                year = item.year,
+                overview = item.overview,
+                poster = item.poster,
+                fanart = item.fanart,
+                monitored = item.monitored,
+                onClick = { onClick(item) }
+            ) {
+                val subtitleCount = item.subtitles.size
+                val missingCount = item.missingSubtitles.size
+                Text(
+                    text = "$subtitleCount Subtitles, $missingCount Missing",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BazarrItem(
+    title: String,
+    year: String,
+    overview: String,
+    poster: String?,
+    fanart: String?,
+    monitored: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    details: @Composable () -> Unit = {}
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            BannerView(
+                bannerModel = fanart?.let { rememberRemoteImageData(it) },
+                modifier = Modifier.matchParentSize()
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(TranslucentBlack)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                ) {
+                    BasePosterItem(
+                        model = rememberRemoteImageData(poster),
+                        modifier = Modifier.height(100.dp),
+                        aspectRatio = AspectRatio.Poster
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentHeight(),
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = buildString {
+                                    append(title)
+                                    append(" ($year)")
+                                },
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Icon(
+                                imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                        details()
+
+                        Text(
+                            text = overview,
+                            fontSize = 14.sp,
+                            lineHeight = 16.sp,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
         }
     }
 }
