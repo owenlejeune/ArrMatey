@@ -44,9 +44,10 @@ class NavigationManager: ObservableObject {
         case .listenarr: audiobookPath.append(route)
         case .seerr: break
         case .prowlarr: break
+        case .bazarr: break
         }
     }
-    
+
     func replaceCurrent(with route: MediaRoute, for type: InstanceType) {
         if showLauncher {
             if !launcherPath.isEmpty { launcherPath.removeLast() }
@@ -74,6 +75,7 @@ class NavigationManager: ObservableObject {
             audiobookPath.append(route)
         case .seerr: break
         case .prowlarr: break // Prowlarr doesn't use media routes
+        case .bazarr: break // Bazarr doesn't use media routes
         }
     }
     
@@ -246,6 +248,7 @@ class NavigationManager: ObservableObject {
         case .listenarr: return TabItemStandard.audiobooks as TabItem
         case .seerr: return TabItemStandard.requests as TabItem
         case .prowlarr: return TabItemStandard.prowlarr as TabItem
+        case .bazarr: return TabItemStandard.bazarr as TabItem
         }
     }
 }

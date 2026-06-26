@@ -75,6 +75,7 @@ import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.api.model.toRatingItems
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
+import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
@@ -98,6 +99,7 @@ import com.dnfapps.arrmatey.ui.components.MovieFileView
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.UpcomingDateView
+import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.sheets.EditArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
@@ -291,17 +293,24 @@ fun MediaDetailsScreen(
                                         },
                                         seasonDeleteInProgress = seasonDeleteStatus is OperationStatus.InProgress
                                     )
-                                    is ArrMovie -> MovieFileView(
-                                        movie = item,
-                                        movieExtraFiles = state.extraFiles,
-                                        searchIds = automaticSearchIds,
-                                        onAutomaticSearch = {
-                                            mediaDetailsViewModel.performAutomaticLookup()
-                                        },
-                                        onDeleteFile = {
-                                            confirmDeleteMovie = true
+                                    is ArrMovie -> {
+                                        MovieFileView(
+                                            movie = item,
+                                            movieExtraFiles = state.extraFiles,
+                                            searchIds = automaticSearchIds,
+                                            onAutomaticSearch = {
+                                                mediaDetailsViewModel.performAutomaticLookup()
+                                            },
+                                            onDeleteFile = {
+                                                confirmDeleteMovie = true
+                                            }
+                                        )
+                                        item.id?.let { movieId ->
+                                            BazarrSubtitlesSection(
+                                                target = BazarrMediaTarget.Movie(movieId)
+                                            )
                                         }
-                                    )
+                                    }
                                     is Arrtist -> AlbumsArea(
                                         artist = item,
                                         albums = state.albums,

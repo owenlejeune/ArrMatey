@@ -21,7 +21,7 @@ data class BazarrMovie(
     override val title: String,
     override val year: String,
     @SerialName("missing_subtitles")
-    val missingSubtitles: List<BazarrMissingSubtitle> = emptyList(),
+    val missingSubtitles: List<BazarrSubtitleLanguage> = emptyList(),
     val sceneName: String? = null,
     val subtitles: List<BazarrSubtitle> = emptyList()
 ) : BazarrMedia

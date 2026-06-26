@@ -60,10 +60,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
-import com.dnfapps.arrmatey.bazarr.api.model.BazarrMissingSubtitle
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitle
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitleLanguage
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.model.toInfoList
@@ -218,7 +218,7 @@ private fun BazarrDetailsHeader(
 @Composable
 private fun SubtitlesSection(
     subtitles: List<BazarrSubtitle>,
-    missingSubtitles: List<BazarrMissingSubtitle> = emptyList()
+    missingSubtitles: List<BazarrSubtitleLanguage> = emptyList()
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -238,7 +238,7 @@ private fun SubtitlesSection(
 }
 
 @Composable
-private fun MissingSubtitleItem(subtitle: BazarrMissingSubtitle) {
+private fun MissingSubtitleItem(subtitle: BazarrSubtitleLanguage) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),

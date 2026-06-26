@@ -144,6 +144,10 @@ class InstanceManager(
         return _instanceRepositories.value.values.filterIsInstance<SeerrInstanceRepository>()
     }
 
+    fun getAllBazarrRepositories(): List<BazarrInstanceRepository> {
+        return _instanceRepositories.value.values.filterIsInstance<BazarrInstanceRepository>()
+    }
+
     fun repositoriesByType(type: InstanceType): Flow<List<InstanceScopedRepository>> =
         instanceRepository.observeInstancesByType(type)
             .combine(_instanceRepositories) { instances, repos ->

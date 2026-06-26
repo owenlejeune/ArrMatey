@@ -11,7 +11,7 @@ import com.dnfapps.arrmatey.navigation.LocalBazarrNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.ui.screens.BazarrDetailsScreen
-import com.dnfapps.arrmatey.ui.screens.BazarrLibraryScreen
+import com.dnfapps.arrmatey.ui.screens.BazarrScreen
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,7 +28,7 @@ fun BazarrTab(
             onBack = { navigation.popBackStack() },
             entryProvider  = entryProvider {
                 entry<BazarrScreen.Library> {
-                    BazarrLibraryScreen(wideRailIsVisible = wideRailIsVisible)
+                    BazarrScreen(wideRailIsVisible = wideRailIsVisible)
                 }
                 entry<BazarrScreen.Details> { details ->
                     BazarrDetailsScreen(details.id, details.type)

@@ -69,6 +69,7 @@ import com.dnfapps.arrmatey.ui.tabs.BazarrTab
 import com.dnfapps.arrmatey.ui.tabs.CalendarTab
 import com.dnfapps.arrmatey.ui.tabs.DashboardTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
+import com.dnfapps.arrmatey.ui.tabs.BazarrTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost

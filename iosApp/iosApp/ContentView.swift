@@ -184,6 +184,7 @@ struct LauncherTabView: View {
                 case .downloads: DownloadsTab().environment(\.navigationContext, .launcher)
                 case .requests: RequestsTab().environment(\.navigationContext, .launcher)
                 case .prowlarr: ProwlarrTab().environment(\.navigationContext, .launcher)
+                case .bazarr: BazarrTab().environment(\.navigationContext, .launcher)
                 case .dashboard: DashboardTab().environment(\.navigationContext, .launcher)
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {

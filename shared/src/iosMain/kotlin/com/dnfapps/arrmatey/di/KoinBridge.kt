@@ -25,6 +25,10 @@ import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
+import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.datastore.PreferencesStore
@@ -106,6 +110,15 @@ object KoinBridge: KoinComponent {
 
     fun getProwlarrSearchViewModel(): ProwlarrSearchViewModel =
         getKoin().get()
+
+    fun getBazarrViewModel(): BazarrViewModel =
+        getKoin().get()
+
+    fun getBazarrSubtitleSearchViewModel(target: BazarrMediaTarget): BazarrSubtitleSearchViewModel =
+        getKoin().get { parametersOf(target) }
+
+    fun getBazarrMediaSubtitlesViewModel(target: BazarrMediaTarget): BazarrMediaSubtitlesViewModel =
+        getKoin().get { parametersOf(target) }
 
     fun getCustomWebpageConfigurationViewModel(webpageId: Long?): CustomWebpageConfigurationViewModel =
         getKoin().get { parametersOf(webpageId) }

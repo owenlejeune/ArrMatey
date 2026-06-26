@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrBazarr
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
@@ -230,10 +231,10 @@ enum class InstanceType(
         apiBase = "api",
         testEndpoint = "system/status",
         getApiKeyEndpoint = "settings/general",
-        includeTopLevelAutomaticSearchOption = true,
+        includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = false,
-        associatedColor = ArrGrey
+        associatedColor = ArrBazarr
     );
 
     companion object {

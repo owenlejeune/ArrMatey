@@ -26,6 +26,7 @@ struct TabItemContent: View {
                 case .downloads: DownloadsTab().environment(\.navigationContext, .mainTab)
                 case .requests: RequestsTab().environment(\.navigationContext, .mainTab)
                 case .prowlarr: ProwlarrTab().environment(\.navigationContext, .mainTab)
+                case .bazarr: BazarrTab().environment(\.navigationContext, .mainTab)
                 case .dashboard: DashboardTab().environment(\.navigationContext, .mainTab)
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {

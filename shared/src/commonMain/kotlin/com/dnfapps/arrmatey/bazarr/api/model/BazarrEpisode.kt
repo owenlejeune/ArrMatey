@@ -10,7 +10,7 @@ data class BazarrEpisode(
     val episode: Int,
     val season: Int,
     @SerialName("missing_subtitles")
-    val missingSubtitles: List<BazarrMissingSubtitle> = emptyList(),
+    val missingSubtitles: List<BazarrSubtitleLanguage> = emptyList(),
     val monitored: Boolean,
     val path: String,
     val sonarrEpisodeId: Long,
