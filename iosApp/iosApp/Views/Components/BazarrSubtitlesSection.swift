@@ -24,8 +24,34 @@ struct BazarrSubtitlesSection: View {
         if state is BazarrSubtitlesUiStateNoInstance || state is BazarrSubtitlesUiStateNotTracked {
             EmptyView()
         } else {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(MR.strings().bazarr_subtitles.localized()).font(.title3).bold()
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 4) {
+                    Text(MR.strings().bazarr_subtitles.localized())
+                        .font(.title3)
+                        .bold()
+                    
+                    if let icon = InstanceType.bazarr.tabIcon {
+                        Image(uiImage: icon.toUIImage()!)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 24, height: 24)
+                    }
+                    
+                    Spacer()
+                    
+                    Button {
+                        showSearch = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "magnifyingglass")
+                            Text(MR.strings().bazarr_search_subtitles.localized())
+                        }
+                        .font(.subheadline)
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .frame(maxWidth: .infinity)
+                
                 content(state)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -37,53 +63,121 @@ struct BazarrSubtitlesSection: View {
 
     @ViewBuilder private func content(_ state: BazarrSubtitlesUiState) -> some View {
         if state is BazarrSubtitlesUiStateLoading {
-            ProgressView()
+            HStack {
+                Spacer()
+                ProgressView()
+                Spacer()
+            }
+            .padding(16)
         } else if let error = state as? BazarrSubtitlesUiStateError {
             Text(error.message).foregroundStyle(.red)
         } else if let success = state as? BazarrSubtitlesUiStateSuccess {
-            if success.present.isEmpty {
-                Text(MR.strings().bazarr_no_subtitles.localized()).foregroundStyle(.secondary)
-            } else {
-                ForEach(Array(success.present.enumerated()), id: \.offset) { _, subtitle in
-                    HStack {
-                        SubtitleChip(label: subtitleLabel(subtitle))
-                        Text(subtitle.name).font(.subheadline)
-                        Spacer()
-                        if subtitle.isExternal {
-                            Button { viewModel.delete(subtitle) } label: {
-                                Image(systemName: "trash").foregroundStyle(.red)
-                            }
-                            .buttonStyle(.borderless)
-                        }
-                    }
-                }
+            if !success.embedded.isEmpty {
+                EmbeddedSubtitlesCard(embedded: success.embedded)
+            }
+            
+            ForEach(success.present, id: \.self) { subtitle in
+                PresentSubtitleRow(subtitle: subtitle, onDelete: { viewModel.delete(subtitle) })
             }
 
-            if !success.missing.isEmpty {
-                Text(MR.strings().bazarr_missing_subtitles.localized()).font(.subheadline)
-                ForEach(Array(success.missing.enumerated()), id: \.offset) { _, language in
-                    HStack {
-                        SubtitleChip(label: chipLabel(language))
-                        Button(MR.strings().bazarr_auto_search.localized()) {
-                            viewModel.autoSearch(language)
-                        }
-                        .buttonStyle(.borderless)
-                        Spacer()
-                    }
-                }
+            ForEach(success.missing, id: \.self) { language in
+                MissingSubtitleRow(language: language, onAutoSearch: { viewModel.autoSearch(language) })
             }
-
-            Button {
-                showSearch = true
-            } label: {
-                Label(MR.strings().bazarr_search_subtitles.localized(), systemImage: "magnifyingglass")
-            }
-            .buttonStyle(.bordered)
 
             if viewModel.operationState is OperationStatusInProgress {
-                ProgressView()
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text(MR.strings().bazarr_auto_search.localized())
+                        .font(.caption)
+                }
+                .padding(.top, 8)
             }
         }
+    }
+}
+
+private struct EmbeddedSubtitlesCard: View {
+    let embedded: [BazarrSubtitle]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("\(embedded.count) Embedded Subtitles")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+            
+            FlowLayout(spacing: 4) {
+                ForEach(embedded, id: \.self) { subtitle in
+                    SubtitleChip(label: subtitleLabel(subtitle))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 18)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+}
+
+private struct PresentSubtitleRow: View {
+    let subtitle: BazarrSubtitle
+    let onDelete: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(subtitle.name)
+                    .font(.subheadline)
+                if let path = subtitle.path {
+                    Text(path)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            SubtitleChip(label: subtitleLabel(subtitle))
+            
+            if subtitle.isExternal {
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                        .foregroundStyle(.red)
+                }
+                .buttonStyle(.borderless)
+            }
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 18)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+}
+
+private struct MissingSubtitleRow: View {
+    let language: BazarrSubtitleLanguage
+    let onAutoSearch: () -> Void
+    
+    var body: some View {
+        Button(action: onAutoSearch) {
+            HStack(spacing: 8) {
+                SubtitleChip(label: chipLabel(language))
+                Text(MR.strings().missing.localized())
+                    .foregroundStyle(.red)
+                    .font(.subheadline)
+                
+                Spacer()
+                
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 18)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
     }
 }
 

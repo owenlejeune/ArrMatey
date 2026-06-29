@@ -35,6 +35,7 @@ class BazarrViewModel(
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _selectedSection = MutableStateFlow(BazarrSection.entries.first())
     val selectedSection: StateFlow<BazarrSection> = _selectedSection.asStateFlow()

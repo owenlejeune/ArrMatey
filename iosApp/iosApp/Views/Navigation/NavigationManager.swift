@@ -20,6 +20,7 @@ class NavigationManager: ObservableObject {
     @Published var seerrPath = NavigationPath()
     @Published var launcherPath = NavigationPath()
     @Published var dashboardPath = NavigationPath()
+    @Published var bazarrPath = NavigationPath()
     
     @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemSettings.shared)
     @Published var selectedDrawerTab: AnyTabItem? = nil
@@ -87,6 +88,14 @@ class NavigationManager: ObservableObject {
         }
     }
     
+    func go(to route: BazarrRoute) {
+        if showLauncher {
+            launcherPath.append(route)
+        } else {
+            bazarrPath.append(route)
+        }
+    }
+    
     func setSelectedDrawerTab(_ tab: AnyTabItem?) {
         selectedDrawerTab = tab
     }
@@ -129,6 +138,7 @@ class NavigationManager: ObservableObject {
         audiobookPath = NavigationPath()
         seerrPath = NavigationPath()
         launcherPath = NavigationPath()
+        bazarrPath = NavigationPath()
     }
     
     func maybeEditInstance(of type: InstanceType, _ instance: Instance?) {
@@ -290,4 +300,9 @@ enum SettingsRoute : Hashable {
     case editDownloadClient(Int64)
     case newCustomWebpage
     case editCustomWebpage(Int64)
+}
+
+enum BazarrRoute: Hashable {
+    case library
+    case details(Int64, BazarrMediaType)
 }

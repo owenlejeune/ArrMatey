@@ -10,9 +10,9 @@ import SwiftUI
 class BazarrViewModelS: ObservableObject {
     private let viewModel: BazarrViewModel
 
-    @Published private(set) var wantedEpisodesState = PagedData<WantedEpisode>()
-    @Published private(set) var wantedMoviesState = PagedData<WantedMovie>()
-    @Published private(set) var providersState = ProvidersUiState(isLoading: false, providers: [], error: nil)
+    @Published private(set) var uiState: BazarrLibrary = BazarrLibraryInitial()
+    @Published private(set) var selectedSection: BazarrSection = BazarrSection.series
+    @Published var searchQuery: String = ""
 
     init() {
         self.viewModel = KoinBridge.shared.getBazarrViewModel()
@@ -20,25 +20,21 @@ class BazarrViewModelS: ObservableObject {
     }
 
     private func startObserving() {
-        viewModel.wantedEpisodesState.observeAsync(on: self, to: \.wantedEpisodesState)
-        viewModel.wantedMoviesState.observeAsync(on: self, to: \.wantedMoviesState)
-        viewModel.providersState.observeAsync(on: self, to: \.providersState)
+        viewModel.uiState.observeAsync(on: self, to: \.uiState)
+        viewModel.selectedSection.observeAsync(on: self, to: \.selectedSection)
+        viewModel.searchQuery.observeAsync(on: self, to: \.searchQuery)
+    }
+
+    func selectSection(_ section: BazarrSection) {
+        viewModel.selectSection(section: section)
+    }
+
+    func updateSearchQuery(_ query: String) {
+        viewModel.updateSearchQuery(query: query)
     }
 
     func refresh() {
         viewModel.refresh()
-    }
-
-    func loadMoreEpisodes() {
-        viewModel.loadMoreEpisodes()
-    }
-
-    func loadMoreMovies() {
-        viewModel.loadMoreMovies()
-    }
-
-    func loadProviders() {
-        viewModel.loadProviders()
     }
 
     func resetProviders() {

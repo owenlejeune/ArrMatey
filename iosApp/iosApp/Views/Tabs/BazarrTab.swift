@@ -8,12 +8,20 @@ import Shared
 
 struct BazarrTab: View {
     @Environment(\.navigationContext) private var context
+    @EnvironmentObject private var navigation: NavigationManager
 
     var body: some View {
         switch context {
         case .mainTab:
-            NavigationStack {
+            NavigationStack(path: $navigation.bazarrPath) {
                 BazarrTabContent()
+                    .navigationDestination(for: BazarrRoute.self) { route in
+                        BazarrRouteDestination(route: route)
+                    }
+                    .navigationDestination(for: AnyTabItem.self) { anyTabItem in
+                        let tab: TabItem = anyTabItem.item
+                        TabItemContent(tabItem: tab)
+                    }
             }
         case .launcher:
             BazarrTabContent()
@@ -27,73 +35,233 @@ private struct SearchTarget: Identifiable {
 }
 
 struct BazarrTabContent: View {
-    @State private var segment = 0
     @State private var searchTarget: SearchTarget?
-    @ObservedObject private var viewModel = BazarrViewModelS()
+    @StateObject private var viewModel = BazarrViewModelS()
+    
+    @EnvironmentObject private var navigation: NavigationManager
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("", selection: $segment) {
-                Text(MR.strings().bazarr_wanted_episodes.localized()).tag(0)
-                Text(MR.strings().bazarr_wanted_movies.localized()).tag(1)
-                Text(MR.strings().bazarr_providers.localized()).tag(2)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(BazarrSection.allCases, id: \.self) { section in
+                        let isSelected = viewModel.selectedSection == section
+                        Text(sectionLabel(section))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(isSelected ? Color.themePrimary : Color.secondary.opacity(0.1))
+                            .foregroundStyle(isSelected ? .white : .primary)
+                            .clipShape(Capsule())
+                            .onTapGesture {
+                                viewModel.selectSection(section)
+                            }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
 
-            switch segment {
-            case 0:
-                WantedEpisodesList(
-                    state: viewModel.wantedEpisodesState,
-                    onLoadMore: viewModel.loadMoreEpisodes,
-                    onRefresh: viewModel.refresh
-                ) { episode in
-                    searchTarget = SearchTarget(
-                        target: BazarrMediaTargetEpisode(
-                            seriesId: episode.sonarrSeriesId,
-                            episodeId: episode.sonarrEpisodeId
+            let state = viewModel.uiState
+            if state is BazarrLibraryInitial || state is BazarrLibraryLoading {
+                Spacer()
+                ProgressView()
+                Spacer()
+            } else if let error = state as? BazarrLibraryError {
+                Spacer()
+                Text(error.message).foregroundStyle(.red)
+                Spacer()
+            } else if let success = state as? BazarrLibrarySuccess {
+                Group {
+                    switch viewModel.selectedSection {
+                    case .series:
+                        let series = success.series
+                        BazarrSeriesList(series: series, onClick: { item in
+                            navigation.go(to: BazarrRoute.details(item.serviceId, .series))
+                        })
+                    case .movies:
+                        let movies = success.movies
+                        BazarrMoviesList(movies: movies, onClick: { item in
+                            navigation.go(to: BazarrRoute.details(item.serviceId, .movie))
+                        })
+                    case .wantedEpisodes:
+                        let episodes = success.wantedEpisodes
+                        WantedEpisodesList(items: episodes, onSearch: { episode in
+                            searchTarget = SearchTarget(
+                                target: BazarrMediaTargetEpisode(
+                                    seriesId: episode.sonarrSeriesId,
+                                    episodeId: episode.sonarrEpisodeId
+                                )
+                            )
+                        })
+                    case .wantedMovies:
+                        let movies = success.wantedMovies
+                        WantedMoviesList(items: movies, onSearch: { movie in
+                            searchTarget = SearchTarget(
+                                target: BazarrMediaTargetMovie(radarrId: movie.radarrId)
+                            )
+                        })
+                    case .providers:
+                        ProvidersList(
+                            providers: success.providers as? [ProviderStatus] ?? [],
+                            onReset: viewModel.resetProviders
                         )
-                    )
+                    default:
+                        EmptyView()
+                    }
                 }
-            case 1:
-                WantedMoviesList(
-                    state: viewModel.wantedMoviesState,
-                    onLoadMore: viewModel.loadMoreMovies,
-                    onRefresh: viewModel.refresh
-                ) { movie in
-                    searchTarget = SearchTarget(
-                        target: BazarrMediaTargetMovie(radarrId: movie.radarrId)
-                    )
-                }
-            default:
-                ProvidersList(
-                    state: viewModel.providersState,
-                    onRefresh: viewModel.loadProviders,
-                    onReset: viewModel.resetProviders
-                )
+                .refreshable { viewModel.refresh() }
             }
         }
         .navigationTitle(MR.strings().bazarr.localized())
+        .searchable(text: $viewModel.searchQuery)
+        .onChange(of: viewModel.searchQuery) { _, newValue in
+            viewModel.updateSearchQuery(newValue)
+        }
         .sheet(item: $searchTarget) { item in
             BazarrSubtitleSearchSheet(target: item.target)
         }
     }
+
+    private func sectionLabel(_ section: BazarrSection) -> String {
+        let success = viewModel.uiState as? BazarrLibrarySuccess
+        let count: Int32 = {
+            guard let success else { return 0 }
+            switch section {
+            case .series: return Int32(success.series.count)
+            case .movies: return Int32(success.movies.count)
+            case .wantedEpisodes: return Int32(success.wantedEpisodes.count)
+            case .wantedMovies: return Int32(success.wantedMovies.count)
+            default: return 0
+            }
+        }()
+
+        let label: String = {
+            switch section {
+            case .series: return MR.strings().series.localized()
+            case .movies: return MR.strings().movies.localized()
+            case .wantedEpisodes: return MR.strings().bazarr_wanted_episodes.localized()
+            case .wantedMovies: return MR.strings().bazarr_wanted_movies.localized()
+            case .providers: return MR.strings().bazarr_providers.localized()
+            default: return ""
+            }
+        }()
+
+        return count > 0 ? "\(label) (\(count))" : label
+    }
+}
+
+private struct BazarrSeriesList: View {
+    let series: [BazarrSeries]
+    let onClick: (BazarrSeries) -> Void
+    var body: some View {
+        List {
+            ForEach(series, id: \.serviceId) { item in
+                BazarrItemRow(
+                    title: item.title,
+                    year: item.year,
+                    overview: item.overview,
+                    poster: item.poster,
+                    fanart: item.fanart,
+                    monitored: item.monitored,
+                    details: "\(item.episodeFileCount) / \(item.episodeFileCount + item.episodeMissingCount) Episodes"
+                )
+                .onTapGesture { onClick(item) }
+            }
+        }
+        .listStyle(.plain)
+    }
+}
+
+private struct BazarrMoviesList: View {
+    let movies: [BazarrMovie]
+    let onClick: (BazarrMovie) -> Void
+    var body: some View {
+        List {
+            ForEach(movies, id: \.serviceId) { item in
+                BazarrItemRow(
+                    title: item.title,
+                    year: item.year,
+                    overview: item.overview,
+                    poster: item.poster,
+                    fanart: item.fanart,
+                    monitored: item.monitored,
+                    details: "\(item.subtitles.count) Subtitles, \(item.missingSubtitles.count) Missing"
+                )
+                .onTapGesture { onClick(item) }
+            }
+        }
+        .listStyle(.plain)
+    }
+}
+
+private struct BazarrItemRow: View {
+    let title: String
+    let year: String
+    let overview: String
+    let poster: String?
+    let fanart: String?
+    let monitored: Bool
+    let details: String
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            if let fanart {
+                AsyncImage(url: URL(string: fanart)) { image in
+                    image.resizable().scaledToFill()
+                } placeholder: {
+                    Color.gray.opacity(0.3)
+                }
+                .frame(height: 120)
+                .clipped()
+                .overlay(Color.black.opacity(0.5))
+            } else {
+                Color.gray.opacity(0.3).frame(height: 120)
+            }
+
+            HStack(alignment: .top, spacing: 12) {
+                if let poster {
+                    AsyncImage(url: URL(string: poster)) { image in
+                        image.resizable().scaledToFit()
+                    } placeholder: {
+                        Color.gray
+                    }
+                    .frame(width: 60, height: 90)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("\(title) (\(year))")
+                            .font(.headline)
+                            .lineLimit(1)
+                            .foregroundStyle(.white)
+                        Spacer()
+                        Image(systemName: monitored ? "bookmark.fill" : "bookmark")
+                            .foregroundStyle(.white)
+                    }
+                    Text(details)
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.8))
+                    Text(overview)
+                        .font(.caption2)
+                        .lineLimit(2)
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+            }
+            .padding(12)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+        .listRowSeparator(.hidden)
+    }
 }
 
 private struct WantedEpisodesList: View {
-    let state: PagedData<WantedEpisode>
-    let onLoadMore: () -> Void
-    let onRefresh: () -> Void
+    let items: [WantedEpisode]
     let onSearch: (WantedEpisode) -> Void
 
     var body: some View {
-        let items = state.items as! [WantedEpisode]
-        if state.isLoading && items.isEmpty {
-            Spacer()
-            ProgressView()
-            Spacer()
-        } else if items.isEmpty {
+        if items.isEmpty {
             Spacer()
             Text(MR.strings().bazarr_no_wanted_episodes.localized())
                 .foregroundStyle(.secondary)
@@ -107,32 +275,19 @@ private struct WantedEpisodesList: View {
                         missing: episode.missingSubtitles,
                         onSearch: { onSearch(episode) }
                     )
-                    .onAppear {
-                        if episode.sonarrEpisodeId == items.last?.sonarrEpisodeId {
-                            onLoadMore()
-                        }
-                    }
                 }
             }
             .listStyle(.plain)
-            .refreshable { onRefresh() }
         }
     }
 }
 
 private struct WantedMoviesList: View {
-    let state: PagedData<WantedMovie>
-    let onLoadMore: () -> Void
-    let onRefresh: () -> Void
+    let items: [WantedMovie]
     let onSearch: (WantedMovie) -> Void
 
     var body: some View {
-        let items = state.items as! [WantedMovie]
-        if state.isLoading && items.isEmpty {
-            Spacer()
-            ProgressView()
-            Spacer()
-        } else if items.isEmpty {
+        if items.isEmpty {
             Spacer()
             Text(MR.strings().bazarr_no_wanted_movies.localized())
                 .foregroundStyle(.secondary)
@@ -146,15 +301,9 @@ private struct WantedMoviesList: View {
                         missing: movie.missingSubtitles,
                         onSearch: { onSearch(movie) }
                     )
-                    .onAppear {
-                        if movie.radarrId == items.last?.radarrId {
-                            onLoadMore()
-                        }
-                    }
                 }
             }
             .listStyle(.plain)
-            .refreshable { onRefresh() }
         }
     }
 }
@@ -188,33 +337,35 @@ private struct WantedRow: View {
 }
 
 private struct ProvidersList: View {
-    let state: ProvidersUiState
-    let onRefresh: () -> Void
+    let providers: [ProviderStatus]
     let onReset: () -> Void
 
     var body: some View {
-        List {
-            ForEach(Array(state.providers.enumerated()), id: \.offset) { _, provider in
-                HStack {
-                    Circle()
-                        .fill(isHealthy(provider) ? Color.green : Color.red)
-                        .frame(width: 10, height: 10)
-                    VStack(alignment: .leading) {
-                        Text(provider.name).font(.headline)
-                        if let status = provider.status, !status.isEmpty {
-                            Text(status).font(.subheadline).foregroundStyle(.secondary)
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                Button(MR.strings().bazarr_reset_providers.localized(), action: onReset)
+                    .buttonStyle(.borderless)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+            }
+            List {
+                ForEach(Array(providers.enumerated()), id: \.offset) { _, provider in
+                    HStack {
+                        Circle()
+                            .fill(isHealthy(provider) ? Color.green : Color.red)
+                            .frame(width: 10, height: 10)
+                        VStack(alignment: .leading) {
+                            Text(provider.name).font(.headline)
+                            if let status = provider.status, !status.isEmpty {
+                                Text(status).font(.subheadline).foregroundStyle(.secondary)
+                            }
                         }
+                        Spacer()
                     }
-                    Spacer()
                 }
             }
-        }
-        .listStyle(.plain)
-        .refreshable { onRefresh() }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(MR.strings().bazarr_reset_providers.localized(), action: onReset)
-            }
+            .listStyle(.plain)
         }
     }
 

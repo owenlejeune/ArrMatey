@@ -25,7 +25,9 @@ import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
@@ -113,6 +115,9 @@ object KoinBridge: KoinComponent {
 
     fun getBazarrViewModel(): BazarrViewModel =
         getKoin().get()
+
+    fun getBazarrDetailsViewModel(id: Long, type: BazarrMediaType): BazarrDetailsViewModel =
+        getKoin().get { parametersOf(id, type) }
 
     fun getBazarrSubtitleSearchViewModel(target: BazarrMediaTarget): BazarrSubtitleSearchViewModel =
         getKoin().get { parametersOf(target) }

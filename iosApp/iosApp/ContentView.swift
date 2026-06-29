@@ -119,6 +119,9 @@ struct AppLauncherGrid: View {
             .navigationDestination(for: SeerrRoute.self) { route in
                 SeerrRouteDestination(route: route)
             }
+            .navigationDestination(for: BazarrRoute.self) { route in
+                BazarrRouteDestination(route: route)
+            }
         }
     }
     
@@ -195,6 +198,9 @@ struct LauncherTabView: View {
         }
         .navigationDestination(for: SeerrRoute.self) { route in
             SeerrRouteDestination(route: route)
+        }
+        .navigationDestination(for: BazarrRoute.self) { route in
+            BazarrRouteDestination(route: route)
         }
     }
 }
