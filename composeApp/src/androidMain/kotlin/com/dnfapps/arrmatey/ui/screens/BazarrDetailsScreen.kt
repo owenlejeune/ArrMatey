@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,14 +40,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -58,13 +62,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.widget.Toast
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitle
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitleLanguage
+import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
+import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.model.toInfoList
 import com.dnfapps.arrmatey.navigation.BazarrScreen
@@ -77,6 +84,7 @@ import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
+import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitleSearchSheet
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -90,7 +98,28 @@ fun BazarrDetailsScreen(
     navigator: Navigator<BazarrScreen> = LocalBazarrNavigator.current
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val operationState by viewModel.operationState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+
+    var searchTarget by remember { mutableStateOf<BazarrMediaTarget?>(null) }
+
+    val searchQueuedMessage = mokoString(MR.strings.search_queued)
+    val searchErrorMessage = mokoString(MR.strings.search_error)
+    LaunchedEffect(operationState) {
+        when (operationState) {
+            is OperationStatus.Success -> {
+                Toast.makeText(context, searchQueuedMessage, Toast.LENGTH_SHORT).show()
+                viewModel.clearOperation()
+            }
+            is OperationStatus.Error -> {
+                Toast.makeText(context, searchErrorMessage, Toast.LENGTH_SHORT).show()
+                viewModel.clearOperation()
+            }
+            else -> {}
+        }
+    }
+
     Scaffold(
         topBar = {
             OverlayTopAppBar(
@@ -104,18 +133,32 @@ fun BazarrDetailsScreen(
                     }
                 },
                 actions = {
-                    if (type == BazarrMediaType.Movie) {
+                    if (type == BazarrMediaType.Movie && uiState.details?.serviceId != null) {
                         IconButton(
-                            onClick = { }
+                            onClick = {
+                                searchTarget = BazarrMediaTarget.Movie(uiState.details!!.serviceId)
+                            },
+                            colors = IconButtonDefaults.headerBarColors()
                         ) {
                             Icon(Icons.Default.Person, null)
                         }
                     }
                     IconButton(
-                        onClick = { },
-                        colors = IconButtonDefaults.headerBarColors()
+                        onClick = {
+                            viewModel.performSearch()
+                        },
+                        colors = IconButtonDefaults.headerBarColors(),
+                        enabled = operationState !is OperationStatus.InProgress
                     ) {
-                        Icon(Icons.Default.Search, null)
+                        if (operationState is OperationStatus.InProgress) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(Icons.Default.Search, null)
+                        }
                     }
                 }
             )
@@ -150,10 +193,14 @@ fun BazarrDetailsScreen(
 
                 when (val details = uiState.details) {
                     is BazarrMovie -> {
-                        SubtitlesSection(details.subtitles, details.missingSubtitles)
+                        SubtitlesSection(details.subtitles, details.missingSubtitles, onSearch = {
+                            searchTarget = BazarrMediaTarget.Movie(details.serviceId)
+                        })
                     }
                     is BazarrSeries -> {
-                        BazarrEpisodesSection(uiState.episodes)
+                        BazarrEpisodesSection(uiState.episodes, onSearch = { seriesId, epId ->
+                            searchTarget = BazarrMediaTarget.Episode(seriesId, epId)
+                        })
                     }
                     null -> {}
                 }
@@ -179,6 +226,13 @@ fun BazarrDetailsScreen(
                 }.toInfoList()
                 InfoArea(infoItems)
             }
+        }
+
+        searchTarget?.let { target ->
+            BazarrSubtitleSearchSheet(
+                target = target,
+                onDismiss = { searchTarget = null }
+            )
         }
     }
 }
@@ -218,7 +272,8 @@ private fun BazarrDetailsHeader(
 @Composable
 private fun SubtitlesSection(
     subtitles: List<BazarrSubtitle>,
-    missingSubtitles: List<BazarrSubtitleLanguage> = emptyList()
+    missingSubtitles: List<BazarrSubtitleLanguage>,
+    onSearch: () -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -232,17 +287,21 @@ private fun SubtitlesSection(
         }
 
         missingSubtitles.forEach { missing ->
-            MissingSubtitleItem(missing)
+            MissingSubtitleItem(missing, onSearch)
         }
     }
 }
 
 @Composable
-private fun MissingSubtitleItem(subtitle: BazarrSubtitleLanguage) {
+private fun MissingSubtitleItem(
+    subtitle: BazarrSubtitleLanguage,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
@@ -320,7 +379,10 @@ private fun SubtitleItem(subtitle: BazarrSubtitle) {
 }
 
 @Composable
-private fun BazarrEpisodesSection(episodes: List<BazarrEpisode>) {
+private fun BazarrEpisodesSection(
+    episodes: List<BazarrEpisode>,
+    onSearch: (Long, Long) -> Unit
+) {
     val seasons = episodes.groupBy { it.season }.toSortedMap(compareByDescending { it })
 
     Column(
@@ -376,7 +438,9 @@ private fun BazarrEpisodesSection(episodes: List<BazarrEpisode>) {
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         seasonEpisodes.sortedBy { it.episode }.forEachIndexed { index, episode ->
-                            BazarrEpisodeItem(episode)
+                            BazarrEpisodeItem(episode, onClick = {
+                                onSearch(episode.sonarrSeriesId, episode.sonarrEpisodeId)
+                            })
                             if (index < seasonEpisodes.size - 1) {
                                 HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
                             }
@@ -389,13 +453,17 @@ private fun BazarrEpisodesSection(episodes: List<BazarrEpisode>) {
 }
 
 @Composable
-private fun BazarrEpisodeItem(episode: BazarrEpisode) {
+private fun BazarrEpisodeItem(
+    episode: BazarrEpisode,
+    onClick: () -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 4.dp)
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier.weight(1f),
@@ -411,6 +479,15 @@ private fun BazarrEpisodeItem(episode: BazarrEpisode) {
                         append(episode.title)
                     }
                 }
+
+                withStyle(SpanStyle(
+                    color = MaterialTheme.colorScheme.error,
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 14.sp
+                )) {
+                    append(" ")
+                    append(mokoString(MR.strings.missing))
+                }
             }
             Text(
                 text = titleString,
@@ -422,7 +499,8 @@ private fun BazarrEpisodeItem(episode: BazarrEpisode) {
             FlowRow(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                itemVerticalAlignment = Alignment.CenterVertically
             ) {
                 episode.audioLanguages.forEach { lang ->
                     LanguageTag(text = lang.name.uppercase(), containerColor = Color(0xFF4A2C5E))
@@ -440,42 +518,10 @@ private fun BazarrEpisodeItem(episode: BazarrEpisode) {
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
-                if (episode.subtitles.isEmpty() && episode.missingSubtitles.isNotEmpty()) {
-                    Text(
-                        text = mokoString(MR.strings.missing),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.error,
-                        fontStyle = FontStyle.Italic,
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                }
             }
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.outline
-            )
-            Icon(
-                imageVector = Icons.Default.History,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.outline
-            )
-            Icon(
-                imageVector = if (episode.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = if (episode.monitored) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-            )
-        }
+
     }
 }
 

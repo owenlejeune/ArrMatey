@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.components.bazarr
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,9 +36,11 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.SubtitleSearchState
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 
 /**
  * Modal sheet listing manual provider subtitle results for a single episode or movie,
@@ -59,7 +62,6 @@ fun BazarrSubtitleSearchSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 24.dp)
         ) {
             Text(
                 text = mokoString(MR.strings.bazarr_search_subtitles),
@@ -85,7 +87,6 @@ fun BazarrSubtitleSearchSheet(
                         Text(mokoString(MR.strings.bazarr_no_results))
                     } else {
                         LazyColumn(
-                            modifier = Modifier.heightIn(max = 480.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(state.results, key = { "${it.provider}:${it.subtitle}" }) { result ->
@@ -113,7 +114,10 @@ private fun SearchResultRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 SubtitleLanguageChip(label = result.languageLabel())
                 Text(result.provider, fontWeight = FontWeight.SemiBold)

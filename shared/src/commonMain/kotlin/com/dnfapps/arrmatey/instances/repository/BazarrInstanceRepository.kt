@@ -141,6 +141,12 @@ class BazarrInstanceRepository(
             subtitle = result.subtitle
         )
 
+    suspend fun autoSearchSeriesSubtitles(seriesId: Long): NetworkResult<Unit> =
+        bazarrClient.autoSearchSeriesSubtitles(seriesId)
+
+    suspend fun autoSearchMovieSubtitles(radarrId: Long): NetworkResult<Unit> =
+        bazarrClient.autoSearchMovieSubtitles(radarrId)
+
     suspend fun autoSearchEpisodeSubtitles(
         seriesId: Long,
         episodeId: Long,

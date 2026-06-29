@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -39,9 +42,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +73,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.LocalBazarrNavigator
 import com.dnfapps.arrmatey.navigation.openDetails
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.BasePosterItem
 import com.dnfapps.arrmatey.ui.components.ContainerCard
@@ -82,6 +86,7 @@ import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -99,16 +104,36 @@ fun BazarrScreen(
 
     var searchTarget by remember { mutableStateOf<BazarrMediaTarget?>(null) }
 
+    val textFieldState = rememberTextFieldState()
+
+    LaunchedEffect(textFieldState.text) {
+        viewModel.updateSearchQuery(textFieldState.text.toString())
+    }
+
+    LaunchedEffect(section) {
+        textFieldState.clearText()
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = { Text(mokoString(MR.strings.bazarr)) },
+            ArrAppBarWithSearch(
+                textFieldState = textFieldState,
+                textFieldEnabled = instancesState.selectedInstance != null && section != BazarrSection.Providers,
+                searchPlaceholder = mokoString(MR.strings.search_placeholder, instancesState.selectedInstance?.label ?: ""),
+                trailingIcon = {
+                    Image(
+                        painter = painterResource(InstanceType.Bazarr.icon),
+                        contentDescription = mokoString(InstanceType.Bazarr.resource),
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
                 navigationIcon = {
                     if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
-                }
+                },
+                actions = {}
             )
         },
         contentWindowInsets = WindowInsets.statusBars

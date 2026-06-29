@@ -34,6 +34,8 @@ class BazarrViewModel(
     private val resetBazarrProvidersUseCase: ResetBazarrProvidersUseCase
 ) : ViewModel() {
 
+    private val _searchQuery = MutableStateFlow("")
+
     private val _selectedSection = MutableStateFlow(BazarrSection.entries.first())
     val selectedSection: StateFlow<BazarrSection> = _selectedSection.asStateFlow()
 
@@ -54,6 +56,22 @@ class BazarrViewModel(
     ) { repo, _ -> repo }
         .flatMapLatest { repo ->
             getBazarrLibraryUseCase(repo)
+        }
+        .combine(_searchQuery) { library, query ->
+            if (query.isBlank() || library !is BazarrLibrary.Success) {
+                library
+            } else {
+                library.copy(
+                    series = library.series.filter { it.title.contains(query, ignoreCase = true) },
+                    movies = library.movies.filter { it.title.contains(query, ignoreCase = true) },
+                    wantedEpisodes = library.wantedEpisodes.filter {
+                        it.seriesTitle.contains(query, ignoreCase = true) ||
+                                it.episodeTitle.contains(query, ignoreCase = true)
+                    },
+                    wantedMovies = library.wantedMovies.filter { it.title.contains(query, ignoreCase = true) },
+                    providers = library.providers.filter { it.name.contains(query, ignoreCase = true) }
+                )
+            }
         }
         .stateIn(
             scope = viewModelScope,
@@ -81,5 +99,9 @@ class BazarrViewModel(
                 refresh()
             }
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
     }
 }

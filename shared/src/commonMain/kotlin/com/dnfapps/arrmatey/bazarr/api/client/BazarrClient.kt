@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.bazarr.api.client
 
+import com.dnfapps.arrmatey.bazarr.api.model.AutoSearchBody
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrBadges
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisodesResponse
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
@@ -23,6 +24,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.koin.core.component.KoinComponent
@@ -258,16 +261,10 @@ class BazarrClientImpl(
         )
 
     override suspend fun autoSearchSeriesSubtitles(seriesId: Long): NetworkResult<Unit> =
-        patch("series", body = buildJsonObject {
-            put("action", "search-missing")
-            put("seriesid", seriesId)
-        })
+        patch("series", body = AutoSearchBody(seriesid = seriesId))
 
     override suspend fun autoSearchMovieSubtitles(radarrId: Long): NetworkResult<Unit> =
-        patch("movies", body = buildJsonObject {
-            put("action", "search-missing")
-            put("radarrid", radarrId)
-        })
+        patch("movies", body = AutoSearchBody(radarrid = radarrId))
 
     override suspend fun deleteEpisodeSubtitle(
         seriesId: Long,
@@ -347,9 +344,12 @@ class BazarrClientImpl(
         body: Any? = null,
         timeoutMillis: Long? = null
     ): NetworkResult<T> =
-        httpClient.safePatch("") {
+        httpClient.safePatch("$baseUrl/$endpoint") {
             applyParams(params, timeoutMillis)
-            body?.let { setBody(it) }
+            body?.let {
+                contentType(ContentType.Application.Json)
+                setBody(it)
+            }
         }
 
     private suspend inline fun <reified T> delete(
