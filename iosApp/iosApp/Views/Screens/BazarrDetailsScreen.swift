@@ -54,9 +54,14 @@ struct BazarrDetailsScreen: View {
                             }
                         }
                     }
-                    .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 24, trailing: 24))
+                    .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 12, trailing: 24))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
+                    
+                    BazarrInfoArea(details: details)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 24, trailing: 24))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
