@@ -41,6 +41,18 @@ struct ArrViewCustomizationSheet: View {
                     Text(MR.strings().customization_options.localized())
                         .font(.headline)
 
+                    Toggle(isOn: Binding(
+                        get: { preferences.applyGlobally },
+                        set: { viewModel.updateApplyGlobally($0) }
+                    )) {
+                        VStack(alignment: .leading) {
+                            Text(MR.strings().apply_globally.localized())
+                            Text(MR.strings().apply_globally_message.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
                     if preferences.viewType == .list {
                         listOptions
                     } else {

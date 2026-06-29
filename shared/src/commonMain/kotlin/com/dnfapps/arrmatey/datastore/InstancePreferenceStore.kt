@@ -39,6 +39,7 @@ class InstancePreferenceStore(
     private val gridSpacingKey = stringPreferencesKey("gridSpacing")
     private val posterElevationKey = stringPreferencesKey("posterElevation")
     private val posterRadiusKey = stringPreferencesKey("posterRadius")
+    private val applyGloballyKey = booleanPreferencesKey("applyGlobally")
 
     private val sortByFlow: Flow<SortBy> = dataStore.data
         .map { preferences ->
@@ -97,6 +98,9 @@ class InstancePreferenceStore(
             preferences[posterRadiusKey]?.let { PosterRadius.valueOf(it) } ?: PosterRadius.Medium
         }
 
+    private val applyGloballyFlow: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[applyGloballyKey] ?: false }
+
     fun observePreferences(): Flow<InstancePreferences> = combine(
         sortByFlow,
         sortOrderFlow,
@@ -110,7 +114,8 @@ class InstancePreferenceStore(
         gridDensityFlow,
         gridSpacingFlow,
         posterElevationFlow,
-        posterRadiusFlow
+        posterRadiusFlow,
+        applyGloballyFlow
     ) { args: Array<Any> ->
         InstancePreferences(
             sortBy = args[0] as SortBy,
@@ -125,7 +130,8 @@ class InstancePreferenceStore(
             gridDensity = args[9] as GridDensity,
             gridSpacing = args[10] as GridSpacing,
             posterElevation = args[11] as PosterElevation,
-            posterRadius = args[12] as PosterRadius
+            posterRadius = args[12] as PosterRadius,
+            applyGlobally = args[13] as Boolean
         )
     }
 
@@ -144,6 +150,7 @@ class InstancePreferenceStore(
             prefs[gridSpacingKey] = preferences.gridSpacing.name
             prefs[posterElevationKey] = preferences.posterElevation.name
             prefs[posterRadiusKey] = preferences.posterRadius.name
+            prefs[applyGloballyKey] = preferences.applyGlobally
         }
     }
 }

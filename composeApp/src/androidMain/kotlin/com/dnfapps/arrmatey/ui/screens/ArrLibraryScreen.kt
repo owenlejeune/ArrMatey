@@ -245,7 +245,8 @@ fun ArrLibraryScreen(
                 onGridDensityChanged = { arrMediaViewModel.updateGridDensity(it) },
                 onGridSpacingChanged = { arrMediaViewModel.updateGridSpacing(it) },
                 onPosterElevationChanged = { arrMediaViewModel.updatePosterElevation(it) },
-                onPosterRadiusChanged = { arrMediaViewModel.updatePosterRadius(it) }
+                onPosterRadiusChanged = { arrMediaViewModel.updatePosterRadius(it) },
+                onApplyGloballyChanged = { arrMediaViewModel.updateApplyGlobally(it) }
             )
         }
     }

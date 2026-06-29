@@ -100,6 +100,10 @@ class ArrMediaViewModelS: ObservableObject {
     func updatePosterRadius(_ radius: PosterRadius) {
         viewModel.updatePosterRadius(radius: radius)
     }
+
+    func updateApplyGlobally(_ applyGlobally: Bool) {
+        viewModel.updateApplyGlobally(applyGlobally: applyGlobally)
+    }
     
     func updateSearchQuery(_ query: String) {
         viewModel.updateSearchQuery(query: query)

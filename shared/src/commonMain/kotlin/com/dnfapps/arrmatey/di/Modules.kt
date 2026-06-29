@@ -125,6 +125,7 @@ import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.SetInstanceActiveUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestNewInstanceConnectionUseCase
+import com.dnfapps.arrmatey.instances.usecase.UpdateAllPreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateCalendarFilterPreferenceUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
@@ -335,12 +336,13 @@ val useCaseModule = module {
     factory { ExportDataUseCase(get(), get(), get(), get(), get(), get()) }
     factory { ImportDataUseCase(get(), get(), get(), get(), get(), get()) }
     factory { GetBazarrInstanceRepositoryUseCase(get()) }
+    factory { UpdateAllPreferencesUseCase(get(), get()) }
 }
 
 val viewModelModule = module {
     factory { ActivityQueueViewModel(get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
-        ArrMediaViewModel(type, get(), get(), get())
+        ArrMediaViewModel(type, get(), get(), get(), get())
     }
     factory { (id: Long, type: InstanceType) ->
         ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get())

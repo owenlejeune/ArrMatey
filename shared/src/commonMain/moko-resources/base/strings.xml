@@ -636,6 +636,8 @@
     <string name="grid_spacing">Grid Spacing</string>
     <string name="poster_elevation">Poster Elevation</string>
     <string name="poster_radius">Poster Radius</string>
+    <string name="apply_globally">Apply Globally</string>
+    <string name="apply_globally_message">Apply these settings to all instances</string>
 
     <!-- Grid Density -->
     <string name="grid_density_compact">Compact</string>

@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -54,7 +55,8 @@ fun ArrViewCustomizationSheet(
     onGridDensityChanged: (GridDensity) -> Unit,
     onGridSpacingChanged: (GridSpacing) -> Unit,
     onPosterElevationChanged: (PosterElevation) -> Unit,
-    onPosterRadiusChanged: (PosterRadius) -> Unit
+    onPosterRadiusChanged: (PosterRadius) -> Unit,
+    onApplyGloballyChanged: (Boolean) -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -131,6 +133,13 @@ fun ArrViewCustomizationSheet(
             Text(
                 text = mokoString(MR.strings.customization_options),
                 style = MaterialTheme.typography.headlineSmall
+            )
+
+            LabelledSwitch(
+                label = mokoString(MR.strings.apply_globally),
+                sublabel = mokoString(MR.strings.apply_globally_message),
+                checked = preferences.applyGlobally,
+                onCheckedChange = { onApplyGloballyChanged(it) }
             )
 
             AnimatedContent(
@@ -362,4 +371,25 @@ fun PosterOptions(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun Preview_ArrViewCustomizationSheet() {
+    ArrViewCustomizationSheet(
+        onDismissRequest = {},
+        type = InstanceType.Sonarr,
+        preferences = InstancePreferences(),
+        onViewTypeChanged = { },
+        onShowFullDetailsChanged = { },
+        onShowOverlayChanged = {},
+        onShowBannerBackgroundChanged = {},
+        onIncludeOverviewChanged = {},
+        onBannerBlurChanged = {},
+        onGridDensityChanged = { },
+        onGridSpacingChanged = {  },
+        onPosterElevationChanged = {  },
+        onPosterRadiusChanged = {},
+        onApplyGloballyChanged = {}
+    )
 }

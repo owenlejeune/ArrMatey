@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceData
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.UpdateAllPreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.Blur
@@ -38,7 +39,8 @@ class ArrMediaViewModel(
     private val instanceType: InstanceType,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
     private val getLibraryUseCase: GetLibraryUseCase,
-    private val updatePreferencesUseCase: UpdateInstancePreferencesUseCase
+    private val updatePreferencesUseCase: UpdateInstancePreferencesUseCase,
+    private val updateAllPreferencesUseCase: UpdateAllPreferencesUseCase
 ): ViewModel() {
 
     private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
@@ -208,6 +210,10 @@ class ArrMediaViewModel(
         safeSavePreference { it.copy(posterRadius = radius) }
     }
 
+    fun updateApplyGlobally(applyGlobally: Boolean) {
+        safeSavePreference { it.copy(applyGlobally = applyGlobally) }
+    }
+
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
@@ -219,7 +225,12 @@ class ArrMediaViewModel(
             val preferences = currentState.preferences
 
             val updatedPreferences = transform(preferences)
-            updatePreferencesUseCase(repository.instance.id, updatedPreferences)
+
+            if (updatedPreferences.applyGlobally) {
+                updateAllPreferencesUseCase(updatedPreferences)
+            } else {
+                updatePreferencesUseCase(repository.instance.id, updatedPreferences)
+            }
         }
     }
 

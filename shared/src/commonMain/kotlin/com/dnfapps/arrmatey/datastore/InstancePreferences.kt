@@ -31,7 +31,9 @@ data class InstancePreferences(
     // List preferences
     val showBannerBackground: Boolean = true,
     val includeOverview: Boolean = false,
-    val bannerBlur: Blur = Blur.Normal
+    val bannerBlur: Blur = Blur.Normal,
+
+    val applyGlobally: Boolean = false
 ) {
     constructor(): this(SortBy.Title)
 }
