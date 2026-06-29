@@ -163,7 +163,7 @@ private struct BazarrSeriesList: View {
                     poster: item.poster,
                     fanart: item.fanart,
                     monitored: item.monitored,
-                    details: "\(item.episodeFileCount) / \(item.episodeFileCount + item.episodeMissingCount) Episodes"
+                    details: MR.strings().bazarr_series_subtitle_count.formatted(args: [item.episodeFileCount, item.episodeFileCount + item.episodeMissingCount])
                 )
                 .onTapGesture { onClick(item) }
             }
@@ -185,7 +185,7 @@ private struct BazarrMoviesList: View {
                     poster: item.poster,
                     fanart: item.fanart,
                     monitored: item.monitored,
-                    details: "\(item.subtitles.count) Subtitles, \(item.missingSubtitles.count) Missing"
+                    details: MR.strings().bazarr_movie_subtitle_count.formatted(args: [item.subtitles.count, item.missingSubtitles.count])
                 )
                 .onTapGesture { onClick(item) }
             }

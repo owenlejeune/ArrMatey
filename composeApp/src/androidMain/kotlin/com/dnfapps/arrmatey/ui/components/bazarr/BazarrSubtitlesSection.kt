@@ -174,7 +174,7 @@ private fun EmbeddedSubtitlesCard(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "${embedded.count()} Embedded Subtitles",
+            text = mokoString(MR.strings.bazarr_embedded_count, embedded.count()),
             fontWeight = FontWeight.SemiBold
         )
         FlowRow(

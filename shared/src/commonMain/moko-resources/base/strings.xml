@@ -707,4 +707,11 @@
     <string name="export_ready">Export ready</string>
     <string name="import_complete">Import complete</string>
     <string name="invalid_backup_file">Invalid or corrupted backup file</string>
+
+    <!-- Subtitles -->
+    <string name="bazarr_series_subtitle_count">%1$d / %2$d episodes</string>
+    <string name="bazarr_movie_subtitle_count">%1$d Subtitles, %2$d Missing</string>
+    <string name="bazarr_files_count">%1$d files</string>
+    <string name="bazarr_missing_count">%1$d missing subtitles</string>
+    <string name="bazarr_embedded_count">%1$d Embedded Subtitles</string>
 </resources>

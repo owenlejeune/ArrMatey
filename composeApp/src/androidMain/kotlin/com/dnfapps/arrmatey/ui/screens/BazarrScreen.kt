@@ -427,7 +427,7 @@ private fun BazarrSeriesList(
                 onClick = { onClick(item) }
             ) {
                 Text(
-                    text = "${item.episodeFileCount} / ${item.episodeFileCount + item.episodeMissingCount} Episodes",
+                    text = mokoString(MR.strings.bazarr_series_subtitle_count, item.episodeFileCount, item.episodeFileCount + item.episodeMissingCount),
                     color = Color.White,
                     fontSize = 14.sp
                 )
@@ -459,7 +459,7 @@ private fun BazarrMoviesList(
                 val subtitleCount = item.subtitles.size
                 val missingCount = item.missingSubtitles.size
                 Text(
-                    text = "$subtitleCount Subtitles, $missingCount Missing",
+                    text = mokoString(MR.strings.bazarr_movie_subtitle_count, subtitleCount, missingCount),
                     color = Color.White,
                     fontSize = 14.sp
                 )

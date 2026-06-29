@@ -101,7 +101,7 @@ private struct EmbeddedSubtitlesCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("\(embedded.count) Embedded Subtitles")
+            Text(MR.strings().bazarr_embedded_count.formatted(args: [embedded.count]))
                 .font(.subheadline)
                 .fontWeight(.semibold)
             

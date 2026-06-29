@@ -213,8 +213,8 @@ fun BazarrDetailsScreen(
 
                     is BazarrSeries -> buildMap {
                         put(mokoString(MR.strings.path), details.path)
-                        put(mokoString(MR.strings.files), "${details.episodeFileCount} files")
-                        put(mokoString(MR.strings.missing), "${details.episodeMissingCount} missing subtitles")
+                        put(mokoString(MR.strings.files), mokoString(MR.strings.bazarr_files_count, details.episodeFileCount))
+                        put(mokoString(MR.strings.missing), mokoString(MR.strings.bazarr_missing_count, details.episodeMissingCount))
                         put(mokoString(MR.strings.status), mokoString(if (details.ended) MR.strings.ended else MR.strings.continuing))
                         details.lastAired?.let { lastAired ->
                             put(mokoString(MR.strings.previous_airing), lastAired)
