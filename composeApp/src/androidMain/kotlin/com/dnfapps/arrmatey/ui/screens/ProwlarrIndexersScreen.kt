@@ -217,7 +217,7 @@ private fun IndexerCard(
                 val protocol = indexer.protocol?.name ?: mokoString(MR.strings.unknown).lowercase()
                 val protocolColor = when (indexer.protocol) {
                     ReleaseProtocol.Torrent -> MaterialTheme.colorScheme.primary
-                    ReleaseProtocol.Usenet -> MaterialTheme.colorScheme.tertiary
+                    ReleaseProtocol.Usenet, ReleaseProtocol.Soulseek -> MaterialTheme.colorScheme.tertiary
                     else -> MaterialTheme.colorScheme.outline
                 }
                 Text(

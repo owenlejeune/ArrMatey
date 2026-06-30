@@ -244,7 +244,7 @@ private fun SearchResultCard(
                     style = MaterialTheme.typography.labelSmall,
                     color = when (result.protocol) {
                         ReleaseProtocol.Torrent -> MaterialTheme.colorScheme.primary
-                        ReleaseProtocol.Usenet -> MaterialTheme.colorScheme.tertiary
+                        ReleaseProtocol.Usenet, ReleaseProtocol.Soulseek -> MaterialTheme.colorScheme.tertiary
                         else -> MaterialTheme.colorScheme.outline
                     }
                 )

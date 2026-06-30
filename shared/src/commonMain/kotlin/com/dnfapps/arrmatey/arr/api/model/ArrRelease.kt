@@ -61,7 +61,7 @@ sealed interface ArrRelease {
 
     val peerColor: Color
         get() = when {
-            protocol == ReleaseProtocol.Usenet -> ArrGreen
+            protocol == ReleaseProtocol.Usenet || protocol == ReleaseProtocol.Soulseek -> ArrGreen
             rejections.any { it.contains("Not enough seeders") } -> ArrRed
             seeders >= 50 -> ArrGreen
             seeders >= 10 -> ArrBlue
@@ -71,7 +71,7 @@ sealed interface ArrRelease {
 
     val peerColorHex: String
         get() = when {
-            protocol == ReleaseProtocol.Usenet -> "#01b801"
+            protocol == ReleaseProtocol.Usenet || protocol == ReleaseProtocol.Soulseek -> "#01b801"
             rejections.any { it.contains("Not enough seeders") } -> "#ff3e3e"
             seeders >= 50 -> "#01b801"
             seeders >= 10 -> "#00b2ff"
@@ -86,6 +86,9 @@ enum class ReleaseProtocol {
 
     @SerialName("torrent")
     Torrent,
+
+    @SerialName("SoulseekDownloadProtocol")
+    Soulseek,
 
     @SerialName("unknown")
     Unknown

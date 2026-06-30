@@ -118,7 +118,7 @@ struct ReleaseFilterByPickerMenu: View {
             }
             .pickerStyle(.inline)
         } label: {
-            Text(MR.strings().custom_format.localized())
+            Text(MR.strings().protocol.localized())
         }
     }
     

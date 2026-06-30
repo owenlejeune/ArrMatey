@@ -253,6 +253,7 @@ struct SearchResultRow: View {
         switch proto {
         case ReleaseProtocol.torrent: return "Torrent"
         case ReleaseProtocol.usenet: return "Usenet"
+        case ReleaseProtocol.soulseek: return "Soulseek"
         default: return MR.strings().unknown.localized()
         }
     }
@@ -262,6 +263,7 @@ struct SearchResultRow: View {
         switch proto {
         case ReleaseProtocol.torrent: return .blue
         case ReleaseProtocol.usenet: return .green
+        case ReleaseProtocol.soulseek: return .green
         default: return .gray
         }
     }
