@@ -156,6 +156,11 @@
     <string name="quality_profile">Quality profile</string>
     <string name="monitor">Monitor</string>
     <string name="monitor_new_albums">Monitor New Albums</string>
+    <string name="automatically_switch_release">Automatically Switch Release</string>
+    <string name="automatically_switch_releass_description">Lidarr with automatically switch to the release best matching downloaded tracks</string>
+    <string name="releases">Releases</string>
+    <string name="mediums_short">med</string>
+    <string name="tracks_lowercase">tracks</string>
     <string name="monitor_new_books">Monitor New Books</string>
     <string name="download_queue_success">Download queued successfully!</string>
     <string name="grab_release_title">Grab Release</string>

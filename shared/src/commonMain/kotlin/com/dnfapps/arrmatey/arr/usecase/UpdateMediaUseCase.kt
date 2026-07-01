@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.usecase
 
+import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.client.NetworkResult
@@ -14,6 +15,13 @@ class UpdateMediaUseCase {
         repository: ArrInstanceRepository
     ): NetworkResult<ArrMedia> {
         return repository.updateMediaItem(item)
+    }
+
+    suspend fun updateAlbum(
+        album: ArrAlbum,
+        repository: ArrInstanceRepository
+    ): NetworkResult<ArrAlbum> {
+        return repository.updateAlbum(album)
     }
 
     suspend fun edit(

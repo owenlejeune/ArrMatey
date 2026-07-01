@@ -14,6 +14,7 @@ struct AlbumRowView: View {
     let tracks: [LidarrTrack]
     let trackFiles: [LidarrTrackFile]
     let onToggleAlbumMonitor: (ArrAlbum) -> Void
+    let onEditAlbum: (ArrAlbum) -> Void
     let onAlbumAutomaticSearch: (Int64) -> Void
     let automaticSearchIds: Set<Int64>
     let onDeleteAlbum: (ArrAlbum) -> Void
@@ -112,6 +113,11 @@ struct AlbumRowView: View {
             }
             .onTapGesture { expanded.toggle() }
             
+            Image(systemName: "pencil")
+                .onTapGesture {
+                    onEditAlbum(album)
+                }
+
             Image(systemName: album.monitored ? "bookmark.fill" : "bookmark")
                 .onTapGesture {
                     onToggleAlbumMonitor(album)

@@ -26,6 +26,7 @@ import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 class ArrMediaDetailsViewModel(
     private val mediaId: Long,
@@ -211,6 +213,22 @@ class ArrMediaDetailsViewModel(
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
             toggleMonitorUseCase.toggleAlbum(album, repository)
+        }
+    }
+
+    fun updateAlbum(album: ArrAlbum) {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            updateMediaUseCase.updateAlbum(album, repository)
+                .onSuccess {
+                    delay(1.seconds)
+                    repository.resetEditItemStatus()
+                    loadData(repository)
+                }
+                .onError { _, _, _ ->
+                    delay(3.seconds)
+                    repository.resetEditItemStatus()
+                }
         }
     }
 

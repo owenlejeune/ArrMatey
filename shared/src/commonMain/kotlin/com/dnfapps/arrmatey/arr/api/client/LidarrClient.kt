@@ -141,6 +141,9 @@ class LidarrClient(
     suspend fun deleteAlbum(albumId: Long): NetworkResult<Unit> =
         delete("album/$albumId")
 
+    suspend fun editAlbum(album: ArrAlbum): NetworkResult<ArrAlbum> =
+        put("album/${album.id}", album)
+
     suspend fun getTracks(
         albumId: Long? = null,
         artistId: Long? = null

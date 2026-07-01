@@ -117,6 +117,10 @@ class ArrMediaDetailsViewModelS: ObservableObject {
         viewModel.toggleAlbumMonitored(album: album)
     }
     
+    func updateAlbum(album: ArrAlbum) {
+        viewModel.updateAlbum(album: album)
+    }
+    
     func toggleBookMonitored(book: Book) {
         viewModel.toggleBookMonitored(book: book)
     }

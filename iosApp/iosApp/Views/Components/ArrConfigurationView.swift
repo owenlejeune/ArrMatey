@@ -231,7 +231,7 @@ struct ArrConfigurationView: View {
             }
             
             if let getApiKey = instanceType.getApiKeyEndpoint {
-                let enabled = !uiState.apiEndpoint.isValidUrl()
+                let enabled = uiState.apiEndpoint.isValidUrl()
                 Button(action: {
                     if let url = URL(string: "\(uiState.apiEndpoint)/\(getApiKey)") {
                         openURL(url)

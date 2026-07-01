@@ -22,6 +22,7 @@ struct MediaDetailsScreen: View {
     @State private var confirmDeleteSeason: Int32? = nil
     @State private var confirmDeleteAlbum: Int64? = nil
     @State private var confirmDeleteFile: Bool = false
+    @State private var editAlbum: ArrAlbum? = nil
     
     init(id: Int64, type: InstanceType) {
         self.id = id
@@ -37,11 +38,16 @@ struct MediaDetailsScreen: View {
                 DeleteMediaSheet(isLoading: viewModel.deleteInProgress, onConfirm: { addExclusion, deleteFiles in
                     viewModel.delete(addExclusion, deleteFiles)
                 })
-                .presentationDetents([.fraction(0.33)])
-                .presentationBackground(.ultraThinMaterial)
+                .presentationDetents([.medium])
             }
             .sheet(isPresented: $showEditSheet) {
                 sheetContent
+            }
+            .sheet(item: $editAlbum) { album in
+                EditAlbumSheet(album: album, editInProgress: viewModel.editInProgress, onEditAlbum: { updatedAlbum in
+                    viewModel.updateAlbum(album: updatedAlbum)
+                })
+                .presentationDetents([.medium])
             }
             .onChange(of: viewModel.deleteSucceeded) { old, success in 
                 if success && !old { 
@@ -51,6 +57,7 @@ struct MediaDetailsScreen: View {
             .onChange(of: viewModel.editItemSucceeded) { _, success in
                 if success {
                     showEditSheet = false
+                    editAlbum = nil
                     viewModel.refreshDetails()
                 }
             }
@@ -255,6 +262,9 @@ struct MediaDetailsScreen: View {
                 onToggleAlbumMonitor: {
                     viewModel.toggleAlbumMonitored(album: $0)
                 },
+                onEditAlbum: {
+                    editAlbum = $0
+                },
                 onAlbumAutomaticSearch: {
                     viewModel.performAlbumAutomaticLookup(albumId: $0)
                 },
@@ -327,24 +337,27 @@ struct MediaDetailsScreen: View {
         case let movie as ArrMovie: EditMovieSheet(item: movie, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newMovie, moveFiles in
             viewModel.editItem(newMovie, moveFiles: moveFiles)
         })
-        .presentationBackground(.ultraThinMaterial)
+        .presentationDetents([.medium])
             
         case let series as ArrSeries: EditSeriesSheet(item: series, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newSeries, moveFiles in
             viewModel.editItem(newSeries, moveFiles: moveFiles)
         })
-        .presentationBackground(.ultraThinMaterial)
+        .presentationDetents([.medium])
             
         case let artist as Arrtist: EditArtistSheet(item: artist, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newArtist, moveFiles in
             viewModel.editItem(newArtist, moveFiles: moveFiles)
         })
+        .presentationDetents([.medium])
             
         case let author as Author: EditAuthorSheet(item: author, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newAuthor, moveFiles in
             viewModel.editItem(newAuthor, moveFiles: moveFiles)
         })
+        .presentationDetents([.medium])
             
         case let audiobook as Audiobook: EditAudiobookSheet(item: audiobook, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, editInProgress: viewModel.editInProgress, onEditItem: { newAudiobook in
             viewModel.editItem(newAudiobook, moveFiles: false)
         })
+        .presentationDetents([.medium])
             
         default: EmptyView()
         }

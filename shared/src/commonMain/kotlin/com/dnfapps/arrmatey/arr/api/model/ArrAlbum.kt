@@ -23,6 +23,7 @@ data class ArrAlbum(
     val profileId: Int,
     val duration: Long,
     val ratings: LidarrRatings? = null,
+    val releases: List<AlbumRelease> = emptyList(),
 
     override val instanceId: Long? = null
 ): CalendarItem, InstanceTypeIdentifiable {

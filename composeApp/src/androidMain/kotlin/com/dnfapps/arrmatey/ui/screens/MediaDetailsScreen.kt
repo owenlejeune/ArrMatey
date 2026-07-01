@@ -5,7 +5,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -23,7 +22,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,12 +50,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
@@ -72,7 +69,6 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
-import com.dnfapps.arrmatey.arr.api.model.toRatingItems
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
@@ -82,7 +78,6 @@ import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.model.toInfoList
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.Navigator
@@ -100,13 +95,13 @@ import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.UpcomingDateView
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
+import com.dnfapps.arrmatey.ui.sheets.EditAlbumSheet
 import com.dnfapps.arrmatey.ui.sheets.EditArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
 import com.dnfapps.arrmatey.ui.sheets.EditMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
 import com.dnfapps.arrmatey.utils.format
-import com.dnfapps.arrmatey.utils.formatToOneDecimal
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
@@ -166,12 +161,14 @@ fun MediaDetailsScreen(
     var confirmDeleteSeasonNumber by remember { mutableStateOf<Int?>(null) }
     var confirmDeleteAlbum by remember { mutableStateOf<Long?>(null) }
     var confirmDeleteMovie by remember { mutableStateOf(false) }
+    var editAlbum by remember { mutableStateOf<ArrAlbum?>(null) }
 
     LaunchedEffect(editStatus) {
         when (val status = editStatus) {
             is OperationStatus.Success -> {
                 Toast.makeText(context, "Item edited successfully", Toast.LENGTH_SHORT).show()
                 showEditSheet = false
+                editAlbum = null
             }
             is OperationStatus.Error -> {
                 Toast.makeText(context, "Error editing items", Toast.LENGTH_SHORT).show()
@@ -320,6 +317,9 @@ fun MediaDetailsScreen(
                                         onToggleAlbumMonitor = {
                                             mediaDetailsViewModel.toggleAlbumMonitored(it)
                                         },
+                                        onEditAlbum = {
+                                            editAlbum = it
+                                        },
                                         onAlbumAutomaticSearch = {
                                             mediaDetailsViewModel.performAlbumAutomaticLookup(it)
                                         },
@@ -448,6 +448,17 @@ fun MediaDetailsScreen(
                             Text(mokoString(MR.strings.no))
                         }
                     }
+                )
+            }
+
+            editAlbum?.let {
+                EditAlbumSheet(
+                    album = it,
+                    editInProgress = editStatus is OperationStatus.InProgress,
+                    onEditAlbum = { album ->
+                        mediaDetailsViewModel.updateAlbum(album)
+                    },
+                    onDismiss = { editAlbum = null }
                 )
             }
 

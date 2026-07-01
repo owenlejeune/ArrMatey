@@ -94,7 +94,7 @@ struct EditArtistSheet: View {
             }
             .toolbarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button {
                         let newArtist = item.doCopyForEdit(
                             monitored: monitored,
@@ -113,8 +113,6 @@ struct EditArtistSheet: View {
                                 .foregroundStyle(.white)
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.primary)
                 }
             }
         }

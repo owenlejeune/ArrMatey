@@ -44,7 +44,8 @@ fun <T> DropdownPicker(
     allLabel: String = mokoString(MR.strings.all),
     onAllSelected: () -> Unit = {},
     allDivider: (@Composable () -> Unit)? = { HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp)) },
-    unknownValueLabel: String = mokoString(MR.strings.unknown)
+    unknownValueLabel: String = mokoString(MR.strings.unknown),
+    singleLine: Boolean = true
 ) {
     var isDropDownExpanded by remember { mutableStateOf(false) }
 
@@ -74,7 +75,7 @@ fun <T> DropdownPicker(
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
                 ),
                 shape = MaterialTheme.shapes.large,
-                singleLine = true
+                singleLine = singleLine
             )
         }
         ExposedDropdownMenu(

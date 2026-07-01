@@ -620,6 +620,28 @@ class ArrInstanceRepository(
             }
     }
 
+    suspend fun updateAlbum(album: ArrAlbum): NetworkResult<ArrAlbum> {
+        _editItemStatus.value = OperationStatus.InProgress
+
+        if (instance.type != InstanceType.Lidarr) {
+            _editItemStatus.value = OperationStatus.Error(message = "Not a Lidarr instance")
+            return NetworkResult.Error(message = "Not a Lidarr instance")
+        }
+
+        return (client as LidarrClient).updateAlbum(album)
+            .onSuccess { resultAlbum ->
+                _editItemStatus.value = OperationStatus.Success("Album updated successfully")
+                updateAlbumInCache(resultAlbum.copy(images = album.images))
+            }
+            .onError { code, message, cause ->
+                _editItemStatus.value = OperationStatus.Error(code, message, cause)
+            }
+    }
+
+    fun resetEditItemStatus() {
+        _editItemStatus.value = OperationStatus.Idle
+    }
+
     private fun updateAlbumInCache(album: ArrAlbum) {
         _artistAlbums.update { currentMap ->
             val updatedMap = currentMap.toMutableMap()

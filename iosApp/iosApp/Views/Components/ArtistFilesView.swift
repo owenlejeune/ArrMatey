@@ -15,6 +15,7 @@ struct ArtistFilesView: View {
     let trackFiles: [KotlinLong: [LidarrTrackFile]]
     let searchIds: Set<Int64>
     let onToggleAlbumMonitor: (ArrAlbum) -> Void
+    let onEditAlbum: (ArrAlbum) -> Void
     let onAlbumAutomaticSearch: (Int64) -> Void
     let deleteAlbumFiles: (ArrAlbum) -> Void
     let albumDeleteInProgress: Bool
@@ -34,6 +35,7 @@ struct ArtistFilesView: View {
                     tracks: tracks[album.id.asKotlinLong] ?? [],
                     trackFiles: trackFiles[album.id.asKotlinLong] ?? [],
                     onToggleAlbumMonitor: onToggleAlbumMonitor,
+                    onEditAlbum: onEditAlbum,
                     onAlbumAutomaticSearch: onAlbumAutomaticSearch,
                     automaticSearchIds: searchIds,
                     onDeleteAlbum: deleteAlbumFiles,

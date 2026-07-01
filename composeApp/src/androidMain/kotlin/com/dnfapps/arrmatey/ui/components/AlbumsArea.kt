@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,6 +53,7 @@ fun AlbumsArea(
     trackFiles: Map<Long, List<LidarrTrackFile>>,
     searchIds: Set<Long>,
     onToggleAlbumMonitor: (ArrAlbum) -> Unit,
+    onEditAlbum: (ArrAlbum) -> Unit,
     onAlbumAutomaticSearch: (Long) -> Unit,
     deleteAlbumFiles: (Long) -> Unit,
     albumDeleteInProgress: Boolean
@@ -108,6 +110,13 @@ fun AlbumsArea(
                             imageVector = Icons.Default.ExpandCircleDown,
                             contentDescription = null,
                             modifier = Modifier.rotate(iconRotation)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = mokoString(MR.strings.edit),
+                            modifier = Modifier.clickable {
+                                onEditAlbum(album)
+                            }
                         )
                         Icon(
                             imageVector = if (album.monitored) Icons.Default.Bookmark
