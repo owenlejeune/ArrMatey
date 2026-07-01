@@ -92,7 +92,7 @@ struct AlbumRowView: View {
     
     private var albumHeader: some View {
         HStack(alignment: .center, spacing: 12) {
-            HStack(alignment: .center, spacing: 12) {
+            HStack(alignment: .center, spacing: 24) {
                 AlbumCoverView(album: album)
                     .frame(width: 60, height: 60)
                 

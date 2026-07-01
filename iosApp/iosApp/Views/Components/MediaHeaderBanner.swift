@@ -10,15 +10,17 @@ import SwiftUI
 struct MediaHeaderBanner: View {
     let bannerUrl: URL?
     let height: CGFloat
+    let gradientHeight: CGFloat
     
-    init(bannerUrl: URL?, height: CGFloat = 400) {
+    init(bannerUrl: URL?, height: CGFloat = 400, gradientHeight: CGFloat = 150) {
         self.bannerUrl = bannerUrl
         self.height = height
+        self.gradientHeight = gradientHeight
     }
     
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
+            ZStack(alignment: .bottom) {
                 Color(.systemBackground)
                 
                 if let url = bannerUrl {
@@ -38,6 +40,17 @@ struct MediaHeaderBanner: View {
                         }
                     }
                 }
+                
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        .clear,
+                        Color(.systemBackground).opacity(0.8),
+                        Color(.systemBackground)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: max(gradientHeight, 150))
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
