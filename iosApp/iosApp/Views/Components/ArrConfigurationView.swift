@@ -265,7 +265,7 @@ struct ArrConfigurationView: View {
                     Text(MR.strings().test.localized())
                 }
             }
-            .disabled(uiState.testing || uiState.apiEndpoint.isEmpty || uiState.apiKey.isEmpty)
+            .disabled(uiState.testing || uiState.apiEndpoint.isEmpty || (!uiState.noApiKeyRequired && uiState.apiKey.isEmpty))
             
             Spacer()
             
@@ -467,7 +467,7 @@ struct ArrConfigurationView: View {
                                 Text(MR.strings().test.localized())
                             }
                         }
-                        .disabled(uiState.localTesting || uiState.localNetworkUrl.isEmpty || uiState.localNetworkSsids.isEmpty)
+                        .disabled(uiState.localTesting || uiState.localNetworkUrl.isEmpty || (!uiState.noApiKeyRequired && uiState.apiKey.isEmpty))
                         
                         Spacer()
                         

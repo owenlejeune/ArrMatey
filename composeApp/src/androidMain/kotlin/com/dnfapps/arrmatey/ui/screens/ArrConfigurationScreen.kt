@@ -247,7 +247,8 @@ fun ArrConfigurationScreen(
 
         TestConnectionSection(
             isTesting = isTesting,
-            testButtonEnabled = !isTesting && apiEndpoint.isNotBlank() && apiKey.isNotBlank(),
+            testButtonEnabled = !isTesting && apiEndpoint.isNotBlank() &&
+                    (uiState.noApiKeyRequired || apiKey.isNotBlank()),
             testResult = testResult,
             onTestConnection = onTestConnection
         )
@@ -712,7 +713,7 @@ fun LocalNetworkArea(
                             onClick = onTestLocalConnection,
                             enabled = !uiState.localTesting &&
                                     uiState.localNetworkUrl.isNotBlank() &&
-                                    uiState.apiKey.isNotBlank(),
+                                    (uiState.noApiKeyRequired || uiState.apiKey.isNotBlank()),
                         ) {
                             if (uiState.localTesting) {
                                 CircularProgressIndicator(

@@ -157,7 +157,13 @@ class AddInstanceViewModel(
 
             _uiState.update { it.copy(localTesting = true, localNetworkUrlError = false) }
 
-            val success = testNewInstanceConnectionUseCase(state.localNetworkUrl, state.apiKey, type, state.headers)
+            val success = testNewInstanceConnectionUseCase(
+                state.localNetworkUrl,
+                state.apiKey,
+                type,
+                state.headers,
+                state.noApiKeyRequired
+            )
 
             _uiState.update {
                 it.copy(
