@@ -237,7 +237,7 @@ class ArrInstanceRepository(
         client.getRootFolders()
             .onSuccess { _rootFolders.value = it }
             .onError { code, message, cause ->
-                print("$message - $code - ${cause?.printStackTrace()}")
+                logger.error(cause) { "Error refreshing root folders: $message (code=$code)" }
             }
     }
 

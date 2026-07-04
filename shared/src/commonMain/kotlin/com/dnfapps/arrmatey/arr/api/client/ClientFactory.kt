@@ -180,6 +180,12 @@ class DynamicLogger(
 
     override fun log(message: String) {
         if (currentLogLevel == LogLevel.NONE) return
+
+        if (isExceptionMessage(message)) {
+            logger.error { message }
+            return
+        }
+
         if (currentLogLevel == LogLevel.ALL) {
             logger.info { message }
             return
@@ -221,6 +227,10 @@ class DynamicLogger(
             logger.info { result }
         }
     }
+}
+
+private fun isExceptionMessage(message: String): Boolean {
+    return message.contains("failed with exception", ignoreCase = true)
 }
 
 private fun isBodyLine(line: String): Boolean {
