@@ -9,12 +9,12 @@ sealed interface BazarrMedia : HasArrImages<BazarrMedia> {
     val serviceId: Long
     val alternativeTitles: List<String>
     val fanart: String?
-    val imdbId: String
+    val imdbId: String?
     val monitored: Boolean
     val overview: String
     val path: String
     val poster: String?
-    val profileId: Int
+    val profileId: Int?
     val tags: List<String>
     val title: String
     val year: String
