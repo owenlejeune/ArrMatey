@@ -35,7 +35,8 @@ struct DownloadsTab: View {
         .navigationTitle(MR.strings().downloads.localized())
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                DownloadClientQueueSortMenu(
+                DownloadQueueFilterMenu(
+                    filterState: viewModel.filterState,
                     sortBy: Binding(
                         get: { viewModel.sortState.sortBy },
                         set: { viewModel.updateSortBy($0) }
@@ -43,7 +44,15 @@ struct DownloadsTab: View {
                     sortOrder: Binding(
                         get: { viewModel.sortState.sortOrder },
                         set: { viewModel.updateSortOrder($0) }
-                    )
+                    ),
+                    availableTags: viewModel.downloadQueueState.queueItems.flatMap { $0.tags }.unique().sorted(),
+                    onToggleStatus: { viewModel.toggleStatusFilter(status: $0) },
+                    onToggleTag: { viewModel.toggleTagFilter(tag: $0) },
+                    onUpdateActiveOnly: { viewModel.updateActiveOnly(activeOnly: $0) },
+                    onUpdateCompletedOnly: { viewModel.updateCompletedOnly(completedOnly: $0) },
+                    onUpdateExcludeStatuses: { viewModel.updateExcludeStatuses(exclude: $0) },
+                    onUpdateExcludeTags: { viewModel.updateExcludeTags(exclude: $0) },
+                    onClearFilters: { viewModel.clearFilters() }
                 )
             }
         }
@@ -81,7 +90,7 @@ struct DownloadsTab: View {
             ClientFilterRow(
                 clients: clientsViewModel.downloadClientsState.downloadClients,
                 transferInfos: viewModel.downloadQueueState.transferInfo,
-                selectedIds: viewModel.clientIdsFilters,
+                selectedIds: viewModel.filterState.clientIds as? [Int64] ?? [],
                 onToggle: {
                     if clientsViewModel.downloadClientsState.downloadClients.count > 1 {
                         viewModel.toggleClientIdFilter(id: $0)
@@ -99,7 +108,7 @@ struct DownloadsTab: View {
                     ForEach(viewModel.downloadQueueState.queueItems, id: \.id) { item in
                         DownloadQueueItemView(
                             item: item,
-                            showClientInfo: viewModel.clientIdsFilters.count > 1
+                            showClientInfo: viewModel.filterState.clientIds.count > 1
                         )
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                         .listRowSeparator(.hidden)
@@ -151,6 +160,13 @@ struct DownloadsTab: View {
                 .font(.system(size: 20, weight: .bold))
         }
         .padding(.horizontal, 24)
+    }
+}
+
+extension Array where Element: Hashable {
+    func unique() -> [Element] {
+        var seen = Set<Element>()
+        return filter { seen.insert($0).inserted }
     }
 }
 

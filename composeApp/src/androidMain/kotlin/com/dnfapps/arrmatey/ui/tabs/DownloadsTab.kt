@@ -50,8 +50,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberSwipeToDismissBoxState
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -86,7 +84,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.ui.menu.DownloadClientQueueSortMenu
+import com.dnfapps.arrmatey.ui.menu.DownloadQueueFilterMenu
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
@@ -104,17 +102,21 @@ fun DownloadsTab(
     clientsViewModel: DownloadClientsViewModel = koinInject()
 ) {
     val queueState by viewModel.downloadQueueState.collectAsStateWithLifecycle()
+    val filterState by viewModel.filterState.collectAsStateWithLifecycle()
     val commandState by viewModel.commandState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val hasLoaded by viewModel.hasLoaded.collectAsStateWithLifecycle()
     val sortState by viewModel.sortState.collectAsStateWithLifecycle()
-    val clientFiltersIds by viewModel.clientIdsFilters.collectAsStateWithLifecycle()
 
     val downloadClientState by clientsViewModel.downloadClientsState.collectAsStateWithLifecycle()
 
     var deleteTarget by remember { mutableStateOf<DownloadItem?>(null) }
 
     val textFieldState = rememberTextFieldState()
+
+    val availableTags = remember(queueState.queueItems) {
+        queueState.queueItems.flatMap { it.tags }.distinct().sorted()
+    }
 
     LaunchedEffect(textFieldState.text) {
         viewModel.updateSearchQuery(textFieldState.text.toString())
@@ -148,11 +150,20 @@ fun DownloadsTab(
                     }
                 },
                 actions = {
-                    DownloadClientQueueSortMenu(
+                    DownloadQueueFilterMenu(
+                        filterState = filterState,
                         sortBy = sortState.sortBy,
                         onSortByChanged = { viewModel.updateSortBy(it) },
                         sortOrder = sortState.sortOrder,
-                        onSortOrderChanged = { viewModel.updateSortOrder(it) }
+                        onSortOrderChanged = { viewModel.updateSortOrder(it) },
+                        availableTags = availableTags,
+                        onToggleStatus = viewModel::toggleStatusFilter,
+                        onToggleTag = viewModel::toggleTagFilter,
+                        onUpdateActiveOnly = viewModel::updateActiveOnly,
+                        onUpdateCompletedOnly = viewModel::updateCompletedOnly,
+                        onUpdateExcludeStatuses = viewModel::updateExcludeStatuses,
+                        onUpdateExcludeTags = viewModel::updateExcludeTags,
+                        onClearFilters = viewModel::clearFilters
                     )
                 }
             )
@@ -192,7 +203,7 @@ fun DownloadsTab(
                                     queueState.transferInfo.firstOrNull { it.client.id == client.id }
                                 FilterChip(
                                     selected = downloadClientState.downloadClients.size > 1
-                                            && clientFiltersIds.contains(client.id),
+                                            && filterState.clientIds.contains(client.id),
                                     onClick = { viewModel.toggleClientIdFilter(client.id) },
                                     leadingIcon = {
                                         Image(
@@ -231,7 +242,7 @@ fun DownloadsTab(
                                 items(items = queueState.queueItems, key = { it.id }) { item ->
                                     TorrentActionsCard(
                                         item = item,
-                                        showClientInfo = clientFiltersIds.size > 1,
+                                        showClientInfo = filterState.clientIds.size > 1,
                                         onPause = { viewModel.pauseDownload(item.id) },
                                         onResume = { viewModel.resumeDownload(item.id) },
                                         onDelete = { deleteTarget = item }

@@ -11,8 +11,10 @@ import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientCommandState
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
+import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueFilterState
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueSortState
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueState
+import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.usecase.DeleteDownloadUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.ObserveDownloadClientsUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.ObserveDownloadQueueUseCase
@@ -44,11 +46,8 @@ class DownloadQueueViewModel(
     observeDownloadClientPreferencesUseCase: ObserveDownloadClientPreferencesUseCase
 ): ViewModel() {
 
-    private val _searchQuery = MutableStateFlow("")
-
-    private val _clientIdsFilters = MutableStateFlow<List<Long>>(emptyList())
-    val clientIdsFilters: StateFlow<List<Long>> = _clientIdsFilters.asStateFlow()
-
+    private val _filterState = MutableStateFlow(DownloadQueueFilterState())
+    val filterState: StateFlow<DownloadQueueFilterState> = _filterState.asStateFlow()
 
     val sortState: StateFlow<DownloadQueueSortState> = observeDownloadClientPreferencesUseCase()
         .stateIn(
@@ -60,13 +59,31 @@ class DownloadQueueViewModel(
     val downloadQueueState: StateFlow<DownloadQueueBundle> =
         combine(
             downloadQueueService.allTransfers,
-            _searchQuery,
-            sortState,
-            _clientIdsFilters
-        ) { queueState, query, sorting, filterIds ->
+            _filterState,
+            sortState
+        ) { queueState, filters, sorting ->
             val filtered = queueState.queueItems.filter { item ->
-                item.name.contains(query, ignoreCase = true) &&
-                        filterIds.contains(item.client.id)
+                val matchesQuery = filters.query.isBlank() || item.name.contains(filters.query, ignoreCase = true)
+                val matchesClient = filters.clientIds.isEmpty() || filters.clientIds.contains(item.client.id)
+
+                val matchesStatus = if (filters.selectedStatuses.isEmpty()) {
+                    true
+                } else {
+                    val contains = filters.selectedStatuses.contains(item.status)
+                    if (filters.excludeStatuses) !contains else contains
+                }
+
+                val matchesTags = if (filters.selectedTags.isEmpty()) {
+                    true
+                } else {
+                    val contains = item.tags.any { filters.selectedTags.contains(it) }
+                    if (filters.excludeTags) !contains else contains
+                }
+
+                val matchesActive = !filters.activeOnly || (item.downloadSpeed > 0 || item.uploadSpeed > 0)
+                val matchesCompleted = !filters.completedOnly || item.progress >= 1.0
+
+                matchesQuery && matchesClient && matchesStatus && matchesTags && matchesActive && matchesCompleted
             }
             val sorted = applySorting(sorting, filtered)
             queueState.copy(queueItems = sorted)
@@ -91,7 +108,7 @@ class DownloadQueueViewModel(
             downloadQueueService.manualRefresh()
 
             val clients = downloadQueueRepository.getAllDownloadClients()
-            _clientIdsFilters.value = clients.map { it.id }
+            _filterState.update { it.copy(clientIds = clients.map { it.id }) }
         }
     }
 
@@ -135,18 +152,65 @@ class DownloadQueueViewModel(
     }
 
     fun updateSearchQuery(query: String) {
-        _searchQuery.value = query
+        _filterState.update { it.copy(query = query) }
     }
 
     fun toggleClientIdFilter(id: Long) {
-        _clientIdsFilters.update {
-            val current = it.toMutableList()
+        _filterState.update { state ->
+            val current = state.clientIds.toMutableList()
             if (current.contains(id)) {
                 current.remove(id)
             } else {
                 current.add(id)
             }
-            current
+            state.copy(clientIds = current)
+        }
+    }
+
+    fun toggleStatusFilter(status: DownloadItemStatus) {
+        _filterState.update { state ->
+            val current = state.selectedStatuses.toMutableSet()
+            if (current.contains(status)) {
+                current.remove(status)
+            } else {
+                current.add(status)
+            }
+            state.copy(selectedStatuses = current)
+        }
+    }
+
+    fun toggleTagFilter(tag: String) {
+        _filterState.update { state ->
+            val current = state.selectedTags.toMutableSet()
+            if (current.contains(tag)) {
+                current.remove(tag)
+            } else {
+                current.add(tag)
+            }
+            state.copy(selectedTags = current)
+        }
+    }
+
+    fun updateActiveOnly(activeOnly: Boolean) {
+        _filterState.update { it.copy(activeOnly = activeOnly) }
+    }
+
+    fun updateCompletedOnly(completedOnly: Boolean) {
+        _filterState.update { it.copy(completedOnly = completedOnly) }
+    }
+
+    fun updateExcludeTags(exclude: Boolean) {
+        _filterState.update { it.copy(excludeTags = exclude) }
+    }
+
+    fun updateExcludeStatuses(exclude: Boolean) {
+        _filterState.update { it.copy(excludeStatuses = exclude) }
+    }
+
+    fun clearFilters() {
+        viewModelScope.launch {
+            val clients = downloadQueueRepository.getAllDownloadClients()
+            _filterState.value = DownloadQueueFilterState(clientIds = clients.map { it.id })
         }
     }
 

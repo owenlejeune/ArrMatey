@@ -10,7 +10,7 @@ import SwiftUI
 class DownloadQueueViewModelS: ObservableObject {
     private let viewModel: DownloadQueueViewModel
 
-    @Published private(set) var clientIdsFilters: [Int64] = []
+    @Published private(set) var filterState: DownloadQueueFilterState = DownloadQueueFilterState()
     @Published private(set) var sortState: DownloadQueueSortState = DownloadQueueSortState()
     @Published private(set) var downloadQueueState: DownloadQueueBundle = DownloadQueueBundle()
     @Published private(set) var commandState: DownloadClientCommandState = DownloadClientCommandStateInitial()
@@ -25,9 +25,7 @@ class DownloadQueueViewModelS: ObservableObject {
     }
 
     private func startObserving() {
-        viewModel.clientIdsFilters.observeAsync(on: self) { owner, filters in
-            owner.clientIdsFilters = filters.map { $0.int64Value }
-        }
+        viewModel.filterState.observeAsync(on: self, to: \.filterState)
         viewModel.sortState.observeAsync(on: self, to: \.sortState)
         viewModel.downloadQueueState.observeAsync(on: self, to: \.downloadQueueState)
         viewModel.commandState.observeAsync(on: self) { owner, state in
@@ -69,6 +67,34 @@ class DownloadQueueViewModelS: ObservableObject {
     
     func toggleClientIdFilter(id: Int64) {
         viewModel.toggleClientIdFilter(id: id)
+    }
+
+    func toggleStatusFilter(status: DownloadItemStatus) {
+        viewModel.toggleStatusFilter(status: status)
+    }
+
+    func toggleTagFilter(tag: String) {
+        viewModel.toggleTagFilter(tag: tag)
+    }
+
+    func updateActiveOnly(activeOnly: Bool) {
+        viewModel.updateActiveOnly(activeOnly: activeOnly)
+    }
+
+    func updateCompletedOnly(completedOnly: Bool) {
+        viewModel.updateCompletedOnly(completedOnly: completedOnly)
+    }
+
+    func updateExcludeTags(exclude: Bool) {
+        viewModel.updateExcludeTags(exclude: exclude)
+    }
+
+    func updateExcludeStatuses(exclude: Bool) {
+        viewModel.updateExcludeStatuses(exclude: exclude)
+    }
+
+    func clearFilters() {
+        viewModel.clearFilters()
     }
     
     func updateSortBy(_ by: SortBy) {

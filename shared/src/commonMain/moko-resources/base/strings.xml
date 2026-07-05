@@ -112,6 +112,11 @@
     <string name="sort_ascending">Ascending</string>
     <string name="sort_descending">Descending</string>
     <string name="all">All</string>
+    <string name="filters">Filters</string>
+    <string name="clear_all">Clear All</string>
+    <string name="active_only">Active Only</string>
+    <string name="completed_only">Completed Only</string>
+    <string name="exclude">Exclude Selected</string>
     <string name="monitored">Monitored</string>
     <string name="unmonitored">Unmonitored</string>
     <string name="wanted">Wanted</string>
