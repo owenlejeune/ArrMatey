@@ -11,6 +11,7 @@ data class LidarrTrack(
     val absoluteTrackNumber: Int = 0,
     val explicit: Boolean = false,
     val hasFile: Boolean = false,
+    val trackFileId: Long? = null,
     val trackFile: LidarrTrackFile? = null,
     val artistId: Long,
     val albumId: Long

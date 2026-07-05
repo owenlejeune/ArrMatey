@@ -158,8 +158,13 @@ fun AlbumsArea(
                         albumTracks.forEachIndexed { index, track ->
                             TrackRow(
                                 track = track,
-                                trackFile = albumTrackFiles
-                                    .firstOrNull { it.albumId == album.id }
+                                trackFile = if (track.hasFile) {
+                                    albumTrackFiles.firstOrNull { file ->
+                                        track.trackFileId?.let { it == file.id } ?: false
+                                    }
+                                } else {
+                                    null
+                                }
                             )
                             if (index < albumTracks.size-1) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
