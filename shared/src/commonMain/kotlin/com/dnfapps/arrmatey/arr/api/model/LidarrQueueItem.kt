@@ -27,10 +27,10 @@ data class LidarrQueueItem (
     override val status: QueueItemStatus? = null,
     override val statusMessages: List<QueueStatusMessage> = emptyList(),
     override val errorMessage: String? = null,
-    override val trackedDownloadStatus: QueueDownloadStatus,
-    override val trackedDownloadState: QueueDownloadState,
+    override val trackedDownloadStatus: QueueDownloadStatus = QueueDownloadStatus.Ok,
+    override val trackedDownloadState: QueueDownloadState = QueueDownloadState.Downloading,
     override val outputPath: String? = null,
-    override val downloadClientHasPostImportCategory: Boolean,
+    override val downloadClientHasPostImportCategory: Boolean = false,
     override var taskGroupCount: Int? = null,
 
     val albumId: Long? = null,
