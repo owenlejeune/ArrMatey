@@ -477,7 +477,18 @@ class ArrInstanceRepository(
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
                 currentCache.remove(id)
                 _mediaDetailsCache.value = currentCache
+
+                removeItemFromLibraryCache(id)
             }
+
+    private fun removeItemFromLibraryCache(id: Long) {
+        val currentLibrary = _library.value
+        if (currentLibrary is NetworkResult.Success) {
+            _library.value = NetworkResult.Success(
+                currentLibrary.data.filterNot { it.id == id }
+            )
+        }
+    }
 
     private fun updateItemInLibraryCache(updatedItem: ArrMedia) {
         val currentLibrary = _library.value
