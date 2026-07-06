@@ -3,14 +3,16 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.state.MediaPreviewUiState
 import com.dnfapps.arrmatey.arr.usecase.AddMediaItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookMetadataUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookPreviewPathUseCase
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
+import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,7 +22,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -33,7 +34,9 @@ class MediaPreviewViewModel(
     getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
     private val addMediaUseCase: AddMediaItemUseCase,
     private val getAudiobookMetadataUseCase: GetAudiobookMetadataUseCase,
-    private val getAudiobookPreviewPathUseCase: GetAudiobookPreviewPathUseCase
+    private val getAudiobookPreviewPathUseCase: GetAudiobookPreviewPathUseCase,
+    observeInstancePreferencesUseCase: ObserveInstancePreferencesUseCase,
+    private val updateInstancePreferencesUseCase: UpdateInstancePreferencesUseCase,
 ): ViewModel() {
 
     private val selectedRepository = getArrInstanceRepositoryUseCase
@@ -78,6 +81,14 @@ class MediaPreviewViewModel(
     }.flatMapLatest { it }
 
 
+    private val preferences = observeInstancePreferencesUseCase(instanceType)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = InstancePreferences()
+        )
+
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<MediaPreviewUiState> = selectedRepository
         .filterNotNull()
@@ -96,15 +107,17 @@ class MediaPreviewViewModel(
                 },
                 repository.addItemStatus,
                 repository.lastAddedItemId,
-                previewPath
-            ) { (qualityProfiles, rootFolders, tags), addItemStatus, lastAddedItemId, previewPath ->
+                previewPath,
+                preferences
+            ) { (qualityProfiles, rootFolders, tags), addItemStatus, lastAddedItemId, previewPath, prefs ->
                 MediaPreviewUiState(
                     qualityProfiles = qualityProfiles,
                     rootFolders = rootFolders,
                     tags = tags,
                     addItemStatus = addItemStatus,
                     lastAddedItemId = lastAddedItemId,
-                    relativePath = previewPath
+                    relativePath = previewPath,
+                    preferences = prefs
                 )
             }
         }
@@ -118,6 +131,14 @@ class MediaPreviewViewModel(
         viewModelScope.launch {
             val metadata = metadataResponse.value
             addMediaUseCase(instanceType, item, metadata, searchOnAdd)
+        }
+    }
+
+    fun updatePreferences(preferences: InstancePreferences) {
+        viewModelScope.launch {
+            selectedRepository.value?.instance?.id?.let { id ->
+                updateInstancePreferencesUseCase(id, preferences)
+            }
         }
     }
 }

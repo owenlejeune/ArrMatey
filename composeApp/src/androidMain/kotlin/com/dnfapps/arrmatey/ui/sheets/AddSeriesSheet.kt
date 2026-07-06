@@ -30,6 +30,7 @@ import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
@@ -46,16 +47,28 @@ fun AddSeriesSheet(
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     addInProgress: Boolean,
+    preferences: InstancePreferences,
+    onUpdatePreferences: (InstancePreferences) -> Unit,
     onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var monitor by remember { mutableStateOf(SeriesMonitorType.All) }
-    var qualityProfile by remember { mutableStateOf(qualityProfiles.first()) }
-    var seriesType by remember { mutableStateOf(SeriesType.Standard) }
-    var seasonFolders by remember { mutableStateOf(true) }
-    var rootFolder by remember { mutableStateOf(rootFolders.first()) }
+    var monitor by remember(preferences.addSeriesMonitor) { mutableStateOf(preferences.addSeriesMonitor) }
+    var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId) {
+        mutableStateOf(
+            qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
+                ?: qualityProfiles.firstOrNull()
+        )
+    }
+    var seriesType by remember(preferences.addSeriesType) { mutableStateOf(preferences.addSeriesType) }
+    var seasonFolders by remember(preferences.addSeriesSeasonFolder) { mutableStateOf(preferences.addSeriesSeasonFolder) }
+    var rootFolder by remember(rootFolders, preferences.addRootFolderPath) {
+        mutableStateOf(
+            rootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
+                ?: rootFolders.firstOrNull()
+        )
+    }
     val selectedTags = remember { mutableStateListOf<Int>() }
-    var searchOnAdd by remember { mutableStateOf(false) }
+    var searchOnAdd by remember(preferences.addSearchOnAdd) { mutableStateOf(preferences.addSearchOnAdd) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -144,17 +157,31 @@ fun AddSeriesSheet(
 
             Button(
                 onClick = {
-                    val newItem = item.copyForCreation(
-                        monitor = monitor,
-                        qualityProfileId = qualityProfile.id,
-                        seriesType = seriesType,
-                        seasonFolder = seasonFolders,
-                        rootFolderPath = rootFolder.path,
-                        tags = selectedTags
-                    )
-                    onAddItem(newItem, searchOnAdd)
+                    val qp = qualityProfile
+                    val rf = rootFolder
+                    if (qp != null && rf != null) {
+                        onUpdatePreferences(
+                            preferences.copy(
+                                addSeriesMonitor = monitor,
+                                addQualityProfileId = qp.id,
+                                addSeriesType = seriesType,
+                                addSeriesSeasonFolder = seasonFolders,
+                                addRootFolderPath = rf.path,
+                                addSearchOnAdd = searchOnAdd
+                            )
+                        )
+                        val newItem = item.copyForCreation(
+                            monitor = monitor,
+                            qualityProfileId = qp.id,
+                            seriesType = seriesType,
+                            seasonFolder = seasonFolders,
+                            rootFolderPath = rf.path,
+                            tags = selectedTags
+                        )
+                        onAddItem(newItem, searchOnAdd)
+                    }
                 },
-                enabled = !addInProgress
+                enabled = !addInProgress && qualityProfile != null && rootFolder != null
             ) {
                 if (addInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))

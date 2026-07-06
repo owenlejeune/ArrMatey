@@ -38,6 +38,7 @@ import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.state.MediaPreviewUiState
 import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -156,6 +157,7 @@ fun MediaPreviewScreen(
                     onAddItem = { newItem, searchOnAdd ->
                         viewModel.addItem(newItem, searchOnAdd)
                     },
+                    onUpdatePreferences = viewModel::updatePreferences,
                     onDismiss = { showBottomSheet = false }
                 )
             }
@@ -169,6 +171,7 @@ private fun AddMediaSheet(
     item: ArrMedia,
     uiState: MediaPreviewUiState,
     onAddItem: (ArrMedia, Boolean) -> Unit,
+    onUpdatePreferences: (InstancePreferences) -> Unit,
     onDismiss: () -> Unit
 ) {
     when (item) {
@@ -178,6 +181,8 @@ private fun AddMediaSheet(
             uiState.rootFolders,
             uiState.tags,
             uiState.addItemStatus == OperationStatus.InProgress,
+            uiState.preferences,
+            onUpdatePreferences,
             onAddItem,
             onDismiss
         )
@@ -187,6 +192,8 @@ private fun AddMediaSheet(
             uiState.rootFolders,
             uiState.tags,
             uiState.addItemStatus == OperationStatus.InProgress,
+            uiState.preferences,
+            onUpdatePreferences,
             onAddItem,
             onDismiss
         )
@@ -196,6 +203,8 @@ private fun AddMediaSheet(
             uiState.rootFolders,
             uiState.tags,
             uiState.addItemStatus == OperationStatus.InProgress,
+            uiState.preferences,
+            onUpdatePreferences,
             onAddItem,
             onDismiss
         )
@@ -205,6 +214,8 @@ private fun AddMediaSheet(
             uiState.rootFolders,
             uiState.tags,
             uiState.addItemStatus == OperationStatus.InProgress,
+            uiState.preferences,
+            onUpdatePreferences,
             onAddItem,
             onDismiss
         )
@@ -214,6 +225,8 @@ private fun AddMediaSheet(
             uiState.rootFolders,
             uiState.relativePath,
             uiState.addItemStatus == OperationStatus.InProgress,
+            uiState.preferences,
+            onUpdatePreferences,
             onAddItem,
             onDismiss
         )

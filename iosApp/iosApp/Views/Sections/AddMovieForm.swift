@@ -14,15 +14,39 @@ struct AddMovieForm: View {
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
+    let preferences: InstancePreferences
+    let onUpdatePreferences: (InstancePreferences) -> Void
     let onAddItem: (ArrMedia, Bool) -> Void
     let onDismiss: () -> Void
     
-    @State private var isMonitored: Bool = true
-    @State private var selectedMinimumAvailability: MediaStatus = .announced
-    @State private var selectedQualityProfileId: Int32? = nil
-    @State private var selectedRootFolderId: Int32? = nil
+    @State private var isMonitored: Bool
+    @State private var selectedMinimumAvailability: MediaStatus
+    @State private var selectedQualityProfileId: Int32?
+    @State private var selectedRootFolderId: Int32?
     @State private var selectedTags: Set<Int> = Set()
-    @State private var searchOnAdd: Bool = false
+    @State private var searchOnAdd: Bool
+    
+    init(movie: ArrMovie, addItemStatus: OperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (ArrMedia, Bool) -> Void, onDismiss: @escaping () -> Void) {
+        self.movie = movie
+        self.addItemStatus = addItemStatus
+        self.qualityProfiles = qualityProfiles
+        self.rootFolders = rootFolders
+        self.tags = tags
+        self.preferences = preferences
+        self.onUpdatePreferences = onUpdatePreferences
+        self.onAddItem = onAddItem
+        self.onDismiss = onDismiss
+        
+        self._isMonitored = State(initialValue: preferences.addMovieMonitored)
+        self._selectedMinimumAvailability = State(initialValue: preferences.addMovieMinimumAvailability)
+        self._searchOnAdd = State(initialValue: preferences.addSearchOnAdd)
+        
+        let qp = qualityProfiles.first(where: { $0.id == preferences.addQualityProfileId?.int32Value }) ?? qualityProfiles.first
+        self._selectedQualityProfileId = State(initialValue: qp?.id)
+        
+        let rf = rootFolders.first(where: { $0.path == preferences.addRootFolderPath }) ?? rootFolders.first
+        self._selectedRootFolderId = State(initialValue: rf?.id)
+    }
     
     private let selectableStatuses: [MediaStatus] = [
         .announced,
@@ -122,6 +146,37 @@ struct AddMovieForm: View {
             Button {
                 Task {
                     if let profileId = selectedQualityProfileId, let path = selectedRootFolderPath {
+                        onUpdatePreferences(
+                            preferences.doCopy(
+                                sortBy: preferences.sortBy,
+                                sortOrder: preferences.sortOrder,
+                                filterBy: preferences.filterBy,
+                                viewType: preferences.viewType,
+                                posterElevation: preferences.posterElevation,
+                                posterRadius: preferences.posterRadius,
+                                showFullDetails: preferences.showFullDetails,
+                                showOverlay: preferences.showOverlay,
+                                gridDensity: preferences.gridDensity,
+                                gridSpacing: preferences.gridSpacing,
+                                showBannerBackground: preferences.showBannerBackground,
+                                includeOverview: preferences.includeOverview,
+                                bannerBlur: preferences.bannerBlur,
+                                applyGlobally: preferences.applyGlobally,
+                                addQualityProfileId: Int32(profileId).asKotlinInt,
+                                addRootFolderPath: path,
+                                addSearchOnAdd: searchOnAdd,
+                                addSeriesMonitor: preferences.addSeriesMonitor,
+                                addSeriesType: preferences.addSeriesType,
+                                addSeriesSeasonFolder: preferences.addSeriesSeasonFolder,
+                                addMovieMonitored: isMonitored,
+                                addMovieMinimumAvailability: selectedMinimumAvailability,
+                                addArtistMonitor: preferences.addArtistMonitor,
+                                addArtistMonitorNew: preferences.addArtistMonitorNew,
+                                addAuthorMonitor: preferences.addAuthorMonitor,
+                                addAuthorMonitorNew: preferences.addAuthorMonitorNew,
+                                addAudiobookMonitored: preferences.addAudiobookMonitored
+                            )
+                        )
                         let newMovie = movie.doCopyForCreation(
                             monitored: isMonitored,
                             minimumAvailability: selectedMinimumAvailability,

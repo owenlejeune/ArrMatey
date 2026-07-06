@@ -94,6 +94,8 @@ struct MediaPreviewScreen: View {
                 qualityProfiles: qualityProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
+                preferences: viewModel.uiState.preferences,
+                onUpdatePreferences: { viewModel.updatePreferences($0) },
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },
@@ -108,6 +110,8 @@ struct MediaPreviewScreen: View {
                 qualityProfiles: qualityProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
+                preferences: viewModel.uiState.preferences,
+                onUpdatePreferences: { viewModel.updatePreferences($0) },
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },
@@ -122,6 +126,8 @@ struct MediaPreviewScreen: View {
                 qualityProfiles: qualityProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
+                preferences: viewModel.uiState.preferences,
+                onUpdatePreferences: { viewModel.updatePreferences($0) },
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },
@@ -136,6 +142,8 @@ struct MediaPreviewScreen: View {
                 qualityProfiles: qualityProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
+                preferences: viewModel.uiState.preferences,
+                onUpdatePreferences: { viewModel.updatePreferences($0) },
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },
@@ -148,6 +156,8 @@ struct MediaPreviewScreen: View {
                 qualityProfiles: qualityProfiles,
                 rootFolders: rootFolders,
                 relativePath: viewModel.uiState.relativePath,
+                preferences: viewModel.uiState.preferences,
+                onUpdatePreferences: { viewModel.updatePreferences($0) },
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },

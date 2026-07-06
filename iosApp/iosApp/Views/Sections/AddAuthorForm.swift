@@ -14,15 +14,39 @@ struct AddAuthorForm: View {
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
+    let preferences: InstancePreferences
+    let onUpdatePreferences: (InstancePreferences) -> Void
     let onAddItem: (Author, Bool) -> Void
     let onDismiss: () -> Void
     
-    @State private var monitor: AuthorMonitorType = .all
-    @State private var monitorNewBooks: AuthorMonitorType = .all
-    @State private var selectedQualityProfileId: Int32? = nil
-    @State private var selectedRootFolderId: Int32? = nil
+    @State private var monitor: AuthorMonitorType
+    @State private var monitorNewBooks: AuthorMonitorType
+    @State private var selectedQualityProfileId: Int32?
+    @State private var selectedRootFolderId: Int32?
     @State private var selectedTags: Set<Int> = Set()
-    @State private var searchOnAdd: Bool = false
+    @State private var searchOnAdd: Bool
+    
+    init(author: Author, addItemStatus: OperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (Author, Bool) -> Void, onDismiss: @escaping () -> Void) {
+        self.author = author
+        self.addItemStatus = addItemStatus
+        self.qualityProfiles = qualityProfiles
+        self.rootFolders = rootFolders
+        self.tags = tags
+        self.preferences = preferences
+        self.onUpdatePreferences = onUpdatePreferences
+        self.onAddItem = onAddItem
+        self.onDismiss = onDismiss
+        
+        self._monitor = State(initialValue: preferences.addAuthorMonitor)
+        self._monitorNewBooks = State(initialValue: preferences.addAuthorMonitorNew)
+        self._searchOnAdd = State(initialValue: preferences.addSearchOnAdd)
+        
+        let qp = qualityProfiles.first(where: { $0.id == preferences.addQualityProfileId?.int32Value }) ?? qualityProfiles.first
+        self._selectedQualityProfileId = State(initialValue: qp?.id)
+        
+        let rf = rootFolders.first(where: { $0.path == preferences.addRootFolderPath }) ?? rootFolders.first
+        self._selectedRootFolderId = State(initialValue: rf?.id)
+    }
     
     private let selectedStatuses: [AuthorMonitorType] = [.all, .none, .future]
     
@@ -121,6 +145,37 @@ struct AddAuthorForm: View {
             Button {
                 Task {
                     if let profileId = selectedQualityProfileId, let path = selectedRootFolderPath {
+                        onUpdatePreferences(
+                            preferences.doCopy(
+                                sortBy: preferences.sortBy,
+                                sortOrder: preferences.sortOrder,
+                                filterBy: preferences.filterBy,
+                                viewType: preferences.viewType,
+                                posterElevation: preferences.posterElevation,
+                                posterRadius: preferences.posterRadius,
+                                showFullDetails: preferences.showFullDetails,
+                                showOverlay: preferences.showOverlay,
+                                gridDensity: preferences.gridDensity,
+                                gridSpacing: preferences.gridSpacing,
+                                showBannerBackground: preferences.showBannerBackground,
+                                includeOverview: preferences.includeOverview,
+                                bannerBlur: preferences.bannerBlur,
+                                applyGlobally: preferences.applyGlobally,
+                                addQualityProfileId: Int32(profileId).asKotlinInt,
+                                addRootFolderPath: path,
+                                addSearchOnAdd: searchOnAdd,
+                                addSeriesMonitor: preferences.addSeriesMonitor,
+                                addSeriesType: preferences.addSeriesType,
+                                addSeriesSeasonFolder: preferences.addSeriesSeasonFolder,
+                                addMovieMonitored: preferences.addMovieMonitored,
+                                addMovieMinimumAvailability: preferences.addMovieMinimumAvailability,
+                                addArtistMonitor: preferences.addArtistMonitor,
+                                addArtistMonitorNew: preferences.addArtistMonitorNew,
+                                addAuthorMonitor: monitor,
+                                addAuthorMonitorNew: monitorNewBooks,
+                                addAudiobookMonitored: preferences.addAudiobookMonitored
+                            )
+                        )
                         let newAuthor = author.doCopyForCreation(
                             monitor: monitor,
                             monitorNew: monitorNewBooks,

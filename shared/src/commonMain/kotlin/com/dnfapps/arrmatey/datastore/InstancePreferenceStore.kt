@@ -4,8 +4,13 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.preferencesOf
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.MediaStatus
+import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
+import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -40,6 +45,25 @@ class InstancePreferenceStore(
     private val posterElevationKey = stringPreferencesKey("posterElevation")
     private val posterRadiusKey = stringPreferencesKey("posterRadius")
     private val applyGloballyKey = booleanPreferencesKey("applyGlobally")
+
+    private val addQualityProfileIdKey = intPreferencesKey("addQualityProfileId")
+    private val addRootFolderPathKey = stringPreferencesKey("addRootFolderPath")
+    private val addSearchOnAddKey = booleanPreferencesKey("addSearchOnAdd")
+
+    private val addSeriesMonitorKey = stringPreferencesKey("addSeriesMonitor")
+    private val addSeriesTypeKey = stringPreferencesKey("addSeriesType")
+    private val addSeriesSeasonFolderKey = booleanPreferencesKey("addSeriesSeasonFolder")
+
+    private val addMovieMonitoredKey = booleanPreferencesKey("addMovieMonitored")
+    private val addMovieMinimumAvailabilityKey = stringPreferencesKey("addMovieMinimumAvailability")
+
+    private val addArtistMonitorKey = stringPreferencesKey("addArtistMonitor")
+    private val addArtistMonitorNewKey = stringPreferencesKey("addArtistMonitorNew")
+
+    private val addAuthorMonitorKey = stringPreferencesKey("addAuthorMonitor")
+    private val addAuthorMonitorNewKey = stringPreferencesKey("addAuthorMonitorNew")
+
+    private val addAudiobookMonitoredKey = booleanPreferencesKey("addAudiobookMonitored")
 
     private val sortByFlow: Flow<SortBy> = dataStore.data
         .map { preferences ->
@@ -101,6 +125,59 @@ class InstancePreferenceStore(
     private val applyGloballyFlow: Flow<Boolean> = dataStore.data
         .map { preferences -> preferences[applyGloballyKey] ?: false }
 
+    private val addQualityProfileIdFlow: Flow<Int?> = dataStore.data
+        .map { preferences -> preferences[addQualityProfileIdKey] }
+
+    private val addRootFolderPathFlow: Flow<String?> = dataStore.data
+        .map { preferences -> preferences[addRootFolderPathKey] }
+
+    private val addSearchOnAddFlow: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[addSearchOnAddKey] ?: false }
+
+    private val addSeriesMonitorFlow: Flow<SeriesMonitorType> = dataStore.data
+        .map { preferences ->
+            preferences[addSeriesMonitorKey]?.let { SeriesMonitorType.valueOf(it) } ?: SeriesMonitorType.All
+        }
+
+    private val addSeriesTypeFlow: Flow<SeriesType> = dataStore.data
+        .map { preferences ->
+            preferences[addSeriesTypeKey]?.let { SeriesType.valueOf(it) } ?: SeriesType.Standard
+        }
+
+    private val addSeriesSeasonFolderFlow: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[addSeriesSeasonFolderKey] ?: true }
+
+    private val addMovieMonitoredFlow: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[addMovieMonitoredKey] ?: true }
+
+    private val addMovieMinimumAvailabilityFlow: Flow<MediaStatus> = dataStore.data
+        .map { preferences ->
+            preferences[addMovieMinimumAvailabilityKey]?.let { MediaStatus.valueOf(it) } ?: MediaStatus.Announced
+        }
+
+    private val addArtistMonitorFlow: Flow<ArtistMonitorType> = dataStore.data
+        .map { preferences ->
+            preferences[addArtistMonitorKey]?.let { ArtistMonitorType.valueOf(it) } ?: ArtistMonitorType.All
+        }
+
+    private val addArtistMonitorNewFlow: Flow<ArtistMonitorType> = dataStore.data
+        .map { preferences ->
+            preferences[addArtistMonitorNewKey]?.let { ArtistMonitorType.valueOf(it) } ?: ArtistMonitorType.None
+        }
+
+    private val addAuthorMonitorFlow: Flow<AuthorMonitorType> = dataStore.data
+        .map { preferences ->
+            preferences[addAuthorMonitorKey]?.let { AuthorMonitorType.valueOf(it) } ?: AuthorMonitorType.All
+        }
+
+    private val addAuthorMonitorNewFlow: Flow<AuthorMonitorType> = dataStore.data
+        .map { preferences ->
+            preferences[addAuthorMonitorNewKey]?.let { AuthorMonitorType.valueOf(it) } ?: AuthorMonitorType.All
+        }
+
+    private val addAudiobookMonitoredFlow: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[addAudiobookMonitoredKey] ?: true }
+
     fun observePreferences(): Flow<InstancePreferences> = combine(
         sortByFlow,
         sortOrderFlow,
@@ -115,8 +192,21 @@ class InstancePreferenceStore(
         gridSpacingFlow,
         posterElevationFlow,
         posterRadiusFlow,
-        applyGloballyFlow
-    ) { args: Array<Any> ->
+        applyGloballyFlow,
+        addQualityProfileIdFlow,
+        addRootFolderPathFlow,
+        addSearchOnAddFlow,
+        addSeriesMonitorFlow,
+        addSeriesTypeFlow,
+        addSeriesSeasonFolderFlow,
+        addMovieMonitoredFlow,
+        addMovieMinimumAvailabilityFlow,
+        addArtistMonitorFlow,
+        addArtistMonitorNewFlow,
+        addAuthorMonitorFlow,
+        addAuthorMonitorNewFlow,
+        addAudiobookMonitoredFlow
+    ) { args: Array<Any?> ->
         InstancePreferences(
             sortBy = args[0] as SortBy,
             sortOrder = args[1] as SortOrder,
@@ -131,7 +221,20 @@ class InstancePreferenceStore(
             gridSpacing = args[10] as GridSpacing,
             posterElevation = args[11] as PosterElevation,
             posterRadius = args[12] as PosterRadius,
-            applyGlobally = args[13] as Boolean
+            applyGlobally = args[13] as Boolean,
+            addQualityProfileId = args[14] as? Int,
+            addRootFolderPath = args[15] as? String,
+            addSearchOnAdd = args[16] as Boolean,
+            addSeriesMonitor = args[17] as SeriesMonitorType,
+            addSeriesType = args[18] as SeriesType,
+            addSeriesSeasonFolder = args[19] as Boolean,
+            addMovieMonitored = args[20] as Boolean,
+            addMovieMinimumAvailability = args[21] as MediaStatus,
+            addArtistMonitor = args[22] as ArtistMonitorType,
+            addArtistMonitorNew = args[23] as ArtistMonitorType,
+            addAuthorMonitor = args[24] as AuthorMonitorType,
+            addAuthorMonitorNew = args[25] as AuthorMonitorType,
+            addAudiobookMonitored = args[26] as Boolean
         )
     }
 
@@ -151,6 +254,25 @@ class InstancePreferenceStore(
             prefs[posterElevationKey] = preferences.posterElevation.name
             prefs[posterRadiusKey] = preferences.posterRadius.name
             prefs[applyGloballyKey] = preferences.applyGlobally
+
+            preferences.addQualityProfileId?.let { prefs[addQualityProfileIdKey] = it } ?: prefs.remove(addQualityProfileIdKey)
+            preferences.addRootFolderPath?.let { prefs[addRootFolderPathKey] = it } ?: prefs.remove(addRootFolderPathKey)
+            prefs[addSearchOnAddKey] = preferences.addSearchOnAdd
+
+            prefs[addSeriesMonitorKey] = preferences.addSeriesMonitor.name
+            prefs[addSeriesTypeKey] = preferences.addSeriesType.name
+            prefs[addSeriesSeasonFolderKey] = preferences.addSeriesSeasonFolder
+
+            prefs[addMovieMonitoredKey] = preferences.addMovieMonitored
+            prefs[addMovieMinimumAvailabilityKey] = preferences.addMovieMinimumAvailability.name
+
+            prefs[addArtistMonitorKey] = preferences.addArtistMonitor.name
+            prefs[addArtistMonitorNewKey] = preferences.addArtistMonitorNew.name
+
+            prefs[addAuthorMonitorKey] = preferences.addAuthorMonitor.name
+            prefs[addAuthorMonitorNewKey] = preferences.addAuthorMonitorNew.name
+
+            prefs[addAudiobookMonitoredKey] = preferences.addAudiobookMonitored
         }
     }
 }

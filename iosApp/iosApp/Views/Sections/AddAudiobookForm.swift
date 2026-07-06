@@ -14,14 +14,16 @@ struct AddAudiobookForm: View {
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let relativePath: String
+    let preferences: InstancePreferences
+    let onUpdatePreferences: (InstancePreferences) -> Void
     let onAddItem: (SearchAudiobook, Bool) -> Void
     let onDismiss: () -> Void
     
-    @State private var monitored: Bool = true
-    @State private var selectedQualityProfileId: Int32? = nil
-    @State private var selectedRootFolderId: Int32? = nil
+    @State private var monitored: Bool
+    @State private var selectedQualityProfileId: Int32?
+    @State private var selectedRootFolderId: Int32?
     @State private var selectedRelativePath: String
-    @State private var searchOnAdd: Bool = false
+    @State private var searchOnAdd: Bool
     
     private var selectedRootFolderPath: String? {
         rootFolders.first { $0.id == selectedRootFolderId }?.path
@@ -37,6 +39,8 @@ struct AddAudiobookForm: View {
         qualityProfiles: [QualityProfile],
         rootFolders: [RootFolder],
         relativePath: String,
+        preferences: InstancePreferences,
+        onUpdatePreferences: @escaping (InstancePreferences) -> Void,
         onAddItem: @escaping (SearchAudiobook, Bool) -> Void,
         onDismiss: @escaping () -> Void
     ) {
@@ -45,10 +49,21 @@ struct AddAudiobookForm: View {
         self.qualityProfiles = qualityProfiles
         self.rootFolders = rootFolders
         self.relativePath = relativePath
+        self.preferences = preferences
+        self.onUpdatePreferences = onUpdatePreferences
         self.onAddItem = onAddItem
         self.onDismiss = onDismiss
         
-        _selectedRelativePath = State(initialValue: relativePath)
+        self._monitored = State(initialValue: preferences.addAudiobookMonitored)
+        self._searchOnAdd = State(initialValue: preferences.addSearchOnAdd)
+        
+        let qp = qualityProfiles.first(where: { $0.id == preferences.addQualityProfileId?.int32Value }) ?? qualityProfiles.first
+        self._selectedQualityProfileId = State(initialValue: qp?.id)
+        
+        let rf = rootFolders.first(where: { $0.path == preferences.addRootFolderPath }) ?? rootFolders.first(where: { $0.isDefault }) ?? rootFolders.first
+        self._selectedRootFolderId = State(initialValue: rf?.id)
+        
+        self._selectedRelativePath = State(initialValue: relativePath)
     }
     
     var body: some View {
@@ -119,6 +134,37 @@ struct AddAudiobookForm: View {
             Button {
                 Task {
                     if let path = selectedRootFolderPath {
+                        onUpdatePreferences(
+                            preferences.doCopy(
+                                sortBy: preferences.sortBy,
+                                sortOrder: preferences.sortOrder,
+                                filterBy: preferences.filterBy,
+                                viewType: preferences.viewType,
+                                posterElevation: preferences.posterElevation,
+                                posterRadius: preferences.posterRadius,
+                                showFullDetails: preferences.showFullDetails,
+                                showOverlay: preferences.showOverlay,
+                                gridDensity: preferences.gridDensity,
+                                gridSpacing: preferences.gridSpacing,
+                                showBannerBackground: preferences.showBannerBackground,
+                                includeOverview: preferences.includeOverview,
+                                bannerBlur: preferences.bannerBlur,
+                                applyGlobally: preferences.applyGlobally,
+                                addQualityProfileId: selectedQualityProfileId.asKotlinInt,
+                                addRootFolderPath: path,
+                                addSearchOnAdd: searchOnAdd,
+                                addSeriesMonitor: preferences.addSeriesMonitor,
+                                addSeriesType: preferences.addSeriesType,
+                                addSeriesSeasonFolder: preferences.addSeriesSeasonFolder,
+                                addMovieMonitored: preferences.addMovieMonitored,
+                                addMovieMinimumAvailability: preferences.addMovieMinimumAvailability,
+                                addArtistMonitor: preferences.addArtistMonitor,
+                                addArtistMonitorNew: preferences.addArtistMonitorNew,
+                                addAuthorMonitor: preferences.addAuthorMonitor,
+                                addAuthorMonitorNew: preferences.addAuthorMonitorNew,
+                                addAudiobookMonitored: monitored
+                            )
+                        )
                         let newAudiobook = audiobook.doCopyForCreation(
                             monitored: monitored,
                             qualityProfileId: selectedQualityProfileId ?? 0,

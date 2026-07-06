@@ -25,6 +25,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
@@ -39,14 +40,27 @@ fun AddAudiobookSheet(
     rootFolders: List<RootFolder>,
     relativePath: String,
     addInProgress: Boolean,
+    preferences: InstancePreferences,
+    onUpdatePreferences: (InstancePreferences) -> Unit,
     onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var monitored by remember { mutableStateOf(true) }
-    var qualityProfile by remember { mutableStateOf(qualityProfiles.firstOrNull()) }
-    var rootFolder by remember { mutableStateOf(rootFolders.first { it.isDefault }) }
+    var monitored by remember(preferences.addAudiobookMonitored) { mutableStateOf(preferences.addAudiobookMonitored) }
+    var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId) {
+        mutableStateOf(
+            qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
+                ?: qualityProfiles.firstOrNull()
+        )
+    }
+    var rootFolder by remember(rootFolders, preferences.addRootFolderPath) {
+        mutableStateOf(
+            rootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
+                ?: rootFolders.firstOrNull { it.isDefault }
+                ?: rootFolders.firstOrNull()
+        )
+    }
     var relativePath by remember { mutableStateOf(relativePath) }
-    var searchOnAdd by remember { mutableStateOf(false) }
+    var searchOnAdd by remember(preferences.addSearchOnAdd) { mutableStateOf(preferences.addSearchOnAdd) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -105,15 +119,26 @@ fun AddAudiobookSheet(
 
             Button(
                 onClick = {
-                    val newItem = item.copyForCreation(
-                        monitored = monitored,
-                        qualityProfileId = qualityProfile?.id ?: 0,
-                        rootFolderPath = rootFolder.path,
-                        relativePath = relativePath
-                    )
-                    onAddItem(newItem, searchOnAdd)
+                    val rf = rootFolder
+                    if (rf != null) {
+                        onUpdatePreferences(
+                            preferences.copy(
+                                addAudiobookMonitored = monitored,
+                                addQualityProfileId = qualityProfile?.id,
+                                addRootFolderPath = rf.path,
+                                addSearchOnAdd = searchOnAdd
+                            )
+                        )
+                        val newItem = item.copyForCreation(
+                            monitored = monitored,
+                            qualityProfileId = qualityProfile?.id ?: 0,
+                            rootFolderPath = rf.path,
+                            relativePath = relativePath
+                        )
+                        onAddItem(newItem, searchOnAdd)
+                    }
                 },
-                enabled = !addInProgress
+                enabled = !addInProgress && rootFolder != null
             ) {
                 if (addInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))

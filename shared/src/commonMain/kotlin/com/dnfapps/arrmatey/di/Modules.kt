@@ -119,6 +119,7 @@ import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCa
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
+import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceScopedRepoUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
@@ -245,6 +246,7 @@ val useCaseModule = module {
     factory { GetLibraryUseCase(get(), get(), get()) }
     factory { GetMediaDetailsUseCase(get()) }
     factory { UpdateInstancePreferencesUseCase(get()) }
+    factory { ObserveInstancePreferencesUseCase(get(), get()) }
     factory { AddMediaItemUseCase(get()) }
     factory { GetActivityTasksUseCase(get()) }
     factory { ObserveAllInstancesByTypeUseCase(get()) }
@@ -354,7 +356,7 @@ val viewModelModule = module {
         ArrSearchViewModel(type, get(), get(), get())
     }
     factory { (preview: ArrMedia, type: InstanceType) ->
-        MediaPreviewViewModel(preview, type, get(), get(), get(), get())
+        MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
         InteractiveSearchViewModel(type, defaultFilter, get(), get(), get())

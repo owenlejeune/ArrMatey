@@ -20,6 +20,15 @@ extension Int32 {
     }
 }
 
+extension Optional where Wrapped == Int32 {
+    var asKotlinInt: KotlinInt? {
+        if let value = self {
+            return KotlinInt(int: value)
+        }
+        return nil
+    }
+}
+
 extension Int {
     var asKotlinInt: KotlinInt {
         return KotlinInt(int: Int32(self))

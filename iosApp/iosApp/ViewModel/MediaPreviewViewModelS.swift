@@ -26,4 +26,8 @@ class MediaPreviewViewModelS: ObservableObject {
     func addItem(_ item: ArrMedia, _ searchOnAdd: Bool) {
         viewModel.addItem(item: item, searchOnAdd: searchOnAdd)
     }
+
+    func updatePreferences(_ preferences: InstancePreferences) {
+        viewModel.updatePreferences(preferences: preferences)
+    }
 }

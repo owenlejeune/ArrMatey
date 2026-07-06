@@ -29,6 +29,7 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
@@ -44,15 +45,27 @@ fun AddArtistSheet(
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     addInProgress: Boolean,
+    preferences: InstancePreferences,
+    onUpdatePreferences: (InstancePreferences) -> Unit,
     onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var monitor by remember { mutableStateOf(ArtistMonitorType.All) }
-    var qualityProfile by remember { mutableStateOf(qualityProfiles.first()) }
-    var monitorNew by remember { mutableStateOf(ArtistMonitorType.None) }
-    var rootFolder by remember { mutableStateOf(rootFolders.first()) }
+    var monitor by remember(preferences.addArtistMonitor) { mutableStateOf(preferences.addArtistMonitor) }
+    var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId) {
+        mutableStateOf(
+            qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
+                ?: qualityProfiles.firstOrNull()
+        )
+    }
+    var monitorNew by remember(preferences.addArtistMonitorNew) { mutableStateOf(preferences.addArtistMonitorNew) }
+    var rootFolder by remember(rootFolders, preferences.addRootFolderPath) {
+        mutableStateOf(
+            rootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
+                ?: rootFolders.firstOrNull()
+        )
+    }
     val selectedTags = remember { mutableStateListOf<Int>() }
-    var searchOnAdd by remember { mutableStateOf(false) }
+    var searchOnAdd by remember(preferences.addSearchOnAdd) { mutableStateOf(preferences.addSearchOnAdd) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -135,16 +148,29 @@ fun AddArtistSheet(
 
             Button(
                 onClick = {
-                    val newItem = item.copyForCreation(
-                        monitor = monitor,
-                        monitorNew = monitorNew,
-                        qualityProfileId = qualityProfile.id,
-                        rootFolderPath = rootFolder.path,
-                        tags = selectedTags
-                    )
-                    onAddItem(newItem, searchOnAdd)
+                    val qp = qualityProfile
+                    val rf = rootFolder
+                    if (qp != null && rf != null) {
+                        onUpdatePreferences(
+                            preferences.copy(
+                                addArtistMonitor = monitor,
+                                addArtistMonitorNew = monitorNew,
+                                addQualityProfileId = qp.id,
+                                addRootFolderPath = rf.path,
+                                addSearchOnAdd = searchOnAdd
+                            )
+                        )
+                        val newItem = item.copyForCreation(
+                            monitor = monitor,
+                            monitorNew = monitorNew,
+                            qualityProfileId = qp.id,
+                            rootFolderPath = rf.path,
+                            tags = selectedTags
+                        )
+                        onAddItem(newItem, searchOnAdd)
+                    }
                 },
-                enabled = !addInProgress
+                enabled = !addInProgress && qualityProfile != null && rootFolder != null
             ) {
                 if (addInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
