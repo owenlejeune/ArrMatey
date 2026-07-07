@@ -346,7 +346,7 @@ val useCaseModule = module {
 val viewModelModule = module {
     factory { ActivityQueueViewModel(get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
-        ArrMediaViewModel(type, get(), get(), get(), get(), get())
+        ArrMediaViewModel(type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (id: Long, type: InstanceType) ->
         ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get())

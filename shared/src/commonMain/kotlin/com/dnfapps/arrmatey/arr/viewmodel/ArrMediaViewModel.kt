@@ -3,9 +3,17 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
+import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
+import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
+import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
+import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
 import com.dnfapps.arrmatey.client.ErrorType
 import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.client.onError
+import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -42,11 +50,28 @@ class ArrMediaViewModel(
     private val getLibraryUseCase: GetLibraryUseCase,
     private val updatePreferencesUseCase: UpdateInstancePreferencesUseCase,
     private val updateAllPreferencesUseCase: UpdateAllPreferencesUseCase,
-    private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository
+    private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository,
+    private val toggleMonitorUseCase: ToggleMonitorUseCase,
+    private val performAutomaticSearchUseCase: PerformAutomaticSearchUseCase,
+    private val updateMediaUseCase: UpdateMediaUseCase,
+    private val deleteMediaUseCase: DeleteMediaUseCase,
+    private val performRefreshUseCase: PerformRefreshUseCase
 ): ViewModel() {
 
     private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val addItemStatus: StateFlow<OperationStatus> = _addItemStatus.asStateFlow()
+
+    private val _monitorStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val monitorStatus: StateFlow<OperationStatus> = _monitorStatus.asStateFlow()
+
+    private val _editItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val editItemStatus: StateFlow<OperationStatus> = _editItemStatus.asStateFlow()
+
+    private val _deleteStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val deleteStatus: StateFlow<OperationStatus> = _deleteStatus.asStateFlow()
+
+    private val _lastSearchResult = MutableStateFlow<Boolean?>(null)
+    val lastSearchResult: StateFlow<Boolean?> = _lastSearchResult.asStateFlow()
 
     private val _hasServerConnectivityError = MutableStateFlow(false)
     val hasServerConnectivityError: StateFlow<Boolean> = _hasServerConnectivityError.asStateFlow()
@@ -271,5 +296,57 @@ class ArrMediaViewModel(
         viewModelScope.launch {
             currentRepository?.refreshLibrary()
         }
+    }
+
+    fun toggleMonitored(item: ArrMedia) {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            toggleMonitorUseCase.toggleMedia(item, repository)
+        }
+    }
+
+    fun performAutomaticLookup(item: ArrMedia) {
+        val mediaId = item.id ?: return
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            performAutomaticSearchUseCase(mediaId, instanceType, repository)
+                .onSuccess { _lastSearchResult.value = true }
+                .onError { _, _, _ -> _lastSearchResult.value = false }
+            _lastSearchResult.value = null
+        }
+    }
+
+    fun performRefresh(item: ArrMedia) {
+        val mediaId = item.id ?: return
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            performRefreshUseCase(mediaId, instanceType, repository)
+        }
+    }
+
+    fun deleteMedia(item: ArrMedia, deleteFiles: Boolean, addImportExclusion: Boolean) {
+        val mediaId = item.id ?: return
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            deleteMediaUseCase(mediaId, deleteFiles, addImportExclusion, repository)
+                .collect { status ->
+                    _deleteStatus.value = status
+                }
+        }
+    }
+
+    fun editItem(item: ArrMedia, moveFiles: Boolean = false) {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            updateMediaUseCase.edit(item, moveFiles, repository)
+        }
+    }
+
+    fun resetDeleteStatus() {
+        _deleteStatus.value = OperationStatus.Idle
+    }
+
+    fun resetEditItemStatus() {
+        _editItemStatus.value = OperationStatus.Idle
     }
 }

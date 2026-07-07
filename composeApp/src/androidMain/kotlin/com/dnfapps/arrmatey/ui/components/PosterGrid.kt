@@ -48,7 +48,8 @@ fun PosterGrid(
     gridDensity: GridDensity = GridDensity.Normal,
     gridSpacing: GridSpacing = GridSpacing.Medium,
     posterElevation: PosterElevation = PosterElevation.Medium,
-    posterRadius: PosterRadius = PosterRadius.Medium
+    posterRadius: PosterRadius = PosterRadius.Medium,
+    onItemLongClick: (ArrMedia) -> Unit = {}
 ) {
     LazyVerticalGrid(
         modifier = modifier,
@@ -65,6 +66,7 @@ fun PosterGrid(
                 elevation = posterElevation,
                 item = item,
                 onItemClick = onItemClick,
+                onLongClick = { onItemLongClick(item) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(gridSpacing.spacing),

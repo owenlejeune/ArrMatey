@@ -17,7 +17,8 @@ fun MediaView(
     items: List<ArrMedia>,
     onItemClick: (ArrMedia) -> Unit,
     itemIsActive: (ArrMedia) -> Boolean,
-    preferences: InstancePreferences
+    preferences: InstancePreferences,
+    onItemLongClick: (ArrMedia) -> Unit = {}
 ) {
     when (preferences.viewType) {
         ViewType.List -> MediaList(
@@ -30,6 +31,7 @@ fun MediaView(
             blur = preferences.bannerBlur,
             posterElevation = preferences.posterElevation,
             posterRadius = preferences.posterRadius,
+            onItemLongClick = onItemLongClick,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .fillMaxSize()
@@ -45,6 +47,7 @@ fun MediaView(
             gridSpacing = preferences.gridSpacing,
             posterElevation = preferences.posterElevation,
             posterRadius = preferences.posterRadius,
+            onItemLongClick = onItemLongClick,
             modifier = Modifier
                 .fillMaxSize()
         )

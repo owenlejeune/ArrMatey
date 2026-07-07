@@ -4,9 +4,11 @@ import android.text.Html
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -82,7 +84,8 @@ fun <T : ArrMedia> MediaList(
     includeOverview: Boolean = false,
     blur: Blur = Blur.Normal,
     posterElevation: PosterElevation = PosterElevation.Medium,
-    posterRadius: PosterRadius = PosterRadius.Medium
+    posterRadius: PosterRadius = PosterRadius.Medium,
+    onItemLongClick: (T) -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier,
@@ -96,6 +99,7 @@ fun <T : ArrMedia> MediaList(
                 aspectRatio = aspectRatio,
                 item = item,
                 onItemClick = onItemClick,
+                onItemLongClick = onItemLongClick,
                 isActive = isActive,
                 showBannerBackground = showBannerBackground,
                 includeOverview = includeOverview,
@@ -107,11 +111,13 @@ fun <T : ArrMedia> MediaList(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T : ArrMedia> MediaItem(
     aspectRatio: AspectRatio,
     item: T,
     onItemClick: (T) -> Unit,
+    onItemLongClick: (T) -> Unit = {},
     isActive: Boolean = false,
     showBannerBackground: Boolean = true,
     includeOverview: Boolean = false,
@@ -125,7 +131,10 @@ fun <T : ArrMedia> MediaItem(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .clickable { onItemClick(item) },
+            .combinedClickable(
+                onClick = { onItemClick(item) },
+                onLongClick = { onItemLongClick(item) }
+            ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
