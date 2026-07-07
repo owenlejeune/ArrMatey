@@ -19,17 +19,16 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.AudiobookFile
-import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadata
 import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataBody
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookEdition
-import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.api.model.SeriesMembership
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
+import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
+import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
@@ -120,6 +119,9 @@ class ArrInstanceRepository(
 
     private val _tags = MutableStateFlow<List<Tag>>(emptyList())
     val tags: StateFlow<List<Tag>> = _tags.asStateFlow()
+
+    private val _customFilters = MutableStateFlow<List<CustomFilter>>(emptyList())
+    val customFilters: StateFlow<List<CustomFilter>> = _customFilters.asStateFlow()
 
     private val _softwareStatus = MutableStateFlow<ArrSoftwareStatus?>(null)
     val softwareStatus: StateFlow<ArrSoftwareStatus?> = _softwareStatus.asStateFlow()
@@ -246,6 +248,14 @@ class ArrInstanceRepository(
             .onSuccess { _tags.value = it }
     }
 
+    suspend fun refreshCustomFilters() {
+        client.getCustomFilters()
+            .onSuccess { _customFilters.value = it }
+            .onError { code, message, cause ->
+                logger.error(cause) { "Error refreshing custom filters: $message (code=$code)" }
+            }
+    }
+
     suspend fun refreshStatus() {
         client.getStatus()
             .onSuccess { _softwareStatus.value = it }
@@ -266,6 +276,7 @@ class ArrInstanceRepository(
             launch { refreshQualityProfiles() }
             launch { refreshRootFolders() }
             launch { refreshTags() }
+            launch { refreshCustomFilters() }
         }
     }
 

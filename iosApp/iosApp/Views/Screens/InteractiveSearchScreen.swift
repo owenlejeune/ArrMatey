@@ -143,7 +143,25 @@ struct InteractiveSearchScreen: View {
         }
 
         ToolbarItem(placement: .primaryAction) {
-            ReleaseFilterByPickerMenu(filterBy: filterBinding, filterQuality: filterQualityBinding, filterLanguage: filterLanguageBinding, filterIndexer: filterIndexerBinding, filterProtocol: filterProtocolBinding, filterCustomFormat: filterCustomFormatBinding, type: type, languages: languages, indexers: indexers, qualities: qualities, protocols: protocols, customFormats: customFormats)
+            ReleaseFilterByPickerMenu(
+                filterBy: filterBinding,
+                filterQuality: filterQualityBinding,
+                filterLanguage: filterLanguageBinding,
+                filterIndexer: filterIndexerBinding,
+                filterProtocol: filterProtocolBinding,
+                filterCustomFormat: filterCustomFormatBinding,
+                type: type,
+                languages: languages,
+                indexers: indexers,
+                qualities: qualities,
+                protocols: protocols,
+                customFormats: customFormats,
+                customFilters: viewModel.customFilters,
+                selectedCustomFilterId: viewModel.filterUiState.customFilterId?.int64Value,
+                onCustomFilterChange: { id in
+                    viewModel.setCustomFilter(id)
+                }
+            )
             .menuIndicator(.hidden)
         }
     }

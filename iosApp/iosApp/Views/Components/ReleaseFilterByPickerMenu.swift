@@ -24,6 +24,10 @@ struct ReleaseFilterByPickerMenu: View {
     let protocols: Set<ReleaseProtocol>
     let customFormats: Set<CustomFormat>
     
+    let customFilters: [CustomFilter]
+    let selectedCustomFilterId: Int64?
+    let onCustomFilterChange: (Int64?) -> Void
+    
     var body: some View {
         Menu {
             if qualities.count > 1 {
@@ -46,11 +50,40 @@ struct ReleaseFilterByPickerMenu: View {
                 indexerPicker
             }
             
+            let releaseFilters = customFilters.filter { $0.type == "release" || $0.type == "releases" }
+            if !releaseFilters.isEmpty {
+                Section {
+                    ForEach(releaseFilters, id: \.id) { filter in
+                        Button {
+                            if selectedCustomFilterId == filter.id.int64Value {
+                                onCustomFilterChange(nil)
+                            } else {
+                                onCustomFilterChange(filter.id.int64Value)
+                            }
+                        } label: {
+                            HStack {
+                                Text(filter.label)
+                                if selectedCustomFilterId == filter.id.int64Value {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
             if type == .sonarr {
                 Section {
                     Picker(MR.strings().filter_by.localized(), selection: $filterBy) {
                         ForEach(ReleaseFilterBy.allCases, id: \.self) { filter in
-                            Text(filter.resource.localized()).tag(filter)
+                            let isSelected = filter == filterBy && selectedCustomFilterId == nil
+                            HStack {
+                                Text(filter.resource.localized())
+                                if isSelected {
+                                    Image(systemName: "check")
+                                }
+                            }
+                            .tag(filter)
                         }
                     }
                     .pickerStyle(.inline)

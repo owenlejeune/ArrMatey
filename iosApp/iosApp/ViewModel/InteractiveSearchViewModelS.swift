@@ -15,6 +15,7 @@ class InteractiveSearchViewModelS: ObservableObject {
     @Published private(set) var releaseUiState: ReleaseLibrary = ReleaseLibraryInitial()
     @Published private(set) var downloadReleaseState: DownloadState = DownloadStateInitial()
     @Published private(set) var filterUiState: InteractiveSearchUiState
+    @Published private(set) var customFilters: [CustomFilter] = []
     @Published private(set) var downloadStatus: Bool? = nil
     @Published var searchQuery: String = "" {
         didSet {
@@ -32,6 +33,7 @@ class InteractiveSearchViewModelS: ObservableObject {
         viewModel.releaseUiState.observeAsync(on: self, to: \.releaseUiState)
         viewModel.downloadReleaseState.observeAsync(on: self, to: \.downloadReleaseState)
         viewModel.filterUiState.observeAsync(on: self, to: \.filterUiState)
+        viewModel.customFilters.observeAsync(on: self, to: \.customFilters)
         viewModel.downloadStatus.observeAsync(on: self) { owner, status in
             owner.downloadStatus = status?.boolValue
         }
@@ -64,6 +66,11 @@ class InteractiveSearchViewModelS: ObservableObject {
     
     func setFilterby(_ filterBy: ReleaseFilterBy) {
         viewModel.setFilterBy(filterBy: filterBy)
+    }
+    
+    func setCustomFilter(_ id: Int64?) {
+        let kotlinInt: KotlinInt? = id != nil ? KotlinInt(value: Int32(id!)) : nil
+        viewModel.setCustomFilter(id: kotlinInt)
     }
     
     func setFilterLanguage(_ filterLanguage: Shared.Language?) {

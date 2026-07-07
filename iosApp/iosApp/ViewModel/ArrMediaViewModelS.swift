@@ -64,6 +64,11 @@ class ArrMediaViewModelS: ObservableObject {
     func updateFilterBy(_ filterBy: FilterBy) {
         viewModel.updateFilterBy(filterBy: filterBy)
     }
+    
+    func updateCustomFilter(_ id: Int64?) {
+        let kotlinInt: KotlinInt? = id != nil ? KotlinInt(value: Int32(id!)) : nil
+        viewModel.updateCustomFilter(customFilterId: kotlinInt)
+    }
 
     func updateShowFullDetails(_ show: Bool) {
         viewModel.updateShowFullDetails(show: show)

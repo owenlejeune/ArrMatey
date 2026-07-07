@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
+import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceData
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -40,23 +41,21 @@ class ArrMediaViewModel(
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
     private val getLibraryUseCase: GetLibraryUseCase,
     private val updatePreferencesUseCase: UpdateInstancePreferencesUseCase,
-    private val updateAllPreferencesUseCase: UpdateAllPreferencesUseCase
+    private val updateAllPreferencesUseCase: UpdateAllPreferencesUseCase,
+    private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository
 ): ViewModel() {
 
     private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val addItemStatus: StateFlow<OperationStatus> = _addItemStatus.asStateFlow()
-
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
-
-    private val _preferences = MutableStateFlow(InstancePreferences())
-    val preferences: StateFlow<InstancePreferences> = _preferences.asStateFlow()
 
     private val _hasServerConnectivityError = MutableStateFlow(false)
     val hasServerConnectivityError: StateFlow<Boolean> = _hasServerConnectivityError.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private var currentRepository: ArrInstanceRepository? = null
 
@@ -73,10 +72,22 @@ class ArrMediaViewModel(
             initialValue = null
         )
 
+    val preferences: StateFlow<InstancePreferences> = selectedRepository
+        .filterNotNull()
+        .flatMapLatest {
+            instancePreferenceStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = InstancePreferences()
+        )
+
     val uiState: StateFlow<ArrLibrary> = selectedRepository
         .filterNotNull()
         .flatMapLatest { repository ->
             currentRepository = repository
+            _searchQuery.value = ""
 
             viewModelScope.launch {
                 repository.refreshAllMetadata()
@@ -84,17 +95,13 @@ class ArrMediaViewModel(
 
             getLibraryUseCase(repository.instance.id)
                 .combine(_searchQuery) { state, query ->
-                    when (state) {
-                        is ArrLibrary.Success -> {
-                            val filtered = filterSuccessState(state, query)
-                            _preferences.value = filtered.preferences
-                            filtered
-                        }
-                        is ArrLibrary.Error -> {
-                            handleErrorState(state)
-                            state
-                        }
-                        else -> state
+                    if (state is ArrLibrary.Success) {
+                        filterSuccessState(state, query)
+                    } else if (state is ArrLibrary.Error) {
+                        handleErrorState(state)
+                        state
+                    } else {
+                        state
                     }
                 }
         }
@@ -114,11 +121,13 @@ class ArrMediaViewModel(
                 repository.qualityProfiles,
                 repository.rootFolders,
                 repository.tags,
-            ) { profiles, folders, tags ->
+                repository.customFilters
+            ) { profiles, folders, tags, filters ->
                 InstanceData(
                     qualityProfiles = profiles,
                     rootFolders = folders,
-                    tags = tags
+                    tags = tags,
+                    customFilters = filters
                 )
             }
         }
@@ -187,7 +196,32 @@ class ArrMediaViewModel(
     }
 
     fun updateFilterBy(filterBy: FilterBy) {
-        safeSavePreference { it.copy(filterBy = filterBy) }
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val updatedPreferences = preferences.value.copy(filterBy = filterBy, customFilterId = null)
+
+            if (updatedPreferences.applyGlobally) {
+                updateAllPreferencesUseCase(updatedPreferences)
+            } else {
+                updatePreferencesUseCase(repository.instance.id, updatedPreferences)
+            }
+        }
+    }
+
+    fun updateCustomFilter(customFilterId: Int?) {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val updatedPreferences = preferences.value.copy(
+                customFilterId = customFilterId,
+                filterBy = if (customFilterId != null) FilterBy.All else preferences.value.filterBy
+            )
+
+            if (updatedPreferences.applyGlobally) {
+                updateAllPreferencesUseCase(updatedPreferences)
+            } else {
+                updatePreferencesUseCase(repository.instance.id, updatedPreferences)
+            }
+        }
     }
 
     fun updateBannerBlur(blur: Blur) {
@@ -221,8 +255,7 @@ class ArrMediaViewModel(
     private fun safeSavePreference(transform: (InstancePreferences) -> InstancePreferences) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
-            val currentState = uiState.value as? ArrLibrary.Success ?: return@launch
-            val preferences = currentState.preferences
+            val preferences = preferences.value
 
             val updatedPreferences = transform(preferences)
 

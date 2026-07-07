@@ -67,7 +67,6 @@ import com.dnfapps.arrmatey.ui.menu.InteractiveSearchMenu
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +84,7 @@ fun InteractiveSearchScreen(
     val downloadState by viewModel.downloadReleaseState.collectAsStateWithLifecycle()
     val downloadStatus by viewModel.downloadStatus.collectAsStateWithLifecycle()
     val filterState by viewModel.filterUiState.collectAsStateWithLifecycle()
+    val customFilters by viewModel.customFilters.collectAsStateWithLifecycle()
 
     val textFieldState = rememberTextFieldState()
     var confirmRelease by remember { mutableStateOf<ArrRelease?>( null) }
@@ -138,7 +138,10 @@ fun InteractiveSearchScreen(
                         filterIndexer = filterState.indexer,
                         onIndexerChange = { viewModel.setFilterIndexer(it) },
                         filterProtocol = filterState.protocol,
-                        onProtocolChange = { viewModel.setFilterProtocol(it) }
+                        onProtocolChange = { viewModel.setFilterProtocol(it) },
+                        customFilters = customFilters,
+                        selectedCustomFilterId = filterState.customFilterId,
+                        onCustomFilterChange = { viewModel.setCustomFilter(it) }
                     )
                 }
             )

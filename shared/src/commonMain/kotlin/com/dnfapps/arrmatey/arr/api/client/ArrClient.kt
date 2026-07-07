@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
+import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
@@ -33,6 +34,7 @@ interface ArrClient {
     suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>>
     suspend fun getRootFolders(): NetworkResult<List<RootFolder>>
     suspend fun getTags(): NetworkResult<List<Tag>>
+    suspend fun getCustomFilters(): NetworkResult<List<CustomFilter>>
     suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrMedia>
     suspend fun command(payload: CommandPayload): NetworkResult<Any>
     suspend fun performAutomaticSearch(id: Long): NetworkResult<Any>

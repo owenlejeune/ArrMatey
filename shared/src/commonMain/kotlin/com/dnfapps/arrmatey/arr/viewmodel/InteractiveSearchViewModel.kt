@@ -3,6 +3,8 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrRelease
+import com.dnfapps.arrmatey.arr.api.model.CustomFilter
+import com.dnfapps.arrmatey.arr.api.model.CustomFilterItem
 import com.dnfapps.arrmatey.arr.api.model.CustomFormat
 import com.dnfapps.arrmatey.arr.api.model.Language
 import com.dnfapps.arrmatey.arr.api.model.QualityInfo
@@ -12,6 +14,7 @@ import com.dnfapps.arrmatey.arr.api.model.SeriesRelease
 import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.arr.state.InteractiveSearchUiState
 import com.dnfapps.arrmatey.arr.state.ReleaseLibrary
+import com.dnfapps.arrmatey.arr.usecase.ApplyCustomFilterItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DownloadReleaseUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetReleasesUseCase
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
@@ -21,11 +24,14 @@ import com.dnfapps.arrmatey.extensions.orderedSortedWith
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -34,6 +40,7 @@ class InteractiveSearchViewModel(
     defaultFilterBy: ReleaseFilterBy,
     private val getReleasesUseCase: GetReleasesUseCase,
     private val downloadReleaseUseCase: DownloadReleaseUseCase,
+    private val applyCustomFilterItemUseCase: ApplyCustomFilterItemUseCase,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase
 ): ViewModel() {
 
@@ -52,6 +59,24 @@ class InteractiveSearchViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val selectedRepository = getArrInstanceRepositoryUseCase
+        .observeSelected(instanceType)
+        .filterNotNull()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
+    val customFilters: StateFlow<List<CustomFilter>> = selectedRepository
+        .filterNotNull()
+        .flatMapLatest { it.customFilters }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     init {
         observeReleases()
         observeDownloadStatus()
@@ -62,12 +87,13 @@ class InteractiveSearchViewModel(
             combine(
                 getReleasesUseCase(instanceType),
                 _filterUiState,
-                _searchQuery
-            ) { release, filter, query ->
+                _searchQuery,
+                customFilters
+            ) { release, filter, query, allCustomFilters ->
                 when (release) {
                     is ReleaseLibrary.Success -> {
                         val sorted = applySorting(release.items, filter)
-                        val filtered = applyFiltering(sorted, filter, query)
+                        val filtered = applyFiltering(sorted, filter, query, allCustomFilters)
                         release.copy(items = filtered)
                     }
                     else -> release
@@ -93,29 +119,62 @@ class InteractiveSearchViewModel(
         return items.orderedSortedWith(filter.sortOrder, comparator)
     }
 
-    private inline fun <reified T :ArrRelease> applyFiltering(
-        items: List<T>,
+    private fun applyFiltering(
+        items: List<ArrRelease>,
         filter: InteractiveSearchUiState,
-        query: String
-    ): List<T> {
+        query: String,
+        allCustomFilters: List<CustomFilter>
+    ): List<ArrRelease> {
         if (items.isEmpty()) return items
 
+        val customFilter = allCustomFilters.find { it.id == filter.customFilterId }
         val filtered = items.filter { item ->
             (filter.language == null || item.languages.any { it.id == filter.language.id }) &&
             (filter.protocol == null || item.protocol == filter.protocol) &&
             (filter.indexer == null || item.indexer == filter.indexer) &&
             (filter.quality == null || item.quality?.quality?.id == filter.quality.quality.id) &&
             (filter.customFormat == null || item.customFormats.any { it.id == filter.customFormat.id }) &&
-            (query.isEmpty() || item.title.contains(query, ignoreCase = true))
+            (query.isEmpty() || item.title.contains(query, ignoreCase = true)) &&
+            (customFilter == null || customFilter.filters.all { applyCustomFilterItem(item, it) })
         }
         return when (filtered.firstOrNull()) {
             null -> filtered
             is SeriesRelease -> {
                 @Suppress("UNCHECKED_CAST")
-                seriesFiltering(filtered as List<SeriesRelease>, filter) as List<T>
+                seriesFiltering(filtered as List<SeriesRelease>, filter) as List<ArrRelease>
             }
             else -> filtered
         }
+    }
+
+    private fun applyCustomFilterItem(item: ArrRelease, filter: CustomFilterItem): Boolean {
+        val itemValue: Any? = when (filter.key) {
+            "title" -> item.title
+            "quality", "qualityProfileId" -> item.quality?.quality?.id
+            "size" -> item.size
+            "indexer" -> item.indexer
+            "language", "languages" -> item.languages.map { it.name }
+            "protocol" -> item.protocol.name.lowercase()
+            "seeders" -> item.seeders
+            "leechers" -> item.leechers
+            "age", "ageMinutes" -> item.ageMinutes
+            "ageHours" -> item.ageHours
+            "ageDays" -> item.age
+            "customFormatScore" -> item.customFormatScore
+            "releaseGroup" -> item.releaseGroup
+            "releaseType" -> {
+                (item as? SeriesRelease)?.let {
+                    when {
+                        it.fullSeason -> "seasonPack"
+                        it.episodeNumbers.size > 1 -> "multiEpisode"
+                        it.episodeNumbers.size == 1 -> "singleEpisode"
+                        else -> "unknown"
+                    }
+                }
+            }
+            else -> null
+        }
+        return applyCustomFilterItemUseCase(itemValue, filter)
     }
 
     private fun seriesFiltering(
@@ -179,7 +238,13 @@ class InteractiveSearchViewModel(
 
     fun setFilterBy(filterBy: ReleaseFilterBy) {
         _filterUiState.update {
-            it.copy(filterBy = filterBy)
+            it.copy(filterBy = filterBy, customFilterId = null)
+        }
+    }
+
+    fun setCustomFilter(id: Int?) {
+        _filterUiState.update {
+            it.copy(customFilterId = id, filterBy = if (id != null) ReleaseFilterBy.Any else it.filterBy)
         }
     }
 

@@ -45,6 +45,7 @@ class InstancePreferenceStore(
     private val posterElevationKey = stringPreferencesKey("posterElevation")
     private val posterRadiusKey = stringPreferencesKey("posterRadius")
     private val applyGloballyKey = booleanPreferencesKey("applyGlobally")
+    private val customFilterIdKey = intPreferencesKey("customFilterId")
 
     private val addQualityProfileIdKey = intPreferencesKey("addQualityProfileId")
     private val addRootFolderPathKey = stringPreferencesKey("addRootFolderPath")
@@ -125,6 +126,9 @@ class InstancePreferenceStore(
     private val applyGloballyFlow: Flow<Boolean> = dataStore.data
         .map { preferences -> preferences[applyGloballyKey] ?: false }
 
+    private val customFilterIdFlow: Flow<Int?> = dataStore.data
+        .map { preferences -> preferences[customFilterIdKey] }
+
     private val addQualityProfileIdFlow: Flow<Int?> = dataStore.data
         .map { preferences -> preferences[addQualityProfileIdKey] }
 
@@ -193,6 +197,7 @@ class InstancePreferenceStore(
         posterElevationFlow,
         posterRadiusFlow,
         applyGloballyFlow,
+        customFilterIdFlow,
         addQualityProfileIdFlow,
         addRootFolderPathFlow,
         addSearchOnAddFlow,
@@ -222,19 +227,20 @@ class InstancePreferenceStore(
             posterElevation = args[11] as PosterElevation,
             posterRadius = args[12] as PosterRadius,
             applyGlobally = args[13] as Boolean,
-            addQualityProfileId = args[14] as? Int,
-            addRootFolderPath = args[15] as? String,
-            addSearchOnAdd = args[16] as Boolean,
-            addSeriesMonitor = args[17] as SeriesMonitorType,
-            addSeriesType = args[18] as SeriesType,
-            addSeriesSeasonFolder = args[19] as Boolean,
-            addMovieMonitored = args[20] as Boolean,
-            addMovieMinimumAvailability = args[21] as MediaStatus,
-            addArtistMonitor = args[22] as ArtistMonitorType,
-            addArtistMonitorNew = args[23] as ArtistMonitorType,
-            addAuthorMonitor = args[24] as AuthorMonitorType,
-            addAuthorMonitorNew = args[25] as AuthorMonitorType,
-            addAudiobookMonitored = args[26] as Boolean
+            customFilterId = args[14] as? Int,
+            addQualityProfileId = args[15] as? Int,
+            addRootFolderPath = args[16] as? String,
+            addSearchOnAdd = args[17] as Boolean,
+            addSeriesMonitor = args[18] as SeriesMonitorType,
+            addSeriesType = args[19] as SeriesType,
+            addSeriesSeasonFolder = args[20] as Boolean,
+            addMovieMonitored = args[21] as Boolean,
+            addMovieMinimumAvailability = args[22] as MediaStatus,
+            addArtistMonitor = args[23] as ArtistMonitorType,
+            addArtistMonitorNew = args[24] as ArtistMonitorType,
+            addAuthorMonitor = args[25] as AuthorMonitorType,
+            addAuthorMonitorNew = args[26] as AuthorMonitorType,
+            addAudiobookMonitored = args[27] as Boolean
         )
     }
 
@@ -254,6 +260,7 @@ class InstancePreferenceStore(
             prefs[posterElevationKey] = preferences.posterElevation.name
             prefs[posterRadiusKey] = preferences.posterRadius.name
             prefs[applyGloballyKey] = preferences.applyGlobally
+            preferences.customFilterId?.let { prefs[customFilterIdKey] = it } ?: prefs.remove(customFilterIdKey)
 
             preferences.addQualityProfileId?.let { prefs[addQualityProfileIdKey] = it } ?: prefs.remove(addQualityProfileIdKey)
             preferences.addRootFolderPath?.let { prefs[addRootFolderPathKey] = it } ?: prefs.remove(addRootFolderPathKey)

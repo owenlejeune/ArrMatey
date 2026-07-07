@@ -24,14 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
-import com.dnfapps.arrmatey.datastore.InstancePreferences
-import com.dnfapps.arrmatey.entensions.imageVector
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -40,6 +38,9 @@ fun LibraryFilterMenu(
     type: InstanceType,
     filterBy: FilterBy,
     onFilterByChanged: (FilterBy) -> Unit,
+    customFilters: List<CustomFilter>,
+    selectedCustomFilterId: Int?,
+    onCustomFilterChanged: (Int?) -> Unit,
     sortBy: SortBy,
     onSortByChanged: (SortBy) -> Unit,
     sortOrder: SortOrder,
@@ -82,8 +83,11 @@ fun LibraryFilterMenu(
                 filterOptions.forEachIndexed { index, filter ->
                     DropdownMenuItem(
                         text = { Text(mokoString(filter.resource)) },
-                        selected = filterBy == filter,
-                        onClick = { onFilterByChanged(filter) },
+                        selected = filterBy == filter && selectedCustomFilterId == null,
+                        onClick = {
+                            onFilterByChanged(filter)
+                            showMenu = false
+                        },
                         shapes = MenuDefaults.itemShape(index, filterOptions.size),
                         selectedLeadingIcon = {
                             Icon(Icons.Default.Check, null)
@@ -91,10 +95,39 @@ fun LibraryFilterMenu(
                     )
                 }
             }
+
+            if (customFilters.isNotEmpty()) {
+                val libraryFilters = customFilters.filter {
+                    it.type == "series" || it.type == "movies" || it.type == "artist" || it.type == "books"
+                }
+                if (libraryFilters.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
+
+                    DropdownMenuGroup(
+                        shapes = MenuDefaults.groupShape(2, 4),
+                        interactionSource = groupInteractionSource
+                    ) {
+                        libraryFilters.forEachIndexed { index, filter ->
+                            DropdownMenuItem(
+                                text = { Text(filter.label) },
+                                selected = selectedCustomFilterId == filter.id,
+                                onClick = {
+                                    onCustomFilterChanged(if (selectedCustomFilterId == filter.id) null else filter.id)
+                                    showMenu = false
+                                },
+                                shapes = MenuDefaults.itemShape(index, libraryFilters.size),
+                                selectedLeadingIcon = {
+                                    Icon(Icons.Default.Check, null)
+                                }
+                            )
+                        }
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
 
             DropdownMenuGroup(
-                shapes = MenuDefaults.groupShape(2, 3),
+                shapes = MenuDefaults.groupShape(if (customFilters.isNotEmpty()) 3 else 2, if (customFilters.isNotEmpty()) 4 else 3),
                 interactionSource = groupInteractionSource
             ) {
                 val sortOptions = SortBy.typeEntries(type)

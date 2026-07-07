@@ -85,6 +85,7 @@ fun ArrLibraryScreen(
     val queueItems by activityQueueViewModel.queueItems.collectAsStateWithLifecycle()
     val uiState by arrMediaViewModel.uiState.collectAsStateWithLifecycle()
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
+    val instanceData by arrMediaViewModel.instanceData.collectAsStateWithLifecycle()
     val preferences by arrMediaViewModel.preferences.collectAsStateWithLifecycle()
 
     val hideInstancePicker by globalPreferencesStore.hideInstanceSwitcher.collectAsStateWithLifecycle(false)
@@ -149,6 +150,9 @@ fun ArrLibraryScreen(
                         type = type,
                         filterBy = preferences.filterBy,
                         onFilterByChanged = { arrMediaViewModel.updateFilterBy(it) },
+                        customFilters = instanceData?.customFilters ?: emptyList(),
+                        selectedCustomFilterId = preferences.customFilterId,
+                        onCustomFilterChanged = { arrMediaViewModel.updateCustomFilter(it) },
                         sortBy = preferences.sortBy,
                         onSortByChanged = { arrMediaViewModel.updateSortBy(it) },
                         sortOrder = preferences.sortOrder,

@@ -10,35 +10,72 @@ import SwiftUI
 
 struct FilterByPickerMenu: View {
     private let type: InstanceType
+    private let customFilters: [CustomFilter]
+    private let selectedCustomFilterId: Int64?
     
     private let changeFilterBy: (FilterBy) -> Void
+    private let changeCustomFilter: (Int64?) -> Void
     
-    @State private var filteredBy: FilterBy
+    let filterBy: FilterBy
     
     init(
         type: InstanceType,
         filterBy: FilterBy,
-        changeFilterBy: @escaping (FilterBy) -> Void
+        customFilters: [CustomFilter],
+        selectedCustomFilterId: Int64?,
+        changeFilterBy: @escaping (FilterBy) -> Void,
+        changeCustomFilter: @escaping (Int64?) -> Void
     ) {
         self.type = type
-        self.filteredBy = filterBy
+        self.filterBy = filterBy
+        self.customFilters = customFilters
+        self.selectedCustomFilterId = selectedCustomFilterId
         self.changeFilterBy = changeFilterBy
+        self.changeCustomFilter = changeCustomFilter
     }
     
     var body: some View {
         Menu {
-            Picker(MR.strings().filter_by.localized(), selection: $filteredBy) {
+            Picker(MR.strings().filter_by.localized(), selection: Binding(get: { filterBy }, set: { changeFilterBy($0) })) {
                 ForEach(FilterBy.companion.typeEntries(type: type), id: \.self) { filterOption in
-                    Text(filterOption.resource.localized())
-                        .tag(filterOption)
+                    let isSelected = filterBy == filterOption && selectedCustomFilterId == nil
+                    HStack {
+                        Text(filterOption.resource.localized())
+                        if isSelected {
+                            Image(systemName: "check")
+                        }
+                    }
+                    .tag(filterOption)
                 }
             }
             .pickerStyle(.inline)
+            
+            if !customFilters.isEmpty {
+                let libraryFilters = customFilters.filter { $0.type == "series" || $0.type == "movies" || $0.type == "artist" || $0.type == "books" }
+                
+                if !libraryFilters.isEmpty {
+                    Divider()
+                    
+                    ForEach(libraryFilters, id: \.id) { filter in
+                        Button {
+                            if selectedCustomFilterId == filter.id.int64Value {
+                                changeCustomFilter(nil)
+                            } else {
+                                changeCustomFilter(filter.id.int64Value)
+                            }
+                        } label: {
+                            HStack {
+                                Text(filter.label)
+                                if selectedCustomFilterId == filter.id.int64Value {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         } label: {
-            Label(filteredBy.resource.localized(), systemImage: "line.3.horizontal.decrease")
+            Label(selectedCustomFilterId != nil ? customFilters.first(where: { $0.id.int64Value == selectedCustomFilterId })?.label ?? filterBy.resource.localized() : filterBy.resource.localized(), systemImage: "line.3.horizontal.decrease")
         }
-        .onChange(of: filteredBy, { _, newValue in
-            changeFilterBy(newValue)
-        })
     }
 }

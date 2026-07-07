@@ -148,8 +148,13 @@ struct ArrTab: View {
                 FilterByPickerMenu(
                     type: type,
                     filterBy: preferences.filterBy,
+                    customFilters: arrMediaViewModel.instanceData?.customFilters ?? [],
+                    selectedCustomFilterId: preferences.customFilterId?.int64Value,
                     changeFilterBy: { newValue in
                         arrMediaViewModel.updateFilterBy(newValue)
+                    },
+                    changeCustomFilter: { newValue in
+                        arrMediaViewModel.updateCustomFilter(newValue)
                     })
                     .menuIndicator(.hidden)
                 

@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
+import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueuePage
@@ -41,6 +42,9 @@ abstract class BaseArrClient(
 
     override suspend fun getTags(): NetworkResult<List<Tag>> =
         get("tag")
+
+    override suspend fun getCustomFilters(): NetworkResult<List<CustomFilter>> =
+        get("customFilter")
 
     override suspend fun command(payload: CommandPayload): NetworkResult<Any> =
         post<CommandPayload, CommandResponse>("command", payload)

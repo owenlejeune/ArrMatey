@@ -16,7 +16,8 @@ data class InteractiveSearchUiState(
     val indexer: String? = null,
     val protocol: ReleaseProtocol? = null,
     val quality: QualityInfo? = null,
-    val customFormat: CustomFormat? = null
+    val customFormat: CustomFormat? = null,
+    val customFilterId: Int? = null
 ) {
     companion object {
         fun empty(filterBy: ReleaseFilterBy) = InteractiveSearchUiState(

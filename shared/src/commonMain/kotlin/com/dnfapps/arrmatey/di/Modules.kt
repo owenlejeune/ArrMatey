@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.usecase.AddMediaItemUseCase
+import com.dnfapps.arrmatey.arr.usecase.ApplyCustomFilterItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteBookFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteEpisodeFileUseCase
@@ -66,6 +67,7 @@ import com.dnfapps.arrmatey.backup.usecase.ExportDataUseCase
 import com.dnfapps.arrmatey.backup.usecase.ImportDataUseCase
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
+import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrEpisodesUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrLibraryUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrMediaDetailsUseCase
@@ -73,6 +75,9 @@ import com.dnfapps.arrmatey.bazarr.usecase.PerformBazarrAutomaticSearchUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.RefreshBazarrBadgesUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.ResetBazarrProvidersUseCase
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
+import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
@@ -108,10 +113,6 @@ import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.usecase.CreateInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.DeleteInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.DismissInfoCardUseCase
-import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
-import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
-import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
-import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
@@ -242,8 +243,9 @@ val serviceModule = module {
 }
 
 val useCaseModule = module {
+    factory { ApplyCustomFilterItemUseCase() }
     factory { GetArrInstanceRepositoryUseCase(get()) }
-    factory { GetLibraryUseCase(get(), get(), get()) }
+    factory { GetLibraryUseCase(get(), get(), get(), get()) }
     factory { GetMediaDetailsUseCase(get()) }
     factory { UpdateInstancePreferencesUseCase(get()) }
     factory { ObserveInstancePreferencesUseCase(get(), get()) }
@@ -344,7 +346,7 @@ val useCaseModule = module {
 val viewModelModule = module {
     factory { ActivityQueueViewModel(get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
-        ArrMediaViewModel(type, get(), get(), get(), get())
+        ArrMediaViewModel(type, get(), get(), get(), get(), get())
     }
     factory { (id: Long, type: InstanceType) ->
         ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
@@ -359,7 +361,7 @@ val viewModelModule = module {
         MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
-        InteractiveSearchViewModel(type, defaultFilter, get(), get(), get())
+        InteractiveSearchViewModel(type, defaultFilter, get(), get(), get(), get())
     }
     factory { (movieId: Long) ->
         MovieFilesViewModel(movieId, get())
