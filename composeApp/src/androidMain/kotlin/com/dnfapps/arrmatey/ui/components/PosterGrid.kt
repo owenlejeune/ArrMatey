@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
@@ -67,9 +66,6 @@ fun PosterGrid(
                 item = item,
                 onItemClick = onItemClick,
                 onLongClick = { onItemLongClick(item) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(gridSpacing.spacing),
                 additionalContent = {
                     if (showOverlay && item.id != null) {
                         PosterGridItemOverlay(
