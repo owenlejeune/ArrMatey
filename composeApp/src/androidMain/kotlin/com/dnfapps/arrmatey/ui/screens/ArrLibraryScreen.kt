@@ -87,10 +87,12 @@ fun ArrLibraryScreen(
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val instanceData by arrMediaViewModel.instanceData.collectAsStateWithLifecycle()
     val preferences by arrMediaViewModel.preferences.collectAsStateWithLifecycle()
+    val errorMessage by arrMediaViewModel.errorMessage.collectAsStateWithLifecycle()
 
     val hideInstancePicker by globalPreferencesStore.hideInstanceSwitcher.collectAsStateWithLifecycle(false)
 
-    val errorMessage by arrMediaViewModel.errorMessage.collectAsStateWithLifecycle()
+    val isInSelectionMode by arrMediaViewModel.selectionState.isInSelectionMode.collectAsStateWithLifecycle()
+    val selectionCount by arrMediaViewModel.selectionState.selectionCount.collectAsStateWithLifecycle()
 
     var showViewCustomizationSheet by remember { mutableStateOf(false) }
 

@@ -4,9 +4,9 @@ import android.text.Html
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +31,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
@@ -52,6 +54,7 @@ import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.selectionClickable
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
@@ -59,13 +62,13 @@ import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.Blur
+import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.skydoves.cloudy.cloudy
-import dev.icerock.moko.resources.StringResource
 import kotlin.time.ExperimentalTime
 
 private val defaultHeight = 100.dp
@@ -82,7 +85,8 @@ fun <T : ArrMedia> MediaList(
     includeOverview: Boolean = false,
     blur: Blur = Blur.Normal,
     posterElevation: PosterElevation = PosterElevation.Medium,
-    posterRadius: PosterRadius = PosterRadius.Medium
+    posterRadius: PosterRadius = PosterRadius.Medium,
+    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
 ) {
     LazyColumn(
         modifier = modifier,
@@ -101,7 +105,8 @@ fun <T : ArrMedia> MediaList(
                 includeOverview = includeOverview,
                 blur = blur,
                 posterElevation = posterElevation,
-                posterRadius = posterRadius
+                posterRadius = posterRadius,
+                multiSelectState = multiSelectState
             )
         }
     }
@@ -119,15 +124,25 @@ fun <T : ArrMedia> MediaItem(
     bannerModel: Any? = null,
     blur: Blur = Blur.Normal,
     posterElevation: PosterElevation = PosterElevation.Medium,
-    posterRadius: PosterRadius = PosterRadius.Medium
+    posterRadius: PosterRadius = PosterRadius.Medium,
+    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
 ) {
+    val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
+    val selectedItems by multiSelectState.selectedItems.collectAsStateWithLifecycle()
+    val isSelected = selectedItems.contains(item)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .clickable { onItemClick(item) },
+            .selectionClickable(
+                item = item,
+                selectionState = multiSelectState,
+                onClick = { onItemClick(item) }
+            ),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        border = if (isSelected) BorderStroke(2.dp, ArrPurple) else null
     ) {
         Box(
             modifier = Modifier
@@ -204,6 +219,12 @@ fun <T : ArrMedia> MediaItem(
                                     imageVector = if (item.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                                     contentDescription = null,
                                     tint = titleColor
+                                )
+                            }
+                            if (isInSelectionMode) {
+                                CircularCheckbox(
+                                    checked = isSelected,
+                                    modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
                         }

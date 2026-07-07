@@ -2,8 +2,10 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
+import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.client.ErrorType
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.FilterBy
@@ -21,6 +23,7 @@ import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.Blur
 import com.dnfapps.arrmatey.utils.GridDensity
 import com.dnfapps.arrmatey.utils.GridSpacing
+import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,7 +45,8 @@ class ArrMediaViewModel(
     private val getLibraryUseCase: GetLibraryUseCase,
     private val updatePreferencesUseCase: UpdateInstancePreferencesUseCase,
     private val updateAllPreferencesUseCase: UpdateAllPreferencesUseCase,
-    private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository
+    private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository,
+    private val performRefreshUseCase: PerformRefreshUseCase
 ): ViewModel() {
 
     private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
@@ -56,6 +60,8 @@ class ArrMediaViewModel(
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    val selectionState = MultiSelectState<ArrMedia>()
 
     private var currentRepository: ArrInstanceRepository? = null
 
@@ -89,19 +95,25 @@ class ArrMediaViewModel(
             currentRepository = repository
             _searchQuery.value = ""
 
+            selectionState.exitSelectionMode()
+
             viewModelScope.launch {
                 repository.refreshAllMetadata()
             }
 
             getLibraryUseCase(repository.instance.id)
                 .combine(_searchQuery) { state, query ->
-                    if (state is ArrLibrary.Success) {
-                        filterSuccessState(state, query)
-                    } else if (state is ArrLibrary.Error) {
-                        handleErrorState(state)
-                        state
-                    } else {
-                        state
+                    when (state) {
+                        is ArrLibrary.Success -> {
+                            filterSuccessState(state, query)
+                        }
+
+                        is ArrLibrary.Error -> {
+                            handleErrorState(state)
+                            state
+                        }
+
+                        else -> state
                     }
                 }
         }
@@ -270,6 +282,78 @@ class ArrMediaViewModel(
     fun refresh() {
         viewModelScope.launch {
             currentRepository?.refreshLibrary()
+        }
+    }
+
+    fun toggleItemSelection(item: ArrMedia) {
+        selectionState.toggle(item)
+    }
+
+    fun selectAllItems() {
+        val success = uiState.value as? ArrLibrary.Success ?: return
+        selectionState.selectAll(success.items)
+    }
+
+    fun toggleAllItems() {
+        val success = uiState.value as? ArrLibrary.Success ?: return
+        selectionState.toggleAll(success.items)
+    }
+
+    fun areAllItemsSelected(): Boolean {
+        val success = uiState.value as? ArrLibrary.Success ?: return false
+        return selectionState.areAllSelected(success.items)
+    }
+
+    fun clearSelection() {
+        selectionState.clearSelection()
+    }
+
+    fun exitSelectionMode() {
+        selectionState.exitSelectionMode()
+    }
+
+    fun enterSelectionMode() {
+        selectionState.enterSelectionMode()
+    }
+
+    fun refreshSelected() {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val selectedIds = selectionState.selectedItems.value.mapNotNull { it.id }
+            if (selectedIds.isNotEmpty()) {
+                performRefreshUseCase.bulkRefresh(selectedIds, instanceType, repository)
+            }
+        }
+    }
+
+    fun deleteSelected(deleteFiles: Boolean, addExclusion: Boolean) {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val selectedItems = selectionState.selectedItems.value
+
+            selectedItems.forEach { item ->
+                item.id?.let { id ->
+                    repository.delete(id, deleteFiles, addExclusion)
+                }
+            }
+
+            selectionState.exitSelectionMode()
+            repository.refreshLibrary()
+        }
+    }
+
+    fun toggleMonitoringForSelected() {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val selectedItems = selectionState.selectedItems.value
+
+            selectedItems.forEach { item ->
+                item.id?.let { id ->
+                    repository.setMonitorState(id, !item.monitored)
+                }
+            }
+
+            repository.refreshLibrary()
         }
     }
 }
