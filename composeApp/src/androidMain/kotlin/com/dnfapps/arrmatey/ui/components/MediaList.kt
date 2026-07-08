@@ -59,6 +59,7 @@ import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
+import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
@@ -87,7 +88,7 @@ fun <T : ArrMedia> MediaList(
     blur: Blur = Blur.Normal,
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
-    onItemLongClick: (T) -> Unit = {}
+    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
 ) {
     LazyColumn(
         modifier = modifier,
@@ -101,13 +102,13 @@ fun <T : ArrMedia> MediaList(
                 aspectRatio = aspectRatio,
                 item = item,
                 onItemClick = onItemClick,
-                onItemLongClick = onItemLongClick,
                 isActive = isActive,
                 showBannerBackground = showBannerBackground,
                 includeOverview = includeOverview,
                 blur = blur,
                 posterElevation = posterElevation,
-                posterRadius = posterRadius
+                posterRadius = posterRadius,
+                multiSelectState = multiSelectState
             )
         }
     }
@@ -119,7 +120,6 @@ fun <T : ArrMedia> MediaItem(
     aspectRatio: AspectRatio,
     item: T,
     onItemClick: (T) -> Unit,
-    onItemLongClick: (T) -> Unit = {},
     isActive: Boolean = false,
     showBannerBackground: Boolean = true,
     includeOverview: Boolean = false,
@@ -139,12 +139,23 @@ fun <T : ArrMedia> MediaItem(
             .fillMaxWidth()
             .wrapContentHeight()
             .combinedClickable(
-                onClick = { onItemClick(item) },
-                onLongClick = { onItemLongClick(item) }
+                onClick = {
+                    if (isInSelectionMode) {
+                        multiSelectState.toggle(item)
+                    } else {
+                        onItemClick(item)
+                    }
+                },
+                onLongClick = {
+                    if (!isInSelectionMode) {
+                        multiSelectState.enterSelectionMode()
+                        multiSelectState.toggle(item)
+                    }
+                }
             ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        border = if (isSelected) BorderStroke(2.dp, ArrPurple) else null
+        border = if (isSelected) BorderStroke(4.dp, ArrLightPurple) else null
     ) {
         Box(
             modifier = Modifier

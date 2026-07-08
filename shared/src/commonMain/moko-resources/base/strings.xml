@@ -160,6 +160,7 @@
     <string name="relevance">Relevance</string>
     <string name="quality_profile">Quality profile</string>
     <string name="monitor">Monitor</string>
+    <string name="update_monitoring">Update Monitoring</string>
     <string name="monitor_new_albums">Monitor New Albums</string>
     <string name="automatically_switch_release">Automatically Switch Release</string>
     <string name="automatically_switch_releass_description">Lidarr with automatically switch to the release best matching downloaded tracks</string>
@@ -283,6 +284,7 @@
     <string name="audiobook_info_authors">Author(s)</string>
     <string name="audiobook_info_narrators">Narrator(s)</string>
     <string name="narrated_by">Narrated by: %1$s</string>
+    <string name="selected_count">%1$d selected</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

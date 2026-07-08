@@ -3,25 +3,32 @@ package com.dnfapps.arrmatey.ui.screens
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -32,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +47,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,32 +57,43 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
+import com.skydoves.flexible.core.FlexibleSheetSize
+import com.skydoves.flexible.core.FlexibleSheetValue
+import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.arrNavigator
@@ -122,18 +142,23 @@ fun ArrLibraryScreen(
     val instanceData by arrMediaViewModel.instanceData.collectAsStateWithLifecycle()
     val preferences by arrMediaViewModel.preferences.collectAsStateWithLifecycle()
 
+    val isInSelectionMode by arrMediaViewModel.selectionState.isInSelectionMode.collectAsStateWithLifecycle()
+    val selectionCount by arrMediaViewModel.selectionState.selectionCount.collectAsStateWithLifecycle()
+
     val hideInstancePicker by globalPreferencesStore.hideInstanceSwitcher.collectAsStateWithLifecycle(false)
 
     val errorMessage by arrMediaViewModel.errorMessage.collectAsStateWithLifecycle()
     val deleteStatus by arrMediaViewModel.deleteStatus.collectAsStateWithLifecycle()
     val editStatus by arrMediaViewModel.editItemStatus.collectAsStateWithLifecycle()
     val lastSearchResult by arrMediaViewModel.lastSearchResult.collectAsStateWithLifecycle()
+    val hasBazarr by arrMediaViewModel.hasBazarr.collectAsStateWithLifecycle()
 
     var showViewCustomizationSheet by remember { mutableStateOf(false) }
-    var selectedItemForMenu by remember { mutableStateOf<ArrMedia?>(null) }
     var confirmDelete by remember { mutableStateOf<ArrMedia?>(null) }
     var showEditSheet by remember { mutableStateOf<ArrMedia?>(null) }
     var moveFilesItem by remember { mutableStateOf<ArrMedia?>(null) }
+    var confirmBulkDelete by remember { mutableStateOf(false) }
+    var showMonitorOptionsSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(errorMessage) {
         errorMessage?.takeUnless { it.isEmpty() }?.let { message ->
@@ -159,7 +184,6 @@ fun ArrLibraryScreen(
     LaunchedEffect(deleteStatus) {
         if (deleteStatus is OperationStatus.Success) {
             arrMediaViewModel.resetDeleteStatus()
-            selectedItemForMenu = null
             confirmDelete = null
         }
     }
@@ -180,7 +204,7 @@ fun ArrLibraryScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
-            if (!isExpanded) {
+            if (!isExpanded && !isInSelectionMode) {
                 instancesState.selectedInstance?.let {
                     FloatingActionButton(
                         onClick = { navigation.toSearch() }
@@ -191,46 +215,64 @@ fun ArrLibraryScreen(
             }
         },
         topBar = {
-            ArrAppBarWithSearch(
-                textFieldState = textFieldState,
-                textFieldEnabled = instancesState.selectedInstance != null,
-                searchPlaceholder = mokoString(MR.strings.search_placeholder, instancesState.selectedInstance?.label ?: ""),
-                trailingIcon = {
-                    Image(
-                        painter = painterResource(type.icon),
-                        contentDescription = mokoString(type.resource),
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                navigationIcon = {
-                    if (!wideRailIsVisible) {
-                        NavigationDrawerButton()
-                    }
-                },
-                actions = {
-                    if (!hideInstancePicker || instancesState.instances.size > 1) {
-                        InstancePicker(
+            if (isInSelectionMode) {
+                SelectionTopBar(
+                    count = selectionCount,
+                    onClose = { arrMediaViewModel.exitSelectionMode() },
+                    onSelectAll = {
+                        if (arrMediaViewModel.areAllItemsSelected()) {
+                            arrMediaViewModel.clearSelection()
+                        } else {
+                            arrMediaViewModel.selectAllItems()
+                        }
+                    },
+                    isAllSelected = arrMediaViewModel.areAllItemsSelected()
+                )
+            } else {
+                ArrAppBarWithSearch(
+                    textFieldState = textFieldState,
+                    textFieldEnabled = instancesState.selectedInstance != null,
+                    searchPlaceholder = mokoString(
+                        MR.strings.search_placeholder,
+                        instancesState.selectedInstance?.label ?: ""
+                    ),
+                    trailingIcon = {
+                        Image(
+                            painter = painterResource(type.icon),
+                            contentDescription = mokoString(type.resource),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    navigationIcon = {
+                        if (!wideRailIsVisible) {
+                            NavigationDrawerButton()
+                        }
+                    },
+                    actions = {
+                        if (!hideInstancePicker || instancesState.instances.size > 1) {
+                            InstancePicker(
+                                type = type,
+                                currentInstance = instancesState.selectedInstance,
+                                typeInstances = instancesState.instances,
+                                onInstanceSelected = { instancesViewModel.setInstanceActive(it) }
+                            )
+                        }
+                        LibraryFilterMenu(
                             type = type,
-                            currentInstance = instancesState.selectedInstance,
-                            typeInstances = instancesState.instances,
-                            onInstanceSelected = { instancesViewModel.setInstanceActive(it) }
+                            filterBy = preferences.filterBy,
+                            onFilterByChanged = { arrMediaViewModel.updateFilterBy(it) },
+                            customFilters = instanceData?.customFilters ?: emptyList(),
+                            selectedCustomFilterId = preferences.customFilterId,
+                            onCustomFilterChanged = { arrMediaViewModel.updateCustomFilter(it) },
+                            sortBy = preferences.sortBy,
+                            onSortByChanged = { arrMediaViewModel.updateSortBy(it) },
+                            sortOrder = preferences.sortOrder,
+                            onSortOrderChanged = { arrMediaViewModel.updateSortOrder(it) },
+                            onOpenViewCustomization = { showViewCustomizationSheet = true }
                         )
                     }
-                    LibraryFilterMenu(
-                        type = type,
-                        filterBy = preferences.filterBy,
-                        onFilterByChanged = { arrMediaViewModel.updateFilterBy(it) },
-                        customFilters = instanceData?.customFilters ?: emptyList(),
-                        selectedCustomFilterId = preferences.customFilterId,
-                        onCustomFilterChanged = { arrMediaViewModel.updateCustomFilter(it) },
-                        sortBy = preferences.sortBy,
-                        onSortByChanged = { arrMediaViewModel.updateSortBy(it) },
-                        sortOrder = preferences.sortOrder,
-                        onSortOrderChanged = { arrMediaViewModel.updateSortOrder(it) },
-                        onOpenViewCustomization = { showViewCustomizationSheet = true }
-                    )
-                }
-            )
+                )
+            }
         },
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
@@ -293,9 +335,7 @@ fun ArrLibraryScreen(
                                     itemIsActive = { item ->
                                         queueItems.any { it.mediaId == item.id }
                                     },
-                                    onItemLongClick = { item ->
-                                        selectedItemForMenu = item
-                                    }
+                                    multiSelectState = arrMediaViewModel.selectionState
                                 )
                             } else {
                                 EmptySearchResultsView(type, textFieldState.text.toString()) {
@@ -327,18 +367,33 @@ fun ArrLibraryScreen(
             )
         }
 
-        selectedItemForMenu?.let { item ->
-            ArrItemContextMenu(
-                item = item,
-                type = type,
-                onDismissRequest = { selectedItemForMenu = null },
-                onSearchMonitored = { arrMediaViewModel.performAutomaticLookup(item) },
-                onSearchSubtitles = { /* TODO */ },
-                onEdit = { showEditSheet = item },
-                onRefresh = { arrMediaViewModel.performRefresh(item) },
-                onRemove = { confirmDelete = item },
-                onToggleMonitored = { arrMediaViewModel.toggleMonitored(item) }
-            )
+        if (isInSelectionMode) {
+            FlexibleBottomSheet(
+                onDismissRequest = { arrMediaViewModel.exitSelectionMode() },
+                sheetState = rememberFlexibleBottomSheetState(
+                    isModal = false,
+                    initialValue = FlexibleSheetValue.IntermediatelyExpanded,
+                    flexibleSheetSize = FlexibleSheetSize(
+                        fullyExpanded = FlexibleSheetSize.WrapContent,
+                        intermediatelyExpanded = 0.15f,
+                        slightlyExpanded = 0.15f
+                    )
+                ),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                SelectionBottomBar(
+                    count = selectionCount,
+                    type = type,
+                    hasBazarr = hasBazarr,
+                    onEdit = { showEditSheet = arrMediaViewModel.selectionState.selectedItems.value.first() },
+                    onToggleMonitor = { arrMediaViewModel.toggleMonitoringForSelected() },
+                    onRefresh = { arrMediaViewModel.refreshSelected() },
+                    onSearchMonitored = { arrMediaViewModel.performAutomaticLookupSelected() },
+                    onSearchSubtitles = { arrMediaViewModel.performSubtitleSearchSelected() },
+                    onUpdateMonitoring = { showMonitorOptionsSheet = true },
+                    onDelete = { confirmBulkDelete = true }
+                )
+            }
         }
 
         confirmDelete?.let { item ->
@@ -398,98 +453,160 @@ fun ArrLibraryScreen(
                 }
             )
         }
+
+        if (confirmBulkDelete) {
+            ConfirmDeleteAlert(
+                deleteInProgress = false, // Bulk delete doesn't expose individual status yet
+                onDismiss = { confirmBulkDelete = false },
+                onDelete = { deleteFiles, addExclusion ->
+                    arrMediaViewModel.deleteSelected(deleteFiles, addExclusion)
+                    confirmBulkDelete = false
+                }
+            )
+        }
+
+        if (showMonitorOptionsSheet) {
+            MonitorOptionsSheet(
+                type = type,
+                onDismissRequest = { showMonitorOptionsSheet = false },
+                onOptionSelected = {
+                    arrMediaViewModel.updateMonitoringSelected(it)
+                    showMonitorOptionsSheet = false
+                }
+            )
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ArrItemContextMenu(
-    item: ArrMedia,
-    type: InstanceType,
-    onDismissRequest: () -> Unit,
-    onSearchMonitored: () -> Unit,
-    onSearchSubtitles: () -> Unit,
-    onEdit: () -> Unit,
-    onRefresh: () -> Unit,
-    onRemove: () -> Unit,
-    onToggleMonitored: () -> Unit
+private fun SelectionTopBar(
+    count: Int,
+    onClose: () -> Unit,
+    onSelectAll: () -> Unit,
+    isAllSelected: Boolean
 ) {
-    ModalBottomSheet(onDismissRequest = onDismissRequest) {
-        Column(
-            modifier = Modifier
-                .padding(bottom = 24.dp)
-                .fillMaxWidth()
-        ) {
+    TopAppBar(
+        title = {
             Text(
-                text = item.title ?: "",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(16.dp)
+                text = mokoString(MR.strings.selected_count, count)
             )
-            HorizontalDivider()
-
-            ListItem(
-                headlineContent = { Text(mokoString(if (item.monitored) MR.strings.unmonitored else MR.strings.monitored)) },
-                leadingContent = {
-                    Icon(
-                        if (item.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        null
-                    )
-                },
-                modifier = Modifier.clickable {
-                    onToggleMonitored()
-                    onDismissRequest()
-                }
-            )
-
-            if (type.includeTopLevelAutomaticSearchOption) {
-                ListItem(
-                    headlineContent = { Text(mokoString(MR.strings.search_monitored)) },
-                    leadingContent = { Icon(Icons.Default.Search, null) },
-                    modifier = Modifier.clickable {
-                        onSearchMonitored()
-                        onDismissRequest()
-                    }
+        },
+        navigationIcon = {
+            IconButton(onClick = onClose) {
+                Icon(Icons.Default.Close, null)
+            }
+        },
+        actions = {
+            IconButton(onClick = onSelectAll) {
+                Icon(
+                    imageVector = if (isAllSelected) Icons.Default.Deselect else Icons.Default.SelectAll,
+                    contentDescription = null
                 )
             }
+        }
+    )
+}
 
-            ListItem(
-                headlineContent = { Text(mokoString(MR.strings.refresh)) },
-                leadingContent = { Icon(Icons.Default.Refresh, null) },
-                modifier = Modifier.clickable {
-                    onRefresh()
-                    onDismissRequest()
-                }
-            )
+@Composable
+private fun SelectionBottomBar(
+    count: Int,
+    type: InstanceType,
+    hasBazarr: Boolean,
+    onEdit: () -> Unit,
+    onToggleMonitor: () -> Unit,
+    onRefresh: () -> Unit,
+    onSearchMonitored: () -> Unit,
+    onSearchSubtitles: () -> Unit,
+    onUpdateMonitoring: () -> Unit,
+    onDelete: () -> Unit
+) {
+    FlowRow (
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 24.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        SelectionActionItem(
+            icon = Icons.Default.Edit,
+            label = mokoString(MR.strings.edit),
+            onClick = onEdit,
+            enabled = count == 1
+        )
+        SelectionActionItem(
+            icon = Icons.Default.Bookmark,
+            label = mokoString(MR.strings.monitored),
+            onClick = onToggleMonitor,
+            enabled = count == 1
+        )
 
-            ListItem(
-                headlineContent = { Text(mokoString(MR.strings.edit)) },
-                leadingContent = { Icon(Icons.Default.Edit, null) },
-                modifier = Modifier.clickable {
-                    onEdit()
-                    onDismissRequest()
-                }
-            )
+        SelectionActionItem(
+            icon = Icons.Default.Refresh,
+            label = mokoString(MR.strings.refresh),
+            onClick = onRefresh,
+            enabled = count > 0
+        )
+        SelectionActionItem(
+            icon = Icons.Default.Search,
+            label = mokoString(MR.strings.search_monitored),
+            onClick = onSearchMonitored,
+            enabled = count > 0
+        )
 
-            ListItem(
-                headlineContent = {
-                    Text(
-                        mokoString(MR.strings.delete),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        Icons.Default.Delete,
-                        null,
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                },
-                modifier = Modifier.clickable {
-                    onRemove()
-                    onDismissRequest()
-                }
+        if (hasBazarr && (type == InstanceType.Sonarr || type == InstanceType.Radarr)) {
+            SelectionActionItem(
+                icon = Icons.Default.Search,
+                label = mokoString(MR.strings.bazarr_search_subtitles),
+                onClick = onSearchSubtitles,
+                enabled = count > 0
             )
         }
+
+        if (type != InstanceType.Radarr && type != InstanceType.Booksehelf) {
+            SelectionActionItem(
+                icon = Icons.Default.Bookmark,
+                label = mokoString(MR.strings.update_monitoring),
+                onClick = onUpdateMonitoring,
+                enabled = count > 0
+            )
+        }
+
+        SelectionActionItem(
+            icon = Icons.Default.Delete,
+            label = mokoString(MR.strings.delete),
+            onClick = onDelete,
+            isError = true,
+            enabled = count > 0
+        )
+    }
+}
+
+@Composable
+private fun SelectionActionItem(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    isError: Boolean = false
+) {
+    Button(
+        onClick = onClick,
+        colors = if (isError) ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError
+        ) else ButtonDefaults.buttonColors(),
+        enabled = enabled
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            modifier = Modifier.padding(end = 4.dp)
+        )
+        Text(
+            text = label.breakable()
+        )
     }
 }
 
@@ -604,6 +721,49 @@ private fun EditMediaSheet(
         )
         is SearchAudiobook,
         is MockMedia -> {}
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MonitorOptionsSheet(
+    type: InstanceType,
+    onDismissRequest: () -> Unit,
+    onOptionSelected: (Any) -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = onDismissRequest) {
+        Column(
+            modifier = Modifier
+                .padding(bottom = 24.dp)
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = mokoString(MR.strings.monitor),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+            HorizontalDivider()
+
+            val options: List<Any> = when (type) {
+                InstanceType.Sonarr -> SeriesMonitorType.entries.filter { it != SeriesMonitorType.Unknown }
+                InstanceType.Lidarr -> ArtistMonitorType.entries.filter { it != ArtistMonitorType.Unknown }
+                InstanceType.Booksehelf -> AuthorMonitorType.entries.filter { it != AuthorMonitorType.Unknown }
+                else -> emptyList()
+            }
+
+            options.forEach { option ->
+                val label = when (option) {
+                    is SeriesMonitorType -> mokoString(option.resource)
+                    is ArtistMonitorType -> mokoString(option.resource)
+                    is AuthorMonitorType -> mokoString(option.resource)
+                    else -> ""
+                }
+                ListItem(
+                    headlineContent = { Text(label) },
+                    modifier = Modifier.clickable { onOptionSelected(option) }
+                )
+            }
+        }
     }
 }
 

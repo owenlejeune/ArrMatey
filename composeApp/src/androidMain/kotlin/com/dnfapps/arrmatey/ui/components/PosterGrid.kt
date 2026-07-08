@@ -31,6 +31,7 @@ import com.dnfapps.arrmatey.ui.theme.TranslucentBlackDarker
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.GridDensity
 import com.dnfapps.arrmatey.utils.GridSpacing
+import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 
@@ -48,13 +49,14 @@ fun PosterGrid(
     gridSpacing: GridSpacing = GridSpacing.Medium,
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
-    onItemLongClick: (ArrMedia) -> Unit = {}
+    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
 ) {
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Adaptive(minSize = gridDensity.minSize),
         contentPadding = PaddingValues(gridSpacing.spacing),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
+        verticalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
         userScrollEnabled = userScrollEnabled
     ) {
         items(items) { item ->
@@ -65,7 +67,6 @@ fun PosterGrid(
                 elevation = posterElevation,
                 item = item,
                 onItemClick = onItemClick,
-                onLongClick = { onItemLongClick(item) },
                 additionalContent = {
                     if (showOverlay && item.id != null) {
                         PosterGridItemOverlay(
@@ -75,7 +76,8 @@ fun PosterGrid(
                         )
                     }
                 },
-                showFooter = showFullDetails
+                showFooter = showFullDetails,
+                multiSelectState = multiSelectState
             )
         }
     }

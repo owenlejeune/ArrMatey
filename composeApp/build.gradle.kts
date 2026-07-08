@@ -37,6 +37,7 @@ kotlin {
             implementation(libs.reorderable)
             implementation(libs.compose.markdown)
             implementation(libs.google.fonts)
+            implementation(libs.flexible.bottomsheet)
             
             implementation(libs.kmp.logger)
         }

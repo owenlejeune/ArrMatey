@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,16 +37,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
+import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.mokoString
@@ -56,7 +60,6 @@ fun PosterItem(
     modifier: Modifier = Modifier,
     showFooter: Boolean = false,
     onItemClick: ((ArrMedia) -> Unit)? = null,
-    onLongClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     elevation: PosterElevation = PosterElevation.Medium,
     radius: PosterRadius = PosterRadius.Medium,
@@ -64,7 +67,12 @@ fun PosterItem(
     aspectRatio: AspectRatio = AspectRatio.Poster,
     posterModel: Any? = null,
     additionalContent: @Composable BoxScope.() -> Unit = {},
+    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
 ) {
+    val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
+    val selectedItems by multiSelectState.selectedItems.collectAsStateWithLifecycle()
+    val isSelected = selectedItems.contains(item)
+
     var imageLoadError by remember { mutableStateOf(value = false) }
 
     val model = posterModel ?: rememberRemoteImageData(
@@ -81,17 +89,37 @@ fun PosterItem(
     BasePosterItem(
         model = model,
         modifier = modifier,
+        isSelected = isSelected,
         enabled = enabled,
         elevation = elevation,
         radius = radius,
         posterHeight = posterHeight,
         aspectRatio = aspectRatio,
         onClick = {
-            onItemClick?.invoke(item)
+            if (isInSelectionMode) {
+                multiSelectState.toggle(item)
+            } else {
+                onItemClick?.invoke(item)
+            }
         },
-        onLongClick = onLongClick,
+        onLongClick = {
+            if (!isInSelectionMode) {
+                multiSelectState.enterSelectionMode()
+                multiSelectState.toggle(item)
+            }
+        },
         additionalContent = {
             additionalContent()
+            if (isInSelectionMode) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    CircularCheckbox(checked = isSelected)
+                }
+            }
         },
         errorContent = {
             if (imageLoadError) {
@@ -143,6 +171,7 @@ fun PosterItem(
     radius: PosterRadius = PosterRadius.Medium,
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
+    isSelected: Boolean = false
 ) {
     var imageLoadError by remember { mutableStateOf(false) }
 
@@ -157,6 +186,7 @@ fun PosterItem(
     BasePosterItem(
         model = model,
         modifier = modifier,
+        isSelected = isSelected,
         elevation = elevation,
         radius = radius,
         posterHeight = posterHeight,
@@ -195,6 +225,7 @@ fun BasePosterItem(
     model: Any,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    isSelected: Boolean = false,
     elevation: PosterElevation = PosterElevation.Medium,
     radius: PosterRadius = PosterRadius.Medium,
     posterHeight: Dp? = null,
@@ -217,7 +248,8 @@ fun BasePosterItem(
                     onLongClick = onLongClick
                 )
             } else Modifier
-        )
+        ),
+        border = if (isSelected) BorderStroke(4.dp, ArrLightPurple) else null
     ) {
         val isFixedSize = posterHeight != null
         Column(modifier = if (isFixedSize) Modifier.width(IntrinsicSize.Min) else Modifier) {

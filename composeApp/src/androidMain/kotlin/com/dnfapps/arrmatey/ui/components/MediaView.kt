@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.ui.theme.ViewType
+import com.dnfapps.arrmatey.utils.MultiSelectState
 
 @Composable
 fun MediaView(
@@ -18,7 +19,7 @@ fun MediaView(
     onItemClick: (ArrMedia) -> Unit,
     itemIsActive: (ArrMedia) -> Boolean,
     preferences: InstancePreferences,
-    onItemLongClick: (ArrMedia) -> Unit = {}
+    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
 ) {
     when (preferences.viewType) {
         ViewType.List -> MediaList(
@@ -31,7 +32,7 @@ fun MediaView(
             blur = preferences.bannerBlur,
             posterElevation = preferences.posterElevation,
             posterRadius = preferences.posterRadius,
-            onItemLongClick = onItemLongClick,
+            multiSelectState = multiSelectState,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .fillMaxSize()
@@ -47,7 +48,7 @@ fun MediaView(
             gridSpacing = preferences.gridSpacing,
             posterElevation = preferences.posterElevation,
             posterRadius = preferences.posterRadius,
-            onItemLongClick = onItemLongClick,
+            multiSelectState = multiSelectState,
             modifier = Modifier
                 .fillMaxSize()
         )

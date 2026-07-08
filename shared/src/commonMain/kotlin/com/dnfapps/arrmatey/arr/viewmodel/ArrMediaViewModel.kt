@@ -3,6 +3,15 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
+import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
@@ -22,7 +31,9 @@ import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceData
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
+import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateAllPreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.ui.theme.ViewType
@@ -41,6 +52,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -56,7 +68,8 @@ class ArrMediaViewModel(
     private val performAutomaticSearchUseCase: PerformAutomaticSearchUseCase,
     private val updateMediaUseCase: UpdateMediaUseCase,
     private val deleteMediaUseCase: DeleteMediaUseCase,
-    private val performRefreshUseCase: PerformRefreshUseCase
+    private val performRefreshUseCase: PerformRefreshUseCase,
+    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase
 ): ViewModel() {
 
     private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
@@ -85,7 +98,17 @@ class ArrMediaViewModel(
 
     val selectionState = MultiSelectState<ArrMedia>()
 
+    val hasBazarr: StateFlow<Boolean> = getBazarrInstanceRepositoryUseCase
+        .observeSelected()
+        .map { it != null }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
     private var currentRepository: ArrInstanceRepository? = null
+    private var currentBazarrRepository: BazarrInstanceRepository? = null
 
     private val selectedRepository = getArrInstanceRepositoryUseCase
         .observeSelected(instanceType)
@@ -175,6 +198,11 @@ class ArrMediaViewModel(
         viewModelScope.launch {
             selectedRepository.filterNotNull().collect { repository ->
                 currentRepository = repository
+            }
+        }
+        viewModelScope.launch {
+            getBazarrInstanceRepositoryUseCase.observeSelected().collect {
+                currentBazarrRepository = it
             }
         }
     }
@@ -428,6 +456,80 @@ class ArrMediaViewModel(
             }
 
             repository.refreshLibrary()
+        }
+    }
+
+    fun performAutomaticLookupSelected() {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val selectedItems = selectionState.selectedItems.value
+
+            selectedItems.forEach { item ->
+                item.id?.let { id ->
+                    performAutomaticSearchUseCase(id, instanceType, repository)
+                }
+            }
+
+            _lastSearchResult.value = true
+            selectionState.exitSelectionMode()
+        }
+    }
+
+    fun performSubtitleSearch(item: ArrMedia) {
+        val mediaId = item.id ?: return
+        viewModelScope.launch {
+            val bazarrRepo = currentBazarrRepository ?: return@launch
+            when (instanceType) {
+                InstanceType.Sonarr -> bazarrRepo.autoSearchSeriesSubtitles(mediaId)
+                InstanceType.Radarr -> bazarrRepo.autoSearchMovieSubtitles(mediaId)
+                else -> {}
+            }
+        }
+    }
+
+    fun performSubtitleSearchSelected() {
+        viewModelScope.launch {
+            val bazarrRepo = currentBazarrRepository ?: return@launch
+            val selectedItems = selectionState.selectedItems.value
+
+            selectedItems.forEach { item ->
+                item.id?.let { id ->
+                    when (instanceType) {
+                        InstanceType.Sonarr -> bazarrRepo.autoSearchSeriesSubtitles(id)
+                        InstanceType.Radarr -> bazarrRepo.autoSearchMovieSubtitles(id)
+                        else -> {}
+                    }
+                }
+            }
+
+            selectionState.exitSelectionMode()
+        }
+    }
+
+    fun updateMonitoringSelected(monitorType: Any) {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val selectedItems = selectionState.selectedItems.value
+
+            selectedItems.forEach { item ->
+                val updatedItem = when (item) {
+                    is ArrSeries -> {
+                        val monitorNewItems = when (monitorType as SeriesMonitorType) {
+                            SeriesMonitorType.All -> MonitorNewItems.All
+                            SeriesMonitorType.None -> MonitorNewItems.None
+                            else -> item.monitorNewItems // Keep existing if not All/None
+                        }
+                        item.copy(monitorNewItems = monitorNewItems)
+                    }
+                    is Arrtist -> item.copy(monitorNewItems = monitorType as ArtistMonitorType)
+                    is Author -> item.copy(monitorNewItems = monitorType as AuthorMonitorType)
+                    else -> item
+                }
+                updateMediaUseCase(updatedItem, repository)
+            }
+
+            repository.refreshLibrary()
+            selectionState.exitSelectionMode()
         }
     }
 }

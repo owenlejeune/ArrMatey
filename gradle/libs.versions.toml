@@ -36,6 +36,7 @@ composeMarkdown = "0.5.8"
 kmp-logger = "1.4.0"
 google-fonts = "1.11.2"
 adaptive = "1.2.0"
+flexible-bottomsheet = "0.3.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -90,6 +91,7 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reo
 compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "composeMarkdown" }
 kmp-logger = { module = "io.github.shivathapaa:logger", version.ref = "kmp-logger" }
 google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "google-fonts" }
+flexible-bottomsheet = { module = "com.github.skydoves:flexible-bottomsheet-material3", version.ref = "flexible-bottomsheet" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
