@@ -49,7 +49,7 @@ fun PosterGrid(
     gridSpacing: GridSpacing = GridSpacing.Medium,
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
-    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
 ) {
     LazyVerticalGrid(
         modifier = modifier,

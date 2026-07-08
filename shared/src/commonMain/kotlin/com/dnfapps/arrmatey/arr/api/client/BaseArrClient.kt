@@ -92,6 +92,9 @@ abstract class BaseArrClient(
     override suspend fun getHealth(): NetworkResult<List<ArrHealth>> =
         get("health")
 
+    override suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> =
+        NetworkResult.Success(Unit)
+
     /**
      * Helpers
      */

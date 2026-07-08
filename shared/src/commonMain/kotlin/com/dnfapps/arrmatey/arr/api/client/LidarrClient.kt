@@ -6,6 +6,9 @@ import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistEditorBody
+import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
+import com.dnfapps.arrmatey.arr.api.model.ArtistMonitoringBody
+import com.dnfapps.arrmatey.arr.api.model.ArtistMonitoringOption
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteTrackBody
@@ -121,6 +124,11 @@ class LidarrClient(
             "unmonitored" to true,
             "includeArtist" to true
         )).map { it.map { ab -> ab.copy(instanceId = instance.id) }}
+
+    override suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> =
+        post("albumStudio",
+            ArtistMonitoringBody(ids, ArtistMonitoringOption(monitor as ArtistMonitorType))
+        )
 
     suspend fun getAlbums(
         artistId: Long,

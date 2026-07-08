@@ -96,7 +96,7 @@ class ArrMediaViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    val selectionState = MultiSelectState<ArrMedia>()
+    val selectionState = MultiSelectState<Long>()
 
     val hasBazarr: StateFlow<Boolean> = getBazarrInstanceRepositoryUseCase
         .observeSelected()
@@ -146,6 +146,13 @@ class ArrMediaViewModel(
                 repository.refreshAllMetadata()
             }
 
+            viewModelScope.launch {
+                repository.monitorStatus.collect { _monitorStatus.value = it }
+            }
+            viewModelScope.launch {
+                repository.editItemStatus.collect { _editItemStatus.value = it }
+            }
+
             getLibraryUseCase(repository.instance.id)
                 .combine(_searchQuery) { state, query ->
                     when (state) {
@@ -167,6 +174,22 @@ class ArrMediaViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = ArrLibrary.Initial
         )
+
+    val selectedItem: StateFlow<ArrMedia?> = combine(
+        selectionState.selectedItems,
+        uiState
+    ) { selectedIds, state ->
+        if (selectedIds.size == 1) {
+            val id = selectedIds.first()
+            (state as? ArrLibrary.Success)?.items?.find { it.id == id }
+        } else {
+            null
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
 
     val instanceData: StateFlow<InstanceData?> = selectedRepository
         .filterNotNull()
@@ -387,23 +410,23 @@ class ArrMediaViewModel(
         _editItemStatus.value = OperationStatus.Idle
     }
 
-    fun toggleItemSelection(item: ArrMedia) {
-        selectionState.toggle(item)
+    fun toggleItemSelection(id: Long) {
+        selectionState.toggle(id)
     }
 
     fun selectAllItems() {
         val success = uiState.value as? ArrLibrary.Success ?: return
-        selectionState.selectAll(success.items)
+        selectionState.selectAll(success.items.mapNotNull { it.id })
     }
 
     fun toggleAllItems() {
         val success = uiState.value as? ArrLibrary.Success ?: return
-        selectionState.toggleAll(success.items)
+        selectionState.toggleAll(success.items.mapNotNull { it.id })
     }
 
     fun areAllItemsSelected(): Boolean {
         val success = uiState.value as? ArrLibrary.Success ?: return false
-        return selectionState.areAllSelected(success.items)
+        return selectionState.areAllSelected(success.items.mapNotNull { it.id })
     }
 
     fun clearSelection() {
@@ -421,22 +444,21 @@ class ArrMediaViewModel(
     fun refreshSelected() {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
-            val selectedIds = selectionState.selectedItems.value.mapNotNull { it.id }
+            val selectedIds = selectionState.selectedItems.value.toList()
             if (selectedIds.isNotEmpty()) {
                 performRefreshUseCase.bulkRefresh(selectedIds, instanceType, repository)
             }
+            selectionState.exitSelectionMode()
         }
     }
 
     fun deleteSelected(deleteFiles: Boolean, addExclusion: Boolean) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
-            val selectedItems = selectionState.selectedItems.value
+            val selectedIds = selectionState.selectedItems.value
 
-            selectedItems.forEach { item ->
-                item.id?.let { id ->
-                    repository.delete(id, deleteFiles, addExclusion)
-                }
+            selectedIds.forEach { id ->
+                repository.delete(id, deleteFiles, addExclusion)
             }
 
             selectionState.exitSelectionMode()
@@ -447,27 +469,25 @@ class ArrMediaViewModel(
     fun toggleMonitoringForSelected() {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
-            val selectedItems = selectionState.selectedItems.value
+            val selectedIds = selectionState.selectedItems.value.toList()
+            val currentItems = (uiState.value as? ArrLibrary.Success)?.items ?: emptyList()
 
-            selectedItems.forEach { item ->
-                item.id?.let { id ->
-                    repository.setMonitorState(id, !item.monitored)
-                }
+            selectedIds.forEach { id ->
+                val item = currentItems.find { it.id == id } ?: return@forEach
+                toggleMonitorUseCase.toggleMedia(item, repository)
             }
 
-            repository.refreshLibrary()
+            selectionState.exitSelectionMode()
         }
     }
 
     fun performAutomaticLookupSelected() {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
-            val selectedItems = selectionState.selectedItems.value
+            val selectedIds = selectionState.selectedItems.value
 
-            selectedItems.forEach { item ->
-                item.id?.let { id ->
-                    performAutomaticSearchUseCase(id, instanceType, repository)
-                }
+            selectedIds.forEach { id ->
+                performAutomaticSearchUseCase(id, instanceType, repository)
             }
 
             _lastSearchResult.value = true
@@ -490,15 +510,13 @@ class ArrMediaViewModel(
     fun performSubtitleSearchSelected() {
         viewModelScope.launch {
             val bazarrRepo = currentBazarrRepository ?: return@launch
-            val selectedItems = selectionState.selectedItems.value
+            val selectedIds = selectionState.selectedItems.value
 
-            selectedItems.forEach { item ->
-                item.id?.let { id ->
-                    when (instanceType) {
-                        InstanceType.Sonarr -> bazarrRepo.autoSearchSeriesSubtitles(id)
-                        InstanceType.Radarr -> bazarrRepo.autoSearchMovieSubtitles(id)
-                        else -> {}
-                    }
+            selectedIds.forEach { id ->
+                when (instanceType) {
+                    InstanceType.Sonarr -> bazarrRepo.autoSearchSeriesSubtitles(id)
+                    InstanceType.Radarr -> bazarrRepo.autoSearchMovieSubtitles(id)
+                    else -> {}
                 }
             }
 
@@ -509,15 +527,17 @@ class ArrMediaViewModel(
     fun updateMonitoringSelected(monitorType: Any) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
-            val selectedItems = selectionState.selectedItems.value
+            val selectedIds = selectionState.selectedItems.value
+            val currentItems = (uiState.value as? ArrLibrary.Success)?.items ?: emptyList()
 
-            selectedItems.forEach { item ->
+            selectedIds.forEach { id ->
+                val item = currentItems.find { it.id == id } ?: return@forEach
                 val updatedItem = when (item) {
                     is ArrSeries -> {
                         val monitorNewItems = when (monitorType as SeriesMonitorType) {
                             SeriesMonitorType.All -> MonitorNewItems.All
                             SeriesMonitorType.None -> MonitorNewItems.None
-                            else -> item.monitorNewItems // Keep existing if not All/None
+                            else -> item.monitorNewItems
                         }
                         item.copy(monitorNewItems = monitorNewItems)
                     }

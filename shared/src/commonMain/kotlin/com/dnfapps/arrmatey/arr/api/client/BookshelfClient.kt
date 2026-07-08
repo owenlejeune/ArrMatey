@@ -4,6 +4,9 @@ import com.dnfapps.arrmatey.arr.api.model.ApplyTags
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorEditorBody
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitoringBody
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitoringOption
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookEdition
 import com.dnfapps.arrmatey.arr.api.model.BookFile

@@ -67,11 +67,11 @@ fun PosterItem(
     aspectRatio: AspectRatio = AspectRatio.Poster,
     posterModel: Any? = null,
     additionalContent: @Composable BoxScope.() -> Unit = {},
-    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
 ) {
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
     val selectedItems by multiSelectState.selectedItems.collectAsStateWithLifecycle()
-    val isSelected = selectedItems.contains(item)
+    val isSelected = item.id?.let { selectedItems.contains(it) } ?: false
 
     var imageLoadError by remember { mutableStateOf(value = false) }
 
@@ -97,7 +97,7 @@ fun PosterItem(
         aspectRatio = aspectRatio,
         onClick = {
             if (isInSelectionMode) {
-                multiSelectState.toggle(item)
+                item.id?.let { multiSelectState.toggle(it) }
             } else {
                 onItemClick?.invoke(item)
             }
@@ -105,7 +105,7 @@ fun PosterItem(
         onLongClick = {
             if (!isInSelectionMode) {
                 multiSelectState.enterSelectionMode()
-                multiSelectState.toggle(item)
+                item.id?.let { multiSelectState.toggle(it) }
             }
         },
         additionalContent = {

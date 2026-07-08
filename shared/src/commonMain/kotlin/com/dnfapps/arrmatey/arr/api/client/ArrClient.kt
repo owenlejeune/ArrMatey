@@ -44,4 +44,5 @@ interface ArrClient {
     suspend fun getItemHistory(id: Long, page: Int, pageSize: Int, altId: Long? = null): NetworkResult<List<HistoryItem>>
     suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any>
     suspend fun getCalendar(start: LocalDate, end: LocalDate): NetworkResult<List<CalendarItem>>
+    suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit>
 }

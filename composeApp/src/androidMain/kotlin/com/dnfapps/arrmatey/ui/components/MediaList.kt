@@ -88,7 +88,7 @@ fun <T : ArrMedia> MediaList(
     blur: Blur = Blur.Normal,
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
-    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
 ) {
     LazyColumn(
         modifier = modifier,
@@ -128,11 +128,11 @@ fun <T : ArrMedia> MediaItem(
     blur: Blur = Blur.Normal,
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
-    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
 ) {
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
     val selectedItems by multiSelectState.selectedItems.collectAsStateWithLifecycle()
-    val isSelected = selectedItems.contains(item)
+    val isSelected = item.id?.let { selectedItems.contains(it) } ?: false
 
     Card(
         modifier = Modifier
@@ -141,7 +141,7 @@ fun <T : ArrMedia> MediaItem(
             .combinedClickable(
                 onClick = {
                     if (isInSelectionMode) {
-                        multiSelectState.toggle(item)
+                        item.id?.let { multiSelectState.toggle(it) }
                     } else {
                         onItemClick(item)
                     }
@@ -149,7 +149,7 @@ fun <T : ArrMedia> MediaItem(
                 onLongClick = {
                     if (!isInSelectionMode) {
                         multiSelectState.enterSelectionMode()
-                        multiSelectState.toggle(item)
+                        item.id?.let { multiSelectState.toggle(it) }
                     }
                 }
             ),
@@ -196,7 +196,8 @@ fun <T : ArrMedia> MediaItem(
                         modifier = Modifier.height(defaultHeight),
                         posterModel = posterModel,
                         elevation = posterElevation,
-                        radius = posterRadius
+                        radius = posterRadius,
+                        multiSelectState = multiSelectState
                     )
 
                     Column(

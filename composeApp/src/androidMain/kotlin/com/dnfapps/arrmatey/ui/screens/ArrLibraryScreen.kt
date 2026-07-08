@@ -144,6 +144,7 @@ fun ArrLibraryScreen(
 
     val isInSelectionMode by arrMediaViewModel.selectionState.isInSelectionMode.collectAsStateWithLifecycle()
     val selectionCount by arrMediaViewModel.selectionState.selectionCount.collectAsStateWithLifecycle()
+    val selectedItem by arrMediaViewModel.selectedItem.collectAsStateWithLifecycle()
 
     val hideInstancePicker by globalPreferencesStore.hideInstanceSwitcher.collectAsStateWithLifecycle(false)
 
@@ -192,6 +193,7 @@ fun ArrLibraryScreen(
         if (editStatus is OperationStatus.Success) {
             arrMediaViewModel.resetEditItemStatus()
             showEditSheet = null
+            arrMediaViewModel.exitSelectionMode()
         }
     }
 
@@ -385,7 +387,10 @@ fun ArrLibraryScreen(
                     count = selectionCount,
                     type = type,
                     hasBazarr = hasBazarr,
-                    onEdit = { showEditSheet = arrMediaViewModel.selectionState.selectedItems.value.first() },
+                    isMonitored = selectedItem?.monitored == true,
+                    onEdit = {
+                        showEditSheet = selectedItem
+                    },
                     onToggleMonitor = { arrMediaViewModel.toggleMonitoringForSelected() },
                     onRefresh = { arrMediaViewModel.refreshSelected() },
                     onSearchMonitored = { arrMediaViewModel.performAutomaticLookupSelected() },
@@ -513,6 +518,7 @@ private fun SelectionBottomBar(
     count: Int,
     type: InstanceType,
     hasBazarr: Boolean,
+    isMonitored: Boolean,
     onEdit: () -> Unit,
     onToggleMonitor: () -> Unit,
     onRefresh: () -> Unit,
@@ -536,8 +542,8 @@ private fun SelectionBottomBar(
             enabled = count == 1
         )
         SelectionActionItem(
-            icon = Icons.Default.Bookmark,
-            label = mokoString(MR.strings.monitored),
+            icon = if (isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+            label = mokoString(if (isMonitored) MR.strings.monitored else MR.strings.unmonitored),
             onClick = onToggleMonitor,
             enabled = count == 1
         )

@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,7 +18,7 @@ fun MediaView(
     onItemClick: (ArrMedia) -> Unit,
     itemIsActive: (ArrMedia) -> Boolean,
     preferences: InstancePreferences,
-    multiSelectState: MultiSelectState<ArrMedia> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
 ) {
     when (preferences.viewType) {
         ViewType.List -> MediaList(
