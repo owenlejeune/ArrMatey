@@ -53,17 +53,18 @@ struct ReleaseFilterByPickerMenu: View {
             let releaseFilters = customFilters.filter { $0.type == "release" || $0.type == "releases" }
             if !releaseFilters.isEmpty {
                 Section {
-                    ForEach(releaseFilters, id: \.id) { filter in
+                    ForEach(releaseFilters, id: \.self) { filter in
                         Button {
-                            if selectedCustomFilterId == filter.id.int64Value {
+                            let filterId = Int64(filter.id)
+                            if selectedCustomFilterId == filterId {
                                 onCustomFilterChange(nil)
                             } else {
-                                onCustomFilterChange(filter.id.int64Value)
+                                onCustomFilterChange(filterId)
                             }
                         } label: {
                             HStack {
                                 Text(filter.label)
-                                if selectedCustomFilterId == filter.id.int64Value {
+                                if selectedCustomFilterId == Int64(filter.id) {
                                     Image(systemName: "checkmark")
                                 }
                             }
@@ -80,7 +81,7 @@ struct ReleaseFilterByPickerMenu: View {
                             HStack {
                                 Text(filter.resource.localized())
                                 if isSelected {
-                                    Image(systemName: "check")
+                                    Image(systemName: "checkmark")
                                 }
                             }
                             .tag(filter)

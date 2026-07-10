@@ -66,8 +66,8 @@ fun InteractiveSearchMenu(
     filterProtocol: ReleaseProtocol?,
     onProtocolChange: (ReleaseProtocol?) -> Unit,
     customFilters: List<CustomFilter>,
-    selectedCustomFilterId: Int?,
-    onCustomFilterChange: (Int?) -> Unit
+    selectedCustomFilterId: Long?,
+    onCustomFilterChange: (Long?) -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 

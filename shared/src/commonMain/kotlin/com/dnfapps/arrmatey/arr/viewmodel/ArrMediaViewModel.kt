@@ -293,7 +293,7 @@ class ArrMediaViewModel(
         }
     }
 
-    fun updateCustomFilter(customFilterId: Int?) {
+    fun updateCustomFilter(customFilterId: Long?) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
             val updatedPreferences = preferences.value.copy(

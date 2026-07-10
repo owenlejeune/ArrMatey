@@ -35,6 +35,8 @@ struct FilterByPickerMenu: View {
     }
     
     var body: some View {
+        let libraryFilters = customFilters.filter { $0.type == "series" || $0.type == "movies" || $0.type == "artist" || $0.type == "books" }
+        
         Menu {
             Picker(MR.strings().filter_by.localized(), selection: Binding(get: { filterBy }, set: { changeFilterBy($0) })) {
                 ForEach(FilterBy.companion.typeEntries(type: type), id: \.self) { filterOption in
@@ -42,7 +44,7 @@ struct FilterByPickerMenu: View {
                     HStack {
                         Text(filterOption.resource.localized())
                         if isSelected {
-                            Image(systemName: "check")
+                            Image(systemName: "checkmark")
                         }
                     }
                     .tag(filterOption)
@@ -50,32 +52,28 @@ struct FilterByPickerMenu: View {
             }
             .pickerStyle(.inline)
             
-            if !customFilters.isEmpty {
-                let libraryFilters = customFilters.filter { $0.type == "series" || $0.type == "movies" || $0.type == "artist" || $0.type == "books" }
+            if !libraryFilters.isEmpty {
+                Divider()
                 
-                if !libraryFilters.isEmpty {
-                    Divider()
-                    
-                    ForEach(libraryFilters, id: \.id) { filter in
-                        Button {
-                            if selectedCustomFilterId == filter.id.int64Value {
-                                changeCustomFilter(nil)
-                            } else {
-                                changeCustomFilter(filter.id.int64Value)
-                            }
-                        } label: {
-                            HStack {
-                                Text(filter.label)
-                                if selectedCustomFilterId == filter.id.int64Value {
-                                    Image(systemName: "checkmark")
-                                }
+                ForEach(libraryFilters, id: \.id) { filter in
+                    Button {
+                        if selectedCustomFilterId == filter.id {
+                            changeCustomFilter(nil)
+                        } else {
+                            changeCustomFilter(filter.id)
+                        }
+                    } label: {
+                        HStack {
+                            Text(filter.label)
+                            if selectedCustomFilterId == filter.id {
+                                Image(systemName: "checkmark")
                             }
                         }
                     }
                 }
             }
         } label: {
-            Label(selectedCustomFilterId != nil ? customFilters.first(where: { $0.id.int64Value == selectedCustomFilterId })?.label ?? filterBy.resource.localized() : filterBy.resource.localized(), systemImage: "line.3.horizontal.decrease")
+            Label(selectedCustomFilterId != nil ? customFilters.first(where: { $0.id == selectedCustomFilterId })?.label ?? filterBy.resource.localized() : filterBy.resource.localized(), systemImage: "line.3.horizontal.decrease")
         }
     }
 }

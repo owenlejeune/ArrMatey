@@ -22,7 +22,7 @@ data class InstancePreferences(
     val sortBy: SortBy = SortBy.Title,
     val sortOrder: SortOrder = SortOrder.Asc,
     val filterBy: FilterBy = FilterBy.All,
-    val customFilterId: Int? = null,
+    val customFilterId: Long? = null,
     val viewType: ViewType = ViewType.Grid,
 
     val posterElevation: PosterElevation = PosterElevation.Medium,

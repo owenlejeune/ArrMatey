@@ -150,6 +150,7 @@ struct AddAuthorForm: View {
                                 sortBy: preferences.sortBy,
                                 sortOrder: preferences.sortOrder,
                                 filterBy: preferences.filterBy,
+                                customFilterId: preferences.customFilterId,
                                 viewType: preferences.viewType,
                                 posterElevation: preferences.posterElevation,
                                 posterRadius: preferences.posterRadius,

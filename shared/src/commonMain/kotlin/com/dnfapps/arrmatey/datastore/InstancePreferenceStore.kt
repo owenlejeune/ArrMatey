@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
@@ -45,7 +46,7 @@ class InstancePreferenceStore(
     private val posterElevationKey = stringPreferencesKey("posterElevation")
     private val posterRadiusKey = stringPreferencesKey("posterRadius")
     private val applyGloballyKey = booleanPreferencesKey("applyGlobally")
-    private val customFilterIdKey = intPreferencesKey("customFilterId")
+    private val customFilterIdKey = longPreferencesKey("customFilterId")
 
     private val addQualityProfileIdKey = intPreferencesKey("addQualityProfileId")
     private val addRootFolderPathKey = stringPreferencesKey("addRootFolderPath")
@@ -126,7 +127,7 @@ class InstancePreferenceStore(
     private val applyGloballyFlow: Flow<Boolean> = dataStore.data
         .map { preferences -> preferences[applyGloballyKey] ?: false }
 
-    private val customFilterIdFlow: Flow<Int?> = dataStore.data
+    private val customFilterIdFlow: Flow<Long?> = dataStore.data
         .map { preferences -> preferences[customFilterIdKey] }
 
     private val addQualityProfileIdFlow: Flow<Int?> = dataStore.data
@@ -227,7 +228,7 @@ class InstancePreferenceStore(
             posterElevation = args[11] as PosterElevation,
             posterRadius = args[12] as PosterRadius,
             applyGlobally = args[13] as Boolean,
-            customFilterId = args[14] as? Int,
+            customFilterId = args[14] as? Long,
             addQualityProfileId = args[15] as? Int,
             addRootFolderPath = args[16] as? String,
             addSearchOnAdd = args[17] as Boolean,

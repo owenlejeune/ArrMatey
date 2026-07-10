@@ -89,7 +89,7 @@ struct ArrTab: View {
                     .progressViewStyle(.circular)
             }
         } else if let success = uiState as? ArrLibrarySuccess {
-            ArrLibraryView(type: type, state: success, searchQuery: $arrMediaViewModel.searchQuery, searchPresented: $searchPresented)
+            ArrLibraryView(type: type, viewModel: arrMediaViewModel, state: success, searchQuery: $arrMediaViewModel.searchQuery, searchPresented: $searchPresented)
         } else if let error = uiState as? ArrLibraryError {
             ZStack {
                 ErrorView(

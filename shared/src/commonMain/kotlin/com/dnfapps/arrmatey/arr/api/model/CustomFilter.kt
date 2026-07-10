@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class CustomFilter(
-    val id: Int,
+    val id: Long,
     val type: String,
     val label: String,
     val filters: List<CustomFilterItem>

@@ -16,6 +16,7 @@ class ArrMediaViewModelS: ObservableObject {
     @Published private(set) var uiState: ArrLibrary = ArrLibraryInitial()
     @Published private(set) var instanceData: InstanceData?
     @Published private(set) var addItemStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var editItemStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var preferences: InstancePreferences = InstancePreferences()
     @Published private(set) var hasServerConnectivityError: Bool = false
     @Published private(set) var errorMessage: String? = nil
@@ -26,6 +27,12 @@ class ArrMediaViewModelS: ObservableObject {
         }
     }
     
+    @Published private(set) var hasBazarr: Bool = false
+    @Published private(set) var isInSelectionMode: Bool = false
+    @Published private(set) var selectionCount: Int32 = 0
+    @Published private(set) var selectedItems: Set<Int64> = []
+    @Published private(set) var selectedItem: ArrMedia? = nil
+
     private var cancellables = Set<AnyCancellable>()
     
     init(type: InstanceType) {
@@ -37,12 +44,26 @@ class ArrMediaViewModelS: ObservableObject {
         viewModel.uiState.observeAsync(on: self, to: \.uiState)
         viewModel.instanceData.observeAsync(on: self, to: \.instanceData)
         viewModel.addItemStatus.observeAsync(on: self, to: \.addItemStatus)
+        viewModel.editItemStatus.observeAsync(on: self, to: \.editItemStatus)
         viewModel.searchQuery.observeAsync(on: self, to: \.searchQuery)
         viewModel.preferences.observeAsync(on: self, to: \.preferences)
         viewModel.hasServerConnectivityError.observeAsync(on: self) { owner, error in
             owner.hasServerConnectivityError = error.boolValue
         }
         viewModel.errorMessage.observeAsync(on: self, to: \.errorMessage)
+        viewModel.hasBazarr.observeAsync(on: self) { owner, hasBazarr in
+            owner.hasBazarr = hasBazarr.boolValue
+        }
+        viewModel.selectionState.isInSelectionMode.observeAsync(on: self) { owner, isInSelectionMode in
+            owner.isInSelectionMode = isInSelectionMode.boolValue
+        }
+        viewModel.selectionState.selectionCount.observeAsync(on: self) { owner, selectionCount in
+            owner.selectionCount = selectionCount.int32Value
+        }
+        viewModel.selectionState.selectedItems.observeAsync(on: self) { owner, selectedItems in
+            owner.selectedItems = Set(selectedItems.compactMap { ($0 as? NSNumber)?.int64Value })
+        }
+        viewModel.selectedItem.observeAsync(on: self, to: \.selectedItem)
     }
     
     func executeAutomaticSearch(_ seriesId: Int64) {
@@ -66,8 +87,7 @@ class ArrMediaViewModelS: ObservableObject {
     }
     
     func updateCustomFilter(_ id: Int64?) {
-        let kotlinInt: KotlinInt? = id != nil ? KotlinInt(value: Int32(id!)) : nil
-        viewModel.updateCustomFilter(customFilterId: kotlinInt)
+        viewModel.updateCustomFilter(customFilterId: id?.asKotlinLong)
     }
 
     func updateShowFullDetails(_ show: Bool) {
@@ -116,5 +136,73 @@ class ArrMediaViewModelS: ObservableObject {
     
     func refresh() {
         viewModel.refresh()
+    }
+    
+    func toggleMonitored(_ item: ArrMedia) {
+        viewModel.toggleMonitored(item: item)
+    }
+    
+    func performAutomaticLookup(_ item: ArrMedia) {
+        viewModel.performAutomaticLookup(item: item)
+    }
+    
+    func performRefresh(_ item: ArrMedia) {
+        viewModel.performRefresh(item: item)
+    }
+    
+    func deleteMedia(_ item: ArrMedia, deleteFiles: Bool, addImportExclusion: Bool) {
+        viewModel.deleteMedia(item: item, deleteFiles: deleteFiles, addImportExclusion: addImportExclusion)
+    }
+    
+    func editItem(_ item: ArrMedia, moveFiles: Bool = false) {
+        viewModel.editItem(item: item, moveFiles: moveFiles)
+    }
+    
+    func toggleItemSelection(_ id: Int64) {
+        viewModel.toggleItemSelection(id: id)
+    }
+    
+    func selectAllItems() {
+        viewModel.selectAllItems()
+    }
+    
+    func clearSelection() {
+        viewModel.clearSelection()
+    }
+    
+    func exitSelectionMode() {
+        viewModel.exitSelectionMode()
+    }
+    
+    func enterSelectionMode() {
+        viewModel.enterSelectionMode()
+    }
+    
+    func areAllItemsSelected() -> Bool {
+        return viewModel.areAllItemsSelected()
+    }
+    
+    func refreshSelected() {
+        viewModel.refreshSelected()
+    }
+    
+    func deleteSelected(deleteFiles: Bool, addExclusion: Bool) {
+        viewModel.deleteSelected(deleteFiles: deleteFiles, addExclusion: addExclusion)
+    }
+    
+    func toggleMonitoringForSelected() {
+        viewModel.toggleMonitoringForSelected()
+    }
+    
+    func performAutomaticLookupSelected() {
+        viewModel.performAutomaticLookupSelected()
+    }
+    
+    func performSubtitleSearchSelected() {
+        viewModel.performSubtitleSearchSelected()
+    }
+    
+    func updateMonitoringSelected(_ monitorType: Any) {
+        viewModel.updateMonitoringSelected(monitorType: monitorType)
     }
 }

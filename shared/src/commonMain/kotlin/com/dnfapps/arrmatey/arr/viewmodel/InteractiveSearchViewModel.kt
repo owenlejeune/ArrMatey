@@ -242,7 +242,7 @@ class InteractiveSearchViewModel(
         }
     }
 
-    fun setCustomFilter(id: Int?) {
+    fun setCustomFilter(id: Long?) {
         _filterUiState.update {
             it.copy(customFilterId = id, filterBy = if (id != null) ReleaseFilterBy.Any else it.filterBy)
         }

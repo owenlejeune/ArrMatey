@@ -69,8 +69,7 @@ class InteractiveSearchViewModelS: ObservableObject {
     }
     
     func setCustomFilter(_ id: Int64?) {
-        let kotlinInt: KotlinInt? = id != nil ? KotlinInt(value: Int32(id!)) : nil
-        viewModel.setCustomFilter(id: kotlinInt)
+        viewModel.setCustomFilter(id: id?.asKotlinLong)
     }
     
     func setFilterLanguage(_ filterLanguage: Shared.Language?) {
