@@ -112,6 +112,7 @@
     <string name="sort_ascending">Ascending</string>
     <string name="sort_descending">Descending</string>
     <string name="all">All</string>
+    <string name="no_change">No Change</string>
     <string name="filters">Filters</string>
     <string name="clear_all">Clear All</string>
     <string name="active_only">Active Only</string>
@@ -160,6 +161,7 @@
     <string name="relevance">Relevance</string>
     <string name="quality_profile">Quality profile</string>
     <string name="monitor">Monitor</string>
+    <string name="monitor_author">Monitor Author</string>
     <string name="update_monitoring">Update Monitoring</string>
     <string name="monitor_new_albums">Monitor New Albums</string>
     <string name="automatically_switch_release">Automatically Switch Release</string>

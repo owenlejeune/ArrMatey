@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteTrackBody
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.LidarrHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.LidarrRelease
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
@@ -126,8 +127,12 @@ class LidarrClient(
         )).map { it.map { ab -> ab.copy(instanceId = instance.id) }}
 
     override suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> =
-        post("albumStudio",
-            ArtistMonitoringBody(ids, ArtistMonitoringOption(monitor as ArtistMonitorType))
+        post(
+            endpoint = "albumStudio",
+            body = ArtistMonitoringBody(
+                artist = ids.map { IdWrapper(it) },
+                monitoringOptions = ArtistMonitoringOption(monitor as ArtistMonitorType)
+            )
         )
 
     suspend fun getAlbums(

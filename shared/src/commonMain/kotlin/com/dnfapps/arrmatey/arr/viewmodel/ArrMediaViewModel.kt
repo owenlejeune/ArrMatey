@@ -527,26 +527,9 @@ class ArrMediaViewModel(
     fun updateMonitoringSelected(monitorType: Any) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
-            val selectedIds = selectionState.selectedItems.value
-            val currentItems = (uiState.value as? ArrLibrary.Success)?.items ?: emptyList()
+            val selectedIds = selectionState.selectedItems.value.toList()
 
-            selectedIds.forEach { id ->
-                val item = currentItems.find { it.id == id } ?: return@forEach
-                val updatedItem = when (item) {
-                    is ArrSeries -> {
-                        val monitorNewItems = when (monitorType as SeriesMonitorType) {
-                            SeriesMonitorType.All -> MonitorNewItems.All
-                            SeriesMonitorType.None -> MonitorNewItems.None
-                            else -> item.monitorNewItems
-                        }
-                        item.copy(monitorNewItems = monitorNewItems)
-                    }
-                    is Arrtist -> item.copy(monitorNewItems = monitorType as ArtistMonitorType)
-                    is Author -> item.copy(monitorNewItems = monitorType as AuthorMonitorType)
-                    else -> item
-                }
-                updateMediaUseCase(updatedItem, repository)
-            }
+            updateMediaUseCase.bulkUpdateMonitoring(selectedIds, monitorType, repository)
 
             repository.refreshLibrary()
             selectionState.exitSelectionMode()

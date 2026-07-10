@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteEpisodeBody
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.SeriesEditorBody
@@ -144,7 +145,13 @@ class SonarrClient(
         )).map { it.map { ep -> ep.copy(instanceId = instance.id) } }
 
     override suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> =
-        post("seasonPass", SeriesMonitoringBody(ids, SeriesMonitorOption(monitor as SeriesMonitorType)))
+        post(
+            endpoint = "seasonPass",
+            body = SeriesMonitoringBody(
+                series = ids.map { IdWrapper(it) },
+                monitoringOptions = SeriesMonitorOption(monitor as SeriesMonitorType)
+            )
+        )
 
     suspend fun updateEpisode(item: Episode): NetworkResult<Episode> =
         put("episode/${item.id}", item)

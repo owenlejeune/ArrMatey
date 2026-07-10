@@ -3,20 +3,20 @@ package com.dnfapps.arrmatey.ui.screens
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -57,7 +57,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.LinkAnnotation
@@ -70,10 +69,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
-import com.skydoves.flexible.core.FlexibleSheetSize
-import com.skydoves.flexible.core.FlexibleSheetValue
-import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
@@ -81,6 +76,7 @@ import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorOptions
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
@@ -117,6 +113,10 @@ import com.dnfapps.arrmatey.ui.sheets.EditMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
+import com.skydoves.flexible.core.FlexibleSheetSize
+import com.skydoves.flexible.core.FlexibleSheetValue
+import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 
@@ -461,7 +461,7 @@ fun ArrLibraryScreen(
 
         if (confirmBulkDelete) {
             ConfirmDeleteAlert(
-                deleteInProgress = false, // Bulk delete doesn't expose individual status yet
+                deleteInProgress = false,
                 onDismiss = { confirmBulkDelete = false },
                 onDelete = { deleteFiles, addExclusion ->
                     arrMediaViewModel.deleteSelected(deleteFiles, addExclusion)
@@ -570,7 +570,7 @@ private fun SelectionBottomBar(
             )
         }
 
-        if (type != InstanceType.Radarr && type != InstanceType.Booksehelf) {
+        if (type != InstanceType.Radarr) {
             SelectionActionItem(
                 icon = Icons.Default.Bookmark,
                 label = mokoString(MR.strings.update_monitoring),
@@ -737,6 +737,11 @@ private fun MonitorOptionsSheet(
     onDismissRequest: () -> Unit,
     onOptionSelected: (Any) -> Unit
 ) {
+    if (type == InstanceType.Booksehelf) {
+        BookshelfMonitorOptionsSheet(onDismissRequest, onOptionSelected)
+        return
+    }
+
     ModalBottomSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier = Modifier
@@ -753,7 +758,6 @@ private fun MonitorOptionsSheet(
             val options: List<Any> = when (type) {
                 InstanceType.Sonarr -> SeriesMonitorType.entries.filter { it != SeriesMonitorType.Unknown }
                 InstanceType.Lidarr -> ArtistMonitorType.entries.filter { it != ArtistMonitorType.Unknown }
-                InstanceType.Booksehelf -> AuthorMonitorType.entries.filter { it != AuthorMonitorType.Unknown }
                 else -> emptyList()
             }
 
@@ -768,6 +772,102 @@ private fun MonitorOptionsSheet(
                     headlineContent = { Text(label) },
                     modifier = Modifier.clickable { onOptionSelected(option) }
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BookshelfMonitorOptionsSheet(
+    onDismissRequest: () -> Unit,
+    onOptionSelected: (Any) -> Unit
+) {
+    var monitorAuthor by remember { mutableStateOf<Boolean?>(null) }
+    var monitorNewBooks by remember { mutableStateOf<AuthorMonitorType?>(null) }
+
+    ModalBottomSheet(onDismissRequest = onDismissRequest) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = mokoString(MR.strings.update_monitoring),
+                style = MaterialTheme.typography.titleLarge
+            )
+            HorizontalDivider()
+
+            Text(
+                text = mokoString(MR.strings.monitor_author),
+                style = MaterialTheme.typography.titleMedium
+            )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(null, true, false).forEach { value ->
+                    val label = when (value) {
+                        null -> mokoString(MR.strings.no_change)
+                        true -> mokoString(MR.strings.monitored)
+                        false -> mokoString(MR.strings.unmonitored)
+                    }
+                    val isSelected = monitorAuthor == value
+                    Button(
+                        onClick = { monitorAuthor = value },
+                        colors = if (isSelected) ButtonDefaults.buttonColors() else ButtonDefaults.outlinedButtonColors(),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(label, textAlign = TextAlign.Center, fontSize = 12.sp)
+                    }
+                }
+            }
+
+            Text(
+                text = mokoString(MR.strings.monitor_new_books),
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            val bookOptions = listOf(null, AuthorMonitorType.All, AuthorMonitorType.None, AuthorMonitorType.New)
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                bookOptions.forEach { value ->
+                    val label = when (value) {
+                        null -> mokoString(MR.strings.no_change)
+                        else -> mokoString(value.resource)
+                    }
+                    val isSelected = monitorNewBooks == value
+                    Button(
+                        onClick = { monitorNewBooks = value },
+                        colors = if (isSelected) ButtonDefaults.buttonColors() else ButtonDefaults.outlinedButtonColors(),
+                    ) {
+                        Text(label, textAlign = TextAlign.Center, fontSize = 12.sp)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    onOptionSelected(
+                        AuthorMonitorOptions(
+                            monitored = monitorAuthor,
+                            monitorNewItems = monitorNewBooks
+                        )
+                    )
+                    onDismissRequest()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = monitorAuthor != null || monitorNewBooks != null
+            ) {
+                Text(mokoString(MR.strings.save))
             }
         }
     }

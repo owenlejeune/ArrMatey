@@ -513,21 +513,14 @@ class ArrInstanceRepository(
         }
     }
 
-    suspend fun setMonitorState(id: Long, status: Boolean): NetworkResult<MonitoredResponse?> {
+    suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> {
         _monitorStatus.value = OperationStatus.InProgress
 
-        val result = client.setMonitorStatus(id, status)
-
-        return result
-            .map { it.firstOrNull() }
-            .onSuccess { response ->
-                _monitorStatus.value = OperationStatus.Success(
-                    if (status) "Monitored" else "Unmonitored"
-                )
-                response?.let { updateMonitoredInCache(it.id, it.monitored) }
+        return client.updateMonitoring(ids, monitor)
+            .onSuccess {
+                _monitorStatus.value = OperationStatus.Success("Monitoring updated successfully")
             }
             .onError { code, message, cause ->
-                logger.error(cause) { "Error setting monitor status: $message" }
                 _monitorStatus.value = OperationStatus.Error(code, message, cause)
             }.also {
                 _monitorStatus.value = OperationStatus.Idle

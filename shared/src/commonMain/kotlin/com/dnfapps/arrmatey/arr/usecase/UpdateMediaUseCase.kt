@@ -59,4 +59,12 @@ class UpdateMediaUseCase {
                 println("$code - $message - ${cause?.printStackTrace()}")
             }
     }
+
+    suspend fun bulkUpdateMonitoring(
+        ids: List<Long>,
+        monitor: Any,
+        repository: ArrInstanceRepository
+    ): NetworkResult<Unit> {
+        return repository.updateMonitoring(ids, monitor)
+    }
 }
