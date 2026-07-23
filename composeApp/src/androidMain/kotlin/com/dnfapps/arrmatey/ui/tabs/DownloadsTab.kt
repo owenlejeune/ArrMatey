@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
@@ -64,6 +65,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -107,6 +109,7 @@ fun DownloadsTab(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val hasLoaded by viewModel.hasLoaded.collectAsStateWithLifecycle()
     val sortState by viewModel.sortState.collectAsStateWithLifecycle()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
 
     val downloadClientState by clientsViewModel.downloadClientsState.collectAsStateWithLifecycle()
 
@@ -178,7 +181,7 @@ fun DownloadsTab(
         ) {
             if (downloadClientState.downloadClients.isEmpty()) {
                 NoDownloadClientsView()
-            } else if (!hasLoaded) {
+            } else if (!hasLoaded || (queueState.queueItems.isEmpty() && isRefreshing)) {
                 LoadingIndicator(
                     modifier = Modifier.size(96.dp)
                 )
@@ -230,7 +233,28 @@ fun DownloadsTab(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Text(text = mokoString(MR.strings.no_activity))
+                                if (errorMessage != null) {
+                                    Icon(
+                                        imageVector = Icons.Default.ErrorOutline,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(64.dp),
+                                        tint = ArrRed
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = errorMessage!!,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = ArrRed,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.padding(horizontal = 32.dp)
+                                    )
+                                } else if (isRefreshing) {
+                                    LoadingIndicator(
+                                        modifier = Modifier.size(64.dp)
+                                    )
+                                } else {
+                                    Text(text = mokoString(MR.strings.no_activity))
+                                }
                             }
                         } else {
                             LazyColumn(

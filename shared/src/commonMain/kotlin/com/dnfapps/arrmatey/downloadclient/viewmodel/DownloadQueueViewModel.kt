@@ -97,18 +97,41 @@ class DownloadQueueViewModel(
     private val _commandState = MutableStateFlow<DownloadClientCommandState>(DownloadClientCommandState.Initial)
     val commandState: StateFlow<DownloadClientCommandState> = _commandState.asStateFlow()
 
-    private val _isRefreshing = MutableStateFlow(false)
+    private val _isRefreshing = MutableStateFlow(true)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     val isPolling: StateFlow<Boolean> = downloadQueueService.isPolling
     val hasLoaded: StateFlow<Boolean> = downloadQueueService.hasLoaded
 
+    val errorMessage: StateFlow<String?> = combine(
+        downloadQueueService.allTransfers,
+        _filterState,
+        downloadQueueRepository.observeAllDownloadClients()
+    ) { bundle, filters, allClients ->
+        if (bundle.clientErrors.isEmpty()) return@combine null
+
+        val selectedClientIds = filters.clientIds
+        val errorsInSelected = bundle.clientErrors.filterKeys { it in selectedClientIds }
+
+        when {
+            allClients.size == 1 -> bundle.clientErrors.values.firstOrNull()
+            selectedClientIds.size == 1 && errorsInSelected.isNotEmpty() -> errorsInSelected.values.first()
+            else -> null
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
+
     init {
         viewModelScope.launch {
+            _isRefreshing.value = true
             downloadQueueService.manualRefresh()
 
             val clients = downloadQueueRepository.getAllDownloadClients()
             _filterState.update { it.copy(clientIds = clients.map { it.id }) }
+            _isRefreshing.value = false
         }
     }
 

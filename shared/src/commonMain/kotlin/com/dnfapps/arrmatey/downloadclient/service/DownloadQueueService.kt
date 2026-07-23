@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.downloadclient.service
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
@@ -38,20 +39,32 @@ class DownloadQueueService(
     private val _allTransfers = MutableStateFlow(DownloadQueueBundle())
     val allTransfers: StateFlow<DownloadQueueBundle> = _allTransfers.asStateFlow()
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private var knownClients: List<DownloadClient> = emptyList()
 
     init {
         observeClientsAndManagePolling()
+        observeApisAndTriggerPoll()
     }
 
     private fun observeClientsAndManagePolling() {
         scope.launch {
             downloadClientManager.observeAllDownloadClients().collect { clients ->
+                knownClients = clients
                 if (clients.isNotEmpty()) {
                     startPolling()
                 } else {
                     stopPolling()
+                    _hasLoaded.value = true
+                }
+            }
+        }
+    }
+
+    private fun observeApisAndTriggerPoll() {
+        scope.launch {
+            downloadClientManager.downloadClientApis.collect { apis ->
+                if (apis.isNotEmpty() && !_hasLoaded.value) {
+                    pollDownloadQueue()
                 }
             }
         }
@@ -76,13 +89,16 @@ class DownloadQueueService(
     private suspend fun pollDownloadQueue() {
         _isPolling.value = true
 
+        val apis = downloadClientManager.downloadClientApis.value
+
         fetchAllDownloadData()
             .onSuccess { bundle ->
                 _allTransfers.value = bundle
-                _hasLoaded.value = true
+                if (knownClients.isEmpty() || apis.isNotEmpty()) {
+                    _hasLoaded.value = true
+                }
             }
-            .onError { _, message, _ ->
-                _errorMessage.value = message
+            .onError { _, _, _ ->
                 _hasLoaded.value = true
             }
 
@@ -90,12 +106,12 @@ class DownloadQueueService(
     }
 
     suspend fun fetchAllDownloadData(): NetworkResult<DownloadQueueBundle> {
-        val downloadClients = downloadClientManager.getAllDownloadClientApis()
+        val downloadClients = downloadClientManager.downloadClientApis.value
 
-        val deferredResults = downloadClients.flatMap { client ->
+        val deferredResults = downloadClients.entries.flatMap { (id, api) ->
             listOf(
-                scope.async { client.getDownloads() },
-                scope.async { client.getTransferInfo() }
+                scope.async { id to api.getDownloads() },
+                scope.async { id to api.getTransferInfo() }
             )
         }
 
@@ -103,9 +119,11 @@ class DownloadQueueService(
 
         val queueItems = mutableListOf<DownloadItem>()
         val transferInfos = mutableListOf<DownloadTransferInfo>()
-        val errors = mutableListOf<NetworkResult.Error>()
+        val clientErrors = mutableMapOf<Long, String>()
 
-        allResults.forEach { result ->
+        allResults.forEach { resultPair ->
+            val clientId = resultPair.first
+            val result = resultPair.second
             when (result) {
                 is NetworkResult.Success<*> -> {
                     val data = result.data
@@ -115,23 +133,20 @@ class DownloadQueueService(
                         transferInfos.add(data)
                     }
                 }
-                is NetworkResult.Error -> errors.add(result)
+                is NetworkResult.Error -> {
+                    clientErrors[clientId] = result.message ?: "Unknown error"
+                }
                 is NetworkResult.Loading -> {}
             }
         }
 
-        return when {
-            queueItems.isNotEmpty() || transferInfos.isNotEmpty() -> {
-                NetworkResult.Success(
-                    DownloadQueueBundle(
-                        queueItems = queueItems,
-                        transferInfo = transferInfos
-                    )
-                )
-            }
-            errors.isNotEmpty() -> errors.first()
-            else -> NetworkResult.Success(DownloadQueueBundle())
-        }
+        return NetworkResult.Success(
+            DownloadQueueBundle(
+                queueItems = queueItems,
+                transferInfo = transferInfos,
+                clientErrors = clientErrors
+            )
+        )
     }
 
     fun cleanup() {

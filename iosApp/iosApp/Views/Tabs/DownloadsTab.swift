@@ -162,11 +162,24 @@ struct DownloadsTab: View {
     @ViewBuilder
     private var emptyView: some View {
         VStack(alignment: .center, spacing: 12) {
-            Image(systemName: "arrow.down.circle")
-                .font(.system(size: 64))
-                .foregroundStyle(.secondary)
-            Text(MR.strings().no_activity.localized())
-                .font(.system(size: 20, weight: .bold))
+            if let error = viewModel.errorMessage {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 64))
+                    .foregroundStyle(.red)
+                Text(error)
+                    .font(.system(size: 16))
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+            } else if viewModel.isRefreshing {
+                ProgressView()
+                    .scaleEffect(1.5)
+            } else {
+                Image(systemName: "arrow.down.circle")
+                    .font(.system(size: 64))
+                    .foregroundStyle(.secondary)
+                Text(MR.strings().no_activity.localized())
+                    .font(.system(size: 20, weight: .bold))
+            }
         }
         .padding(.horizontal, 24)
     }

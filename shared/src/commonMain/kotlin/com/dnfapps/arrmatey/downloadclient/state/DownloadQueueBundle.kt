@@ -5,7 +5,8 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 
 data class DownloadQueueBundle(
     val queueItems: List<DownloadItem> = emptyList(),
-    val transferInfo: List<DownloadTransferInfo> = emptyList()
+    val transferInfo: List<DownloadTransferInfo> = emptyList(),
+    val clientErrors: Map<Long, String> = emptyMap()
 ) {
     constructor(): this(queueItems = emptyList()) // ios empty constructor
 }

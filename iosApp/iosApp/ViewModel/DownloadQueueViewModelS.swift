@@ -16,8 +16,9 @@ class DownloadQueueViewModelS: ObservableObject {
     @Published private(set) var commandState: DownloadClientCommandState = DownloadClientCommandStateInitial()
     @Published private(set) var isCommandLoading: Bool = false
     @Published private(set) var isCommandSuccess: Bool = false
-    @Published private(set) var isRefreshing: Bool = false
+    @Published private(set) var isRefreshing: Bool = true
     @Published private(set) var hasLoaded: Bool = false
+    @Published private(set) var errorMessage: String? = nil
 
     init() {
         self.viewModel = KoinBridge.shared.getDownloadQueueViewModel()
@@ -39,6 +40,7 @@ class DownloadQueueViewModelS: ObservableObject {
         viewModel.hasLoaded.observeAsync(on: self) { owner, hasLoaded in
             owner.hasLoaded = hasLoaded.boolValue
         }
+        viewModel.errorMessage.observeAsync(on: self, to: \.errorMessage)
     }
     
     func refresh() {
