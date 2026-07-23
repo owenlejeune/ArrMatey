@@ -106,6 +106,39 @@ struct InteractiveSearchScreen: View {
                                 confirmRelease = release
                             }
                         })
+                        .contextMenu {
+                            Button(action: {
+                                if item.downloadAllowed {
+                                    viewModel.downloadRelease(item, false)
+                                } else {
+                                    confirmRelease = item
+                                }
+                            }) {
+                                Label(MR.strings().grab.localized(), systemImage: "arrow.down.circle")
+                            }
+                            
+                            Button(action: {
+                                viewModel.downloadRelease(item, true)
+                            }) {
+                                Label("\(MR.strings().grab.localized()) (\(MR.strings().advanced.localized()))", systemImage: "arrow.down.circle.fill")
+                            }
+                            
+                            Divider()
+                            
+                            Button(action: {
+                                UIPasteboard.general.string = item.title
+                            }) {
+                                Label("Copy Title", systemImage: "doc.on.doc")
+                            }
+                            
+                            if let infoUrl = item.infoUrl, let url = URL(string: infoUrl) {
+                                Button(action: {
+                                    UIApplication.shared.open(url)
+                                }) {
+                                    Label(MR.strings().open_in_browser.localized(), systemImage: "safari")
+                                }
+                            }
+                        }
                     }
                 }
                 .padding(.horizontal, 18)

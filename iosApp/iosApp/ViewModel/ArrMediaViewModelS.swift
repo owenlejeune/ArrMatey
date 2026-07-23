@@ -198,6 +198,10 @@ class ArrMediaViewModelS: ObservableObject {
         viewModel.performAutomaticLookupSelected()
     }
     
+    func performSubtitleSearch(item: ArrMedia) {
+        viewModel.performSubtitleSearch(item: item)
+    }
+    
     func performSubtitleSearchSelected() {
         viewModel.performSubtitleSearchSelected()
     }

@@ -112,18 +112,20 @@ struct ArrTab: View {
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if uiState is ArrLibrarySuccess {
-            toolbarViewOptions
-        }
-        
-        if !globalPreferences.hideInstanceSwitcher || instanceState.instances.count > 1 {
-            ToolbarItem(placement: .topBarLeading) {
-                InstancePickerMenu(
-                    instances: instanceState.instances,
-                    onChangeInstance: { instancesViewModel.setInstanceActive($0) },
-                    onAddNewInstance: { navigation.goToNewInstance(of: type) }
-                )
-                .menuIndicator(.hidden)
+        if !arrMediaViewModel.isInSelectionMode {
+            if uiState is ArrLibrarySuccess {
+                toolbarViewOptions
+            }
+            
+            if !globalPreferences.hideInstanceSwitcher || instanceState.instances.count > 1 {
+                ToolbarItem(placement: .topBarLeading) {
+                    InstancePickerMenu(
+                        instances: instanceState.instances,
+                        onChangeInstance: { instancesViewModel.setInstanceActive($0) },
+                        onAddNewInstance: { navigation.goToNewInstance(of: type) }
+                    )
+                    .menuIndicator(.hidden)
+                }
             }
         }
     }

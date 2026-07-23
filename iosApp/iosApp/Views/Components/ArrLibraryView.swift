@@ -133,16 +133,6 @@ struct ArrLibraryView: View {
             ToolbarItemGroup(placement: .bottomBar) {
                 selectionBottomBar
             }
-        } else {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(viewModel.isInSelectionMode ? MR.strings().done.localized() : MR.strings().edit.localized()) {
-                    if viewModel.isInSelectionMode {
-                        viewModel.exitSelectionMode()
-                    } else {
-                        viewModel.enterSelectionMode()
-                    }
-                }
-            }
         }
     }
     
@@ -349,10 +339,17 @@ struct ArrLibraryView: View {
                 viewModel.enterSelectionMode()
             }
         }) {
-            Label(MR.strings().edit.localized(), systemImage: "checkmark.circle")
+            Label("Select", systemImage: "checkmark.circle")
         }
         
         Divider()
+        
+        Button(action: {
+            selectedItemForEdit = item
+            showEditSheet = true
+        }) {
+            Label(MR.strings().edit.localized(), systemImage: "pencil")
+        }
         
         Button(action: {
             viewModel.toggleMonitored(item)
@@ -371,6 +368,25 @@ struct ArrLibraryView: View {
             viewModel.performAutomaticLookup(item)
         }) {
             Label(MR.strings().search.localized(), systemImage: "magnifyingglass")
+        }
+        
+        if viewModel.hasBazarr && (type == .sonarr || type == .radarr) {
+            Button(action: {
+                viewModel.performSubtitleSearch(item: item)
+            }) {
+                Label(MR.strings().bazarr_search_subtitles.localized(), systemImage: "captions.bubble")
+            }
+        }
+        
+        if type != .radarr {
+            Button(action: {
+                if let id = item.id?.int64Value {
+                    viewModel.toggleItemSelection(id)
+                    showMonitorOptions = true
+                }
+            }) {
+                Label(MR.strings().update_monitoring.localized(), systemImage: "bookmark.circle")
+            }
         }
         
         Divider()
