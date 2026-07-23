@@ -490,6 +490,8 @@
     <string name="location_rationale_title">Location Access Required</string>
     <string name="location_rationale_description_android">Android requires Location permission to reveal the name of your Wi-Fi network. This allows ArrMatey to know when you are at home to use your local server address. None of your location information is collected, stored, or transmitted off of your device.</string>
     <string name="location_rationale_description_ios">iOS requires Location permission to reveal the name of your Wi-Fi network. This allows ArrMatey to know when you are at home to use your local server address. None of your location information is collected, stored, or transmitted off of your device.</string>
+    <string name="local_network_rationale_title">Local Network Access Required</string>
+    <string name="local_network_rationale_description">ArrMatey requires permission to access your local network to connect to your media servers (Sonarr, Radarr, etc.) when they are hosted on your home network.</string>
 
     <!-- Local Network Switching -->
     <string name="ssid_get_error">Couldn\'t get current WiFi SSID</string>

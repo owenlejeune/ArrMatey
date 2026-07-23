@@ -1,30 +1,16 @@
 package com.dnfapps.arrmatey
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.datastore.PreferencesStore
-import com.dnfapps.arrmatey.features.ReleaseNotes
+import com.dnfapps.arrmatey.permissions.rememberLocalNetworkPermissionHandler
 import com.dnfapps.arrmatey.ui.screens.HomeScreen
 import com.dnfapps.arrmatey.ui.theme.ArrMateyTheme
-import com.dnfapps.arrmatey.utils.mokoString
-import dev.icerock.moko.resources.compose.readTextAsState
-import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -35,8 +21,11 @@ fun App(
 ) {
     val showReleaseNotesSheet by preferences.shouldShowReleaseNotes.collectAsStateWithLifecycle(false)
 
+    val localNetworkPermissionHandler = rememberLocalNetworkPermissionHandler()
+
     LaunchedEffect(Unit) {
         preferences.markFirstLaunchComplete()
+        localNetworkPermissionHandler.requestPermission()
     }
 
     ArrMateyTheme {
