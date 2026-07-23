@@ -64,7 +64,7 @@ class DownloadQueueViewModel(
         ) { queueState, filters, sorting ->
             val filtered = queueState.queueItems.filter { item ->
                 val matchesQuery = filters.query.isBlank() || item.name.contains(filters.query, ignoreCase = true)
-                val matchesClient = filters.clientIds.isEmpty() || filters.clientIds.contains(item.client.id)
+                val matchesClient = filters.clientIds.contains(item.client.id)
 
                 val matchesStatus = if (filters.selectedStatuses.isEmpty()) {
                     true
