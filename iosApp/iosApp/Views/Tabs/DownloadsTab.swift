@@ -10,6 +10,7 @@ struct DownloadsTab: View {
 
     @StateObject private var viewModel = DownloadQueueViewModelS()
     @StateObject private var clientsViewModel = DownloadClientsViewModelS()
+    @EnvironmentObject private var navigation: NavigationManager
 
     @State private var deleteTarget: DownloadItem? = nil
     @State private var deleteId: String? = nil
@@ -34,6 +35,14 @@ struct DownloadsTab: View {
         }
         .navigationTitle(MR.strings().downloads.localized())
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    navigation.showLauncher = true
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                }
+            }
+
             ToolbarItem(placement: .primaryAction) {
                 DownloadQueueFilterMenu(
                     filterState: viewModel.filterState,

@@ -26,6 +26,7 @@ struct CalendarTab: View {
 struct CalendarTabContent: View {
     
     @ObservedObject private var viewModel = CalendarViewModelS()
+    @EnvironmentObject private var navigationManager: NavigationManager
     
     private var viewModeIcon: String {
         viewModel.calendarState.filterState.viewMode == .list ? "calendar" : "list.bullet"
@@ -56,6 +57,14 @@ struct CalendarTabContent: View {
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Button {
+                navigationManager.showLauncher = true
+            } label: {
+                Image(systemName: "line.3.horizontal")
+            }
+        }
+
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button(action: {
                 viewModel.toggleViewMode()

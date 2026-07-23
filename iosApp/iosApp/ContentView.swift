@@ -30,7 +30,6 @@ struct ContentView: View {
                     ForEach(preferences.bottomTabItems, id: \.key) { tabItem in
                         NavigationStack {
                             TabItemContent(tabItem: tabItem.item)
-                                .toolbar { toolbarItem }
                         }
                         .tabItem {
                             TabLabel(item: tabItem.item, useServiceLogos: preferences.useServiceNavLogos)

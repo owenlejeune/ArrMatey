@@ -27,14 +27,22 @@ struct ArrLibraryView: View {
     }
     
     var body: some View {
-        Group {
-            if state.items.isEmpty && searchQuery.isEmpty {
-                VStack {
-                    EmptyLibraryView()
+        ZStack(alignment: .bottom) {
+            Group {
+                if state.items.isEmpty && searchQuery.isEmpty {
+                    VStack {
+                        EmptyLibraryView()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    contentView(items: state.items, prefs: state.preferences)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                contentView(items: state.items, prefs: state.preferences)
+            }
+            
+            if viewModel.isInSelectionMode {
+                selectionBottomBar
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(1)
             }
         }
         .searchable(
@@ -129,10 +137,6 @@ struct ArrLibraryView: View {
                     Image(systemName: viewModel.areAllItemsSelected() ? "checkmark.circle.fill" : "circle")
                 }
             }
-            
-            ToolbarItemGroup(placement: .bottomBar) {
-                selectionBottomBar
-            }
         }
     }
     
@@ -192,6 +196,15 @@ struct ArrLibraryView: View {
             }
             .foregroundColor(.red)
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 15)
+                .fill(Color(uiColor: .systemBackground))
+                .shadow(radius: 10)
+        )
+        .padding(.horizontal, 16)
+        .padding(.bottom, 20)
     }
     
     private func contentView(
@@ -290,6 +303,7 @@ struct ArrLibraryView: View {
                     }
                 }
                 .padding(16)
+                .padding(.bottom, viewModel.isInSelectionMode ? 100 : 0)
             } else {
                 LazyVStack(spacing: 12) {
                     ForEach(items, id: \.id) { item in
@@ -327,6 +341,7 @@ struct ArrLibraryView: View {
                     }
                 }
                 .padding(16)
+                .padding(.bottom, viewModel.isInSelectionMode ? 100 : 0)
             }
         }
     }

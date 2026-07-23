@@ -195,6 +195,15 @@ struct SettingsScreen: View {
         }
         .navigationTitle(MR.strings().settings.localized())
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    navigationManager.showLauncher = true
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                }
+            }
+        }
         .sheet(isPresented: $showLibrariesSheet) {
             LibrariesSheet()
         }

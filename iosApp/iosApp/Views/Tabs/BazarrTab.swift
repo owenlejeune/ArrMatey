@@ -113,6 +113,15 @@ struct BazarrTabContent: View {
             }
         }
         .navigationTitle(MR.strings().bazarr.localized())
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    navigation.showLauncher = true
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                }
+            }
+        }
         .searchable(text: $viewModel.searchQuery)
         .onChange(of: viewModel.searchQuery) { _, newValue in
             viewModel.updateSearchQuery(newValue)

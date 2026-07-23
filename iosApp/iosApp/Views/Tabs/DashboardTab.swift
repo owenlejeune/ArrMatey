@@ -55,6 +55,16 @@ struct DashboardTabContent: View {
         .navigationTitle(MR.strings().dashboard.localized())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            if !viewModel.isEditing {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigationManager.showLauncher = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
+                }
+            }
+
             if viewModel.isEditing {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(MR.strings().close.localized()) {

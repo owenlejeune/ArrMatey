@@ -59,6 +59,15 @@ struct SeerrTabContent: View {
         }
         .navigationTitle(MR.strings().seerr.localized())
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    navigationManager.showLauncher = true
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                }
+            }
+        }
         .refreshable {
             viewModel.refresh()
         }
