@@ -14,4 +14,19 @@ expect class NotificationManager {
     fun cancelNotification(id: Int)
     fun cancelAllNotifications()
     fun cancelNotificationsForInstance(instanceName: String)
+
+    fun showProgressNotification(
+        id: Int,
+        title: String,
+        message: String,
+        progress: Float,
+        instanceName: String
+    )
+
+    fun showNotification(
+        id: Int,
+        title: String,
+        message: String,
+        instanceName: String
+    )
 }

@@ -743,4 +743,9 @@
     <string name="bazarr_files_count">%1$d files</string>
     <string name="bazarr_missing_count">%1$d missing subtitles</string>
     <string name="bazarr_embedded_count">%1$d Embedded Subtitles</string>
+
+    <!-- Downloads -->
+    <string name="downloading_file">Downloading %1$s</string>
+    <string name="downloading_progress">In progress...</string>
+    <string name="download_complete">Download complete</string>
 </resources>

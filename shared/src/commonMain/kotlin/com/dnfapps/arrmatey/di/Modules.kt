@@ -387,7 +387,7 @@ val viewModelModule = module {
         BazarrSubtitleSearchViewModel(target, get())
     }
     factory { (target: BazarrMediaTarget) ->
-        BazarrMediaSubtitlesViewModel(target, get())
+        BazarrMediaSubtitlesViewModel(target, get(), get(), get())
     }
     factory { ProwlarrIndexersViewModel(get(), get(), get()) }
     factory { ProwlarrSearchViewModel(get(), get(), get()) }

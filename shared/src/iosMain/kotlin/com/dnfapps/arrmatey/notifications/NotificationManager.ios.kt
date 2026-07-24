@@ -66,4 +66,37 @@ actual class NotificationManager(
             }
         }
     }
+
+    actual fun showProgressNotification(
+        id: Int,
+        title: String,
+        message: String,
+        progress: Float,
+        instanceName: String
+    ) {
+        if (progress >= 1f) {
+            showNotification(id, title, message, instanceName)
+        } else {
+            val content = UNMutableNotificationContent().apply {
+                setTitle(title)
+                setBody("$message (${(progress * 100).toInt()}%)")
+            }
+            val request = UNNotificationRequest.requestWithIdentifier(id.toString(), content, null)
+            notificationCenter.addNotificationRequest(request, null)
+        }
+    }
+
+    actual fun showNotification(
+        id: Int,
+        title: String,
+        message: String,
+        instanceName: String
+    ) {
+        val content = UNMutableNotificationContent().apply {
+            setTitle(title)
+            setBody(message)
+        }
+        val request = UNNotificationRequest.requestWithIdentifier(id.toString(), content, null)
+        notificationCenter.addNotificationRequest(request, null)
+    }
 }

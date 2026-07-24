@@ -13,6 +13,7 @@ struct BazarrSubtitlesSection: View {
     let target: BazarrMediaTarget
     @StateObject private var viewModel: BazarrMediaSubtitlesViewModelS
     @State private var showSearch = false
+    @State private var toastMessage: String? = nil
 
     init(target: BazarrMediaTarget) {
         self.target = target
@@ -58,6 +59,19 @@ struct BazarrSubtitlesSection: View {
             .sheet(isPresented: $showSearch, onDismiss: { viewModel.load() }) {
                 BazarrSubtitleSearchSheet(target: target)
             }
+            .overlay(alignment: .bottom) {
+                if let message = toastMessage {
+                    ToastView(message: message)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                                withAnimation { toastMessage = nil }
+                            }
+                        }
+                        .padding(.bottom, 64)
+                }
+            }
+            .animation(.easeInOut(duration: 0.3), value: toastMessage != nil)
         }
     }
 
@@ -84,6 +98,9 @@ struct BazarrSubtitlesSection: View {
                             if let data = data {
                                 let fileName = (subtitle.path as NSString?)?.lastPathComponent ?? subtitle.name
                                 shareFile(data: data, fileName: fileName)
+                                toastMessage = "Subtitle downloaded"
+                            } else {
+                                toastMessage = "Failed to download subtitle"
                             }
                         }
                     },
@@ -205,4 +222,19 @@ private func subtitleLabel(_ subtitle: BazarrSubtitle) -> String {
     if subtitle.forced { label += " · Forced" }
     if subtitle.hi { label += " · HI" }
     return label
+}
+
+private struct ToastView: View {
+    let message: String
+    
+    var body: some View {
+        Text(message)
+            .font(.system(size: 14, weight: .medium))
+            .foregroundColor(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(Color.black.opacity(0.75))
+            .cornerRadius(20)
+            .padding(.bottom, 24)
+    }
 }

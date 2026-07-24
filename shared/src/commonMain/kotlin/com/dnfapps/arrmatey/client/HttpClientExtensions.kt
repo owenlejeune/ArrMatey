@@ -14,10 +14,18 @@ import io.ktor.client.request.put
 
 suspend inline fun <reified T> HttpClient.safeGet(
     url: String,
+    crossinline onProgress: (Float) -> Unit = {},
     crossinline builder: HttpRequestBuilder.() -> Unit = {}
 ): NetworkResult<T> {
     return safeCall {
-        get(url, builder).body()
+        get(url) {
+            builder()
+            onDownload { bytesSentTotal, contentLength ->
+                if (contentLength != null && contentLength > 0) {
+                    onProgress(bytesSentTotal.toFloat() / contentLength)
+                }
+            }
+        }.body()
     }
 }
 

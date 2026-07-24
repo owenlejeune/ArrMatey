@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.core.app.NotificationCompat
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.MokoStrings
 import kotlin.time.Instant
@@ -88,5 +89,42 @@ actual class NotificationManager(
             notificationManager.deleteNotificationChannel(channelId)
         }
         notificationManager.cancelAll()
+    }
+
+    actual fun showProgressNotification(
+        id: Int,
+        title: String,
+        message: String,
+        progress: Float,
+        instanceName: String
+    ) {
+        val channelId = ensureChannelExists(instanceName)
+        val builder = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(MR.images.icon.drawableResId)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(progress < 1f)
+            .setOnlyAlertOnce(true)
+            .setProgress(100, (progress * 100).toInt(), progress < 0f)
+
+        notificationManager.notify(id, builder.build())
+    }
+
+    actual fun showNotification(
+        id: Int,
+        title: String,
+        message: String,
+        instanceName: String
+    ) {
+        val channelId = ensureChannelExists(instanceName)
+        val builder = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(MR.images.icon.drawableResId)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+
+        notificationManager.notify(id, builder.build())
     }
 }

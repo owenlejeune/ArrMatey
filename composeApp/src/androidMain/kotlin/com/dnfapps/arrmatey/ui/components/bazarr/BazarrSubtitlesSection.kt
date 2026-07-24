@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components.bazarr
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -82,6 +83,9 @@ fun BazarrSubtitlesSection(
                         context.contentResolver.openOutputStream(it)?.use { outputStream ->
                             outputStream.write(bytes)
                         }
+                        Toast.makeText(context, "Subtitle downloaded", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Failed to download subtitle", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

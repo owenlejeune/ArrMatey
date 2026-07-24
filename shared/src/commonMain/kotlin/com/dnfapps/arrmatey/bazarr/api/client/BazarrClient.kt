@@ -122,7 +122,10 @@ interface BazarrClient {
     ): NetworkResult<Unit>
 
     /** Download a subtitle file to the mobile device. */
-    suspend fun getSubtitleFile(path: String): NetworkResult<ByteArray>
+    suspend fun getSubtitleFile(
+        path: String,
+        onProgress: (Float) -> Unit = {}
+    ): NetworkResult<ByteArray>
 }
 
 class BazarrClientImpl(
@@ -307,8 +310,11 @@ class BazarrClientImpl(
             )
         )
 
-    override suspend fun getSubtitleFile(path: String): NetworkResult<ByteArray> =
-        get("subtitles/contents", mapOf("subtitlePath" to path))
+    override suspend fun getSubtitleFile(
+        path: String,
+        onProgress: (Float) -> Unit
+    ): NetworkResult<ByteArray> =
+        get("subtitles/contents", mapOf("subtitlePath" to path), onProgress = onProgress)
 
     /**
      * Helpers — Bazarr reads arguments from the query string for these endpoints, so all
@@ -333,9 +339,12 @@ class BazarrClientImpl(
     private suspend inline fun <reified T> get(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
-        timeoutMillis: Long? = null
+        timeoutMillis: Long? = null,
+        crossinline onProgress: (Float) -> Unit = {}
     ): NetworkResult<T> =
-        httpClient.safeGet<T>("$baseUrl/$endpoint") { applyParams(params, timeoutMillis) }
+        httpClient.safeGet<T>("$baseUrl/$endpoint", onProgress = onProgress) {
+            applyParams(params, timeoutMillis)
+        }
 
     private suspend inline fun <reified T> post(
         endpoint: String,

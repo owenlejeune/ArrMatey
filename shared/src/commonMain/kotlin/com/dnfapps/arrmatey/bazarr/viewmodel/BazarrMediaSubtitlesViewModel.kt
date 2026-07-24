@@ -10,6 +10,9 @@ import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.notifications.NotificationManager
+import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.utils.MokoStrings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +26,9 @@ import kotlinx.coroutines.launch
  */
 class BazarrMediaSubtitlesViewModel(
     private val target: BazarrMediaTarget,
-    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase
+    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
+    private val notificationManager: NotificationManager,
+    private val mokoStrings: MokoStrings
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<BazarrSubtitlesUiState>(BazarrSubtitlesUiState.Loading)
@@ -132,11 +137,34 @@ class BazarrMediaSubtitlesViewModel(
 
     fun downloadToDevice(subtitle: BazarrSubtitle, onResult: (ByteArray?) -> Unit) {
         val path = subtitle.path ?: return
+        val fileName = path.substringAfterLast('/')
         viewModelScope.launch {
             val repo = repo() ?: return@launch
-            repo.getSubtitleFile(path)
-                .onSuccess { onResult(it) }
-                .onError { _, _, _ -> onResult(null) }
+            val notificationId = path.hashCode()
+            val instanceName = repo.instance.label
+
+            repo.getSubtitleFile(path) { progress ->
+                notificationManager.showProgressNotification(
+                    id = notificationId,
+                    title = mokoStrings.getString(MR.strings.downloading_file, listOf(fileName)),
+                    message = mokoStrings.getString(MR.strings.downloading_progress),
+                    progress = progress,
+                    instanceName = instanceName
+                )
+            }
+                .onSuccess {
+                    notificationManager.showNotification(
+                        id = notificationId,
+                        title = mokoStrings.getString(MR.strings.download_complete),
+                        message = fileName,
+                        instanceName = instanceName
+                    )
+                    onResult(it)
+                }
+                .onError { _, _, _ ->
+                    notificationManager.cancelNotification(notificationId)
+                    onResult(null)
+                }
         }
     }
 

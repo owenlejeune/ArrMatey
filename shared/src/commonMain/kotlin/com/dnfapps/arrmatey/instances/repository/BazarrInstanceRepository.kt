@@ -183,8 +183,11 @@ class BazarrInstanceRepository(
     ): NetworkResult<Unit> =
         bazarrClient.deleteMovieSubtitle(radarrId, language, forced, hi, path)
 
-    suspend fun getSubtitleFile(path: String): NetworkResult<ByteArray> =
-        bazarrClient.getSubtitleFile(path)
+    suspend fun getSubtitleFile(
+        path: String,
+        onProgress: (Float) -> Unit = {}
+    ): NetworkResult<ByteArray> =
+        bazarrClient.getSubtitleFile(path, onProgress)
 
     suspend fun refresh() {
         getSeries()
