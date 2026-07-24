@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -19,10 +20,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
@@ -31,6 +34,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
@@ -62,6 +67,8 @@ import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.extensions.nowTimestamp
 import com.dnfapps.arrmatey.isDebug
+import com.dnfapps.arrmatey.model.AppColor
+import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.navigation.navigationManager
@@ -151,6 +158,12 @@ fun SettingsScreen(
 
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
+
+    val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
+    val appColor by viewModel.appColor.collectAsStateWithLifecycle()
+
+    var showThemeDropdown by remember { mutableStateOf(false) }
+    var showColorDropdown by remember { mutableStateOf(false) }
 
     BackHandler {
         navManager.openDrawer()
@@ -291,6 +304,56 @@ fun SettingsScreen(
             SettingsGroup(
                 title = mokoString(MR.strings.user_interface),
                 items = listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Contrast),
+                        title = mokoString(MR.strings.theme),
+                        subtitle = mokoString(appTheme.resource),
+                        onClick = { showThemeDropdown = true },
+                        trailingContent = {
+                            Box {
+                                DropdownMenu(
+                                    expanded = showThemeDropdown,
+                                    onDismissRequest = { showThemeDropdown = false }
+                                ) {
+                                    AppTheme.entries.forEach { theme ->
+                                        DropdownMenuItem(
+                                            text = { Text(mokoString(theme.resource)) },
+                                            onClick = {
+                                                viewModel.setAppTheme(theme)
+                                                showThemeDropdown = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Palette),
+                        title = mokoString(MR.strings.color),
+                        subtitle = mokoString(appColor.resource),
+                        onClick = { showColorDropdown = true },
+                        trailingContent = {
+                            Box {
+                                DropdownMenu(
+                                    expanded = showColorDropdown,
+                                    onDismissRequest = { showColorDropdown = false }
+                                ) {
+                                    AppColor.entries
+                                        .filter { it != AppColor.Dynamic || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S }
+                                        .forEach { color ->
+                                            DropdownMenuItem(
+                                                text = { Text(mokoString(color.resource)) },
+                                                onClick = {
+                                                    viewModel.setAppColor(color)
+                                                    showColorDropdown = false
+                                                }
+                                            )
+                                        }
+                                }
+                            }
+                        }
+                    ),
                     SettingItem(
                         icon = IconSource.Vector(Icons.Default.Navigation),
                         title = mokoString(MR.strings.navigation_bar_configuration),

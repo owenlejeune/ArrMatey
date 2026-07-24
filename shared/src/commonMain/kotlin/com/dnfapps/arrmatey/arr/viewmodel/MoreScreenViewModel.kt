@@ -8,7 +8,8 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
-import com.dnfapps.arrmatey.instances.usecase.TestNewInstanceConnectionUseCase
+import com.dnfapps.arrmatey.model.AppColor
+import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,6 +41,20 @@ class MoreScreenViewModel(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = false
+        )
+
+    val appTheme = preferencesStore.appTheme
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = AppTheme.System
+        )
+
+    val appColor = preferencesStore.appColor
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = preferencesStore.defaultAppColor
         )
 
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
@@ -135,6 +150,14 @@ class MoreScreenViewModel(
 
     fun toggleInstanceSwitcher() {
         preferencesStore.toggleInstanceSwitcher()
+    }
+
+    fun setAppTheme(theme: AppTheme) {
+        preferencesStore.setAppTheme(theme)
+    }
+
+    fun setAppColor(color: AppColor) {
+        preferencesStore.setAppColor(color)
     }
 
 }

@@ -15,6 +15,8 @@ import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
+import com.dnfapps.arrmatey.model.AppTheme
+import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientConfigurationUiState
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueSortState
 import com.dnfapps.arrmatey.features.ReleaseNotes
@@ -35,8 +37,10 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.collections.emptyList
 
 class PreferencesStore(
-    dataStoreFactory: DataStoreFactory
+    private val dataStoreFactory: DataStoreFactory
 ) {
+
+    val defaultAppColor: AppColor = dataStoreFactory.defaultAppColor
 
     private val dataStore: DataStore<Preferences> = dataStoreFactory.provideDataStore()
 
@@ -60,6 +64,8 @@ class PreferencesStore(
     private val useClearLogoKey = booleanPreferencesKey("useClearLogo")
     private val useServiceNavLogosKey = booleanPreferencesKey("useServiceNavLogos")
     private val hideInstanceSwitcherKey = booleanPreferencesKey("hideInstanceSwitcher")
+    private val appThemeKey = stringPreferencesKey("appTheme")
+    private val appColorKey = stringPreferencesKey("appColor")
     private val tabPreferencesKey = stringPreferencesKey("tabPreferences")
     private val lastReleaseNotesKey = intPreferencesKey("lastReleaseNotes")
     private val isFirstLaunchKey = booleanPreferencesKey("isFirstLaunch")
@@ -113,6 +119,16 @@ class PreferencesStore(
     val useDynamicTheme: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[useDynamicThemeKey] ?: true
+        }
+
+    val appTheme: Flow<AppTheme> = dataStore.data
+        .map { preferences ->
+            preferences[appThemeKey]?.let { AppTheme.valueOf(it) } ?: AppTheme.System
+        }
+
+    val appColor: Flow<AppColor> = dataStore.data
+        .map { preferences ->
+            preferences[appColorKey]?.let { AppColor.valueOf(it) } ?: dataStoreFactory.defaultAppColor
         }
 
     val useClearLogo: Flow<Boolean> = dataStore.data
@@ -217,6 +233,22 @@ class PreferencesStore(
         scope.launch {
             dataStore.edit { preferences ->
                 preferences[httpLogLevelKey] = level.name
+            }
+        }
+    }
+
+    fun setAppTheme(theme: AppTheme) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                preferences[appThemeKey] = theme.name
+            }
+        }
+    }
+
+    fun setAppColor(color: AppColor) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                preferences[appColorKey] = color.name
             }
         }
     }

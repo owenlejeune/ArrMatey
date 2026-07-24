@@ -5,6 +5,7 @@ package com.dnfapps.arrmatey.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import com.dnfapps.arrmatey.model.AppColor
 import okio.Path.Companion.toPath
 
 fun createDataStore(producePath: () -> String): DataStore<Preferences> =
@@ -16,6 +17,7 @@ internal const val dataStoreFileName = "arrmatey.preferences_pb"
 internal fun instanceDataStoreFileName(id: Long) = "arrmatey.instance_$id.preferences_pb"
 
 expect class DataStoreFactory() {
+    val defaultAppColor: AppColor
     fun provideDataStore(): DataStore<Preferences>
     fun provideInstanceDataStore(instanceId: Long): DataStore<Preferences>
     fun providePlatformDataStore(): DataStore<Preferences>

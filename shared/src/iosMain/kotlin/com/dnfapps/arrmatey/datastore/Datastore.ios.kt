@@ -1,11 +1,14 @@
 package com.dnfapps.arrmatey.datastore
 
+import com.dnfapps.arrmatey.model.AppColor
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
 actual class DataStoreFactory {
+    actual val defaultAppColor: AppColor = AppColor.ArrMatey
+
     actual fun provideDataStore() = createDataStore(
         producePath = {
             val documentDirectory: NSURL? = NSFileManager.defaultManager.URLForDirectory(

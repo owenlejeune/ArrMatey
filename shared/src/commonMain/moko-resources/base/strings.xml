@@ -1,6 +1,7 @@
 <resources>
     <!-- General -->
     <string name="app_name">ArrMatey</string>
+    <string name="arrmatey">ArrMatey</string>
     <string name="app_link">https://github.com/owenlejeune/ArrMatey</string>
     <string name="bug_report_link">https://github.com/owenlejeune/ArrMatey/issues/new?template=bug_report.md</string>
     <string name="feature_request_link">https://github.com/owenlejeune/ArrMatey/issues/new?template=feature_request.md</string>
@@ -236,6 +237,13 @@
     <string name="system_info">System details</string>
     <string name="no_issues">No issues</string>
     <string name="user_interface">User Interface</string>
+    <string name="theme">Theme</string>
+    <string name="system">System</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="color">Color</string>
+    <string name="dynamic">Dynamic</string>
+    <string name="amoled">AMOLED Dark</string>
     <string name="invalid_url">Invalid URL</string>
     <string name="bug_report">Bug report</string>
     <string name="feature_request">Feature request</string>
