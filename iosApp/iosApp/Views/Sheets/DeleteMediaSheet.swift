@@ -10,12 +10,23 @@ import Shared
 
 struct DeleteMediaSheet: View {
     let isLoading: Bool
+    let initialAddExclusion: Bool
+    let initialDeleteFiles: Bool
     let onConfirm: (_ addExclusion: Bool, _ deleteFiles: Bool) -> Void
     
-    @State private var addExclusion: Bool = false
-    @State private var deleteFiles: Bool = false
+    @State private var addExclusion: Bool
+    @State private var deleteFiles: Bool
     
     @Environment(\.dismiss) private var dismiss
+    
+    init(isLoading: Bool, initialAddExclusion: Bool = false, initialDeleteFiles: Bool = false, onConfirm: @escaping (_ addExclusion: Bool, _ deleteFiles: Bool) -> Void) {
+        self.isLoading = isLoading
+        self.initialAddExclusion = initialAddExclusion
+        self.initialDeleteFiles = initialDeleteFiles
+        self.onConfirm = onConfirm
+        self._addExclusion = State(initialValue: initialAddExclusion)
+        self._deleteFiles = State(initialValue: initialDeleteFiles)
+    }
     
     var body: some View {
         NavigationStack {

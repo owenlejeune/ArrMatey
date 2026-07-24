@@ -54,7 +54,11 @@ struct ArrLibraryView: View {
             toolbarContent
         }
         .sheet(isPresented: $confirmDelete) {
-            DeleteMediaSheet(isLoading: false) { addExclusion, deleteFiles in
+            DeleteMediaSheet(
+                isLoading: false,
+                initialAddExclusion: viewModel.preferences.deleteAddExclusion,
+                initialDeleteFiles: viewModel.preferences.deleteDeleteFiles
+            ) { addExclusion, deleteFiles in
                 if viewModel.isInSelectionMode {
                     viewModel.deleteSelected(deleteFiles: deleteFiles, addExclusion: addExclusion)
                 } else if let item = selectedItemForAction {

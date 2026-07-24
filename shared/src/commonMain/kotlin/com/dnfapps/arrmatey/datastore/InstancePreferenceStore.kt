@@ -67,6 +67,9 @@ class InstancePreferenceStore(
 
     private val addAudiobookMonitoredKey = booleanPreferencesKey("addAudiobookMonitored")
 
+    private val deleteDeleteFilesKey = booleanPreferencesKey("deleteDeleteFiles")
+    private val deleteAddExclusionKey = booleanPreferencesKey("deleteAddExclusion")
+
     private val sortByFlow: Flow<SortBy> = dataStore.data
         .map { preferences ->
             preferences[sortByKey]?.let { SortBy.valueOf(it) } ?: SortBy.Title
@@ -183,6 +186,12 @@ class InstancePreferenceStore(
     private val addAudiobookMonitoredFlow: Flow<Boolean> = dataStore.data
         .map { preferences -> preferences[addAudiobookMonitoredKey] ?: true }
 
+    private val deleteDeleteFilesFlow: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[deleteDeleteFilesKey] ?: false }
+
+    private val deleteAddExclusionFlow: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[deleteAddExclusionKey] ?: false }
+
     fun observePreferences(): Flow<InstancePreferences> = combine(
         sortByFlow,
         sortOrderFlow,
@@ -211,7 +220,9 @@ class InstancePreferenceStore(
         addArtistMonitorNewFlow,
         addAuthorMonitorFlow,
         addAuthorMonitorNewFlow,
-        addAudiobookMonitoredFlow
+        addAudiobookMonitoredFlow,
+        deleteDeleteFilesFlow,
+        deleteAddExclusionFlow
     ) { args: Array<Any?> ->
         InstancePreferences(
             sortBy = args[0] as SortBy,
@@ -241,7 +252,9 @@ class InstancePreferenceStore(
             addArtistMonitorNew = args[24] as ArtistMonitorType,
             addAuthorMonitor = args[25] as AuthorMonitorType,
             addAuthorMonitorNew = args[26] as AuthorMonitorType,
-            addAudiobookMonitored = args[27] as Boolean
+            addAudiobookMonitored = args[27] as Boolean,
+            deleteDeleteFiles = args[28] as Boolean,
+            deleteAddExclusion = args[29] as Boolean
         )
     }
 
@@ -281,6 +294,9 @@ class InstancePreferenceStore(
             prefs[addAuthorMonitorNewKey] = preferences.addAuthorMonitorNew.name
 
             prefs[addAudiobookMonitoredKey] = preferences.addAudiobookMonitored
+
+            prefs[deleteDeleteFilesKey] = preferences.deleteDeleteFiles
+            prefs[deleteAddExclusionKey] = preferences.deleteAddExclusion
         }
     }
 }

@@ -64,7 +64,11 @@ data class InstancePreferences(
     val addAuthorMonitorNew: AuthorMonitorType = AuthorMonitorType.All,
 
     // Audiobookshelf
-    val addAudiobookMonitored: Boolean = true
+    val addAudiobookMonitored: Boolean = true,
+
+    // Delete Media defaults
+    val deleteDeleteFiles: Boolean = false,
+    val deleteAddExclusion: Boolean = false
 ) {
     constructor(): this(SortBy.Title)
 }

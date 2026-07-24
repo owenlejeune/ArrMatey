@@ -404,6 +404,8 @@ fun ArrLibraryScreen(
         confirmDelete?.let { item ->
             ConfirmDeleteAlert(
                 deleteInProgress = deleteStatus is OperationStatus.InProgress,
+                initialAddExclusion = preferences.deleteAddExclusion,
+                initialDeleteFiles = preferences.deleteDeleteFiles,
                 onDismiss = { confirmDelete = null },
                 onDelete = { deleteFiles, addExclusion ->
                     arrMediaViewModel.deleteMedia(item, deleteFiles, addExclusion)
@@ -462,6 +464,8 @@ fun ArrLibraryScreen(
         if (confirmBulkDelete) {
             ConfirmDeleteAlert(
                 deleteInProgress = false,
+                initialAddExclusion = preferences.deleteAddExclusion,
+                initialDeleteFiles = preferences.deleteDeleteFiles,
                 onDismiss = { confirmBulkDelete = false },
                 onDelete = { deleteFiles, addExclusion ->
                     arrMediaViewModel.deleteSelected(deleteFiles, addExclusion)
@@ -620,11 +624,13 @@ private fun SelectionActionItem(
 @Composable
 private fun ConfirmDeleteAlert(
     deleteInProgress: Boolean,
+    initialAddExclusion: Boolean = false,
+    initialDeleteFiles: Boolean = false,
     onDismiss: () -> Unit,
     onDelete: (Boolean, Boolean) -> Unit
 ) {
-    var addExclusion by remember { mutableStateOf(false) }
-    var deleteFiles by remember { mutableStateOf(false) }
+    var addExclusion by remember { mutableStateOf(initialAddExclusion) }
+    var deleteFiles by remember { mutableStateOf(initialDeleteFiles) }
     ModalBottomSheet(
         onDismissRequest = onDismiss
     ) {

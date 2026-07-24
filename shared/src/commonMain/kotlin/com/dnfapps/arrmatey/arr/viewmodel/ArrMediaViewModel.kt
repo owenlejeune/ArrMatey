@@ -329,6 +329,14 @@ class ArrMediaViewModel(
         safeSavePreference { it.copy(posterRadius = radius) }
     }
 
+    fun updateDeleteDeleteFiles(deleteFiles: Boolean) {
+        safeSavePreference { it.copy(deleteDeleteFiles = deleteFiles) }
+    }
+
+    fun updateDeleteAddExclusion(addExclusion: Boolean) {
+        safeSavePreference { it.copy(deleteAddExclusion = addExclusion) }
+    }
+
     fun updateApplyGlobally(applyGlobally: Boolean) {
         safeSavePreference { it.copy(applyGlobally = applyGlobally) }
     }
@@ -388,6 +396,10 @@ class ArrMediaViewModel(
         val mediaId = item.id ?: return
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
+
+            updateDeleteDeleteFiles(deleteFiles)
+            updateDeleteAddExclusion(addImportExclusion)
+
             deleteMediaUseCase(mediaId, deleteFiles, addImportExclusion, repository)
                 .collect { status ->
                     _deleteStatus.value = status
@@ -455,6 +467,10 @@ class ArrMediaViewModel(
     fun deleteSelected(deleteFiles: Boolean, addExclusion: Boolean) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
+
+            updateDeleteDeleteFiles(deleteFiles)
+            updateDeleteAddExclusion(addExclusion)
+
             val selectedIds = selectionState.selectedItems.value
 
             selectedIds.forEach { id ->

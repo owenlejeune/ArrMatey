@@ -121,6 +121,7 @@ fun MediaDetailsScreen(
     val lastSearchResult by mediaDetailsViewModel.lastSearchResult.collectAsStateWithLifecycle()
 
     val isMonitored by mediaDetailsViewModel.isMonitored.collectAsStateWithLifecycle()
+    val preferences by mediaDetailsViewModel.preferences.collectAsStateWithLifecycle()
     val qualityProfiles by mediaDetailsViewModel.qualityProfiles.collectAsStateWithLifecycle()
     val rootFolders by mediaDetailsViewModel.rootFolders.collectAsStateWithLifecycle()
     val tags by mediaDetailsViewModel.tags.collectAsStateWithLifecycle()
@@ -374,6 +375,8 @@ fun MediaDetailsScreen(
             if (confirmDelete) {
                 ConfirmDeleteAlert(
                     deleteInProgress = deleteStatus is OperationStatus.InProgress,
+                    initialAddExclusion = preferences.deleteAddExclusion,
+                    initialDeleteFiles = preferences.deleteDeleteFiles,
                     onDismiss = { confirmDelete = false },
                     onDelete = { deleteFiles, addExclusion ->
                         mediaDetailsViewModel.deleteMedia(deleteFiles, addExclusion)
@@ -525,11 +528,13 @@ fun MediaDetailsScreen(
 @Composable
 private fun ConfirmDeleteAlert(
     deleteInProgress: Boolean,
+    initialAddExclusion: Boolean = false,
+    initialDeleteFiles: Boolean = false,
     onDismiss: () -> Unit,
     onDelete: (Boolean, Boolean) -> Unit
 ) {
-    var addExclusion by remember { mutableStateOf(false) }
-    var deleteFiles by remember { mutableStateOf(false) }
+    var addExclusion by remember { mutableStateOf(initialAddExclusion) }
+    var deleteFiles by remember { mutableStateOf(initialDeleteFiles) }
     ModalBottomSheet(
         onDismissRequest = onDismiss
     ) {

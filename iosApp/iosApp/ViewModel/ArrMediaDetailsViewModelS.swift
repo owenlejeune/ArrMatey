@@ -34,6 +34,8 @@ class ArrMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var deleteAlbumSucceeded: Bool = false
     @Published private(set) var deleteAlbumInProgress: Bool = false
     
+    @Published private(set) var preferences: InstancePreferences = InstancePreferences()
+    
     @Published private(set) var qualityProfiles: [QualityProfile] = []
     @Published private(set) var rootFolders: [RootFolder] = []
     @Published private(set) var tags: [Tag] = []
@@ -83,6 +85,8 @@ class ArrMediaDetailsViewModelS: ObservableObject {
             owner.deleteAlbumSucceeded = status is OperationStatusSuccess
             owner.deleteAlbumInProgress = status is OperationStatusInProgress
         }
+        
+        viewModel.preferences.observeAsync(on: self, to: \.preferences)
         
         viewModel.qualityProfiles.observeAsync(on: self, to: \.qualityProfiles)
         viewModel.rootFolders.observeAsync(on: self, to: \.rootFolders)

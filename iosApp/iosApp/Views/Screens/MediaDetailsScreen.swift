@@ -35,9 +35,14 @@ struct MediaDetailsScreen: View {
             .toolbar { toolbarContent }
             .task { viewModel.refreshDetails() }
             .sheet(isPresented: $showConfirmSheet) {
-                DeleteMediaSheet(isLoading: viewModel.deleteInProgress, onConfirm: { addExclusion, deleteFiles in
-                    viewModel.delete(addExclusion, deleteFiles)
-                })
+                DeleteMediaSheet(
+                    isLoading: viewModel.deleteInProgress,
+                    initialAddExclusion: viewModel.preferences.deleteAddExclusion,
+                    initialDeleteFiles: viewModel.preferences.deleteDeleteFiles,
+                    onConfirm: { addExclusion, deleteFiles in
+                        viewModel.delete(addExclusion, deleteFiles)
+                    }
+                )
                 .presentationDetents([.medium])
             }
             .sheet(isPresented: $showEditSheet) {

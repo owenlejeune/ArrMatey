@@ -23,19 +23,28 @@ import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.UpdateAllPreferencesUseCase
+import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ArrMediaDetailsViewModel(
     private val mediaId: Long,
     private val instanceType: InstanceType,
@@ -48,7 +57,10 @@ class ArrMediaDetailsViewModel(
     private val deleteMovieFileUseCase: DeleteMovieFileUseCase,
     private val deleteSeasonFilesUseCase: DeleteSeasonFilesUseCase,
     private val deleteAlbumFilesUseCase: DeleteAlbumFilesUseCase,
-    private val performRefreshUseCase: PerformRefreshUseCase
+    private val performRefreshUseCase: PerformRefreshUseCase,
+    private val updatePreferencesUseCase: UpdateInstancePreferencesUseCase,
+    private val updateAllPreferencesUseCase: UpdateAllPreferencesUseCase,
+    private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow<MediaDetailsUiState>(MediaDetailsUiState.Initial)
@@ -84,6 +96,25 @@ class ArrMediaDetailsViewModel(
     private val _deleteMovieFileStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val deleteMovieFileStatus: StateFlow<OperationStatus> = _deleteMovieFileStatus.asStateFlow()
 
+    private val selectedRepository = getArrInstanceRepositoryUseCase
+        .observeSelected(instanceType)
+        .filterNotNull()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
+    val preferences: StateFlow<InstancePreferences> = selectedRepository
+        .filterNotNull()
+        .flatMapLatest {
+            instancePreferenceStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = InstancePreferences()
+        )
 
     private val _qualityProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
     val qualityProfiles: StateFlow<List<QualityProfile>> = _qualityProfiles.asStateFlow()
@@ -243,9 +274,36 @@ class ArrMediaDetailsViewModel(
         books.forEach { book -> toggleBookMonitored(book) }
     }
 
+    fun updateDeleteDeleteFiles(deleteFiles: Boolean) {
+        safeSavePreference { it.copy(deleteDeleteFiles = deleteFiles) }
+    }
+
+    fun updateDeleteAddExclusion(addExclusion: Boolean) {
+        safeSavePreference { it.copy(deleteAddExclusion = addExclusion) }
+    }
+
+    private fun safeSavePreference(transform: (InstancePreferences) -> InstancePreferences) {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val preferences = preferences.value
+
+            val updatedPreferences = transform(preferences)
+
+            if (updatedPreferences.applyGlobally) {
+                updateAllPreferencesUseCase(updatedPreferences)
+            } else {
+                updatePreferencesUseCase(repository.instance.id, updatedPreferences)
+            }
+        }
+    }
+
     fun deleteMedia(deleteFiles: Boolean, addImportExclusion: Boolean) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
+
+            updateDeleteDeleteFiles(deleteFiles)
+            updateDeleteAddExclusion(addImportExclusion)
+
             deleteMediaUseCase(mediaId, deleteFiles, addImportExclusion, repository)
                 .collect { status ->
                     _deleteStatus.value = status
