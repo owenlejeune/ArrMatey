@@ -77,7 +77,18 @@ struct BazarrSubtitlesSection: View {
             }
             
             ForEach(success.present, id: \.self) { subtitle in
-                PresentSubtitleRow(subtitle: subtitle, onDelete: { viewModel.delete(subtitle) })
+                PresentSubtitleRow(
+                    subtitle: subtitle,
+                    onDownload: {
+                        viewModel.downloadToDevice(subtitle) { data in
+                            if let data = data {
+                                let fileName = (subtitle.path as NSString?)?.lastPathComponent ?? subtitle.name
+                                shareFile(data: data, fileName: fileName)
+                            }
+                        }
+                    },
+                    onDelete: { viewModel.delete(subtitle) }
+                )
             }
 
             ForEach(success.missing, id: \.self) { language in
@@ -121,6 +132,7 @@ private struct EmbeddedSubtitlesCard: View {
 
 private struct PresentSubtitleRow: View {
     let subtitle: BazarrSubtitle
+    let onDownload: () -> Void
     let onDelete: () -> Void
     
     var body: some View {
@@ -141,6 +153,13 @@ private struct PresentSubtitleRow: View {
             SubtitleChip(label: subtitleLabel(subtitle))
             
             if subtitle.isExternal {
+                Button(action: onDownload) {
+                    Image(systemName: "square.and.arrow.down")
+                        .foregroundStyle(.themePrimary)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel(MR.strings().bazarr_download_subtitle.localized())
+
                 Button(action: onDelete) {
                     Image(systemName: "trash")
                         .foregroundStyle(.red)

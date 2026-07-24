@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.ui.components.bazarr
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,15 +16,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -67,6 +69,24 @@ fun BazarrSubtitlesSection(
     }
 
     var showSearch by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    var pendingSubtitle by remember { mutableStateOf<BazarrSubtitle?>(null) }
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("*/*")
+    ) { uri ->
+        uri?.let {
+            pendingSubtitle?.let { subtitle ->
+                viewModel.downloadToDevice(subtitle) { bytes ->
+                    if (bytes != null) {
+                        context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                            outputStream.write(bytes)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -113,6 +133,11 @@ fun BazarrSubtitlesSection(
                 s.present.forEach { subtitle ->
                     PresentSubtitleRow(
                         subtitle = subtitle,
+                        onDownload = {
+                            pendingSubtitle = subtitle
+                            val fileName = subtitle.path?.substringAfterLast('/') ?: subtitle.name
+                            createDocumentLauncher.launch(fileName)
+                        },
                         onDelete = { viewModel.delete(subtitle) }
                     )
                 }
@@ -197,6 +222,7 @@ private fun EmbeddedSubtitlesCard(
 @Composable
 private fun PresentSubtitleRow(
     subtitle: BazarrSubtitle,
+    onDownload: () -> Unit,
     onDelete: () -> Unit
 ) {
     ContainerCard {
@@ -222,13 +248,22 @@ private fun PresentSubtitleRow(
                     if (subtitle.hi) append(" · HI")
                 }
             )
-            if (subtitle.isExternal) {
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = mokoString(MR.strings.bazarr_delete_subtitle),
-                        tint = MaterialTheme.colorScheme.error
-                    )
+            Row {
+                if (subtitle.isExternal) {
+                    IconButton(onClick = onDownload) {
+                        Icon(
+                            Icons.Default.Download,
+                            contentDescription = mokoString(MR.strings.bazarr_download_subtitle),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = mokoString(MR.strings.bazarr_delete_subtitle),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         }

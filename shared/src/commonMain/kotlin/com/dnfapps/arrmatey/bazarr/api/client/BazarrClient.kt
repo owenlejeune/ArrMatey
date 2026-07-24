@@ -120,6 +120,9 @@ interface BazarrClient {
         hi: Boolean,
         path: String
     ): NetworkResult<Unit>
+
+    /** Download a subtitle file to the mobile device. */
+    suspend fun getSubtitleFile(path: String): NetworkResult<ByteArray>
 }
 
 class BazarrClientImpl(
@@ -303,6 +306,9 @@ class BazarrClientImpl(
                 "path" to path
             )
         )
+
+    override suspend fun getSubtitleFile(path: String): NetworkResult<ByteArray> =
+        get("subtitles/contents", mapOf("subtitlePath" to path))
 
     /**
      * Helpers — Bazarr reads arguments from the query string for these endpoints, so all

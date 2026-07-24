@@ -34,4 +34,14 @@ class BazarrMediaSubtitlesViewModelS: ObservableObject {
     func delete(_ subtitle: BazarrSubtitle) {
         viewModel.delete(subtitle: subtitle)
     }
+
+    func downloadToDevice(_ subtitle: BazarrSubtitle, completion: @escaping (Data?) -> Void) {
+        viewModel.downloadToDevice(subtitle: subtitle) { bytes in
+            if let bytes = bytes {
+                completion(bytes.toData())
+            } else {
+                completion(nil)
+            }
+        }
+    }
 }

@@ -41,6 +41,17 @@ extension Bool {
     }
 }
 
+extension KotlinByteArray {
+    func toData() -> Data {
+        let size = Int(self.size)
+        var data = Data(count: size)
+        for i in 0..<size {
+            data[i] = UInt8(bitPattern: self.get(index: Int32(i)))
+        }
+        return data
+    }
+}
+
 struct IdentifiableInt: Identifiable {
     let id: Int32
     var value: Int32 { id }

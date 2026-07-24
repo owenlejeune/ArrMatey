@@ -130,6 +130,16 @@ class BazarrMediaSubtitlesViewModel(
         }
     }
 
+    fun downloadToDevice(subtitle: BazarrSubtitle, onResult: (ByteArray?) -> Unit) {
+        val path = subtitle.path ?: return
+        viewModelScope.launch {
+            val repo = repo() ?: return@launch
+            repo.getSubtitleFile(path)
+                .onSuccess { onResult(it) }
+                .onError { _, _, _ -> onResult(null) }
+        }
+    }
+
     fun clearOperation() {
         _operationState.value = OperationStatus.Idle
     }
