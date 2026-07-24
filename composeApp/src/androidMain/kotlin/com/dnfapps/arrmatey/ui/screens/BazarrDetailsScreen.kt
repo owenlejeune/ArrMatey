@@ -1,5 +1,8 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -23,10 +26,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ExpandCircleDown
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -62,7 +63,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import android.widget.Toast
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
@@ -84,6 +84,7 @@ import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
+import com.dnfapps.arrmatey.ui.components.bazarr.BazarrMediaSubtitlesSheet
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitleSearchSheet
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
@@ -102,10 +103,32 @@ fun BazarrDetailsScreen(
     val scrollState = rememberScrollState()
     val context = LocalContext.current
 
+    var selectedMediaTarget by remember { mutableStateOf<BazarrMediaTarget?>(null) }
     var searchTarget by remember { mutableStateOf<BazarrMediaTarget?>(null) }
 
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
+
+    var pendingSubtitle by remember { mutableStateOf<BazarrSubtitle?>(null) }
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("*/*")
+    ) { uri ->
+        uri?.let {
+            pendingSubtitle?.let { subtitle ->
+                viewModel.downloadToDevice(subtitle) { bytes ->
+                    if (bytes != null) {
+                        context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                            outputStream.write(bytes)
+                        }
+                        Toast.makeText(context, "Subtitle downloaded", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Failed to download subtitle", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
     LaunchedEffect(operationState) {
         when (operationState) {
             is OperationStatus.Success -> {
@@ -193,13 +216,22 @@ fun BazarrDetailsScreen(
 
                 when (val details = uiState.details) {
                     is BazarrMovie -> {
-                        SubtitlesSection(details.subtitles, details.missingSubtitles, onSearch = {
-                            searchTarget = BazarrMediaTarget.Movie(details.serviceId)
-                        })
+                        SubtitlesSection(
+                            subtitles = details.subtitles,
+                            missingSubtitles = details.missingSubtitles,
+                            onSearch = {
+                                searchTarget = BazarrMediaTarget.Movie(details.serviceId)
+                            },
+                            onDownload = { subtitle ->
+                                pendingSubtitle = subtitle
+                                val fileName = subtitle.path?.substringAfterLast('/') ?: subtitle.name
+                                createDocumentLauncher.launch(fileName)
+                            }
+                        )
                     }
                     is BazarrSeries -> {
-                        BazarrEpisodesSection(uiState.episodes, onSearch = { seriesId, epId ->
-                            searchTarget = BazarrMediaTarget.Episode(seriesId, epId)
+                        BazarrEpisodesSection(uiState.episodes, onEpisodeClick = { seriesId, epId ->
+                            selectedMediaTarget = BazarrMediaTarget.Episode(seriesId, epId)
                         })
                     }
                     null -> {}
@@ -232,6 +264,13 @@ fun BazarrDetailsScreen(
             BazarrSubtitleSearchSheet(
                 target = target,
                 onDismiss = { searchTarget = null }
+            )
+        }
+
+        selectedMediaTarget?.let { target ->
+            BazarrMediaSubtitlesSheet(
+                target = target,
+                onDismiss = { selectedMediaTarget = null }
             )
         }
     }
@@ -274,6 +313,7 @@ private fun SubtitlesSection(
     subtitles: List<BazarrSubtitle>,
     missingSubtitles: List<BazarrSubtitleLanguage>,
     onSearch: () -> Unit,
+    onDownload: (BazarrSubtitle) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -283,7 +323,7 @@ private fun SubtitlesSection(
             style = MaterialTheme.typography.titleLarge
         )
         subtitles.forEach { subtitle ->
-            SubtitleItem(subtitle)
+            SubtitleItem(subtitle, onDownload)
         }
 
         missingSubtitles.forEach { missing ->
@@ -335,7 +375,10 @@ private fun MissingSubtitleItem(
 }
 
 @Composable
-private fun SubtitleItem(subtitle: BazarrSubtitle) {
+private fun SubtitleItem(
+    subtitle: BazarrSubtitle,
+    onDownload: (BazarrSubtitle) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -356,23 +399,38 @@ private fun SubtitleItem(subtitle: BazarrSubtitle) {
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = buildString {
-                        append(subtitle.name.uppercase())
-                        if (subtitle.hi) append(" HI")
-                    },
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold
-                )
+                if (subtitle.isExternal) {
+                    IconButton(onClick = { onDownload(subtitle) }, modifier = Modifier.size(24.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = mokoString(MR.strings.bazarr_download_subtitle),
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = buildString {
+                            append(subtitle.code2.uppercase())
+                            if (subtitle.hi) append(" HI")
+                        },
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
@@ -381,7 +439,7 @@ private fun SubtitleItem(subtitle: BazarrSubtitle) {
 @Composable
 private fun BazarrEpisodesSection(
     episodes: List<BazarrEpisode>,
-    onSearch: (Long, Long) -> Unit
+    onEpisodeClick: (Long, Long) -> Unit
 ) {
     val seasons = episodes.groupBy { it.season }.toSortedMap(compareByDescending { it })
 
@@ -439,7 +497,7 @@ private fun BazarrEpisodesSection(
                     ) {
                         seasonEpisodes.sortedBy { it.episode }.forEachIndexed { index, episode ->
                             BazarrEpisodeItem(episode, onClick = {
-                                onSearch(episode.sonarrSeriesId, episode.sonarrEpisodeId)
+                                onEpisodeClick(episode.sonarrSeriesId, episode.sonarrEpisodeId)
                             })
                             if (index < seasonEpisodes.size - 1) {
                                 HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))

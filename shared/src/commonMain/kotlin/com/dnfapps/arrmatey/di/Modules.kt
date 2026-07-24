@@ -414,7 +414,7 @@ val viewModelModule = module {
         AudiobookFilesViewModel(audiobookId, get())
     }
     factory { (id: Long, type: BazarrMediaType) ->
-        BazarrDetailsViewModel(id, type, get(), get(), get(), get())
+        BazarrDetailsViewModel(id, type, get(), get(), get(), get(), get())
     }
     factory { CombinedDashboardViewModel(get(), get(), get(), get(), get(), get()) }
     factory { BackupViewModel(get(), get(), get(), get()) }
