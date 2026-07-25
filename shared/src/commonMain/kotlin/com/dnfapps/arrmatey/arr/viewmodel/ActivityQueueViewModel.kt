@@ -56,6 +56,8 @@ class ActivityQueueViewModel(
             initialValue = false
         )
 
+    val hasLoaded: StateFlow<Boolean> = activityQueueService.hasLoaded
+
     val instances = instanceRepository.observeAllInstances()
         .map { all ->
             all.filter { it.type.supportsActivityQueue }

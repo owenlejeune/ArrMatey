@@ -33,8 +33,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -88,7 +90,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
 @Composable
 fun ActivityTab(
     wideRailIsVisible: Boolean,
@@ -99,6 +101,7 @@ fun ActivityTab(
     val uiState by viewModel.activityQueueUiState.collectAsStateWithLifecycle()
     val removeItemStatus by viewModel.removeItemState.collectAsStateWithLifecycle()
     val isLoading by viewModel.isPolling.collectAsStateWithLifecycle()
+    val hasLoaded by viewModel.hasLoaded.collectAsStateWithLifecycle()
 
     var showConfirmRemove by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf<QueueItem?>(null) }
@@ -141,32 +144,43 @@ fun ActivityTab(
         },
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
-        PullToRefreshBox(
+        Box(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize(),
-            contentAlignment = Alignment.Center,
-            isRefreshing = isLoading,
-            onRefresh = { viewModel.refresh() }
+            contentAlignment = Alignment.Center
         ) {
-            if (queueItems.isEmpty()) {
-                EmptyActivityState(modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()))
+            if (instances.isNotEmpty() && (!hasLoaded || (queueItems.isEmpty() && isLoading))) {
+                LoadingIndicator(
+                    modifier = Modifier.size(96.dp)
+                )
             } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .fillMaxSize()
+                PullToRefreshBox(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                    isRefreshing = isLoading,
+                    onRefresh = { viewModel.refresh() }
                 ) {
-                    items(items = queueItems) { item ->
-                        ActivityItem(item) {
-                            selectedItem = item
+                    if (queueItems.isEmpty()) {
+                        EmptyActivityState(modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()))
+                    } else {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .fillMaxSize()
+                        ) {
+                            items(items = queueItems) { item ->
+                                ActivityItem(item) {
+                                    selectedItem = item
+                                }
+                            }
+                            item {
+                                Spacer(Modifier.height(0.dp))
+                            }
                         }
-                    }
-                    item {
-                        Spacer(Modifier.height(0.dp))
                     }
                 }
             }

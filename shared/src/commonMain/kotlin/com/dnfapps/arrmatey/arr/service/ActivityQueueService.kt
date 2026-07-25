@@ -29,6 +29,9 @@ class ActivityQueueService(
     private val _isPolling = MutableStateFlow(false)
     val isPolling: StateFlow<Boolean> = _isPolling
 
+    private val _hasLoaded = MutableStateFlow(false)
+    val hasLoaded: StateFlow<Boolean> = _hasLoaded.asStateFlow()
+
     private val _allActivityTasks = MutableStateFlow<List<QueueItem>>(emptyList())
     val allActivityTasks: StateFlow<List<QueueItem>> = _allActivityTasks.asStateFlow()
 
@@ -68,6 +71,9 @@ class ActivityQueueService(
 
             val issueCount = allTasks.count { task -> task.hasIssue }
             _tasksWithIssues.value = issueCount
+            if (repositories.isNotEmpty()) {
+                _hasLoaded.value = true
+            }
             _isPolling.value = false
         }
     }
