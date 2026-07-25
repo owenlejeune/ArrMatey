@@ -263,7 +263,10 @@ fun DownloadsTab(
                                 contentPadding = PaddingValues(16.dp),
                                 state = listState
                             ) {
-                                items(items = queueState.queueItems, key = { it.id }) { item ->
+                                items(
+                                    items = queueState.queueItems,
+                                    key = { "${it.client.id}:${it.id}" }
+                                ) { item ->
                                     TorrentActionsCard(
                                         item = item,
                                         showClientInfo = filterState.clientIds.size > 1,
