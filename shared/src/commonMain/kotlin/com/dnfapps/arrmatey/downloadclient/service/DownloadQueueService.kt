@@ -54,7 +54,6 @@ class DownloadQueueService(
                     startPolling()
                 } else {
                     stopPolling()
-                    _hasLoaded.value = true
                 }
             }
         }
@@ -94,12 +93,14 @@ class DownloadQueueService(
         fetchAllDownloadData()
             .onSuccess { bundle ->
                 _allTransfers.value = bundle
-                if (knownClients.isEmpty() || apis.isNotEmpty()) {
+                if (apis.isNotEmpty()) {
                     _hasLoaded.value = true
                 }
             }
             .onError { _, _, _ ->
-                _hasLoaded.value = true
+                if (apis.isNotEmpty()) {
+                    _hasLoaded.value = true
+                }
             }
 
         _isPolling.value = false
