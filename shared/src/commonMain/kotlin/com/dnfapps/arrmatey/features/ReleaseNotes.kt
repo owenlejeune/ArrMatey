@@ -47,6 +47,12 @@ object ReleaseNotes {
             version = "0.6.0",
             title = MR.strings.v7_title,
             androidContentFile = MR.files.release_0_6_0_txt
+        ),
+        FeatureUpdate(
+            buildCode = 10,
+            version = "0.7.0",
+            title = MR.strings.v8_title,
+            androidContentFile = MR.files.release_0_7_0_txt
         )
     ).sortedByDescending { it.buildCode }
 

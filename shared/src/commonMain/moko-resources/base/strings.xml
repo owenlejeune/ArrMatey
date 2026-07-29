@@ -721,6 +721,7 @@
     <string name="v5_title">Downloads, Webpages, and Customization</string>
     <string name="v6_title">Dashboard, Shortcuts, and Audiobooks</string>
     <string name="v7_title">Subtitles, Settings, and Security</string>
+    <string name="v8_title">Quick Actions, Theming, and Bug Fixes</string>
 
     <!-- Backup & Restore -->
     <string name="backup_restore">Backup &amp; Restore</string>
