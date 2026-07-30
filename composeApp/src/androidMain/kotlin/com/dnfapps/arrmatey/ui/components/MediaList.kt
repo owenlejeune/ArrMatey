@@ -360,7 +360,7 @@ private fun MovieDetails(
     val contentColor =
         if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
 
-    item.releaseDate?.format()?.let {
+    item.releaseDate?.format("MMMM d, yyyy")?.let {
         Text(it, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
     }
 
