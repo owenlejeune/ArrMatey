@@ -14,6 +14,9 @@ import com.dnfapps.arrmatey.navigation.LocalSettingsNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsScreen
 import com.dnfapps.arrmatey.navigation.SettingsTabNavigator
+import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.AddEditCustomWebpageScreen
 import com.dnfapps.arrmatey.ui.screens.AddInstanceScreen
 import com.dnfapps.arrmatey.ui.screens.ArrInstanceDashboard
@@ -43,6 +46,9 @@ fun SettingsTabNavHost(
         NavDisplay(
             backStack = navigation.backStack,
             onBack = { navigation.popBackStack() },
+            transitionSpec = { forwardSlideTransform() },
+            popTransitionSpec = { popSlideTransform() },
+            predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
             entryProvider = entryProvider {
                 entry<SettingsScreen.Landing> { SettingsScreen() }
                 entry<SettingsScreen.AddInstance> { AddInstanceScreen(it.type) }

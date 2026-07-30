@@ -25,6 +25,9 @@ import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.LocalArrNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.ArrLibraryScreen
 import com.dnfapps.arrmatey.ui.screens.ArrSearchScreen
 import com.dnfapps.arrmatey.ui.screens.AudiobookFilesScreen
@@ -64,6 +67,9 @@ fun ArrTab(
                 NavDisplay(
                     backStack = if (showDetails) listOf(baseScreen) else navigation.backStack,
                     onBack = { navigation.popBackStack() },
+                    transitionSpec = { forwardSlideTransform() },
+                    popTransitionSpec = { popSlideTransform() },
+                    predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
                     entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible)
                 )
             }
@@ -84,6 +90,9 @@ fun ArrTab(
                         NavDisplay(
                             backStack = lastValidDetailBackStack.value,
                             onBack = { navigation.popBackStack() },
+                            transitionSpec = { forwardSlideTransform() },
+                            popTransitionSpec = { popSlideTransform() },
+                            predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
                             entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible)
                         )
                     }

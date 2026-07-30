@@ -5,7 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -175,8 +175,13 @@ fun SettingsScreen(
     var showThemeDropdown by remember { mutableStateOf(false) }
     var showColorDropdown by remember { mutableStateOf(false) }
 
-    BackHandler {
-        navManager.openDrawer()
+    PredictiveBackHandler { progress ->
+        try {
+            progress.collect { }
+            navManager.openDrawer()
+        } catch (_: kotlinx.coroutines.CancellationException) {
+            // Gesture cancelled
+        }
     }
 
     Scaffold(

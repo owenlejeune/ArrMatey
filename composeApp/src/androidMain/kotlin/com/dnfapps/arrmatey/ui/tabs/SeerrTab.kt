@@ -13,6 +13,9 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.SeerrScreen
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
+import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.RequestsScreen
 import com.dnfapps.arrmatey.ui.screens.SeerrDetailsScreen
 import org.koin.compose.koinInject
@@ -31,6 +34,9 @@ fun SeerrTab(
         NavDisplay(
             backStack = navigation.backStack,
             onBack = { navigation.popBackStack() },
+            transitionSpec = { forwardSlideTransform() },
+            popTransitionSpec = { popSlideTransform() },
+            predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
             entryProvider = entryProvider {
                 entry<SeerrScreen.Home> {
                     RequestsScreen(viewModel = viewModel, isExpanded, wideRailIsVisible)

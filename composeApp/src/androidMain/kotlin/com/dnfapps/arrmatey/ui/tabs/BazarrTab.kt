@@ -10,6 +10,9 @@ import com.dnfapps.arrmatey.navigation.BazarrScreen
 import com.dnfapps.arrmatey.navigation.LocalBazarrNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.BazarrDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.BazarrScreen
 import org.koin.compose.koinInject
@@ -26,6 +29,9 @@ fun BazarrTab(
         NavDisplay(
             backStack = navigation.backStack,
             onBack = { navigation.popBackStack() },
+            transitionSpec = { forwardSlideTransform() },
+            popTransitionSpec = { popSlideTransform() },
+            predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
             entryProvider  = entryProvider {
                 entry<BazarrScreen.Library> {
                     BazarrScreen(wideRailIsVisible = wideRailIsVisible)

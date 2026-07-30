@@ -9,6 +9,9 @@ import com.dnfapps.arrmatey.navigation.DashboardScreen
 import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
 import com.dnfapps.arrmatey.navigation.LocalDashboardNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.ArrInstanceDashboard
 import com.dnfapps.arrmatey.ui.screens.dashboard.CombinedDashboard
 import org.koin.compose.koinInject
@@ -23,6 +26,9 @@ fun DashboardTab(
         NavDisplay(
             backStack = navigation.backStack,
             onBack = { navigation.popBackStack() },
+            transitionSpec = { forwardSlideTransform() },
+            popTransitionSpec = { popSlideTransform() },
+            predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
             entryProvider = entryProvider { 
                 entry<DashboardScreen.Main> { CombinedDashboard(windowSizeClass) }
                 entry<DashboardScreen.ArrDashboard> { ArrInstanceDashboard(it.id, navigation, windowSizeClass) }
