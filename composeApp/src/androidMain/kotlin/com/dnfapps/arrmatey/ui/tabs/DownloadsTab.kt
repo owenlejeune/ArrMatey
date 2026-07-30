@@ -269,7 +269,7 @@ fun DownloadsTab(
                                 ) { item ->
                                     TorrentActionsCard(
                                         item = item,
-                                        showClientInfo = filterState.clientIds.size > 1,
+                                        showClientInfo = downloadClientState.downloadClients.size > 1,
                                         onPause = { viewModel.pauseDownload(item.id) },
                                         onResume = { viewModel.resumeDownload(item.id) },
                                         onDelete = { deleteTarget = item }

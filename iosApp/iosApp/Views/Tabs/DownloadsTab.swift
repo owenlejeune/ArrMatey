@@ -117,7 +117,7 @@ struct DownloadsTab: View {
                     ForEach(viewModel.downloadQueueState.queueItems, id: \.id) { item in
                         DownloadQueueItemView(
                             item: item,
-                            showClientInfo: viewModel.filterState.clientIds.count > 1
+                            showClientInfo: clientsViewModel.downloadClientsState.downloadClients.count > 1
                         )
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                         .listRowSeparator(.hidden)
