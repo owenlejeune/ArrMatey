@@ -70,16 +70,9 @@ struct ArtistDetailsView: View {
             
             Spacer()
             
-            HStack {
-                Text("\(item.trackFileCount)")
-                    .font(.system(size: 12))
-                
-                Spacer()
-                
-                Text("/\(item.trackCount)")
-                    .font(.system(size: 12))
-            }
-            .padding(.bottom, 1)
+            Text("\(item.trackFileCount)/\(item.trackCount)")
+                .font(.system(size: 12))
+                .padding(.bottom, 1)
             
             ProgressView(value: item.statusProgress)
                 .progressViewStyle(LinearProgressViewStyle(tint: progressColor))

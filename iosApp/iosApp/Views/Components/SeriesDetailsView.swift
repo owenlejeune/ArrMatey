@@ -73,17 +73,10 @@ struct SeriesDetailsView: View {
                 .font(.system(size: 14))
                 .lineSpacing(4)
             
-            HStack {
-                Text("\(item.episodeFileCount)")
-                    .font(.system(size: 12))
-                
-                Spacer()
-                
-                Text("/\(item.episodeCount)")
-                    .font(.system(size: 12))
-            }
-            .padding(.bottom, 1)
-            .padding(.top, 4)
+            Text("\(item.episodeFileCount)/\(item.episodeCount)")
+                .font(.system(size: 12))
+                .padding(.bottom, 1)
+                .padding(.top, 4)
             
             ProgressView(value: item.statusProgress)
                 .progressViewStyle(LinearProgressViewStyle(tint: progressColor))

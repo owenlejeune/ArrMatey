@@ -329,16 +329,12 @@ private fun SeriesDetails(
     Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
     if (item.id != null) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 1.dp)
-        ) {
-            Text(text = item.episodeFileCount.toString(), fontSize = 12.sp, color = contentColor)
-            Text(text = "/${item.episodeCount}", fontSize = 12.sp, color = contentColor)
-        }
+        Text(
+            text = "${item.episodeFileCount}/${item.episodeCount}",
+            fontSize = 12.sp,
+            color = contentColor,
+            modifier = Modifier.padding(top = 8.dp, bottom = 1.dp)
+        )
         LinearProgressIndicator(
             progress = { item.statusProgress },
             modifier = Modifier
@@ -411,16 +407,12 @@ private fun ArtistDetails(
     Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
     if (item.id != null) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 1.dp)
-        ) {
-            Text(text = item.trackFileCount.toString(), fontSize = 12.sp, color = contentColor)
-            Text(text = "/${item.trackCount}", fontSize = 12.sp, color = contentColor)
-        }
+        Text(
+            text = "${item.trackFileCount}/${item.trackCount}",
+            fontSize = 12.sp,
+            color = contentColor,
+            modifier = Modifier.padding(top = 8.dp, bottom = 1.dp)
+        )
         LinearProgressIndicator(
             progress = { item.statusProgress },
             color = if (isActive) ArrPurple else item.statusColor,
@@ -455,16 +447,12 @@ private fun AuthorDetails(
     Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
     if (item.id != null) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 1.dp)
-        ) {
-            Text(text = item.bookFileCount.toString(), fontSize = 12.sp, color = contentColor)
-            Text(text = "/${item.bookCount}", fontSize = 12.sp, color = contentColor)
-        }
+        Text(
+            text = "${item.bookFileCount}/${item.bookCount}",
+            fontSize = 12.sp,
+            color = contentColor,
+            modifier = Modifier.padding(top = 8.dp, bottom = 1.dp)
+        )
         LinearProgressIndicator(
             progress = { item.statusProgress },
             color = if (isActive) ArrPurple else item.statusColor,

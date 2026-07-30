@@ -70,16 +70,9 @@ struct AuthorDetailsView: View {
             
             Spacer()
             
-            HStack {
-                Text("\(item.bookFileCount)")
-                    .font(.system(size: 12))
-                
-                Spacer()
-                
-                Text("/\(item.bookCount)")
-                    .font(.system(size: 12))
-            }
-            .padding(.bottom, 1)
+            Text("\(item.bookFileCount)/\(item.bookCount)")
+                .font(.system(size: 12))
+                .padding(.bottom, 1)
             
             ProgressView(value: item.statusProgress)
                 .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
