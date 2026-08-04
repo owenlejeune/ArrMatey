@@ -10,7 +10,7 @@ class PauseDownloadUseCase(
     private val downloadClientManager: DownloadClientManager
 ) {
 
-    operator fun invoke(id: String): Flow<OperationStatus> = flow {
+    operator fun invoke(ids: List<String>): Flow<OperationStatus> = flow {
         emit(OperationStatus.InProgress)
 
         val api = downloadClientManager.getSelectedDownloadClientApiSnapshot()
@@ -19,11 +19,10 @@ class PauseDownloadUseCase(
             return@flow
         }
 
-        when (val result = api.pauseDownload(id)) {
-            is NetworkResult.Success -> emit(OperationStatus.Success("Download paused"))
+        when (val result = api.pauseDownload(ids)) {
+            is NetworkResult.Success -> emit(OperationStatus.Success("Downloads paused"))
             is NetworkResult.Error -> emit(OperationStatus.Error(result.code, result.message, result.cause))
             is NetworkResult.Loading -> emit(OperationStatus.InProgress)
-            else -> emit(OperationStatus.Error(message = "Unknown response"))
         }
     }
 }

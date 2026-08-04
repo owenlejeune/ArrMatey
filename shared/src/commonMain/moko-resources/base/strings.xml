@@ -75,6 +75,8 @@
     <string name="remove">Remove</string>
     <string name="manual_import">Manual Import</string>
     <string name="refresh">Refresh</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
     <string name="search_monitored">Search monitored</string>
     <string name="copy_link">Copy Link</string>
     <string name="api_key_in_browser">Open instance settings to copy API key</string>

@@ -37,23 +37,23 @@ class QBittorrentClient(
         }
     }
 
-    override suspend fun pauseDownload(id: String): NetworkResult<Unit> {
+    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> {
         return when (val authResult = ensureAuthenticated()) {
-            is NetworkResult.Success -> postTorrentAction("api/v2/torrents/stop", id)
+            is NetworkResult.Success -> postTorrentAction("api/v2/torrents/stop", ids)
             is NetworkResult.Error -> authResult
             is NetworkResult.Loading -> NetworkResult.Loading
         }
     }
 
-    override suspend fun resumeDownload(id: String): NetworkResult<Unit> {
+    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> {
         return when (val authResult = ensureAuthenticated()) {
-            is NetworkResult.Success -> postTorrentAction("api/v2/torrents/start", id)
+            is NetworkResult.Success -> postTorrentAction("api/v2/torrents/start", ids)
             is NetworkResult.Error -> authResult
             is NetworkResult.Loading -> NetworkResult.Loading
         }
     }
 
-    override suspend fun deleteDownload(id: String, deleteFiles: Boolean): NetworkResult<Unit> {
+    override suspend fun deleteDownload(ids: List<String>, deleteFiles: Boolean): NetworkResult<Unit> {
         return when (val authResult = ensureAuthenticated()) {
             is NetworkResult.Success -> {
                 httpClient.safeCall {
@@ -61,7 +61,7 @@ class QBittorrentClient(
                         setBody(
                             FormDataContent(
                                 Parameters.build {
-                                    append("hashes", id)
+                                    append("hashes", ids.joinToString("|"))
                                     append("deleteFiles", deleteFiles.toString())
                                 }
                             )
@@ -122,13 +122,13 @@ class QBittorrentClient(
         }
     }
 
-    private suspend fun postTorrentAction(endpoint: String, hash: String): NetworkResult<Unit> {
+    private suspend fun postTorrentAction(endpoint: String, hashes: List<String>): NetworkResult<Unit> {
         return httpClient.safeCall {
             post(endpoint) {
                 setBody(
                     FormDataContent(
                         Parameters.build {
-                            append("hashes", hash)
+                            append("hashes", hashes.joinToString("|"))
                         }
                     )
                 )

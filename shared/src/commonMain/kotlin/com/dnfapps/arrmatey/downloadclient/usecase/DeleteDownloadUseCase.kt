@@ -10,7 +10,7 @@ class DeleteDownloadUseCase(
     private val downloadClientManager: DownloadClientManager
 ) {
 
-    operator fun invoke(id: String, deleteFiles: Boolean): Flow<OperationStatus> = flow {
+    operator fun invoke(ids: List<String>, deleteFiles: Boolean): Flow<OperationStatus> = flow {
         emit(OperationStatus.InProgress)
 
         val api = downloadClientManager.getSelectedDownloadClientApiSnapshot()
@@ -19,8 +19,8 @@ class DeleteDownloadUseCase(
             return@flow
         }
 
-        when (val result = api.deleteDownload(id, deleteFiles)) {
-            is NetworkResult.Success -> emit(OperationStatus.Success("Download deleted"))
+        when (val result = api.deleteDownload(ids, deleteFiles)) {
+            is NetworkResult.Success -> emit(OperationStatus.Success("Downloads deleted"))
             is NetworkResult.Error -> emit(OperationStatus.Error(result.code, result.message, result.cause))
             is NetworkResult.Loading -> emit(OperationStatus.InProgress)
         }

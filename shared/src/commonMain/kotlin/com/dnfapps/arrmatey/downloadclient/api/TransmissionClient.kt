@@ -88,21 +88,21 @@ class TransmissionClient(
         }
     }
 
-    override suspend fun pauseDownload(id: String): NetworkResult<Unit> {
+    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> {
         return executeTorrentAction(
             method = "torrent-stop",
-            id = id
+            ids = ids
         )
     }
 
-    override suspend fun resumeDownload(id: String): NetworkResult<Unit> {
+    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> {
         return executeTorrentAction(
             method = "torrent-start",
-            id = id
+            ids = ids
         )
     }
 
-    override suspend fun deleteDownload(id: String, deleteFiles: Boolean): NetworkResult<Unit> {
+    override suspend fun deleteDownload(ids: List<String>, deleteFiles: Boolean): NetworkResult<Unit> {
         return when (
             val result = executeTransmissionRequest<JsonObject>(
                 method = "torrent-remove",
@@ -110,7 +110,9 @@ class TransmissionClient(
                     put(
                         "ids",
                         buildJsonArray {
-                            add(id.toTransmissionId())
+                            ids.forEach { id ->
+                                add(id.toTransmissionId())
+                            }
                         }
                     )
                     put("delete-local-data", JsonPrimitive(deleteFiles))
@@ -146,7 +148,7 @@ class TransmissionClient(
         }
     }
 
-    private suspend fun executeTorrentAction(method: String, id: String): NetworkResult<Unit> {
+    private suspend fun executeTorrentAction(method: String, ids: List<String>): NetworkResult<Unit> {
         return when (
             val result = executeTransmissionRequest<JsonObject>(
                 method = method,
@@ -154,7 +156,9 @@ class TransmissionClient(
                     put(
                         "ids",
                         buildJsonArray {
-                            add(id.toTransmissionId())
+                            ids.forEach { id ->
+                                add(id.toTransmissionId())
+                            }
                         }
                     )
                 }

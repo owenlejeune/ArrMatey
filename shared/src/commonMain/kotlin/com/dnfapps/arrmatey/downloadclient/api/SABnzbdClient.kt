@@ -70,33 +70,54 @@ class SABnzbdClient(
         }
     }
 
-    override suspend fun pauseDownload(id: String): NetworkResult<Unit> {
-        return httpClient.safePost<SABnzbdStatusResponse>("api") {
-            parameter("mode", "pause")
-            parameter("value", id)
-            parameter("apikey", downloadClient.apiKey.value)
-            parameter("output", "json")
-        }.map { }
+    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> {
+        var lastError: NetworkResult.Error? = null
+        for (id in ids) {
+            val result = httpClient.safePost<SABnzbdStatusResponse>("api") {
+                parameter("mode", "pause")
+                parameter("value", id)
+                parameter("apikey", downloadClient.apiKey.value)
+                parameter("output", "json")
+            }.map { }
+            if (result is NetworkResult.Error) {
+                lastError = result
+            }
+        }
+        return lastError ?: NetworkResult.Success(Unit)
     }
 
-    override suspend fun resumeDownload(id: String): NetworkResult<Unit> {
-        return httpClient.safePost<SABnzbdStatusResponse>("api") {
-            parameter("mode", "resume")
-            parameter("value", id)
-            parameter("apikey", downloadClient.apiKey.value)
-            parameter("output", "json")
-        }.map { }
+    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> {
+        var lastError: NetworkResult.Error? = null
+        for (id in ids) {
+            val result = httpClient.safePost<SABnzbdStatusResponse>("api") {
+                parameter("mode", "resume")
+                parameter("value", id)
+                parameter("apikey", downloadClient.apiKey.value)
+                parameter("output", "json")
+            }.map { }
+            if (result is NetworkResult.Error) {
+                lastError = result
+            }
+        }
+        return lastError ?: NetworkResult.Success(Unit)
     }
 
-    override suspend fun deleteDownload(id: String, deleteFiles: Boolean): NetworkResult<Unit> {
-        return httpClient.safePost<SABnzbdStatusResponse>("api") {
-            parameter("mode", "queue")
-            parameter("name", "delete")
-            parameter("value", id)
-            parameter("del_files", if (deleteFiles) "1" else "0")
-            parameter("apikey", downloadClient.apiKey.value)
-            parameter("output", "json")
-        }.map { Unit }
+    override suspend fun deleteDownload(ids: List<String>, deleteFiles: Boolean): NetworkResult<Unit> {
+        var lastError: NetworkResult.Error? = null
+        for (id in ids) {
+            val result = httpClient.safePost<SABnzbdStatusResponse>("api") {
+                parameter("mode", "queue")
+                parameter("name", "delete")
+                parameter("value", id)
+                parameter("del_files", if (deleteFiles) "1" else "0")
+                parameter("apikey", downloadClient.apiKey.value)
+                parameter("output", "json")
+            }
+            if (result is NetworkResult.Error) {
+                lastError = result
+            }
+        }
+        return lastError ?: NetworkResult.Success(Unit)
     }
 
     override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> {

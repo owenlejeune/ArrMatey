@@ -19,22 +19,97 @@ struct DownloadsTab: View {
     
     private var searchPrompt: String {
         let count = viewModel.downloadQueueState.queueItems.count
-        return MR.strings().search_downloads.formatted(args: [count])
+        return MR.strings().search_downloads.format(args: [count]).localized()
     }
 
     var body: some View {
-        ZStack {
-            if clientsViewModel.downloadClientsState.downloadClients.isEmpty {
-                NoDownloadClientsView()
-            } else if !viewModel.hasLoaded {
-                ProgressView()
-                    .scaleEffect(2)
-            } else {
-                queueContent
+        ZStack(alignment: .bottom) {
+            Group {
+                if clientsViewModel.downloadClientsState.downloadClients.isEmpty {
+                    NoDownloadClientsView()
+                } else if !viewModel.hasLoaded {
+                    ProgressView()
+                        .scaleEffect(2)
+                } else {
+                    queueContent
+                }
+            }
+
+            if viewModel.isInSelectionMode {
+                selectionBottomBar
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(1)
             }
         }
         .navigationTitle(MR.strings().downloads.localized())
         .toolbar {
+            toolbarContent
+        }
+        .onChange(of: viewModel.isCommandSuccess) { _, isSuccess in
+            if isSuccess {
+                deleteTarget = nil
+                viewModel.resetCommandState()
+            }
+        }
+        .confirmationDialog(
+            MR.strings().delete_files.localized(),
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            if let id = deleteId {
+                Button(MR.strings().yes.localized(), role: .destructive) {
+                    viewModel.deleteDownload(id, deleteFiles: true)
+                }
+                Button(MR.strings().no.localized()) {
+                    viewModel.deleteDownload(id, deleteFiles: false)
+                }
+            } else if viewModel.isInSelectionMode {
+                Button(MR.strings().yes.localized(), role: .destructive) {
+                    viewModel.deleteSelected(deleteFiles: true)
+                }
+                Button(MR.strings().no.localized()) {
+                    viewModel.deleteSelected(deleteFiles: false)
+                }
+            }
+            Button(MR.strings().cancel.localized(), role: .cancel) {
+                deleteTarget = nil
+                deleteId = nil
+            }
+        } message: {
+            if viewModel.isInSelectionMode {
+                Text(MR.strings().selected_count.format(args: [viewModel.selectionCount]).localized())
+            } else {
+                Text(deleteTarget?.name ?? "")
+            }
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        if viewModel.isInSelectionMode {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(MR.strings().close.localized()) {
+                    viewModel.exitSelectionMode()
+                }
+            }
+            
+            ToolbarItem(placement: .principal) {
+                Text(MR.strings().selected_count.format(args: [viewModel.selectionCount]).localized())
+                    .font(.headline)
+            }
+            
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: {
+                    if viewModel.areAllItemsSelected() {
+                        viewModel.clearSelection()
+                    } else {
+                        viewModel.selectAllItems()
+                    }
+                }) {
+                    Image(systemName: viewModel.areAllItemsSelected() ? "checkmark.circle.fill" : "circle")
+                }
+            }
+        } else {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
                     navigation.showLauncher = true
@@ -65,32 +140,38 @@ struct DownloadsTab: View {
                 )
             }
         }
-        .onChange(of: viewModel.isCommandSuccess) { _, isSuccess in
-            if isSuccess {
-                deleteTarget = nil
-                viewModel.resetCommandState()
+    }
+
+    private var selectionBottomBar: some View {
+        HStack {
+            Button(action: { viewModel.pauseSelected() }) {
+                Label(MR.strings().pause.localized(), systemImage: "pause.fill")
             }
+            
+            Spacer()
+            
+            Button(action: { viewModel.resumeSelected() }) {
+                Label(MR.strings().resume.localized(), systemImage: "play.fill")
+            }
+            
+            Spacer()
+            
+            Button(role: .destructive, action: {
+                showDeleteConfirm = true
+            }) {
+                Label(MR.strings().delete.localized(), systemImage: "trash")
+            }
+            .foregroundColor(.red)
         }
-        .confirmationDialog(
-            MR.strings().delete_files.localized(),
-            isPresented: $showDeleteConfirm,
-            titleVisibility: .visible
-        ) {
-            if let id = deleteId {
-                Button(MR.strings().yes.localized(), role: .destructive) {
-                    viewModel.deleteDownload(id, deleteFiles: true)
-                }
-                Button(MR.strings().no.localized()) {
-                    viewModel.deleteDownload(id, deleteFiles: false)
-                }
-            }
-            Button(MR.strings().cancel.localized(), role: .cancel) {
-                deleteTarget = nil
-                deleteId = nil
-            }
-        } message: {
-            Text(deleteTarget?.name ?? "")
-        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 15)
+                .fill(Color(uiColor: .systemBackground))
+                .shadow(radius: 10)
+        )
+        .padding(.horizontal, 16)
+        .padding(.bottom, 20)
     }
 
     @ViewBuilder
@@ -115,31 +196,55 @@ struct DownloadsTab: View {
             } else {
                 List {
                     ForEach(viewModel.downloadQueueState.queueItems, id: \.id) { item in
-                        DownloadQueueItemView(
-                            item: item,
-                            showClientInfo: clientsViewModel.downloadClientsState.downloadClients.count > 1
-                        )
+                        let isSelected = viewModel.selectedItems.contains(item.id)
+                        HStack {
+                            if viewModel.isInSelectionMode {
+                                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(isSelected ? .blue : .secondary)
+                                    .onTapGesture {
+                                        viewModel.toggleItemSelection(item.id)
+                                    }
+                            }
+                            
+                            DownloadQueueItemView(
+                                item: item,
+                                showClientInfo: clientsViewModel.downloadClientsState.downloadClients.count > 1
+                            )
+                            .onTapGesture {
+                                if viewModel.isInSelectionMode {
+                                    viewModel.toggleItemSelection(item.id)
+                                }
+                            }
+                            .onLongPressGesture {
+                                viewModel.toggleItemSelection(item.id)
+                                viewModel.enterSelectionMode()
+                            }
+                        }
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                         .listRowSeparator(.hidden)
                         .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                            Button {
-                                if item.status.isPaused {
-                                    viewModel.resumeDownload(item.id)
-                                } else {
-                                    viewModel.pauseDownload(item.id)
+                            if !viewModel.isInSelectionMode {
+                                Button {
+                                    if item.status.isPaused {
+                                        viewModel.resumeDownload(item.id)
+                                    } else {
+                                        viewModel.pauseDownload(item.id)
+                                    }
+                                } label: {
+                                    Label(item.status.isPaused ? "Resume" : "Pause", systemImage: item.status.isPaused ? "play.fill" : "pause.fill")
                                 }
-                            } label: {
-                                Label(item.status.isPaused ? "Resume" : "Pause", systemImage: item.status.isPaused ? "play.fill" : "pause.fill")
+                                .tint(.blue)
                             }
-                            .tint(.blue)
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                deleteTarget = item
-                                deleteId = item.id
-                                showDeleteConfirm = true
-                            } label: {
-                                Label("Delete", systemImage: "trash.fill")
+                            if !viewModel.isInSelectionMode {
+                                Button(role: .destructive) {
+                                    deleteTarget = item
+                                    deleteId = item.id
+                                    showDeleteConfirm = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash.fill")
+                                }
                             }
                         }
                     }

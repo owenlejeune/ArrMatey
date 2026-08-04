@@ -1,6 +1,8 @@
 package com.dnfapps.arrmatey.ui.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,21 +28,26 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +56,7 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
@@ -62,6 +70,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -93,6 +102,10 @@ import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.utils.mokoString
+import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
+import com.skydoves.flexible.core.FlexibleSheetSize
+import com.skydoves.flexible.core.FlexibleSheetValue
+import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 
@@ -113,7 +126,12 @@ fun DownloadsTab(
 
     val downloadClientState by clientsViewModel.downloadClientsState.collectAsStateWithLifecycle()
 
+    val isInSelectionMode by viewModel.selectionState.isInSelectionMode.collectAsStateWithLifecycle()
+    val selectionCount by viewModel.selectionState.selectionCount.collectAsStateWithLifecycle()
+    val selectedItems by viewModel.selectionState.selectedItems.collectAsStateWithLifecycle()
+
     var deleteTarget by remember { mutableStateOf<DownloadItem?>(null) }
+    var bulkDeleteTarget by remember { mutableStateOf(false) }
 
     val textFieldState = rememberTextFieldState()
 
@@ -130,6 +148,7 @@ fun DownloadsTab(
             is DownloadClientCommandState.Success,
             is DownloadClientCommandState.Error -> {
                 deleteTarget = null
+                bulkDeleteTarget = false
                 viewModel.resetCommandState()
             }
             else -> {}
@@ -141,35 +160,50 @@ fun DownloadsTab(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            val count = queueState.queueItems.size
-            val placeholderLabel = mokoString(MR.strings.search_downloads, count)
+            if (isInSelectionMode) {
+                SelectionTopBar(
+                    count = selectionCount,
+                    onClose = { viewModel.exitSelectionMode() },
+                    onSelectAll = {
+                        if (viewModel.areAllItemsSelected()) {
+                            viewModel.clearSelection()
+                        } else {
+                            viewModel.selectAllItems()
+                        }
+                    },
+                    isAllSelected = viewModel.areAllItemsSelected()
+                )
+            } else {
+                val count = queueState.queueItems.size
+                val placeholderLabel = mokoString(MR.strings.search_downloads, count)
 
-            ArrAppBarWithSearch(
-                textFieldState = textFieldState,
-                searchPlaceholder = placeholderLabel,
-                navigationIcon = {
-                    if (!wideRailIsVisible) {
-                        NavigationDrawerButton()
+                ArrAppBarWithSearch(
+                    textFieldState = textFieldState,
+                    searchPlaceholder = placeholderLabel,
+                    navigationIcon = {
+                        if (!wideRailIsVisible) {
+                            NavigationDrawerButton()
+                        }
+                    },
+                    actions = {
+                        DownloadQueueFilterMenu(
+                            filterState = filterState,
+                            sortBy = sortState.sortBy,
+                            onSortByChanged = { viewModel.updateSortBy(it) },
+                            sortOrder = sortState.sortOrder,
+                            onSortOrderChanged = { viewModel.updateSortOrder(it) },
+                            availableTags = availableTags,
+                            onToggleStatus = viewModel::toggleStatusFilter,
+                            onToggleTag = viewModel::toggleTagFilter,
+                            onUpdateActiveOnly = viewModel::updateActiveOnly,
+                            onUpdateCompletedOnly = viewModel::updateCompletedOnly,
+                            onUpdateExcludeStatuses = viewModel::updateExcludeStatuses,
+                            onUpdateExcludeTags = viewModel::updateExcludeTags,
+                            onClearFilters = viewModel::clearFilters
+                        )
                     }
-                },
-                actions = {
-                    DownloadQueueFilterMenu(
-                        filterState = filterState,
-                        sortBy = sortState.sortBy,
-                        onSortByChanged = { viewModel.updateSortBy(it) },
-                        sortOrder = sortState.sortOrder,
-                        onSortOrderChanged = { viewModel.updateSortOrder(it) },
-                        availableTags = availableTags,
-                        onToggleStatus = viewModel::toggleStatusFilter,
-                        onToggleTag = viewModel::toggleTagFilter,
-                        onUpdateActiveOnly = viewModel::updateActiveOnly,
-                        onUpdateCompletedOnly = viewModel::updateCompletedOnly,
-                        onUpdateExcludeStatuses = viewModel::updateExcludeStatuses,
-                        onUpdateExcludeTags = viewModel::updateExcludeTags,
-                        onClearFilters = viewModel::clearFilters
-                    )
-                }
-            )
+                )
+            }
         },
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
@@ -267,18 +301,52 @@ fun DownloadsTab(
                                     items = queueState.queueItems,
                                     key = { "${it.client.id}:${it.id}" }
                                 ) { item ->
+                                    val isSelected = selectedItems.contains(item.id)
                                     TorrentActionsCard(
                                         item = item,
                                         showClientInfo = downloadClientState.downloadClients.size > 1,
+                                        isInSelectionMode = isInSelectionMode,
+                                        isSelected = isSelected,
                                         onPause = { viewModel.pauseDownload(item.id) },
                                         onResume = { viewModel.resumeDownload(item.id) },
-                                        onDelete = { deleteTarget = item }
+                                        onDelete = { deleteTarget = item },
+                                        onLongClick = {
+                                            viewModel.toggleItemSelection(item.id)
+                                            viewModel.enterSelectionMode()
+                                        },
+                                        onClick = {
+                                            if (isInSelectionMode) {
+                                                viewModel.toggleItemSelection(item.id)
+                                            }
+                                        }
                                     )
                                 }
                             }
                         }
                     }
                 }
+            }
+        }
+
+        if (isInSelectionMode) {
+            FlexibleBottomSheet(
+                onDismissRequest = { viewModel.exitSelectionMode() },
+                sheetState = rememberFlexibleBottomSheetState(
+                    isModal = false,
+                    initialValue = FlexibleSheetValue.IntermediatelyExpanded,
+                    flexibleSheetSize = FlexibleSheetSize(
+                        fullyExpanded = FlexibleSheetSize.WrapContent,
+                        intermediatelyExpanded = 0.15f,
+                        slightlyExpanded = 0.15f
+                    )
+                ),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                DownloadSelectionBottomBar(
+                    onPause = { viewModel.pauseSelected() },
+                    onResume = { viewModel.resumeSelected() },
+                    onDelete = { bulkDeleteTarget = true }
+                )
             }
         }
 
@@ -293,13 +361,118 @@ fun DownloadsTab(
                 }
             )
         }
+
+        if (bulkDeleteTarget) {
+            DeleteDownloadDialog(
+                commandState = commandState,
+                onDismiss = { bulkDeleteTarget = false },
+                onConfirm = { deleteFiles ->
+                    viewModel.deleteSelected(deleteFiles)
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SelectionTopBar(
+    count: Int,
+    onClose: () -> Unit,
+    onSelectAll: () -> Unit,
+    isAllSelected: Boolean
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text = mokoString(MR.strings.selected_count, count)
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onClose) {
+                Icon(Icons.Default.Close, null)
+            }
+        },
+        actions = {
+            IconButton(onClick = onSelectAll) {
+                Icon(
+                    imageVector = if (isAllSelected) Icons.Default.Deselect else Icons.Default.SelectAll,
+                    contentDescription = null
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun DownloadSelectionBottomBar(
+    onPause: () -> Unit,
+    onResume: () -> Unit,
+    onDelete: () -> Unit
+) {
+    FlowRow(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 24.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        DownloadSelectionActionItem(
+            icon = Icons.Default.Pause,
+            label = mokoString(MR.strings.pause),
+            onClick = onPause
+        )
+        DownloadSelectionActionItem(
+            icon = Icons.Default.PlayArrow,
+            label = mokoString(MR.strings.resume),
+            onClick = onResume
+        )
+        DownloadSelectionActionItem(
+            icon = Icons.Default.Delete,
+            label = mokoString(MR.strings.delete),
+            onClick = onDelete,
+            isError = true
+        )
     }
 }
 
 @Composable
+private fun DownloadSelectionActionItem(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    isError: Boolean = false
+) {
+    Button(
+        onClick = onClick,
+        colors = if (isError) ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError
+        ) else ButtonDefaults.buttonColors(),
+        enabled = enabled
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            modifier = Modifier.padding(end = 4.dp)
+        )
+        Text(
+            text = label.breakable()
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 private fun DownloadQueueItem(
     item: DownloadItem,
-    showClientInfo: Boolean
+    showClientInfo: Boolean,
+    isInSelectionMode: Boolean,
+    isSelected: Boolean,
+    onLongClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     val statusColor = remember(item.status) { when(item.status) {
         DownloadItemStatus.Downloading,
@@ -323,118 +496,141 @@ private fun DownloadQueueItem(
     } }
 
     ContainerCard (
+        modifier = Modifier.combinedClickable(
+            onLongClick = onLongClick,
+            onClick = onClick
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow
+        ),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = item.name.breakable(),
-            style = MaterialTheme.typography.titleMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        val statusLabel = buildAnnotatedString {
-            withStyle(SpanStyle(color = statusColor)) {
-                append(mokoString(item.status.resource))
-            }
-            if (item.downloadSpeed > 0L) {
-                append(Bullet)
-                append(ArrowDown)
-                append(item.downloadSpeed.bytesAsFileSizeString())
-                append("/s")
-            }
-            if (item.uploadSpeed > 0L) {
-                append(Bullet)
-                append(ArrowUp)
-                append(item.uploadSpeed.bytesAsFileSizeString())
-                append("/s")
-            }
-        }
-        Text(
-            text = statusLabel,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        val progressLabel = buildString {
-            append(item.downloaded.bytesAsFileSizeString())
-            append(" / ")
-            append(item.size.bytesAsFileSizeString())
-            append(Bullet)
-            append("${(item.progress * 100).toInt()}%")
-        }
-        Text(
-            text = progressLabel,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        LinearProgressIndicator(
-            progress = { item.progress.toFloat() },
-            modifier = Modifier.fillMaxWidth(),
-            trackColor = statusColor.copy(alpha = 0.3f),
-            color = statusColor
-        )
-
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(top = 4.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (item.etaString.isNotBlank()) {
-                Text(
-                    text = "ETA: ${item.etaString}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            if (isInSelectionMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onClick() }
                 )
             }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = item.name.breakable(),
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
 
-            Spacer(modifier = Modifier.weight(1f))
+                val statusLabel = buildAnnotatedString {
+                    withStyle(SpanStyle(color = statusColor)) {
+                        append(mokoString(item.status.resource))
+                    }
+                    if (item.downloadSpeed > 0L) {
+                        append(Bullet)
+                        append(ArrowDown)
+                        append(item.downloadSpeed.bytesAsFileSizeString())
+                        append("/s")
+                    }
+                    if (item.uploadSpeed > 0L) {
+                        append(Bullet)
+                        append(ArrowUp)
+                        append(item.uploadSpeed.bytesAsFileSizeString())
+                        append("/s")
+                    }
+                }
+                Text(
+                    text = statusLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
-            if (showClientInfo) {
+                val progressLabel = buildString {
+                    append(item.downloaded.bytesAsFileSizeString())
+                    append(" / ")
+                    append(item.size.bytesAsFileSizeString())
+                    append(Bullet)
+                    append("${(item.progress * 100).toInt()}%")
+                }
+                Text(
+                    text = progressLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                LinearProgressIndicator(
+                    progress = { item.progress.toFloat() },
+                    modifier = Modifier.fillMaxWidth(),
+                    trackColor = statusColor.copy(alpha = 0.3f),
+                    color = statusColor
+                )
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(top = 4.dp)
                 ) {
-                    Image(
-                        painter = painterResource(item.client.type.icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = item.client.label,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
+                    if (item.etaString.isNotBlank()) {
+                        Text(
+                            text = "ETA: ${item.etaString}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
-        if (item.category.isNotEmpty() || item.tags.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item.category.takeUnless { it.isEmpty() }?.let { category ->
-                    AssistChip(
-                        onClick = { },
-                        label = { Text(category) },
-                        border = null,
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    )
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    if (showClientInfo) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(item.client.type.icon),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = item.client.label,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
-                item.tags.forEach { tag ->
-                    AssistChip(
-                        onClick = { },
-                        label = { Text(tag) },
-                        border = null,
-                        shape = CircleShape,
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            labelColor = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                    )
+
+                if (item.category.isNotEmpty() || item.tags.isNotEmpty()) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        item.category.takeUnless { it.isEmpty() }?.let { category ->
+                            AssistChip(
+                                onClick = { },
+                                label = { Text(category) },
+                                border = null,
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            )
+                        }
+                        item.tags.forEach { tag ->
+                            AssistChip(
+                                onClick = { },
+                                label = { Text(tag) },
+                                border = null,
+                                shape = CircleShape,
+                                colors = AssistChipDefaults.assistChipColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                    labelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -529,27 +725,35 @@ private fun NoDownloadClientsView(
 fun TorrentActionsCard(
     item: DownloadItem,
     showClientInfo: Boolean,
+    isInSelectionMode: Boolean,
+    isSelected: Boolean,
     onPause: () -> Unit,
     onResume: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onLongClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     val state = rememberSwipeToDismissBoxState()
 
     LaunchedEffect(state.currentValue) {
-        when (state.currentValue) {
-            SwipeToDismissBoxValue.StartToEnd -> {
-                if (item.status.isPaused) onResume() else onPause()
+        if (!isInSelectionMode) {
+            when (state.currentValue) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    if (item.status.isPaused) onResume() else onPause()
+                }
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onDelete()
+                }
+                else -> {}
             }
-            SwipeToDismissBoxValue.EndToStart -> {
-                onDelete()
-            }
-            else -> {}
         }
         state.snapTo(SwipeToDismissBoxValue.Settled)
     }
 
     SwipeToDismissBox(
         state = state,
+        enableDismissFromStartToEnd = !isInSelectionMode,
+        enableDismissFromEndToStart = !isInSelectionMode,
         backgroundContent = {
             val color = when (state.dismissDirection) {
                 SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
@@ -590,6 +794,13 @@ fun TorrentActionsCard(
         },
         onDismiss = {}
     ) {
-        DownloadQueueItem(item, showClientInfo)
+        DownloadQueueItem(
+            item = item,
+            showClientInfo = showClientInfo,
+            isInSelectionMode = isInSelectionMode,
+            isSelected = isSelected,
+            onLongClick = onLongClick,
+            onClick = onClick
+        )
     }
 }

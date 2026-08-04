@@ -20,6 +20,11 @@ class DownloadQueueViewModelS: ObservableObject {
     @Published private(set) var hasLoaded: Bool = false
     @Published private(set) var errorMessage: String? = nil
 
+    @Published private(set) var isInSelectionMode: Bool = false
+    @Published private(set) var selectionCount: Int32 = 0
+    @Published private(set) var selectedItems: Set<String> = []
+    @Published private(set) var selectedItem: DownloadItem? = nil
+
     init() {
         self.viewModel = KoinBridge.shared.getDownloadQueueViewModel()
         startObserving()
@@ -41,6 +46,17 @@ class DownloadQueueViewModelS: ObservableObject {
             owner.hasLoaded = hasLoaded.boolValue
         }
         viewModel.errorMessage.observeAsync(on: self, to: \.errorMessage)
+
+        viewModel.selectionState.isInSelectionMode.observeAsync(on: self) { owner, isInSelectionMode in
+            owner.isInSelectionMode = isInSelectionMode.boolValue
+        }
+        viewModel.selectionState.selectionCount.observeAsync(on: self) { owner, count in
+            owner.selectionCount = count.int32Value
+        }
+        viewModel.selectionState.selectedItems.observeAsync(on: self) { owner, items in
+            owner.selectedItems = Set(items as? [String] ?? [])
+        }
+        viewModel.selectedItem.observeAsync(on: self, to: \.selectedItem)
     }
     
     func refresh() {
@@ -61,6 +77,42 @@ class DownloadQueueViewModelS: ObservableObject {
 
     func resetCommandState() {
         viewModel.resetCommandState()
+    }
+
+    func toggleItemSelection(_ id: String) {
+        viewModel.toggleItemSelection(id: id)
+    }
+
+    func selectAllItems() {
+        viewModel.selectAllItems()
+    }
+
+    func clearSelection() {
+        viewModel.clearSelection()
+    }
+
+    func enterSelectionMode() {
+        viewModel.enterSelectionMode()
+    }
+
+    func exitSelectionMode() {
+        viewModel.exitSelectionMode()
+    }
+
+    func areAllItemsSelected() -> Bool {
+        return viewModel.areAllItemsSelected()
+    }
+
+    func pauseSelected() {
+        viewModel.pauseSelected()
+    }
+
+    func resumeSelected() {
+        viewModel.resumeSelected()
+    }
+
+    func deleteSelected(deleteFiles: Bool) {
+        viewModel.deleteSelected(deleteFiles: deleteFiles)
     }
     
     func updateSearchQuery(_ query: String) {

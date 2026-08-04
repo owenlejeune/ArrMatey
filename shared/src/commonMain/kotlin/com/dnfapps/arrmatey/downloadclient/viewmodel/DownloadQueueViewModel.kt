@@ -2,30 +2,24 @@ package com.dnfapps.arrmatey.downloadclient.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.arr.api.model.IndexerPrivacy
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
+import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientCommandState
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueFilterState
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueSortState
-import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueState
-import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.usecase.DeleteDownloadUseCase
-import com.dnfapps.arrmatey.downloadclient.usecase.ObserveDownloadClientsUseCase
-import com.dnfapps.arrmatey.downloadclient.usecase.ObserveDownloadQueueUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.PauseDownloadUseCase
-import com.dnfapps.arrmatey.downloadclient.usecase.RefreshDownloadQueueUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.ResumeDownloadUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientPreferencesUseCase
-import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientUseCase
 import com.dnfapps.arrmatey.extensions.orderedSortedWith
 import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
-import io.ktor.util.Hash.combine
+import com.dnfapps.arrmatey.utils.MultiSelectState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +28,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.collections.emptyList
 
 class DownloadQueueViewModel(
     private val downloadQueueRepository: DownloadClientRepository,
@@ -94,6 +87,23 @@ class DownloadQueueViewModel(
             initialValue = DownloadQueueBundle()
         )
 
+    val selectionState = MultiSelectState<String>()
+
+    val selectedItem: StateFlow<DownloadItem?> = combine(
+        selectionState.selectedItems,
+        downloadQueueState
+    ) { selectedIds, state ->
+        if (selectedIds.size == 1) {
+            state.queueItems.find { it.id == selectedIds.first() }
+        } else {
+            null
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
+
     private val _commandState = MutableStateFlow<DownloadClientCommandState>(DownloadClientCommandState.Initial)
     val commandState: StateFlow<DownloadClientCommandState> = _commandState.asStateFlow()
 
@@ -145,7 +155,7 @@ class DownloadQueueViewModel(
 
     fun pauseDownload(id: String) {
         viewModelScope.launch {
-            pauseDownloadUseCase(id).collect { state ->
+            pauseDownloadUseCase(listOf(id)).collect { state ->
                 _commandState.value = state.toCommandState()
                 if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
             }
@@ -154,7 +164,7 @@ class DownloadQueueViewModel(
 
     fun resumeDownload(id: String) {
         viewModelScope.launch {
-            resumeDownloadUseCase(id).collect { state ->
+            resumeDownloadUseCase(listOf(id)).collect { state ->
                 _commandState.value = state.toCommandState()
                 if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
             }
@@ -163,7 +173,7 @@ class DownloadQueueViewModel(
 
     fun deleteDownload(id: String, deleteFiles: Boolean) {
         viewModelScope.launch {
-            deleteDownloadUseCase(id, deleteFiles).collect { state ->
+            deleteDownloadUseCase(listOf(id), deleteFiles).collect { state ->
                 _commandState.value = state.toCommandState()
                 if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
             }
@@ -172,6 +182,66 @@ class DownloadQueueViewModel(
 
     fun resetCommandState() {
         _commandState.value = DownloadClientCommandState.Initial
+    }
+
+    fun toggleItemSelection(id: String) {
+        selectionState.toggle(id)
+    }
+
+    fun selectAllItems() {
+        val items = downloadQueueState.value.queueItems.map { it.id }
+        selectionState.selectAll(items)
+    }
+
+    fun clearSelection() {
+        selectionState.clearSelection()
+    }
+
+    fun enterSelectionMode() {
+        selectionState.enterSelectionMode()
+    }
+
+    fun exitSelectionMode() {
+        selectionState.exitSelectionMode()
+    }
+
+    fun areAllItemsSelected(): Boolean {
+        val items = downloadQueueState.value.queueItems.map { it.id }
+        val selected = selectionState.selectedItems.value
+        return items.isNotEmpty() && items.all { selected.contains(it) }
+    }
+
+    fun pauseSelected() {
+        viewModelScope.launch {
+            val selected = selectionState.selectedItems.value.toList()
+            if (selected.isEmpty()) return@launch
+            pauseDownloadUseCase(selected).collect { state ->
+                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
+            }
+            exitSelectionMode()
+        }
+    }
+
+    fun resumeSelected() {
+        viewModelScope.launch {
+            val selected = selectionState.selectedItems.value.toList()
+            if (selected.isEmpty()) return@launch
+            resumeDownloadUseCase(selected).collect { state ->
+                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
+            }
+            exitSelectionMode()
+        }
+    }
+
+    fun deleteSelected(deleteFiles: Boolean) {
+        viewModelScope.launch {
+            val selected = selectionState.selectedItems.value.toList()
+            if (selected.isEmpty()) return@launch
+            deleteDownloadUseCase(selected, deleteFiles).collect { state ->
+                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
+            }
+            exitSelectionMode()
+        }
     }
 
     fun updateSearchQuery(query: String) {

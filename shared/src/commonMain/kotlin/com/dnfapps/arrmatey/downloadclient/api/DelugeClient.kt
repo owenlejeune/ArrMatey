@@ -77,12 +77,12 @@ class DelugeClient(
         }
     }
 
-    override suspend fun pauseDownload(id: String): NetworkResult<Unit> {
+    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> {
         return when (val authResult = ensureAuthenticated()) {
             is NetworkResult.Success -> {
                 executeTorrentAction(
                     method = "core.pause_torrent",
-                    id = id
+                    ids = ids
                 )
             }
             is NetworkResult.Error -> authResult
@@ -90,12 +90,12 @@ class DelugeClient(
         }
     }
 
-    override suspend fun resumeDownload(id: String): NetworkResult<Unit> {
+    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> {
         return when (val authResult = ensureAuthenticated()) {
             is NetworkResult.Success -> {
                 executeTorrentAction(
                     method = "core.resume_torrent",
-                    id = id
+                    ids = ids
                 )
             }
             is NetworkResult.Error -> authResult
@@ -103,19 +103,20 @@ class DelugeClient(
         }
     }
 
-    override suspend fun deleteDownload(id: String, deleteFiles: Boolean): NetworkResult<Unit> {
+    override suspend fun deleteDownload(ids: List<String>, deleteFiles: Boolean): NetworkResult<Unit> {
         return when (val authResult = ensureAuthenticated()) {
             is NetworkResult.Success -> {
-                when (
+                var lastError: NetworkResult.Error? = null
+                for (id in ids) {
                     val result = callDeluge<JsonElement>(
                         method = "core.remove_torrent",
                         params = listOf(JsonPrimitive(id), JsonPrimitive(deleteFiles))
                     )
-                ) {
-                    is NetworkResult.Success -> result.data.toUnitResult()
-                    is NetworkResult.Error -> result
-                    is NetworkResult.Loading -> result
+                    if (result is NetworkResult.Error) {
+                        lastError = result
+                    }
                 }
+                lastError ?: NetworkResult.Success(Unit)
             }
             is NetworkResult.Error -> authResult
             is NetworkResult.Loading -> NetworkResult.Loading
@@ -207,13 +208,15 @@ class DelugeClient(
         }
     }
 
-    private suspend fun executeTorrentAction(method: String, id: String): NetworkResult<Unit> {
+    private suspend fun executeTorrentAction(method: String, ids: List<String>): NetworkResult<Unit> {
         return when (
             val result = callDeluge<JsonElement>(
                 method = method,
                 params = listOf(
                     buildJsonArray {
-                        add(JsonPrimitive(id))
+                        ids.forEach { id ->
+                            add(JsonPrimitive(id))
+                        }
                     }
                 )
             )
