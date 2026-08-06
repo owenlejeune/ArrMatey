@@ -16,6 +16,7 @@ struct DownloadsTab: View {
     @State private var deleteId: String? = nil
     @State private var showDeleteConfirm: Bool = false
     @State private var searchQuery: String = ""
+    @State private var toastMessage: String? = nil
     
     private var searchPrompt: String {
         let count = viewModel.downloadQueueState.queueItems.count
@@ -51,6 +52,27 @@ struct DownloadsTab: View {
                 viewModel.resetCommandState()
             }
         }
+        .onChange(of: viewModel.isCommandError) { _, isError in
+            if isError {
+                let error = viewModel.commandState as? DownloadClientCommandStateError
+                toastMessage = error?.message ?? MR.strings().error.localized()
+                deleteTarget = nil
+                deleteId = nil
+                viewModel.resetCommandState()
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if let message = toastMessage {
+                ToastView(message: message)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                            withAnimation { toastMessage = nil }
+                        }
+                    }
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: toastMessage != nil)
         .confirmationDialog(
             MR.strings().delete_files.localized(),
             isPresented: $showDeleteConfirm,

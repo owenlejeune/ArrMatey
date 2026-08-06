@@ -16,6 +16,7 @@ class DownloadQueueViewModelS: ObservableObject {
     @Published private(set) var commandState: DownloadClientCommandState = DownloadClientCommandStateInitial()
     @Published private(set) var isCommandLoading: Bool = false
     @Published private(set) var isCommandSuccess: Bool = false
+    @Published private(set) var isCommandError: Bool = false
     @Published private(set) var isRefreshing: Bool = true
     @Published private(set) var hasLoaded: Bool = false
     @Published private(set) var errorMessage: String? = nil
@@ -38,6 +39,7 @@ class DownloadQueueViewModelS: ObservableObject {
             owner.commandState = state
             owner.isCommandLoading = state is DownloadClientCommandStateLoading
             owner.isCommandSuccess = state is DownloadClientCommandStateSuccess
+            owner.isCommandError = state is DownloadClientCommandStateError
         }
         viewModel.isRefreshing.observeAsync(on: self) { owner, isRefreshing in
             owner.isRefreshing = isRefreshing.boolValue

@@ -20,11 +20,15 @@ import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientPreferenc
 import com.dnfapps.arrmatey.extensions.orderedSortedWith
 import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
 import com.dnfapps.arrmatey.utils.MultiSelectState
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -154,26 +158,36 @@ class DownloadQueueViewModel(
     }
 
     fun pauseDownload(id: String) {
-        viewModelScope.launch {
-            pauseDownloadUseCase(listOf(id)).collect { state ->
-                _commandState.value = state.toCommandState()
-                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
-            }
+        runSingleItemOp(id) { clientId ->
+            pauseDownloadUseCase(clientId, listOf(id))
         }
     }
 
     fun resumeDownload(id: String) {
-        viewModelScope.launch {
-            resumeDownloadUseCase(listOf(id)).collect { state ->
-                _commandState.value = state.toCommandState()
-                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
-            }
+        runSingleItemOp(id) { clientId ->
+            resumeDownloadUseCase(clientId, listOf(id))
         }
     }
 
     fun deleteDownload(id: String, deleteFiles: Boolean) {
+        runSingleItemOp(id) { clientId ->
+            deleteDownloadUseCase(clientId, listOf(id), deleteFiles)
+        }
+    }
+
+    private fun runSingleItemOp(
+        id: String,
+        op: (clientId: Long) -> Flow<OperationStatus>
+    ) {
         viewModelScope.launch {
-            deleteDownloadUseCase(listOf(id), deleteFiles).collect { state ->
+            val clientId = downloadQueueState.value.queueItems.firstOrNull { it.id == id }?.client?.id
+            if (clientId == null) {
+                _commandState.value = DownloadClientCommandState.Error(
+                    message = "Download item no longer available"
+                )
+                return@launch
+            }
+            op(clientId).collect { state ->
                 _commandState.value = state.toCommandState()
                 if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
             }
@@ -212,34 +226,61 @@ class DownloadQueueViewModel(
     }
 
     fun pauseSelected() {
-        viewModelScope.launch {
-            val selected = selectionState.selectedItems.value.toList()
-            if (selected.isEmpty()) return@launch
-            pauseDownloadUseCase(selected).collect { state ->
-                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
-            }
-            exitSelectionMode()
-        }
+        runBulkOp { clientId, ids -> pauseDownloadUseCase(clientId, ids) }
     }
 
     fun resumeSelected() {
-        viewModelScope.launch {
-            val selected = selectionState.selectedItems.value.toList()
-            if (selected.isEmpty()) return@launch
-            resumeDownloadUseCase(selected).collect { state ->
-                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
-            }
-            exitSelectionMode()
-        }
+        runBulkOp { clientId, ids -> resumeDownloadUseCase(clientId, ids) }
     }
 
     fun deleteSelected(deleteFiles: Boolean) {
+        runBulkOp { clientId, ids -> deleteDownloadUseCase(clientId, ids, deleteFiles) }
+    }
+
+    private fun runBulkOp(
+        op: (clientId: Long, ids: List<String>) -> Flow<OperationStatus>
+    ) {
         viewModelScope.launch {
-            val selected = selectionState.selectedItems.value.toList()
-            if (selected.isEmpty()) return@launch
-            deleteDownloadUseCase(selected, deleteFiles).collect { state ->
-                if (state is OperationStatus.Success) downloadQueueService.manualRefresh()
+            val selectedIds = selectionState.selectedItems.value
+            if (selectedIds.isEmpty()) return@launch
+
+            val itemsById = downloadQueueState.value.queueItems.associateBy { it.id }
+            val idsByClient = selectedIds
+                .mapNotNull { id -> itemsById[id]?.let { it.client.id to id } }
+                .groupBy({ it.first }, { it.second })
+
+            if (idsByClient.isEmpty()) {
+                _commandState.value = DownloadClientCommandState.Error(
+                    message = "No items available for this action"
+                )
+                exitSelectionMode()
+                return@launch
             }
+
+            _commandState.value = DownloadClientCommandState.Loading
+
+            val results = idsByClient.entries
+                .map { (clientId, ids) -> async { op(clientId, ids).last() } }
+                .awaitAll()
+
+            val errors = results.filterIsInstance<OperationStatus.Error>()
+            val anySuccess = results.any { it is OperationStatus.Success }
+
+            _commandState.value = when {
+                errors.isEmpty() -> DownloadClientCommandState.Success
+                anySuccess -> DownloadClientCommandState.Error(
+                    message = "Partial failure on ${errors.size} of ${results.size} clients: " +
+                            errors.mapNotNull { it.message }.joinToString("; ")
+                )
+                else -> DownloadClientCommandState.Error(
+                    code = errors.first().code,
+                    message = errors.mapNotNull { it.message }.joinToString("; ")
+                        .ifBlank { "Operation failed" },
+                    cause = errors.first().cause
+                )
+            }
+
+            if (anySuccess) downloadQueueService.manualRefresh()
             exitSelectionMode()
         }
     }

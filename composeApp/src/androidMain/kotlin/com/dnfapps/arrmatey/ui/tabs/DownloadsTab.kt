@@ -52,6 +52,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -90,6 +92,7 @@ import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
 import com.dnfapps.arrmatey.entensions.ArrowDown
 import com.dnfapps.arrmatey.entensions.ArrowUp
 import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.showErrorImmediately
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
@@ -133,6 +136,9 @@ fun DownloadsTab(
     var deleteTarget by remember { mutableStateOf<DownloadItem?>(null) }
     var bulkDeleteTarget by remember { mutableStateOf(false) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val genericErrorMessage = mokoString(MR.strings.error)
+
     val textFieldState = rememberTextFieldState()
 
     val availableTags = remember(queueState.queueItems) {
@@ -144,11 +150,18 @@ fun DownloadsTab(
     }
 
     LaunchedEffect(commandState) {
-        when (commandState) {
-            is DownloadClientCommandState.Success,
+        when (val state = commandState) {
+            is DownloadClientCommandState.Success -> {
+                deleteTarget = null
+                bulkDeleteTarget = false
+                viewModel.resetCommandState()
+            }
             is DownloadClientCommandState.Error -> {
                 deleteTarget = null
                 bulkDeleteTarget = false
+                snackbarHostState.showErrorImmediately(
+                    message = state.message ?: genericErrorMessage
+                )
                 viewModel.resetCommandState()
             }
             else -> {}
@@ -159,6 +172,7 @@ fun DownloadsTab(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             if (isInSelectionMode) {
                 SelectionTopBar(

@@ -301,9 +301,9 @@ val useCaseModule = module {
     factory { GetSeerrTvRatingsUseCase(get()) }
     factory { ObserveDownloadClientsUseCase(get()) }
     factory { ObserveDownloadQueueUseCase(get()) }
-    factory { PauseDownloadUseCase(get()) }
-    factory { ResumeDownloadUseCase(get()) }
-    factory { DeleteDownloadUseCase(get()) }
+    factory { PauseDownloadUseCase(get(), get()) }
+    factory { ResumeDownloadUseCase(get(), get()) }
+    factory { DeleteDownloadUseCase(get(), get()) }
     factory { TestDownloadClientConnectionUseCase(get()) }
     factory { CreateDownloadClientUseCase(get()) }
     factory { DeleteDownloadClientUseCase(get()) }
