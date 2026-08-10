@@ -35,6 +35,8 @@ interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
     suspend fun getTrending(page: Int = 1): NetworkResult<DiscoverResponse>
+    suspend fun getDiscoverMovies(page: Int = 1): NetworkResult<DiscoverResponse>
+    suspend fun getDiscoverTv(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getRequests(page: Int = 1, pageSize: Int = 100): NetworkResult<RequestResponse>
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
@@ -78,6 +80,12 @@ class SeerrClientImpl(
 
     override suspend fun getTrending(page: Int): NetworkResult<DiscoverResponse> =
         get("discover/trending", mapOf("page" to page))
+
+    override suspend fun getDiscoverMovies(page: Int): NetworkResult<DiscoverResponse> =
+        get("discover/movies", mapOf("page" to page))
+
+    override suspend fun getDiscoverTv(page: Int): NetworkResult<DiscoverResponse> =
+        get("discover/tv", mapOf("page" to page))
 
     override suspend fun getRequests(
         page: Int,

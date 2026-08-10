@@ -10,6 +10,8 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverMoviesUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverTvUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetTrendingUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +26,9 @@ import kotlinx.coroutines.launch
 class TrendingViewModel(
     private val instanceManager: InstanceManager,
     private val instanceRepository: InstanceRepository,
-    private val getTrendingUseCase: GetTrendingUseCase
+    private val getTrendingUseCase: GetTrendingUseCase,
+    private val getDiscoverMoviesUseCase: GetDiscoverMoviesUseCase,
+    private val getDiscoverTvUseCase: GetDiscoverTvUseCase
 ) : ViewModel() {
 
     private val seerrRepository: StateFlow<SeerrInstanceRepository?> = instanceManager.getSelectedSeerrRepository()
@@ -41,10 +45,18 @@ class TrendingViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    private var pagingController: PagingController<DiscoverResult>? = null
+    private var trendingPagingController: PagingController<DiscoverResult>? = null
+    private var moviesPagingController: PagingController<DiscoverResult>? = null
+    private var tvPagingController: PagingController<DiscoverResult>? = null
 
     private val _trendingState = MutableStateFlow(PagedData<DiscoverResult>())
     val trendingState: StateFlow<PagedData<DiscoverResult>> = _trendingState.asStateFlow()
+
+    private val _moviesState = MutableStateFlow(PagedData<DiscoverResult>())
+    val moviesState: StateFlow<PagedData<DiscoverResult>> = _moviesState.asStateFlow()
+
+    private val _tvState = MutableStateFlow(PagedData<DiscoverResult>())
+    val tvState: StateFlow<PagedData<DiscoverResult>> = _tvState.asStateFlow()
 
     init {
         observeRepository()
@@ -56,28 +68,58 @@ class TrendingViewModel(
                 if (repo != null) {
                     viewModelScope.launch {
                         val controller = getTrendingUseCase.createPagingController(repo, viewModelScope)
-                        pagingController = controller
+                        trendingPagingController = controller
                         controller.loadInitialPage()
                         controller.state.collect {
                             _trendingState.value = it
                         }
                     }
+                    viewModelScope.launch {
+                        val controller = getDiscoverMoviesUseCase.createPagingController(repo, viewModelScope)
+                        moviesPagingController = controller
+                        controller.loadInitialPage()
+                        controller.state.collect {
+                            _moviesState.value = it
+                        }
+                    }
+                    viewModelScope.launch {
+                        val controller = getDiscoverTvUseCase.createPagingController(repo, viewModelScope)
+                        tvPagingController = controller
+                        controller.loadInitialPage()
+                        controller.state.collect {
+                            _tvState.value = it
+                        }
+                    }
                 } else {
-                    pagingController = null
+                    trendingPagingController = null
+                    moviesPagingController = null
+                    tvPagingController = null
                     _trendingState.value = PagedData()
+                    _moviesState.value = PagedData()
+                    _tvState.value = PagedData()
                 }
             }
         }
     }
 
-    fun loadNextPage() {
-        pagingController?.loadNextPage()
+    fun loadNextTrendingPage() {
+        trendingPagingController?.loadNextPage()
+    }
+
+    fun loadNextMoviesPage() {
+        moviesPagingController?.loadNextPage()
+    }
+
+    fun loadNextTvPage() {
+        tvPagingController?.loadNextPage()
     }
 
     fun refresh() {
         viewModelScope.launch {
             _isRefreshing.value = true
-            pagingController?.refresh()
+            trendingPagingController?.refresh()
+            moviesPagingController?.refresh()
+            tvPagingController?.refresh()
             _isRefreshing.value = false
         }
     }

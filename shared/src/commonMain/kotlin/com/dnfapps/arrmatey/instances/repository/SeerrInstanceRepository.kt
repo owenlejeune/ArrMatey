@@ -117,6 +117,36 @@ class SeerrInstanceRepository(
         )
     }
 
+    fun getDiscoverMoviesPaging(): PagingSource<DiscoverResult> {
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getDiscoverMovies(page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
+    fun getDiscoverTvPaging(): PagingSource<DiscoverResult> {
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getDiscoverTv(page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
     suspend fun getRequests(
         page: Int = 1,
         pageSize: Int = 10

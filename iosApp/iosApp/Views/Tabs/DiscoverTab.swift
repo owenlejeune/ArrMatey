@@ -50,12 +50,34 @@ private struct DiscoverTabContent: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        TrendingSection(
+                        DiscoverSection(
+                            title: MR.strings().trending.localized(),
+                            icon: "chart.line.uptrend.xyaxis",
                             data: viewModel.trendingState,
                             onItemClick: { item in
                                 navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
                             },
-                            onLoadMore: { viewModel.loadNextPage() }
+                            onLoadMore: { viewModel.loadNextTrendingPage() }
+                        )
+
+                        DiscoverSection(
+                            title: MR.strings().popular_movies.localized(),
+                            icon: "movieclapper",
+                            data: viewModel.moviesState,
+                            onItemClick: { item in
+                                navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                            },
+                            onLoadMore: { viewModel.loadNextMoviesPage() }
+                        )
+
+                        DiscoverSection(
+                            title: MR.strings().popular_series.localized(),
+                            icon: "tv",
+                            data: viewModel.tvState,
+                            onItemClick: { item in
+                                navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                            },
+                            onLoadMore: { viewModel.loadNextTvPage() }
                         )
                     }
                     .padding(.vertical, 16)
@@ -82,7 +104,9 @@ private struct DiscoverTabContent: View {
     }
 }
 
-private struct TrendingSection: View {
+private struct DiscoverSection: View {
+    let title: String
+    let icon: String
     let data: PagedData<DiscoverResult>
     let onItemClick: (DiscoverResult) -> Void
     let onLoadMore: () -> Void
@@ -90,9 +114,9 @@ private struct TrendingSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
-                Image(systemName: "chart.line.uptrend.xyaxis")
+                Image(systemName: icon)
                     .font(.system(size: 20))
-                Text(MR.strings().trending.localized())
+                Text(title)
                     .font(.headline)
             }
             .padding(.horizontal, 16)

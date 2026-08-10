@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -16,8 +17,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -36,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,6 +63,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.SeerrDetailsScreen
 import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.StringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -101,6 +108,8 @@ private fun DiscoverHomeScreen(
     onItemClick: (DiscoverResult) -> Unit
 ) {
     val trendingState by viewModel.trendingState.collectAsStateWithLifecycle()
+    val moviesState by viewModel.moviesState.collectAsStateWithLifecycle()
+    val tvState by viewModel.tvState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -122,21 +131,43 @@ private fun DiscoverHomeScreen(
             modifier = Modifier.padding(paddingValues).fillMaxSize()
         ) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                TrendingSection(
+                DiscoverSection(
+                    title = MR.strings.trending,
+                    icon = Icons.Default.TrendingUp,
                     data = trendingState,
                     onItemClick = onItemClick,
-                    onLoadMore = { viewModel.loadNextPage() }
+                    onLoadMore = { viewModel.loadNextTrendingPage() }
                 )
+
+                DiscoverSection(
+                    title = MR.strings.popular_movies,
+                    icon = Icons.Default.Movie,
+                    data = moviesState,
+                    onItemClick = onItemClick,
+                    onLoadMore = { viewModel.loadNextMoviesPage() }
+                )
+
+                DiscoverSection(
+                    title = MR.strings.popular_series,
+                    icon = Icons.Default.Tv,
+                    data = tvState,
+                    onItemClick = onItemClick,
+                    onLoadMore = { viewModel.loadNextTvPage() }
+                )
+
+                Spacer(modifier = Modifier.height(0.dp))
             }
         }
     }
 }
 
 @Composable
-private fun TrendingSection(
+private fun DiscoverSection(
+    title: StringResource,
+    icon: ImageVector,
     data: PagedData<DiscoverResult>,
     onItemClick: (DiscoverResult) -> Unit,
     onLoadMore: () -> Unit
@@ -162,29 +193,29 @@ private fun TrendingSection(
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.TrendingUp, null, modifier = Modifier.size(20.dp))
+            Icon(icon, null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
             Text(
-                text = mokoString(MR.strings.trending),
+                text = mokoString(title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        val trendingItems = data.items
+        val items = data.items
 
-        if (data.isLoading && trendingItems.isEmpty()) {
+        if (data.isLoading && items.isEmpty()) {
             Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-        } else if (trendingItems.isNotEmpty()) {
+        } else if (items.isNotEmpty()) {
             LazyRow(
                 state = lazyListState,
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                items(trendingItems) { item ->
+                items(items) { item ->
                     PosterItem(
                         item = item,
                         modifier = Modifier.width(120.dp),
