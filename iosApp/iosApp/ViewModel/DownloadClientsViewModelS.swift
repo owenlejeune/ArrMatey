@@ -13,7 +13,7 @@ class DownloadClientsViewModelS: ObservableObject {
     private let viewModel: DownloadClientsViewModel
     
     @Published private(set) var downloadClientsState: DownloadClientsState = DownloadClientsState()
-    @Published private(set) var connectionStates: [Int64:OperationStatus] = [:]
+    @Published private(set) var connectionStates: [Int64:NetworkingOperationStatus] = [:]
     @Published private(set) var mutationState: DownloadClientMutationState = DownloadClientMutationStateInitial()
     
     init() {
@@ -24,7 +24,7 @@ class DownloadClientsViewModelS: ObservableObject {
     private func startObserving() {
         viewModel.downloadClientsState.observeAsync(on: self, to: \.downloadClientsState)
         viewModel.connectionStates.observeAsync(on: self) { owner, states in
-            owner.connectionStates = states.reduce(into: [Int64: OperationStatus]()) { result, entry in
+            owner.connectionStates = states.reduce(into: [Int64: NetworkingOperationStatus]()) { result, entry in
                 let key = Int64(truncating: entry.key)
                 result[key] = entry.value
             }

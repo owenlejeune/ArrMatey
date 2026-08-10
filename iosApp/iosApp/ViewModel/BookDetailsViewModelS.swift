@@ -16,8 +16,8 @@ class BookDetailsViewModelS: ObservableObject {
     @Published private(set) var bookFiles: [BookFile] = []
     @Published private(set) var bookEdition: BookEdition? = nil
     @Published private(set) var history: HistoryState = HistoryStateInitial()
-    @Published private(set) var monitorStatus: OperationStatus = OperationStatusIdle()
-    @Published private(set) var deleteStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var monitorStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
+    @Published private(set) var deleteStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
     
     init(authorId: Int64, book: Book) {
         self.book = book

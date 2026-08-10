@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AddArtistForm: View {
     let artist: Arrtist
-    let addItemStatus: OperationStatus
+    let addItemStatus: NetworkingOperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
@@ -26,7 +26,7 @@ struct AddArtistForm: View {
     @State private var selectedTags: Set<Int> = Set()
     @State private var searchOnAdd: Bool
     
-    init(artist: Arrtist, addItemStatus: OperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (Arrtist, Bool) -> Void, onDismiss: @escaping () -> Void) {
+    init(artist: Arrtist, addItemStatus: NetworkingOperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (Arrtist, Bool) -> Void, onDismiss: @escaping () -> Void) {
         self.artist = artist
         self.addItemStatus = addItemStatus
         self.qualityProfiles = qualityProfiles
@@ -55,7 +55,7 @@ struct AddArtistForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is OperationStatusInProgress
+        addItemStatus is NetworkingOperationStatusInProgress
     }
     
     var body: some View {
@@ -175,7 +175,9 @@ struct AddArtistForm: View {
                                 addArtistMonitorNew: monitorNew,
                                 addAuthorMonitor: preferences.addAuthorMonitor,
                                 addAuthorMonitorNew: preferences.addAuthorMonitorNew,
-                                addAudiobookMonitored: preferences.addAudiobookMonitored
+                                addAudiobookMonitored: preferences.addAudiobookMonitored,
+                                deleteDeleteFiles: preferences.deleteDeleteFiles,
+                                deleteAddExclusion: preferences.deleteAddExclusion
                             )
                         )
                         let newArtist = artist.doCopyForCreation(

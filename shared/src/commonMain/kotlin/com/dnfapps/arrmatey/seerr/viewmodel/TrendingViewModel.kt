@@ -2,9 +2,8 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
-import com.dnfapps.arrmatey.client.paging.PagingState
-import com.dnfapps.arrmatey.client.paging.toPagingState
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -17,8 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -46,19 +43,32 @@ class TrendingViewModel(
 
     private var pagingController: PagingController<DiscoverResult>? = null
 
-    val trendingState: StateFlow<PagingState<DiscoverResult>> = seerrRepository
-        .flatMapLatest { repo ->
-            if (repo != null) {
-                val controller = getTrendingUseCase.createPagingController(repo, viewModelScope)
-                pagingController = controller
-                controller.loadInitialPage()
-                controller.state.map { it.toPagingState() }
-            } else {
-                pagingController = null
-                flowOf(PagingState.Initial)
+    private val _trendingState = MutableStateFlow(PagedData<DiscoverResult>())
+    val trendingState: StateFlow<PagedData<DiscoverResult>> = _trendingState.asStateFlow()
+
+    init {
+        observeRepository()
+    }
+
+    private fun observeRepository() {
+        viewModelScope.launch {
+            seerrRepository.collect { repo ->
+                if (repo != null) {
+                    viewModelScope.launch {
+                        val controller = getTrendingUseCase.createPagingController(repo, viewModelScope)
+                        pagingController = controller
+                        controller.loadInitialPage()
+                        controller.state.collect {
+                            _trendingState.value = it
+                        }
+                    }
+                } else {
+                    pagingController = null
+                    _trendingState.value = PagedData()
+                }
             }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PagingState.Initial)
+    }
 
     fun loadNextPage() {
         pagingController?.loadNextPage()

@@ -25,6 +25,7 @@ struct TabItemContent: View {
                 case .calendar: CalendarTab().environment(\.navigationContext, .mainTab)
                 case .downloads: DownloadsTab().environment(\.navigationContext, .mainTab)
                 case .requests: RequestsTab().environment(\.navigationContext, .mainTab)
+                case .discover: DiscoverTab().environment(\.navigationContext, .mainTab)
                 case .prowlarr: ProwlarrTab().environment(\.navigationContext, .mainTab)
                 case .bazarr: BazarrTab().environment(\.navigationContext, .mainTab)
                 case .dashboard: DashboardTab().environment(\.navigationContext, .mainTab)

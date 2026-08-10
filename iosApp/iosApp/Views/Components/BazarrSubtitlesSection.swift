@@ -112,7 +112,7 @@ struct BazarrSubtitlesSection: View {
                 MissingSubtitleRow(language: language, onAutoSearch: { viewModel.autoSearch(language) })
             }
 
-            if viewModel.operationState is OperationStatusInProgress {
+            if viewModel.operationState is NetworkingOperationStatusInProgress {
                 HStack(spacing: 8) {
                     ProgressView()
                     Text(MR.strings().bazarr_auto_search.localized())
@@ -222,19 +222,4 @@ private func subtitleLabel(_ subtitle: BazarrSubtitle) -> String {
     if subtitle.forced { label += " · Forced" }
     if subtitle.hi { label += " · HI" }
     return label
-}
-
-private struct ToastView: View {
-    let message: String
-    
-    var body: some View {
-        Text(message)
-            .font(.system(size: 14, weight: .medium))
-            .foregroundColor(.white)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(Color.black.opacity(0.75))
-            .cornerRadius(20)
-            .padding(.bottom, 24)
-    }
 }

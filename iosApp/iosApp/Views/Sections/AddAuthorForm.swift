@@ -10,7 +10,7 @@ import Shared
 
 struct AddAuthorForm: View {
     let author: Author
-    let addItemStatus: OperationStatus
+    let addItemStatus: NetworkingOperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
@@ -26,7 +26,7 @@ struct AddAuthorForm: View {
     @State private var selectedTags: Set<Int> = Set()
     @State private var searchOnAdd: Bool
     
-    init(author: Author, addItemStatus: OperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (Author, Bool) -> Void, onDismiss: @escaping () -> Void) {
+    init(author: Author, addItemStatus: NetworkingOperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (Author, Bool) -> Void, onDismiss: @escaping () -> Void) {
         self.author = author
         self.addItemStatus = addItemStatus
         self.qualityProfiles = qualityProfiles
@@ -55,7 +55,7 @@ struct AddAuthorForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is OperationStatusInProgress
+        addItemStatus is NetworkingOperationStatusInProgress
     }
     
     var body: some View {
@@ -174,7 +174,9 @@ struct AddAuthorForm: View {
                                 addArtistMonitorNew: preferences.addArtistMonitorNew,
                                 addAuthorMonitor: monitor,
                                 addAuthorMonitorNew: monitorNewBooks,
-                                addAudiobookMonitored: preferences.addAudiobookMonitored
+                                addAudiobookMonitored: preferences.addAudiobookMonitored,
+                                deleteDeleteFiles: preferences.deleteDeleteFiles,
+                                deleteAddExclusion: preferences.deleteAddExclusion
                             )
                         )
                         let newAuthor = author.doCopyForCreation(

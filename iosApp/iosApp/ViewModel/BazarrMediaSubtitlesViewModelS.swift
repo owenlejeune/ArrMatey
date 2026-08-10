@@ -11,7 +11,7 @@ class BazarrMediaSubtitlesViewModelS: ObservableObject {
     private let viewModel: BazarrMediaSubtitlesViewModel
 
     @Published private(set) var state: BazarrSubtitlesUiState = BazarrSubtitlesUiStateLoading()
-    @Published private(set) var operationState: OperationStatus = OperationStatusIdle()
+    @Published private(set) var operationState: NetworkingOperationStatus = NetworkingOperationStatusIdle()
 
     init(target: BazarrMediaTarget) {
         self.viewModel = KoinBridge.shared.getBazarrMediaSubtitlesViewModel(target: target)

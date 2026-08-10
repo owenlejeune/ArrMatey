@@ -34,7 +34,7 @@ struct SeerrIssueDetailsSheet: View {
     }
     
     private var isSubmitting: Bool {
-        viewModel.uiState.commentSubmissionStatus is OperationStatusInProgress
+        viewModel.uiState.commentSubmissionStatus is NetworkingOperationStatusInProgress
     }
     
     var body: some View {
@@ -73,7 +73,7 @@ struct SeerrIssueDetailsSheet: View {
                 Button(MR.strings().no.localized(), role: .cancel) {}
             }
             .onChange(of: isSubmitting) { _, submitting in
-                if !submitting && viewModel.uiState.commentSubmissionStatus is OperationStatusSuccess {
+                if !submitting && viewModel.uiState.commentSubmissionStatus is NetworkingOperationStatusSuccess {
                     newComment = ""
                 }
             }

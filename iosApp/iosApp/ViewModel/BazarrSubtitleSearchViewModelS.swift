@@ -11,7 +11,7 @@ class BazarrSubtitleSearchViewModelS: ObservableObject {
     private let viewModel: BazarrSubtitleSearchViewModel
 
     @Published private(set) var searchState: SubtitleSearchState = SubtitleSearchStateLoading()
-    @Published private(set) var downloadStates: [String: OperationStatus] = [:]
+    @Published private(set) var downloadStates: [String: NetworkingOperationStatus] = [:]
 
     init(target: BazarrMediaTarget) {
         self.viewModel = KoinBridge.shared.getBazarrSubtitleSearchViewModel(target: target)
@@ -31,7 +31,7 @@ class BazarrSubtitleSearchViewModelS: ObservableObject {
         viewModel.download(result: result)
     }
 
-    func downloadStatus(for result: ProviderSubtitle) -> OperationStatus? {
+    func downloadStatus(for result: ProviderSubtitle) -> NetworkingOperationStatus? {
         downloadStates["\(result.provider):\(result.subtitle)"]
     }
 }

@@ -185,6 +185,7 @@ struct LauncherTabView: View {
                 case .calendar: CalendarTab().environment(\.navigationContext, .launcher)
                 case .downloads: DownloadsTab().environment(\.navigationContext, .launcher)
                 case .requests: RequestsTab().environment(\.navigationContext, .launcher)
+                case .discover: DiscoverTab().environment(\.navigationContext, .launcher)
                 case .prowlarr: ProwlarrTab().environment(\.navigationContext, .launcher)
                 case .bazarr: BazarrTab().environment(\.navigationContext, .launcher)
                 case .dashboard: DashboardTab().environment(\.navigationContext, .launcher)

@@ -9,13 +9,13 @@ import SwiftUI
 import Shared
 
 struct ErrorView: View {
-    let errorType: ErrorType
+    let errorType: NetworkingErrorType
     let message: String
     let onOpenSettings: () -> Void
     let onRetry: () -> Void
 
     init(
-        errorType: ErrorType,
+        errorType: NetworkingErrorType,
         message: String,
         onOpenSettings: @escaping () -> Void,
         onRetry: @escaping () -> Void

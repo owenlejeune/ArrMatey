@@ -58,7 +58,7 @@ struct BazarrSubtitleSearchSheet: View {
 
 private struct BazarrSearchResultRow: View {
     let result: ProviderSubtitle
-    let status: OperationStatus?
+    let status: NetworkingOperationStatus?
     let onDownload: () -> Void
 
     var body: some View {
@@ -79,9 +79,9 @@ private struct BazarrSearchResultRow: View {
     }
 
     @ViewBuilder private var downloadControl: some View {
-        if status is OperationStatusInProgress {
+        if status is NetworkingOperationStatusInProgress {
             ProgressView()
-        } else if status is OperationStatusSuccess {
+        } else if status is NetworkingOperationStatusSuccess {
             Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
         } else {
             Button(action: onDownload) {

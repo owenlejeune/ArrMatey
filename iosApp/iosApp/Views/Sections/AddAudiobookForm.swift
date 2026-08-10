@@ -10,7 +10,7 @@ import Shared
 
 struct AddAudiobookForm: View {
     let audiobook: SearchAudiobook
-    let addItemStatus: OperationStatus
+    let addItemStatus: NetworkingOperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let relativePath: String
@@ -30,12 +30,12 @@ struct AddAudiobookForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is OperationStatusInProgress
+        addItemStatus is NetworkingOperationStatusInProgress
     }
     
     init(
         audiobook: SearchAudiobook,
-        addItemStatus: OperationStatus,
+        addItemStatus: NetworkingOperationStatus,
         qualityProfiles: [QualityProfile],
         rootFolders: [RootFolder],
         relativePath: String,
@@ -163,7 +163,9 @@ struct AddAudiobookForm: View {
                                 addArtistMonitorNew: preferences.addArtistMonitorNew,
                                 addAuthorMonitor: preferences.addAuthorMonitor,
                                 addAuthorMonitorNew: preferences.addAuthorMonitorNew,
-                                addAudiobookMonitored: monitored
+                                addAudiobookMonitored: monitored,
+                                deleteDeleteFiles: preferences.deleteDeleteFiles,
+                                deleteAddExclusion: preferences.deleteAddExclusion
                             )
                         )
                         let newAudiobook = audiobook.doCopyForCreation(

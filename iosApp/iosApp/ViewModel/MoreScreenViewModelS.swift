@@ -15,7 +15,7 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var instances: [Instance] = []
     @Published private(set) var downloadClients: [DownloadClient] = []
     @Published private(set) var customWebpages: [CustomWebpage] = []
-    @Published private(set) var connectionStatuses: [KotlinLong:OperationStatus] = [:]
+    @Published private(set) var connectionStatuses: [KotlinLong:NetworkingOperationStatus] = [:]
     @Published private(set) var useServiceNavLogos: Bool = false
     @Published private(set) var hideInstanceSwitcher: Bool = false
     

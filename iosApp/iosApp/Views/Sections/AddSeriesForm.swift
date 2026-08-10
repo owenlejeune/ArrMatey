@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AddSeriesForm: View {
     let series: ArrSeries
-    let addItemStatus: OperationStatus
+    let addItemStatus: NetworkingOperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
@@ -28,7 +28,7 @@ struct AddSeriesForm: View {
     @State private var selectedTags: Set<Int> = Set()
     @State private var searchOnAdd: Bool
     
-    init(series: ArrSeries, addItemStatus: OperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (ArrMedia, Bool) -> Void, onDismiss: @escaping () -> Void) {
+    init(series: ArrSeries, addItemStatus: NetworkingOperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (ArrMedia, Bool) -> Void, onDismiss: @escaping () -> Void) {
         self.series = series
         self.addItemStatus = addItemStatus
         self.qualityProfiles = qualityProfiles
@@ -60,7 +60,7 @@ struct AddSeriesForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is OperationStatusInProgress
+        addItemStatus is NetworkingOperationStatusInProgress
     }
     
     var body: some View {
@@ -179,7 +179,9 @@ struct AddSeriesForm: View {
                                 addArtistMonitorNew: preferences.addArtistMonitorNew,
                                 addAuthorMonitor: preferences.addAuthorMonitor,
                                 addAuthorMonitorNew: preferences.addAuthorMonitorNew,
-                                addAudiobookMonitored: preferences.addAudiobookMonitored
+                                addAudiobookMonitored: preferences.addAudiobookMonitored,
+                                deleteDeleteFiles: preferences.deleteDeleteFiles,
+                                deleteAddExclusion: preferences.deleteAddExclusion
                             )
                         )
                         let newSeries = series.doCopyForCreation(

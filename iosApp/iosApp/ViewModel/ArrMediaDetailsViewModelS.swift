@@ -14,23 +14,23 @@ class ArrMediaDetailsViewModelS: ObservableObject {
     
     @Published private(set) var uiState: MediaDetailsUiState = MediaDetailsUiStateInitial()
     @Published private(set) var history: [HistoryItem] = []
-    @Published private(set) var monitorStatus: OperationStatus = OperationStatusIdle()
-    @Published private(set) var editItemStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var monitorStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
+    @Published private(set) var editItemStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
     @Published private(set) var editItemSucceeded: Bool = false
     @Published private(set) var editInProgress: Bool = false
     @Published private(set) var isMonitored: Bool = false
     @Published private(set) var automaticSearchIds: Set<Int64> = Set()
     @Published private(set) var lastSearchResult: Bool? = nil
     
-    @Published private(set) var deleteStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var deleteStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
     @Published private(set) var deleteSucceeded: Bool = false
     @Published private(set) var deleteInProgress: Bool = false
     
-    @Published private(set) var deleteSeasonStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var deleteSeasonStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
     @Published private(set) var deleteSeasonSucceeded: Bool = false
     @Published private(set) var deleteSeasonInProgress: Bool = false
     
-    @Published private(set) var deleteAlbumStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var deleteAlbumStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
     @Published private(set) var deleteAlbumSucceeded: Bool = false
     @Published private(set) var deleteAlbumInProgress: Bool = false
     
@@ -58,8 +58,8 @@ class ArrMediaDetailsViewModelS: ObservableObject {
         viewModel.monitorStatus.observeAsync(on: self, to: \.monitorStatus)
         viewModel.editItemStatus.observeAsync(on: self) { owner, status in
             owner.editItemStatus = status
-            owner.editItemSucceeded = status is OperationStatusSuccess
-            owner.editInProgress = status is OperationStatusInProgress
+            owner.editItemSucceeded = status is NetworkingOperationStatusSuccess
+            owner.editInProgress = status is NetworkingOperationStatusInProgress
         }
         viewModel.isMonitored.observeAsync(on: self) { owner, monitored in
             owner.isMonitored = monitored.boolValue
@@ -72,18 +72,18 @@ class ArrMediaDetailsViewModelS: ObservableObject {
         }
         viewModel.deleteStatus.observeAsync(on: self) { owner, status in
             owner.deleteStatus = status
-            owner.deleteSucceeded = status is OperationStatusSuccess
-            owner.deleteInProgress = status is OperationStatusInProgress
+            owner.deleteSucceeded = status is NetworkingOperationStatusSuccess
+            owner.deleteInProgress = status is NetworkingOperationStatusInProgress
         }
         viewModel.deleteSeasonStatus.observeAsync(on: self) { owner, status in
             owner.deleteSeasonStatus = status
-            owner.deleteSeasonSucceeded = status is OperationStatusSuccess
-            owner.deleteSeasonInProgress = status is OperationStatusInProgress
+            owner.deleteSeasonSucceeded = status is NetworkingOperationStatusSuccess
+            owner.deleteSeasonInProgress = status is NetworkingOperationStatusInProgress
         }
         viewModel.deleteAlbumStatus.observeAsync(on: self) { owner, status in
             owner.deleteAlbumStatus = status
-            owner.deleteAlbumSucceeded = status is OperationStatusSuccess
-            owner.deleteAlbumInProgress = status is OperationStatusInProgress
+            owner.deleteAlbumSucceeded = status is NetworkingOperationStatusSuccess
+            owner.deleteAlbumInProgress = status is NetworkingOperationStatusInProgress
         }
         
         viewModel.preferences.observeAsync(on: self, to: \.preferences)

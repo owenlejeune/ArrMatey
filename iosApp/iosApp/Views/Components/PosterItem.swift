@@ -100,50 +100,103 @@ struct PosterItem<Content: View>: View {
     @ViewBuilder
     private var posterImageView: some View {
         GeometryReader { geometry in
-            if let resource = posterImage {
-                let image = Image(resource: resource)
-                ZStack {
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .blur(radius: 20)
-                    
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(height: geometry.size.height)
+            PosterImageView(
+                urlString: item.getPoster()?.remoteUrl,
+                resource: posterImage,
+                geometry: geometry,
+                loadError: $loadError
+            )
+        }
+    }
+}
+
+struct DiscoverPosterItem: View {
+    let item: DiscoverResult
+    let elevation: Shared.PosterElevation
+    let radius: Shared.PosterRadius
+    let aspectRatio: AspectRatio
+    let posterHeight: CGFloat?
+    let onItemClick: ((DiscoverResult) -> Void)?
+
+    @State private var loadError = false
+
+    init(
+        item: DiscoverResult,
+        aspectRatio: AspectRatio = .poster,
+        elevation: Shared.PosterElevation = .medium,
+        radius: Shared.PosterRadius = .medium,
+        posterHeight: CGFloat? = nil,
+        onItemClick: ((DiscoverResult) -> Void)? = nil
+    ) {
+        self.item = item
+        self.elevation = elevation
+        self.radius = radius
+        self.aspectRatio = aspectRatio
+        self.posterHeight = posterHeight
+        self.onItemClick = onItemClick
+    }
+
+    var body: some View {
+        BasePosterItem(
+            elevation: CGFloat(truncating: elevation.elevation as NSNumber),
+            radius: CGFloat(truncating: radius.radius as NSNumber),
+            aspectRatio: aspectRatio,
+            posterHeight: posterHeight,
+            onClick: { onItemClick?(item) },
+            enabled: true,
+            footerVisible: true,
+            posterContent: {
+                posterImageView
+            },
+            errorContent: {
+                if loadError || item.fullPosterPath == nil {
+                    VStack(spacing: 4) {
+                        Image(systemName: "photo.badge.exclamationmark")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 48, height: 48)
+                            .foregroundColor(.red)
+                        Text(item.title ?? item.name ?? MR.strings().unknown.localized())
+                            .font(.system(size: 14, weight: .semibold))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 8)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .clipped()
-            } else if let urlString = item.getPoster()?.remoteUrl, let url = URL(string: urlString) {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let image):
-                        ZStack {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: geometry.size.width, height: geometry.size.height)
-                                .blur(radius: 20)
-                            
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(height: geometry.size.height)
-                        }
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .clipped()
-                    case .failure:
-                        Color.clear.onAppear { loadError = true }
-                    case .empty:
-                        ProgressView()
-                            .frame(width: geometry.size.width, height: geometry.size.height)
-                    @unknown default:
-                        EmptyView()
+            },
+            additionalContent: {
+                RequestTypeChip(type: item.mediaType, solid: true)
+                    .padding(8)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            },
+            footerContent: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.title ?? item.name ?? MR.strings().unknown.localized())
+                        .font(.system(size: 14, weight: .semibold))
+                        .lineLimit(2, reservesSpace: true)
+                        .multilineTextAlignment(.leading)
+                    
+                    let date = item.releaseDate ?? item.firstAirDate
+                    if let d = date, d.count >= 4 {
+                        Text(String(d.prefix(4)))
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
                     }
                 }
             }
+        )
+    }
+
+    @ViewBuilder
+    private var posterImageView: some View {
+        GeometryReader { geometry in
+            PosterImageView(
+                urlString: item.fullPosterPath,
+                resource: nil,
+                geometry: geometry,
+                loadError: $loadError
+            )
         }
     }
 }
@@ -179,34 +232,12 @@ struct RequestPosterItem: View {
             posterHeight: posterHeight,
             posterContent: {
                 GeometryReader { geometry in
-                    if let urlString = item.fullPosterPath, let url = URL(string: urlString) {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .success(let image):
-                                ZStack {
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: geometry.size.width, height: geometry.size.height)
-                                        .blur(radius: 20)
-                                    
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(height: geometry.size.height)
-                                }
-                                .frame(width: geometry.size.width, height: geometry.size.height)
-                                .clipped()
-                            case .failure:
-                                Color.clear.onAppear { loadError = true }
-                            case .empty:
-                                ProgressView()
-                                    .frame(width: geometry.size.width, height: geometry.size.height)
-                            @unknown default:
-                                EmptyView()
-                            }
-                        }
-                    }
+                    PosterImageView(
+                        urlString: item.fullPosterPath,
+                        resource: nil,
+                        geometry: geometry,
+                        loadError: $loadError
+                    )
                 }
             },
             errorContent: {
@@ -270,6 +301,8 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
     }
     
     var body: some View {
+        let width = posterHeight.map { $0 * CGFloat(aspectRatio.ratio) }
+        
         Button(action: { onClick?() }) {
             VStack(alignment: .leading, spacing: 0) {
                 ZStack {
@@ -277,24 +310,64 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
                     errorContent()
                     additionalContent()
                 }
+                .background(Color(.secondarySystemBackground))
                 .aspectRatio(CGFloat(aspectRatio.ratio), contentMode: .fit)
                 .frame(height: posterHeight)
+                .clipped()
                 
                 if footerVisible {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading) {
                         footerContent()
                     }
-                    .padding(8)
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 8)
+                    .padding(.top, 8)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
+            .frame(width: width)
         }
         .buttonStyle(.plain)
         .disabled(!enabled || onClick == nil)
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(Color(.systemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: radius))
         .shadow(radius: elevation)
         .animation(.default, value: footerVisible)
+    }
+}
+
+private struct PosterImageView: View {
+    let urlString: String?
+    let resource: Shared.ImageResource?
+    let geometry: GeometryProxy
+    @Binding var loadError: Bool
+    
+    var body: some View {
+        if let resource = resource {
+            Image(resource: resource)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .clipped()
+        } else if let urlString = urlString, let url = URL(string: urlString) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .clipped()
+                case .failure:
+                    Color.clear.onAppear { loadError = true }
+                case .empty:
+                    ProgressView()
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                @unknown default:
+                    EmptyView()
+                }
+            }
+        }
     }
 }
 
@@ -335,50 +408,12 @@ struct GenericPosterItem<Content: View>: View {
             posterHeight: posterHeight,
             posterContent: {
                 GeometryReader { geometry in
-                    if let resource = posterImage {
-                        let image = Image(resource: resource)
-                        ZStack {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: geometry.size.width, height: geometry.size.height)
-                                .blur(radius: 20)
-                            
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(height: geometry.size.height)
-                        }
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .clipped()
-                    } else if let urlString = posterUrl, let url = URL(string: urlString) {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .success(let image):
-                                ZStack {
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: geometry.size.width, height: geometry.size.height)
-                                        .blur(radius: 20)
-                                    
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(height: geometry.size.height)
-                                }
-                                .frame(width: geometry.size.width, height: geometry.size.height)
-                                .clipped()
-                            case .failure:
-                                Color.clear.onAppear { loadError = true }
-                            case .empty:
-                                ProgressView()
-                                    .frame(width: geometry.size.width, height: geometry.size.height)
-                            @unknown default:
-                                EmptyView()
-                            }
-                        }
-                    }
+                    PosterImageView(
+                        urlString: posterUrl,
+                        resource: posterImage,
+                        geometry: geometry,
+                        loadError: $loadError
+                    )
                 }
             },
             errorContent: {

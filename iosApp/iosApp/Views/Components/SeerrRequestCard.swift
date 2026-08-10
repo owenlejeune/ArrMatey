@@ -228,14 +228,23 @@ struct SeerrStatusChip: View {
 
 struct RequestTypeChip: View {
     let type: RequestType
+    var solid: Bool = false
     
     var body: some View {
         Text(type.name)
             .font(.caption2.bold())
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(type == .movie ? Color.blue.opacity(0.2) : Color.purple.opacity(0.2))
-            .foregroundColor(type == .movie ? .blue : .purple)
+            .background(
+                Group {
+                    if solid {
+                        type == .movie ? Color.blue : Color.purple
+                    } else {
+                        type == .movie ? Color.blue.opacity(0.2) : Color.purple.opacity(0.2)
+                    }
+                }
+            )
+            .foregroundColor(solid ? .white : (type == .movie ? .blue : .purple))
             .clipShape(Capsule())
     }
 }

@@ -43,16 +43,16 @@ struct ProwlarrSearchView: View {
                 Text("Send \"\(result.title ?? MR.strings().unknown.localized())\" to your download client?")
             }
         }
-        .onChange(of: viewModel.grabStatus is OperationStatusSuccess) { _, isSuccess in
+        .onChange(of: viewModel.grabStatus is NetworkingOperationStatusSuccess) { _, isSuccess in
             if isSuccess {
                 toastMessage = MR.strings().download_queue_success.localized()
                 grabbingGuid = nil
                 viewModel.resetGrabStatus()
             }
         }
-        .onChange(of: viewModel.grabStatus is OperationStatusError) { _, isError in
+        .onChange(of: viewModel.grabStatus is NetworkingOperationStatusError) { _, isError in
             if isError {
-                let error = viewModel.grabStatus as? OperationStatusError
+                let error = viewModel.grabStatus as? NetworkingOperationStatusError
                 toastMessage = error?.message ?? MR.strings().error.localized()
                 grabbingGuid = nil
                 viewModel.resetGrabStatus()

@@ -202,6 +202,23 @@ fun PosterItem(
         additionalContent = {
             MediaTypeOverlay(item.mediaType)
         },
+        footerVisible = true,
+        footerContent = {
+            Text(
+                text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+                style = MaterialTheme.typography.labelLarge,
+                minLines = 2,
+                maxLines = 2
+            )
+            val date = item.releaseDate ?: item.firstAirDate
+            if (date != null && date.length >= 4) {
+                Text(
+                    text = date.take(4),
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1
+                )
+            }
+        },
         errorContent = {
             if (imageLoadError) {
                 Column (

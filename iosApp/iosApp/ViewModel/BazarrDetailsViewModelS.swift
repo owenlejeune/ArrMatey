@@ -11,7 +11,7 @@ class BazarrDetailsViewModelS: ObservableObject {
     private let viewModel: BazarrDetailsViewModel
 
     @Published private(set) var uiState: BazarrDetails = BazarrDetails(details: nil, episodes: [])
-    @Published private(set) var operationState: OperationStatus = OperationStatusIdle()
+    @Published private(set) var operationState: NetworkingOperationStatus = NetworkingOperationStatusIdle()
 
     init(id: Int64, type: BazarrMediaType) {
         self.viewModel = KoinBridge.shared.getBazarrDetailsViewModel(id: id, type: type)

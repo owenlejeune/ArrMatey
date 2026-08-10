@@ -76,13 +76,13 @@ struct BazarrDetailsScreen: View {
                 Button {
                     viewModel.performSearch()
                 } label: {
-                    if viewModel.operationState is OperationStatusInProgress {
+                    if viewModel.operationState is NetworkingOperationStatusInProgress {
                         ProgressView()
                     } else {
                         Image(systemName: "magnifyingglass")
                     }
                 }
-                .disabled(viewModel.operationState is OperationStatusInProgress)
+                .disabled(viewModel.operationState is NetworkingOperationStatusInProgress)
             }
         }
         .sheet(item: $searchTarget) { item in

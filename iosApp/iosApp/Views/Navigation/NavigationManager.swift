@@ -228,6 +228,10 @@ class NavigationManager: ObservableObject {
     func openProwlarrTab() {
         navigateToTab(TabItemStandard.prowlarr as TabItem)
     }
+    
+    func openBazarrTab() {
+        navigateToTab(TabItemStandard.bazarr as TabItem)
+    }
 
     func openDownloadsTab() {
         navigateToTab(TabItemStandard.downloads as TabItem)

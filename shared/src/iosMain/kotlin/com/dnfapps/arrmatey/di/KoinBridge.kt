@@ -93,6 +93,9 @@ object KoinBridge: KoinComponent {
     fun getRequestsViewModel(): RequestsViewModel =
         getKoin().get()
 
+    fun getTrendingViewModel(): com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel =
+        getKoin().get()
+
     fun getSeerrMediaDetailsViewModel(tmdbId: Long, mediaType: RequestType): SeerrMediaDetailsViewModel =
         getKoin().get { parametersOf(tmdbId, mediaType) }
 

@@ -17,7 +17,7 @@ class ActivityQueueViewModelS: ObservableObject {
     @Published private(set) var isPolling: Bool = false
     @Published private(set) var instances: [Instance] = []
     @Published private(set) var uiState: ActivityQueueUiState = ActivityQueueUiState()
-    @Published private(set) var removeItemStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var removeItemStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
     @Published private(set) var removeInProgress: Bool = false
     @Published private(set) var removeSuccesss: Bool = false
     
@@ -38,8 +38,8 @@ class ActivityQueueViewModelS: ObservableObject {
         viewModel.activityQueueUiState.observeAsync(on: self, to: \.uiState)
         viewModel.removeItemState.observeAsync(on: self) { owner, status in
             owner.removeItemStatus = status
-            owner.removeInProgress = status is OperationStatusInProgress
-            owner.removeSuccesss = status is OperationStatusSuccess
+            owner.removeInProgress = status is NetworkingOperationStatusInProgress
+            owner.removeSuccesss = status is NetworkingOperationStatusSuccess
         }
     }
     

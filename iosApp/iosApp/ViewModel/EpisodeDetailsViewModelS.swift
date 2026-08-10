@@ -14,8 +14,8 @@ class EpisodeDetailsViewModelS: ObservableObject {
     
     @Published private(set) var episode: Episode
     @Published private(set) var history: HistoryState = HistoryStateInitial()
-    @Published private(set) var monitorStatus: OperationStatus = OperationStatusIdle()
-    @Published private(set) var deleteStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var monitorStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
+    @Published private(set) var deleteStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
     
     init(seriesId: Int64, episode: Episode) {
         self.episode = episode

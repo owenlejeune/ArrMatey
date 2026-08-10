@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.dnfapps.arrmatey.client.paging.PagingState
+import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.navigation.DiscoverScreen
 import com.dnfapps.arrmatey.navigation.LocalDiscoverNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
@@ -126,7 +126,7 @@ private fun DiscoverHomeScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 TrendingSection(
-                    state = trendingState,
+                    data = trendingState,
                     onItemClick = onItemClick,
                     onLoadMore = { viewModel.loadNextPage() }
                 )
@@ -137,7 +137,7 @@ private fun DiscoverHomeScreen(
 
 @Composable
 private fun TrendingSection(
-    state: PagingState<DiscoverResult>,
+    data: PagedData<DiscoverResult>,
     onItemClick: (DiscoverResult) -> Unit,
     onLoadMore: () -> Unit
 ) {
@@ -171,24 +171,20 @@ private fun TrendingSection(
             )
         }
 
-        val items = when (state) {
-            is PagingState.Success -> state.items
-            is PagingState.LoadingMore -> state.items
-            else -> emptyList()
-        }
+        val trendingItems = data.items
 
-        if (state is PagingState.Loading) {
+        if (data.isLoading && trendingItems.isEmpty()) {
             Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-        } else if (items.isNotEmpty()) {
+        } else if (trendingItems.isNotEmpty()) {
             LazyRow(
                 state = lazyListState,
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                items(items) { item ->
+                items(trendingItems) { item ->
                     PosterItem(
                         item = item,
                         modifier = Modifier.width(120.dp),
@@ -196,15 +192,15 @@ private fun TrendingSection(
                     )
                 }
 
-                if (state is PagingState.LoadingMore) {
+                if (data.isLoadingMore) {
                     item {
                         CircularProgressIndicator(modifier = Modifier.padding(16.dp))
                     }
                 }
             }
-        } else if (state is PagingState.Error) {
+        } else if (data.error != null) {
             Text(
-                text = state.message,
+                text = data.error ?: "",
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.error
             )

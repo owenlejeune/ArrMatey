@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AddMovieForm: View {
     let movie: ArrMovie
-    let addItemStatus: OperationStatus
+    let addItemStatus: NetworkingOperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
@@ -26,7 +26,7 @@ struct AddMovieForm: View {
     @State private var selectedTags: Set<Int> = Set()
     @State private var searchOnAdd: Bool
     
-    init(movie: ArrMovie, addItemStatus: OperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (ArrMedia, Bool) -> Void, onDismiss: @escaping () -> Void) {
+    init(movie: ArrMovie, addItemStatus: NetworkingOperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (ArrMedia, Bool) -> Void, onDismiss: @escaping () -> Void) {
         self.movie = movie
         self.addItemStatus = addItemStatus
         self.qualityProfiles = qualityProfiles
@@ -59,7 +59,7 @@ struct AddMovieForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is OperationStatusInProgress
+        addItemStatus is NetworkingOperationStatusInProgress
     }
     
     var body: some View {
@@ -175,7 +175,9 @@ struct AddMovieForm: View {
                                 addArtistMonitorNew: preferences.addArtistMonitorNew,
                                 addAuthorMonitor: preferences.addAuthorMonitor,
                                 addAuthorMonitorNew: preferences.addAuthorMonitorNew,
-                                addAudiobookMonitored: preferences.addAudiobookMonitored
+                                addAudiobookMonitored: preferences.addAudiobookMonitored,
+                                deleteDeleteFiles: preferences.deleteDeleteFiles,
+                                deleteAddExclusion: preferences.deleteAddExclusion
                             )
                         )
                         let newMovie = movie.doCopyForCreation(
