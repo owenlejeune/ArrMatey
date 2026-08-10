@@ -18,6 +18,7 @@
     <string name="indexers">Indexers</string>
     <string name="home">Home</string>
     <string name="requests">Requests</string>
+    <string name="discover">Discover</string>
     <string name="issues">Issues</string>
 
     <string name="type_series">series</string>
@@ -32,6 +33,7 @@
     <string name="couldnt_connect">Couldn\'t Connect</string>
     <string name="no_type_instances">No %1$s instances</string>
     <string name="empty_library">Nothing here</string>
+    <string name="trending">Trending</string>
 
     <!-- Messages -->
     <string name="confirm_delete_instance">Are you sure you want to delete %1$s?</string>

@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.seerr.api.client.SeerrClient
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClientImpl
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
@@ -96,6 +97,21 @@ class SeerrInstanceRepository(
                     items = enrichedRequests,
                     totalItemCount = response.pageInfo.results,
                     hasNextPage = response.pageInfo.page < response.pageInfo.pages
+                )
+            }
+        )
+    }
+
+    fun getTrendingPaging(): PagingSource<DiscoverResult> {
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getTrending(page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
                 )
             }
         )

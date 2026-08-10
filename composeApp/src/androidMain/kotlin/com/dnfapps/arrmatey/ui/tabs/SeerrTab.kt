@@ -42,7 +42,7 @@ fun SeerrTab(
                     RequestsScreen(viewModel = viewModel, isExpanded, wideRailIsVisible)
                 }
                 entry<SeerrScreen.Details> { details ->
-                    SeerrDetailsScreen(details.tmdbId, details.requestType)
+                    SeerrDetailsScreen(details.tmdbId, details.requestType, onBack = { navigation.popBackStack() })
                 }
             }
         )

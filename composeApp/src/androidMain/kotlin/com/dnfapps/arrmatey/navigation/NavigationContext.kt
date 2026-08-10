@@ -19,6 +19,10 @@ val LocalSeerrNavigator = staticCompositionLocalOf<Navigator<SeerrScreen>> {
     error("No SeerrNavigator provided")
 }
 
+val LocalDiscoverNavigator = staticCompositionLocalOf<Navigator<DiscoverScreen>> {
+    error("No DiscoverNavigator provided")
+}
+
 val LocalSettingsNavigator = staticCompositionLocalOf<Navigator<SettingsScreen>> {
     error("No SettingsNavigator provided")
 }
@@ -46,6 +50,10 @@ val arrNavigator: Navigator<ArrScreen>
 val seerrNavigator: Navigator<SeerrScreen>
     @Composable
     get() = LocalSeerrNavigator.current
+
+val discoverNavigator: Navigator<DiscoverScreen>
+    @Composable
+    get() = LocalDiscoverNavigator.current
 
 val settingsNavigator: Navigator<SettingsScreen>
     @Composable

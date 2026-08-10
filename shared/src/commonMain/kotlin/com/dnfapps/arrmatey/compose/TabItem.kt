@@ -40,6 +40,7 @@ sealed interface TabItem {
         DOWNLOADS("arrow.down.circle", MR.strings.downloads),
         CALENDAR("calendar", MR.strings.schedule),
         REQUESTS("tray.fill", MR.strings.requests),
+        DISCOVER("sparkles", MR.strings.discover),
         PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr),
         BAZARR("captions.bubble", MR.strings.bazarr, associatedType = InstanceType.Bazarr),
         DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard);

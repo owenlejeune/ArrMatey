@@ -42,6 +42,14 @@ sealed interface SeerrScreen: NavKey {
     ): SeerrScreen
 }
 
+sealed interface DiscoverScreen: NavKey {
+    data object Home: DiscoverScreen
+    data class Details(
+        val tmdbId: Long,
+        val requestType: RequestType
+    ): DiscoverScreen
+}
+
 sealed interface SettingsScreen : NavKey {
     data object Landing : SettingsScreen
     data class AddInstance(val type: InstanceType = InstanceType.Sonarr) : SettingsScreen

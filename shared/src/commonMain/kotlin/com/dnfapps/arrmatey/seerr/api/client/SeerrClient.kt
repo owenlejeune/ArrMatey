@@ -8,6 +8,7 @@ import com.dnfapps.networking.safePut
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResponse
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssuesResponse
@@ -33,6 +34,7 @@ import org.koin.core.component.KoinComponent
 interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
+    suspend fun getTrending(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getRequests(page: Int = 1, pageSize: Int = 100): NetworkResult<RequestResponse>
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
@@ -73,6 +75,9 @@ class SeerrClientImpl(
 
     override suspend fun getUserInfo(): NetworkResult<SeerrUser> =
         get("auth/me")
+
+    override suspend fun getTrending(page: Int): NetworkResult<DiscoverResponse> =
+        get("discover/trending", mapOf("page" to page))
 
     override suspend fun getRequests(
         page: Int,

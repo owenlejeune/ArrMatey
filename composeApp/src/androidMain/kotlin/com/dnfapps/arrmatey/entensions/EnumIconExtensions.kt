@@ -39,6 +39,7 @@ import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.ui.icons.Hard_drive
+import com.dnfapps.arrmatey.ui.icons.Stars2
 import com.dnfapps.arrmatey.ui.theme.ViewType
 
 val ContentFilter.imageVector: ImageVector
@@ -63,10 +64,10 @@ val TabItem.androidIcon: ImageVector
             TabItem.Standard.DOWNLOADS -> Icons.Default.CloudDownload
             TabItem.Standard.CALENDAR -> Icons.Default.CalendarMonth
             TabItem.Standard.REQUESTS -> Icons.Default.Inbox
+            TabItem.Standard.DISCOVER -> Stars2
             TabItem.Standard.PROWLARR -> Icons.AutoMirrored.Filled.ManageSearch
             TabItem.Standard.BAZARR -> Icons.Default.Subtitles
             TabItem.Standard.DASHBOARD -> Icons.Default.Dashboard
-            TabItem.Standard.BAZARR -> Icons.Default.Subtitles
         }
         is TabItem.CustomWebpage -> Icons.Default.Language
         is TabItem.Settings -> Icons.Default.Settings

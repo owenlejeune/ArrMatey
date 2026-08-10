@@ -173,7 +173,8 @@ fun DetailsHeader(
                 .fillMaxWidth()
                 .padding(top = 170.dp)
                 .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            verticalAlignment = Alignment.Bottom
         ) {
             PosterItem(
                 item = item,

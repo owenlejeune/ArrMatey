@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.navigation
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.NavKey
+import kotlin.jvm.JvmName
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
@@ -74,6 +75,7 @@ class SeriesTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class MoviesTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class MusicTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class RequestsTabNavigator : BaseNavigator<SeerrScreen>(SeerrScreen.Home)
+class DiscoverTabNavigator : BaseNavigator<DiscoverScreen>(DiscoverScreen.Home)
 class BooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class AudiobooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
@@ -102,7 +104,15 @@ fun Navigator<ArrScreen>.toAudiobookRelease(audiobookId: Long?, query: String) =
  * Domain-specific navigation extensions for Seerr feature set.
  */
 fun Navigator<SeerrScreen>.toHome() = navigateTo(SeerrScreen.Home)
+@JvmName("toSeerrDetails")
 fun Navigator<SeerrScreen>.toDetails(tmdbId: Long, requestType: RequestType) = navigateTo(SeerrScreen.Details(tmdbId, requestType))
+
+/**
+ * Domain-specific navigation extensions for Discover tab
+ */
+fun Navigator<DiscoverScreen>.toDiscover() = navigateTo(DiscoverScreen.Home)
+@JvmName("toDiscoverDetails")
+fun Navigator<DiscoverScreen>.toDetails(tmdbId: Long, requestType: RequestType) = navigateTo(DiscoverScreen.Details(tmdbId, requestType))
 
 /**
  * Domain-specific navigation extensions for Settings feature set.

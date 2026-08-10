@@ -63,7 +63,6 @@ import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.navigation.navigationManager
-import com.dnfapps.arrmatey.navigation.seerrNavigator
 import com.dnfapps.arrmatey.seerr.api.model.Episode
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -99,11 +98,11 @@ import kotlin.math.roundToInt
 fun SeerrDetailsScreen(
     tmdbId: Long,
     requestType: RequestType,
+    onBack: () -> Unit,
     viewModel: SeerrMediaDetailsViewModel = koinInjectParams(tmdbId, requestType),
     moko: MokoStrings = koinInject()
 ) {
     val navManager = navigationManager
-    val navigation = seerrNavigator
     val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -163,11 +162,17 @@ fun SeerrDetailsScreen(
                             DetailsHeader(item)
 
                             Column(
-                                modifier = Modifier.padding(bottom = 24.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                modifier = Modifier
+                                    .padding(horizontal = 24.dp)
+                                    .padding(bottom = 24.dp)
+                                    .padding(top = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
+                                Text(
+                                    text = item.displayTitle,
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
                                 MediaDetailsActions(
-                                    modifier = Modifier.padding(horizontal = 24.dp),
                                     buttonState = buttonState,
                                     onWatchClicked = { url, provider ->
                                         handleWatchClick(
@@ -190,20 +195,18 @@ fun SeerrDetailsScreen(
                                         text = it,
                                         style = MaterialTheme.typography.headlineSmall,
                                         fontStyle = FontStyle.Italic,
-                                        color = MaterialTheme.colorScheme.tertiary,
-                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                        color = MaterialTheme.colorScheme.tertiary
                                     )
                                 }
 
                                 item.overview?.let { overview ->
-                                    ItemDescriptionCard(overview, modifier = Modifier.padding(horizontal = 24.dp))
+                                    ItemDescriptionCard(overview)
                                 }
 
                                 (item as? TvDetails)?.let { series ->
                                     Text(
                                         text = mokoString(MR.strings.seasons_header),
-                                        style = MaterialTheme.typography.titleLarge,
-                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                        style = MaterialTheme.typography.titleLarge
                                     )
                                     series.seasons.forEach { season ->
                                         var expanded by rememberSaveable { mutableStateOf(false) }
@@ -214,7 +217,6 @@ fun SeerrDetailsScreen(
                                         )
                                         ContainerCard(modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(horizontal = 24.dp)
                                             .clickable { expanded = !expanded }
                                         ) {
                                             Row(
@@ -287,7 +289,6 @@ fun SeerrDetailsScreen(
                                     add(InfoItem(mokoString(MR.strings.studios), studiosText))
                                 }
                                 InfoArea(
-                                    modifier = Modifier.padding(horizontal = 24.dp),
                                     infoItems = infoItems,
                                     header = {
                                         Row(
@@ -325,7 +326,7 @@ fun SeerrDetailsScreen(
                 modifier = Modifier.align(Alignment.TopCenter),
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() },
+                        onClick = { onBack() },
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(

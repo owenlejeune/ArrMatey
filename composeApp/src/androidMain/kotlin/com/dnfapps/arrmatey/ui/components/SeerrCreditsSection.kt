@@ -43,12 +43,10 @@ fun SeerrCreditsSection(
 ) {
     Text(
         text = mokoString(MR.strings.cast),
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(horizontal = 24.dp)
+        style = MaterialTheme.typography.titleLarge
     )
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(horizontal = 24.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(credits.cast) { castMember ->
             CastCrewItem(
@@ -61,14 +59,12 @@ fun SeerrCreditsSection(
 
     Text(
         text = mokoString(MR.strings.crew),
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(horizontal = 24.dp)
+        style = MaterialTheme.typography.titleLarge
     )
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp)
     ) {
         credits.crew.forEach { crewMember ->
             CastCrewItem(

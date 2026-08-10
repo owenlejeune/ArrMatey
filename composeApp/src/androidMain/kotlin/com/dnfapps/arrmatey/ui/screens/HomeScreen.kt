@@ -68,6 +68,7 @@ import com.dnfapps.arrmatey.ui.tabs.ArrTab
 import com.dnfapps.arrmatey.ui.tabs.BazarrTab
 import com.dnfapps.arrmatey.ui.tabs.CalendarTab
 import com.dnfapps.arrmatey.ui.tabs.DashboardTab
+import com.dnfapps.arrmatey.ui.tabs.DiscoverTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
 import com.dnfapps.arrmatey.ui.tabs.BazarrTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
@@ -427,5 +428,6 @@ private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSiz
         TabItem.Standard.PROWLARR -> ProwlarrTab(wideRailIsVisible)
         TabItem.Standard.DASHBOARD -> DashboardTab(windowSizeClass)
         TabItem.Standard.BAZARR -> BazarrTab(windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.DISCOVER -> DiscoverTab(windowSizeClass, wideRailIsVisible)
     }
 }

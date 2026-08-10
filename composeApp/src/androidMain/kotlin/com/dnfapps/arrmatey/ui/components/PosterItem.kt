@@ -43,7 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.InstanceTypeIdentifiable
+import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
@@ -163,6 +167,67 @@ fun PosterItem(
 
 @Composable
 fun PosterItem(
+    item: DiscoverResult,
+    modifier: Modifier = Modifier,
+    onItemClick: ((DiscoverResult) -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
+    elevation: PosterElevation = PosterElevation.Medium,
+    radius: PosterRadius = PosterRadius.Medium,
+    posterHeight: Dp? = null,
+    aspectRatio: AspectRatio = AspectRatio.Poster,
+    isSelected: Boolean = false
+) {
+    var imageLoadError by remember { mutableStateOf(false) }
+
+    val model = rememberRemoteImageData(
+        url = item.fullPosterPath,
+        onError = { _, err ->
+            println(err.throwable.message)
+            imageLoadError = true
+        }
+    )
+
+    BasePosterItem(
+        model = model,
+        modifier = modifier,
+        isSelected = isSelected,
+        elevation = elevation,
+        radius = radius,
+        posterHeight = posterHeight,
+        aspectRatio = aspectRatio,
+        onClick = {
+            onItemClick?.invoke(item)
+        },
+        onLongClick = onLongClick,
+        additionalContent = {
+            MediaTypeOverlay(item.mediaType)
+        },
+        errorContent = {
+            if (imageLoadError) {
+                Column (
+                    modifier = Modifier.align(Alignment.Center).padding(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.BrokenImage,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Text(
+                        text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+                        style = MaterialTheme.typography.titleSmall,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun PosterItem(
     item: RequestMediaDetails,
     modifier: Modifier = Modifier,
     onItemClick: ((RequestMediaDetails) -> Unit)? = null,
@@ -195,6 +260,9 @@ fun PosterItem(
             onItemClick?.invoke(item)
         },
         onLongClick = onLongClick,
+        additionalContent = {
+            MediaTypeOverlay(item.requestType)
+        },
         errorContent = {
             if (imageLoadError) {
                 Column (
@@ -216,6 +284,22 @@ fun PosterItem(
                 }
             }
         }
+    )
+}
+
+@Composable
+private fun BoxScope.MediaTypeOverlay(type: RequestType) {
+    val text = when (type) {
+        RequestType.Movie -> mokoString(MR.strings.type_movie)
+        RequestType.Tv -> mokoString(MR.strings.type_series)
+    }.replaceFirstChar { it.uppercase() }
+
+    MediaRequestTypeChip(
+        text = text,
+        requestType = type,
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(8.dp)
     )
 }
 
