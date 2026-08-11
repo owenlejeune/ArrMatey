@@ -178,7 +178,8 @@ fun DetailsHeader(
         ) {
             PosterItem(
                 item = item,
-                modifier = Modifier.width(150.dp)
+                modifier = Modifier.width(150.dp),
+                showOverlays = false
             )
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),

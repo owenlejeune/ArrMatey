@@ -165,9 +165,17 @@ struct DiscoverPosterItem: View {
                 }
             },
             additionalContent: {
-                RequestTypeChip(type: item.mediaType, solid: true)
-                    .padding(8)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                ZStack(alignment: .topLeading) {
+                    RequestTypeChip(type: item.mediaType, solid: true)
+                        .padding(8)
+                    
+                    if let status = item.mediaInfo?.status {
+                        StatusBadge(status: status)
+                            .padding(8)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             },
             footerContent: {
                 VStack(alignment: .leading, spacing: 2) {
@@ -255,6 +263,19 @@ struct RequestPosterItem: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
+            },
+            additionalContent: {
+                ZStack(alignment: .topLeading) {
+                    RequestTypeChip(type: item.requestType, solid: true)
+                        .padding(8)
+                    
+                    if let status = item.mediaInfo?.status {
+                        StatusBadge(status: status)
+                            .padding(8)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         )
     }
@@ -333,6 +354,29 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
         .clipShape(RoundedRectangle(cornerRadius: radius))
         .shadow(radius: elevation)
         .animation(.default, value: footerVisible)
+    }
+}
+
+struct StatusBadge: View {
+    let status: Int32
+    
+    var body: some View {
+        let (icon, color): (String, Color) = {
+            switch status {
+            case 5: return ("checkmark.circle.fill", Color(hex: 0x50d27d))
+            case 4: return ("minus.circle.fill", Color(hex: 0xfbbf24))
+            case 2, 3: return ("clock.circle.fill", Color(hex: 0x3b82f6))
+            default: return ("", .clear)
+            }
+        }()
+        
+        if !icon.isEmpty {
+            Image(systemName: icon)
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.white, color)
+                .font(.system(size: 20))
+                .background(Circle().fill(.white).padding(2))
+        }
     }
 }
 
