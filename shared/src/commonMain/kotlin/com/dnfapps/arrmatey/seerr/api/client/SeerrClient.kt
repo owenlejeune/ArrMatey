@@ -36,7 +36,9 @@ interface SeerrClient {
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
     suspend fun getTrending(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getDiscoverMovies(page: Int = 1): NetworkResult<DiscoverResponse>
+    suspend fun getUpcomingMovies(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
     suspend fun getDiscoverTv(page: Int = 1): NetworkResult<DiscoverResponse>
+    suspend fun getUpcomingTv(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
     suspend fun getRequests(page: Int = 1, pageSize: Int = 100): NetworkResult<RequestResponse>
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
@@ -84,8 +86,14 @@ class SeerrClientImpl(
     override suspend fun getDiscoverMovies(page: Int): NetworkResult<DiscoverResponse> =
         get("discover/movies", mapOf("page" to page))
 
+    override suspend fun getUpcomingMovies(page: Int, today: String): NetworkResult<DiscoverResponse> =
+        get("discover/movies", mapOf("page" to page, "primaryReleaseDateGte" to today))
+
     override suspend fun getDiscoverTv(page: Int): NetworkResult<DiscoverResponse> =
         get("discover/tv", mapOf("page" to page))
+
+    override suspend fun getUpcomingTv(page: Int, today: String): NetworkResult<DiscoverResponse> =
+        get("discover/tv", mapOf("page" to page, "firstAirDateGte" to today))
 
     override suspend fun getRequests(
         page: Int,

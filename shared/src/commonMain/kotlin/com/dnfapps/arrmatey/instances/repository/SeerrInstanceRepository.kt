@@ -1,9 +1,5 @@
 package com.dnfapps.arrmatey.instances.repository
 
-import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.OperationStatus
-import com.dnfapps.networking.onError
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.client.paging.BasePagingSource
 import com.dnfapps.arrmatey.client.paging.PageResult
 import com.dnfapps.arrmatey.client.paging.PagingSource
@@ -29,6 +25,10 @@ import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.service.MediaIssuePackageService
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.OperationStatus
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +37,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 class SeerrInstanceRepository(
     override val instance: Instance,
@@ -136,6 +139,38 @@ class SeerrInstanceRepository(
         return BasePagingSource(
             fetcher = { page ->
                 client.getDiscoverTv(page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
+    fun getUpcomingMoviesPaging(): PagingSource<DiscoverResult> {
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getUpcomingMovies(page = page, today = today)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
+    fun getUpcomingTvPaging(): PagingSource<DiscoverResult> {
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getUpcomingTv(page = page, today = today)
             },
             processor = { response ->
                 PageResult(

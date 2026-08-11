@@ -79,6 +79,26 @@ private struct DiscoverTabContent: View {
                             },
                             onLoadMore: { viewModel.loadNextTvPage() }
                         )
+
+                        DiscoverSection(
+                            title: MR.strings().upcoming_movies.localized(),
+                            icon: "calendar",
+                            data: viewModel.upcomingMoviesState,
+                            onItemClick: { item in
+                                navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                            },
+                            onLoadMore: { viewModel.loadNextUpcomingMoviesPage() }
+                        )
+
+                        DiscoverSection(
+                            title: MR.strings().upcoming_series.localized(),
+                            icon: "calendar",
+                            data: viewModel.upcomingTvState,
+                            onItemClick: { item in
+                                navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                            },
+                            onLoadMore: { viewModel.loadNextUpcomingTvPage() }
+                        )
                     }
                     .padding(.vertical, 16)
                 }

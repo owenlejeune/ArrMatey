@@ -13,6 +13,8 @@ class TrendingViewModelS: ObservableObject {
     @Published private(set) var trendingState = PagedData<DiscoverResult>()
     @Published private(set) var moviesState = PagedData<DiscoverResult>()
     @Published private(set) var tvState = PagedData<DiscoverResult>()
+    @Published private(set) var upcomingMoviesState = PagedData<DiscoverResult>()
+    @Published private(set) var upcomingTvState = PagedData<DiscoverResult>()
     @Published private(set) var isRefreshing: Bool = false
     
     init() {
@@ -24,6 +26,8 @@ class TrendingViewModelS: ObservableObject {
         viewModel.trendingState.observeAsync(on: self, to: \.trendingState)
         viewModel.moviesState.observeAsync(on: self, to: \.moviesState)
         viewModel.tvState.observeAsync(on: self, to: \.tvState)
+        viewModel.upcomingMoviesState.observeAsync(on: self, to: \.upcomingMoviesState)
+        viewModel.upcomingTvState.observeAsync(on: self, to: \.upcomingTvState)
         viewModel.isRefreshing.observeAsync(on: self) { owner, refreshing in
             owner.isRefreshing = refreshing.boolValue
         }
@@ -39,6 +43,14 @@ class TrendingViewModelS: ObservableObject {
 
     func loadNextTvPage() {
         viewModel.loadNextTvPage()
+    }
+
+    func loadNextUpcomingMoviesPage() {
+        viewModel.loadNextUpcomingMoviesPage()
+    }
+
+    func loadNextUpcomingTvPage() {
+        viewModel.loadNextUpcomingTvPage()
     }
     
     func refresh() {

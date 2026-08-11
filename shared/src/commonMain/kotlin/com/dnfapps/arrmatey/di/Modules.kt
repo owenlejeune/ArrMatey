@@ -146,6 +146,8 @@ import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetTrendingUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverMoviesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverTvUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingMoviesUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingTvUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
@@ -296,6 +298,8 @@ val useCaseModule = module {
     factory { GetTrendingUseCase() }
     factory { GetDiscoverMoviesUseCase() }
     factory { GetDiscoverTvUseCase() }
+    factory { GetUpcomingMoviesUseCase() }
+    factory { GetUpcomingTvUseCase() }
     factory { GetIssuesUseCase() }
     factory { GetIssueDetailsUseCase(get()) }
     factory { SubmitIssueUseCase(get()) }
@@ -353,7 +357,7 @@ val useCaseModule = module {
 }
 
 val viewModelModule = module {
-    factory { TrendingViewModel(get(), get(), get(), get(), get()) }
+    factory { TrendingViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { ActivityQueueViewModel(get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
         ArrMediaViewModel(type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),get())

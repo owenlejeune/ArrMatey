@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Tv
@@ -110,6 +111,8 @@ private fun DiscoverHomeScreen(
     val trendingState by viewModel.trendingState.collectAsStateWithLifecycle()
     val moviesState by viewModel.moviesState.collectAsStateWithLifecycle()
     val tvState by viewModel.tvState.collectAsStateWithLifecycle()
+    val upcomingMoviesState by viewModel.upcomingMoviesState.collectAsStateWithLifecycle()
+    val upcomingTvState by viewModel.upcomingTvState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -131,7 +134,10 @@ private fun DiscoverHomeScreen(
             modifier = Modifier.padding(paddingValues).fillMaxSize()
         ) {
             Column(
-                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 DiscoverSection(
@@ -151,11 +157,27 @@ private fun DiscoverHomeScreen(
                 )
 
                 DiscoverSection(
+                    title = MR.strings.upcoming_movies,
+                    icon = Icons.Default.Event,
+                    data = upcomingMoviesState,
+                    onItemClick = onItemClick,
+                    onLoadMore = { viewModel.loadNextUpcomingMoviesPage() }
+                )
+
+                DiscoverSection(
                     title = MR.strings.popular_series,
                     icon = Icons.Default.Tv,
                     data = tvState,
                     onItemClick = onItemClick,
                     onLoadMore = { viewModel.loadNextTvPage() }
+                )
+
+                DiscoverSection(
+                    title = MR.strings.upcoming_series,
+                    icon = Icons.Default.Event,
+                    data = upcomingTvState,
+                    onItemClick = onItemClick,
+                    onLoadMore = { viewModel.loadNextUpcomingTvPage() }
                 )
 
                 Spacer(modifier = Modifier.height(0.dp))

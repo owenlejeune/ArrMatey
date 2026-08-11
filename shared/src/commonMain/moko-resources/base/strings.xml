@@ -36,6 +36,8 @@
     <string name="trending">Trending</string>
     <string name="popular_movies">Popular Movies</string>
     <string name="popular_series">Popular Series</string>
+    <string name="upcoming_movies">Upcoming Movies</string>
+    <string name="upcoming_series">Upcoming Series</string>
 
     <!-- Messages -->
     <string name="confirm_delete_instance">Are you sure you want to delete %1$s?</string>
