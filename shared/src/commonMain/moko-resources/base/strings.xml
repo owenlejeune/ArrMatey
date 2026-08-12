@@ -571,6 +571,7 @@
     <string name="watch_trailer">Watch Trailer</string>
     <string name="view_request">View Request</string>
     <string name="request">Request</string>
+    <string name="request_more">Request More</string>
     <string name="requested_by">Requested by</string>
     <string name="approved_by">Approved by</string>
     <string name="opened_by">Opened by</string>

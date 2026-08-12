@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
@@ -40,6 +41,7 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -81,6 +83,7 @@ import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
 import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.sheets.SeerrReportIssueSheet
+import com.dnfapps.arrmatey.ui.sheets.SeerrRequestSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
@@ -109,8 +112,12 @@ fun SeerrDetailsScreen(
     val selectedInstance by viewModel.selectedInstance.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
 
+    val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
+    val users by viewModel.users.collectAsStateWithLifecycle()
+
     val isViewRequestSheetVisible by viewModel.isViewRequestSheetVisible.collectAsStateWithLifecycle()
     val isReportIssueSheetVisible by viewModel.isReportIssueSheetVisible.collectAsStateWithLifecycle()
+    val isRequestSheetVisible by viewModel.isRequestSheetVisible.collectAsStateWithLifecycle()
     val reportIssueState by viewModel.reportIssueState.collectAsStateWithLifecycle()
 
     val serviceDetails by viewModel.serviceDetails.collectAsStateWithLifecycle()
@@ -182,7 +189,7 @@ fun SeerrDetailsScreen(
                                             moko
                                         )
                                     },
-                                    onRequestClicked = { },
+                                    onRequestClicked = { viewModel.showRequestSheet() },
                                     onRequest4kClicked = { },
                                     onWatchTrailerClicked = { context.openLink(it) },
                                     onViewRequestClicked = { viewModel.showViewRequestSheet() },
@@ -336,33 +343,60 @@ fun SeerrDetailsScreen(
                     }
                 },
                 actions = {
-                    if (buttonState.showReportIssueButton) {
+                    if (buttonState.showRequestButton) {
                         IconButton(
-                            onClick = { viewModel.showReportIssueSheet() },
+                            onClick = { viewModel.showRequestSheet() },
                             colors = IconButtonDefaults.headerBarColors()
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Warning,
-                                contentDescription = mokoString(MR.strings.report_issue),
-                                tint = ArrOrange
+                                imageVector = Icons.Default.Add,
+                                contentDescription = mokoString(MR.strings.request)
                             )
                         }
-                    }
-                    if (isDebug()) {
-                        if (buttonState.showManageMenu) {
+                    } else {
+                        if (buttonState.showReportIssueButton) {
                             IconButton(
-                                onClick = { },
+                                onClick = { viewModel.showReportIssueSheet() },
                                 colors = IconButtonDefaults.headerBarColors()
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Settings,
-                                    contentDescription = mokoString(MR.strings.manage)
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = mokoString(MR.strings.report_issue),
+                                    tint = ArrOrange
                                 )
+                            }
+                        }
+                        if (isDebug()) {
+                            if (buttonState.showManageMenu) {
+                                IconButton(
+                                    onClick = { },
+                                    colors = IconButtonDefaults.headerBarColors()
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = mokoString(MR.strings.manage)
+                                    )
+                                }
                             }
                         }
                     }
                 }
             )
+
+            if (isRequestSheetVisible) {
+                (uiState as? SeerrDetailsState.Success)?.item?.let { details ->
+                    SeerrRequestSheet(
+                        details = details,
+                        serviceDetails = serviceDetails,
+                        currentUser = currentUser,
+                        users = users,
+                        onDismissRequest = { viewModel.hideRequestSheet() },
+                        onSubmitRequest = { profileId, rootFolder, langId, seasons, userId ->
+                            viewModel.submitRequest(profileId, rootFolder, langId, seasons, userId = userId)
+                        }
+                    )
+                }
+            }
 
             if (isReportIssueSheetVisible) {
                 SeerrReportIssueSheet(

@@ -134,7 +134,7 @@ fun MediaInfo?.toButtonState(
         showReportIssueButton = hasContent,
 
         // Manage menu
-        showManageMenu = true,
+        showManageMenu = status != 1,
         showOpenInServiceButton = !serviceUrl.isNullOrEmpty(),
         serviceUrl = serviceUrl,
         serviceName = serviceName,

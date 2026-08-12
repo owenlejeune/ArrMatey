@@ -39,13 +39,41 @@ struct SeerrDetailsScreen: View {
             viewModel.refreshDetails()
         }
         .toolbar {
-            if viewModel.buttonState.showReportIssueButton {
+            if viewModel.buttonState.showRequestButton {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { viewModel.showReportIssueSheet() }) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.orange)
+                    Button(action: { viewModel.showRequestSheet() }) {
+                        Image(systemName: "plus.circle")
                     }
                 }
+            } else {
+                if viewModel.buttonState.showReportIssueButton {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: { viewModel.showReportIssueSheet() }) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                        }
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $viewModel.isRequestSheetVisible) {
+            if let state = viewModel.uiState as? SeerrDetailsStateSuccess {
+                SeerrRequestSheet(
+                    details: state.item,
+                    serviceDetails: viewModel.serviceDetails,
+                    currentUser: viewModel.currentUser,
+                    users: viewModel.users,
+                    onDismiss: { viewModel.hideRequestSheet() },
+                    onSubmit: { profileId, rootFolder, langId, seasons, userId in
+                        viewModel.submitRequest(
+                            profileId: profileId,
+                            rootFolder: rootFolder,
+                            languageProfileId: langId,
+                            seasons: seasons,
+                            userId: userId
+                        )
+                    }
+                )
             }
         }
     }

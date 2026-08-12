@@ -15,6 +15,7 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
@@ -78,6 +79,11 @@ class SeerrInstanceRepository(
     suspend fun getLoggedInUser() {
         client.getUserInfo()
             .onSuccess { _loggedInUser.value = it }
+    }
+
+    suspend fun getUsers() {
+        client.getUsers()
+            .onSuccess { _users.value = it }
     }
 
     suspend fun refreshCounts() {
@@ -187,6 +193,10 @@ class SeerrInstanceRepository(
         pageSize: Int = 10
     ): NetworkResult<RequestResponse> {
         return client.getRequests(page = page, pageSize = pageSize)
+    }
+
+    suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> {
+        return client.createRequest(request)
     }
 
     suspend fun setRequestStatus(

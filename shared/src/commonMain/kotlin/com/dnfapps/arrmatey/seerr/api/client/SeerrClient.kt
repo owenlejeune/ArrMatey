@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssuesResponse
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
@@ -34,12 +35,14 @@ import org.koin.core.component.KoinComponent
 interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
+    suspend fun getUsers(): NetworkResult<List<SeerrUser>>
     suspend fun getTrending(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getDiscoverMovies(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getUpcomingMovies(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
     suspend fun getDiscoverTv(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getUpcomingTv(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
     suspend fun getRequests(page: Int = 1, pageSize: Int = 100): NetworkResult<RequestResponse>
+    suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest>
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
     suspend fun setRequestStatus(
@@ -80,6 +83,9 @@ class SeerrClientImpl(
     override suspend fun getUserInfo(): NetworkResult<SeerrUser> =
         get("auth/me")
 
+    override suspend fun getUsers(): NetworkResult<List<SeerrUser>> =
+        get("user")
+
     override suspend fun getTrending(page: Int): NetworkResult<DiscoverResponse> =
         get("discover/trending", mapOf("page" to page))
 
@@ -104,6 +110,9 @@ class SeerrClientImpl(
             "skip" to (page - 1) * pageSize,
             "filter" to "pending"
         ))
+
+    override suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> =
+        post("request", request)
 
     override suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails> =
         get("movie/$tmdbId")

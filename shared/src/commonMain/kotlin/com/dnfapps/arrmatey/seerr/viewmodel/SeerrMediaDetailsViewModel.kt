@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
@@ -28,6 +29,7 @@ import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -49,7 +51,8 @@ class SeerrMediaDetailsViewModel(
     private val cancelRequestUseCase: CancelRequestUseCase,
     private val getSeerrTvRatingsUseCase: GetSeerrTvRatingsUseCase,
     private val getSeerrMovieRatingsUseCase: GetSeerrMovieRatingsUseCase,
-    private val submitIssueUseCase: SubmitIssueUseCase
+    private val submitIssueUseCase: SubmitIssueUseCase,
+    private val submitRequestUseCase: SubmitRequestUseCase
 ): ViewModel() {
 
     private val _combinedRatings = MutableStateFlow<CombinedRatings?>(null)
@@ -79,6 +82,9 @@ class SeerrMediaDetailsViewModel(
 
     private val _isViewRequestSheetVisible = MutableStateFlow(false)
     val isViewRequestSheetVisible: StateFlow<Boolean> = _isViewRequestSheetVisible.asStateFlow()
+
+    private val _isRequestSheetVisible = MutableStateFlow(false)
+    val isRequestSheetVisible: StateFlow<Boolean> = _isRequestSheetVisible.asStateFlow()
 
     private var seerrMediaId: Long? = null
 
@@ -114,6 +120,9 @@ class SeerrMediaDetailsViewModel(
 
     private val _sonarrServices = MutableStateFlow<List<Service>>(emptyList())
     val sonarrServices: StateFlow<List<Service>> = _sonarrServices.asStateFlow()
+
+    private val _users = MutableStateFlow<List<SeerrUser>>(emptyList())
+    val users: StateFlow<List<SeerrUser>> = _users.asStateFlow()
 
     private val _serviceDetails = MutableStateFlow<ServiceDetails?>(null)
     val serviceDetails: StateFlow<ServiceDetails?> = _serviceDetails.asStateFlow()
@@ -174,6 +183,18 @@ class SeerrMediaDetailsViewModel(
         }
         viewModelScope.launch {
             repository.sonarrServices.collect { _sonarrServices.value = it }
+        }
+        viewModelScope.launch {
+            repository.getLoggedInUser()
+        }
+        viewModelScope.launch {
+            repository.loggedInUser.collect { _currentUser.value = it }
+        }
+        viewModelScope.launch {
+            repository.getUsers()
+        }
+        viewModelScope.launch {
+            repository.users.collect { _users.value = it }
         }
         viewModelScope.launch {
             combine(_uiState, _radarrServices, _sonarrServices) { state, radarr, sonarr ->
@@ -257,6 +278,42 @@ class SeerrMediaDetailsViewModel(
 
     fun hideViewRequestSheet() {
         _isViewRequestSheetVisible.value = false
+    }
+
+    fun showRequestSheet() {
+        _isRequestSheetVisible.value = true
+    }
+
+    fun hideRequestSheet() {
+        _isRequestSheetVisible.value = false
+    }
+
+    fun submitRequest(
+        profileId: Long? = null,
+        rootFolder: String? = null,
+        languageProfileId: Long? = null,
+        seasons: List<Int>? = null,
+        is4k: Boolean = false,
+        userId: Long? = null
+    ) {
+        val repository = currentRepository ?: return
+        viewModelScope.launch {
+            val body = RequestMediaBody(
+                mediaType = mediaType,
+                mediaId = tmdbId,
+                is4k = is4k,
+                serverId = null, // serverId will be determined by Seerr based on profile/rootFolder
+                profileId = profileId,
+                rootFolder = rootFolder,
+                languageProfileId = languageProfileId,
+                seasons = seasons,
+                userId = userId
+            )
+            submitRequestUseCase(body, repository).onSuccess {
+                hideRequestSheet()
+                refreshDetails()
+            }
+        }
     }
 
     fun showReportIssueSheet() {
