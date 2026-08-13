@@ -20,6 +20,7 @@ class MediaRequestPackageService(
             when (request.type) {
                 RequestType.Movie -> fetchMovieDetails(request.media.tmdbId)
                 RequestType.Tv -> fetchTvDetails(request.media.tmdbId)
+                RequestType.Person -> null
             }
         }
 
@@ -27,6 +28,7 @@ class MediaRequestPackageService(
             when (request.type) {
                 RequestType.Movie -> fetchRadarrDetails(request.serverId ?: 0)
                 RequestType.Tv -> fetchSonarrDetails(request.serverId ?: 0)
+                RequestType.Person -> null
             }
         }
 

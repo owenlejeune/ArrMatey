@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.seerr.api.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -30,8 +31,11 @@ data class DiscoverResult(
     val voteCount: Int = 0,
     val backdropPath: String? = null,
     val posterPath: String? = null,
+    val profilePath: String? = null,
+    val knownFor: List<DiscoverResult> = emptyList(),
+    val knownForDepartment: String? = null,
     val mediaInfo: MediaInfo? = null
 ) {
     val fullPosterPath: String?
-        get() = posterPath?.let { "https://image.tmdb.org/t/p/w500${it}" }
+        get() = (posterPath ?: profilePath)?.let { "https://image.tmdb.org/t/p/w500${it}" }
 }

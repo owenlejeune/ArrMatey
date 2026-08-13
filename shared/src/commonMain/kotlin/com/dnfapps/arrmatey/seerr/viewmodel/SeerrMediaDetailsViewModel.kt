@@ -203,6 +203,7 @@ class SeerrMediaDetailsViewModel(
                     val serverId = request?.serverId ?: when (state.item.requestType) {
                         RequestType.Movie -> radarr.find { it.isDefault }?.id
                         RequestType.Tv -> sonarr.find { it.isDefault }?.id
+                        RequestType.Person -> null
                     }
                     if (serverId != null) serverId to state.item.requestType else null
                 } else null
@@ -213,6 +214,7 @@ class SeerrMediaDetailsViewModel(
                     val result = when (type) {
                         RequestType.Movie -> repository.getRadarrDetails(serverId)
                         RequestType.Tv -> repository.getSonarrDetails(serverId)
+                        RequestType.Person -> return@collectLatest
                     }
                     result.onSuccess { details ->
                         _serviceDetails.value = details

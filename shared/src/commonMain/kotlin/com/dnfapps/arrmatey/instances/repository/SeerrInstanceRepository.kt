@@ -188,6 +188,21 @@ class SeerrInstanceRepository(
         )
     }
 
+    fun searchPaging(query: String): PagingSource<DiscoverResult> {
+        return BasePagingSource(
+            fetcher = { page ->
+                client.search(query = query, page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
     suspend fun getRequests(
         page: Int = 1,
         pageSize: Int = 10
@@ -262,6 +277,7 @@ class SeerrInstanceRepository(
         val result = when (mediaType) {
             RequestType.Movie -> client.getMovieDetails(tmdbId)
             RequestType.Tv -> client.getTvDetails(tmdbId)
+            RequestType.Person -> client.getPersonDetails(tmdbId)
         }
         when (result) {
             is NetworkResult.Success<*> -> {

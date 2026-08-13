@@ -15,16 +15,23 @@ import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverTvUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetTrendingUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingMoviesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingTvUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SearchSeerrUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class TrendingViewModel(
     private val instanceManager: InstanceManager,
     private val instanceRepository: InstanceRepository,
@@ -32,7 +39,8 @@ class TrendingViewModel(
     private val getDiscoverMoviesUseCase: GetDiscoverMoviesUseCase,
     private val getDiscoverTvUseCase: GetDiscoverTvUseCase,
     private val getUpcomingMoviesUseCase: GetUpcomingMoviesUseCase,
-    private val getUpcomingTvUseCase: GetUpcomingTvUseCase
+    private val getUpcomingTvUseCase: GetUpcomingTvUseCase,
+    private val searchSeerrUseCase: SearchSeerrUseCase
 ) : ViewModel() {
 
     private val seerrRepository: StateFlow<SeerrInstanceRepository?> = instanceManager.getSelectedSeerrRepository()
@@ -54,6 +62,8 @@ class TrendingViewModel(
     private var tvPagingController: PagingController<DiscoverResult>? = null
     private var upcomingMoviesPagingController: PagingController<DiscoverResult>? = null
     private var upcomingTvPagingController: PagingController<DiscoverResult>? = null
+    private var searchPagingController: PagingController<DiscoverResult>? = null
+    private var searchJob: Job? = null
 
     private val _trendingState = MutableStateFlow(PagedData<DiscoverResult>())
     val trendingState: StateFlow<PagedData<DiscoverResult>> = _trendingState.asStateFlow()
@@ -70,8 +80,15 @@ class TrendingViewModel(
     private val _upcomingTvState = MutableStateFlow(PagedData<DiscoverResult>())
     val upcomingTvState: StateFlow<PagedData<DiscoverResult>> = _upcomingTvState.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _searchState = MutableStateFlow(PagedData<DiscoverResult>())
+    val searchState: StateFlow<PagedData<DiscoverResult>> = _searchState.asStateFlow()
+
     init {
         observeRepository()
+        observeSearchQuery()
     }
 
     private fun observeRepository() {
@@ -134,6 +151,40 @@ class TrendingViewModel(
         }
     }
 
+    private fun observeSearchQuery() {
+        viewModelScope.launch {
+            searchQuery
+                .debounce(500.milliseconds)
+                .distinctUntilChanged()
+                .collectLatest { query ->
+                    if (query.isNotEmpty()) {
+                        performSearch(query)
+                    } else {
+                        searchPagingController = null
+                        _searchState.value = PagedData()
+                    }
+                }
+        }
+    }
+
+    private fun performSearch(query: String) {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            seerrRepository.value?.let { repo ->
+                val controller = searchSeerrUseCase.createPagingController(query, repo, viewModelScope)
+                searchPagingController = controller
+                controller.loadInitialPage()
+                controller.state.collect {
+                    _searchState.value = it
+                }
+            }
+        }
+    }
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+
     fun loadNextTrendingPage() {
         trendingPagingController?.loadNextPage()
     }
@@ -152,6 +203,10 @@ class TrendingViewModel(
 
     fun loadNextUpcomingTvPage() {
         upcomingTvPagingController?.loadNextPage()
+    }
+
+    fun loadNextSearchPage() {
+        searchPagingController?.loadNextPage()
     }
 
     fun refresh() {

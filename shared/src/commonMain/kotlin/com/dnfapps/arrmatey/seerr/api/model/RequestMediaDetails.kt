@@ -28,12 +28,14 @@ sealed interface RequestMediaDetails {
         get() = when (this) {
             is MovieDetails -> title
             is TvDetails -> name
+            is PersonDetails -> name
         }
 
     val displayDate: LocalDate?
         get() = when (this) {
             is MovieDetails -> releaseDate
             is TvDetails -> firstAirDate
+            is PersonDetails -> birthday
         }
 
     val fullBackdropPath: String?

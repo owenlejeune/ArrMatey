@@ -25,6 +25,7 @@
     <string name="type_movie">movie</string>
     <string name="type_artist">artist</string>
     <string name="type_author">author</string>
+    <string name="type_person">person</string>
 
     <!-- Titles -->
     <string name="add_instance">Add instance</string>

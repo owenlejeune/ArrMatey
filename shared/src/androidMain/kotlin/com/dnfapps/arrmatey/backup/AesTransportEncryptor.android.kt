@@ -16,7 +16,7 @@ actual class AesTransportEncryptor : TransportEncryptor {
     private val iterations = 65536
     private val keyLength = 256
 
-    override fun encrypt(data: String, password: String): String {
+    actual override fun encrypt(data: String, password: String): String {
         val salt = ByteArray(saltLength)
         SecureRandom().nextBytes(salt)
 
@@ -41,7 +41,7 @@ actual class AesTransportEncryptor : TransportEncryptor {
         return Base64.encodeToString(combined, Base64.NO_WRAP)
     }
 
-    override fun decrypt(encryptedData: String, password: String): String {
+    actual override fun decrypt(encryptedData: String, password: String): String {
         return try {
             val combined = Base64.decode(encryptedData, Base64.NO_WRAP)
             val salt = combined.sliceArray(0 until saltLength)

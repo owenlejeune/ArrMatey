@@ -15,9 +15,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Event
@@ -45,6 +50,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.rememberSearchBarState
+import com.dnfapps.arrmatey.entensions.isExpanded
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -57,6 +64,7 @@ import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
@@ -114,11 +122,22 @@ private fun DiscoverHomeScreen(
     val upcomingMoviesState by viewModel.upcomingMoviesState.collectAsStateWithLifecycle()
     val upcomingTvState by viewModel.upcomingTvState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val searchState by viewModel.searchState.collectAsStateWithLifecycle()
+
+    val textFieldState = rememberTextFieldState(searchQuery)
+    val searchBarState = rememberSearchBarState()
+
+    LaunchedEffect(textFieldState.text) {
+        viewModel.updateSearchQuery(textFieldState.text.toString())
+    }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(mokoString(MR.strings.discover)) },
+            ArrAppBarWithSearch(
+                textFieldState = textFieldState,
+                searchBarState = searchBarState,
+                searchPlaceholder = mokoString(MR.strings.discover),
                 navigationIcon = {
                     if (!wideRailIsVisible) {
                         NavigationDrawerButton()
@@ -128,59 +147,69 @@ private fun DiscoverHomeScreen(
         },
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
-        PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = { viewModel.refresh() },
-            modifier = Modifier.padding(paddingValues).fillMaxSize()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                DiscoverSection(
-                    title = MR.strings.trending,
-                    icon = Icons.Default.TrendingUp,
-                    data = trendingState,
+        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+            if (searchBarState.isExpanded()) {
+                DiscoverSearchOverlay(
+                    data = searchState,
                     onItemClick = onItemClick,
-                    onLoadMore = { viewModel.loadNextTrendingPage() }
+                    onLoadMore = { viewModel.loadNextSearchPage() }
                 )
+            } else {
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = { viewModel.refresh() },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp)
+                    ) {
+                        DiscoverSection(
+                            title = MR.strings.trending,
+                            icon = Icons.Default.TrendingUp,
+                            data = trendingState,
+                            onItemClick = onItemClick,
+                            onLoadMore = { viewModel.loadNextTrendingPage() }
+                        )
 
-                DiscoverSection(
-                    title = MR.strings.popular_movies,
-                    icon = Icons.Default.Movie,
-                    data = moviesState,
-                    onItemClick = onItemClick,
-                    onLoadMore = { viewModel.loadNextMoviesPage() }
-                )
+                        DiscoverSection(
+                            title = MR.strings.popular_movies,
+                            icon = Icons.Default.Movie,
+                            data = moviesState,
+                            onItemClick = onItemClick,
+                            onLoadMore = { viewModel.loadNextMoviesPage() }
+                        )
 
-                DiscoverSection(
-                    title = MR.strings.upcoming_movies,
-                    icon = Icons.Default.Event,
-                    data = upcomingMoviesState,
-                    onItemClick = onItemClick,
-                    onLoadMore = { viewModel.loadNextUpcomingMoviesPage() }
-                )
+                        DiscoverSection(
+                            title = MR.strings.upcoming_movies,
+                            icon = Icons.Default.Event,
+                            data = upcomingMoviesState,
+                            onItemClick = onItemClick,
+                            onLoadMore = { viewModel.loadNextUpcomingMoviesPage() }
+                        )
 
-                DiscoverSection(
-                    title = MR.strings.popular_series,
-                    icon = Icons.Default.Tv,
-                    data = tvState,
-                    onItemClick = onItemClick,
-                    onLoadMore = { viewModel.loadNextTvPage() }
-                )
+                        DiscoverSection(
+                            title = MR.strings.popular_series,
+                            icon = Icons.Default.Tv,
+                            data = tvState,
+                            onItemClick = onItemClick,
+                            onLoadMore = { viewModel.loadNextTvPage() }
+                        )
 
-                DiscoverSection(
-                    title = MR.strings.upcoming_series,
-                    icon = Icons.Default.Event,
-                    data = upcomingTvState,
-                    onItemClick = onItemClick,
-                    onLoadMore = { viewModel.loadNextUpcomingTvPage() }
-                )
+                        DiscoverSection(
+                            title = MR.strings.upcoming_series,
+                            icon = Icons.Default.Event,
+                            data = upcomingTvState,
+                            onItemClick = onItemClick,
+                            onLoadMore = { viewModel.loadNextUpcomingTvPage() }
+                        )
 
-                Spacer(modifier = Modifier.height(0.dp))
+                        Spacer(modifier = Modifier.height(0.dp))
+                    }
+                }
             }
         }
     }
@@ -257,6 +286,63 @@ private fun DiscoverSection(
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.error
             )
+        }
+    }
+}
+
+@Composable
+private fun DiscoverSearchOverlay(
+    data: PagedData<DiscoverResult>,
+    onItemClick: (DiscoverResult) -> Unit,
+    onLoadMore: () -> Unit
+) {
+    val lazyGridState = rememberLazyGridState()
+
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val totalItemsCount = lazyGridState.layoutInfo.totalItemsCount
+            val lastVisibleItemIndex = lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            lastVisibleItemIndex >= totalItemsCount - 5 && totalItemsCount > 0
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore) {
+            onLoadMore()
+        }
+    }
+
+    if (data.isLoading && data.items.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else if (data.items.isNotEmpty()) {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 120.dp),
+            state = lazyGridState,
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(data.items, key = { it.id }) { item ->
+                PosterItem(
+                    item = item,
+                    onItemClick = { onItemClick(item) }
+                )
+            }
+
+            if (data.isLoadingMore) {
+                item {
+                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+        }
+    } else if (data.error != null) {
+        Box(Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+            Text(text = data.error ?: "", color = MaterialTheme.colorScheme.error)
         }
     }
 }

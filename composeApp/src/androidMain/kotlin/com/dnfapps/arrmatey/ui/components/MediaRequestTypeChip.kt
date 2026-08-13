@@ -22,6 +22,7 @@ fun MediaRequestTypeChip(
     val (container, content) = when (requestType) {
         RequestType.Tv -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
         RequestType.Movie -> MaterialTheme.colorScheme.tertiary to MaterialTheme.colorScheme.onTertiary
+        RequestType.Person -> MaterialTheme.colorScheme.secondary to MaterialTheme.colorScheme.onSecondary
     }
 
     Box(

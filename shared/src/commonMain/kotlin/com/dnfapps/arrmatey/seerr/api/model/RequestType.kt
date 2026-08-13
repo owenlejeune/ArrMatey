@@ -7,5 +7,8 @@ enum class RequestType {
     Movie,
 
     @SerialName("tv")
-    Tv
+    Tv,
+
+    @SerialName("person")
+    Person
 }

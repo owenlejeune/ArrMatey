@@ -220,14 +220,15 @@ fun PosterItem(
                 minLines = 2,
                 maxLines = 2
             )
-            val date = item.releaseDate ?: item.firstAirDate
-            if (date != null && date.length >= 4) {
-                Text(
-                    text = date.take(4),
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1
-                )
+            val subText = when (item.mediaType) {
+                RequestType.Person -> item.knownForDepartment ?: ""
+                else -> (item.releaseDate ?: item.firstAirDate)?.take(4) ?: ""
             }
+            Text(
+                text = subText,
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1
+            )
         },
         errorContent = {
             if (imageLoadError) {
@@ -325,6 +326,7 @@ private fun BoxScope.MediaTypeOverlay(type: RequestType) {
     val text = when (type) {
         RequestType.Movie -> mokoString(MR.strings.type_movie)
         RequestType.Tv -> mokoString(MR.strings.type_series)
+        RequestType.Person -> mokoString(MR.strings.type_person)
     }.replaceFirstChar { it.uppercase() }
 
     MediaRequestTypeChip(

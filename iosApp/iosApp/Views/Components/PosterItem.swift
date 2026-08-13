@@ -190,6 +190,11 @@ struct DiscoverPosterItem: View {
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                             .lineLimit(1)
+                    } else if item.mediaType == .person, let dept = item.knownForDepartment {
+                        Text(dept)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
                     }
                 }
             }

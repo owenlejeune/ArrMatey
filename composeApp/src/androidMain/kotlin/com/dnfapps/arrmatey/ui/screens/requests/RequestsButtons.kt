@@ -226,6 +226,7 @@ private fun AdminActionButtons(
         val serviceName = when (request.type) {
             RequestType.Movie -> InstanceType.Radarr.name
             RequestType.Tv -> InstanceType.Sonarr.name
+            else -> ""
         }
 
         ConfirmableButton(

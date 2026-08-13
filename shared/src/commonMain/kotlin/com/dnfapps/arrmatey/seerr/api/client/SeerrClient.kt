@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssuesResponse
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
+import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
@@ -41,10 +42,12 @@ interface SeerrClient {
     suspend fun getUpcomingMovies(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
     suspend fun getDiscoverTv(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getUpcomingTv(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
+    suspend fun search(query: String, page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getRequests(page: Int = 1, pageSize: Int = 100): NetworkResult<RequestResponse>
     suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest>
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
+    suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails>
     suspend fun setRequestStatus(
         requestId: Long,
         status: ApprovalStatus,
@@ -101,6 +104,9 @@ class SeerrClientImpl(
     override suspend fun getUpcomingTv(page: Int, today: String): NetworkResult<DiscoverResponse> =
         get("discover/tv", mapOf("page" to page, "firstAirDateGte" to today))
 
+    override suspend fun search(query: String, page: Int): NetworkResult<DiscoverResponse> =
+        get("search", mapOf("query" to query, "page" to page))
+
     override suspend fun getRequests(
         page: Int,
         pageSize: Int
@@ -119,6 +125,9 @@ class SeerrClientImpl(
 
     override suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails> =
         get("tv/$tmdbId")
+
+    override suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails> =
+        get("person/$personId")
 
     override suspend fun setRequestStatus(
         requestId: Long,

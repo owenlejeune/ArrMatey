@@ -14,7 +14,7 @@ actual class AesTransportEncryptor : TransportEncryptor {
     private val keyLength = 32u // 256 bits
 
     @OptIn(BetaInteropApi::class)
-    override fun encrypt(data: String, password: String): String = memScoped {
+    actual override fun encrypt(data: String, password: String): String = memScoped {
         val salt = ByteArray(saltLength)
         val saltPtr = allocArray<UByteVar>(saltLength)
         if (SecRandomCopyBytes(kSecRandomDefault, saltLength.toULong(), saltPtr) != 0) return ""
@@ -40,7 +40,7 @@ actual class AesTransportEncryptor : TransportEncryptor {
     }
 
     @OptIn(BetaInteropApi::class)
-    override fun decrypt(encryptedData: String, password: String): String = memScoped {
+    actual override fun decrypt(encryptedData: String, password: String): String = memScoped {
         val data = NSData.create(base64EncodedString = encryptedData, options = 1u) ?: return "" // 1u = NSDataBase64DecodingIgnoreUnknownCharacters
         if (data.length < (saltLength + ivLength).toULong()) return ""
         
