@@ -4,6 +4,7 @@ import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -128,5 +129,9 @@ class NavigationManager(
 
     fun openScheduleTab() {
         navigateToTab(TabItem.Standard.CALENDAR)
+    }
+
+    fun openSeerrDetails(tmdbId: Long, requestType: RequestType) {
+        discover.navigateTo(DiscoverScreen.Details(tmdbId, requestType))
     }
 }

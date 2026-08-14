@@ -31,7 +31,11 @@ struct DiscoverTab: View {
     private func seerrDestination(for route: SeerrRoute) -> some View {
         switch route {
         case .details(let tmdbId, let requestType):
-            SeerrDetailsScreen(tmdbId: tmdbId, requestType: requestType)
+            if requestType == .person {
+                SeerrPersonDetailsScreen(personId: tmdbId)
+            } else {
+                SeerrDetailsScreen(tmdbId: tmdbId, requestType: requestType)
+            }
         }
     }
 }
@@ -124,7 +128,7 @@ private struct DiscoverTabContent: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(context == .mainTab)
         .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always))
-        .onChange(of: searchQuery) { newValue in
+        .onChange(of: searchQuery) { _, newValue in
             viewModel.updateSearchQuery(newValue)
         }
         .toolbar {
@@ -147,6 +151,7 @@ private struct DiscoverSection: View {
     let data: PagedData<DiscoverResult>
     let onItemClick: (DiscoverResult) -> Void
     let onLoadMore: () -> Void
+    var showOverlays: Bool = true
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -173,7 +178,8 @@ private struct DiscoverSection: View {
                                 item: item,
                                 elevation: .none,
                                 posterHeight: 180,
-                                onItemClick: onItemClick
+                                onItemClick: onItemClick,
+                                showOverlays: showOverlays
                             )
                             .onAppear {
                                 if item.id == (data.items.last as? DiscoverResult)?.id {

@@ -19,6 +19,7 @@ class SeerrMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var currentUser: SeerrUser? = nil
     @Published private(set) var users: [SeerrUser] = []
     @Published private(set) var serviceDetails: ServiceDetails? = nil
+    @Published private(set) var personCredits: PersonCredits? = nil
 
     init(tmdbId: Int64, requestType: RequestType) {
         self.viewModel = KoinBridge.shared.getSeerrMediaDetailsViewModel(tmdbId: tmdbId, mediaType: requestType)
@@ -41,6 +42,7 @@ class SeerrMediaDetailsViewModelS: ObservableObject {
         viewModel.currentUser.observeAsync(on: self, to: \.currentUser)
         viewModel.users.observeAsync(on: self, to: \.users)
         viewModel.serviceDetails.observeAsync(on: self, to: \.serviceDetails)
+        viewModel.personCredits.observeAsync(on: self, to: \.personCredits)
     }
     
     func refreshDetails() {

@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
+import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
@@ -24,6 +25,7 @@ import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
 import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.state.toButtonState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetPersonCreditsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
@@ -52,11 +54,16 @@ class SeerrMediaDetailsViewModel(
     private val getSeerrTvRatingsUseCase: GetSeerrTvRatingsUseCase,
     private val getSeerrMovieRatingsUseCase: GetSeerrMovieRatingsUseCase,
     private val submitIssueUseCase: SubmitIssueUseCase,
-    private val submitRequestUseCase: SubmitRequestUseCase
+    private val submitRequestUseCase: SubmitRequestUseCase,
+    private val getPersonCreditsUseCase: GetPersonCreditsUseCase
 ): ViewModel() {
 
     private val _combinedRatings = MutableStateFlow<CombinedRatings?>(null)
     private val _rtRatings = MutableStateFlow<RottenTomatoesRating?>(null)
+
+    private val _personCredits = MutableStateFlow<PersonCredits?>(null)
+    val personCredits: StateFlow<PersonCredits?> = _personCredits.asStateFlow()
+
     private val _uiState = MutableStateFlow<SeerrDetailsState>(SeerrDetailsState.Initial)
     val uiState: StateFlow<SeerrDetailsState> = combine(
         _uiState,
@@ -228,6 +235,12 @@ class SeerrMediaDetailsViewModel(
         viewModelScope.launch {
             getSeerrTvRatingsUseCase(tmdbId)
                 .collect { rt -> _rtRatings.value = rt }
+        }
+        if (mediaType == RequestType.Person) {
+            viewModelScope.launch {
+                getPersonCreditsUseCase(tmdbId, repository)
+                    .onSuccess { _personCredits.value = it }
+            }
         }
     }
 

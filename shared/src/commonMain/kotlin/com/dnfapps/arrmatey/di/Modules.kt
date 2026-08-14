@@ -142,6 +142,7 @@ import com.dnfapps.arrmatey.seerr.usecase.CloseIssueUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetIssueDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetIssuesUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetPersonCreditsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetTrendingUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverMoviesUseCase
@@ -305,6 +306,7 @@ val useCaseModule = module {
     factory { SearchSeerrUseCase() }
     factory { SubmitRequestUseCase() }
     factory { GetIssuesUseCase() }
+    factory { GetPersonCreditsUseCase() }
     factory { GetIssueDetailsUseCase(get()) }
     factory { SubmitIssueUseCase(get()) }
     factory { SubmitIssueCommentUseCase(get()) }
@@ -398,7 +400,7 @@ val viewModelModule = module {
     factory { CalendarViewModel(get(), get(), get(), get()) }
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { (tmdbId: Long, mediaType: RequestType) ->
-        SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get(), get())
+        SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { BazarrViewModel(get(), get(), get(), get()) }
     factory { (target: BazarrMediaTarget) ->

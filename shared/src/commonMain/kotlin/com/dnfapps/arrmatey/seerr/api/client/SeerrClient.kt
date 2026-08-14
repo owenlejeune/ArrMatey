@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssuesResponse
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
+import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
@@ -48,6 +49,7 @@ interface SeerrClient {
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
     suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails>
+    suspend fun getPersonCredits(personId: Long): NetworkResult<PersonCredits>
     suspend fun setRequestStatus(
         requestId: Long,
         status: ApprovalStatus,
@@ -128,6 +130,9 @@ class SeerrClientImpl(
 
     override suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails> =
         get("person/$personId")
+
+    override suspend fun getPersonCredits(personId: Long): NetworkResult<PersonCredits> =
+        get("person/$personId/combined_credits")
 
     override suspend fun setRequestStatus(
         requestId: Long,

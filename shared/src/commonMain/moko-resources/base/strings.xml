@@ -574,6 +574,8 @@
     <string name="request">Request</string>
     <string name="request_more">Request More</string>
     <string name="requested_by">Requested by</string>
+    <string name="appearances">Appearances</string>
+    <string name="also_known_as">Also Known As</string>
     <string name="approved_by">Approved by</string>
     <string name="opened_by">Opened by</string>
     <string name="open">Open</string>

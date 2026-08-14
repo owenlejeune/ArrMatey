@@ -124,7 +124,6 @@ struct SeerrDetailsScreen: View {
         }
         .ignoresSafeArea(edges: .top)
     }
-    
 
     // MARK: - Seasons
     

@@ -117,6 +117,7 @@ struct DiscoverPosterItem: View {
     let aspectRatio: AspectRatio
     let posterHeight: CGFloat?
     let onItemClick: ((DiscoverResult) -> Void)?
+    let showOverlays: Bool
 
     @State private var loadError = false
 
@@ -126,7 +127,8 @@ struct DiscoverPosterItem: View {
         elevation: Shared.PosterElevation = .medium,
         radius: Shared.PosterRadius = .medium,
         posterHeight: CGFloat? = nil,
-        onItemClick: ((DiscoverResult) -> Void)? = nil
+        onItemClick: ((DiscoverResult) -> Void)? = nil,
+        showOverlays: Bool = true
     ) {
         self.item = item
         self.elevation = elevation
@@ -134,6 +136,7 @@ struct DiscoverPosterItem: View {
         self.aspectRatio = aspectRatio
         self.posterHeight = posterHeight
         self.onItemClick = onItemClick
+        self.showOverlays = showOverlays
     }
 
     var body: some View {
@@ -149,7 +152,7 @@ struct DiscoverPosterItem: View {
                 posterImageView
             },
             errorContent: {
-                if loadError || item.fullPosterPath == nil {
+                if loadError || (item.posterPath == nil && item.profilePath == nil) {
                     VStack(spacing: 4) {
                         Image(systemName: "photo.badge.exclamationmark")
                             .resizable()
@@ -165,17 +168,19 @@ struct DiscoverPosterItem: View {
                 }
             },
             additionalContent: {
-                ZStack(alignment: .topLeading) {
-                    RequestTypeChip(type: item.mediaType, solid: true)
-                        .padding(8)
-                    
-                    if let status = item.mediaInfo?.status {
-                        StatusBadge(status: status)
+                if showOverlays {
+                    ZStack(alignment: .topLeading) {
+                        RequestTypeChip(type: item.mediaType, solid: true)
                             .padding(8)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        
+                        if let status = item.mediaInfo?.status {
+                            StatusBadge(status: status)
+                                .padding(8)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             },
             footerContent: {
                 VStack(alignment: .leading, spacing: 2) {

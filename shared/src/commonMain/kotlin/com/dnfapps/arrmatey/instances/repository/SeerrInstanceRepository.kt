@@ -15,6 +15,8 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
+import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
+import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -356,6 +358,14 @@ class SeerrInstanceRepository(
 
     suspend fun getSonarrDetails(serverId: Long): NetworkResult<ServiceDetails> {
         return client.getSonarrDetails(serverId)
+    }
+
+    suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails> {
+        return client.getPersonDetails(personId)
+    }
+
+    suspend fun getPersonCredits(personId: Long): NetworkResult<PersonCredits> {
+        return client.getPersonCredits(personId)
     }
 
     suspend fun closeIssue(issueId: Long): NetworkResult<Unit> {
