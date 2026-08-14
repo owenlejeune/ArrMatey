@@ -11,7 +11,10 @@ class GetRequestsUseCase {
         repository: SeerrInstanceRepository,
         scope: CoroutineScope
     ): PagingController<MediaRequestPackage> {
-        return PagingController(scope) {
+        return PagingController(
+            scope = scope,
+            keySelector = { it.request.id }
+        ) {
             repository.getRequestsPaging()
         }
     }

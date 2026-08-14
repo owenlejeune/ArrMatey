@@ -6,6 +6,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -182,76 +183,87 @@ fun PosterItem(
     isSelected: Boolean = false,
     showOverlays: Boolean = true
 ) {
-    var imageLoadError by remember { mutableStateOf(false) }
+    if (item.mediaType == RequestType.Person) {
+        CastCrewItem(
+            profilePath = item.fullPosterPath,
+            name = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+            credit = item.knownForDepartment ?: "",
+            modifier = modifier.clickable(enabled = onItemClick != null) {
+                onItemClick?.invoke(item)
+            }
+        )
+    } else {
+        var imageLoadError by remember { mutableStateOf(false) }
 
-    val model = rememberRemoteImageData(
-        url = item.fullPosterPath,
-        onError = { _, err ->
-            println(err.throwable.message)
-            imageLoadError = true
-        }
-    )
+        val model = rememberRemoteImageData(
+            url = item.fullPosterPath,
+            onError = { _, err ->
+                println(err.throwable.message)
+                imageLoadError = true
+            }
+        )
 
-    BasePosterItem(
-        model = model,
-        modifier = modifier,
-        isSelected = isSelected,
-        elevation = elevation,
-        radius = radius,
-        posterHeight = posterHeight,
-        aspectRatio = aspectRatio,
-        onClick = {
-            onItemClick?.invoke(item)
-        },
-        onLongClick = onLongClick,
-        additionalContent = {
-            if (showOverlays) {
-                MediaTypeOverlay(item.mediaType)
-                item.mediaInfo?.let { info ->
-                    StatusOverlay(MediaStatus.fromValue(info.status))
+        BasePosterItem(
+            model = model,
+            modifier = modifier,
+            isSelected = isSelected,
+            elevation = elevation,
+            radius = radius,
+            posterHeight = posterHeight,
+            aspectRatio = aspectRatio,
+            onClick = {
+                onItemClick?.invoke(item)
+            },
+            onLongClick = onLongClick,
+            additionalContent = {
+                if (showOverlays) {
+                    MediaTypeOverlay(item.mediaType)
+                    item.mediaInfo?.let { info ->
+                        StatusOverlay(MediaStatus.fromValue(info.status))
+                    }
+                }
+            },
+            footerVisible = true,
+            footerContent = {
+                Text(
+                    text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+                    style = MaterialTheme.typography.labelLarge,
+                    minLines = 2,
+                    maxLines = 2
+                )
+                val subText = when (item.mediaType) {
+                    RequestType.Person -> item.knownForDepartment ?: ""
+                    else -> (item.releaseDate ?: item.firstAirDate)?.take(4) ?: ""
+                }
+                Text(
+                    text = subText,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1
+                )
+            },
+            errorContent = {
+                if (imageLoadError) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center).padding(4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.BrokenImage,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Text(
+                            text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+                            style = MaterialTheme.typography.titleSmall,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
-        },
-        footerVisible = true,
-        footerContent = {
-            Text(
-                text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
-                style = MaterialTheme.typography.labelLarge,
-                minLines = 2,
-                maxLines = 2
-            )
-            val subText = when (item.mediaType) {
-                RequestType.Person -> item.knownForDepartment ?: ""
-                else -> (item.releaseDate ?: item.firstAirDate)?.take(4) ?: ""
-            }
-            Text(
-                text = subText,
-                style = MaterialTheme.typography.labelSmall,
-                maxLines = 1
-            )
-        },
-        errorContent = {
-            if (imageLoadError) {
-                Column (
-                    modifier = Modifier.align(Alignment.Center).padding(4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.BrokenImage,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Text(
-                        text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    )
+        )
+    }
 }
 
 @Composable

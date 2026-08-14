@@ -10,7 +10,10 @@ class GetDiscoverTvUseCase {
         repository: SeerrInstanceRepository,
         scope: CoroutineScope
     ): PagingController<DiscoverResult> {
-        return PagingController(scope) {
+        return PagingController(
+            scope = scope,
+            keySelector = { "${it.mediaType.name}_${it.id}" }
+        ) {
             repository.getDiscoverTvPaging()
         }
     }

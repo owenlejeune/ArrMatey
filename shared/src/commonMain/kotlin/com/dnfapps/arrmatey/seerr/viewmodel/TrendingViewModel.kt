@@ -93,9 +93,9 @@ class TrendingViewModel(
 
     private fun observeRepository() {
         viewModelScope.launch {
-            seerrRepository.collect { repo ->
+            seerrRepository.collectLatest { repo ->
                 if (repo != null) {
-                    viewModelScope.launch {
+                    launch {
                         val controller = getTrendingUseCase.createPagingController(repo, viewModelScope)
                         trendingPagingController = controller
                         controller.loadInitialPage()
@@ -103,7 +103,7 @@ class TrendingViewModel(
                             _trendingState.value = it
                         }
                     }
-                    viewModelScope.launch {
+                    launch {
                         val controller = getDiscoverMoviesUseCase.createPagingController(repo, viewModelScope)
                         moviesPagingController = controller
                         controller.loadInitialPage()
@@ -111,7 +111,7 @@ class TrendingViewModel(
                             _moviesState.value = it
                         }
                     }
-                    viewModelScope.launch {
+                    launch {
                         val controller = getDiscoverTvUseCase.createPagingController(repo, viewModelScope)
                         tvPagingController = controller
                         controller.loadInitialPage()
@@ -119,7 +119,7 @@ class TrendingViewModel(
                             _tvState.value = it
                         }
                     }
-                    viewModelScope.launch {
+                    launch {
                         val controller = getUpcomingMoviesUseCase.createPagingController(repo, viewModelScope)
                         upcomingMoviesPagingController = controller
                         controller.loadInitialPage()
@@ -127,7 +127,7 @@ class TrendingViewModel(
                             _upcomingMoviesState.value = it
                         }
                     }
-                    viewModelScope.launch {
+                    launch {
                         val controller = getUpcomingTvUseCase.createPagingController(repo, viewModelScope)
                         upcomingTvPagingController = controller
                         controller.loadInitialPage()

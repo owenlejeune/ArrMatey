@@ -277,7 +277,12 @@ fun SeerrDetailsScreen(
                                 }
 
                                 item.credits?.let { credits ->
-                                    SeerrCreditsSection(credits)
+                                    SeerrCreditsSection(
+                                        credits = credits,
+                                        onPersonClick = { personId ->
+                                            navManager.openSeerrDetails(personId, RequestType.Person)
+                                        }
+                                    )
                                 }
 
                                 val infoItems = buildList {

@@ -164,7 +164,9 @@ struct SeerrDetailsScreen: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(credits.cast.prefix(20), id: \.id) { member in
-                            CastMemberView(member: member)
+                            CastMemberView(member: member) { personId in
+                                navigationManager.goToSeerrDetails(tmdbId: personId, requestType: .person)
+                            }
                         }
                     }
                     .padding(.horizontal, 24)
@@ -374,39 +376,45 @@ private struct SeerrEpisodeRow: View {
 
 private struct CastMemberView: View {
     let member: CastMember
+    let onPersonClick: (Int64) -> Void
     
     var body: some View {
-        VStack(spacing: 4) {
-            if let profilePath = member.fullProfilePath,
-               let url = URL(string: profilePath) {
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Color(.systemGray4)
-                }
-                .frame(width: 80, height: 80)
-                .clipShape(Circle())
-            } else {
-                Circle()
-                    .fill(Color(.systemGray4))
-                    .frame(width: 80, height: 80)
-                    .overlay {
-                        Image(systemName: "person.fill")
-                            .foregroundColor(.gray)
+        Button {
+            onPersonClick(member.id)
+        } label: {
+            VStack(spacing: 4) {
+                if let profilePath = member.fullProfilePath,
+                   let url = URL(string: profilePath) {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Color(.systemGray4)
                     }
+                    .frame(width: 80, height: 80)
+                    .clipShape(Circle())
+                } else {
+                    Circle()
+                        .fill(Color(.systemGray4))
+                        .frame(width: 80, height: 80)
+                        .overlay {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.gray)
+                        }
+                }
+                
+                Text(member.name)
+                    .font(.caption)
+                    .lineLimit(1)
+                
+                Text(member.character)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
             }
-            
-            Text(member.name)
-                .font(.caption)
-                .lineLimit(1)
-            
-            Text(member.character)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .lineLimit(1)
+            .frame(width: 80)
         }
-        .frame(width: 80)
+        .buttonStyle(.plain)
     }
 }

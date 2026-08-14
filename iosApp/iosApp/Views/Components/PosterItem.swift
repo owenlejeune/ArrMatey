@@ -140,70 +140,79 @@ struct DiscoverPosterItem: View {
     }
 
     var body: some View {
-        BasePosterItem(
-            elevation: CGFloat(truncating: elevation.elevation as NSNumber),
-            radius: CGFloat(truncating: radius.radius as NSNumber),
-            aspectRatio: aspectRatio,
-            posterHeight: posterHeight,
-            onClick: { onItemClick?(item) },
-            enabled: true,
-            footerVisible: true,
-            posterContent: {
-                posterImageView
-            },
-            errorContent: {
-                if loadError || (item.posterPath == nil && item.profilePath == nil) {
-                    VStack(spacing: 4) {
-                        Image(systemName: "photo.badge.exclamationmark")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 48, height: 48)
-                            .foregroundColor(.red)
+        if item.mediaType == .person {
+            CastMemberProfileView(
+                profilePath: item.fullPosterPath,
+                name: item.title ?? item.name ?? MR.strings().unknown.localized(),
+                credit: item.knownForDepartment ?? "",
+                onClick: { onItemClick?(item) }
+            )
+        } else {
+            BasePosterItem(
+                elevation: CGFloat(truncating: elevation.elevation as NSNumber),
+                radius: CGFloat(truncating: radius.radius as NSNumber),
+                aspectRatio: aspectRatio,
+                posterHeight: posterHeight,
+                onClick: { onItemClick?(item) },
+                enabled: true,
+                footerVisible: true,
+                posterContent: {
+                    posterImageView
+                },
+                errorContent: {
+                    if loadError || (item.posterPath == nil && item.profilePath == nil) {
+                        VStack(spacing: 4) {
+                            Image(systemName: "photo.badge.exclamationmark")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 48, height: 48)
+                                .foregroundColor(.red)
+                            Text(item.title ?? item.name ?? MR.strings().unknown.localized())
+                                .font(.system(size: 14, weight: .semibold))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 8)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                },
+                additionalContent: {
+                    if showOverlays {
+                        ZStack(alignment: .topLeading) {
+                            RequestTypeChip(type: item.mediaType, solid: true)
+                                .padding(8)
+                            
+                            if let status = item.mediaInfo?.status {
+                                StatusBadge(status: status)
+                                    .padding(8)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    }
+                },
+                footerContent: {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(item.title ?? item.name ?? MR.strings().unknown.localized())
                             .font(.system(size: 14, weight: .semibold))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 8)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-            },
-            additionalContent: {
-                if showOverlays {
-                    ZStack(alignment: .topLeading) {
-                        RequestTypeChip(type: item.mediaType, solid: true)
-                            .padding(8)
+                            .lineLimit(2, reservesSpace: true)
+                            .multilineTextAlignment(.leading)
                         
-                        if let status = item.mediaInfo?.status {
-                            StatusBadge(status: status)
-                                .padding(8)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        let date = item.releaseDate ?? item.firstAirDate
+                        if let d = date, d.count >= 4 {
+                            Text(String(d.prefix(4)))
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                        } else if item.mediaType == .person, let dept = item.knownForDepartment {
+                            Text(dept)
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
                         }
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
-            },
-            footerContent: {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.title ?? item.name ?? MR.strings().unknown.localized())
-                        .font(.system(size: 14, weight: .semibold))
-                        .lineLimit(2, reservesSpace: true)
-                        .multilineTextAlignment(.leading)
-                    
-                    let date = item.releaseDate ?? item.firstAirDate
-                    if let d = date, d.count >= 4 {
-                        Text(String(d.prefix(4)))
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                    } else if item.mediaType == .person, let dept = item.knownForDepartment {
-                        Text(dept)
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-            }
-        )
+            )
+        }
     }
 
     @ViewBuilder
@@ -243,51 +252,107 @@ struct RequestPosterItem: View {
     }
     
     var body: some View {
-        BasePosterItem(
-            elevation: CGFloat(truncating: elevation.elevation as NSNumber),
-            radius: CGFloat(truncating: radius.radius as NSNumber),
-            aspectRatio: aspectRatio,
-            posterHeight: posterHeight,
-            posterContent: {
-                GeometryReader { geometry in
-                    PosterImageView(
-                        urlString: item.fullPosterPath,
-                        resource: nil,
-                        geometry: geometry,
-                        loadError: $loadError
-                    )
-                }
-            },
-            errorContent: {
-                if loadError || item.fullPosterPath == nil {
-                    VStack(spacing: 4) {
-                        Image(systemName: "photo.badge.exclamationmark")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 48, height: 48)
-                            .foregroundColor(.red)
-                        Text(item.displayTitle)
-                            .font(.system(size: 14, weight: .semibold))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 8)
+        if item.requestType == .person {
+            CastMemberProfileView(
+                profilePath: item.fullPosterPath,
+                name: item.displayTitle,
+                credit: "",
+                onClick: { }
+            )
+        } else {
+            BasePosterItem(
+                elevation: CGFloat(truncating: elevation.elevation as NSNumber),
+                radius: CGFloat(truncating: radius.radius as NSNumber),
+                aspectRatio: aspectRatio,
+                posterHeight: posterHeight,
+                posterContent: {
+                    GeometryReader { geometry in
+                        PosterImageView(
+                            urlString: item.fullPosterPath,
+                            resource: nil,
+                            geometry: geometry,
+                            loadError: $loadError
+                        )
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-            },
-            additionalContent: {
-                ZStack(alignment: .topLeading) {
-                    RequestTypeChip(type: item.requestType, solid: true)
-                        .padding(8)
-                    
-                    if let status = item.mediaInfo?.status {
-                        StatusBadge(status: status)
+                },
+                errorContent: {
+                    if loadError || item.fullPosterPath == nil {
+                        VStack(spacing: 4) {
+                            Image(systemName: "photo.badge.exclamationmark")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 48, height: 48)
+                                .foregroundColor(.red)
+                            Text(item.displayTitle)
+                                .font(.system(size: 14, weight: .semibold))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 8)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                },
+                additionalContent: {
+                    ZStack(alignment: .topLeading) {
+                        RequestTypeChip(type: item.requestType, solid: true)
                             .padding(8)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        
+                        if let status = item.mediaInfo?.status {
+                            StatusBadge(status: status)
+                                .padding(8)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            )
+        }
+    }
+}
+
+struct CastMemberProfileView: View {
+    let profilePath: String?
+    let name: String
+    let credit: String
+    let onClick: () -> Void
+    
+    var body: some View {
+        Button(action: onClick) {
+            VStack(spacing: 4) {
+                if let profilePath = profilePath,
+                   let url = URL(string: profilePath) {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Color(.systemGray4)
+                    }
+                    .frame(width: 80, height: 80)
+                    .clipShape(Circle())
+                } else {
+                    Circle()
+                        .fill(Color(.systemGray4))
+                        .frame(width: 80, height: 80)
+                        .overlay {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.gray)
+                        }
+                }
+                
+                Text(name)
+                    .font(.caption)
+                    .lineLimit(1)
+                
+                if !credit.isEmpty {
+                    Text(credit)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
             }
-        )
+            .frame(width: 80)
+        }
+        .buttonStyle(.plain)
     }
 }
 

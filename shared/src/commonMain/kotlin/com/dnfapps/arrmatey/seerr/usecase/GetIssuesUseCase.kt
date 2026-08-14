@@ -10,7 +10,10 @@ class GetIssuesUseCase {
         repository: SeerrInstanceRepository,
         scope: CoroutineScope
     ): PagingController<MediaIssuePackage> {
-        return PagingController(scope) {
+        return PagingController(
+            scope = scope,
+            keySelector = { it.issue.id }
+        ) {
             repository.getIssuesPaging()
         }
     }

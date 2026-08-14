@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 
 class PagingController<T: Any>(
     private val scope: CoroutineScope,
+    private val keySelector: ((T) -> Any)? = null,
     private val sourceFactory: () -> PagingSource<T>
 ) {
     private val _state = MutableStateFlow(PagedData<T>())
@@ -28,9 +29,11 @@ class PagingController<T: Any>(
 
             when (val result = pagingSource?.load(1)) {
                 is LoadResult.Page<*> -> {
+                    val data = result.data as List<T>
+                    val items = if (keySelector != null) data.distinctBy(keySelector) else data
                     _state.update {
                         PagedData(
-                            items = result.data as List<T>,
+                            items = items,
                             totalItemCount = result.totalItemCount,
                             currentPage = result.currentPage,
                             hasMore = result.hasNextPage,
@@ -71,9 +74,12 @@ class PagingController<T: Any>(
 
             when (val result = pagingSource?.load(nextPage)) {
                 is LoadResult.Page<*> -> {
+                    val data = result.data as List<T>
                     _state.update {
+                        val newItems = it.items + data
+                        val items = if (keySelector != null) newItems.distinctBy(keySelector) else newItems
                         it.copy(
-                            items = it.items + (result.data as List<T>),
+                            items = items,
                             currentPage = result.currentPage,
                             hasMore = result.hasNextPage,
                             isLoadingMore = false,
