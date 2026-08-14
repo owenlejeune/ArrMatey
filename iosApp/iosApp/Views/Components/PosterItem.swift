@@ -424,7 +424,7 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
             .frame(width: width)
         }
         .buttonStyle(.plain)
-        .disabled(!enabled || onClick == nil)
+        .disabled(!enabled)
         .background(Color(.systemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: radius))
         .shadow(radius: elevation)

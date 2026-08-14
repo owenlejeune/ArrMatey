@@ -61,6 +61,7 @@ import com.dnfapps.arrmatey.compose.utils.formatWithCommas
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.openLink
+import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.navigation.navigationManager
@@ -196,7 +197,7 @@ fun SeerrDetailsScreen(
                                     onDeclineRequestClicked = { viewModel.declineRequest(it) },
                                 )
 
-                                item.tagline?.let {
+                                item.tagline?.unlessEmpty {
                                     Text(
                                         text = it,
                                         style = MaterialTheme.typography.headlineSmall,
@@ -205,7 +206,7 @@ fun SeerrDetailsScreen(
                                     )
                                 }
 
-                                item.overview?.takeUnless { it.isEmpty() }?.let { overview ->
+                                item.overview?.unlessEmpty { overview ->
                                     ItemDescriptionCard(overview)
                                 }
 

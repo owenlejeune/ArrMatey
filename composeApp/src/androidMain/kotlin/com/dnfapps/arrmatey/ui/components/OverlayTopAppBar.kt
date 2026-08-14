@@ -5,6 +5,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBar
@@ -24,11 +26,69 @@ fun OverlayTopAppBar(
     title: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {}
 ) {
+    OverlayTopAppBar(
+        scrollValueProvider = { scrollState.value },
+        modifier = modifier,
+        navigationIcon = navigationIcon,
+        title = title,
+        actions = actions
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OverlayTopAppBar(
+    gridState: LazyGridState,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable () -> Unit = {},
+    title: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {}
+) {
+    OverlayTopAppBar(
+        scrollValueProvider = {
+            if (gridState.firstVisibleItemIndex == 0) gridState.firstVisibleItemScrollOffset else 500
+        },
+        modifier = modifier,
+        navigationIcon = navigationIcon,
+        title = title,
+        actions = actions
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OverlayTopAppBar(
+    listState: LazyListState,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable () -> Unit = {},
+    title: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {}
+) {
+    OverlayTopAppBar(
+        scrollValueProvider = {
+            if (listState.firstVisibleItemIndex == 0) listState.firstVisibleItemScrollOffset else 500
+        },
+        modifier = modifier,
+        navigationIcon = navigationIcon,
+        title = title,
+        actions = actions
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OverlayTopAppBar(
+    scrollValueProvider: () -> Int,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable () -> Unit = {},
+    title: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {}
+) {
     val headerBackgroundAlpha by remember {
         derivedStateOf {
             // Fade in over 200 pixels of scroll
             val fadeDistance = 200f
-            (scrollState.value / fadeDistance).coerceIn(0f, 1f)
+            (scrollValueProvider() / fadeDistance).coerceIn(0f, 1f)
         }
     }
 

@@ -16,26 +16,14 @@ struct DiscoverTab: View {
             NavigationStack(path: $navigationManager.seerrPath) { // Using seerrPath for now
                 DiscoverTabContent()
                     .navigationDestination(for: SeerrRoute.self) { route in
-                        seerrDestination(for: route)
+                        SeerrRouteDestination(route: route)
                     }
             }
         case .launcher:
             DiscoverTabContent()
                 .navigationDestination(for: SeerrRoute.self) { route in
-                    seerrDestination(for: route)
+                    SeerrRouteDestination(route: route)
                 }
-        }
-    }
-    
-    @ViewBuilder
-    private func seerrDestination(for route: SeerrRoute) -> some View {
-        switch route {
-        case .details(let tmdbId, let requestType):
-            if requestType == .person {
-                SeerrPersonDetailsScreen(personId: tmdbId)
-            } else {
-                SeerrDetailsScreen(tmdbId: tmdbId, requestType: requestType)
-            }
         }
     }
 }

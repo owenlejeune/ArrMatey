@@ -305,6 +305,7 @@
     <string name="narrated_by">Narrated by: %1$s</string>
     <string name="selected_count">%1$d selected</string>
     <string name="done">Done</string>
+    <string name="born_on"> Born: %1$s  |  %2$s</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

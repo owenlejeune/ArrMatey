@@ -75,28 +75,31 @@ fun MediaDetailsActions(
     onRequest4kClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-
-    Row(
-        modifier = modifier,
-//        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    if (
+        buttonState.showWatchButton || buttonState.showWatchTrailerOption ||
+        buttonState.showViewRequestButton || buttonState.showRequestMoreButton
     ) {
-        if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
-            WatchButton(buttonState, onWatchClicked, onWatchTrailerClicked)
-        }
-        if (buttonState.showViewRequestButton) {
-            ViewRequestButton(
-                buttonState,
-                onViewRequestClicked,
-                onApproveRequestClicked,
-                onDeclineRequestClicked
-            )
-        }
-        if (buttonState.showRequestMoreButton) {
-            RequestButton(
-                label = mokoString(MR.strings.request_more),
-                onClick = onRequestClicked
-            )
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
+                WatchButton(buttonState, onWatchClicked, onWatchTrailerClicked)
+            }
+            if (buttonState.showViewRequestButton) {
+                ViewRequestButton(
+                    buttonState,
+                    onViewRequestClicked,
+                    onApproveRequestClicked,
+                    onDeclineRequestClicked
+                )
+            }
+            if (buttonState.showRequestMoreButton) {
+                RequestButton(
+                    label = mokoString(MR.strings.request_more),
+                    onClick = onRequestClicked
+                )
+            }
         }
     }
 }

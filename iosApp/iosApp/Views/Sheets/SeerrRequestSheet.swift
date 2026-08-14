@@ -35,7 +35,7 @@ struct SeerrRequestSheet: View {
         self.onSubmit = onSubmit
         
         // Initialize state with default values from service details
-        _selectedProfileId = State(initialValue: serviceDetails?.server.activeProfileId?.int64Value)
+        _selectedProfileId = State(initialValue: serviceDetails.map { Int64($0.server.activeProfileId) })
         _selectedRootFolder = State(initialValue: serviceDetails?.server.activeDirectory)
         _selectedUserId = State(initialValue: currentUser?.id)
         
