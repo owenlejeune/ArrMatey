@@ -32,6 +32,8 @@ data class DiscoverResult(
     val backdropPath: String? = null,
     val posterPath: String? = null,
     val profilePath: String? = null,
+    val character: String? = null,
+    val job: String? = null,
     val knownFor: List<DiscoverResult> = emptyList(),
     val knownForDepartment: String? = null,
     val mediaInfo: MediaInfo? = null

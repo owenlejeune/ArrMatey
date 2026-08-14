@@ -245,7 +245,8 @@ private fun LazyGridScope.seerrCreditsGrid(
     items(items) { item ->
         PosterItem(
             item = item,
-            onItemClick = { onItemClick(item) }
+            onItemClick = { onItemClick(item) },
+            includeCredits = true
         )
     }
 }

@@ -118,6 +118,7 @@ struct DiscoverPosterItem: View {
     let posterHeight: CGFloat?
     let onItemClick: ((DiscoverResult) -> Void)?
     let showOverlays: Bool
+    let includeCredits: Bool
 
     @State private var loadError = false
 
@@ -128,7 +129,8 @@ struct DiscoverPosterItem: View {
         radius: Shared.PosterRadius = .medium,
         posterHeight: CGFloat? = nil,
         onItemClick: ((DiscoverResult) -> Void)? = nil,
-        showOverlays: Bool = true
+        showOverlays: Bool = true,
+        includeCredits: Bool = false
     ) {
         self.item = item
         self.elevation = elevation
@@ -137,6 +139,7 @@ struct DiscoverPosterItem: View {
         self.posterHeight = posterHeight
         self.onItemClick = onItemClick
         self.showOverlays = showOverlays
+        self.includeCredits = includeCredits
     }
 
     var body: some View {
@@ -197,20 +200,29 @@ struct DiscoverPosterItem: View {
                             .lineLimit(2, reservesSpace: true)
                             .multilineTextAlignment(.leading)
                         
-                        let date = item.releaseDate ?? item.firstAirDate
-                        if let d = date, d.count >= 4 {
-                            Text(String(d.prefix(4)))
-                                .font(.system(size: 12))
+                        let subText: String = {
+                            if item.mediaType == .person { return item.knownForDepartment ?? "" }
+                            let date = item.releaseDate ?? item.firstAirDate
+                            if let d = date, d.count >= 4 {
+                                return String(d.prefix(4))
+                            }
+                            return ""
+                        }()
+
+                        Text(subText)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+
+                        if includeCredits {
+                            let credit = item.character ?? item.job ?? " "
+                            Text(credit)
+                                .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(.secondary)
-                                .lineLimit(1)
-                        } else if item.mediaType == .person, let dept = item.knownForDepartment {
-                            Text(dept)
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
+                                .lineLimit(2, reservesSpace: true)
                         }
                     }
-                }
+                },
             )
         }
     }

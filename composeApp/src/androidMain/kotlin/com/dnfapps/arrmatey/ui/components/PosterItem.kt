@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -170,6 +172,7 @@ fun PosterItem(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PosterItem(
     item: DiscoverResult,
@@ -181,7 +184,8 @@ fun PosterItem(
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
     isSelected: Boolean = false,
-    showOverlays: Boolean = true
+    showOverlays: Boolean = true,
+    includeCredits: Boolean = false
 ) {
     if (item.mediaType == RequestType.Person) {
         CastCrewItem(
@@ -240,6 +244,16 @@ fun PosterItem(
                     style = MaterialTheme.typography.labelSmall,
                     maxLines = 1
                 )
+
+                if (includeCredits) {
+                    val credit = (item.character ?: item.job) ?: ""
+                    Text(
+                        text = credit,
+                        style = MaterialTheme.typography.labelMediumEmphasized,
+                        maxLines = 2,
+                        minLines = 2
+                    )
+                }
             },
             errorContent = {
                 if (imageLoadError) {

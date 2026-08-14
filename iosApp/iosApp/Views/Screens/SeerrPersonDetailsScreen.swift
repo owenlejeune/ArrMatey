@@ -9,8 +9,10 @@ import Shared
 struct SeerrPersonDetailsScreen: View {
     @StateObject private var viewModel: SeerrMediaDetailsViewModelS
     @EnvironmentObject private var navigationManager: NavigationManager
-    
-    private let columns = [GridItem(.adaptive(minimum: GridDensity.normal.iosSize), spacing: GridSpacing.medium.iosSpacing)]
+
+    private let columns = [
+        GridItem(.adaptive(minimum: GridDensity.normal.iosSize), spacing: GridSpacing.medium.iosSpacing)
+    ]
     
     init(personId: Int64) {
         _viewModel = StateObject(wrappedValue: SeerrMediaDetailsViewModelS(tmdbId: personId, requestType: .person))
@@ -86,7 +88,7 @@ struct SeerrPersonDetailsScreen: View {
                 .padding(24)
                 
                 if let credits = viewModel.personCredits {
-                    LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 24) {
                         creditsSection(title: MR.strings().appearances.localized(), icon: "film", items: credits.cast)
                         creditsSection(title: MR.strings().crew.localized(), icon: "gearshape", items: credits.crew)
                     }
@@ -101,7 +103,7 @@ struct SeerrPersonDetailsScreen: View {
     @ViewBuilder
     private func creditsSection(title: String, icon: String, items: [DiscoverResult]) -> some View {
         if !items.isEmpty {
-            Section(header:
+            VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 8) {
                     Image(systemName: icon)
                         .font(.system(size: 20))
@@ -110,11 +112,16 @@ struct SeerrPersonDetailsScreen: View {
                         .bold()
                     Spacer()
                 }
-                .padding(.top, 12)
-            ) {
-                ForEach(items, id: \.id) { result in
-                    DiscoverPosterItem(item: result) { _ in 
-                        navigationManager.goToSeerrDetails(tmdbId: result.id, requestType: result.mediaType)
+                
+                LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
+                    ForEach(items, id: \.id) { result in
+                        DiscoverPosterItem(
+                            item: result,
+                            onItemClick: { item in
+                                navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                            },
+                            includeCredits: true
+                        )
                     }
                 }
             }
