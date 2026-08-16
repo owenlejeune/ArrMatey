@@ -64,15 +64,16 @@ struct SeerrPersonDetailsScreen: View {
                         Text(MR.strings().born_on.formatted(args: [birthday, birthplace]))
                             .font(.body)
                             .foregroundColor(.secondary)
-                    }
-                    
-                    if !item.alsoKnownAs.isEmpty {
-                        HStack(alignment: .top, spacing: 8) {
-                            Text(MR.strings().also_known_as.localized())
-                                .font(.headline)
-                                .bold()
-                            Text(item.alsoKnownAs.joined(separator: ", "))
-                                .font(.body)
+                        
+                        if !item.alsoKnownAs.isEmpty {
+                            HStack(alignment: .top, spacing: 8) {
+                                Text(MR.strings().also_known_as.localized())
+                                    .font(.headline)
+                                    .bold()
+                                Text(item.alsoKnownAs.joined(separator: ", "))
+                                    .font(.body)
+                            }
+                            .padding(.top, 4)
                         }
                     }
                     
@@ -81,6 +82,7 @@ struct SeerrPersonDetailsScreen: View {
                     }
                 }
                 .padding(24)
+                .padding(.top, 12)
                 
                 if let credits = viewModel.personCredits {
                     VStack(alignment: .leading, spacing: 24) {
