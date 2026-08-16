@@ -40,4 +40,7 @@ data class DiscoverResult(
 ) {
     val fullPosterPath: String?
         get() = (posterPath ?: profilePath)?.let { "https://image.tmdb.org/t/p/w500${it}" }
+
+    val fullBackdropPath: String?
+        get() = backdropPath?.let { "https://image.tmdb.org/t/p/original${it}" }
 }

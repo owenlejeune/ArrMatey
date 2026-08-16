@@ -166,7 +166,7 @@ fun DetailsHeader(
     Box(modifier = Modifier.fillMaxWidth()) {
         DetailHeaderBanner(
             bannerUrl = item.fullBackdropPath,
-            gradientHeight = detailHeight.times(2).dp()
+            gradientHeight = detailHeight.times(3).dp()
         )
         Row(
             modifier = Modifier

@@ -3,7 +3,10 @@ package com.dnfapps.arrmatey.entensions
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.utils.MultiSelectState
 
@@ -39,4 +42,20 @@ fun Modifier.selectionClickable(
         interactionSource = interactionSource,
         hapticFeedbackEnabled = hapticFeedbackEnabled,
     )
+)
+
+fun Modifier.breakPadding(horizontal: Dp): Modifier = this.then(
+    Modifier.layout { measurable, constraints ->
+        val paddingPx = horizontal.roundToPx()
+        val targetWidth = constraints.maxWidth + (paddingPx * 2)
+        val placeable = measurable.measure(
+            constraints.copy(
+                minWidth = targetWidth,
+                maxWidth = targetWidth
+            )
+        )
+        layout(constraints.maxWidth, placeable.height) {
+            placeable.placeRelative(-paddingPx, 0)
+        }
+    }
 )

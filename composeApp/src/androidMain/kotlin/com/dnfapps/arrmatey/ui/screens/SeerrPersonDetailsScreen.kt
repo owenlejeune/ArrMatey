@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -35,11 +38,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.entensions.breakPadding
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.takeUnlessEmpty
@@ -54,8 +59,8 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
+import com.dnfapps.arrmatey.ui.components.PersonDetailsHeader
 import com.dnfapps.arrmatey.ui.components.PosterItem
-import com.dnfapps.arrmatey.ui.helpers.statusBarHeight
 import com.dnfapps.arrmatey.utils.GridDensity
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -117,20 +122,16 @@ fun SeerrPersonDetailsScreen(
                             columns = GridCells.Adaptive(minSize = GridDensity.Normal.minSize),
                             state = gridState,
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 24.dp),
+                            contentPadding = PaddingValues(bottom = 24.dp, start = 24.dp, end = 24.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             item(span = { GridItemSpan(maxLineSpan) }) {
-                                Box(
-                                    modifier = Modifier.padding(top = 170.dp)
-                                ) {
-                                    PosterItem(
-                                        item = item,
-                                        modifier = Modifier.width(150.dp),
-                                        showOverlays = false
-                                    )
-                                }
+                                PersonDetailsHeader(
+                                    item = item,
+                                    credits = credits,
+                                    modifier = Modifier.breakPadding(24.dp)
+                                )
                             }
 
                             item(span = { GridItemSpan(maxLineSpan) }) {

@@ -47,14 +47,11 @@ struct SeerrPersonDetailsScreen: View {
     
     @ViewBuilder
     private func successContent(state: SeerrDetailsStateSuccess) -> some View {
-        let item = state.item
+        let item = state.item as! PersonDetails
         
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                GenericPosterItem(posterUrl: item.fullPosterPath)
-                    .frame(width: 150)
-                    .padding(.top, 170)
-                    .padding(.horizontal, 24)
+                PersonDetailsHeader(item: item, credits: viewModel.personCredits)
                 
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 4) {
@@ -62,26 +59,24 @@ struct SeerrPersonDetailsScreen: View {
                             .font(.title)
                             .bold()
                         
-                        if let person = item as? PersonDetails {
-                            let birthday = person.birthday?.format(pattern: "MMMM d, yyyy") ?? MR.strings().unknown.localized()
-                            let birthplace = person.placeOfBirth ?? MR.strings().unknown.localized()
-                            Text(MR.strings().born_on.formatted(args: [birthday, birthplace]))
-                                .font(.body)
-                                .foregroundColor(.secondary)
-                        }
+                        let birthday = item.birthday?.format(pattern: "MMMM d, yyyy") ?? MR.strings().unknown.localized()
+                        let birthplace = item.placeOfBirth ?? MR.strings().unknown.localized()
+                        Text(MR.strings().born_on.formatted(args: [birthday, birthplace]))
+                            .font(.body)
+                            .foregroundColor(.secondary)
                     }
                     
-                    if let person = item as? PersonDetails, !person.alsoKnownAs.isEmpty {
+                    if !item.alsoKnownAs.isEmpty {
                         HStack(alignment: .top, spacing: 8) {
                             Text(MR.strings().also_known_as.localized())
                                 .font(.headline)
                                 .bold()
-                            Text(person.alsoKnownAs.joined(separator: ", "))
+                            Text(item.alsoKnownAs.joined(separator: ", "))
                                 .font(.body)
                         }
                     }
                     
-                    if let person = item as? PersonDetails, let bio = person.biography, !bio.isEmpty {
+                    if let bio = item.biography, !bio.isEmpty {
                         ItemDescriptionCard(overview: bio)
                     }
                 }
