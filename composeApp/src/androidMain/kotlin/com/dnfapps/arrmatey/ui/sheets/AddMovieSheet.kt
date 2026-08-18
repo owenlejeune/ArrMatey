@@ -38,6 +38,8 @@ import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
 
+import com.dnfapps.arrmatey.instances.model.Instance
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun AddMovieSheet(
@@ -49,7 +51,10 @@ fun AddMovieSheet(
     preferences: InstancePreferences,
     onUpdatePreferences: (InstancePreferences) -> Unit,
     onAddItem: (ArrMedia, Boolean) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    instances: List<Instance> = emptyList(),
+    selectedInstance: Instance? = null,
+    onInstanceSelected: (Instance) -> Unit = {}
 ) {
     var monitored by remember(preferences.addMovieMonitored) { mutableStateOf(preferences.addMovieMonitored) }
     var minimumAvailability by remember(preferences.addMovieMinimumAvailability) { mutableStateOf(preferences.addMovieMinimumAvailability) }
@@ -78,6 +83,17 @@ fun AddMovieSheet(
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            if (instances.size > 1 && selectedInstance != null) {
+                DropdownPicker(
+                    options = instances,
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedOption = selectedInstance,
+                    onOptionSelected = onInstanceSelected,
+                    getOptionLabel = { it.label },
+                    label = { Text(mokoString(MR.strings.instances)) }
+                )
+            }
+
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,

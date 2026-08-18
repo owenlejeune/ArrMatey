@@ -18,11 +18,15 @@ class AddMediaItemUseCase(
     suspend operator fun invoke(
         instanceType: InstanceType,
         item: ArrMedia,
-        metadata: AudiobookMetadataResponse?,
-        searchOnAdd: Boolean
+        metadata: AudiobookMetadataResponse? = null,
+        searchOnAdd: Boolean = false,
+        targetInstanceId: Long? = null
     ) {
-        val repository = instanceManager.getSelectedArrRepository(instanceType)
-            .firstOrNull()
+        val repository = if (targetInstanceId != null) {
+            instanceManager.getArrRepository(targetInstanceId)
+        } else {
+            instanceManager.getSelectedArrRepository(instanceType).firstOrNull()
+        }
 
         if (repository == null) {
             return

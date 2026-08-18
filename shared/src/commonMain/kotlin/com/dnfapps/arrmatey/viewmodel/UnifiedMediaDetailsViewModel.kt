@@ -3,12 +3,15 @@ package com.dnfapps.arrmatey.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.arr.usecase.GetUnifiedMediaDetailsUseCase
 import com.dnfapps.arrmatey.arr.usecase.SmartAddMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
@@ -19,40 +22,46 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
-import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
+import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
-import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
-import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
-import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
-import com.dnfapps.arrmatey.seerr.api.model.RequestType
-import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
-import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
-import com.dnfapps.arrmatey.seerr.api.model.UserPermission
-import com.dnfapps.arrmatey.seerr.api.model.TvDetails
-import com.dnfapps.arrmatey.seerr.state.MediaButtonState
-import com.dnfapps.arrmatey.seerr.state.toButtonState
-import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
-import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
-import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
-import com.dnfapps.arrmatey.seerr.api.model.IssueBody
-import com.dnfapps.arrmatey.seerr.api.model.IssueType
-import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
-import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
-import com.dnfapps.arrmatey.seerr.api.model.Service
-import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
-import com.dnfapps.arrmatey.datastore.InstancePreferences
+import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
+import com.dnfapps.arrmatey.model.InstanceMediaPresence
+import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
+import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.IssueBody
+import com.dnfapps.arrmatey.seerr.api.model.IssueType
+import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.api.model.Service
+import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
+import com.dnfapps.arrmatey.seerr.api.model.TvDetails
+import com.dnfapps.arrmatey.seerr.api.model.UserPermission
+import com.dnfapps.arrmatey.seerr.state.MediaButtonState
+import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
+import com.dnfapps.arrmatey.seerr.state.toButtonState
+import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
+import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.OperationStatus
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.networking.onError
-import kotlinx.coroutines.flow.SharingStarted
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -65,7 +74,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -93,7 +101,8 @@ class UnifiedMediaDetailsViewModel(
     private val deleteMovieFileUseCase: DeleteMovieFileUseCase,
     private val submitIssueUseCase: SubmitIssueUseCase,
     observeInstancePreferencesUseCase: ObserveInstancePreferencesUseCase,
-    private val updateInstancePreferencesUseCase: UpdateInstancePreferencesUseCase
+    private val updateInstancePreferencesUseCase: UpdateInstancePreferencesUseCase,
+    private val observeScopedReposByTypeUseCase: ObserveScopedReposByTypeUseCase
 ) : ViewModel() {
 
     private var seerrMediaId: Long? = null
@@ -223,39 +232,150 @@ class UnifiedMediaDetailsViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = InstancePreferences()
         )
-    
-    private val arrRepositoryFlow = if (resolvedInstanceType != null) {
+
+    private val _selectedInstanceId = MutableStateFlow<Long?>(null)
+    val selectedInstanceId: StateFlow<Long?> = _selectedInstanceId.asStateFlow()
+
+    private val _instancePresencesMap = MutableStateFlow<Map<Long, ArrMedia?>>(emptyMap())
+
+    private val allArrReposFlow: Flow<List<ArrInstanceRepository>> = if (resolvedInstanceType != null) {
+        observeScopedReposByTypeUseCase(resolvedInstanceType)
+            .map { it.filterIsInstance<ArrInstanceRepository>() }
+    } else flowOf(emptyList())
+
+    val availableInstances: StateFlow<List<Instance>> = allArrReposFlow
+        .map { repos -> repos.map { it.instance } }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    private val defaultSelectedArrRepoFlow: Flow<ArrInstanceRepository?> = if (resolvedInstanceType != null) {
         getArrInstanceRepositoryUseCase.observeSelected(resolvedInstanceType)
     } else flowOf(null)
 
+    private val activeArrRepoFlow: Flow<ArrInstanceRepository?> = combine(
+        allArrReposFlow,
+        defaultSelectedArrRepoFlow,
+        _selectedInstanceId
+    ) { allRepos, defaultRepo, selectedId ->
+        if (selectedId != null) {
+            allRepos.firstOrNull { it.instance.id == selectedId }
+                ?: getArrInstanceRepositoryUseCase(selectedId)
+                ?: defaultRepo
+        } else {
+            defaultRepo ?: allRepos.firstOrNull()
+        }
+    }
+
     private val seerrRepositoryFlow = getSeerrInstanceRepositoryUseCase.observeSelected()
     private val bazarrRepositoryFlow = getBazarrInstanceRepositoryUseCase.observeSelected()
+
+    // Add Sheet Dynamic State
+    private val _addSheetTargetInstance = MutableStateFlow<Instance?>(null)
+    val addSheetTargetInstance: StateFlow<Instance?> = _addSheetTargetInstance.asStateFlow()
+
+    private val _addSheetQualityProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
+    val addSheetQualityProfiles: StateFlow<List<QualityProfile>> = _addSheetQualityProfiles.asStateFlow()
+
+    private val _addSheetRootFolders = MutableStateFlow<List<RootFolder>>(emptyList())
+    val addSheetRootFolders: StateFlow<List<RootFolder>> = _addSheetRootFolders.asStateFlow()
+
+    private val _addSheetTags = MutableStateFlow<List<Tag>>(emptyList())
+    val addSheetTags: StateFlow<List<Tag>> = _addSheetTags.asStateFlow()
 
     init {
         observeData()
     }
 
+    fun selectInstance(instanceId: Long) {
+        if (_selectedInstanceId.value == instanceId) return
+        _selectedInstanceId.value = instanceId
+
+        val currentSuccess = _uiState.value as? UnifiedMediaDetailsUiState.Success
+        if (currentSuccess != null) {
+            val targetMedia = _instancePresencesMap.value[instanceId]
+                ?: currentSuccess.instancePresences.firstOrNull { it.instance.id == instanceId }?.arrMedia
+            if (targetMedia != null) {
+                _isMonitored.value = targetMedia.monitored
+                _uiState.value = currentSuccess.copy(
+                    arrMedia = targetMedia,
+                    selectedInstanceId = instanceId
+                )
+            } else {
+                _uiState.value = currentSuccess.copy(
+                    selectedInstanceId = instanceId
+                )
+            }
+        }
+    }
+
+    fun setAddSheetTargetInstance(instance: Instance?) {
+        _addSheetTargetInstance.value = instance
+        if (instance != null) {
+            val repo = getArrInstanceRepositoryUseCase(instance.id)
+            if (repo != null) {
+                _addSheetQualityProfiles.value = repo.qualityProfiles.value
+                _addSheetRootFolders.value = repo.rootFolders.value
+                _addSheetTags.value = repo.tags.value
+                viewModelScope.launch {
+                    repo.refreshQualityProfiles()
+                    _addSheetQualityProfiles.value = repo.qualityProfiles.value
+                }
+                viewModelScope.launch {
+                    repo.refreshRootFolders()
+                    _addSheetRootFolders.value = repo.rootFolders.value
+                }
+                viewModelScope.launch {
+                    repo.refreshTags()
+                    _addSheetTags.value = repo.tags.value
+                }
+            }
+        }
+    }
+
     private fun observeData() {
         viewModelScope.launch {
+            _instancePresencesMap.collect { map ->
+                val current = _uiState.value as? UnifiedMediaDetailsUiState.Success ?: return@collect
+                val updatedPresences = current.availableInstances.map { instance ->
+                    val media = if (instance.id == current.selectedInstanceId && current.hasArrId) {
+                        current.arrMedia
+                    } else {
+                        map[instance.id]
+                    }
+                    val isPresent = media?.let { it.id != null && it.id != 0L } ?: false
+                    InstanceMediaPresence(instance = instance, arrMedia = media, isPresent = isPresent)
+                }
+                _uiState.value = current.copy(instancePresences = updatedPresences)
+            }
+        }
+
+        viewModelScope.launch {
             combine(
-                arrRepositoryFlow,
+                activeArrRepoFlow,
+                allArrReposFlow,
                 seerrRepositoryFlow,
                 bazarrRepositoryFlow
-            ) { arrRepo, seerrRepo, bazarrRepo ->
-                Triple(arrRepo, seerrRepo, bazarrRepo)
-            }.collectLatest { (arrRepo, seerrRepo, bazarrRepo) ->
-                if (arrRepo != null) {
+            ) { activeRepo, allRepos, seerrRepo, bazarrRepo ->
+                Quad(activeRepo, allRepos, seerrRepo, bazarrRepo)
+            }.collectLatest { (activeRepo, allRepos, seerrRepo, bazarrRepo) ->
+                if (activeRepo != null) {
                     launch {
-                        arrRepo.qualityProfiles.collect { _qualityProfiles.value = it }
+                        activeRepo.qualityProfiles.collect { _qualityProfiles.value = it }
                     }
                     launch {
-                        arrRepo.rootFolders.collect { _rootFolders.value = it }
+                        activeRepo.rootFolders.collect { _rootFolders.value = it }
                     }
                     launch {
-                        arrRepo.tags.collect { _tags.value = it }
+                        activeRepo.tags.collect { _tags.value = it }
                     }
                     launch {
-                        arrRepo.editItemStatus.collect { _editStatus.value = it }
+                        activeRepo.editItemStatus.collect { _editStatus.value = it }
+                    }
+                    if (_addSheetTargetInstance.value == null) {
+                        setAddSheetTargetInstance(activeRepo.instance)
                     }
                 }
 
@@ -311,23 +431,104 @@ class UnifiedMediaDetailsViewModel(
                     }
                 }
 
+                val cachedArrMedia = activeRepo?.let { _instancePresencesMap.value[it.instance.id] }
+                val targetArrId = cachedArrMedia?.id
+                    ?: (if (activeRepo != null && activeRepo.instance.id == arrId) arrId else null)
+
                 getUnifiedMediaDetailsUseCase(
-                    arrId = arrId,
+                    arrId = targetArrId ?: if (_selectedInstanceId.value == null) arrId else null,
                     tmdbId = tmdbId,
                     tvdbId = tvdbId,
                     instanceType = resolvedInstanceType,
                     requestType = resolvedRequestType,
-                    arrRepository = arrRepo,
+                    arrRepository = activeRepo,
                     seerrRepository = seerrRepo,
                     bazarrRepository = bazarrRepo
-                ).collect { 
-                    _uiState.value = it 
-                    if (it is UnifiedMediaDetailsUiState.Success) {
-                        _isMonitored.value = it.arrMedia?.monitored ?: false
+                ).collect { rawState ->
+                    if (rawState is UnifiedMediaDetailsUiState.Success) {
+                        _isMonitored.value = rawState.arrMedia?.monitored ?: false
+
+                        val resolvedTvdbLookupId = tvdbId
+                            ?: (rawState.arrMedia as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
+                            ?: (rawState.seerrMedia as? TvDetails)?.externalIds?.tvdbId?.takeIf { it > 0 }
+
+                        val resolvedLookupId = tmdbId
+                            ?: (rawState.arrMedia as? ArrMovie)?.tmdbId?.takeIf { it > 0 }
+                            ?: (rawState.arrMedia as? ArrSeries)?.tmdbId?.takeIf { it > 0 }
+                            ?: (rawState.seerrMedia as? MovieDetails)?.id
+                            ?: (rawState.seerrMedia as? TvDetails)?.id
+
+                        val query = if (resolvedInstanceType == InstanceType.Sonarr || resolvedRequestType == RequestType.Tv) {
+                            resolvedTvdbLookupId?.let { "tvdb:$it" } ?: resolvedLookupId?.let { "tmdb:$it" }
+                        } else {
+                            resolvedLookupId?.let { "tmdb:$it" } ?: resolvedTvdbLookupId?.let { "tvdb:$it" }
+                        }
+
+                        if (activeRepo != null && rawState.hasArrId && rawState.arrMedia != null) {
+                            if (_instancePresencesMap.value[activeRepo.instance.id] != rawState.arrMedia) {
+                                val updated = _instancePresencesMap.value.toMutableMap()
+                                updated[activeRepo.instance.id] = rawState.arrMedia
+                                _instancePresencesMap.value = updated
+                            }
+                        }
+
+                        if (allRepos.isNotEmpty() && query != null) {
+                            val missingRepos = allRepos.filter { repo ->
+                                repo.instance.id != activeRepo?.instance?.id && !_instancePresencesMap.value.containsKey(repo.instance.id)
+                            }
+                            if (missingRepos.isNotEmpty()) {
+                                launch {
+                                    val newMap = _instancePresencesMap.value.toMutableMap()
+                                    missingRepos.forEach { repo ->
+                                        val lookupRes = repo.directLookup(query)
+                                        val list = (lookupRes as? NetworkResult.Success)?.data ?: emptyList()
+                                        val match = list.firstOrNull { media ->
+                                            when (media) {
+                                                is ArrSeries -> {
+                                                    (resolvedTvdbLookupId != null && resolvedTvdbLookupId > 0 && media.tvdbId == resolvedTvdbLookupId) ||
+                                                    (resolvedLookupId != null && resolvedLookupId > 0 && media.tmdbId == resolvedLookupId)
+                                                }
+                                                is ArrMovie -> {
+                                                    resolvedLookupId != null && resolvedLookupId > 0 && media.tmdbId == resolvedLookupId
+                                                }
+                                                else -> false
+                                            }
+                                        } ?: if (resolvedTvdbLookupId == null && resolvedLookupId == null) list.firstOrNull() else null
+                                        newMap[repo.instance.id] = match
+                                    }
+                                    _instancePresencesMap.value = newMap
+                                }
+                            }
+                        }
+
+                        val presences = allRepos.map { repo ->
+                            val media = if (repo.instance.id == activeRepo?.instance?.id && rawState.hasArrId) {
+                                rawState.arrMedia
+                            } else {
+                                _instancePresencesMap.value[repo.instance.id]
+                            }
+                            val isPresent = media?.let { it.id != null && it.id != 0L } ?: false
+                            InstanceMediaPresence(instance = repo.instance, arrMedia = media, isPresent = isPresent)
+                        }
+
+                        _uiState.value = rawState.copy(
+                            availableInstances = allRepos.map { it.instance },
+                            selectedInstanceId = activeRepo?.instance?.id ?: _selectedInstanceId.value,
+                            instancePresences = presences
+                        )
+                    } else {
+                        if (_uiState.value !is UnifiedMediaDetailsUiState.Success) {
+                            _uiState.value = rawState
+                        }
                     }
                 }
             }
         }
+    }
+
+    private fun getEffectiveArrId(): Long? {
+        val stateMediaId = (uiState.value as? UnifiedMediaDetailsUiState.Success)?.arrMedia?.id
+        return if (stateMediaId != null && stateMediaId != 0L) stateMediaId else arrId
     }
 
     fun refresh() {
@@ -360,19 +561,21 @@ class UnifiedMediaDetailsViewModel(
     }
 
     // Smart Actions
-    fun smartAdd(item: ArrMedia, searchOnAdd: Boolean = false) {
+    fun smartAdd(item: ArrMedia, searchOnAdd: Boolean = false, targetInstanceId: Long? = null) {
         viewModelScope.launch {
-            val arrRepo = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             val seerrRepo = seerrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             val successState = uiState.value as? UnifiedMediaDetailsUiState.Success
+            val effectiveInstanceId = targetInstanceId ?: _addSheetTargetInstance.value?.id ?: _selectedInstanceId.value
             
             smartAddMediaUseCase(
                 instanceType = resolvedInstanceType ?: return@launch,
                 item = item,
                 searchOnAdd = searchOnAdd,
                 seerrMediaDetails = successState?.seerrMedia,
-                seerrRepository = seerrRepo
+                seerrRepository = seerrRepo,
+                targetInstanceId = effectiveInstanceId
             )
+            refresh()
         }
     }
 
@@ -443,14 +646,15 @@ class UnifiedMediaDetailsViewModel(
     // Arr Actions
     fun toggleMonitored() {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             val item = (uiState.value as? UnifiedMediaDetailsUiState.Success)?.arrMedia ?: return@launch
             toggleMonitorUseCase.toggleMedia(item, repository)
         }
     }
 
     fun performAutomaticLookup() {
-        runSearch(arrId ?: return)
+        val effectiveId = getEffectiveArrId() ?: return
+        runSearch(effectiveId)
     }
 
     fun performEpisodeAutomaticLookup(episodeId: Long) {
@@ -458,7 +662,8 @@ class UnifiedMediaDetailsViewModel(
     }
 
     fun performSeasonAutomaticLookup(seasonNumber: Int) {
-        runSearch(arrId ?: return, seasonNumber = seasonNumber)
+        val effectiveId = getEffectiveArrId() ?: return
+        runSearch(effectiveId, seasonNumber = seasonNumber)
     }
 
     fun performAlbumAutomaticLookup(albumId: Long) {
@@ -476,10 +681,11 @@ class UnifiedMediaDetailsViewModel(
         albumId: Long? = null
     ) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val effectiveId = getEffectiveArrId() ?: return@launch
             updateSearchIds(trackingId, add = true)
 
-            performAutomaticSearchUseCase(arrId ?: return@launch, resolvedInstanceType ?: return@launch, repository, episodeId, seasonNumber, albumId)
+            performAutomaticSearchUseCase(effectiveId, resolvedInstanceType ?: return@launch, repository, episodeId, seasonNumber, albumId)
                 .onSuccess { _lastSearchResult.value = true }
                 .onError { _, _, _ -> _lastSearchResult.value = false }
 
@@ -496,14 +702,14 @@ class UnifiedMediaDetailsViewModel(
 
     fun editItem(item: ArrMedia, moveFiles: Boolean = false) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             updateMediaUseCase.edit(item, moveFiles, repository)
         }
     }
 
     fun updateAlbum(album: ArrAlbum) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             updateMediaUseCase.updateAlbum(album, repository)
                 .onSuccess {
                     delay(1.seconds)
@@ -519,8 +725,9 @@ class UnifiedMediaDetailsViewModel(
 
     fun deleteMedia(deleteFiles: Boolean, addImportExclusion: Boolean) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
-            deleteMediaUseCase(arrId ?: return@launch, deleteFiles, addImportExclusion, repository)
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val effectiveId = getEffectiveArrId() ?: return@launch
+            deleteMediaUseCase(effectiveId, deleteFiles, addImportExclusion, repository)
                 .collect { status ->
                     _deleteStatus.value = status
                 }
@@ -529,8 +736,9 @@ class UnifiedMediaDetailsViewModel(
 
     fun deleteSeasonFiles(seasonNumber: Int) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
-            deleteSeasonFilesUseCase(arrId ?: return@launch, seasonNumber, repository)
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val effectiveId = getEffectiveArrId() ?: return@launch
+            deleteSeasonFilesUseCase(effectiveId, seasonNumber, repository)
                 .collect { status ->
                     _deleteSeasonStatus.value = status
                 }
@@ -539,8 +747,9 @@ class UnifiedMediaDetailsViewModel(
 
     fun deleteAlbumFiles(albumId: Long) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
-            deleteAlbumFilesUseCase(arrId ?: return@launch, albumId, repository)
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val effectiveId = getEffectiveArrId() ?: return@launch
+            deleteAlbumFilesUseCase(effectiveId, albumId, repository)
                 .collect { status ->
                     _deleteAlbumStatus.value = status
                 }
@@ -549,8 +758,9 @@ class UnifiedMediaDetailsViewModel(
 
     fun deleteMovieFile() {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
-            deleteMovieFileUseCase(arrId ?: return@launch, repository)
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val effectiveId = getEffectiveArrId() ?: return@launch
+            deleteMovieFileUseCase(effectiveId, repository)
                 .collect { status ->
                     _deleteMovieFileStatus.value = status
                 }
@@ -559,42 +769,43 @@ class UnifiedMediaDetailsViewModel(
 
     fun toggleSeasonMonitored(seasonNumber: Int) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
-            toggleMonitorUseCase.toggleSeason(arrId ?: return@launch, seasonNumber, repository)
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val effectiveId = getEffectiveArrId() ?: return@launch
+            toggleMonitorUseCase.toggleSeason(effectiveId, seasonNumber, repository)
         }
     }
 
     fun toggleEpisodeMonitored(episode: Episode) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             toggleMonitorUseCase.toggleEpisode(episode, repository)
         }
     }
 
     fun toggleAlbumMonitored(album: ArrAlbum) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             toggleMonitorUseCase.toggleAlbum(album, repository)
         }
     }
 
     fun toggleBookMonitored(book: Book) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             toggleMonitorUseCase.toggleBook(book, repository)
         }
     }
 
     fun toggleBookSeriesMonitored(books: List<Book>) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             books.forEach { book ->
                 toggleMonitorUseCase.toggleBook(book, repository)
             }
         }
     }
 
-    val isArrConfigured: StateFlow<Boolean> = arrRepositoryFlow.map { it != null }
+    val isArrConfigured: StateFlow<Boolean> = activeArrRepoFlow.map { it != null }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     val isSeerrConfigured: StateFlow<Boolean> = seerrRepositoryFlow.map { it != null }
@@ -602,7 +813,7 @@ class UnifiedMediaDetailsViewModel(
 
     fun updatePreferences(preferences: InstancePreferences) {
         viewModelScope.launch {
-            val repository = arrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val repository = activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             updateInstancePreferencesUseCase(repository.instance.id, preferences)
         }
     }
@@ -659,3 +870,5 @@ class UnifiedMediaDetailsViewModel(
         }
     }
 }
+
+private data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)

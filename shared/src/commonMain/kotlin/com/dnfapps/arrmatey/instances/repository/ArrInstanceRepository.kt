@@ -322,6 +322,14 @@ class ArrInstanceRepository(
         _lookupResults.value = null
     }
 
+    suspend fun directLookup(query: String): NetworkResult<List<ArrMedia>> {
+        if (query.isBlank()) return NetworkResult.Success(emptyList())
+        val language = _listenarrConfiguration.value.defaultSearchLanguage
+        val region = _listenarrConfiguration.value.defaultSearchRegion
+        val queryParams = LookupParams(query, language, region)
+        return client.lookup(queryParams)
+    }
+
     suspend fun addItem(item: ArrMedia, searchOnAdd: Boolean) {
         _addItemStatus.value = OperationStatus.InProgress
         delay(100)

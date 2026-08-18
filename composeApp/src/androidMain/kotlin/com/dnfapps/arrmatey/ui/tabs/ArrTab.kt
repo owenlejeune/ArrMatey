@@ -20,8 +20,6 @@ import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Book
-import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -54,11 +52,10 @@ import com.dnfapps.arrmatey.ui.screens.AuthorFilesScreen
 import com.dnfapps.arrmatey.ui.screens.BookDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.EpisodeDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.InteractiveSearchScreen
-import com.dnfapps.arrmatey.ui.screens.MediaDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.MediaPreviewScreen
+import com.dnfapps.arrmatey.ui.screens.MovieFilesScreen
 import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
-import com.dnfapps.arrmatey.ui.screens.MovieFilesScreen
 import org.koin.compose.koinInject
 
 @Composable
@@ -192,7 +189,9 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             type = type,
             onBack = { navigation.popBackStack() },
             onNavigateToDetails = { navigation.toDetails(it) },
-            onNavigateToUnifiedDetails = { arrId, tmdbId, instanceType -> navigation.toUnifiedDetails(arrId, tmdbId, null, instanceType) },
+            onNavigateToUnifiedDetails = { arrId, tmdbId, tvdbId, instanceType ->
+                navigation.toUnifiedDetails(arrId, tmdbId, tvdbId, instanceType)
+            },
             onNavigateToPreview = { navigation.navigateTo(ArrScreen.Preview(it)) }
         )
     }

@@ -379,7 +379,7 @@ val viewModelModule = module {
         ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (arrId: Long?, tmdbId: Long?, tvdbId: Long?, instanceType: InstanceType?, requestType: RequestType?) ->
-        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType) ->
         InstancesViewModel(type, get(), get(), get())

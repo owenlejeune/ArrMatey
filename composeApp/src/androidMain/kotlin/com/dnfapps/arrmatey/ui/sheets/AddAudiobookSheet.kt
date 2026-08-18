@@ -27,6 +27,7 @@ import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
@@ -43,7 +44,10 @@ fun AddAudiobookSheet(
     preferences: InstancePreferences,
     onUpdatePreferences: (InstancePreferences) -> Unit,
     onAddItem: (ArrMedia, Boolean) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    instances: List<Instance> = emptyList(),
+    selectedInstance: Instance? = null,
+    onInstanceSelected: (Instance) -> Unit = {}
 ) {
     var monitored by remember(preferences.addAudiobookMonitored) { mutableStateOf(preferences.addAudiobookMonitored) }
     var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId) {
@@ -72,6 +76,16 @@ fun AddAudiobookSheet(
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            if (instances.size > 1 && selectedInstance != null) {
+                DropdownPicker(
+                    options = instances,
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedOption = selectedInstance,
+                    onOptionSelected = onInstanceSelected,
+                    getOptionLabel = { it.label },
+                    label = { Text(mokoString(MR.strings.instances)) }
+                )
+            }
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,

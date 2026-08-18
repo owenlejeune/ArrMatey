@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.model
 
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode as ArrEpisode
@@ -99,6 +100,12 @@ data class EpisodeWrapper(
     fun formatAirDateUtc(): String? = arrEpisode?.formatAirDateUtc()
 }
 
+data class InstanceMediaPresence(
+    val instance: com.dnfapps.arrmatey.instances.model.Instance,
+    val arrMedia: ArrMedia? = null,
+    val isPresent: Boolean = arrMedia?.let { it.id != null && it.id != 0L } ?: false
+)
+
 sealed interface UnifiedMediaDetailsUiState {
     object Initial : UnifiedMediaDetailsUiState
     object Loading : UnifiedMediaDetailsUiState
@@ -122,8 +129,18 @@ sealed interface UnifiedMediaDetailsUiState {
         val books: List<Book> = emptyList(),
         val extraFiles: List<ExtraFile> = emptyList(),
 
-        val isMonitored: Boolean = false
+        val isMonitored: Boolean = false,
+
+        val availableInstances: List<Instance> = emptyList(),
+        val selectedInstanceId: Long? = null,
+        val instancePresences: List<InstanceMediaPresence> = emptyList()
     ) : UnifiedMediaDetailsUiState {
+
+        val missingInstances: List<Instance>
+            get() = instancePresences.filter { !it.isPresent }.map { it.instance }
+
+        val presentInstances: List<Instance>
+            get() = instancePresences.filter { it.isPresent }.map { it.instance }
 
         val hasArrId: Boolean
             get() = arrMedia?.let { it.id != null && it.id != 0L } ?: false

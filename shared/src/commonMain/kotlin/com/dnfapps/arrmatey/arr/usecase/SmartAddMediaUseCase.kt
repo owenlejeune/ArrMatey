@@ -19,9 +19,16 @@ class SmartAddMediaUseCase(
         metadata: AudiobookMetadataResponse? = null,
         searchOnAdd: Boolean = false,
         seerrMediaDetails: RequestMediaDetails? = null,
-        seerrRepository: SeerrInstanceRepository? = null
+        seerrRepository: SeerrInstanceRepository? = null,
+        targetInstanceId: Long? = null
     ) {
-        addMediaItemUseCase(instanceType, item, metadata, searchOnAdd)
+        addMediaItemUseCase(
+            instanceType = instanceType,
+            item = item,
+            metadata = metadata,
+            searchOnAdd = searchOnAdd,
+            targetInstanceId = targetInstanceId
+        )
 
         if (seerrMediaDetails != null && seerrRepository != null) {
             val pendingRequest = seerrMediaDetails.mediaInfo?.requests?.firstOrNull { it.status == 1 }

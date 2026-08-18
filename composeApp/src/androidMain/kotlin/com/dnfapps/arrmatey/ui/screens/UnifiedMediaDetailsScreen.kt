@@ -4,19 +4,15 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,9 +21,9 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -39,6 +35,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -51,19 +48,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -82,7 +75,6 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
-import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.compose.utils.formatWithCommas
 import com.dnfapps.arrmatey.entensions.copy
@@ -91,12 +83,12 @@ import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.InfoItem
+import com.dnfapps.arrmatey.model.InstanceMediaPresence
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.model.toInfoList
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
-import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
@@ -193,6 +185,11 @@ fun UnifiedMediaDetailsScreen(
 
     val automaticSearchIds by viewModel.automaticSearchIds.collectAsStateWithLifecycle()
     val lastSearchResult by viewModel.lastSearchResult.collectAsStateWithLifecycle()
+    val addTargetInstance by viewModel.addSheetTargetInstance.collectAsStateWithLifecycle()
+    val addQualityProfiles by viewModel.addSheetQualityProfiles.collectAsStateWithLifecycle()
+    val addRootFolders by viewModel.addSheetRootFolders.collectAsStateWithLifecycle()
+    val addTags by viewModel.addSheetTags.collectAsStateWithLifecycle()
+    val availableInstances by viewModel.availableInstances.collectAsStateWithLifecycle()
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
 
@@ -268,8 +265,8 @@ fun UnifiedMediaDetailsScreen(
                             }
                         }
 
-                        if (isArrConfigured) {
-                            if (success.hasArrId) {
+                        if (success.hasArrId) {
+                            if (isArrConfigured) {
                                 IconButton(
                                     onClick = { viewModel.toggleMonitored() },
                                     colors = IconButtonDefaults.headerBarColors()
@@ -279,17 +276,18 @@ fun UnifiedMediaDetailsScreen(
                                         contentDescription = null
                                     )
                                 }
-                            } else {
-                                ToolbarAddButton(
-                                    isArrConfigured = isArrConfigured,
-                                    isSeerrConfigured = isSeerrConfigured,
-                                    pendingRequestId = buttonState.pendingRequestId,
-                                    resolvedInstanceType = viewModel.resolvedInstanceType,
-                                    onAddDirectlyClicked = { showAddSheet = true },
-                                    onViewRequestClicked = { viewModel.showViewRequestSheet() },
-                                    onRequestClicked = { viewModel.showRequestSheet() }
-                                )
                             }
+                        } else {
+                            val canAddDirectly = success.arrMedia != null && isArrConfigured
+                            ToolbarAddButton(
+                                canAddDirectly = canAddDirectly,
+                                isSeerrConfigured = isSeerrConfigured,
+                                pendingRequestId = buttonState.pendingRequestId,
+                                resolvedInstanceType = viewModel.resolvedInstanceType,
+                                onAddDirectlyClicked = { showAddSheet = true },
+                                onViewRequestClicked = { viewModel.showViewRequestSheet() },
+                                onRequestClicked = { viewModel.showRequestSheet() }
+                            )
                         }
 
                         if (success.hasArrId && isArrConfigured) {
@@ -299,7 +297,25 @@ fun UnifiedMediaDetailsScreen(
                                 onDelete = { confirmDelete = true },
                                 showSearch = instanceType?.includeTopLevelAutomaticSearchOption == true,
                                 enableSearch = isMonitored,
-                                onSearchMonitored = { viewModel.performAutomaticLookup() }
+                                onSearchMonitored = { viewModel.performAutomaticLookup() },
+                                extraMenuItems = { closeMenu ->
+                                    for (missingInstance in success.missingInstances) {
+                                        DropdownMenuItem(
+                                            text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.Default.Add,
+                                                    contentDescription = null
+                                                )
+                                            },
+                                            onClick = {
+                                                closeMenu()
+                                                viewModel.setAddSheetTargetInstance(missingInstance)
+                                                showAddSheet = true
+                                            }
+                                        )
+                                    }
+                                }
                             )
                         }
                     }
@@ -407,6 +423,18 @@ fun UnifiedMediaDetailsScreen(
                                     )
                                 }
 
+                                val presentPresences = state.instancePresences.filter { it.isPresent }
+                                if (presentPresences.size > 1) {
+                                    InstanceChipsRow(
+                                        presences = presentPresences,
+                                        selectedInstanceId = state.selectedInstanceId,
+                                        onInstanceSelected = { instanceId ->
+                                            viewModel.selectInstance(instanceId)
+                                        },
+                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                    )
+                                }
+
                                 if (state.seasons.isNotEmpty()) {
                                     val arrSeries = state.arrMedia as? ArrSeries
                                     SeasonsArea(
@@ -495,7 +523,10 @@ fun UnifiedMediaDetailsScreen(
 
                                 val infoItems = infoItems(state, qualityProfiles, tags)
                                 if (infoItems.isNotEmpty()) {
-                                    InfoArea(infoItems, modifier = Modifier.padding(horizontal = 24.dp))
+                                    InfoArea(
+                                        infoItems,
+                                        modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
+                                    )
                                 }
                             }
                         }
@@ -538,13 +569,16 @@ fun UnifiedMediaDetailsScreen(
                             when (arrMedia) {
                                 is ArrSeries -> AddSeriesSheet(
                                     item = arrMedia,
-                                    qualityProfiles = qualityProfiles,
-                                    rootFolders = rootFolders,
-                                    tags = tags,
+                                    qualityProfiles = addQualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addRootFolders.ifEmpty { rootFolders },
+                                    tags = addTags.ifEmpty { tags },
                                     addInProgress = editStatus is OperationStatus.InProgress,
                                     preferences = preferences,
+                                    instances = availableInstances,
+                                    selectedInstance = addTargetInstance ?: availableInstances.firstOrNull(),
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd)
+                                        viewModel.smartAdd(newItem, searchOnAdd, addTargetInstance?.id)
                                         showAddSheet = false
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
@@ -553,13 +587,16 @@ fun UnifiedMediaDetailsScreen(
 
                                 is ArrMovie -> AddMovieSheet(
                                     item = arrMedia,
-                                    qualityProfiles = qualityProfiles,
-                                    rootFolders = rootFolders,
-                                    tags = tags,
+                                    qualityProfiles = addQualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addRootFolders.ifEmpty { rootFolders },
+                                    tags = addTags.ifEmpty { tags },
                                     addInProgress = editStatus is OperationStatus.InProgress,
                                     preferences = preferences,
+                                    instances = availableInstances,
+                                    selectedInstance = addTargetInstance ?: availableInstances.firstOrNull(),
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd)
+                                        viewModel.smartAdd(newItem, searchOnAdd, addTargetInstance?.id)
                                         showAddSheet = false
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
@@ -919,7 +956,7 @@ private fun EditMediaSheet(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun ToolbarAddButton(
-    isArrConfigured: Boolean,
+    canAddDirectly: Boolean,
     isSeerrConfigured: Boolean,
     pendingRequestId: Long?,
     resolvedInstanceType: InstanceType?,
@@ -928,7 +965,7 @@ private fun ToolbarAddButton(
     onRequestClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (isArrConfigured && isSeerrConfigured) {
+    if (canAddDirectly && isSeerrConfigured) {
         var showToolbarAddMenu by remember { mutableStateOf(false) }
         Box(modifier = modifier) {
             IconButton(
@@ -984,7 +1021,7 @@ private fun ToolbarAddButton(
                 }
             }
         }
-    } else if (isArrConfigured) {
+    } else if (canAddDirectly) {
         IconButton(
             onClick = onAddDirectlyClicked,
             colors = IconButtonDefaults.headerBarColors(),
@@ -1042,6 +1079,47 @@ fun handleWatchClick(
 
         MediaProvider.None -> {
             Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun InstanceChipsRow(
+    presences: List<InstanceMediaPresence>,
+    selectedInstanceId: Long?,
+    onInstanceSelected: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        presences.forEach { presence ->
+            val instance = presence.instance
+            val isSelected = instance.id == selectedInstanceId
+            val hasFile = when (val media = presence.arrMedia) {
+                is ArrMovie -> media.hasFile
+                is ArrSeries -> media.episodeFileCount > 0
+                else -> true
+            }
+
+            FilterChip(
+                selected = isSelected,
+                onClick = { onInstanceSelected(instance.id) },
+                label = { Text(instance.label) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (hasFile) Icons.Default.CheckCircle else Icons.Default.Schedule,
+                        contentDescription = null,
+                        tint = if (hasFile) MaterialTheme.colorScheme.primary else ArrOrange,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            )
         }
     }
 }

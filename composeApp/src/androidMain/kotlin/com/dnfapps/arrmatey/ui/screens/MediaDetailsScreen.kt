@@ -668,7 +668,8 @@ fun MenuButton(
     onRefresh: () -> Unit,
     showSearch: Boolean,
     enableSearch: Boolean,
-    onSearchMonitored: () -> Unit
+    onSearchMonitored: () -> Unit,
+    extraMenuItems: @Composable (closeMenu: () -> Unit) -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -721,6 +722,7 @@ fun MenuButton(
                         }
                     )
                 }
+                extraMenuItems { showMenu = false }
             }
             Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
             DropdownMenuGroup(

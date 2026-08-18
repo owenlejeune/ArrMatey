@@ -35,6 +35,7 @@ import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
 import com.dnfapps.arrmatey.utils.mokoPlural
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +49,10 @@ fun AddArtistSheet(
     preferences: InstancePreferences,
     onUpdatePreferences: (InstancePreferences) -> Unit,
     onAddItem: (ArrMedia, Boolean) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    instances: List<Instance> = emptyList(),
+    selectedInstance: Instance? = null,
+    onInstanceSelected: (Instance) -> Unit = {}
 ) {
     var monitor by remember(preferences.addArtistMonitor) { mutableStateOf(preferences.addArtistMonitor) }
     var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId) {
@@ -78,6 +82,16 @@ fun AddArtistSheet(
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            if (instances.size > 1 && selectedInstance != null) {
+                DropdownPicker(
+                    options = instances,
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedOption = selectedInstance,
+                    onOptionSelected = onInstanceSelected,
+                    getOptionLabel = { it.label },
+                    label = { Text(mokoString(MR.strings.instances)) }
+                )
+            }
             DropdownPicker(
                 options = ArtistMonitorType.entries.toList(),
                 modifier = Modifier.fillMaxWidth(),

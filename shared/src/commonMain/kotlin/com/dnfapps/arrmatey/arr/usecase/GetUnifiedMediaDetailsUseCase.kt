@@ -15,8 +15,8 @@ import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.model.EpisodeWrapper
 import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
-import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
@@ -26,6 +26,7 @@ import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -55,8 +56,16 @@ class GetUnifiedMediaDetailsUseCase(
             if (arrId != null) {
                 getMediaDetailsUseCase(arrId, arrRepository.instance.id)
             } else if (tmdbId != null || tvdbId != null) {
-                val query = tmdbId?.let { "tmdb:$it" } ?: "tvdb:$tvdbId"
-                repositoryLookupFlow(arrRepository, query)
+                val query = if (instanceType == InstanceType.Sonarr || requestType == RequestType.Tv) {
+                    if (tvdbId != null && tvdbId > 0) "tvdb:$tvdbId" else if (tmdbId != null && tmdbId > 0) "tmdb:$tmdbId" else null
+                } else {
+                    if (tmdbId != null && tmdbId > 0) "tmdb:$tmdbId" else if (tvdbId != null && tvdbId > 0) "tvdb:$tvdbId" else null
+                }
+                if (query != null) {
+                    repositoryLookupFlow(arrRepository, query, tmdbId, tvdbId)
+                } else {
+                    flowOf(MediaDetailsUiState.Initial)
+                }
             } else {
                 flowOf(MediaDetailsUiState.Initial)
             }
@@ -247,27 +256,38 @@ class GetUnifiedMediaDetailsUseCase(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun repositoryLookupFlow(repository: ArrInstanceRepository, query: String): Flow<MediaDetailsUiState> {
-        return flowOf(Unit).map {
-            repository.performLookup(query)
-        }.flatMapLatest {
-            repository.lookupResults.flatMapLatest { result ->
-                when (result) {
-                    is NetworkResult.Success -> {
-                        val item = result.data.firstOrNull()
-                        if (item?.id != null && item.id != 0L) {
-                            getMediaDetailsUseCase(item.id!!, repository.instance.id)
-                        } else {
-                            val targetItem = item ?: return@flatMapLatest flowOf(MediaDetailsUiState.Initial)
-                            flowOf(MediaDetailsUiState.Success(item = targetItem))
+    private fun repositoryLookupFlow(
+        repository: ArrInstanceRepository,
+        query: String,
+        targetTmdbId: Long? = null,
+        targetTvdbId: Long? = null
+    ): Flow<MediaDetailsUiState> = flow {
+        emit(MediaDetailsUiState.Loading)
+        when (val result = repository.directLookup(query)) {
+            is NetworkResult.Success -> {
+                val item = result.data.firstOrNull { media ->
+                    when (media) {
+                        is ArrSeries -> {
+                            (targetTvdbId != null && targetTvdbId > 0 && media.tvdbId == targetTvdbId) ||
+                            (targetTmdbId != null && targetTmdbId > 0 && media.tmdbId == targetTmdbId)
                         }
+                        is ArrMovie -> {
+                            targetTmdbId != null && targetTmdbId > 0 && media.tmdbId == targetTmdbId
+                        }
+                        else -> false
                     }
-                    is NetworkResult.Error -> flowOf(MediaDetailsUiState.Error(result.message))
-                    is NetworkResult.Loading -> flowOf(MediaDetailsUiState.Loading)
-                    null -> flowOf(MediaDetailsUiState.Initial)
+                } ?: if (targetTmdbId == null && targetTvdbId == null) result.data.firstOrNull() else null
+
+                if (item?.id != null && item.id != 0L) {
+                    emitAll(getMediaDetailsUseCase(item.id!!, repository.instance.id))
+                } else if (item != null) {
+                    emit(MediaDetailsUiState.Success(item = item))
+                } else {
+                    emit(MediaDetailsUiState.Initial)
                 }
             }
+            is NetworkResult.Error -> emit(MediaDetailsUiState.Error(result.message))
+            is NetworkResult.Loading -> emit(MediaDetailsUiState.Loading)
         }
     }
 }

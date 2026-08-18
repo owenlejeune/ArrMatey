@@ -25,13 +25,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.MediaList
@@ -43,6 +43,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.koinInject
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class,
     ExperimentalMaterial3ExpressiveApi::class
@@ -53,7 +54,7 @@ fun ArrSearchScreen(
     type: InstanceType,
     onBack: () -> Unit,
     onNavigateToDetails: (Long) -> Unit,
-    onNavigateToUnifiedDetails: (Long?, Long?, InstanceType) -> Unit,
+    onNavigateToUnifiedDetails: (Long?, Long?, Long?, InstanceType) -> Unit,
     onNavigateToPreview: (ArrMedia) -> Unit,
     viewModel: ArrSearchViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject()
@@ -77,7 +78,7 @@ fun ArrSearchScreen(
 
     LaunchedEffect(Unit) {
         snapshotFlow { textFieldState.text.toString() }
-            .debounce(500)
+            .debounce(500.milliseconds)
             .distinctUntilChanged()
             .collect { query ->
                 viewModel.performLookup(query)
@@ -138,7 +139,7 @@ fun ArrSearchScreen(
                                      if (type == InstanceType.Radarr || type == InstanceType.Sonarr) {
                                          val tmdbId = (item as? ArrMovie)?.tmdbId ?: (item as? ArrSeries)?.tmdbId
                                          val tvdbId = (item as? ArrSeries)?.tvdbId
-                                         onNavigateToUnifiedDetails(tmdbId, tvdbId, type)
+                                         onNavigateToUnifiedDetails(null, tmdbId, tvdbId, type)
                                      } else {
                                          onNavigateToPreview(item)
                                      }
