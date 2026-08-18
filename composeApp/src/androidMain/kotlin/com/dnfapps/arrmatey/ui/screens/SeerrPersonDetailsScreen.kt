@@ -41,7 +41,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.entensions.breakPadding
@@ -72,6 +75,7 @@ import dev.icerock.moko.resources.StringResource
 fun SeerrPersonDetailsScreen(
     personId: Long,
     onBack: () -> Unit,
+    onMediaClick: (Long, RequestType) -> Unit = { _, _ -> },
     viewModel: SeerrMediaDetailsViewModel = koinInjectParams(personId, RequestType.Person)
 ) {
     val navManager = navigationManager
@@ -152,21 +156,22 @@ fun SeerrPersonDetailsScreen(
                                         )
 
                                         if (item.alsoKnownAs.isNotEmpty()) {
-                                            Row(
+                                            Text(
                                                 modifier = Modifier.padding(top = 8.dp),
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                verticalAlignment = Alignment.Bottom
-                                            ) {
-                                                Text(
-                                                    text = mokoString(MR.strings.also_known_as),
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                                Text(
-                                                    text = item.alsoKnownAs.joinToString(", "),
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-                                            }
+                                                text = buildAnnotatedString {
+                                                    withStyle(
+                                                        style = MaterialTheme.typography.titleMediumEmphasized.toSpanStyle()
+                                                    ) {
+                                                        append(mokoString(MR.strings.also_known_as))
+                                                    }
+                                                    withStyle(
+                                                        style = MaterialTheme.typography.bodyMedium.toSpanStyle()
+                                                    ) {
+                                                        append(" ")
+                                                        append(item.alsoKnownAs.joinToString(", "))
+                                                    }
+                                                }
+                                            )
                                         }
                                     }
 
@@ -183,7 +188,7 @@ fun SeerrPersonDetailsScreen(
                                         icon = Icons.Default.Movie,
                                         items = personCredits.cast,
                                         onItemClick = { result ->
-                                            navManager.openSeerrDetails(result.id, result.mediaType)
+                                            onMediaClick(result.id, result.mediaType)
                                         }
                                     )
                                 }
@@ -193,7 +198,7 @@ fun SeerrPersonDetailsScreen(
                                         icon = Icons.Default.Settings,
                                         items = personCredits.crew,
                                         onItemClick = { result ->
-                                            navManager.openSeerrDetails(result.id, result.mediaType)
+                                            onMediaClick(result.id, result.mediaType)
                                         }
                                     )
                                 }

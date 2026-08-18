@@ -11,11 +11,14 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.SeerrScreen
 import com.dnfapps.arrmatey.navigation.toDetails
+import com.dnfapps.arrmatey.navigation.toPersonDetails
+import com.dnfapps.arrmatey.navigation.toUnifiedDetails
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.RequestsScreen
+import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
 import org.koin.compose.koinInject
 
@@ -50,14 +53,25 @@ fun SeerrTab(
                 UnifiedMediaDetailsScreen(
                     tmdbId = details.tmdbId,
                     requestType = details.requestType,
-                    onBack = { navigation.popBackStack() }
+                    onBack = { navigation.popBackStack() },
+                    onPersonClick = { navigation.toPersonDetails(it) }
                 )
             }
             entry<SeerrScreen.UnifiedDetails> { details ->
                 UnifiedMediaDetailsScreen(
                     tmdbId = details.tmdbId,
                     requestType = details.requestType,
-                    onBack = { navigation.popBackStack() }
+                    onBack = { navigation.popBackStack() },
+                    onPersonClick = { navigation.toPersonDetails(it) }
+                )
+            }
+            entry<SeerrScreen.PersonDetails> { details ->
+                SeerrPersonDetailsScreen(
+                    personId = details.personId,
+                    onBack = { navigation.popBackStack() },
+                    onMediaClick = { tmdbId, type ->
+                        navigation.toUnifiedDetails(tmdbId, type)
+                    }
                 )
             }
         }

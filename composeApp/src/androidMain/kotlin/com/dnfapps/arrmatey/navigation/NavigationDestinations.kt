@@ -38,6 +38,7 @@ sealed interface ArrScreen : NavKey {
     data class AlbumRelease(val albumId: Long, val artistId: Long? = null): ArrScreen
     data class BookRelease(val bookId: Long): ArrScreen
     data class AudiobookRelease(val audiobookId: Long?, val query: String): ArrScreen
+    data class PersonDetails(val personId: Long): ArrScreen
 }
 
 sealed interface SeerrScreen: NavKey {
@@ -50,6 +51,7 @@ sealed interface SeerrScreen: NavKey {
         val tmdbId: Long,
         val requestType: RequestType
     ): SeerrScreen
+    data class PersonDetails(val personId: Long): SeerrScreen
 }
 
 sealed interface DiscoverScreen: NavKey {
@@ -62,6 +64,7 @@ sealed interface DiscoverScreen: NavKey {
         val tmdbId: Long,
         val requestType: RequestType
     ): DiscoverScreen
+    data class PersonDetails(val personId: Long): DiscoverScreen
 }
 
 sealed interface SettingsScreen : NavKey {

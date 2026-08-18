@@ -105,6 +105,7 @@ fun Navigator<ArrScreen>.toSeriesRelease(seriesId: Long? = null, seasonNumber: I
 fun Navigator<ArrScreen>.toAlbumRelease(albumId: Long, artistId: Long? = null) = navigateTo(ArrScreen.AlbumRelease(albumId, artistId))
 fun Navigator<ArrScreen>.toBookRelease(bookId: Long) = navigateTo(ArrScreen.BookRelease(bookId))
 fun Navigator<ArrScreen>.toAudiobookRelease(audiobookId: Long?, query: String) = navigateTo(ArrScreen.AudiobookRelease(audiobookId, query))
+fun Navigator<ArrScreen>.toPersonDetails(personId: Long) = navigateTo(ArrScreen.PersonDetails(personId))
 
 /**
  * Domain-specific navigation extensions for Seerr feature set.
@@ -114,6 +115,8 @@ fun Navigator<SeerrScreen>.toHome() = navigateTo(SeerrScreen.Home)
 fun Navigator<SeerrScreen>.toDetails(tmdbId: Long, requestType: RequestType) = navigateTo(SeerrScreen.Details(tmdbId, requestType))
 @JvmName("toSeerrUnifiedDetails")
 fun Navigator<SeerrScreen>.toUnifiedDetails(tmdbId: Long, requestType: RequestType) = navigateTo(SeerrScreen.UnifiedDetails(tmdbId, requestType))
+@JvmName("toSeerrPersonDetails")
+fun Navigator<SeerrScreen>.toPersonDetails(personId: Long) = navigateTo(SeerrScreen.PersonDetails(personId))
 
 /**
  * Domain-specific navigation extensions for Discover tab
@@ -123,6 +126,8 @@ fun Navigator<DiscoverScreen>.toDiscover() = navigateTo(DiscoverScreen.Home)
 fun Navigator<DiscoverScreen>.toDetails(tmdbId: Long, requestType: RequestType) = navigateTo(DiscoverScreen.Details(tmdbId, requestType))
 @JvmName("toDiscoverUnifiedDetails")
 fun Navigator<DiscoverScreen>.toUnifiedDetails(tmdbId: Long, requestType: RequestType) = navigateTo(DiscoverScreen.UnifiedDetails(tmdbId, requestType))
+@JvmName("toDiscoverPersonDetails")
+fun Navigator<DiscoverScreen>.toPersonDetails(personId: Long) = navigateTo(DiscoverScreen.PersonDetails(personId))
 
 /**
  * Domain-specific navigation extensions for Settings feature set.

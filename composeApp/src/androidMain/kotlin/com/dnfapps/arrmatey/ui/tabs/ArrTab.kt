@@ -39,9 +39,11 @@ import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toEpisodeDetails
 import com.dnfapps.arrmatey.navigation.toMovieFiles
 import com.dnfapps.arrmatey.navigation.toMovieReleases
+import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toSearch
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.navigation.toUnifiedDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
@@ -54,6 +56,7 @@ import com.dnfapps.arrmatey.ui.screens.EpisodeDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.InteractiveSearchScreen
 import com.dnfapps.arrmatey.ui.screens.MediaDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.MediaPreviewScreen
+import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.MovieFilesScreen
 import org.koin.compose.koinInject
@@ -158,7 +161,8 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             onNavigateToBookRelease = { navigation.toBookRelease(it) },
             onNavigateToAudiobookFiles = { navigation.toAudiobookFiles(it) },
             onNavigateToAudiobookRelease = { id, query -> navigation.toAudiobookRelease(id, query ?: "") },
-            onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) }
+            onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) },
+            onPersonClick = { navigation.toPersonDetails(it) }
         )
     }
     entry<ArrScreen.UnifiedDetails> { details ->
@@ -178,7 +182,8 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             onNavigateToBookRelease = { navigation.toBookRelease(it) },
             onNavigateToAudiobookFiles = { navigation.toAudiobookFiles(it) },
             onNavigateToAudiobookRelease = { id, query -> navigation.toAudiobookRelease(id, query ?: "") },
-            onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) }
+            onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) },
+            onPersonClick = { navigation.toPersonDetails(it) }
         )
     }
     entry<ArrScreen.Search> { search ->
@@ -252,5 +257,21 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             query = params.query
         )
         InteractiveSearchScreen(type, releaseParams)
+    }
+    entry<ArrScreen.PersonDetails> { params ->
+        SeerrPersonDetailsScreen(
+            personId = params.personId,
+            onBack = { navigation.popBackStack() },
+            onMediaClick = { tmdbId, requestType ->
+                navigation.toUnifiedDetails(
+                    tmdbId = tmdbId,
+                    type = when (requestType) {
+                        RequestType.Movie -> InstanceType.Radarr
+                        RequestType.Tv -> InstanceType.Sonarr
+                        else -> null
+                    }
+                )
+            }
+        )
     }
 }
