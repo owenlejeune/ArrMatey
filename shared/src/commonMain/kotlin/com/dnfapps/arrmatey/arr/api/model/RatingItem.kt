@@ -23,8 +23,8 @@ fun ArrRatings.toRatingItems(): List<RatingItem> = when (this) {
         )
     }
     is SeriesRatings -> listOf(RatingItem(value.format(), MR.images.tmdb))
-    is LidarrRatings -> listOf(RatingItem(value.format(), MR.images.tmdb))
-    is BookshelfRatings -> listOf(RatingItem(value.format(), MR.images.tmdb))
+    is LidarrRatings -> listOf(RatingItem(value.format(), MR.images.rating_star))
+    is BookshelfRatings -> listOf(RatingItem(value.format(), MR.images.rating_star))
 }
 
 private fun Double.format(): String = if (this == 0.0) "0" else {

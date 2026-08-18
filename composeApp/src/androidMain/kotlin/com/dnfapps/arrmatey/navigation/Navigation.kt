@@ -87,6 +87,12 @@ class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
  */
 fun Navigator<ArrScreen>.toLibrary() = navigateTo(ArrScreen.Library)
 fun Navigator<ArrScreen>.toDetails(id: Long) = navigateTo(ArrScreen.Details(id))
+fun Navigator<ArrScreen>.toUnifiedDetails(
+    id: Long? = null,
+    tmdbId: Long? = null,
+    tvdbId: Long? = null,
+    type: InstanceType? = null
+) = navigateTo(ArrScreen.UnifiedDetails(id, tmdbId, tvdbId, type))
 fun <T> Navigator<ArrScreen>.toPreview(item: T) = navigateTo(ArrScreen.Preview(item))
 fun Navigator<ArrScreen>.toSearch(query: String = "") = navigateTo(ArrScreen.Search(query))
 fun Navigator<ArrScreen>.toMovieReleases(movieId: Long) = navigateTo(ArrScreen.MovieReleases(movieId))
@@ -106,6 +112,8 @@ fun Navigator<ArrScreen>.toAudiobookRelease(audiobookId: Long?, query: String) =
 fun Navigator<SeerrScreen>.toHome() = navigateTo(SeerrScreen.Home)
 @JvmName("toSeerrDetails")
 fun Navigator<SeerrScreen>.toDetails(tmdbId: Long, requestType: RequestType) = navigateTo(SeerrScreen.Details(tmdbId, requestType))
+@JvmName("toSeerrUnifiedDetails")
+fun Navigator<SeerrScreen>.toUnifiedDetails(tmdbId: Long, requestType: RequestType) = navigateTo(SeerrScreen.UnifiedDetails(tmdbId, requestType))
 
 /**
  * Domain-specific navigation extensions for Discover tab
@@ -113,6 +121,8 @@ fun Navigator<SeerrScreen>.toDetails(tmdbId: Long, requestType: RequestType) = n
 fun Navigator<DiscoverScreen>.toDiscover() = navigateTo(DiscoverScreen.Home)
 @JvmName("toDiscoverDetails")
 fun Navigator<DiscoverScreen>.toDetails(tmdbId: Long, requestType: RequestType) = navigateTo(DiscoverScreen.Details(tmdbId, requestType))
+@JvmName("toDiscoverUnifiedDetails")
+fun Navigator<DiscoverScreen>.toUnifiedDetails(tmdbId: Long, requestType: RequestType) = navigateTo(DiscoverScreen.UnifiedDetails(tmdbId, requestType))
 
 /**
  * Domain-specific navigation extensions for Settings feature set.

@@ -56,10 +56,12 @@ fun AlbumsArea(
     onEditAlbum: (ArrAlbum) -> Unit,
     onAlbumAutomaticSearch: (Long) -> Unit,
     deleteAlbumFiles: (Long) -> Unit,
-    albumDeleteInProgress: Boolean
+    albumDeleteInProgress: Boolean,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
     ) {
         Text(
             text = mokoString(MR.strings.albums_header),

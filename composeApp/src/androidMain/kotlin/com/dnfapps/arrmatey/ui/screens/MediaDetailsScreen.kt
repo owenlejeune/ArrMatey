@@ -642,7 +642,7 @@ private fun EditMediaSheet(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun MenuButton(
+fun MenuButton(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onRefresh: () -> Unit,
@@ -745,7 +745,7 @@ private fun MenuButton(
 }
 
 @Composable
-private fun seriesInfo(
+fun seriesInfo(
     series: ArrSeries,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>
@@ -779,7 +779,7 @@ private fun seriesInfo(
 
 @OptIn(ExperimentalTime::class)
 @Composable
-private fun movieInfo(
+fun movieInfo(
     movie: ArrMovie,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>
@@ -813,7 +813,7 @@ private fun movieInfo(
 }
 
 @Composable
-private fun artistInfo(
+fun artistInfo(
     artist: Arrtist,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>
@@ -843,7 +843,7 @@ private fun artistInfo(
 }
 
 @Composable
-private fun authorInfo(
+fun authorInfo(
     author: Author,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>
@@ -873,7 +873,7 @@ private fun authorInfo(
 }
 
 @Composable
-private fun audiobookInfo(
+fun audiobookInfo(
     audiobook: Audiobook
 ): Map<String, String> {
     val unknown = mokoString(MR.strings.unknown)

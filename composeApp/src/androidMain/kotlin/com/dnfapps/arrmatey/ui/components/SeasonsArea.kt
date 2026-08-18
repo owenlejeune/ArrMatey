@@ -54,13 +54,15 @@ fun SeasonsArea(
     onSeasonAutomaticSearch: (Int) -> Unit,
     deleteSeasonFiles: (Int) -> Unit,
     seasonDeleteInProgress: Boolean,
+    modifier: Modifier = Modifier,
     activityQueueViewModel: ActivityQueueViewModel = koinInject()
 ) {
     val navigation = arrNavigator
     val queueItems by activityQueueViewModel.activityTasks.collectAsStateWithLifecycle()
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
     ) {
         Text(
             text = mokoString(MR.strings.seasons_header),

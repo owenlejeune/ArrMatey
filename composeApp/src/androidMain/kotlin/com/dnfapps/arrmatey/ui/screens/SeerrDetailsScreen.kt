@@ -77,6 +77,7 @@ import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InfoArea
+import com.dnfapps.arrmatey.ui.components.SeerrSeasonsSection
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
@@ -211,70 +212,9 @@ fun SeerrDetailsScreen(
                                 }
 
                                 (item as? TvDetails)?.let { series ->
-                                    Text(
-                                        text = mokoString(MR.strings.seasons_header),
-                                        style = MaterialTheme.typography.titleLarge
+                                    SeerrSeasonsSection(
+                                        seasons = series.seasons
                                     )
-                                    series.seasons.forEach { season ->
-                                        var expanded by rememberSaveable { mutableStateOf(false) }
-                                        val iconRotation by animateFloatAsState(
-                                            targetValue = if (expanded) 180f else 0f,
-                                            animationSpec = tween(durationMillis = 200),
-                                            label = "iconRotation"
-                                        )
-                                        ContainerCard(modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable { expanded = !expanded }
-                                        ) {
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    text = if (season.seasonNumber == 0) {
-                                                        mokoString(MR.strings.specials)
-                                                    } else {
-                                                        mokoString(MR.strings.season_label, season.seasonNumber)
-                                                    },
-                                                    style = MaterialTheme.typography.titleLarge
-                                                )
-                                                Text(
-                                                    text = mokoPlural(MR.plurals.episodes, season.episodeCount),//"${season.episodeCount} episodes",
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-                                                Spacer(modifier = Modifier.weight(1f))
-                                                Icon(
-                                                    imageVector = Icons.Default.ExpandCircleDown,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.rotate(iconRotation)
-                                                )
-                                            }
-                                        }
-
-                                        AnimatedVisibility(
-                                            visible = expanded,
-                                            enter = expandVertically(),
-                                            exit = shrinkVertically()
-                                        ) {
-                                            Column(
-                                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                                            ) {
-                                                season.episodes.forEachIndexed { index, episode ->
-                                                    EpisodeCard(
-                                                        episode,
-                                                        modifier = Modifier.padding(horizontal = 32.dp)
-                                                    )
-                                                    if (index < season.episodeCount - 1) {
-                                                        HorizontalDivider(
-                                                            modifier = Modifier.padding(
-                                                                horizontal = 24.dp
-                                                            )
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
                                 }
 
                                 item.credits?.let { credits ->
@@ -314,10 +254,12 @@ fun SeerrDetailsScreen(
                                                         rt.criticsRating.icon,
                                                         "${rt.criticsScore}%"
                                                     )
-                                                    RatingView(
-                                                        rt.audienceRating.icon,
-                                                        "${rt.audienceScore}%"
-                                                    )
+                                                    if (rt.audienceRating != null && rt.audienceScore != null) {
+                                                        RatingView(
+                                                            rt.audienceRating!!.icon,
+                                                            "${rt.audienceScore}%"
+                                                        )
+                                                    }
                                                 }
                                             }
                                             state.imdbRatings?.let { imdb ->
@@ -438,7 +380,7 @@ fun SeerrDetailsScreen(
 }
 
 @Composable
-private fun RatingView(
+fun RatingView(
     logo: ImageResource,
     rating: String
 ) {

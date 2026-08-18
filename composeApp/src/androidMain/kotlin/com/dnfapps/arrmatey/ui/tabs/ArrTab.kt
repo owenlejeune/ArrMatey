@@ -37,6 +37,7 @@ import com.dnfapps.arrmatey.ui.screens.EpisodeDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.InteractiveSearchScreen
 import com.dnfapps.arrmatey.ui.screens.MediaDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.MediaPreviewScreen
+import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.MovieFilesScreen
 import org.koin.compose.koinInject
 
@@ -70,7 +71,7 @@ fun ArrTab(
                     transitionSpec = { forwardSlideTransform() },
                     popTransitionSpec = { popSlideTransform() },
                     predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-                    entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible)
+                    entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation)
                 )
             }
 
@@ -93,7 +94,7 @@ fun ArrTab(
                             transitionSpec = { forwardSlideTransform() },
                             popTransitionSpec = { popSlideTransform() },
                             predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-                            entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible)
+                            entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation)
                         )
                     }
                 }
@@ -102,12 +103,27 @@ fun ArrTab(
     }
 }
 
-private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIsVisible: Boolean) = entryProvider {
+private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIsVisible: Boolean, navigation: Navigator<ArrScreen>) = entryProvider {
     entry<ArrScreen.Library> {
         ArrLibraryScreen(type, isExpanded, wideRailIsVisible)
     }
     entry<ArrScreen.Details> { details ->
-        MediaDetailsScreen(details.id, type, isExpanded)
+        UnifiedMediaDetailsScreen(
+            arrId = details.id,
+            instanceType = type,
+            isExpanded = isExpanded,
+            onBack = { navigation.popBackStack() }
+        )
+    }
+    entry<ArrScreen.UnifiedDetails> { details ->
+        UnifiedMediaDetailsScreen(
+            arrId = details.id,
+            tmdbId = details.tmdbId,
+            tvdbId = details.tvdbId,
+            instanceType = details.type ?: type,
+            isExpanded = isExpanded,
+            onBack = { navigation.popBackStack() }
+        )
     }
     entry<ArrScreen.Search> { search ->
         ArrSearchScreen(search.query, type)

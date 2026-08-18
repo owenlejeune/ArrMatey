@@ -41,6 +41,9 @@ import com.dnfapps.arrmatey.arr.usecase.PerformProwlarrSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetUnifiedMediaDetailsUseCase
+import com.dnfapps.arrmatey.arr.usecase.SmartAddMediaUseCase
+import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
@@ -295,6 +298,8 @@ val useCaseModule = module {
     factory { GrabProwlarrReleaseUseCase(get()) }
     factory { UpdateCalendarFilterPreferenceUseCase(get()) }
     factory { GetSeerrInstanceRepositoryUseCase(get()) }
+    factory { SmartAddMediaUseCase(get(), get()) }
+    factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get()) }
     factory { GetBazarrInstanceRepositoryUseCase(get()) }
     factory { GetCurrentSeerrUserUseCase() }
     factory { GetRequestsUseCase() }
@@ -358,6 +363,8 @@ val useCaseModule = module {
     factory { CredentialMigrationUseCase(get(), get(), get()) }
     factory { ExportDataUseCase(get(), get(), get(), get(), get(), get()) }
     factory { ImportDataUseCase(get(), get(), get(), get(), get(), get()) }
+    factory { SmartAddMediaUseCase(get(), get()) }
+    factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get()) }
     factory { GetBazarrInstanceRepositoryUseCase(get()) }
     factory { UpdateAllPreferencesUseCase(get(), get()) }
 }
@@ -370,6 +377,9 @@ val viewModelModule = module {
     }
     factory { (id: Long, type: InstanceType) ->
         ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+    }
+    factory { (arrId: Long?, tmdbId: Long?, tvdbId: Long?, instanceType: InstanceType?, requestType: RequestType?) ->
+        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType) ->
         InstancesViewModel(type, get(), get(), get())

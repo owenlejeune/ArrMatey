@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.RequestsScreen
 import com.dnfapps.arrmatey.ui.screens.SeerrDetailsScreen
+import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -42,7 +43,10 @@ fun SeerrTab(
                     RequestsScreen(viewModel = viewModel, isExpanded, wideRailIsVisible)
                 }
                 entry<SeerrScreen.Details> { details ->
-                    SeerrDetailsScreen(details.tmdbId, details.requestType, onBack = { navigation.popBackStack() })
+                    UnifiedMediaDetailsScreen(tmdbId = details.tmdbId, requestType = details.requestType, onBack = { navigation.popBackStack() })
+                }
+                entry<SeerrScreen.UnifiedDetails> { details ->
+                    UnifiedMediaDetailsScreen(tmdbId = details.tmdbId, requestType = details.requestType, onBack = { navigation.popBackStack() })
                 }
             }
         )

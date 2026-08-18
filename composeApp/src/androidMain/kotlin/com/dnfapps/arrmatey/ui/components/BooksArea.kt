@@ -76,12 +76,14 @@ fun BooksArea(
     searchIds: Set<Long>,
     onToggleMonitor: (Book) -> Unit,
     onToggleSeriesMonitor: (List<Book>) -> Unit,
-    onAutomaticSearch: (Long) -> Unit
+    onAutomaticSearch: (Long) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val navigation = arrNavigator
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

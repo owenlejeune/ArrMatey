@@ -7,7 +7,7 @@ data class SeriesMembership(
     val id: Long? = null,
     val audiobookId: Long? = null,
     val seriesName: String,
-    val seriesNumber: String,
+    val seriesNumber: String? = null,
     val seriesAsin: String? = null,
     val isPrimary: Boolean,
     val sortOrder: Int

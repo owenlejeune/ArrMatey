@@ -27,25 +27,15 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun AudiobookFileView(
     audiobook: Audiobook,
     searchIds: Set<Long>,
-    onAutomaticSearch: () -> Unit
+    onAutomaticSearch: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val navigation = arrNavigator
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
     ) {
-        ReleaseDownloadButtons(
-            onInteractiveClicked = {
-                navigation.toAudiobookRelease(audiobook.id, audiobook.releaseQuery)
-            },
-            onAutomaticClicked = onAutomaticSearch,
-            automaticSearchEnabled = audiobook.monitored,
-            automaticSearchInProgress = searchIds.contains(audiobook.id),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
-        )
-
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -65,6 +55,18 @@ fun AudiobookFileView(
                 }
             )
         }
+
+        ReleaseDownloadButtons(
+            onInteractiveClicked = {
+                navigation.toAudiobookRelease(audiobook.id, audiobook.releaseQuery)
+            },
+            onAutomaticClicked = onAutomaticSearch,
+            automaticSearchEnabled = audiobook.monitored,
+            automaticSearchInProgress = searchIds.contains(audiobook.id),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        )
 
         audiobook.files.forEach { file ->
             AudiobookFileCard(file)

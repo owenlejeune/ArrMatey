@@ -6,9 +6,11 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -37,39 +39,49 @@ fun SeerrCreditsSection(
     credits: Credits,
     onPersonClick: (Long) -> Unit = {}
 ) {
-    Text(
-        text = mokoString(MR.strings.cast),
-        style = MaterialTheme.typography.titleLarge
-    )
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(credits.cast) { castMember ->
-            CastCrewItem(
-                profilePath = castMember.fullProfilePath,
-                name = castMember.name,
-                credit = castMember.character,
-                modifier = Modifier.clickable { onPersonClick(castMember.id) }
+    if (credits.cast.isNotEmpty()) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                text = mokoString(MR.strings.cast),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 24.dp)
             )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp)
+            ) {
+                items(credits.cast) { castMember ->
+                    CastCrewItem(
+                        profilePath = castMember.fullProfilePath,
+                        name = castMember.name,
+                        credit = castMember.character,
+                        modifier = Modifier.clickable { onPersonClick(castMember.id) }
+                    )
+                }
+            }
         }
     }
 
-    Text(
-        text = mokoString(MR.strings.crew),
-        style = MaterialTheme.typography.titleLarge
-    )
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .horizontalScroll(rememberScrollState())
-    ) {
-        credits.crew.forEach { crewMember ->
-            CastCrewItem(
-                profilePath = crewMember.fullProfilePath,
-                name = crewMember.name,
-                credit = crewMember.job,
-                modifier = Modifier.clickable { onPersonClick(crewMember.id) }
+    if (credits.crew.isNotEmpty()) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                text = mokoString(MR.strings.crew),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 24.dp)
             )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp)
+            ) {
+                items(credits.crew) { crewMember ->
+                    CastCrewItem(
+                        profilePath = crewMember.fullProfilePath,
+                        name = crewMember.name,
+                        credit = crewMember.job,
+                        modifier = Modifier.clickable { onPersonClick(crewMember.id) }
+                    )
+                }
+            }
         }
     }
 }

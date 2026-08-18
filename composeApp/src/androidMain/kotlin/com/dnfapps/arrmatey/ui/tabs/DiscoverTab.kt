@@ -64,6 +64,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.SeerrDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
+import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 
@@ -94,11 +95,10 @@ fun DiscoverTab(
                     )
                 }
                 entry<DiscoverScreen.Details> { details ->
-                    if (details.requestType == RequestType.Person) {
-                        SeerrPersonDetailsScreen(details.tmdbId, onBack = { navigation.popBackStack() })
-                    } else {
-                        SeerrDetailsScreen(details.tmdbId, details.requestType, onBack = { navigation.popBackStack() })
-                    }
+                    UnifiedMediaDetailsScreen(tmdbId = details.tmdbId, requestType = details.requestType, onBack = { navigation.popBackStack() })
+                }
+                entry<DiscoverScreen.UnifiedDetails> { details ->
+                    UnifiedMediaDetailsScreen(tmdbId = details.tmdbId, requestType = details.requestType, onBack = { navigation.popBackStack() })
                 }
             }
         )
