@@ -57,6 +57,7 @@ fun AlbumsArea(
     onAlbumAutomaticSearch: (Long) -> Unit,
     deleteAlbumFiles: (Long) -> Unit,
     albumDeleteInProgress: Boolean,
+    onNavigateToAlbumRelease: (Long, Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -154,7 +155,8 @@ fun AlbumsArea(
                             onDeleteAlbum = {
                                 deleteAlbumFiles(album.id)
                             },
-                            deleteInProgress = albumDeleteInProgress
+                            deleteInProgress = albumDeleteInProgress,
+                            onNavigateToAlbumRelease = onNavigateToAlbumRelease
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         albumTracks.forEachIndexed { index, track ->

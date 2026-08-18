@@ -82,6 +82,16 @@ import com.dnfapps.arrmatey.model.toInfoList
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toAlbumRelease
+import com.dnfapps.arrmatey.navigation.toAudiobookFiles
+import com.dnfapps.arrmatey.navigation.toAudiobookRelease
+import com.dnfapps.arrmatey.navigation.toAuthorFiles
+import com.dnfapps.arrmatey.navigation.toBookDetails
+import com.dnfapps.arrmatey.navigation.toBookRelease
+import com.dnfapps.arrmatey.navigation.toEpisodeDetails
+import com.dnfapps.arrmatey.navigation.toMovieFiles
+import com.dnfapps.arrmatey.navigation.toMovieReleases
+import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
 import com.dnfapps.arrmatey.ui.components.AudiobookFileView
@@ -289,7 +299,9 @@ fun MediaDetailsScreen(
                                         deleteSeasonFiles = { seasonNumber ->
                                             confirmDeleteSeasonNumber = seasonNumber
                                         },
-                                        seasonDeleteInProgress = seasonDeleteStatus is OperationStatus.InProgress
+                                        seasonDeleteInProgress = seasonDeleteStatus is OperationStatus.InProgress,
+                                        onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },
+                                        onNavigateToSeriesRelease = { seriesId, seasonNumber -> navigation.toSeriesRelease(seriesId, seasonNumber) }
                                     )
                                     is ArrMovie -> {
                                         MovieFileView(
@@ -301,7 +313,9 @@ fun MediaDetailsScreen(
                                             },
                                             onDeleteFile = {
                                                 confirmDeleteMovie = true
-                                            }
+                                            },
+                                            onNavigateToMovieFiles = { navigation.toMovieFiles(it) },
+                                            onNavigateToMovieReleases = { navigation.toMovieReleases(it) }
                                         )
                                         item.id?.let { movieId ->
                                             BazarrSubtitlesSection(
@@ -328,6 +342,7 @@ fun MediaDetailsScreen(
                                             confirmDeleteAlbum = it
                                         },
                                         albumDeleteInProgress = albumDeleteStatus is OperationStatus.InProgress,
+                                        onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) }
                                     )
                                     is Author -> BooksArea(
                                         author = item,
@@ -343,14 +358,19 @@ fun MediaDetailsScreen(
                                         },
                                         onAutomaticSearch = { bookId ->
                                             mediaDetailsViewModel.performBookAutomaticLookup(bookId)
-                                        }
+                                        },
+                                        onNavigateToAuthorFiles = { navigation.toAuthorFiles(it) },
+                                        onNavigateToBookDetails = { author, book -> navigation.toBookDetails(author, book) },
+                                        onNavigateToBookRelease = { navigation.toBookRelease(it) }
                                     )
                                     is Audiobook -> AudiobookFileView(
                                         audiobook = item,
                                         searchIds = automaticSearchIds,
                                         onAutomaticSearch = {
                                             mediaDetailsViewModel.performAutomaticLookup()
-                                        }
+                                        },
+                                        onNavigateToAudiobookFiles = { navigation.toAudiobookFiles(it) },
+                                        onNavigateToAudiobookRelease = { id, query -> navigation.toAudiobookRelease(id, query ?: "") }
                                     )
                                     is SearchAudiobook,
                                     is MockMedia -> {}

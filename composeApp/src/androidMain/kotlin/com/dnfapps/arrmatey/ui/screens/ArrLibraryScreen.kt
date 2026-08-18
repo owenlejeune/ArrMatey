@@ -92,10 +92,7 @@ import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.navigation.navigationManager
-import com.dnfapps.arrmatey.navigation.toDetails
-import com.dnfapps.arrmatey.navigation.toSearch
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
@@ -127,13 +124,14 @@ fun ArrLibraryScreen(
     type: InstanceType,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
+    onNavigateToSearch: (String) -> Unit,
+    onNavigateToDetails: (ArrMedia) -> Unit,
     arrMediaViewModel: ArrMediaViewModel = koinInjectParams(type),
     instancesViewModel: InstancesViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject(),
     globalPreferencesStore: PreferencesStore = koinInject(),
 ) {
     val context = LocalContext.current
-    val navigation = arrNavigator
     val navigationManager = navigationManager
 
     val queueItems by activityQueueViewModel.queueItems.collectAsStateWithLifecycle()
@@ -209,7 +207,7 @@ fun ArrLibraryScreen(
             if (!isExpanded && !isInSelectionMode) {
                 instancesState.selectedInstance?.let {
                     FloatingActionButton(
-                        onClick = { navigation.toSearch() }
+                        onClick = { onNavigateToSearch("") }
                     ) {
                         Icon(Icons.Default.Add, null)
                     }
@@ -329,9 +327,7 @@ fun ArrLibraryScreen(
                                     type = type,
                                     items = items,
                                     onItemClick = {
-                                        it.id?.let { id ->
-                                            navigation.toDetails(id)
-                                        }
+                                        onNavigateToDetails(it)
                                     },
                                     preferences = preferences,
                                     itemIsActive = { item ->
@@ -341,7 +337,7 @@ fun ArrLibraryScreen(
                                 )
                             } else {
                                 EmptySearchResultsView(type, textFieldState.text.toString()) {
-                                    navigation.toSearch(textFieldState.text.toString())
+                                    onNavigateToSearch(textFieldState.text.toString())
                                 }
                             }
                         }

@@ -16,9 +16,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toAudiobookFiles
-import com.dnfapps.arrmatey.navigation.toAudiobookRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.AudiobookFileCard
 import com.dnfapps.arrmatey.utils.mokoString
@@ -28,10 +25,10 @@ fun AudiobookFileView(
     audiobook: Audiobook,
     searchIds: Set<Long>,
     onAutomaticSearch: () -> Unit,
+    onNavigateToAudiobookFiles: (Audiobook) -> Unit,
+    onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val navigation = arrNavigator
-
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
@@ -51,14 +48,14 @@ fun AudiobookFileView(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable {
-                    navigation.toAudiobookFiles(audiobook)
+                    onNavigateToAudiobookFiles(audiobook)
                 }
             )
         }
 
         ReleaseDownloadButtons(
             onInteractiveClicked = {
-                navigation.toAudiobookRelease(audiobook.id, audiobook.releaseQuery)
+                onNavigateToAudiobookRelease(audiobook.id, audiobook.releaseQuery)
             },
             onAutomaticClicked = onAutomaticSearch,
             automaticSearchEnabled = audiobook.monitored,

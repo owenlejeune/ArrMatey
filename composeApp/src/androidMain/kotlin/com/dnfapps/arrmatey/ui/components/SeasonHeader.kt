@@ -12,8 +12,6 @@ import com.dnfapps.arrmatey.arr.api.model.Season
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -28,9 +26,9 @@ fun SeasonHeader(
     onPerformAutomaticSearch: (Int) -> Unit,
     searchInProgress: (Int) -> Boolean,
     onDeleteSeason: () -> Unit,
-    deleteInProgress: Boolean
+    deleteInProgress: Boolean,
+    onNavigateToSeriesRelease: (Long?, Int) -> Unit
 ) {
-    val navigation = arrNavigator
     val tbaLabel = mokoString(MR.strings.tba)
     val year = remember(episodes) {
         episodes.mapNotNull { it.airDateUtc }.minOrNull()
@@ -55,12 +53,7 @@ fun SeasonHeader(
 
     ReleaseDownloadButtons(
         onInteractiveClicked = {
-            seriesId?.let { seriesId ->
-                navigation.toSeriesRelease(
-                    seriesId = seriesId,
-                    seasonNumber = season.seasonNumber
-                )
-            }
+            onNavigateToSeriesRelease(seriesId, season.seasonNumber)
         },
         onAutomaticClicked = {
             onPerformAutomaticSearch(season.seasonNumber)

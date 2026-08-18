@@ -47,7 +47,6 @@ import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.navigation.DiscoverScreen
-import com.dnfapps.arrmatey.navigation.LocalDiscoverNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.toDetails
@@ -77,32 +76,38 @@ fun DiscoverTab(
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<DiscoverScreen> = navigationManager.discover
 ) {
-    CompositionLocalProvider(LocalDiscoverNavigator provides navigation) {
-        NavDisplay(
-            backStack = navigation.backStack,
-            onBack = { navigation.popBackStack() },
-            transitionSpec = { forwardSlideTransform() },
-            popTransitionSpec = { popSlideTransform() },
-            predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-            entryProvider = entryProvider {
-                entry<DiscoverScreen.Home> {
-                    DiscoverHomeScreen(
-                        viewModel = viewModel,
-                        wideRailIsVisible = wideRailIsVisible,
-                        onItemClick = { result ->
-                            navigation.toDetails(result.id, result.mediaType)
-                        }
-                    )
-                }
-                entry<DiscoverScreen.Details> { details ->
-                    UnifiedMediaDetailsScreen(tmdbId = details.tmdbId, requestType = details.requestType, onBack = { navigation.popBackStack() })
-                }
-                entry<DiscoverScreen.UnifiedDetails> { details ->
-                    UnifiedMediaDetailsScreen(tmdbId = details.tmdbId, requestType = details.requestType, onBack = { navigation.popBackStack() })
-                }
+    NavDisplay(
+        backStack = navigation.backStack,
+        onBack = { navigation.popBackStack() },
+        transitionSpec = { forwardSlideTransform() },
+        popTransitionSpec = { popSlideTransform() },
+        predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
+        entryProvider = entryProvider {
+            entry<DiscoverScreen.Home> {
+                DiscoverHomeScreen(
+                    viewModel = viewModel,
+                    wideRailIsVisible = wideRailIsVisible,
+                    onItemClick = { result ->
+                        navigation.toDetails(result.id, result.mediaType)
+                    }
+                )
             }
-        )
-    }
+            entry<DiscoverScreen.Details> { details ->
+                UnifiedMediaDetailsScreen(
+                    tmdbId = details.tmdbId,
+                    requestType = details.requestType,
+                    onBack = { navigation.popBackStack() }
+                )
+            }
+            entry<DiscoverScreen.UnifiedDetails> { details ->
+                UnifiedMediaDetailsScreen(
+                    tmdbId = details.tmdbId,
+                    requestType = details.requestType,
+                    onBack = { navigation.popBackStack() }
+                )
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -35,9 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.Season
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toEpisodeDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
@@ -54,10 +53,11 @@ fun SeasonsArea(
     onSeasonAutomaticSearch: (Int) -> Unit,
     deleteSeasonFiles: (Int) -> Unit,
     seasonDeleteInProgress: Boolean,
+    onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit,
+    onNavigateToSeriesRelease: (Long?, Int) -> Unit,
     modifier: Modifier = Modifier,
     activityQueueViewModel: ActivityQueueViewModel = koinInject()
 ) {
-    val navigation = arrNavigator
     val queueItems by activityQueueViewModel.activityTasks.collectAsStateWithLifecycle()
 
     Column(
@@ -136,7 +136,8 @@ fun SeasonsArea(
                             onPerformAutomaticSearch = onSeasonAutomaticSearch,
                             searchInProgress = { searchIds.contains(it.toLong()) },
                             onDeleteSeason = { deleteSeasonFiles(season.seasonNumber) },
-                            deleteInProgress = seasonDeleteInProgress
+                            deleteInProgress = seasonDeleteInProgress,
+                            onNavigateToSeriesRelease = onNavigateToSeriesRelease
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         seasonEpisodes.forEachIndexed { index, episode ->
@@ -151,10 +152,11 @@ fun SeasonsArea(
                                 isActive = isActive,
                                 progressLabel = activityProgress,
                                 onClick = {
-                                    navigation.toEpisodeDetails(series, episode)
+                                    onNavigateToEpisodeDetails(series, episode)
                                 },
                                 onAutomaticSearch = onEpisodeAutomaticSearch,
                                 onToggleMonitor = onToggleEpisodeMonitor,
+                                onNavigateToSeriesRelease = { onNavigateToSeriesRelease(series.id, episode.episodeNumber) },
                                 searchInProgress = { searchIds.contains(it) }
                             )
                             if (index < seasonEpisodes.size-1) {

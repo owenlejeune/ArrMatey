@@ -56,10 +56,6 @@ import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.extensions.isToday
 import com.dnfapps.arrmatey.extensions.isTodayOrAfter
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toAuthorFiles
-import com.dnfapps.arrmatey.navigation.toBookDetails
-import com.dnfapps.arrmatey.navigation.toBookRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.format
@@ -77,9 +73,11 @@ fun BooksArea(
     onToggleMonitor: (Book) -> Unit,
     onToggleSeriesMonitor: (List<Book>) -> Unit,
     onAutomaticSearch: (Long) -> Unit,
+    onNavigateToAuthorFiles: (Author) -> Unit,
+    onNavigateToBookDetails: (Author, Book) -> Unit,
+    onNavigateToBookRelease: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val navigation = arrNavigator
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -112,7 +110,7 @@ fun BooksArea(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable {
-                    navigation.toAuthorFiles(author)
+                    onNavigateToAuthorFiles(author)
                 }
             )
         }
@@ -130,7 +128,9 @@ fun BooksArea(
                     books = books,
                     searchIds = searchIds,
                     onToggleMonitor = onToggleMonitor,
-                    onAutomaticSearch = onAutomaticSearch
+                    onAutomaticSearch = onAutomaticSearch,
+                    onNavigateToBookDetails = onNavigateToBookDetails,
+                    onNavigateToBookRelease = onNavigateToBookRelease
                 )
 
                 1 -> SeriesView(
@@ -140,7 +140,8 @@ fun BooksArea(
                     searchIds = searchIds,
                     onToggleMonitor = onToggleMonitor,
                     onToggleSeriesMonitor = onToggleSeriesMonitor,
-                    onAutomaticSearch = onAutomaticSearch
+                    onAutomaticSearch = onAutomaticSearch,
+                    onNavigateToBookRelease = onNavigateToBookRelease
                 )
             }
         }
@@ -154,9 +155,10 @@ private fun BooksView(
     books: List<Book>,
     searchIds: Set<Long>,
     onToggleMonitor: (Book) -> Unit,
-    onAutomaticSearch: (Long) -> Unit
+    onAutomaticSearch: (Long) -> Unit,
+    onNavigateToBookDetails: (Author, Book) -> Unit,
+    onNavigateToBookRelease: (Long) -> Unit
 ) {
-    val navigation = arrNavigator
     Column {
         books.forEach { book ->
             BookRow(
@@ -166,8 +168,9 @@ private fun BooksView(
                 onAutomaticSearch = onAutomaticSearch,
                 onToggleMonitor = onToggleMonitor,
                 searchInProgress = { searchIds.contains(it) },
+                onNavigateToBookRelease = onNavigateToBookRelease,
                 onClick = {
-                    navigation.toBookDetails(author, book)
+                    onNavigateToBookDetails(author, book)
                 }
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -183,12 +186,12 @@ fun BookRow(
     onAutomaticSearch: (Long) -> Unit,
     onToggleMonitor: (Book) -> Unit,
     searchInProgress: (Long) -> Boolean,
+    onNavigateToBookRelease: (Long) -> Unit,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     progressLabel: String? = null,
     seriesPosition: String? = null
 ) {
-    val navigation = arrNavigator
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -236,7 +239,7 @@ fun BookRow(
 
         IconButton(
             onClick = {
-                navigation.toBookRelease(bookId = book.id)
+                onNavigateToBookRelease(book.id)
             },
             modifier = Modifier.size(24.dp),
             enabled = book.monitored
@@ -291,9 +294,9 @@ private fun SeriesView(
     searchIds: Set<Long>,
     onToggleMonitor: (Book) -> Unit,
     onToggleSeriesMonitor: (List<Book>) -> Unit,
-    onAutomaticSearch: (Long) -> Unit
+    onAutomaticSearch: (Long) -> Unit,
+    onNavigateToBookRelease: (Long) -> Unit
 ) {
-    val navigation = arrNavigator
     Column {
         series.forEach { bookSeries ->
             val seriesBooks = remember(series, books) {
@@ -372,8 +375,9 @@ private fun SeriesView(
                                     onAutomaticSearch = onAutomaticSearch,
                                     onToggleMonitor = onToggleMonitor,
                                     searchInProgress = { searchIds.contains(it) },
+                                    onNavigateToBookRelease = onNavigateToBookRelease,
                                     onClick = {
-                                        navigation.toBookRelease(book.id)
+                                        onNavigateToBookRelease(book.id)
                                     },
                                     seriesPosition = link.position
                                 )

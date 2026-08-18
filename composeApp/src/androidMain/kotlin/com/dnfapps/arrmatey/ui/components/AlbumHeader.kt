@@ -11,8 +11,6 @@ import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toAlbumRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -27,14 +25,14 @@ fun AlbumHeader(
     onPerformAutomaticSearch: (Long) -> Unit,
     searchInProgress: (Long) -> Boolean,
     onDeleteAlbum: () -> Unit,
-    deleteInProgress: Boolean
+    deleteInProgress: Boolean,
+    onNavigateToAlbumRelease: (Long, Long) -> Unit
 ) {
-    val navigation = arrNavigator
     val release = album.releaseDate?.format("MMM d, yyyy")
         ?: mokoString(MR.strings.tba)
 
     val runtime = remember(tracks) {
-        tracks.sumOf { it.duration }.div(60_000).formatMinutesAsRuntime()
+        (tracks.sumOf { it.duration } / 60_000).formatMinutesAsRuntime()
     }
 
     val albumInfo = listOfNotNull(
@@ -48,10 +46,7 @@ fun AlbumHeader(
     ReleaseDownloadButtons(
         onInteractiveClicked = {
             artistId?.let {
-                navigation.toAlbumRelease(
-                    artistId = it,
-                    albumId = album.id
-                )
+                onNavigateToAlbumRelease(it, album.id)
             }
         },
         onAutomaticClicked = {

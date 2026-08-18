@@ -29,9 +29,9 @@ import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toDetails
-import com.dnfapps.arrmatey.navigation.toPreview
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.MediaList
@@ -51,10 +51,13 @@ import org.koin.compose.koinInject
 fun ArrSearchScreen(
     initialQuery: String,
     type: InstanceType,
+    onBack: () -> Unit,
+    onNavigateToDetails: (Long) -> Unit,
+    onNavigateToUnifiedDetails: (Long?, Long?, InstanceType) -> Unit,
+    onNavigateToPreview: (ArrMedia) -> Unit,
     viewModel: ArrSearchViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject()
 ) {
-    val navigation = arrNavigator
     val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()
     val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
 
@@ -91,7 +94,7 @@ fun ArrSearchScreen(
                 textFieldState = textFieldState,
                 searchBarState = searchBarState,
                 inputFieldModifier = Modifier.focusRequester(focusRequester),
-                navigationIcon = { BackButton(navigation) },
+                navigationIcon = { BackButton(onBack) },
                 actions = {
                     SearchSortMenu(
                         sortBy = sortBy,
@@ -132,10 +135,16 @@ fun ArrSearchScreen(
                             items = state.items,
                             onItemClick = { item ->
                                 if (item.id == null) {
-                                    navigation.toPreview(item)
-                                } else {
-                                    navigation.toDetails(item.id!!)
-                                }
+                                     if (type == InstanceType.Radarr || type == InstanceType.Sonarr) {
+                                         val tmdbId = (item as? ArrMovie)?.tmdbId ?: (item as? ArrSeries)?.tmdbId
+                                         val tvdbId = (item as? ArrSeries)?.tvdbId
+                                         onNavigateToUnifiedDetails(tmdbId, tvdbId, type)
+                                     } else {
+                                         onNavigateToPreview(item)
+                                     }
+                                 } else {
+                                     onNavigateToDetails(item.id!!)
+                                 }
                             },
                             itemIsActive = { item -> queueItems.any { it.mediaId == item.id } },
                             includeOverview = true

@@ -21,9 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toMovieFiles
-import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
@@ -37,9 +34,10 @@ fun MovieFileView(
     searchIds: Set<Long>,
     onAutomaticSearch: () -> Unit,
     onDeleteFile: () -> Unit,
+    onNavigateToMovieFiles: (ArrMovie) -> Unit,
+    onNavigateToMovieReleases: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val navigation = arrNavigator
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
@@ -65,13 +63,13 @@ fun MovieFileView(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable {
-                    navigation.toMovieFiles(movie)
+                    onNavigateToMovieFiles(movie)
                 }
             )
         }
         ReleaseDownloadButtons(
             onInteractiveClicked = {
-                navigation.toMovieReleases(movie.id!!)
+                onNavigateToMovieReleases(movie.id!!)
             },
             onAutomaticClicked = onAutomaticSearch,
             automaticSearchEnabled = movie.monitored,

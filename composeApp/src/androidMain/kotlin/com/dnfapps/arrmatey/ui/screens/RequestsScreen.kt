@@ -27,8 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.compose.SeerrTab
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.seerrNavigator
-import com.dnfapps.arrmatey.navigation.toDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
@@ -44,9 +43,9 @@ fun RequestsScreen(
     viewModel: RequestsViewModel,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
+    onNavigateToDetails: (Long, RequestType) -> Unit,
     instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr)
 ) {
-    val navigation = seerrNavigator
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val userState by viewModel.userState.collectAsStateWithLifecycle()
     val pagedData by viewModel.requestsState.collectAsStateWithLifecycle()
@@ -120,9 +119,7 @@ fun RequestsScreen(
                                 onEdit = { },
                                 onDelete = { viewModel.cancelRequest(it) },
                                 onRemoveFromService = { viewModel.deleteMediaFile(it) },
-                                onNavigateToDetails = { tmdbId, type ->
-                                    navigation.toDetails(tmdbId, type)
-                                },
+                                onNavigateToDetails = onNavigateToDetails,
                                 onLoadMore = { viewModel.loadNextRequestsPage() },
                                 onRetry = { viewModel.retryRequests() },
                                 onClearError = { viewModel.clearRequestsError() }
@@ -160,9 +157,7 @@ fun RequestsScreen(
                                         onEdit = { },
                                         onDelete = { viewModel.cancelRequest(it) },
                                         onRemoveFromService = { viewModel.deleteMediaFile(it) },
-                                        onNavigateToDetails = { tmdbId, type ->
-                                            navigation.toDetails(tmdbId, type)
-                                        },
+                                        onNavigateToDetails = onNavigateToDetails,
                                         onLoadMore = { viewModel.loadNextRequestsPage() },
                                         onRetry = { viewModel.retryRequests() },
                                         onClearError = { viewModel.clearRequestsError() }

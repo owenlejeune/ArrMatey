@@ -42,8 +42,6 @@ import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
@@ -62,10 +60,11 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun MediaPreviewScreen(
     item: ArrMedia,
     type: InstanceType,
+    onBack: () -> Unit,
+    onItemAdded: (Long) -> Unit,
     isExpanded: Boolean = false,
     viewModel: MediaPreviewViewModel = koinInjectParams(item, type)
 ) {
-    val navigation = arrNavigator
     val context = LocalContext.current
     var showBottomSheet by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -92,7 +91,7 @@ fun MediaPreviewScreen(
     LaunchedEffect(uiState.lastAddedItemId) {
         uiState.lastAddedItemId?.let { id ->
             showBottomSheet = false
-            navigation.replaceBackStack(listOf(ArrScreen.Library, ArrScreen.Details(id)))
+            onItemAdded(id)
         }
     }
 
@@ -102,7 +101,7 @@ fun MediaPreviewScreen(
                 scrollState = scrollState,
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() },
+                        onClick = { onBack() },
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(

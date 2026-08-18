@@ -93,10 +93,7 @@ fun SeerrSeasonsSection(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     season.episodes.forEachIndexed { index, episode ->
-                        EpisodeCard(
-                            episode,
-                            modifier = Modifier.padding(horizontal = 32.dp)
-                        )
+                        EpisodeCard(episode)
                         if (index < season.episodeCount - 1) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(

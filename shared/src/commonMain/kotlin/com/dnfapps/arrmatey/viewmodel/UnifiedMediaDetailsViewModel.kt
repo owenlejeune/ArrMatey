@@ -42,6 +42,8 @@ import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
+import com.dnfapps.arrmatey.seerr.api.model.Service
+import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
@@ -55,6 +57,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -137,6 +140,18 @@ class UnifiedMediaDetailsViewModel(
     private val _isReportIssueSheetVisible = MutableStateFlow(false)
     val isReportIssueSheetVisible: StateFlow<Boolean> = _isReportIssueSheetVisible.asStateFlow()
 
+    private val _radarrServices = MutableStateFlow<List<Service>>(emptyList())
+    val radarrServices: StateFlow<List<Service>> = _radarrServices.asStateFlow()
+
+    private val _sonarrServices = MutableStateFlow<List<Service>>(emptyList())
+    val sonarrServices: StateFlow<List<Service>> = _sonarrServices.asStateFlow()
+
+    private val _users = MutableStateFlow<List<SeerrUser>>(emptyList())
+    val users: StateFlow<List<SeerrUser>> = _users.asStateFlow()
+
+    private val _serviceDetails = MutableStateFlow<ServiceDetails?>(null)
+    val serviceDetails: StateFlow<ServiceDetails?> = _serviceDetails.asStateFlow()
+
     private val _reportIssueState = MutableStateFlow(ReportIssueUiState())
     val reportIssueState: StateFlow<ReportIssueUiState> = _reportIssueState
         .combine(_uiState) { issueState, uiState ->
@@ -189,6 +204,12 @@ class UnifiedMediaDetailsViewModel(
     val resolvedInstanceType = instanceType ?: when (requestType) {
         RequestType.Movie -> InstanceType.Radarr
         RequestType.Tv -> InstanceType.Sonarr
+        else -> null
+    }
+
+    val resolvedRequestType = requestType ?: when (resolvedInstanceType) {
+        InstanceType.Radarr -> RequestType.Movie
+        InstanceType.Sonarr -> RequestType.Tv
         else -> null
     }
 
@@ -245,6 +266,49 @@ class UnifiedMediaDetailsViewModel(
                     launch {
                         seerrRepo.loggedInUser.collect { _currentUser.value = it }
                     }
+                    launch {
+                        seerrRepo.getUsers()
+                    }
+                    launch {
+                        seerrRepo.users.collect { _users.value = it }
+                    }
+                    launch {
+                        seerrRepo.getRadarrServices()
+                    }
+                    launch {
+                        seerrRepo.getSonarrServices()
+                    }
+                    launch {
+                        seerrRepo.radarrServices.collect { _radarrServices.value = it }
+                    }
+                    launch {
+                        seerrRepo.sonarrServices.collect { _sonarrServices.value = it }
+                    }
+                    launch {
+                        combine(_uiState, _radarrServices, _sonarrServices) { state, radarr, sonarr ->
+                            if (state is UnifiedMediaDetailsUiState.Success) {
+                                val request = state.seerrMedia?.mediaInfo?.requests?.firstOrNull { it.status == 1 }
+                                val serverId = request?.serverId ?: when (resolvedRequestType) {
+                                    RequestType.Movie -> radarr.find { it.isDefault }?.id
+                                    RequestType.Tv -> sonarr.find { it.isDefault }?.id
+                                    else -> null
+                                }
+                                if (serverId != null) serverId to resolvedRequestType else null
+                            } else null
+                        }
+                            .filterNotNull()
+                            .distinctUntilChanged()
+                            .collectLatest { (serverId, type) ->
+                                val result = when (type) {
+                                    RequestType.Movie -> seerrRepo.getRadarrDetails(serverId)
+                                    RequestType.Tv -> seerrRepo.getSonarrDetails(serverId)
+                                    else -> return@collectLatest
+                                }
+                                result.onSuccess { details ->
+                                    _serviceDetails.value = details
+                                }
+                            }
+                    }
                 }
 
                 getUnifiedMediaDetailsUseCase(
@@ -252,7 +316,7 @@ class UnifiedMediaDetailsViewModel(
                     tmdbId = tmdbId,
                     tvdbId = tvdbId,
                     instanceType = resolvedInstanceType,
-                    requestType = requestType,
+                    requestType = resolvedRequestType,
                     arrRepository = arrRepo,
                     seerrRepository = seerrRepo,
                     bazarrRepository = bazarrRepo
@@ -323,7 +387,7 @@ class UnifiedMediaDetailsViewModel(
         viewModelScope.launch {
             val repository = seerrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             val body = RequestMediaBody(
-                mediaType = requestType ?: return@launch,
+                mediaType = resolvedRequestType ?: return@launch,
                 mediaId = tmdbId ?: return@launch,
                 is4k = is4k,
                 serverId = null,

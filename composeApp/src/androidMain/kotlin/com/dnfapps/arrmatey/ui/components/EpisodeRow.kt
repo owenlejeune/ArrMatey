@@ -34,8 +34,6 @@ import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.extensions.isToday
 import com.dnfapps.arrmatey.extensions.isTodayOrAfter
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -46,11 +44,11 @@ fun EpisodeRow(
     onAutomaticSearch: (Long) -> Unit,
     onToggleMonitor: (Episode) -> Unit,
     searchInProgress: (Long) -> Boolean,
+    onNavigateToSeriesRelease: (Long?) -> Unit,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     progressLabel: String? = null
 ) {
-    val navigation = arrNavigator
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -121,7 +119,7 @@ fun EpisodeRow(
         }
         IconButton(
             onClick = {
-                navigation.toSeriesRelease(episodeId = episode.id)
+                onNavigateToSeriesRelease(episode.id)
             },
             modifier = Modifier.size(24.dp)
         ) {

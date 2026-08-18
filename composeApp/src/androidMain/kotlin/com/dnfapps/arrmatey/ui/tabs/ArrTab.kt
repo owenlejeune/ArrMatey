@@ -18,6 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -25,6 +29,19 @@ import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.LocalArrNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.toAlbumRelease
+import com.dnfapps.arrmatey.navigation.toAudiobookFiles
+import com.dnfapps.arrmatey.navigation.toAudiobookRelease
+import com.dnfapps.arrmatey.navigation.toAuthorFiles
+import com.dnfapps.arrmatey.navigation.toBookDetails
+import com.dnfapps.arrmatey.navigation.toBookRelease
+import com.dnfapps.arrmatey.navigation.toDetails
+import com.dnfapps.arrmatey.navigation.toEpisodeDetails
+import com.dnfapps.arrmatey.navigation.toMovieFiles
+import com.dnfapps.arrmatey.navigation.toMovieReleases
+import com.dnfapps.arrmatey.navigation.toSearch
+import com.dnfapps.arrmatey.navigation.toSeriesRelease
+import com.dnfapps.arrmatey.navigation.toUnifiedDetails
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
@@ -105,14 +122,43 @@ fun ArrTab(
 
 private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIsVisible: Boolean, navigation: Navigator<ArrScreen>) = entryProvider {
     entry<ArrScreen.Library> {
-        ArrLibraryScreen(type, isExpanded, wideRailIsVisible)
+        ArrLibraryScreen(
+            type = type,
+            isExpanded = isExpanded,
+            wideRailIsVisible = wideRailIsVisible,
+            onNavigateToSearch = { navigation.toSearch(it) },
+            onNavigateToDetails = { media ->
+                val tmdbId = when (media) {
+                    is ArrMovie -> media.tmdbId.takeIf { it > 0 }
+                    is ArrSeries -> media.tmdbId?.takeIf { it > 0 }
+                    else -> null
+                }
+                val tvdbId = (media as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
+                navigation.toUnifiedDetails(
+                    id = media.id,
+                    tmdbId = tmdbId,
+                    tvdbId = tvdbId,
+                    type = type
+                )
+            }
+        )
     }
     entry<ArrScreen.Details> { details ->
         UnifiedMediaDetailsScreen(
             arrId = details.id,
             instanceType = type,
             isExpanded = isExpanded,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
+            onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },
+            onNavigateToSeriesRelease = { seriesId, seasonNumber -> navigation.toSeriesRelease(seriesId, seasonNumber) },
+            onNavigateToMovieFiles = { navigation.toMovieFiles(it) },
+            onNavigateToMovieReleases = { navigation.toMovieReleases(it) },
+            onNavigateToAuthorFiles = { navigation.toAuthorFiles(it) },
+            onNavigateToBookDetails = { author, book -> navigation.toBookDetails(author, book) },
+            onNavigateToBookRelease = { navigation.toBookRelease(it) },
+            onNavigateToAudiobookFiles = { navigation.toAudiobookFiles(it) },
+            onNavigateToAudiobookRelease = { id, query -> navigation.toAudiobookRelease(id, query ?: "") },
+            onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) }
         )
     }
     entry<ArrScreen.UnifiedDetails> { details ->
@@ -122,14 +168,37 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             tvdbId = details.tvdbId,
             instanceType = details.type ?: type,
             isExpanded = isExpanded,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
+            onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },
+            onNavigateToSeriesRelease = { seriesId, seasonNumber -> navigation.toSeriesRelease(seriesId, seasonNumber) },
+            onNavigateToMovieFiles = { navigation.toMovieFiles(it) },
+            onNavigateToMovieReleases = { navigation.toMovieReleases(it) },
+            onNavigateToAuthorFiles = { navigation.toAuthorFiles(it) },
+            onNavigateToBookDetails = { author, book -> navigation.toBookDetails(author, book) },
+            onNavigateToBookRelease = { navigation.toBookRelease(it) },
+            onNavigateToAudiobookFiles = { navigation.toAudiobookFiles(it) },
+            onNavigateToAudiobookRelease = { id, query -> navigation.toAudiobookRelease(id, query ?: "") },
+            onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) }
         )
     }
     entry<ArrScreen.Search> { search ->
-        ArrSearchScreen(search.query, type)
+        ArrSearchScreen(
+            initialQuery = search.query,
+            type = type,
+            onBack = { navigation.popBackStack() },
+            onNavigateToDetails = { navigation.toDetails(it) },
+            onNavigateToUnifiedDetails = { arrId, tmdbId, instanceType -> navigation.toUnifiedDetails(arrId, tmdbId, null, instanceType) },
+            onNavigateToPreview = { navigation.navigateTo(ArrScreen.Preview(it)) }
+        )
     }
     entry<ArrScreen.Preview<ArrMedia>> { preview ->
-        MediaPreviewScreen(preview.item, type, isExpanded = isExpanded)
+        MediaPreviewScreen(
+            item = preview.item,
+            type = type,
+            isExpanded = isExpanded,
+            onBack = { navigation.popBackStack() },
+            onItemAdded = { navigation.toDetails(it) }
+        )
     }
     entry<ArrScreen.MovieReleases> { params ->
         val releaseParams = ReleaseParams.Movie(params.movieId)

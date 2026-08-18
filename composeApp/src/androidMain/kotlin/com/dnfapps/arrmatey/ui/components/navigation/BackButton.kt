@@ -10,13 +10,18 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
-fun BackButton(navigation: Navigator<*>) {
+fun BackButton(onClick: () -> Unit) {
     IconButton(
-        onClick = { navigation.popBackStack() }
+        onClick = onClick
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Default.ArrowBack,
             contentDescription = mokoString(MR.strings.back)
         )
     }
+}
+
+@Composable
+fun BackButton(navigation: Navigator<*>) {
+    BackButton(onClick = { navigation.popBackStack() })
 }

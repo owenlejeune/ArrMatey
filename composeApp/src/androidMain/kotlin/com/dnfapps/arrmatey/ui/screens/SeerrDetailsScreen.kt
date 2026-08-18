@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -425,46 +427,22 @@ fun EpisodeCard(
                 )
             }
         }
-        episode.overview?.let { overview ->
-            Text(overview, style = MaterialTheme.typography.bodyMedium)
-        }
-        episode.stillPath?.let { stillPath ->
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             AsyncImage(
-                model = rememberRemoteImageData(stillPath),
+                model = rememberRemoteImageData(episode.stillPath),
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .height(60.dp)
+                    .aspectRatio(1.77f)
                     .clip(RoundedCornerShape(12.dp)),
                 contentDescription = null
             )
+            episode.overview?.let { overview ->
+                Text(overview, style = MaterialTheme.typography.bodyMedium)
+            }
         }
     }
 }
 
-fun handleWatchClick(
-    url: String,
-    provider: MediaProvider,
-    context: Context,
-    moko: MokoStrings
-) {
-    when (provider) {
-        MediaProvider.Plex -> {
-            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-            try {
-                context.startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
-            }
-        }
-        MediaProvider.Jellyfin -> {
-            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-            try {
-                context.startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
-            }
-        }
-        MediaProvider.None -> {
-            Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
-        }
-    }
-}
