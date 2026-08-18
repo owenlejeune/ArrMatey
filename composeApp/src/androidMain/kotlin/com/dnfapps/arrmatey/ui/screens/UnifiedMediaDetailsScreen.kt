@@ -98,7 +98,6 @@ import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.state.MediaProvider
-import com.dnfapps.arrmatey.ui.components.SeerrSeasonsSection
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
 import com.dnfapps.arrmatey.ui.components.AudiobookFileView
@@ -145,7 +144,6 @@ fun UnifiedMediaDetailsScreen(
     requestType: RequestType? = null,
     isExpanded: Boolean = false,
     viewModel: UnifiedMediaDetailsViewModel = koinInjectParams(arrId, tmdbId, tvdbId, instanceType, requestType),
-    activityQueueViewModel: ActivityQueueViewModel = koinInject(),
     moko: MokoStrings = koinInject(),
     onBack: () -> Unit,
     onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit = { _, _ -> },
@@ -409,92 +407,86 @@ fun UnifiedMediaDetailsScreen(
                                     )
                                 }
 
-                                if (state.hasArrId) {
-                                    when (val item = state.arrMedia) {
-                                        is ArrSeries -> SeasonsArea(
-                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                            series = item,
-                                            episodes = state.episodes,
-                                            searchIds = automaticSearchIds,
-                                            onToggleSeasonMonitor = { viewModel.toggleSeasonMonitored(it) },
-                                            onToggleEpisodeMonitor = { viewModel.toggleEpisodeMonitored(it) },
-                                            onEpisodeAutomaticSearch = { viewModel.performEpisodeAutomaticLookup(it) },
-                                            onSeasonAutomaticSearch = { viewModel.performSeasonAutomaticLookup(it) },
-                                            deleteSeasonFiles = { confirmDeleteSeasonNumber = it },
-                                            seasonDeleteInProgress = deleteSeasonStatus is OperationStatus.InProgress,
-                                            onNavigateToEpisodeDetails = onNavigateToEpisodeDetails,
-                                            onNavigateToSeriesRelease = onNavigateToSeriesRelease,
-                                            activityQueueViewModel = activityQueueViewModel
-                                        )
+                                if (state.seasons.isNotEmpty()) {
+                                    val arrSeries = state.arrMedia as? ArrSeries
+                                    SeasonsArea(
+                                        seasons = state.seasons,
+                                        seriesId = arrSeries?.id,
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                        searchIds = automaticSearchIds,
+                                        onToggleSeasonMonitor = { viewModel.toggleSeasonMonitored(it) },
+                                        onToggleEpisodeMonitor = { viewModel.toggleEpisodeMonitored(it) },
+                                        onEpisodeAutomaticSearch = { viewModel.performEpisodeAutomaticLookup(it) },
+                                        onSeasonAutomaticSearch = { viewModel.performSeasonAutomaticLookup(it) },
+                                        deleteSeasonFiles = { confirmDeleteSeasonNumber = it },
+                                        seasonDeleteInProgress = deleteSeasonStatus is OperationStatus.InProgress,
+                                        onNavigateToEpisodeDetails = { episode ->
+                                            arrSeries?.let { series -> onNavigateToEpisodeDetails(series, episode) }
+                                        },
+                                        onNavigateToSeriesRelease = onNavigateToSeriesRelease
+                                    )
+                                }
 
-                                        is ArrMovie -> {
-                                            MovieFileView(
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                                movie = item,
-                                                movieExtraFiles = state.extraFiles,
-                                                searchIds = automaticSearchIds,
-                                                onAutomaticSearch = { viewModel.performAutomaticLookup() },
-                                                onDeleteFile = { confirmDeleteMovie = true },
-                                                onNavigateToMovieFiles = onNavigateToMovieFiles,
-                                                onNavigateToMovieReleases = onNavigateToMovieReleases
+                                when (val item = state.arrMedia) {
+                                    is ArrMovie -> {
+                                        MovieFileView(
+                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                            movie = item,
+                                            movieExtraFiles = state.extraFiles,
+                                            searchIds = automaticSearchIds,
+                                            onAutomaticSearch = { viewModel.performAutomaticLookup() },
+                                            onDeleteFile = { confirmDeleteMovie = true },
+                                            onNavigateToMovieFiles = onNavigateToMovieFiles,
+                                            onNavigateToMovieReleases = onNavigateToMovieReleases
+                                        )
+                                        item.id?.let { movieId ->
+                                            BazarrSubtitlesSection(
+                                                target = BazarrMediaTarget.Movie(movieId),
+                                                modifier = Modifier.padding(horizontal = 24.dp)
                                             )
-                                            item.id?.let { movieId ->
-                                                BazarrSubtitlesSection(
-                                                    target = BazarrMediaTarget.Movie(movieId),
-                                                    modifier = Modifier.padding(horizontal = 24.dp)
-                                                )
-                                            }
                                         }
-
-                                        is Arrtist -> AlbumsArea(
-                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                            artist = item,
-                                            albums = state.albums,
-                                            tracks = state.tracks,
-                                            trackFiles = state.trackFiles,
-                                            searchIds = automaticSearchIds,
-                                            onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
-                                            onEditAlbum = { editAlbum = it },
-                                            onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
-                                            deleteAlbumFiles = { confirmDeleteAlbum = it },
-                                            albumDeleteInProgress = deleteAlbumStatus is OperationStatus.InProgress,
-                                            onNavigateToAlbumRelease = onNavigateToAlbumRelease
-                                        )
-
-                                        is Author -> BooksArea(
-                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                            author = item,
-                                            series = state.bookSeries,
-                                            files = state.bookFiles,
-                                            books = state.books,
-                                            searchIds = automaticSearchIds,
-                                            onToggleMonitor = { viewModel.toggleBookMonitored(it) },
-                                            onToggleSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
-                                            onAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
-                                            onNavigateToAuthorFiles = onNavigateToAuthorFiles,
-                                            onNavigateToBookDetails = onNavigateToBookDetails,
-                                            onNavigateToBookRelease = onNavigateToBookRelease
-                                        )
-
-                                        is Audiobook -> AudiobookFileView(
-                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                            audiobook = item,
-                                            searchIds = automaticSearchIds,
-                                            onAutomaticSearch = { item.id?.let { viewModel.performBookAutomaticLookup(it) } },
-                                            onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
-                                            onNavigateToAudiobookRelease = onNavigateToAudiobookRelease
-                                        )
-
-                                        is SearchAudiobook, is MockMedia, null -> {}
                                     }
-                                } else {
-                                    val seerrMedia = state.seerrMedia
-                                    if (isSeerrConfigured && seerrMedia is TvDetails) {
-                                        SeerrSeasonsSection(
-                                            seasons = seerrMedia.seasons,
-                                            modifier = Modifier.padding(horizontal = 24.dp)
-                                        )
-                                    }
+
+                                    is Arrtist -> AlbumsArea(
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                        artist = item,
+                                        albums = state.albums,
+                                        tracks = state.tracks,
+                                        trackFiles = state.trackFiles,
+                                        searchIds = automaticSearchIds,
+                                        onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
+                                        onEditAlbum = { editAlbum = it },
+                                        onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
+                                        deleteAlbumFiles = { confirmDeleteAlbum = it },
+                                        albumDeleteInProgress = deleteAlbumStatus is OperationStatus.InProgress,
+                                        onNavigateToAlbumRelease = onNavigateToAlbumRelease
+                                    )
+
+                                    is Author -> BooksArea(
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                        author = item,
+                                        series = state.bookSeries,
+                                        files = state.bookFiles,
+                                        books = state.books,
+                                        searchIds = automaticSearchIds,
+                                        onToggleMonitor = { viewModel.toggleBookMonitored(it) },
+                                        onToggleSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
+                                        onAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
+                                        onNavigateToAuthorFiles = onNavigateToAuthorFiles,
+                                        onNavigateToBookDetails = onNavigateToBookDetails,
+                                        onNavigateToBookRelease = onNavigateToBookRelease
+                                    )
+
+                                    is Audiobook -> AudiobookFileView(
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                        audiobook = item,
+                                        searchIds = automaticSearchIds,
+                                        onAutomaticSearch = { item.id?.let { viewModel.performBookAutomaticLookup(it) } },
+                                        onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
+                                        onNavigateToAudiobookRelease = onNavigateToAudiobookRelease
+                                    )
+
+                                    is ArrSeries, is SearchAudiobook, is MockMedia, null -> {}
                                 }
 
                                 state.seerrMedia?.credits?.let { credits ->

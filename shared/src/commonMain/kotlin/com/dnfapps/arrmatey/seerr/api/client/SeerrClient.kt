@@ -21,6 +21,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.api.model.UserResponse
 import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
@@ -37,7 +38,7 @@ import org.koin.core.component.KoinComponent
 interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
-    suspend fun getUsers(): NetworkResult<List<SeerrUser>>
+    suspend fun getUsers(take: Int = 100, skip: Int = 0): NetworkResult<UserResponse>
     suspend fun getTrending(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getDiscoverMovies(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getUpcomingMovies(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
@@ -88,8 +89,8 @@ class SeerrClientImpl(
     override suspend fun getUserInfo(): NetworkResult<SeerrUser> =
         get("auth/me")
 
-    override suspend fun getUsers(): NetworkResult<List<SeerrUser>> =
-        get("user")
+    override suspend fun getUsers(take: Int, skip: Int): NetworkResult<UserResponse> =
+        get("user", mapOf("take" to take, "skip" to skip))
 
     override suspend fun getTrending(page: Int): NetworkResult<DiscoverResponse> =
         get("discover/trending", mapOf("page" to page))

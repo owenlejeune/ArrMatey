@@ -78,8 +78,10 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.ErrorView
+import com.dnfapps.arrmatey.model.EpisodeWrapper
+import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.ui.components.InfoArea
-import com.dnfapps.arrmatey.ui.components.SeerrSeasonsSection
+import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
@@ -214,8 +216,15 @@ fun SeerrDetailsScreen(
                                 }
 
                                 (item as? TvDetails)?.let { series ->
-                                    SeerrSeasonsSection(
-                                        seasons = series.seasons
+                                    val seasons = series.seasons.map { season ->
+                                        SeasonWrapper(
+                                            seasonNumber = season.seasonNumber,
+                                            seerrSeason = season,
+                                            episodes = season.episodes.map { ep -> EpisodeWrapper(seerrEpisode = ep) }
+                                        )
+                                    }
+                                    SeasonsArea(
+                                        seasons = seasons
                                     )
                                 }
 
@@ -252,10 +261,12 @@ fun SeerrDetailsScreen(
                                         ) {
                                             state.rtRatings?.let { rt ->
                                                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                                    RatingView(
-                                                        rt.criticsRating.icon,
-                                                        "${rt.criticsScore}%"
-                                                    )
+                                                    if (rt.criticsScore != null && rt.criticsRating != null) {
+                                                        RatingView(
+                                                            rt.criticsRating!!.icon,
+                                                            "${rt.criticsScore}%"
+                                                        )
+                                                    }
                                                     if (rt.audienceRating != null && rt.audienceScore != null) {
                                                         RatingView(
                                                             rt.audienceRating!!.icon,

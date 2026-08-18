@@ -85,7 +85,7 @@ class SeerrInstanceRepository(
 
     suspend fun getUsers() {
         client.getUsers()
-            .onSuccess { _users.value = it }
+            .onSuccess { _users.value = it.results }
     }
 
     suspend fun refreshCounts() {

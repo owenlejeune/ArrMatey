@@ -299,7 +299,7 @@ val useCaseModule = module {
     factory { UpdateCalendarFilterPreferenceUseCase(get()) }
     factory { GetSeerrInstanceRepositoryUseCase(get()) }
     factory { SmartAddMediaUseCase(get(), get()) }
-    factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get()) }
+    factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get(), get()) }
     factory { GetBazarrInstanceRepositoryUseCase(get()) }
     factory { GetCurrentSeerrUserUseCase() }
     factory { GetRequestsUseCase() }
@@ -364,7 +364,7 @@ val useCaseModule = module {
     factory { ExportDataUseCase(get(), get(), get(), get(), get(), get()) }
     factory { ImportDataUseCase(get(), get(), get(), get(), get(), get()) }
     factory { SmartAddMediaUseCase(get(), get()) }
-    factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get()) }
+    factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get(), get()) }
     factory { GetBazarrInstanceRepositoryUseCase(get()) }
     factory { UpdateAllPreferencesUseCase(get(), get()) }
 }

@@ -9,8 +9,8 @@ import kotlinx.serialization.SerialName
 data class RottenTomatoesRating(
     val title: String,
     val url: String,
-    val criticsRating: CriticsRating,
-    val criticsScore: Int,
+    val criticsRating: CriticsRating? = null,
+    val criticsScore: Int? = null,
     val audienceRating: AudienceRating? = null,
     val audienceScore: Int? = null,
 )

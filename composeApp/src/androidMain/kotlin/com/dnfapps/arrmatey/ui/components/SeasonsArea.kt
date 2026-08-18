@@ -22,43 +22,39 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.api.model.Season
-import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
+import com.dnfapps.arrmatey.arr.api.model.Episode as ArrEpisode
+import com.dnfapps.arrmatey.model.EpisodeWrapper
+import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SeasonsArea(
-    series: ArrSeries,
-    episodes: List<Episode>,
-    searchIds: Set<Long>,
-    onToggleSeasonMonitor: (Int) -> Unit,
-    onToggleEpisodeMonitor: (Episode) -> Unit,
-    onEpisodeAutomaticSearch: (Long) -> Unit,
-    onSeasonAutomaticSearch: (Int) -> Unit,
-    deleteSeasonFiles: (Int) -> Unit,
-    seasonDeleteInProgress: Boolean,
-    onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit,
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit,
+    seasons: List<SeasonWrapper>,
     modifier: Modifier = Modifier,
-    activityQueueViewModel: ActivityQueueViewModel = koinInject()
+    seriesId: Long? = null,
+    searchIds: Set<Long> = emptySet(),
+    onToggleSeasonMonitor: (Int) -> Unit = {},
+    onToggleEpisodeMonitor: (ArrEpisode) -> Unit = {},
+    onEpisodeAutomaticSearch: (Long) -> Unit = {},
+    onSeasonAutomaticSearch: (Int) -> Unit = {},
+    deleteSeasonFiles: (Int) -> Unit = {},
+    seasonDeleteInProgress: Boolean = false,
+    onNavigateToEpisodeDetails: (ArrEpisode) -> Unit = {},
+    onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> }
 ) {
-    val queueItems by activityQueueViewModel.activityTasks.collectAsStateWithLifecycle()
+    if (seasons.isEmpty()) return
 
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -68,17 +64,19 @@ fun SeasonsArea(
             text = mokoString(MR.strings.seasons_header),
             style = MaterialTheme.typography.titleLarge
         )
-        series.seasons.sortedByDescending { it.seasonNumber }.forEach { season ->
+
+        seasons.forEach { season ->
             var expanded by rememberSaveable { mutableStateOf(false) }
             val iconRotation by animateFloatAsState(
                 targetValue = if (expanded) 180f else 0f,
                 animationSpec = tween(durationMillis = 200),
                 label = "iconRotation"
             )
+
             Column(
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
-                ContainerCard (
+                ContainerCard(
                     modifier = Modifier.clickable { expanded = !expanded }
                 ) {
                     Row(
@@ -93,46 +91,48 @@ fun SeasonsArea(
                             },
                             style = MaterialTheme.typography.titleLarge
                         )
-                        season.statistics?.let { statistics ->
-                            Text(
-                                text = "${statistics.episodeFileCount}/${statistics.totalEpisodeCount}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
+                        val statsText = season.episodeFileCount?.let {
+                            "$it/${season.totalEpisodeCount}"
+                        } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
+
+                        Text(
+                            text = statsText,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
                         Spacer(modifier = Modifier.weight(1f))
                         Icon(
                             imageVector = Icons.Default.ExpandCircleDown,
                             contentDescription = null,
                             modifier = Modifier.rotate(iconRotation)
                         )
-                        Icon(
-                            imageVector = if (season.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                            contentDescription = if (season.monitored) {
-                                mokoString(MR.strings.monitored)
-                            } else {
-                                mokoString(MR.strings.unmonitored)
-                            },
-                            modifier = Modifier.clickable {
-                                onToggleSeasonMonitor(season.seasonNumber)
-                            }
-                        )
+
+                        if (season.monitored != null) {
+                            Icon(
+                                imageVector = if (season.isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                contentDescription = if (season.isMonitored) {
+                                    mokoString(MR.strings.monitored)
+                                } else {
+                                    mokoString(MR.strings.unmonitored)
+                                },
+                                modifier = Modifier.clickable {
+                                    onToggleSeasonMonitor(season.seasonNumber)
+                                }
+                            )
+                        }
                     }
                 }
+
                 AnimatedVisibility(
                     visible = expanded,
                     enter = expandVertically(),
                     exit = shrinkVertically()
                 ) {
                     Column {
-                        val seasonEpisodes = episodes
-                            .filter { it.seasonNumber == season.seasonNumber }
-                            .sortedByDescending { it.episodeNumber }
-
                         Spacer(modifier = Modifier.height(6.dp))
                         SeasonHeader(
-                            seriesId = series.id,
                             season = season,
-                            episodes = seasonEpisodes,
+                            seriesId = seriesId,
                             onPerformAutomaticSearch = onSeasonAutomaticSearch,
                             searchInProgress = { searchIds.contains(it.toLong()) },
                             onDeleteSeason = { deleteSeasonFiles(season.seasonNumber) },
@@ -140,26 +140,20 @@ fun SeasonsArea(
                             onNavigateToSeriesRelease = onNavigateToSeriesRelease
                         )
                         Spacer(modifier = Modifier.height(12.dp))
-                        seasonEpisodes.forEachIndexed { index, episode ->
-                            val queueItem by remember(episode.id, queueItems) {
-                                derivedStateOf { activityQueueViewModel.getQueueItemForEpisode(episode) }
-                            }
-                            val isActive = queueItem != null
-                            val activityProgress = queueItem?.progressLabel
+
+                        season.episodes.forEachIndexed { index, episode ->
+                            val arrEp = episode.arrEpisode
 
                             EpisodeRow(
                                 episode = episode,
-                                isActive = isActive,
-                                progressLabel = activityProgress,
-                                onClick = {
-                                    onNavigateToEpisodeDetails(series, episode)
-                                },
+                                onClick = arrEp?.let { ep -> { onNavigateToEpisodeDetails(ep) } },
                                 onAutomaticSearch = onEpisodeAutomaticSearch,
                                 onToggleMonitor = onToggleEpisodeMonitor,
-                                onNavigateToSeriesRelease = { onNavigateToSeriesRelease(series.id, episode.episodeNumber) },
+                                onNavigateToSeriesRelease = { onNavigateToSeriesRelease(seriesId, episode.episodeNumber) },
                                 searchInProgress = { searchIds.contains(it) }
                             )
-                            if (index < seasonEpisodes.size-1) {
+
+                            if (index < season.episodes.size - 1) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                             }
                         }
@@ -168,4 +162,47 @@ fun SeasonsArea(
             }
         }
     }
+}
+
+@Composable
+fun SeasonsArea(
+    series: ArrSeries,
+    episodes: List<ArrEpisode>,
+    searchIds: Set<Long>,
+    onToggleSeasonMonitor: (Int) -> Unit,
+    onToggleEpisodeMonitor: (ArrEpisode) -> Unit,
+    onEpisodeAutomaticSearch: (Long) -> Unit,
+    onSeasonAutomaticSearch: (Int) -> Unit,
+    deleteSeasonFiles: (Int) -> Unit,
+    seasonDeleteInProgress: Boolean,
+    onNavigateToEpisodeDetails: (ArrSeries, ArrEpisode) -> Unit,
+    onNavigateToSeriesRelease: (Long?, Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val arrEpMap = episodes.groupBy { it.seasonNumber }
+    val wrappedSeasons = series.seasons.sortedByDescending { it.seasonNumber }.map { season ->
+        val seasonEpisodes = (arrEpMap[season.seasonNumber] ?: emptyList())
+            .sortedByDescending { it.episodeNumber }
+            .map { EpisodeWrapper(arrEpisode = it) }
+        SeasonWrapper(
+            seasonNumber = season.seasonNumber,
+            arrSeason = season,
+            episodes = seasonEpisodes
+        )
+    }
+
+    SeasonsArea(
+        seasons = wrappedSeasons,
+        seriesId = series.id,
+        searchIds = searchIds,
+        onToggleSeasonMonitor = onToggleSeasonMonitor,
+        onToggleEpisodeMonitor = onToggleEpisodeMonitor,
+        onEpisodeAutomaticSearch = onEpisodeAutomaticSearch,
+        onSeasonAutomaticSearch = onSeasonAutomaticSearch,
+        deleteSeasonFiles = deleteSeasonFiles,
+        seasonDeleteInProgress = seasonDeleteInProgress,
+        onNavigateToEpisodeDetails = { onNavigateToEpisodeDetails(series, it) },
+        onNavigateToSeriesRelease = onNavigateToSeriesRelease,
+        modifier = modifier
+    )
 }

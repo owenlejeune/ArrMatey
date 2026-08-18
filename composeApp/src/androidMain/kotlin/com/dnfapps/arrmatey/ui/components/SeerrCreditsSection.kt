@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.seerr.api.model.Credits
@@ -37,10 +40,14 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun SeerrCreditsSection(
     credits: Credits,
+    modifier: Modifier = Modifier,
     onPersonClick: (Long) -> Unit = {}
 ) {
-    if (credits.cast.isNotEmpty()) {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
+    ) {
+        if (credits.cast.isNotEmpty()) {
             Text(
                 text = mokoString(MR.strings.cast),
                 style = MaterialTheme.typography.titleLarge,
@@ -60,10 +67,8 @@ fun SeerrCreditsSection(
                 }
             }
         }
-    }
 
-    if (credits.crew.isNotEmpty()) {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (credits.crew.isNotEmpty()) {
             Text(
                 text = mokoString(MR.strings.crew),
                 style = MaterialTheme.typography.titleLarge,
@@ -95,7 +100,6 @@ fun CastCrewItem(
 ) {
     ContainerCard(
         modifier = modifier
-            .height(200.dp)
             .width(120.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -124,12 +128,28 @@ fun CastCrewItem(
         ) {
             Text(
                 text = name,
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.titleSmall,
+                minLines = 2,
+                maxLines = 2
             )
-            Text(
-                text = credit,
-                style = MaterialTheme.typography.labelMedium
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.BottomStart
+            ) {
+                Text(
+                    text = "",
+                    style = MaterialTheme.typography.labelMedium,
+                    minLines = 3,
+                    maxLines = 3
+                )
+                Text(
+                    text = credit,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
