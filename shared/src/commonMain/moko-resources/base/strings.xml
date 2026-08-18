@@ -79,6 +79,10 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
+    <string name="item_edited_successfully">Item edited successfully</string>
+    <string name="error_editing_item">Error editing item</string>
+    <string name="item_deleted_successfully">Item deleted successfully</string>
+    <string name="error_deleting_item">Error deleting item</string>
     <string name="remove">Remove</string>
     <string name="manual_import">Manual Import</string>
     <string name="refresh">Refresh</string>

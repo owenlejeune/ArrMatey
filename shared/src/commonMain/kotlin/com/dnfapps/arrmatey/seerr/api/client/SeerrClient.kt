@@ -29,6 +29,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLQueryComponent
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -108,7 +109,7 @@ class SeerrClientImpl(
         get("discover/tv", mapOf("page" to page, "firstAirDateGte" to today))
 
     override suspend fun search(query: String, page: Int): NetworkResult<DiscoverResponse> =
-        get("search", mapOf("query" to query, "page" to page))
+        get("search", mapOf("query" to query.encodeURLQueryComponent(), "page" to page))
 
     override suspend fun getRequests(
         page: Int,

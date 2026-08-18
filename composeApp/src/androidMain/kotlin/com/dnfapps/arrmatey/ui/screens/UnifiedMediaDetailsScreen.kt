@@ -1,14 +1,9 @@
 package com.dnfapps.arrmatey.ui.screens
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,31 +12,24 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -59,7 +47,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -71,54 +58,44 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
-import com.dnfapps.arrmatey.arr.api.model.QualityProfile
-import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
-import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
-import com.dnfapps.arrmatey.compose.utils.formatWithCommas
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.model.InfoItem
-import com.dnfapps.arrmatey.model.InstanceMediaPresence
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
-import com.dnfapps.arrmatey.model.toInfoList
-import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
-import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
-import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
 import com.dnfapps.arrmatey.ui.components.AudiobookFileView
 import com.dnfapps.arrmatey.ui.components.BooksArea
+import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
 import com.dnfapps.arrmatey.ui.components.InfoArea
+import com.dnfapps.arrmatey.ui.components.InstanceChipsRow
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MovieFileView
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
+import com.dnfapps.arrmatey.ui.components.ToolbarAddButton
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.UpcomingDateView
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
+import com.dnfapps.arrmatey.ui.components.buildUnifiedInfoItems
 import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
 import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAlbumSheet
-import com.dnfapps.arrmatey.ui.sheets.EditArtistSheet
-import com.dnfapps.arrmatey.ui.sheets.EditAudiobookSheet
-import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
-import com.dnfapps.arrmatey.ui.sheets.EditMovieSheet
-import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
+import com.dnfapps.arrmatey.ui.sheets.EditMediaSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrReportIssueSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrRequestSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
-import com.dnfapps.arrmatey.utils.format
+import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
@@ -185,13 +162,13 @@ fun UnifiedMediaDetailsScreen(
 
     val automaticSearchIds by viewModel.automaticSearchIds.collectAsStateWithLifecycle()
     val lastSearchResult by viewModel.lastSearchResult.collectAsStateWithLifecycle()
-    val addTargetInstance by viewModel.addSheetTargetInstance.collectAsStateWithLifecycle()
-    val addQualityProfiles by viewModel.addSheetQualityProfiles.collectAsStateWithLifecycle()
-    val addRootFolders by viewModel.addSheetRootFolders.collectAsStateWithLifecycle()
-    val addTags by viewModel.addSheetTags.collectAsStateWithLifecycle()
-    val availableInstances by viewModel.availableInstances.collectAsStateWithLifecycle()
+    val addSheetUiState by viewModel.addSheetUiState.collectAsStateWithLifecycle()
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
+    val itemEditedSuccessfullyMessage = mokoString(MR.strings.item_edited_successfully)
+    val errorEditingItemMessage = mokoString(MR.strings.error_editing_item)
+    val itemDeletedSuccessfullyMessage = mokoString(MR.strings.item_deleted_successfully)
+    val errorDeletingItemMessage = mokoString(MR.strings.error_deleting_item)
 
     LaunchedEffect(lastSearchResult) {
         when (lastSearchResult) {
@@ -204,13 +181,13 @@ fun UnifiedMediaDetailsScreen(
     LaunchedEffect(editStatus) {
         when (editStatus) {
             is OperationStatus.Success -> {
-                Toast.makeText(context, "Item edited successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, itemEditedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
                 showEditSheet = false
                 editAlbum = null
             }
 
             is OperationStatus.Error -> {
-                Toast.makeText(context, "Error editing items", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, errorEditingItemMessage, Toast.LENGTH_SHORT).show()
             }
 
             else -> {}
@@ -220,12 +197,12 @@ fun UnifiedMediaDetailsScreen(
     LaunchedEffect(deleteStatus) {
         when (deleteStatus) {
             is OperationStatus.Success -> {
-                Toast.makeText(context, "Item deleted successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, itemDeletedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
                 onBack()
             }
 
             is OperationStatus.Error -> {
-                Toast.makeText(context, "Error deleting item", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, errorDeletingItemMessage, Toast.LENGTH_SHORT).show()
             }
 
             else -> {}
@@ -521,7 +498,7 @@ fun UnifiedMediaDetailsScreen(
                                     SeerrCreditsSection(credits) { onPersonClick(it) }
                                 }
 
-                                val infoItems = infoItems(state, qualityProfiles, tags)
+                                val infoItems = buildUnifiedInfoItems(state, qualityProfiles, tags)
                                 if (infoItems.isNotEmpty()) {
                                     InfoArea(
                                         infoItems,
@@ -540,14 +517,8 @@ fun UnifiedMediaDetailsScreen(
                                 currentUser = currentUser,
                                 users = users,
                                 onDismissRequest = { viewModel.hideRequestSheet() },
-                                onSubmitRequest = { profileId, rootFolder, languageProfileId, seasons, userId ->
-                                    viewModel.submitRequest(
-                                        profileId = profileId,
-                                        rootFolder = rootFolder,
-                                        languageProfileId = languageProfileId,
-                                        seasons = seasons,
-                                        userId = userId
-                                    )
+                                onSubmitRequest = { profileId, rootFolder, langId, seasons, userId ->
+                                    viewModel.submitRequest(profileId, rootFolder, langId, seasons, userId = userId)
                                 }
                             )
                         }
@@ -569,16 +540,16 @@ fun UnifiedMediaDetailsScreen(
                             when (arrMedia) {
                                 is ArrSeries -> AddSeriesSheet(
                                     item = arrMedia,
-                                    qualityProfiles = addQualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addRootFolders.ifEmpty { rootFolders },
-                                    tags = addTags.ifEmpty { tags },
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    tags = addSheetUiState.tags.ifEmpty { tags },
                                     addInProgress = editStatus is OperationStatus.InProgress,
                                     preferences = preferences,
-                                    instances = availableInstances,
-                                    selectedInstance = addTargetInstance ?: availableInstances.firstOrNull(),
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addTargetInstance?.id)
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
                                         showAddSheet = false
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
@@ -587,16 +558,16 @@ fun UnifiedMediaDetailsScreen(
 
                                 is ArrMovie -> AddMovieSheet(
                                     item = arrMedia,
-                                    qualityProfiles = addQualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addRootFolders.ifEmpty { rootFolders },
-                                    tags = addTags.ifEmpty { tags },
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    tags = addSheetUiState.tags.ifEmpty { tags },
                                     addInProgress = editStatus is OperationStatus.InProgress,
                                     preferences = preferences,
-                                    instances = availableInstances,
-                                    selectedInstance = addTargetInstance ?: availableInstances.firstOrNull(),
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addTargetInstance?.id)
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
                                         showAddSheet = false
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
@@ -639,112 +610,10 @@ fun UnifiedMediaDetailsScreen(
                                 rootFolders = rootFolders,
                                 tags = tags,
                                 editInProgress = editStatus is OperationStatus.InProgress,
-                                onEditItem = {
-                                    if (arrMedia.rootFolderPath != it.rootFolderPath) {
-                                        moveFilesItem = it
-                                    } else {
-                                        viewModel.editItem(it)
-                                    }
-                                },
+                                onEditItem = { viewModel.editItem(it) },
                                 onDismiss = { showEditSheet = false }
                             )
                         }
-                    }
-
-                    moveFilesItem?.let { item ->
-                        AlertDialog(
-                            onDismissRequest = { moveFilesItem = null },
-                            title = {
-                                Text(mokoString(MR.strings.move_files_confirm, item.rootFolderPath ?: ""))
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.editItem(item, moveFiles = true)
-                                        moveFilesItem = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.yes))
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.editItem(item)
-                                        moveFilesItem = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.no))
-                                }
-                            }
-                        )
-                    }
-
-                    editAlbum?.let {
-                        EditAlbumSheet(
-                            album = it,
-                            editInProgress = editStatus is OperationStatus.InProgress,
-                            onEditAlbum = { album ->
-                                viewModel.updateAlbum(album)
-                            },
-                            onDismiss = { editAlbum = null }
-                        )
-                    }
-
-                    confirmDeleteSeasonNumber?.let {
-                        AlertDialog(
-                            onDismissRequest = { confirmDeleteSeasonNumber = null },
-                            title = {
-                                Text(mokoString(MR.strings.delete_season, it))
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.deleteSeasonFiles(it)
-                                        confirmDeleteSeasonNumber = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.yes))
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(
-                                    onClick = {
-                                        confirmDeleteSeasonNumber = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.no))
-                                }
-                            }
-                        )
-                    }
-
-                    confirmDeleteAlbum?.let {
-                        AlertDialog(
-                            onDismissRequest = { confirmDeleteAlbum = null },
-                            title = {
-                                Text(mokoString(MR.strings.delete_season, it))
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.deleteAlbumFiles(it)
-                                        confirmDeleteAlbum = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.yes))
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(
-                                    onClick = {
-                                        confirmDeleteAlbum = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.no))
-                                }
-                            }
-                        )
                     }
 
                     if (confirmDelete) {
@@ -754,6 +623,74 @@ fun UnifiedMediaDetailsScreen(
                             onDelete = { deleteFiles, addExclusion ->
                                 viewModel.deleteMedia(deleteFiles, addExclusion)
                             }
+                        )
+                    }
+
+                    confirmDeleteSeasonNumber?.let { seasonNumber ->
+                        AlertDialog(
+                            onDismissRequest = { confirmDeleteSeasonNumber = null },
+                            title = {
+                                Text(mokoString(MR.strings.delete_season, seasonNumber))
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        viewModel.deleteSeasonFiles(seasonNumber)
+                                        confirmDeleteSeasonNumber = null
+                                    }
+                                ) {
+                                    Text(mokoString(MR.strings.yes))
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = {
+                                        confirmDeleteSeasonNumber = null
+                                    }
+                                ) {
+                                    Text(mokoString(MR.strings.no))
+                                }
+                            }
+                        )
+                    }
+
+                    confirmDeleteAlbum?.let { albumId ->
+                        AlertDialog(
+                            onDismissRequest = { confirmDeleteAlbum = null },
+                            title = {
+                                Text(mokoString(MR.strings.delete_album))
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        viewModel.deleteAlbumFiles(albumId)
+                                        confirmDeleteAlbum = null
+                                    }
+                                ) {
+                                    Text(mokoString(MR.strings.yes))
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = {
+                                        confirmDeleteAlbum = null
+                                    }
+                                ) {
+                                    Text(mokoString(MR.strings.no))
+                                }
+                            }
+                        )
+                    }
+
+                    editAlbum?.let { album ->
+                        EditAlbumSheet(
+                            album = album,
+                            editInProgress = editStatus is OperationStatus.InProgress,
+                            onEditAlbum = {
+                                viewModel.updateAlbum(it)
+                                editAlbum = null
+                            },
+                            onDismiss = { editAlbum = null }
                         )
                     }
 
@@ -779,54 +716,6 @@ fun UnifiedMediaDetailsScreen(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun infoItems(
-    state: UnifiedMediaDetailsUiState.Success,
-    qualityProfiles: List<QualityProfile>,
-    tags: List<Tag>,
-
-): List<InfoItem> = buildList {
-    val arrMedia = state.arrMedia
-    if (arrMedia != null && state.hasArrId) {
-        val arrMap = when (arrMedia) {
-            is ArrSeries -> seriesInfo(arrMedia, qualityProfiles, tags)
-            is ArrMovie -> movieInfo(arrMedia, qualityProfiles, tags)
-            is Arrtist -> artistInfo(arrMedia, qualityProfiles, tags)
-            is Author -> authorInfo(arrMedia, qualityProfiles, tags)
-            is Audiobook -> audiobookInfo(arrMedia)
-            else -> emptyMap()
-        }.toInfoList()
-        addAll(arrMap)
-    }
-
-    val seerrMedia = state.seerrMedia
-    if (seerrMedia != null && seerrMedia !is PersonDetails) {
-        val statusLabel = mokoString(MR.strings.status)
-        add(InfoItem(statusLabel, seerrMedia.status))
-
-        (seerrMedia as? MovieDetails)?.let { movie ->
-            movie.releaseDate?.format("MMM dd, yyyy")?.let { releaseDate ->
-                add(InfoItem(mokoString(MR.strings.release_date), releaseDate))
-            }
-            if (movie.revenue > 0L) {
-                add(InfoItem(mokoString(MR.strings.revenue), movie.revenue.formatWithCommas()))
-            }
-            if (movie.budget > 0L) {
-                add(InfoItem(mokoString(MR.strings.budget), movie.budget.formatWithCommas()))
-            }
-        }
-
-        val countriesText = seerrMedia.productionCountries.joinToString("\n") { it.name }
-        if (countriesText.isNotEmpty()) {
-            add(InfoItem(mokoString(MR.strings.production_countries), countriesText))
-        }
-        val studiosText = seerrMedia.productionCompanies.joinToString("\n") { it.name }
-        if (studiosText.isNotEmpty()) {
-            add(InfoItem(mokoString(MR.strings.studios), studiosText))
         }
     }
 }
@@ -883,243 +772,6 @@ private fun ConfirmDeleteAlert(
                     Text(text = mokoString(MR.strings.delete))
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun EditMediaSheet(
-    item: ArrMedia,
-    qualityProfiles: List<QualityProfile>,
-    rootFolders: List<RootFolder>,
-    tags: List<Tag>,
-    editInProgress: Boolean,
-    onEditItem: (ArrMedia) -> Unit,
-    onDismiss: () -> Unit
-) {
-    when (item) {
-        is ArrMovie -> EditMovieSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss,
-        )
-
-        is ArrSeries -> EditSeriesSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
-
-        is Arrtist -> EditArtistSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
-
-        is Author -> EditAuthorSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
-
-        is Audiobook -> EditAudiobookSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
-
-        is SearchAudiobook,
-        is MockMedia -> {
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
-@Composable
-private fun ToolbarAddButton(
-    canAddDirectly: Boolean,
-    isSeerrConfigured: Boolean,
-    pendingRequestId: Long?,
-    resolvedInstanceType: InstanceType?,
-    onAddDirectlyClicked: () -> Unit,
-    onViewRequestClicked: () -> Unit,
-    onRequestClicked: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    if (canAddDirectly && isSeerrConfigured) {
-        var showToolbarAddMenu by remember { mutableStateOf(false) }
-        Box(modifier = modifier) {
-            IconButton(
-                onClick = { showToolbarAddMenu = true },
-                colors = IconButtonDefaults.headerBarColors()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = mokoString(MR.strings.add)
-                )
-            }
-            DropdownMenuPopup(
-                expanded = showToolbarAddMenu,
-                onDismissRequest = { showToolbarAddMenu = false }
-            ) {
-                DropdownMenuGroup(
-                    shapes = MenuDefaults.groupShape(0, 1)
-                ) {
-
-                    DropdownMenuItem(
-                        selected = false,
-                        text = { Text(mokoString(MR.strings.add_to_arr, resolvedInstanceType?.name ?: "Arr")) },
-                        onClick = {
-                            showToolbarAddMenu = false
-                            onAddDirectlyClicked()
-                        },
-                        leadingIcon = { Icon(Icons.Default.Add, null) },
-                        shapes = MenuDefaults.itemShape(1, 2)
-                    )
-                    if (pendingRequestId != null) {
-                        DropdownMenuItem(
-                            selected = false,
-                            text = { Text(mokoString(MR.strings.view_request)) },
-                            onClick = {
-                                showToolbarAddMenu = false
-                                onViewRequestClicked()
-                            },
-                            leadingIcon = { Icon(Icons.Default.Schedule, null) },
-                            shapes = MenuDefaults.itemShape(0, 2)
-                        )
-                    } else {
-                        DropdownMenuItem(
-                            selected = false,
-                            text = { Text(mokoString(MR.strings.request)) },
-                            onClick = {
-                                showToolbarAddMenu = false
-                                onRequestClicked()
-                            },
-                            leadingIcon = { Icon(Icons.AutoMirrored.Default.Send, null) },
-                            shapes = MenuDefaults.itemShape(1, 2)
-                        )
-                    }
-                }
-            }
-        }
-    } else if (canAddDirectly) {
-        IconButton(
-            onClick = onAddDirectlyClicked,
-            colors = IconButtonDefaults.headerBarColors(),
-            modifier = modifier
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = mokoString(MR.strings.add)
-            )
-        }
-    } else if (isSeerrConfigured) {
-        IconButton(
-            onClick = {
-                if (pendingRequestId != null) {
-                    onViewRequestClicked()
-                } else {
-                    onRequestClicked()
-                }
-            },
-            colors = IconButtonDefaults.headerBarColors(),
-            modifier = modifier
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = mokoString(MR.strings.add)
-            )
-        }
-    }
-}
-
-fun handleWatchClick(
-    url: String,
-    provider: MediaProvider,
-    context: Context,
-    moko: MokoStrings
-) {
-    when (provider) {
-        MediaProvider.Plex -> {
-            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-            try {
-                context.startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        MediaProvider.Jellyfin -> {
-            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-            try {
-                context.startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        MediaProvider.None -> {
-            Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun InstanceChipsRow(
-    presences: List<InstanceMediaPresence>,
-    selectedInstanceId: Long?,
-    onInstanceSelected: (Long) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        presences.forEach { presence ->
-            val instance = presence.instance
-            val isSelected = instance.id == selectedInstanceId
-            val hasFile = when (val media = presence.arrMedia) {
-                is ArrMovie -> media.hasFile
-                is ArrSeries -> media.episodeFileCount > 0
-                else -> true
-            }
-
-            FilterChip(
-                selected = isSelected,
-                onClick = { onInstanceSelected(instance.id) },
-                label = { Text(instance.label) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (hasFile) Icons.Default.CheckCircle else Icons.Default.Schedule,
-                        contentDescription = null,
-                        tint = if (hasFile) MaterialTheme.colorScheme.primary else ArrOrange,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            )
         }
     }
 }

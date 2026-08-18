@@ -1,110 +1,27 @@
 package com.dnfapps.arrmatey.model
 
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Episode as ArrEpisode
-import com.dnfapps.arrmatey.arr.api.model.Season as ArrSeason
-import com.dnfapps.arrmatey.arr.api.model.FinaleType
-import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
+import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.BookFile
+import com.dnfapps.arrmatey.arr.api.model.BookSeries
+import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
-import com.dnfapps.arrmatey.arr.api.model.Book
-import com.dnfapps.arrmatey.arr.api.model.BookSeries
-import com.dnfapps.arrmatey.arr.api.model.BookFile
-import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.RatingItem
 import com.dnfapps.arrmatey.arr.api.model.toRatingItems
 import com.dnfapps.arrmatey.bazarr.state.BazarrDetails
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
-import com.dnfapps.arrmatey.seerr.api.model.Episode as SeerrEpisode
-import com.dnfapps.arrmatey.seerr.api.model.Season as SeerrSeason
 import com.dnfapps.arrmatey.seerr.api.model.ImdbRating
+import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
-import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
-import kotlinx.datetime.LocalDate
 import kotlin.math.roundToInt
-import kotlin.time.Instant
-
-data class SeasonWrapper(
-    val seasonNumber: Int,
-    val arrSeason: ArrSeason? = null,
-    val seerrSeason: SeerrSeason? = null,
-    val episodes: List<EpisodeWrapper> = emptyList()
-) {
-    val totalEpisodeCount: Int
-        get() = arrSeason?.statistics?.totalEpisodeCount ?: seerrSeason?.episodeCount ?: episodes.size
-
-    val episodeFileCount: Int?
-        get() = arrSeason?.statistics?.episodeFileCount
-
-    val monitored: Boolean?
-        get() = arrSeason?.monitored
-
-    val isMonitored: Boolean
-        get() = arrSeason?.monitored == true
-
-    val hasArrSeason: Boolean
-        get() = arrSeason != null
-
-    val name: String?
-        get() = seerrSeason?.name
-}
-
-data class EpisodeWrapper(
-    val arrEpisode: ArrEpisode? = null,
-    val seerrEpisode: SeerrEpisode? = null,
-    val isActive: Boolean = false,
-    val activityProgress: String? = null
-) {
-    val seasonNumber: Int
-        get() = arrEpisode?.seasonNumber ?: seerrEpisode?.seasonNumber ?: 0
-
-    val episodeNumber: Int
-        get() = arrEpisode?.episodeNumber ?: seerrEpisode?.episodeNumber ?: 0
-
-    val title: String?
-        get() = arrEpisode?.displayTitle ?: seerrEpisode?.name
-
-    val overview: String?
-        get() = arrEpisode?.overview ?: seerrEpisode?.overview
-
-    val stillPath: String?
-        get() = seerrEpisode?.stillPath ?: arrEpisode?.images?.firstOrNull()?.remoteUrl
-
-    val airDate: LocalDate?
-        get() = arrEpisode?.airDate ?: seerrEpisode?.airDate
-
-    val airDateUtc: Instant?
-        get() = arrEpisode?.airDateUtc
-
-    val monitored: Boolean?
-        get() = arrEpisode?.monitored
-
-    val isMonitored: Boolean
-        get() = arrEpisode?.monitored == true
-
-    val hasFile: Boolean
-        get() = arrEpisode?.hasFile == true
-
-    val fileQualityName: String?
-        get() = arrEpisode?.fileQualityName
-
-    val finaleType: FinaleType?
-        get() = arrEpisode?.finaleType
-
-    fun formatAirDateUtc(): String? = arrEpisode?.formatAirDateUtc()
-}
-
-data class InstanceMediaPresence(
-    val instance: com.dnfapps.arrmatey.instances.model.Instance,
-    val arrMedia: ArrMedia? = null,
-    val isPresent: Boolean = arrMedia?.let { it.id != null && it.id != 0L } ?: false
-)
 
 sealed interface UnifiedMediaDetailsUiState {
     object Initial : UnifiedMediaDetailsUiState

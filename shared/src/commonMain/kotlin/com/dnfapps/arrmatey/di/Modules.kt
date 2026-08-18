@@ -42,6 +42,7 @@ import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetUnifiedMediaDetailsUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetInstancePresencesUseCase
 import com.dnfapps.arrmatey.arr.usecase.SmartAddMediaUseCase
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
@@ -366,6 +367,7 @@ val useCaseModule = module {
     factory { SmartAddMediaUseCase(get(), get()) }
     factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get(), get()) }
     factory { GetBazarrInstanceRepositoryUseCase(get()) }
+    factory { GetInstancePresencesUseCase() }
     factory { UpdateAllPreferencesUseCase(get(), get()) }
 }
 
@@ -379,7 +381,7 @@ val viewModelModule = module {
         ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (arrId: Long?, tmdbId: Long?, tvdbId: Long?, instanceType: InstanceType?, requestType: RequestType?) ->
-        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType) ->
         InstancesViewModel(type, get(), get(), get())
