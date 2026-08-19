@@ -9,11 +9,13 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
+import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetInstancePresencesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetUnifiedMediaDetailsUseCase
@@ -101,7 +103,8 @@ class UnifiedMediaDetailsViewModel(
     observeInstancePreferencesUseCase: ObserveInstancePreferencesUseCase,
     private val updateInstancePreferencesUseCase: UpdateInstancePreferencesUseCase,
     private val observeScopedReposByTypeUseCase: ObserveScopedReposByTypeUseCase,
-    private val getInstancePresencesUseCase: GetInstancePresencesUseCase
+    private val getInstancePresencesUseCase: GetInstancePresencesUseCase,
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase
 ) : ViewModel() {
 
     private var seerrMediaId: Long? = null
@@ -138,6 +141,9 @@ class UnifiedMediaDetailsViewModel(
 
     private val _deleteMovieFileStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val deleteMovieFileStatus: StateFlow<OperationStatus> = _deleteMovieFileStatus.asStateFlow()
+
+    private val _removeQueueItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val removeQueueItemStatus: StateFlow<OperationStatus> = _removeQueueItemStatus.asStateFlow()
 
     private val _lastSearchResult = MutableStateFlow<Boolean?>(null)
     val lastSearchResult: StateFlow<Boolean?> = _lastSearchResult.asStateFlow()
@@ -536,6 +542,24 @@ class UnifiedMediaDetailsViewModel(
 
     fun hideViewRequestSheet() {
         _isViewRequestSheetVisible.value = false
+    }
+
+    fun removeQueueItem(
+        queueItem: QueueItem,
+        removeFromClient: Boolean,
+        addToBlocklist: Boolean,
+        skipRedownload: Boolean
+    ) {
+        viewModelScope.launch {
+            deleteQueueItemUseCase(
+                queueItem = queueItem,
+                removeFromClient = removeFromClient,
+                addToBlocklist = addToBlocklist,
+                skipRedownload = skipRedownload
+            ).collect { status ->
+                _removeQueueItemStatus.value = status
+            }
+        }
     }
 
     // Smart Actions

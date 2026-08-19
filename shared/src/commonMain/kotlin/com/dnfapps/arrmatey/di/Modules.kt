@@ -381,7 +381,7 @@ val viewModelModule = module {
         ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (arrId: Long?, tmdbId: Long?, tvdbId: Long?, instanceType: InstanceType?, requestType: RequestType?) ->
-        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType) ->
         InstancesViewModel(type, get(), get(), get())
@@ -396,10 +396,10 @@ val viewModelModule = module {
         InteractiveSearchViewModel(type, defaultFilter, get(), get(), get(), get())
     }
     factory { (movieId: Long) ->
-        MovieFilesViewModel(movieId, get())
+        MovieFilesViewModel(movieId, get(), get(), get())
     }
     factory { (seriesId: Long, episode: Episode) ->
-        EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get())
+        EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get())
     }
     factory { MoreScreenViewModel(get(), get(), get(), get(), get(), get()) }
     factory { AddInstanceViewModel(get(), get(), get(), get()) }
@@ -440,10 +440,10 @@ val viewModelModule = module {
         BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get())
     }
     factory { (authorId: Long) ->
-        AuthorFilesViewModel(authorId, get())
+        AuthorFilesViewModel(authorId, get(), get(), get())
     }
     factory { (audiobookId: Long) ->
-        AudiobookFilesViewModel(audiobookId, get())
+        AudiobookFilesViewModel(audiobookId, get(), get(), get())
     }
     factory { (id: Long, type: BazarrMediaType) ->
         BazarrDetailsViewModel(id, type, get(), get(), get(), get(), get())

@@ -21,7 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 import kotlin.time.ExperimentalTime
@@ -51,11 +53,11 @@ fun MovieFileView(
                 text = mokoString(MR.strings.files),
                 style = MaterialTheme.typography.titleLarge
             )
-            Image(
-                painter = painterResource(MR.images.radarr),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
+//            Image(
+//                painter = painterResource(MR.images.radarr),
+//                contentDescription = null,
+//                modifier = Modifier.size(24.dp)
+//            )
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = mokoString(MR.strings.history),

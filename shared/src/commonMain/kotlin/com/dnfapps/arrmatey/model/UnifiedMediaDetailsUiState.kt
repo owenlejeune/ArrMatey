@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.RatingItem
 import com.dnfapps.arrmatey.arr.api.model.toRatingItems
 import com.dnfapps.arrmatey.bazarr.state.BazarrDetails
@@ -50,7 +51,8 @@ sealed interface UnifiedMediaDetailsUiState {
 
         val availableInstances: List<Instance> = emptyList(),
         val selectedInstanceId: Long? = null,
-        val instancePresences: List<InstanceMediaPresence> = emptyList()
+        val instancePresences: List<InstanceMediaPresence> = emptyList(),
+        val queueItems: List<QueueItem> = emptyList()
     ) : UnifiedMediaDetailsUiState {
 
         val missingInstances: List<Instance>

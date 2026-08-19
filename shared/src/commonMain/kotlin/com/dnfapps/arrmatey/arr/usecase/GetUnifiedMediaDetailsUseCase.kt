@@ -2,7 +2,11 @@ package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.LidarrQueueItem
+import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
+import com.dnfapps.arrmatey.arr.api.model.RadarrQueueItem
+import com.dnfapps.arrmatey.arr.api.model.ReadarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.bazarr.state.BazarrDetails
@@ -232,6 +236,23 @@ class GetUnifiedMediaDetailsUseCase(
 
         val combinedEpisodes = combinedSeasons.flatMap { it.episodes }
 
+        val targetItem = arrSuccess?.item
+        val targetId = targetItem?.id
+        val mediaQueueItems = if (targetId != null && targetId > 0) {
+            activityTasks.filter { task ->
+                task.mediaId == targetId ||
+                    (task as? SonarrQueueItem)?.calcSeriesId == targetId ||
+                    (task as? RadarrQueueItem)?.movieId == targetId ||
+                    (task as? LidarrQueueItem)?.artistId == targetId ||
+                    (task as? LidarrQueueItem)?.albumId == targetId ||
+                    (task as? ReadarrQueueItem)?.authorId == targetId ||
+                    (task as? ReadarrQueueItem)?.bookId == targetId ||
+                    (task as? ListenarrQueueItem)?.audiobookId == targetId
+            }
+        } else {
+            emptyList()
+        }
+
         return UnifiedMediaDetailsUiState.Success(
             arrMedia = arrSuccess?.item,
             seerrMedia = seerrSuccess?.item,
@@ -247,7 +268,8 @@ class GetUnifiedMediaDetailsUseCase(
             bookFiles = arrSuccess?.bookFiles ?: emptyList(),
             books = arrSuccess?.books ?: emptyList(),
             extraFiles = arrSuccess?.extraFiles ?: emptyList(),
-            isMonitored = arrSuccess?.item?.monitored ?: false
+            isMonitored = arrSuccess?.item?.monitored ?: false,
+            queueItems = mediaQueueItems
         )
     }
 

@@ -21,6 +21,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.AudiobookFile
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
@@ -36,9 +40,13 @@ import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
+import com.dnfapps.arrmatey.ui.components.MediaActivitySection
+import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
+import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.networking.OperationStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +56,11 @@ fun AudiobookFilesScreen(
 ) {
     val navigation = arrNavigator
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
+    val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
+
+    var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
+    var showConfirmRemoveQueueItem by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -78,6 +91,14 @@ fun AudiobookFilesScreen(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                if (queueItems.isNotEmpty()) {
+                    item {
+                        MediaActivitySection(
+                            queueItems = queueItems,
+                            onQueueItemClicked = { selectedQueueItem = it }
+                        )
+                    }
+                }
                 item {
                     Text(
                         text = mokoString(MR.strings.files),
@@ -107,6 +128,31 @@ fun AudiobookFilesScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                 }
             }
+        }
+
+        selectedQueueItem?.let { item ->
+            QueueItemInfoSheet(
+                item = item,
+                onDismiss = { selectedQueueItem = null },
+                onRemove = { showConfirmRemoveQueueItem = true }
+            )
+        }
+
+        if (showConfirmRemoveQueueItem && selectedQueueItem != null) {
+            ConfirmDeleteItemSheet(
+                onDismiss = { showConfirmRemoveQueueItem = false },
+                deleteInProgress = removeQueueItemStatus is OperationStatus.InProgress,
+                onDelete = { clientRemove, blocklist, skipRedownload ->
+                    viewModel.removeQueueItem(
+                        queueItem = selectedQueueItem!!,
+                        removeFromClient = clientRemove,
+                        addToBlocklist = blocklist,
+                        skipRedownload = skipRedownload
+                    )
+                    showConfirmRemoveQueueItem = false
+                    selectedQueueItem = null
+                }
+            )
         }
     }
 }

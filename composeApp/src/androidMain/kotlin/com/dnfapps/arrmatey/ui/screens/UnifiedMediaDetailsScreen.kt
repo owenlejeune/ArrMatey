@@ -58,6 +58,7 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.entensions.copy
@@ -76,6 +77,7 @@ import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.InstanceChipsRow
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
+import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.MovieFileView
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
@@ -93,6 +95,8 @@ import com.dnfapps.arrmatey.ui.sheets.EditMediaSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrReportIssueSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrRequestSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
+import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
+import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.handleWatchClick
@@ -139,6 +143,8 @@ fun UnifiedMediaDetailsScreen(
     var confirmDeleteAlbum by remember { mutableStateOf<Long?>(null) }
     var confirmDeleteMovie by remember { mutableStateOf(false) }
     var editAlbum by remember { mutableStateOf<ArrAlbum?>(null) }
+    var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
+    var showConfirmRemoveQueueItem by remember { mutableStateOf(false) }
 
     val qualityProfiles by viewModel.qualityProfiles.collectAsStateWithLifecycle()
     val rootFolders by viewModel.rootFolders.collectAsStateWithLifecycle()
@@ -148,6 +154,7 @@ fun UnifiedMediaDetailsScreen(
     val deleteSeasonStatus by viewModel.deleteSeasonStatus.collectAsStateWithLifecycle()
     val deleteAlbumStatus by viewModel.deleteAlbumStatus.collectAsStateWithLifecycle()
     val deleteMovieFileStatus by viewModel.deleteMovieFileStatus.collectAsStateWithLifecycle()
+    val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
 
     val isRequestSheetVisible by viewModel.isRequestSheetVisible.collectAsStateWithLifecycle()
     val isReportIssueSheetVisible by viewModel.isReportIssueSheetVisible.collectAsStateWithLifecycle()
@@ -406,6 +413,16 @@ fun UnifiedMediaDetailsScreen(
                                         selectedInstanceId = state.selectedInstanceId,
                                         onInstanceSelected = { instanceId ->
                                             viewModel.selectInstance(instanceId)
+                                        },
+                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                    )
+                                }
+
+                                if (state.queueItems.isNotEmpty()) {
+                                    MediaActivitySection(
+                                        queueItems = state.queueItems,
+                                        onQueueItemClicked = { item ->
+                                            selectedQueueItem = item
                                         },
                                         modifier = Modifier.padding(horizontal = 24.dp)
                                     )
@@ -713,62 +730,30 @@ fun UnifiedMediaDetailsScreen(
                             }
                         )
                     }
-                }
-            }
-        }
-    }
-}
+                    selectedQueueItem?.let { item ->
+                        QueueItemInfoSheet(
+                            item = item,
+                            onDismiss = { selectedQueueItem = null },
+                            onRemove = { showConfirmRemoveQueueItem = true }
+                        )
+                    }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ConfirmDeleteAlert(
-    deleteInProgress: Boolean,
-    initialAddExclusion: Boolean = false,
-    initialDeleteFiles: Boolean = false,
-    onDismiss: () -> Unit,
-    onDelete: (Boolean, Boolean) -> Unit
-) {
-    var addExclusion by remember { mutableStateOf(initialAddExclusion) }
-    var deleteFiles by remember { mutableStateOf(initialDeleteFiles) }
-    ModalBottomSheet(
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-        ) {
-            LabelledSwitch(
-                label = mokoString(MR.strings.add_exclusion),
-                sublabel = mokoString(MR.strings.add_exclusion_description),
-                checked = addExclusion,
-                onCheckedChange = { addExclusion = !addExclusion }
-            )
-            LabelledSwitch(
-                label = mokoString(MR.strings.delete_files),
-                sublabel = mokoString(MR.strings.delete_files_description),
-                checked = deleteFiles,
-                onCheckedChange = { deleteFiles = !deleteFiles }
-            )
-            Button(
-                onClick = { onDelete(deleteFiles, addExclusion) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
-                enabled = !deleteInProgress
-            ) {
-                if (deleteInProgress) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp)
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null
-                    )
-                    Text(text = mokoString(MR.strings.delete))
+                    if (showConfirmRemoveQueueItem && selectedQueueItem != null) {
+                        ConfirmDeleteItemSheet(
+                            onDismiss = { showConfirmRemoveQueueItem = false },
+                            deleteInProgress = removeQueueItemStatus is OperationStatus.InProgress,
+                            onDelete = { clientRemove, blocklist, skipRedownload ->
+                                viewModel.removeQueueItem(
+                                    queueItem = selectedQueueItem!!,
+                                    removeFromClient = clientRemove,
+                                    addToBlocklist = blocklist,
+                                    skipRedownload = skipRedownload
+                                )
+                                showConfirmRemoveQueueItem = false
+                                selectedQueueItem = null
+                            }
+                        )
+                    }
                 }
             }
         }

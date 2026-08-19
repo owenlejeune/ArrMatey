@@ -3,8 +3,12 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
+import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
 import com.dnfapps.arrmatey.arr.state.HistoryState
 import com.dnfapps.arrmatey.arr.usecase.DeleteEpisodeFileUseCase
+import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetEpisodeHistoryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
@@ -13,11 +17,13 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class EpisodeDetailsViewModel(
@@ -27,7 +33,9 @@ class EpisodeDetailsViewModel(
     private val toggleMonitorUseCase: ToggleMonitorUseCase,
     private val performAutomaticSearchUseCase: PerformAutomaticSearchUseCase,
     private val getEpisodeHistoryUseCase: GetEpisodeHistoryUseCase,
-    private val deleteEpisodeUseCase: DeleteEpisodeFileUseCase
+    private val deleteEpisodeUseCase: DeleteEpisodeFileUseCase,
+    getActivityTasksUseCase: GetActivityTasksUseCase,
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase
 ): ViewModel() {
 
     private val _episode = MutableStateFlow(episode)
@@ -41,6 +49,22 @@ class EpisodeDetailsViewModel(
 
     private val _deleteStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val deleteStatus: StateFlow<OperationStatus> = _deleteStatus.asStateFlow()
+
+    val queueItems: StateFlow<List<QueueItem>> = getActivityTasksUseCase()
+        .map { tasks ->
+            tasks.filterIsInstance<SonarrQueueItem>().filter { task ->
+                task.calcEpisodeId == episode.id ||
+                    (task.calcSeriesId == seriesId && task.seasonNumber == episode.seasonNumber && task.calcEpisodeId == null)
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    private val _removeQueueItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val removeQueueItemStatus: StateFlow<OperationStatus> = _removeQueueItemStatus.asStateFlow()
 
     private var currentRepository: ArrInstanceRepository? = null
 
@@ -126,4 +150,21 @@ class EpisodeDetailsViewModel(
         _monitorStatus.value = OperationStatus.Idle
     }
 
+    fun removeQueueItem(
+        queueItem: QueueItem,
+        removeFromClient: Boolean,
+        addToBlocklist: Boolean,
+        skipRedownload: Boolean
+    ) {
+        viewModelScope.launch {
+            deleteQueueItemUseCase(
+                queueItem = queueItem,
+                removeFromClient = removeFromClient,
+                addToBlocklist = addToBlocklist,
+                skipRedownload = skipRedownload
+            ).collect { status ->
+                _removeQueueItemStatus.value = status
+            }
+        }
+    }
 }
