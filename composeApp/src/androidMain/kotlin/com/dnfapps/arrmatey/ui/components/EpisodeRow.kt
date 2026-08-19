@@ -1,5 +1,14 @@
 package com.dnfapps.arrmatey.ui.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import com.dnfapps.arrmatey.shared.MR
 import androidx.compose.foundation.clickable
@@ -140,50 +149,69 @@ fun EpisodeRow(
                 }
             }
 
-            if (arrEp != null) {
-                IconButton(
-                    onClick = {
-                        onNavigateToSeriesRelease(arrEp.id)
-                    },
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        onAutomaticSearch(arrEp.id)
-                    },
-                    enabled = arrEp.monitored && !searchInProgress(arrEp.id),
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    if (searchInProgress(arrEp.id)) {
-                        CircularProgressIndicator(
+            AnimatedVisibility(
+                visible = arrEp != null,
+                enter = fadeIn() + expandHorizontally(),
+                exit = fadeOut() + shrinkHorizontally()
+            ) {
+                if (arrEp != null) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = {
+                                onNavigateToSeriesRelease(arrEp.id)
+                            },
                             modifier = Modifier.size(24.dp)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                        )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                onAutomaticSearch(arrEp.id)
+                            },
+                            enabled = arrEp.monitored && !searchInProgress(arrEp.id),
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            if (searchInProgress(arrEp.id)) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = {
+                                onToggleMonitor(arrEp)
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            AnimatedContent(
+                                targetState = arrEp.monitored,
+                                transitionSpec = {
+                                    (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
+                                },
+                                label = "EpisodeBookmarkIconAnimation"
+                            ) { monitored ->
+                                Icon(
+                                    imageVector = if (monitored) {
+                                        Icons.Default.Bookmark
+                                    } else {
+                                        Icons.Default.BookmarkBorder
+                                    },
+                                    contentDescription = null,
+                                )
+                            }
+                        }
                     }
-                }
-                IconButton(
-                    onClick = {
-                        onToggleMonitor(arrEp)
-                    },
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = if (arrEp.monitored) {
-                            Icons.Default.Bookmark
-                        } else {
-                            Icons.Default.BookmarkBorder
-                        },
-                        contentDescription = null,
-                    )
                 }
             }
         }

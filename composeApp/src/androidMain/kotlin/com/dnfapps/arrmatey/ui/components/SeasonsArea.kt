@@ -1,6 +1,16 @@
 package com.dnfapps.arrmatey.ui.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -95,25 +105,45 @@ fun SeasonsArea(
                             "$it/${season.totalEpisodeCount}"
                         } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
 
-                        Text(
-                            text = statsText,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                        AnimatedContent(
+                            targetState = statsText,
+                            transitionSpec = {
+                                (fadeIn() + slideInVertically { it }).togetherWith(fadeOut() + slideOutVertically { -it })
+                            },
+                            label = "SeasonStatsTextAnimation"
+                        ) { text ->
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        if (season.monitored != null && seriesId != null && seriesId > 0) {
-                            Icon(
-                                imageVector = if (season.isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                contentDescription = if (season.isMonitored) {
-                                    mokoString(MR.strings.monitored)
-                                } else {
-                                    mokoString(MR.strings.unmonitored)
+                        AnimatedVisibility(
+                            visible = season.monitored != null && seriesId != null && seriesId > 0,
+                            enter = fadeIn() + expandHorizontally(),
+                            exit = fadeOut() + shrinkHorizontally()
+                        ) {
+                            AnimatedContent(
+                                targetState = season.isMonitored,
+                                transitionSpec = {
+                                    (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
                                 },
-                                modifier = Modifier.clickable {
-                                    onToggleSeasonMonitor(season.seasonNumber)
-                                }
-                            )
+                                label = "SeasonBookmarkIconAnimation"
+                            ) { isMonitored ->
+                                Icon(
+                                    imageVector = if (isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                    contentDescription = if (isMonitored) {
+                                        mokoString(MR.strings.monitored)
+                                    } else {
+                                        mokoString(MR.strings.unmonitored)
+                                    },
+                                    modifier = Modifier.clickable {
+                                        onToggleSeasonMonitor(season.seasonNumber)
+                                    }
+                                )
+                            }
                         }
                         Icon(
                             imageVector = Icons.Default.ExpandCircleDown,

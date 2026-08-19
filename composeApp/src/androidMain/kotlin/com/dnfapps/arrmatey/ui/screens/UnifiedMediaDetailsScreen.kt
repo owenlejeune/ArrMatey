@@ -1,9 +1,21 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -235,7 +247,11 @@ fun UnifiedMediaDetailsScreen(
                         val isMonitored by viewModel.isMonitored.collectAsStateWithLifecycle()
                         val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
 
-                        if (buttonState.showReportIssueButton) {
+                        AnimatedVisibility(
+                            visible = buttonState.showReportIssueButton,
+                            enter = fadeIn() + expandHorizontally(),
+                            exit = fadeOut() + shrinkHorizontally()
+                        ) {
                             IconButton(
                                 onClick = { viewModel.showReportIssueSheet() },
                                 colors = IconButtonDefaults.headerBarColors()
@@ -248,58 +264,76 @@ fun UnifiedMediaDetailsScreen(
                             }
                         }
 
-                        if (success.hasArrId) {
-                            if (isArrConfigured) {
-                                IconButton(
-                                    onClick = { viewModel.toggleMonitored() },
-                                    colors = IconButtonDefaults.headerBarColors()
-                                ) {
-                                    Icon(
-                                        imageVector = if (isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        } else {
-                            val canAddDirectly = success.arrMedia != null && isArrConfigured
-                            ToolbarAddButton(
-                                canAddDirectly = canAddDirectly,
-                                isSeerrConfigured = isSeerrConfigured,
-                                pendingRequestId = buttonState.pendingRequestId,
-                                resolvedInstanceType = viewModel.resolvedInstanceType,
-                                onAddDirectlyClicked = { showAddSheet = true },
-                                onViewRequestClicked = { viewModel.showViewRequestSheet() },
-                                onRequestClicked = { viewModel.showRequestSheet() }
-                            )
-                        }
-
-                        if (success.hasArrId && isArrConfigured) {
-                            MenuButton(
-                                onRefresh = { viewModel.refresh() },
-                                onEdit = { showEditSheet = true },
-                                onDelete = { confirmDelete = true },
-                                showSearch = instanceType?.includeTopLevelAutomaticSearchOption == true,
-                                enableSearch = isMonitored,
-                                onSearchMonitored = { viewModel.performAutomaticLookup() },
-                                extraMenuItems = { closeMenu ->
-                                    for (missingInstance in success.missingInstances) {
-                                        DropdownMenuItem(
-                                            text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
-                                            leadingIcon = {
+                        AnimatedContent(
+                            targetState = success.hasArrId,
+                            transitionSpec = {
+                                (fadeIn() + scaleIn()).togetherWith(fadeOut() + scaleOut())
+                            },
+                            label = "ToolbarActionsAnimation"
+                        ) { hasArrId ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (hasArrId) {
+                                    if (isArrConfigured) {
+                                        IconButton(
+                                            onClick = { viewModel.toggleMonitored() },
+                                            colors = IconButtonDefaults.headerBarColors()
+                                        ) {
+                                            AnimatedContent(
+                                                targetState = isMonitored,
+                                                transitionSpec = {
+                                                    (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
+                                                },
+                                                label = "BookmarkIconAnimation"
+                                            ) { monitored ->
                                                 Icon(
-                                                    imageVector = Icons.Default.Add,
+                                                    imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                                                     contentDescription = null
                                                 )
-                                            },
-                                            onClick = {
-                                                closeMenu()
-                                                viewModel.setAddSheetTargetInstance(missingInstance)
-                                                showAddSheet = true
+                                            }
+                                        }
+                                        MenuButton(
+                                            onRefresh = { viewModel.refresh() },
+                                            onEdit = { showEditSheet = true },
+                                            onDelete = { confirmDelete = true },
+                                            showSearch = instanceType?.includeTopLevelAutomaticSearchOption == true,
+                                            enableSearch = isMonitored,
+                                            onSearchMonitored = { viewModel.performAutomaticLookup() },
+                                            extraMenuItems = { closeMenu ->
+                                                for (missingInstance in success.missingInstances) {
+                                                    DropdownMenuItem(
+                                                        text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
+                                                        leadingIcon = {
+                                                            Icon(
+                                                                imageVector = Icons.Default.Add,
+                                                                contentDescription = null
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            closeMenu()
+                                                            viewModel.setAddSheetTargetInstance(missingInstance)
+                                                            showAddSheet = true
+                                                        }
+                                                    )
+                                                }
                                             }
                                         )
                                     }
+                                } else {
+                                    val canAddDirectly = success.arrMedia != null && isArrConfigured
+                                    ToolbarAddButton(
+                                        canAddDirectly = canAddDirectly,
+                                        isSeerrConfigured = isSeerrConfigured,
+                                        pendingRequestId = buttonState.pendingRequestId,
+                                        resolvedInstanceType = viewModel.resolvedInstanceType,
+                                        onAddDirectlyClicked = { showAddSheet = true },
+                                        onViewRequestClicked = { viewModel.showViewRequestSheet() },
+                                        onRequestClicked = { viewModel.showRequestSheet() }
+                                    )
                                 }
-                            )
+                            }
                         }
                     }
                 }
@@ -453,66 +487,74 @@ fun UnifiedMediaDetailsScreen(
                                     )
                                 }
 
-                                when (val item = state.arrMedia) {
-                                    is ArrMovie -> {
-                                        MovieFileView(
-                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                            movie = item,
-                                            movieExtraFiles = state.extraFiles,
-                                            searchIds = automaticSearchIds,
-                                            onAutomaticSearch = { viewModel.performAutomaticLookup() },
-                                            onDeleteFile = { confirmDeleteMovie = true },
-                                            onNavigateToMovieFiles = onNavigateToMovieFiles,
-                                            onNavigateToMovieReleases = onNavigateToMovieReleases
-                                        )
-                                        item.id?.let { movieId ->
-                                            BazarrSubtitlesSection(
-                                                target = BazarrMediaTarget.Movie(movieId),
-                                                modifier = Modifier.padding(horizontal = 24.dp)
-                                            )
+                                AnimatedVisibility(
+                                    visible = state.hasArrId,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
+                                    when (val item = state.arrMedia) {
+                                        is ArrMovie -> {
+                                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                                MovieFileView(
+                                                    modifier = Modifier.padding(horizontal = 24.dp),
+                                                    movie = item,
+                                                    movieExtraFiles = state.extraFiles,
+                                                    searchIds = automaticSearchIds,
+                                                    onAutomaticSearch = { viewModel.performAutomaticLookup() },
+                                                    onDeleteFile = { confirmDeleteMovie = true },
+                                                    onNavigateToMovieFiles = onNavigateToMovieFiles,
+                                                    onNavigateToMovieReleases = onNavigateToMovieReleases
+                                                )
+                                                item.id?.let { movieId ->
+                                                    BazarrSubtitlesSection(
+                                                        target = BazarrMediaTarget.Movie(movieId),
+                                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                                    )
+                                                }
+                                            }
                                         }
+
+                                        is Arrtist -> AlbumsArea(
+                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                            artist = item,
+                                            albums = state.albums,
+                                            tracks = state.tracks,
+                                            trackFiles = state.trackFiles,
+                                            searchIds = automaticSearchIds,
+                                            onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
+                                            onEditAlbum = { editAlbum = it },
+                                            onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
+                                            deleteAlbumFiles = { confirmDeleteAlbum = it },
+                                            albumDeleteInProgress = deleteAlbumStatus is OperationStatus.InProgress,
+                                            onNavigateToAlbumRelease = onNavigateToAlbumRelease
+                                        )
+
+                                        is Author -> BooksArea(
+                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                            author = item,
+                                            series = state.bookSeries,
+                                            files = state.bookFiles,
+                                            books = state.books,
+                                            searchIds = automaticSearchIds,
+                                            onToggleMonitor = { viewModel.toggleBookMonitored(it) },
+                                            onToggleSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
+                                            onAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
+                                            onNavigateToAuthorFiles = onNavigateToAuthorFiles,
+                                            onNavigateToBookDetails = onNavigateToBookDetails,
+                                            onNavigateToBookRelease = onNavigateToBookRelease
+                                        )
+
+                                        is Audiobook -> AudiobookFileView(
+                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                            audiobook = item,
+                                            searchIds = automaticSearchIds,
+                                            onAutomaticSearch = { item.id?.let { viewModel.performBookAutomaticLookup(it) } },
+                                            onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
+                                            onNavigateToAudiobookRelease = onNavigateToAudiobookRelease
+                                        )
+
+                                        is ArrSeries, is SearchAudiobook, is MockMedia, null -> {}
                                     }
-
-                                    is Arrtist -> AlbumsArea(
-                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                        artist = item,
-                                        albums = state.albums,
-                                        tracks = state.tracks,
-                                        trackFiles = state.trackFiles,
-                                        searchIds = automaticSearchIds,
-                                        onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
-                                        onEditAlbum = { editAlbum = it },
-                                        onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
-                                        deleteAlbumFiles = { confirmDeleteAlbum = it },
-                                        albumDeleteInProgress = deleteAlbumStatus is OperationStatus.InProgress,
-                                        onNavigateToAlbumRelease = onNavigateToAlbumRelease
-                                    )
-
-                                    is Author -> BooksArea(
-                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                        author = item,
-                                        series = state.bookSeries,
-                                        files = state.bookFiles,
-                                        books = state.books,
-                                        searchIds = automaticSearchIds,
-                                        onToggleMonitor = { viewModel.toggleBookMonitored(it) },
-                                        onToggleSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
-                                        onAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
-                                        onNavigateToAuthorFiles = onNavigateToAuthorFiles,
-                                        onNavigateToBookDetails = onNavigateToBookDetails,
-                                        onNavigateToBookRelease = onNavigateToBookRelease
-                                    )
-
-                                    is Audiobook -> AudiobookFileView(
-                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                        audiobook = item,
-                                        searchIds = automaticSearchIds,
-                                        onAutomaticSearch = { item.id?.let { viewModel.performBookAutomaticLookup(it) } },
-                                        onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
-                                        onNavigateToAudiobookRelease = onNavigateToAudiobookRelease
-                                    )
-
-                                    is ArrSeries, is SearchAudiobook, is MockMedia, null -> {}
                                 }
 
                                 state.seerrMedia?.credits?.let { credits ->
