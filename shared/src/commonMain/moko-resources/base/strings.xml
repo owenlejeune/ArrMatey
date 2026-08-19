@@ -26,6 +26,7 @@
     <string name="type_artist">artist</string>
     <string name="type_author">author</string>
     <string name="type_person">person</string>
+    <string name="type_audiobook">audiobook</string>
 
     <!-- Titles -->
     <string name="add_instance">Add instance</string>
