@@ -400,10 +400,9 @@ fun UnifiedMediaDetailsScreen(
                                     )
                                 }
 
-                                val presentPresences = state.instancePresences.filter { it.isPresent }
-                                if (presentPresences.size > 1) {
+                                if (state.instancePresences.size > 1) {
                                     InstanceChipsRow(
-                                        presences = presentPresences,
+                                        presences = state.instancePresences,
                                         selectedInstanceId = state.selectedInstanceId,
                                         onInstanceSelected = { instanceId ->
                                             viewModel.selectInstance(instanceId)

@@ -353,6 +353,9 @@ class UnifiedMediaDetailsViewModel(
                 Quad(activeRepo, allRepos, seerrRepo, bazarrRepo)
             }.collectLatest { (activeRepo, allRepos, seerrRepo, bazarrRepo) ->
                 if (activeRepo != null) {
+                    if (_selectedInstanceId.value == null) {
+                        _selectedInstanceId.value = activeRepo.instance.id
+                    }
                     launch {
                         activeRepo.qualityProfiles.collect { _qualityProfiles.value = it }
                     }
@@ -423,11 +426,10 @@ class UnifiedMediaDetailsViewModel(
                 }
 
                 val cachedArrMedia = activeRepo?.let { _instancePresencesMap.value[it.instance.id] }
-                val targetArrId = cachedArrMedia?.id
-                    ?: (if (activeRepo != null && activeRepo.instance.id == arrId) arrId else null)
+                val targetArrId = cachedArrMedia?.id ?: arrId
 
                 getUnifiedMediaDetailsUseCase(
-                    arrId = targetArrId ?: if (_selectedInstanceId.value == null) arrId else null,
+                    arrId = targetArrId,
                     tmdbId = tmdbId,
                     tvdbId = tvdbId,
                     instanceType = resolvedInstanceType,

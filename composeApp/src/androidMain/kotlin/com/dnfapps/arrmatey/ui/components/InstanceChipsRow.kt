@@ -41,6 +41,7 @@ fun InstanceChipsRow(
         presences.forEach { presence ->
             val instance = presence.instance
             val isSelected = instance.id == selectedInstanceId
+            val isPresent = presence.isPresent
             val hasFile = when (val media = presence.arrMedia) {
                 is ArrMovie -> media.hasFile
                 is ArrSeries -> media.episodeFileCount > 0
@@ -51,14 +52,16 @@ fun InstanceChipsRow(
                 selected = isSelected,
                 onClick = { onInstanceSelected(instance.id) },
                 label = { Text(instance.label) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (hasFile) Icons.Default.CheckCircle else Icons.Default.Schedule,
-                        contentDescription = null,
-                        tint = if (hasFile) MaterialTheme.colorScheme.primary else ArrOrange,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                leadingIcon = if (isPresent) {
+                    {
+                        Icon(
+                            imageVector = if (hasFile) Icons.Default.CheckCircle else Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = if (hasFile) MaterialTheme.colorScheme.primary else ArrOrange,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                } else null
             )
         }
     }
