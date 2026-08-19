@@ -84,7 +84,6 @@ import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
 import com.dnfapps.arrmatey.ui.components.ToolbarAddButton
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
-import com.dnfapps.arrmatey.ui.components.UpcomingDateView
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.components.buildUnifiedInfoItems
 import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
@@ -374,7 +373,13 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    state.arrMedia?.let { UpcomingDateView(it) }
+                                    state.upcomingDateString?.let { airingString ->
+                                        Text(
+                                            text = airingString,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
 
                                 val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()

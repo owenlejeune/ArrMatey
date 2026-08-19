@@ -193,7 +193,7 @@ class GetUnifiedMediaDetailsUseCase(
         val bazarrEpisodeMap = bazarr.episodes.associateBy { it.sonarrEpisodeId }
         val bazarrSeasonEpMap = bazarr.episodes.associateBy { it.season to it.episode }
 
-        val combinedSeasons = allSeasonNumbers.map { seasonNumber ->
+        val combinedSeasons = allSeasonNumbers.mapNotNull { seasonNumber ->
             val arrSeason = arrSeasonMap[seasonNumber]
             val seerrSeason = seerrSeasonMap[seasonNumber]
             val seasonArrEps = arrEpMap[seasonNumber] ?: emptyList()
@@ -226,12 +226,15 @@ class GetUnifiedMediaDetailsUseCase(
                 )
             }
 
-            SeasonWrapper(
-                seasonNumber = seasonNumber,
-                arrSeason = arrSeason,
-                seerrSeason = seerrSeason,
-                episodes = seasonEpisodes
-            )
+            if (seasonEpisodes.isEmpty()) null
+            else {
+                SeasonWrapper(
+                    seasonNumber = seasonNumber,
+                    arrSeason = arrSeason,
+                    seerrSeason = seerrSeason,
+                    episodes = seasonEpisodes
+                )
+            }
         }
 
         val combinedEpisodes = combinedSeasons.flatMap { it.episodes }

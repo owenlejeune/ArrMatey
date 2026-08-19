@@ -22,7 +22,9 @@ actual fun Instant.format(pattern: String): String {
 }
 
 actual fun LocalDate.format(pattern: String): String {
-    val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+    val sdf = SimpleDateFormat(pattern, Locale.getDefault()).apply {
+        timeZone = JavaTimeZone.getTimeZone("UTC")
+    }
     return sdf.format(Date(toEpochDays() * 86_400_000))
 }
 

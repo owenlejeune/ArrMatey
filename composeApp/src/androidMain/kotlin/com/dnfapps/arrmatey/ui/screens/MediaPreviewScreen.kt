@@ -37,7 +37,6 @@ import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.state.MediaPreviewUiState
 import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
-import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
@@ -46,7 +45,6 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
-import com.dnfapps.arrmatey.ui.components.UpcomingDateView
 import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAuthorSheet
@@ -54,6 +52,7 @@ import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.networking.OperationStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,7 +140,7 @@ fun MediaPreviewScreen(
                         .padding(top = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    UpcomingDateView(item)
+//                    UpcomingDateView(item)
 
                     item.overview?.let { overview ->
                         ItemDescriptionCard(overview)

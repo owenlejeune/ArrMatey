@@ -72,7 +72,6 @@ import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
-import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.copy
@@ -103,7 +102,6 @@ import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MovieFileView
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
-import com.dnfapps.arrmatey.ui.components.UpcomingDateView
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.sheets.EditAlbumSheet
 import com.dnfapps.arrmatey.ui.sheets.EditArtistSheet
@@ -114,6 +112,7 @@ import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.networking.OperationStatus
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -272,7 +271,7 @@ fun MediaDetailsScreen(
                                         text = item.title ?: mokoString(MR.strings.unknown),
                                         style = MaterialTheme.typography.headlineMedium
                                     )
-                                    UpcomingDateView(item)
+//                                    UpcomingDateView(item)
                                 }
 
                                 item.overview?.let { overview ->

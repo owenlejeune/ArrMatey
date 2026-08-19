@@ -15,6 +15,7 @@ import com.dnfapps.arrmatey.arr.api.model.RatingItem
 import com.dnfapps.arrmatey.arr.api.model.toRatingItems
 import com.dnfapps.arrmatey.bazarr.state.BazarrDetails
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
+import com.dnfapps.arrmatey.extensions.getUpcomingDateString
 import com.dnfapps.arrmatey.seerr.api.model.ImdbRating
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
@@ -126,6 +127,13 @@ sealed interface UnifiedMediaDetailsUiState {
 
         val releasedBy: String?
             get() = arrMedia?.releasedBy
+
+        val upcomingDateString: String?
+            get() {
+                val media = arrMedia ?: return null
+                val seerrNextAirDate = (seerrMedia as? TvDetails)?.nextEpisodeToAir?.airDate
+                return media.getUpcomingDateString(seerrNextAirDate)
+            }
 
         val seasonCount: Int?
             get() = (seerrMedia as? TvDetails)?.seasons?.size ?: (arrMedia as? ArrSeries)?.seasons?.size

@@ -101,13 +101,8 @@ fun SeasonsArea(
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
-                        Icon(
-                            imageVector = Icons.Default.ExpandCircleDown,
-                            contentDescription = null,
-                            modifier = Modifier.rotate(iconRotation)
-                        )
 
-                        if (season.monitored != null) {
+                        if (season.monitored != null && seriesId != null && seriesId > 0) {
                             Icon(
                                 imageVector = if (season.isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                                 contentDescription = if (season.isMonitored) {
@@ -120,6 +115,11 @@ fun SeasonsArea(
                                 }
                             )
                         }
+                        Icon(
+                            imageVector = Icons.Default.ExpandCircleDown,
+                            contentDescription = null,
+                            modifier = Modifier.rotate(iconRotation)
+                        )
                     }
                 }
 
