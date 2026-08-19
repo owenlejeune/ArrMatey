@@ -112,7 +112,23 @@ class GetUnifiedMediaDetailsUseCase(
             }
 
             val activityTasksFlow = getActivityTasksUseCase()
-            val bazarrFlow = flowOf(BazarrDetails())
+            val bazarrFlow = if (bazarrRepository != null && targetItem is ArrSeries && targetItem.id != null && targetItem.id > 0) {
+                flow {
+                    bazarrRepository.getEpisodes(targetItem.id)
+                    emitAll(bazarrRepository.episodes.map { epMap ->
+                        val eps = epMap[targetItem.id] ?: emptyList()
+                        BazarrDetails(episodes = eps)
+                    })
+                }
+            } else if (bazarrRepository != null && targetItem is ArrMovie && targetItem.id != null && targetItem.id > 0) {
+                bazarrRepository.movies.map { result ->
+                    val movies = (result as? NetworkResult.Success)?.data
+                    val details = movies?.find { it.serviceId == targetItem.id }
+                    BazarrDetails(details = details)
+                }
+            } else {
+                flowOf(BazarrDetails())
+            }
 
             combine(
                 seerrAndRatingsFlow,
@@ -170,6 +186,9 @@ class GetUnifiedMediaDetailsUseCase(
 
         val sonarrTasks = activityTasks.filterIsInstance<SonarrQueueItem>()
 
+        val bazarrEpisodeMap = bazarr.episodes.associateBy { it.sonarrEpisodeId }
+        val bazarrSeasonEpMap = bazarr.episodes.associateBy { it.season to it.episode }
+
         val combinedSeasons = allSeasonNumbers.map { seasonNumber ->
             val arrSeason = arrSeasonMap[seasonNumber]
             val seerrSeason = seerrSeasonMap[seasonNumber]
@@ -183,6 +202,7 @@ class GetUnifiedMediaDetailsUseCase(
             val seasonEpisodes = allEpNumbers.map { epNum ->
                 val arrEp = seasonArrEpMap[epNum]
                 val seerrEp = seasonSeerrEpMap[epNum]
+                val bazarrEp = arrEp?.let { bazarrEpisodeMap[it.id] } ?: bazarrSeasonEpMap[seasonNumber to epNum]
 
                 val queueItem = arrEp?.let { ep ->
                     sonarrTasks.firstOrNull { it.calcEpisodeId == ep.id }
@@ -196,6 +216,7 @@ class GetUnifiedMediaDetailsUseCase(
                 EpisodeWrapper(
                     arrEpisode = arrEp,
                     seerrEpisode = seerrEp,
+                    bazarrEpisode = bazarrEp,
                     isActive = queueItem != null,
                     activityProgress = queueItem?.progressLabel
                 )

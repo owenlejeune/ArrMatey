@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.dnfapps.arrmatey.ui.components.bazarr.EpisodeSubtitlesRow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -203,14 +205,25 @@ fun EpisodeRow(
                     contentDescription = null
                 )
 
-                if (epOverview != null) {
-                    Text(
-                        text = epOverview,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.height(70.dp),
-                        overflow = TextOverflow.Ellipsis
-                    )
+                Column(
+                    modifier = Modifier.height(70.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (epOverview != null) {
+                        Text(
+                            text = epOverview,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    episode.bazarrEpisode?.let { bazarrEp ->
+                        EpisodeSubtitlesRow(
+                            bazarrEpisode = bazarrEp,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
                 }
             }
         }
