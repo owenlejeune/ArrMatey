@@ -108,6 +108,7 @@ class UnifiedMediaDetailsViewModel(
 ) : ViewModel() {
 
     private var seerrMediaId: Long? = null
+    private var initialInstanceId: Long? = null
 
     private val _isMonitored = MutableStateFlow(false)
     val isMonitored: StateFlow<Boolean> = _isMonitored.asStateFlow()
@@ -467,6 +468,7 @@ class UnifiedMediaDetailsViewModel(
                 if (activeRepo != null) {
                     if (_selectedInstanceId.value == null) {
                         _selectedInstanceId.value = activeRepo.instance.id
+                        initialInstanceId = activeRepo.instance.id
                     }
                     launch {
                         activeRepo.qualityProfiles.collect { _qualityProfiles.value = it }
@@ -535,7 +537,11 @@ class UnifiedMediaDetailsViewModel(
                 }
 
                 val cachedArrMedia = activeRepo?.let { _instancePresencesMap.value[it.instance.id] }
-                val targetArrId = cachedArrMedia?.id ?: arrId
+                val targetArrId = if (activeRepo?.instance?.id == initialInstanceId) {
+                    cachedArrMedia?.id ?: arrId
+                } else {
+                    cachedArrMedia?.id
+                }
 
                 getUnifiedMediaDetailsUseCase(
                     arrId = targetArrId,
