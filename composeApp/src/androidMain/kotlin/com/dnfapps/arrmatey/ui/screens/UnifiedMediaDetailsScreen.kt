@@ -28,12 +28,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -42,7 +38,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -72,6 +67,7 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.arr.api.model.SearchAuthor
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
@@ -88,7 +84,6 @@ import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.InstanceChipsRow
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
-import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.MovieFileView
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
@@ -99,6 +94,9 @@ import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.components.buildUnifiedInfoItems
 import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
+import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
+import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
+import com.dnfapps.arrmatey.ui.sheets.AddAuthorSheet
 import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAlbumSheet
@@ -295,7 +293,7 @@ fun UnifiedMediaDetailsScreen(
                                             }
                                         }
                                         MenuButton(
-                                            onRefresh = { viewModel.refresh() },
+                                            onRefresh = { viewModel.performRefresh() },
                                             onEdit = { showEditSheet = true },
                                             onDelete = { confirmDelete = true },
                                             showSearch = instanceType?.includeTopLevelAutomaticSearchOption == true,
@@ -434,8 +432,8 @@ fun UnifiedMediaDetailsScreen(
                                             requestId
                                         )
                                     },
-                                    onRequestClicked = { viewModel.showRequestSheet() },
-                                    onRequest4kClicked = { },
+                                    onRequestClicked = { viewModel.showRequestSheet(is4k = false) },
+                                    onRequest4kClicked = { viewModel.showRequestSheet(is4k = true) },
                                     modifier = Modifier.padding(horizontal = 24.dp)
                                 )
 
@@ -574,6 +572,7 @@ fun UnifiedMediaDetailsScreen(
 
                     if (isRequestSheetVisible) {
                         state.seerrMedia?.let { seerrMedia ->
+                            val isRequest4k by viewModel.isRequest4k.collectAsStateWithLifecycle()
                             SeerrRequestSheet(
                                 details = seerrMedia,
                                 serviceDetails = serviceDetails,
@@ -581,7 +580,7 @@ fun UnifiedMediaDetailsScreen(
                                 users = users,
                                 onDismissRequest = { viewModel.hideRequestSheet() },
                                 onSubmitRequest = { profileId, rootFolder, langId, seasons, userId ->
-                                    viewModel.submitRequest(profileId, rootFolder, langId, seasons, userId = userId)
+                                    viewModel.submitRequest(profileId, rootFolder, langId, seasons, is4k = isRequest4k, userId = userId)
                                 }
                             )
                         }
@@ -636,6 +635,86 @@ fun UnifiedMediaDetailsScreen(
                                     onUpdatePreferences = viewModel::updatePreferences,
                                     onDismiss = { showAddSheet = false }
                                 )
+
+                                is Arrtist -> AddArtistSheet(
+                                    item = arrMedia,
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    tags = addSheetUiState.tags.ifEmpty { tags },
+                                    addInProgress = editStatus is OperationStatus.InProgress,
+                                    preferences = preferences,
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                    onAddItem = { newItem, searchOnAdd ->
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                        showAddSheet = false
+                                    },
+                                    onUpdatePreferences = viewModel::updatePreferences,
+                                    onDismiss = { showAddSheet = false }
+                                )
+
+                                is Author -> AddAuthorSheet(
+                                    item = arrMedia,
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    tags = addSheetUiState.tags.ifEmpty { tags },
+                                    addInProgress = editStatus is OperationStatus.InProgress,
+                                    preferences = preferences,
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                    onAddItem = { newItem, searchOnAdd ->
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                        showAddSheet = false
+                                    },
+                                    onUpdatePreferences = viewModel::updatePreferences,
+                                    onDismiss = { showAddSheet = false }
+                                )
+
+                                is SearchAudiobook -> AddAudiobookSheet(
+                                    item = arrMedia,
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    relativePath = "",
+                                    addInProgress = editStatus is OperationStatus.InProgress,
+                                    preferences = preferences,
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                    onAddItem = { newItem, searchOnAdd ->
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                        showAddSheet = false
+                                    },
+                                    onUpdatePreferences = viewModel::updatePreferences,
+                                    onDismiss = { showAddSheet = false }
+                                )
+
+                                is Audiobook -> {
+                                    val searchAudiobook = SearchAudiobook(
+                                        asin = arrMedia.asin ?: "",
+                                        title = arrMedia.title ?: "",
+                                        summary = arrMedia.overview,
+                                        authors = arrMedia.authors.map { SearchAuthor(name = it) }
+                                    )
+                                    AddAudiobookSheet(
+                                        item = searchAudiobook,
+                                        qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                        rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                        relativePath = "",
+                                        addInProgress = editStatus is OperationStatus.InProgress,
+                                        preferences = preferences,
+                                        instances = addSheetUiState.availableInstances,
+                                        selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                        onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                        onAddItem = { newItem, searchOnAdd ->
+                                            viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                            showAddSheet = false
+                                        },
+                                        onUpdatePreferences = viewModel::updatePreferences,
+                                        onDismiss = { showAddSheet = false }
+                                    )
+                                }
 
                                 else -> {}
                             }

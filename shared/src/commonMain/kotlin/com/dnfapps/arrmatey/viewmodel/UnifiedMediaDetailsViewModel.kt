@@ -193,6 +193,9 @@ class UnifiedMediaDetailsViewModel(
     private val _isViewRequestSheetVisible = MutableStateFlow(false)
     val isViewRequestSheetVisible: StateFlow<Boolean> = _isViewRequestSheetVisible.asStateFlow()
 
+    private val _isRequest4k = MutableStateFlow(false)
+    val isRequest4k: StateFlow<Boolean> = _isRequest4k.asStateFlow()
+
     private val _automaticSearchIds = MutableStateFlow<Set<Long>>(emptySet())
     val automaticSearchIds: StateFlow<Set<Long>> = _automaticSearchIds.asStateFlow()
 
@@ -608,11 +611,28 @@ class UnifiedMediaDetailsViewModel(
     }
 
     fun refresh() {
+        viewModelScope.launch {
+            val repository =
+                activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            launch { repository.refreshQualityProfiles() }
+            launch { repository.refreshRootFolders() }
+            launch { repository.refreshTags() }
+        }
         observeData()
     }
 
+    fun performRefresh() {
+        viewModelScope.launch {
+            val repository =
+                activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val effectiveId = getEffectiveArrId() ?: return@launch
+            performRefreshUseCase(effectiveId, resolvedInstanceType ?: return@launch, repository)
+        }
+    }
+
     // Sheet Visibility Actions
-    fun showRequestSheet() {
+    fun showRequestSheet(is4k: Boolean = false) {
+        _isRequest4k.value = is4k
         _isRequestSheetVisible.value = true
     }
 
