@@ -116,35 +116,37 @@ struct RequestMediaDetailsHeader: View {
             MediaHeaderBanner(
                 bannerUrl: URL(string: item.fullBackdropPath ?? ""),
                 height: 350,
-                gradientHeight: infoHeight * 2
+                gradientHeight: infoHeight
             )
             
             HStack(alignment: .bottom, spacing: 24) {
                 GenericPosterItem(posterUrl: item.fullPosterPath)
                     .frame(width: 150)
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(infoString)
-                        .font(.system(size: 16))
-                        .padding(.top, 6)
-                    
-                    Text(item.genres.map { $0.name }.joined(separator: " • "))
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                        .lineSpacing(2)
+                GeometryReader { geometry in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(infoString)
+                            .font(.system(size: 16))
+                            .padding(.top, 6)
+                        
+                        Text(item.genres.map { $0.name }.joined(separator: " • "))
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .lineSpacing(2)
+                    }
+                    .background(GeometryReader { geometry in
+                        Color.clear.preference(key: ViewHeightKey.self, value: geometry.size.height)
+                    })
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .onChange(of: geometry.size.height) { _, height in
+                        self.infoHeight = (height * 4)
+                    }
                 }
-                .background(GeometryReader { geometry in
-                    Color.clear.preference(key: ViewHeightKey.self, value: geometry.size.height)
-                })
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
         }
         .frame(height: 350)
-        .onPreferenceChange(ViewHeightKey.self) { height in
-            self.infoHeight = height
-        }
     }
     
     private var infoString: String {

@@ -12,12 +12,14 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -27,10 +29,20 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -38,6 +50,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -73,9 +86,11 @@ import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.entensions.unlessEmpty
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
 import com.dnfapps.arrmatey.ui.components.AudiobookFileView
@@ -153,6 +168,8 @@ fun UnifiedMediaDetailsScreen(
     var editAlbum by remember { mutableStateOf<ArrAlbum?>(null) }
     var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
     var showConfirmRemoveQueueItem by remember { mutableStateOf(false) }
+    var confirmRemoveFromService by remember { mutableStateOf(false) }
+    var confirmClearData by remember { mutableStateOf(false) }
 
     val qualityProfiles by viewModel.qualityProfiles.collectAsStateWithLifecycle()
     val rootFolders by viewModel.rootFolders.collectAsStateWithLifecycle()
@@ -174,6 +191,8 @@ fun UnifiedMediaDetailsScreen(
     val isArrConfigured by viewModel.isArrConfigured.collectAsStateWithLifecycle()
     val isSeerrConfigured by viewModel.isSeerrConfigured.collectAsStateWithLifecycle()
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
+    val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
+    val isMonitored by viewModel.isMonitored.collectAsStateWithLifecycle()
 
     val automaticSearchIds by viewModel.automaticSearchIds.collectAsStateWithLifecycle()
     val lastSearchResult by viewModel.lastSearchResult.collectAsStateWithLifecycle()
@@ -242,8 +261,8 @@ fun UnifiedMediaDetailsScreen(
                 },
                 actions = {
                     (uiState as? UnifiedMediaDetailsUiState.Success)?.let { success ->
-                        val isMonitored by viewModel.isMonitored.collectAsStateWithLifecycle()
-                        val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
+                        val showArrActions = success.hasArrId && isArrConfigured
+                        val canAddDirectly = !success.hasArrId && success.arrMedia != null && isArrConfigured
 
                         AnimatedVisibility(
                             visible = buttonState.showReportIssueButton,
@@ -262,78 +281,58 @@ fun UnifiedMediaDetailsScreen(
                             }
                         }
 
-                        AnimatedContent(
-                            targetState = success.hasArrId,
-                            transitionSpec = {
-                                (fadeIn() + scaleIn()).togetherWith(fadeOut() + scaleOut())
-                            },
-                            label = "ToolbarActionsAnimation"
-                        ) { hasArrId ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
+                        if (showArrActions) {
+                            IconButton(
+                                onClick = { viewModel.toggleMonitored() },
+                                colors = IconButtonDefaults.headerBarColors()
                             ) {
-                                if (hasArrId) {
-                                    if (isArrConfigured) {
-                                        IconButton(
-                                            onClick = { viewModel.toggleMonitored() },
-                                            colors = IconButtonDefaults.headerBarColors()
-                                        ) {
-                                            AnimatedContent(
-                                                targetState = isMonitored,
-                                                transitionSpec = {
-                                                    (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
-                                                },
-                                                label = "BookmarkIconAnimation"
-                                            ) { monitored ->
-                                                Icon(
-                                                    imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                                    contentDescription = null
-                                                )
-                                            }
-                                        }
-                                        MenuButton(
-                                            onRefresh = { viewModel.performRefresh() },
-                                            onEdit = { showEditSheet = true },
-                                            onDelete = { confirmDelete = true },
-                                            showSearch = instanceType?.includeTopLevelAutomaticSearchOption == true,
-                                            enableSearch = isMonitored,
-                                            onSearchMonitored = { viewModel.performAutomaticLookup() },
-                                            extraMenuItems = { closeMenu ->
-                                                for (missingInstance in success.missingInstances) {
-                                                    DropdownMenuItem(
-                                                        text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
-                                                        leadingIcon = {
-                                                            Icon(
-                                                                imageVector = Icons.Default.Add,
-                                                                contentDescription = null
-                                                            )
-                                                        },
-                                                        onClick = {
-                                                            closeMenu()
-                                                            viewModel.setAddSheetTargetInstance(missingInstance)
-                                                            showAddSheet = true
-                                                        }
-                                                    )
-                                                }
-                                            }
-                                        )
-                                    }
-                                } else {
-                                    val canAddDirectly = success.arrMedia != null && isArrConfigured
-                                    if (canAddDirectly) {
-                                        IconButton(
-                                            onClick = { showAddSheet = true },
-                                            colors = IconButtonDefaults.headerBarColors()
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Add,
-                                                contentDescription = mokoString(MR.strings.add)
-                                            )
-                                        }
-                                    }
+                                AnimatedContent(
+                                    targetState = isMonitored,
+                                    transitionSpec = {
+                                        (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
+                                    },
+                                    label = "BookmarkIconAnimation"
+                                ) { monitored ->
+                                    Icon(
+                                        imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                        contentDescription = null
+                                    )
                                 }
                             }
                         }
+
+                        if (canAddDirectly) {
+                            IconButton(
+                                onClick = { showAddSheet = true },
+                                colors = IconButtonDefaults.headerBarColors()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = mokoString(MR.strings.add)
+                                )
+                            }
+                        }
+
+                        UnifiedMediaDetailsToolbarMenu(
+                            success = success,
+                            buttonState = buttonState,
+                            instanceType = instanceType,
+                            requestType = requestType ?: viewModel.resolvedRequestType,
+                            isArrConfigured = isArrConfigured,
+                            isSeerrConfigured = isSeerrConfigured,
+                            isMonitored = isMonitored,
+                            onRefresh = { viewModel.performRefresh() },
+                            onAutomaticLookup = { viewModel.performAutomaticLookup() },
+                            onAddMissingInstance = { missingInstance ->
+                                viewModel.setAddSheetTargetInstance(missingInstance)
+                                showAddSheet = true
+                            },
+                            onEdit = { showEditSheet = true },
+                            onDelete = { confirmDelete = true },
+                            onMarkAsAvailable = { viewModel.markSeerrMediaAsAvailable() },
+                            onRemoveFromService = { confirmRemoveFromService = true },
+                            onClearData = { confirmClearData = true }
+                        )
                     }
                 }
             )
@@ -882,6 +881,311 @@ fun UnifiedMediaDetailsScreen(
                                 )
                                 showConfirmRemoveQueueItem = false
                                 selectedQueueItem = null
+                            }
+                        )
+                    }
+
+                    if (confirmRemoveFromService) {
+                        val serviceName = buttonState.serviceName ?: if (requestType == RequestType.Movie) "Radarr" else "Sonarr"
+                        AlertDialog(
+                            onDismissRequest = { confirmRemoveFromService = false },
+                            title = {
+                                Text(mokoString(MR.strings.are_you_sure))
+                            },
+                            text = {
+                                Text(mokoString(MR.strings.remove_from_service_confirm, serviceName))
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        viewModel.deleteSeerrMediaFile(is4k = false)
+                                        confirmRemoveFromService = false
+                                    }
+                                ) {
+                                    Text(
+                                        text = mokoString(MR.strings.yes),
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { confirmRemoveFromService = false }) {
+                                    Text(mokoString(MR.strings.no))
+                                }
+                            }
+                        )
+                    }
+
+                    if (confirmClearData) {
+                        AlertDialog(
+                            onDismissRequest = { confirmClearData = false },
+                            title = {
+                                Text(mokoString(MR.strings.are_you_sure))
+                            },
+                            text = {
+                                Text(mokoString(MR.strings.clear_data_confirm))
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        viewModel.clearSeerrMediaData()
+                                        confirmClearData = false
+                                    }
+                                ) {
+                                    Text(
+                                        text = mokoString(MR.strings.yes),
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { confirmClearData = false }) {
+                                    Text(mokoString(MR.strings.no))
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@Composable
+private fun UnifiedMediaDetailsToolbarMenu(
+    success: UnifiedMediaDetailsUiState.Success,
+    buttonState: MediaButtonState,
+    instanceType: InstanceType?,
+    requestType: RequestType?,
+    isArrConfigured: Boolean,
+    isSeerrConfigured: Boolean,
+    isMonitored: Boolean,
+    onRefresh: () -> Unit,
+    onAutomaticLookup: () -> Unit,
+    onAddMissingInstance: (Instance) -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onMarkAsAvailable: () -> Unit,
+    onRemoveFromService: () -> Unit,
+    onClearData: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val showArrActions = success.hasArrId && isArrConfigured
+    val showSeerrActions = isSeerrConfigured && (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
+    val showMissingInstances = success.missingInstances.isNotEmpty()
+    val showMenuButton = showArrActions || showSeerrActions || showMissingInstances
+
+    if (!showMenuButton) return
+
+    var showMenu by remember { mutableStateOf(false) }
+    val menuInteractionSource = remember { MutableInteractionSource() }
+
+    Box(modifier = modifier) {
+        IconButton(
+            onClick = { showMenu = !showMenu },
+            colors = IconButtonDefaults.headerBarColors()
+        ) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = null
+            )
+        }
+
+        DropdownMenuPopup(
+            expanded = showMenu,
+            onDismissRequest = { showMenu = false }
+        ) {
+            val totalGroups = (if (showArrActions) 2 else 0) +
+                    (if (showMissingInstances && !showArrActions) 1 else 0) +
+                    (if (showSeerrActions) 1 else 0)
+            var currentGroup = 0
+
+            if (showArrActions) {
+                DropdownMenuGroup(
+                    shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
+                    interactionSource = menuInteractionSource
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(mokoString(MR.strings.refresh)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = null
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            onRefresh()
+                        }
+                    )
+                    if (instanceType?.includeTopLevelAutomaticSearchOption == true) {
+                        DropdownMenuItem(
+                            text = { Text(mokoString(MR.strings.search_monitored)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null
+                                )
+                            },
+                            enabled = isMonitored,
+                            onClick = {
+                                showMenu = false
+                                onAutomaticLookup()
+                            }
+                        )
+                    }
+                    for (missingInstance in success.missingInstances) {
+                        DropdownMenuItem(
+                            text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onAddMissingInstance(missingInstance)
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
+
+                DropdownMenuGroup(
+                    shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
+                    interactionSource = menuInteractionSource
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(mokoString(MR.strings.edit)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            onEdit()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = mokoString(MR.strings.delete),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            onDelete()
+                        }
+                    )
+                }
+            } else if (showMissingInstances) {
+                DropdownMenuGroup(
+                    shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
+                    interactionSource = menuInteractionSource
+                ) {
+                    for (missingInstance in success.missingInstances) {
+                        DropdownMenuItem(
+                            text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onAddMissingInstance(missingInstance)
+                            }
+                        )
+                    }
+                }
+            }
+
+            if (showSeerrActions) {
+                if (currentGroup > 0) {
+                    Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
+                }
+                DropdownMenuGroup(
+                    shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
+                    interactionSource = menuInteractionSource
+                ) {
+                    if (buttonState.showMarkAsAvailableButton) {
+                        val markText = if (requestType == RequestType.Movie) {
+                            mokoString(MR.strings.mark_as_available)
+                        } else {
+                            mokoString(MR.strings.mark_all_seasons_as_available)
+                        }
+                        DropdownMenuItem(
+                            text = { Text(markText) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onMarkAsAvailable()
+                            }
+                        )
+                    }
+                    if (buttonState.showRemoveFromServiceButton) {
+                        val removeText = if (requestType == RequestType.Movie) {
+                            mokoString(MR.strings.remove_from_radarr)
+                        } else {
+                            mokoString(MR.strings.remove_from_sonarr)
+                        }
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = removeText,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.DeleteOutline,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onRemoveFromService()
+                            }
+                        )
+                    }
+                    if (buttonState.showClearDataButton) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = mokoString(MR.strings.clear_data),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.CleaningServices,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onClearData()
                             }
                         )
                     }

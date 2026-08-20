@@ -565,6 +565,13 @@
     <string name="cancel_request">Cancel Request</string>
     <string name="delete_request">Delete Request</string>
     <string name="remove_from_service">Remove from %1$s</string>
+    <string name="remove_from_radarr">Remove from Radarr</string>
+    <string name="remove_from_sonarr">Remove from Sonarr</string>
+    <string name="clear_data">Clear Data</string>
+    <string name="mark_as_available">Mark as Available</string>
+    <string name="mark_all_seasons_as_available">Mark all seasons as available</string>
+    <string name="remove_from_service_confirm">Are you sure you want to remove this media and its files from %1$s?</string>
+    <string name="clear_data_confirm">Are you sure you want to clear this media\'s data from Seerr?</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="pending">Pending</string>
     <string name="processing">Processing</string>

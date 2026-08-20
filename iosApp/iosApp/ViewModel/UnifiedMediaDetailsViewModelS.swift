@@ -51,6 +51,10 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         return viewModel.resolvedInstanceType
     }
     
+    var resolvedRequestType: RequestType? {
+        return viewModel.resolvedRequestType
+    }
+    
     init(
         arrId: Int64?,
         tmdbId: Int64?,
@@ -332,5 +336,17 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
             addToBlocklist: addToBlocklist,
             skipRedownload: skipRedownload
         )
+    }
+    
+    func deleteSeerrMediaFile(is4k: Bool = false) {
+        viewModel.deleteSeerrMediaFile(is4k: is4k)
+    }
+    
+    func clearSeerrMediaData() {
+        viewModel.clearSeerrMediaData()
+    }
+    
+    func markSeerrMediaAsAvailable(is4k: Bool = false) {
+        viewModel.markSeerrMediaAsAvailable(is4k: is4k)
     }
 }

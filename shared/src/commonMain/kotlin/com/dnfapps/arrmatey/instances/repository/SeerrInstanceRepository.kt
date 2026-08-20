@@ -252,6 +252,18 @@ class SeerrInstanceRepository(
             }
     }
 
+    suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit> {
+        return client.deleteMediaFile(mediaId, is4k)
+    }
+
+    suspend fun clearMediaData(mediaId: Long): NetworkResult<Unit> {
+        return client.clearMediaData(mediaId)
+    }
+
+    suspend fun markMediaAsAvailable(mediaId: Long, is4k: Boolean = false): NetworkResult<Unit> {
+        return client.markMediaAsAvailable(mediaId, is4k)
+    }
+
     private fun updateOperationsState(requestId: Long, status: ApprovalStatus, state: OperationStatus) {
         _operationsState.update {
             val currentStates = when (status) {

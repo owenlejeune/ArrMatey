@@ -50,7 +50,7 @@ struct MediaHeaderBanner: View {
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: max(gradientHeight, 150))
+                .frame(height: gradientHeight)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }

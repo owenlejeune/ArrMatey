@@ -62,7 +62,7 @@ fun MediaDetailsActions(
     if (
         buttonState.showWatchButton || buttonState.showWatchTrailerOption ||
         buttonState.showViewRequestButton || buttonState.showRequestMoreButton ||
-        buttonState.showRequestButton
+        buttonState.showRequestButton || buttonState.showRequest4kButton
     ) {
         Row(
             modifier = modifier,
@@ -85,68 +85,71 @@ fun MediaDetailsActions(
                     onClick = onRequestClicked
                 )
             }
-            if (buttonState.showRequestButton) {
-                if (buttonState.showRequest4kButton) {
-                    var showRequestMenu by remember { mutableStateOf(false) }
-                    SplitButtonLayout(
-                        modifier = Modifier,
-                        leadingButton = {
-                            SplitButtonDefaults.LeadingButton(
-                                onClick = onRequestClicked,
+            if (buttonState.showRequestButton && buttonState.showRequest4kButton) {
+                var showRequestMenu by remember { mutableStateOf(false) }
+                SplitButtonLayout(
+                    modifier = Modifier,
+                    leadingButton = {
+                        SplitButtonDefaults.LeadingButton(
+                            onClick = onRequestClicked,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Add, null)
+                                Spacer(Modifier.width(8.dp))
+                                Text(mokoString(MR.strings.request))
+                            }
+                        }
+                    },
+                    trailingButton = {
+                        Box {
+                            SplitButtonDefaults.TrailingButton(
+                                onClick = { showRequestMenu = true },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primary
                                 )
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Add, null)
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(mokoString(MR.strings.request))
-                                }
+                                Icon(Icons.Default.ArrowDropDown, null)
                             }
-                        },
-                        trailingButton = {
-                            Box {
-                                SplitButtonDefaults.TrailingButton(
-                                    onClick = { showRequestMenu = true },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
+                            DropdownMenuPopup(
+                                expanded = showRequestMenu,
+                                onDismissRequest = { showRequestMenu = false }
+                            ) {
+                                DropdownMenuGroup(
+                                    shapes = MenuDefaults.groupShape(0, 1)
+                                ) {
+                                    DropdownMenuItem(
+                                        selected = false,
+                                        text = { Text(mokoString(MR.strings.request_in_4k)) },
+                                        onClick = {
+                                            showRequestMenu = false
+                                            onRequest4kClicked()
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.HighQuality,
+                                                contentDescription = null
+                                            )
+                                        },
+                                        shapes = MenuDefaults.itemShape(0, 1)
                                     )
-                                ) {
-                                    Icon(Icons.Default.ArrowDropDown, null)
-                                }
-                                DropdownMenuPopup(
-                                    expanded = showRequestMenu,
-                                    onDismissRequest = { showRequestMenu = false }
-                                ) {
-                                    DropdownMenuGroup(
-                                        shapes = MenuDefaults.groupShape(0, 1)
-                                    ) {
-                                        DropdownMenuItem(
-                                            selected = false,
-                                            text = { Text(mokoString(MR.strings.request_in_4k)) },
-                                            onClick = {
-                                                showRequestMenu = false
-                                                onRequest4kClicked()
-                                            },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = Icons.Default.HighQuality,
-                                                    contentDescription = null
-                                                )
-                                            },
-                                            shapes = MenuDefaults.itemShape(0, 1)
-                                        )
-                                    }
                                 }
                             }
                         }
-                    )
-                } else {
-                    RequestButton(
-                        label = mokoString(MR.strings.request),
-                        onClick = onRequestClicked
-                    )
-                }
+                    }
+                )
+            } else if (buttonState.showRequestButton) {
+                RequestButton(
+                    label = mokoString(MR.strings.request),
+                    onClick = onRequestClicked
+                )
+            } else if (buttonState.showRequest4kButton) {
+                RequestButton(
+                    label = mokoString(MR.strings.request_in_4k),
+                    onClick = onRequest4kClicked
+                )
             }
         }
     }

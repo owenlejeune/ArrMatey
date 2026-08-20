@@ -52,6 +52,9 @@ import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
 import com.dnfapps.arrmatey.seerr.state.toButtonState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
+import com.dnfapps.arrmatey.seerr.usecase.ClearSeerrMediaDataUseCase
+import com.dnfapps.arrmatey.seerr.usecase.MarkSeerrMediaAsAvailableUseCase
+import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
@@ -106,7 +109,10 @@ class UnifiedMediaDetailsViewModel(
     private val observeScopedReposByTypeUseCase: ObserveScopedReposByTypeUseCase,
     private val getInstancePresencesUseCase: GetInstancePresencesUseCase,
     private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
-    private val activityQueueService: ActivityQueueService
+    private val activityQueueService: ActivityQueueService,
+    private val removeSeerrMediaFileUseCase: RemoveSeerrMediaFileUseCase,
+    private val clearSeerrMediaDataUseCase: ClearSeerrMediaDataUseCase,
+    private val markSeerrMediaAsAvailableUseCase: MarkSeerrMediaAsAvailableUseCase
 ) : ViewModel() {
 
     private var seerrMediaId: Long? = null
@@ -292,31 +298,34 @@ class UnifiedMediaDetailsViewModel(
     ) { state, user, isConfigured, radarr, sonarr ->
         when (state) {
             is UnifiedMediaDetailsUiState.Success -> {
-                val isAdmin = user?.hasPermission(UserPermission.ADMIN) == true
-                val totalSeasonCount = (state.seerrMedia as? TvDetails)?.numberOfSeasons ?: 0
-                val rawButtonState = state.seerrMedia?.mediaInfo.toButtonState(
-                    state.seerrMedia?.relatedVideos ?: emptyList(),
-                    totalSeasonCount,
-                    user?.id,
-                    isAdmin
-                )
-                if (!isConfigured || state.hasArrId) {
-                    rawButtonState.copy(
-                        showRequestButton = false,
-                        showRequestMoreButton = false,
-                        showRequest4kButton = false
-                    )
+                if (!isConfigured) {
+                    MediaButtonState()
                 } else {
+                    val isAdmin = user?.hasPermission(UserPermission.ADMIN) == true
+                    val totalSeasonCount = (state.seerrMedia as? TvDetails)?.numberOfSeasons ?: 0
+                    val rawButtonState = state.seerrMedia?.mediaInfo.toButtonState(
+                        state.seerrMedia?.relatedVideos ?: emptyList(),
+                        totalSeasonCount,
+                        user?.id,
+                        isAdmin
+                    )
                     val has4kServer = when (resolvedRequestType) {
                         RequestType.Movie -> radarr.any { it.is4k }
                         RequestType.Tv -> sonarr.any { it.is4k }
                         else -> false
                     }
-                    rawButtonState.copy(
-                        showRequest4kButton = has4kServer && (
-                            rawButtonState.showRequestButton || rawButtonState.showRequest4kButton
+                    val existsInAnyArr = state.hasArrId || state.presentInstances.isNotEmpty()
+                    if (existsInAnyArr) {
+                        rawButtonState.copy(
+                            showRequestButton = false,
+                            showRequestMoreButton = false,
+                            showRequest4kButton = false
                         )
-                    )
+                    } else {
+                        rawButtonState.copy(
+                            showRequest4kButton = has4kServer && rawButtonState.showRequest4kButton
+                        )
+                    }
                 }
             }
 
@@ -769,6 +778,39 @@ class UnifiedMediaDetailsViewModel(
             val repository =
                 seerrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Decline, repository)
+                .onSuccess { refresh() }
+        }
+    }
+
+    fun deleteSeerrMediaFile(is4k: Boolean = false) {
+        viewModelScope.launch {
+            val repository =
+                seerrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val currentMediaId = (uiState.value as? UnifiedMediaDetailsUiState.Success)?.seerrMedia?.mediaInfo?.id
+                ?: seerrMediaId ?: return@launch
+            removeSeerrMediaFileUseCase(currentMediaId, is4k, repository)
+                .onSuccess { refresh() }
+        }
+    }
+
+    fun clearSeerrMediaData() {
+        viewModelScope.launch {
+            val repository =
+                seerrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val currentMediaId = (uiState.value as? UnifiedMediaDetailsUiState.Success)?.seerrMedia?.mediaInfo?.id
+                ?: seerrMediaId ?: return@launch
+            clearSeerrMediaDataUseCase(currentMediaId, repository)
+                .onSuccess { refresh() }
+        }
+    }
+
+    fun markSeerrMediaAsAvailable(is4k: Boolean = false) {
+        viewModelScope.launch {
+            val repository =
+                seerrRepositoryFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            val currentMediaId = (uiState.value as? UnifiedMediaDetailsUiState.Success)?.seerrMedia?.mediaInfo?.id
+                ?: seerrMediaId ?: return@launch
+            markSeerrMediaAsAvailableUseCase(currentMediaId, is4k, repository)
                 .onSuccess { refresh() }
         }
     }

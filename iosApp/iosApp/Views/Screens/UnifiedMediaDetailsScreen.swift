@@ -20,9 +20,15 @@ struct UnifiedMediaDetailsScreen: View {
     @State private var confirmDeleteSeasonNumber: Int32? = nil
     @State private var confirmDeleteAlbumId: Int64? = nil
     @State private var confirmDeleteMovie = false
+    @State private var confirmRemoveFromService = false
+    @State private var confirmClearData = false
     @State private var selectedQueueItem: QueueItem? = nil
     
     @State private var toastMessage: String? = nil
+    
+    private var removeServiceName: String {
+        viewModel.buttonState.serviceName ?? (viewModel.resolvedRequestType == RequestType.movie ? "Radarr" : "Sonarr")
+    }
     
     init(
         arrId: Int64? = nil,
@@ -48,55 +54,29 @@ struct UnifiedMediaDetailsScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
         .task { viewModel.refresh() }
-        .sheet(isPresented: $showEditSheet) { editSheetContent }
-        .sheet(isPresented: $showAddSheet) { addSheetContent }
-        .sheet(isPresented: $showConfirmSheet) { confirmSheetContent }
-        .sheet(item: $editAlbum) { editAlbumSheetContent($0) }
-        .sheet(isPresented: $viewModel.isRequestSheetVisible) { requestSheetContent }
-        .sheet(isPresented: $viewModel.isReportIssueSheetVisible) { reportIssueSheetContent }
-        .sheet(isPresented: $viewModel.isViewRequestSheetVisible) { viewRequestSheetContent }
-        .sheet(item: Binding(
-            get: { selectedQueueItem.map { IdentifiableQueueItem(item: $0) } },
-            set: { selectedQueueItem = $0?.item }
-        )) {
-            queueItemSheetContent($0)
-        }
-        .alert(MR.strings().confirm_delete.localized(), isPresented: $confirmDeleteMovie) {
-            deleteMovieAlertContent
-        } message: {
-            Text(MR.strings().confirm_delete_file.localized())
-        }
-        .confirmationDialog("", isPresented: Binding(
-            get: { confirmDeleteSeasonNumber != nil },
-            set: { if !$0 { confirmDeleteSeasonNumber = nil } }
-        )) {
-            deleteSeasonDialogContent
-        } message: {
-            deleteSeasonDialogMessage
-        }
-        .confirmationDialog("", isPresented: Binding(
-            get: { confirmDeleteAlbumId != nil },
-            set: { if !$0 { confirmDeleteAlbumId = nil } }
-        )) {
-            deleteAlbumDialogContent
-        } message: {
-            Text(MR.strings().delete_album_confirm.localized())
-        }
-        .onChange(of: viewModel.lastSearchResult) { old, newVal in
-            onLastSearchResultChanged(newVal)
-        }
-        .onChange(of: viewModel.editSuccessTrigger) { _, _ in
-            onEditSuccess()
-        }
-        .onChange(of: viewModel.editErrorTrigger) { _, _ in
-            onEditError()
-        }
-        .onChange(of: viewModel.deleteSuccessTrigger) { _, _ in
-            onDeleteSuccess()
-        }
-        .onChange(of: viewModel.deleteErrorTrigger) { _, _ in
-            onDeleteError()
-        }
+        .modifier(UnifiedMediaDetailsSheetsModifier(
+            viewModel: viewModel,
+            showEditSheet: $showEditSheet,
+            showAddSheet: $showAddSheet,
+            showConfirmSheet: $showConfirmSheet,
+            editAlbum: $editAlbum,
+            selectedQueueItem: $selectedQueueItem,
+            screen: self
+        ))
+        .modifier(UnifiedMediaDetailsAlertsModifier(
+            viewModel: viewModel,
+            confirmDeleteMovie: $confirmDeleteMovie,
+            confirmRemoveFromService: $confirmRemoveFromService,
+            confirmClearData: $confirmClearData,
+            confirmDeleteSeasonNumber: $confirmDeleteSeasonNumber,
+            confirmDeleteAlbumId: $confirmDeleteAlbumId,
+            removeServiceName: removeServiceName,
+            screen: self
+        ))
+        .modifier(UnifiedMediaDetailsEventsModifier(
+            viewModel: viewModel,
+            screen: self
+        ))
     }
 }
 
@@ -501,7 +481,7 @@ extension UnifiedMediaDetailsScreen {
 // MARK: - Modals and Sheets
 extension UnifiedMediaDetailsScreen {
     @ViewBuilder
-    private var addSheetContent: some View {
+    fileprivate var addSheetContent: some View {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
             switch success.arrMedia {
             case let series as ArrSeries:
@@ -603,7 +583,7 @@ extension UnifiedMediaDetailsScreen {
     }
     
     @ViewBuilder
-    private var editSheetContent: some View {
+    fileprivate var editSheetContent: some View {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
             switch success.arrMedia {
             case let movie as ArrMovie:
@@ -673,7 +653,7 @@ extension UnifiedMediaDetailsScreen {
     }
     
     @ViewBuilder
-    private var confirmSheetContent: some View {
+    fileprivate var confirmSheetContent: some View {
         DeleteMediaSheet(
             isLoading: viewModel.deleteStatus is NetworkingOperationStatusInProgress,
             initialAddExclusion: viewModel.preferences.deleteAddExclusion,
@@ -685,7 +665,7 @@ extension UnifiedMediaDetailsScreen {
     }
     
     @ViewBuilder
-    private func queueItemSheetContent(_ wrapper: IdentifiableQueueItem) -> some View {
+    fileprivate func queueItemSheetContent(_ wrapper: IdentifiableQueueItem) -> some View {
         QueueItemInfoSheet(
             item: wrapper.item,
             deleteInProgress: viewModel.removeQueueItemStatus is NetworkingOperationStatusInProgress,
@@ -698,14 +678,14 @@ extension UnifiedMediaDetailsScreen {
     }
     
     @ViewBuilder
-    private func editAlbumSheetContent(_ album: ArrAlbum) -> some View {
+    fileprivate func editAlbumSheetContent(_ album: ArrAlbum) -> some View {
         EditAlbumSheet(album: album, editInProgress: viewModel.editStatus is NetworkingOperationStatusInProgress, onEditAlbum: { updatedAlbum in
             viewModel.updateAlbum(album: updatedAlbum)
         })
     }
     
     @ViewBuilder
-    private var requestSheetContent: some View {
+    fileprivate var requestSheetContent: some View {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess, let seerrMedia = success.seerrMedia {
             SeerrRequestSheet(
                 details: seerrMedia,
@@ -729,19 +709,19 @@ extension UnifiedMediaDetailsScreen {
     }
     
     @ViewBuilder
-    private var reportIssueSheetContent: some View {
+    fileprivate var reportIssueSheetContent: some View {
         SeerrReportIssueSheet(viewModel: viewModel, onDismiss: { viewModel.hideReportIssueSheet() })
     }
     
     @ViewBuilder
-    private var viewRequestSheetContent: some View {
+    fileprivate var viewRequestSheetContent: some View {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess, let seerrMedia = success.seerrMedia {
             SeerrViewRequestSheet(details: seerrMedia, viewModel: viewModel, onDismissRequest: { viewModel.hideViewRequestSheet() })
         }
     }
     
     @ViewBuilder
-    private var deleteMovieAlertContent: some View {
+    fileprivate var deleteMovieAlertContent: some View {
         Button(MR.strings().cancel.localized(), role: .cancel) { }
         Button(MR.strings().confirm.localized(), role: .destructive) {
             viewModel.deleteMovieFile()
@@ -749,7 +729,7 @@ extension UnifiedMediaDetailsScreen {
     }
     
     @ViewBuilder
-    private var deleteSeasonDialogContent: some View {
+    fileprivate var deleteSeasonDialogContent: some View {
         Button(MR.strings().confirm.localized(), role: .destructive) {
             if let season = confirmDeleteSeasonNumber {
                 viewModel.deleteSeasonFiles(seasonNumber: season)
@@ -762,14 +742,14 @@ extension UnifiedMediaDetailsScreen {
     }
     
     @ViewBuilder
-    private var deleteSeasonDialogMessage: some View {
+    fileprivate var deleteSeasonDialogMessage: some View {
         if let season = confirmDeleteSeasonNumber {
             Text(MR.strings().delete_season_confirm.formatted(args: [season]))
         }
     }
     
     @ViewBuilder
-    private var deleteAlbumDialogContent: some View {
+    fileprivate var deleteAlbumDialogContent: some View {
         Button(MR.strings().confirm.localized(), role: .destructive) {
             if let albumId = confirmDeleteAlbumId {
                 viewModel.deleteAlbumFiles(albumId: albumId)
@@ -785,7 +765,7 @@ extension UnifiedMediaDetailsScreen {
 // MARK: - Handlers & Utilities
 extension UnifiedMediaDetailsScreen {
     @ViewBuilder
-    private var toastOverlay: some View {
+    fileprivate var toastOverlay: some View {
         if let message = toastMessage {
             VStack {
                 Spacer()
@@ -809,7 +789,7 @@ extension UnifiedMediaDetailsScreen {
         }
     }
     
-    private func onLastSearchResultChanged(_ newVal: Bool?) {
+    fileprivate func onLastSearchResultChanged(_ newVal: Bool?) {
         if let result = newVal {
             withAnimation {
                 toastMessage = result ? MR.strings().search_queued.localized() : MR.strings().search_error.localized()
@@ -817,7 +797,7 @@ extension UnifiedMediaDetailsScreen {
         }
     }
     
-    private func onEditSuccess() {
+    fileprivate func onEditSuccess() {
         withAnimation {
             toastMessage = MR.strings().item_edited_successfully.localized()
         }
@@ -825,13 +805,13 @@ extension UnifiedMediaDetailsScreen {
         editAlbum = nil
     }
     
-    private func onEditError() {
+    fileprivate func onEditError() {
         withAnimation {
             toastMessage = MR.strings().error_editing_item.localized()
         }
     }
     
-    private func onDeleteSuccess() {
+    fileprivate func onDeleteSuccess() {
         withAnimation {
             toastMessage = MR.strings().item_deleted_successfully.localized()
         }
@@ -840,7 +820,7 @@ extension UnifiedMediaDetailsScreen {
         }
     }
     
-    private func onDeleteError() {
+    fileprivate func onDeleteError() {
         withAnimation {
             toastMessage = MR.strings().error_deleting_item.localized()
         }
@@ -852,12 +832,14 @@ extension UnifiedMediaDetailsScreen {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
-            let canAddDirectly = success.arrMedia != nil && viewModel.isArrConfigured
+            let canAddDirectly = !success.hasArrId && success.arrMedia != nil && viewModel.isArrConfigured
             let showArrActions = success.hasArrId && viewModel.isArrConfigured
-            let showAddActions = !success.hasArrId && canAddDirectly
+            let showSeerrActions = viewModel.isSeerrConfigured && (viewModel.buttonState.showRemoveFromServiceButton || viewModel.buttonState.showClearDataButton || viewModel.buttonState.showMarkAsAvailableButton)
+            let showMissingInstances = !success.missingInstances.isEmpty
+            let showMenuButton = showArrActions || showSeerrActions || showMissingInstances
             let showReportIssue = viewModel.buttonState.showReportIssueButton
             
-            if showReportIssue || showArrActions || showAddActions {
+            if showReportIssue || showArrActions || canAddDirectly || showMenuButton {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
                         if showReportIssue {
@@ -871,30 +853,40 @@ extension UnifiedMediaDetailsScreen {
                             Button(action: { viewModel.toggleMonitored() }) {
                                 Image(systemName: viewModel.isMonitored ? "bookmark.fill" : "bookmark")
                             }
-                            
+                        }
+                        
+                        if canAddDirectly {
+                            Button(action: { showAddSheet = true }) {
+                                Image(systemName: "plus")
+                            }
+                        }
+                        
+                        if showMenuButton {
                             Menu {
-                                Section {
-                                    Button(action: { viewModel.performRefresh() }) {
-                                        Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
-                                    }
-                                    
-                                    if viewModel.resolvedInstanceType?.includeTopLevelAutomaticSearchOption == true {
-                                        Button(action: { viewModel.performAutomaticLookup() }) {
-                                            Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
+                                if showArrActions {
+                                    Section {
+                                        Button(action: { viewModel.performRefresh() }) {
+                                            Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
                                         }
-                                        .disabled(!viewModel.isMonitored)
-                                    }
-                                    
-                                    Button(action: { showEditSheet = true }) {
-                                        Label(MR.strings().edit.localized(), systemImage: "pencil")
-                                    }
-                                    
-                                    Button(role: .destructive, action: { showConfirmSheet = true }) {
-                                        Label(MR.strings().delete.localized(), systemImage: "trash")
+                                        
+                                        if viewModel.resolvedInstanceType?.includeTopLevelAutomaticSearchOption == true {
+                                            Button(action: { viewModel.performAutomaticLookup() }) {
+                                                Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
+                                            }
+                                            .disabled(!viewModel.isMonitored)
+                                        }
+                                        
+                                        Button(action: { showEditSheet = true }) {
+                                            Label(MR.strings().edit.localized(), systemImage: "pencil")
+                                        }
+                                        
+                                        Button(role: .destructive, action: { showConfirmSheet = true }) {
+                                            Label(MR.strings().delete.localized(), systemImage: "trash")
+                                        }
                                     }
                                 }
                                 
-                                if !success.missingInstances.isEmpty {
+                                if showMissingInstances {
                                     Section {
                                         ForEach(success.missingInstances, id: \.id) { instance in
                                             Button(action: {
@@ -906,12 +898,32 @@ extension UnifiedMediaDetailsScreen {
                                         }
                                     }
                                 }
+                                
+                                if showSeerrActions {
+                                    Section {
+                                        if viewModel.buttonState.showMarkAsAvailableButton {
+                                            let markTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().mark_as_available.localized() : MR.strings().mark_all_seasons_as_available.localized()
+                                            Button(action: { viewModel.markSeerrMediaAsAvailable() }) {
+                                                Label(markTitle, systemImage: "checkmark.circle")
+                                            }
+                                        }
+                                        
+                                        if viewModel.buttonState.showRemoveFromServiceButton {
+                                            let removeTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().remove_from_radarr.localized() : MR.strings().remove_from_sonarr.localized()
+                                            Button(role: .destructive, action: { confirmRemoveFromService = true }) {
+                                                Label(removeTitle, systemImage: "trash")
+                                            }
+                                        }
+                                        
+                                        if viewModel.buttonState.showClearDataButton {
+                                            Button(role: .destructive, action: { confirmClearData = true }) {
+                                                Label(MR.strings().clear_data.localized(), systemImage: "xmark.bin")
+                                            }
+                                        }
+                                    }
+                                }
                             } label: {
                                 Image(systemName: "ellipsis.circle")
-                            }
-                        } else if showAddActions {
-                            Button(action: { showAddSheet = true }) {
-                                Image(systemName: "plus")
                             }
                         }
                     }
@@ -1204,6 +1216,18 @@ struct UnifiedMediaDetailsActions: View {
                         .cornerRadius(8)
                     }
                 }
+            } else if buttonState.showRequest4kButton {
+                Button(action: onRequest4k) {
+                    HStack {
+                        Image(systemName: "plus")
+                        Text(MR.strings().request_in_4k.localized())
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
             }
         }
     }
@@ -1239,5 +1263,113 @@ struct InstanceChipsRow: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - View Modifiers
+fileprivate struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
+    @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
+    @Binding var showEditSheet: Bool
+    @Binding var showAddSheet: Bool
+    @Binding var showConfirmSheet: Bool
+    @Binding var editAlbum: ArrAlbum?
+    @Binding var selectedQueueItem: QueueItem?
+    let screen: UnifiedMediaDetailsScreen
+    
+    func body(content: Content) -> some View {
+        content
+            .sheet(isPresented: $showEditSheet) { screen.editSheetContent }
+            .sheet(isPresented: $showAddSheet) { screen.addSheetContent }
+            .sheet(isPresented: $showConfirmSheet) { screen.confirmSheetContent }
+            .sheet(item: $editAlbum) { screen.editAlbumSheetContent($0) }
+            .sheet(isPresented: $viewModel.isRequestSheetVisible) { screen.requestSheetContent }
+            .sheet(isPresented: $viewModel.isReportIssueSheetVisible) { screen.reportIssueSheetContent }
+            .sheet(isPresented: $viewModel.isViewRequestSheetVisible) { screen.viewRequestSheetContent }
+            .sheet(item: Binding(
+                get: { selectedQueueItem.map { IdentifiableQueueItem(item: $0) } },
+                set: { selectedQueueItem = $0?.item }
+            )) {
+                screen.queueItemSheetContent($0)
+            }
+    }
+}
+
+fileprivate struct UnifiedMediaDetailsAlertsModifier: ViewModifier {
+    @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
+    @Binding var confirmDeleteMovie: Bool
+    @Binding var confirmRemoveFromService: Bool
+    @Binding var confirmClearData: Bool
+    @Binding var confirmDeleteSeasonNumber: Int32?
+    @Binding var confirmDeleteAlbumId: Int64?
+    let removeServiceName: String
+    let screen: UnifiedMediaDetailsScreen
+    
+    func body(content: Content) -> some View {
+        content
+            .alert(MR.strings().confirm_delete.localized(), isPresented: $confirmDeleteMovie) {
+                screen.deleteMovieAlertContent
+            } message: {
+                Text(MR.strings().confirm_delete_file.localized())
+            }
+            .alert(MR.strings().are_you_sure.localized(), isPresented: $confirmRemoveFromService) {
+                Button(MR.strings().no.localized(), role: .cancel) {}
+                Button(role: .destructive) {
+                    viewModel.deleteSeerrMediaFile(is4k: false)
+                } label: {
+                    Text(MR.strings().yes.localized())
+                }
+            } message: {
+                Text(MR.strings().remove_from_service_confirm.formatted(args: [removeServiceName]))
+            }
+            .alert(MR.strings().are_you_sure.localized(), isPresented: $confirmClearData) {
+                Button(MR.strings().no.localized(), role: .cancel) {}
+                Button(role: .destructive) {
+                    viewModel.clearSeerrMediaData()
+                } label: {
+                    Text(MR.strings().yes.localized())
+                }
+            } message: {
+                Text(MR.strings().clear_data_confirm.localized())
+            }
+            .confirmationDialog("", isPresented: Binding(
+                get: { confirmDeleteSeasonNumber != nil },
+                set: { if !$0 { confirmDeleteSeasonNumber = nil } }
+            )) {
+                screen.deleteSeasonDialogContent
+            } message: {
+                screen.deleteSeasonDialogMessage
+            }
+            .confirmationDialog("", isPresented: Binding(
+                get: { confirmDeleteAlbumId != nil },
+                set: { if !$0 { confirmDeleteAlbumId = nil } }
+            )) {
+                screen.deleteAlbumDialogContent
+            } message: {
+                Text(MR.strings().delete_album_confirm.localized())
+            }
+    }
+}
+
+fileprivate struct UnifiedMediaDetailsEventsModifier: ViewModifier {
+    @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
+    let screen: UnifiedMediaDetailsScreen
+    
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: viewModel.lastSearchResult) { _, newVal in
+                screen.onLastSearchResultChanged(newVal)
+            }
+            .onChange(of: viewModel.editSuccessTrigger) { _, _ in
+                screen.onEditSuccess()
+            }
+            .onChange(of: viewModel.editErrorTrigger) { _, _ in
+                screen.onEditError()
+            }
+            .onChange(of: viewModel.deleteSuccessTrigger) { _, _ in
+                screen.onDeleteSuccess()
+            }
+            .onChange(of: viewModel.deleteErrorTrigger) { _, _ in
+                screen.onDeleteError()
+            }
     }
 }

@@ -62,6 +62,8 @@ interface SeerrClient {
     ): NetworkResult<MediaRequest>
     suspend fun deleteRequest(requestId: Long): NetworkResult<Unit>
     suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit>
+    suspend fun clearMediaData(mediaId: Long): NetworkResult<Unit>
+    suspend fun markMediaAsAvailable(mediaId: Long, is4k: Boolean = false): NetworkResult<Unit>
     suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings>
     suspend fun getTvRatings(mediaId: Long): NetworkResult<RottenTomatoesRating>
     suspend fun getSeasonDetails(mediaId: Long, seasonNumber: Int): NetworkResult<Season>
@@ -155,7 +157,15 @@ class SeerrClientImpl(
         delete("request/$requestId")
 
     override suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit> =
-        delete("media/$mediaId", mapOf("is4k" to is4k))
+        delete("media/$mediaId/file", mapOf("is4k" to is4k))
+
+    override suspend fun clearMediaData(mediaId: Long): NetworkResult<Unit> =
+        delete("media/$mediaId")
+
+    override suspend fun markMediaAsAvailable(mediaId: Long, is4k: Boolean): NetworkResult<Unit> =
+        post("media/$mediaId/available", buildJsonObject {
+            put("is4k", is4k)
+        })
 
     override suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings> =
         get("movie/$mediaId/ratingscombined")

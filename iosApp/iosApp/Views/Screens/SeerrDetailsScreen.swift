@@ -38,58 +38,67 @@ struct SeerrDetailsScreen: View {
         .refreshable {
             viewModel.refreshDetails()
         }
-        .toolbar {
-            if viewModel.buttonState.showRequestButton {
-                ToolbarItem(placement: .topBarTrailing) {
-                    if viewModel.buttonState.showRequest4kButton {
-                        Menu {
-                            Button(action: { viewModel.showRequestSheet(is4k: false) }) {
-                                Label(MR.strings().request.localized(), systemImage: "plus")
-                            }
-                            Button(action: { viewModel.showRequestSheet(is4k: true) }) {
-                                Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
-                            }
-                        } label: {
-                            Image(systemName: "plus.circle")
-                        }
-                    } else {
-                        Button(action: { viewModel.showRequestSheet(is4k: false) }) {
-                            Image(systemName: "plus.circle")
-                        }
-                    }
+        .toolbar { toolbarContent }
+        .sheet(isPresented: $viewModel.isRequestSheetVisible) { requestSheetContent }
+    }
+    
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            trailingToolbarView
+        }
+    }
+    
+    @ViewBuilder
+    private var trailingToolbarView: some View {
+        if viewModel.buttonState.showRequestButton && viewModel.buttonState.showRequest4kButton {
+            Menu {
+                Button(action: { viewModel.showRequestSheet(is4k: false) }) {
+                    Label(MR.strings().request.localized(), systemImage: "plus")
                 }
-            } else {
-                if viewModel.buttonState.showReportIssueButton {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: { viewModel.showReportIssueSheet() }) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                        }
-                    }
+                Button(action: { viewModel.showRequestSheet(is4k: true) }) {
+                    Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
                 }
+            } label: {
+                Image(systemName: "plus.circle")
+            }
+        } else if viewModel.buttonState.showRequestButton {
+            Button(action: { viewModel.showRequestSheet(is4k: false) }) {
+                Image(systemName: "plus.circle")
+            }
+        } else if viewModel.buttonState.showRequest4kButton {
+            Button(action: { viewModel.showRequestSheet(is4k: true) }) {
+                Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
+            }
+        } else if viewModel.buttonState.showReportIssueButton {
+            Button(action: { viewModel.showReportIssueSheet() }) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
             }
         }
-        .sheet(isPresented: $viewModel.isRequestSheetVisible) {
-            if let state = viewModel.uiState as? SeerrDetailsStateSuccess {
-                SeerrRequestSheet(
-                    details: state.item,
-                    serviceDetails: viewModel.serviceDetails,
-                    currentUser: viewModel.currentUser,
-                    users: viewModel.users,
-                    is4k: viewModel.isRequest4k,
-                    onDismiss: { viewModel.hideRequestSheet() },
-                    onSubmit: { profileId, rootFolder, langId, seasons, is4k, userId in
-                        viewModel.submitRequest(
-                            profileId: profileId,
-                            rootFolder: rootFolder,
-                            languageProfileId: langId,
-                            seasons: seasons,
-                            is4k: is4k,
-                            userId: userId
-                        )
-                    }
-                )
-            }
+    }
+    
+    @ViewBuilder
+    private var requestSheetContent: some View {
+        if let state = viewModel.uiState as? SeerrDetailsStateSuccess {
+            SeerrRequestSheet(
+                details: state.item,
+                serviceDetails: viewModel.serviceDetails,
+                currentUser: viewModel.currentUser,
+                users: viewModel.users,
+                is4k: viewModel.isRequest4k,
+                onDismiss: { viewModel.hideRequestSheet() },
+                onSubmit: { profileId, rootFolder, langId, seasons, is4k, userId in
+                    viewModel.submitRequest(
+                        profileId: profileId,
+                        rootFolder: rootFolder,
+                        languageProfileId: langId,
+                        seasons: seasons,
+                        is4k: is4k,
+                        userId: userId
+                    )
+                }
+            )
         }
     }
     

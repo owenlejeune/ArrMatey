@@ -157,8 +157,10 @@ import com.dnfapps.arrmatey.seerr.usecase.SearchSeerrUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
+import com.dnfapps.arrmatey.seerr.usecase.ClearSeerrMediaDataUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.MarkSeerrMediaAsAvailableUseCase
 import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueCommentUseCase
@@ -319,6 +321,8 @@ val useCaseModule = module {
     factory { CancelRequestUseCase() }
     factory { SetRequestApprovalStatusUseCase() }
     factory { RemoveSeerrMediaFileUseCase() }
+    factory { ClearSeerrMediaDataUseCase() }
+    factory { MarkSeerrMediaAsAvailableUseCase() }
     factory { GetSeerrMediaDetailsUseCase() }
     factory { GetSeerrMovieRatingsUseCase(get()) }
     factory { GetSeerrTvRatingsUseCase(get()) }
@@ -381,7 +385,7 @@ val viewModelModule = module {
         ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (arrId: Long?, tmdbId: Long?, tvdbId: Long?, instanceType: InstanceType?, requestType: RequestType?) ->
-        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType) ->
         InstancesViewModel(type, get(), get(), get())

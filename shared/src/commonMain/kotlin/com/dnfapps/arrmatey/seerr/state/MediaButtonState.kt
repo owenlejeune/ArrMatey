@@ -35,7 +35,9 @@ data class MediaButtonState(
     val showOpenInServiceButton: Boolean = false,
     val serviceUrl: String? = null,
     val serviceName: String? = null,
+    val showRemoveFromServiceButton: Boolean = false,
     val showClearDataButton: Boolean = false,
+    val showMarkAsAvailableButton: Boolean = false,
 
     val mediaProvider: MediaProvider = MediaProvider.None
 ) {
@@ -57,6 +59,7 @@ fun MediaInfo?.toButtonState(
     if (this == null) {
         return MediaButtonState(
             showRequestButton = true,
+            showRequest4kButton = true,
             showWatchTrailerOption = getTrailerUrl(relatedVideos) != null,
             trailerUrl = getTrailerUrl(relatedVideos)
         )
@@ -67,6 +70,7 @@ fun MediaInfo?.toButtonState(
     val isPending = status == 2  // PENDING
     val isProcessing = status == 3  // PROCESSING
     val hasContent = isAvailable || isPartiallyAvailable
+    val hasSeerrMedia = status != 1
 
     // For TV shows, check if we have all seasons or just some
     val isTvShow = mediaType == RequestType.Tv
@@ -104,6 +108,8 @@ fun MediaInfo?.toButtonState(
         serviceUrl?.contains("sonarr", ignoreCase = true) == true -> "Sonarr"
         serviceUrl?.contains("radarr", ignoreCase = true) == true -> "Radarr"
         serviceUrl?.contains("lidarr", ignoreCase = true) == true -> "Lidarr"
+        mediaType == RequestType.Movie -> "Radarr"
+        mediaType == RequestType.Tv -> "Sonarr"
         else -> null
     }
 
@@ -118,9 +124,9 @@ fun MediaInfo?.toButtonState(
         trailerUrl = trailerUrl,
 
         // Request buttons
-        showRequestButton = status == 1,  // Only if nothing requested yet
-        showRequestMoreButton = hasPartialContent,  // NEW: Show for partial TV content
-        showRequest4kButton = hasContent && (status4k == null || status4k == 1),
+        showRequestButton = status == 1,  // Only if standard not requested yet
+        showRequestMoreButton = hasPartialContent,  // Show for partial TV content
+        showRequest4kButton = status4k == null || status4k == 1,  // Only if 4k not requested yet
         availableSeasons = availableSeasonNumbers,
         totalSeasons = totalSeasonCount,
 
@@ -134,11 +140,13 @@ fun MediaInfo?.toButtonState(
         showReportIssueButton = hasContent,
 
         // Manage menu
-        showManageMenu = status != 1,
+        showManageMenu = hasSeerrMedia,
         showOpenInServiceButton = !serviceUrl.isNullOrEmpty(),
         serviceUrl = serviceUrl,
         serviceName = serviceName,
-        showClearDataButton = isAdmin,
+        showRemoveFromServiceButton = hasSeerrMedia,
+        showClearDataButton = hasSeerrMedia && isAdmin,
+        showMarkAsAvailableButton = hasSeerrMedia && !isAvailable,
 
         mediaProvider = mediaProvider
     )

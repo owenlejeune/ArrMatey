@@ -11,4 +11,11 @@ class RemoveSeerrMediaFileUseCase {
         repository: SeerrInstanceRepository
     ): NetworkResult<Unit> =
         repository.deleteMediaFile(requestId, mediaId, is4k)
+
+    suspend operator fun invoke(
+        mediaId: Long,
+        is4k: Boolean,
+        repository: SeerrInstanceRepository
+    ): NetworkResult<Unit> =
+        repository.deleteMediaFile(mediaId, is4k)
 }
