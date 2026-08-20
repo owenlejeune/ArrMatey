@@ -131,19 +131,27 @@ extension UnifiedMediaDetailsScreen {
                 UnifiedMediaDetailsHeader(success: success, type: viewModel.resolvedInstanceType)
                 
                 VStack(alignment: .leading, spacing: 24) {
-                    Text(success.displayTitle ?? MR.strings().unknown.localized())
-                        .font(.system(size: 28, weight: .bold))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    if let airingString = success.upcomingDateString {
-                        Text(airingString)
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.themePrimary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(success.displayTitle ?? MR.strings().unknown.localized())
+                            .font(.system(size: 28, weight: .bold))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        if let tagline = success.tagline, !tagline.isEmpty {
+                            Text(tagline)
+                                .font(.system(size: 16))
+                                .italic()
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        if let airingString = success.upcomingDateString {
+                            Text(airingString)
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.themePrimary)
+                        }
                     }
                     
                     UnifiedMediaDetailsActions(
                         buttonState: viewModel.buttonState,
-                        isSeerrConfigured: viewModel.isSeerrConfigured,
                         onWatch: { url in
                             if let urlObj = URL(string: url) { openURL(urlObj) }
                         },
@@ -167,20 +175,12 @@ extension UnifiedMediaDetailsScreen {
                         InstanceChipsRow(
                             presences: success.instancePresences,
                             selectedInstanceId: success.selectedInstanceId?.int64Value,
-                            onInstanceSelected: { viewModel.selectInstance(instanceId: $0.id) }
+                            onInstanceSelected: { id in
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    viewModel.selectInstance(instanceId: id.id)
+                                }
+                            }
                         )
-                    }
-                    
-                    filesArea(success)
-                    
-                    if let arrMedia = success.arrMedia {
-                        MediaInfoArea(item: arrMedia, qualityProfiles: viewModel.qualityProfiles, tags: viewModel.tags)
-                    } else {
-                        seerrInfoArea(success)
-                    }
-                    
-                    if let credits = success.seerrMedia?.credits {
-                        creditsSection(credits)
                     }
                     
                     if !success.queueItems.isEmpty {
@@ -192,10 +192,24 @@ extension UnifiedMediaDetailsScreen {
                             }
                         }
                     }
+                    
+                    seasonsArea(success)
+                    
+                    if success.hasArrId {
+                        arrLibraryFilesArea(success)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                    
+                    if let credits = success.seerrMedia?.credits {
+                        creditsSection(credits)
+                    }
+                    
+                    unifiedInfoArea(success)
                 }
                 .padding(.top, 12)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
+                .animation(.easeInOut(duration: 0.3), value: success.selectedInstanceId?.int64Value)
             }
         }
         .ignoresSafeArea(edges: .top)
@@ -207,35 +221,47 @@ extension UnifiedMediaDetailsScreen {
 
 // MARK: - Components and Sections
 extension UnifiedMediaDetailsScreen {
+    
+    /// Shows seasons using the unified SeasonsArea component.
+    /// Mirrors Android: SeasonsArea takes List<SeasonWrapper> combining arr + seerr data,
+    /// and shows arr controls only when arrSeason is present and seriesId > 0.
     @ViewBuilder
-    private func filesArea(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
-        if let series = success.arrMedia as? ArrSeries {
-            SeriesFilesView(
-                series: series,
-                episodes: success.episodes.compactMap { $0.arrEpisode },
-                searchIds: viewModel.automaticSearchIds,
-                searchResult: viewModel.lastSearchResult,
-                onToggleSeasonMonitor: { viewModel.toggleSeasonMonitored(seasonNumber: $0) },
-                onToggleEpisodeMonitor: { viewModel.toggleEpisodeMonitored(episode: $0) },
-                onEpisodeAutomaticSearch: { viewModel.performEpisodeAutomaticLookup(episodeId: $0) },
-                onSeasonAutomaticSearch: { viewModel.performSeasonAutomaticLookup(seasonNumber: $0) },
-                onDeleteSeasonFiles: { confirmDeleteSeasonNumber = $0 },
-                seasonDeleteInProgress: viewModel.deleteSeasonStatus is NetworkingOperationStatusInProgress
-            )
-        } else if let movie = success.arrMedia as? ArrMovie {
-            MovieFilesView(
-                movie: movie,
-                movieExtraFiles: success.extraFiles,
-                searchIds: viewModel.automaticSearchIds,
-                searchResult: viewModel.lastSearchResult,
-                onAutomaticSearch: { viewModel.performAutomaticLookup() },
-                onDeleteFile: { confirmDeleteMovie = true }
-            )
-            
-            if let arrId = success.arrMedia?.id?.int64Value {
-                BazarrSubtitlesSection(
-                    target: BazarrMediaTargetMovie(radarrId: arrId)
+    private func seasonsArea(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
+        let seriesId = (success.arrMedia as? ArrSeries)?.id?.int64Value
+        SeasonsArea(
+            seasons: success.seasons,
+            seriesId: seriesId,
+            searchIds: viewModel.automaticSearchIds,
+            onToggleSeasonMonitor: { viewModel.toggleSeasonMonitored(seasonNumber: $0) },
+            onToggleEpisodeMonitor: { viewModel.toggleEpisodeMonitored(episode: $0) },
+            onEpisodeAutomaticSearch: { viewModel.performEpisodeAutomaticLookup(episodeId: $0) },
+            onSeasonAutomaticSearch: { viewModel.performSeasonAutomaticLookup(seasonNumber: $0) },
+            deleteSeasonFiles: { confirmDeleteSeasonNumber = $0 },
+            seasonDeleteInProgress: viewModel.deleteSeasonStatus is NetworkingOperationStatusInProgress
+        )
+    }
+
+
+    /// Shows file-level content (movie files, albums, books, audiobooks).
+    /// Only called when success.hasArrId is true, matching Android AnimatedVisibility(visible = state.hasArrId).
+    @ViewBuilder
+    private func arrLibraryFilesArea(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
+        if let movie = success.arrMedia as? ArrMovie {
+            VStack(spacing: 12) {
+                MovieFilesView(
+                    movie: movie,
+                    movieExtraFiles: success.extraFiles,
+                    searchIds: viewModel.automaticSearchIds,
+                    searchResult: viewModel.lastSearchResult,
+                    onAutomaticSearch: { viewModel.performAutomaticLookup() },
+                    onDeleteFile: { confirmDeleteMovie = true }
                 )
+                
+                if let arrId = movie.id?.int64Value {
+                    BazarrSubtitlesSection(
+                        target: BazarrMediaTargetMovie(radarrId: arrId)
+                    )
+                }
             }
         } else if let artist = success.arrMedia as? Arrtist {
             ArtistFilesView(
@@ -267,46 +293,37 @@ extension UnifiedMediaDetailsScreen {
                 searchIds: viewModel.automaticSearchIds,
                 onAutomaticSearch: { viewModel.performAutomaticLookup() }
             )
-        } else if let tvDetails = success.seerrMedia as? TvDetails {
-            seasonsSection(tvDetails)
-        }
-    }
-    
-    @ViewBuilder
-    private func seasonsSection(_ series: TvDetails) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(MR.strings().seasons_header.localized())
-                .font(.title3.bold())
-            
-            ForEach(series.seasons, id: \.seasonNumber) { season in
-                SeasonDisclosureRow(
-                    seasonNumber: season.seasonNumber,
-                    episodeCount: season.episodeCount,
-                    episodes: season.episodes.map { ep in
-                        SeerrEpisodeData(
-                            episodeNumber: ep.episodeNumber,
-                            name: ep.name,
-                            airDate: ep.airDate,
-                            overview: ep.overview,
-                            stillPath: ep.stillPath
-                        )
-                    }
-                )
-            }
         }
     }
     
     @ViewBuilder
     private func creditsSection(_ credits: Credits) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(MR.strings().cast.localized())
-                .font(.title3.bold())
+            if !credits.cast.isEmpty {
+                Text(MR.strings().cast.localized())
+                    .font(.title3.bold())
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(credits.cast.prefix(20), id: \.id) { member in
+                            CastMemberView(member: member) { personId in
+                                navigationManager.goToSeerrDetails(tmdbId: personId, requestType: .person)
+                            }
+                        }
+                    }
+                }
+            }
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(credits.cast.prefix(20), id: \.id) { member in
-                        CastMemberView(member: member) { personId in
-                            navigationManager.goToSeerrDetails(tmdbId: personId, requestType: .person)
+            if !credits.crew.isEmpty {
+                Text(MR.strings().crew.localized())
+                    .font(.title3.bold())
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(credits.crew.prefix(20), id: \.creditId) { member in
+                            CrewMemberView(member: member) { personId in
+                                navigationManager.goToSeerrDetails(tmdbId: personId, requestType: .person)
+                            }
                         }
                     }
                 }
@@ -315,53 +332,161 @@ extension UnifiedMediaDetailsScreen {
     }
     
     @ViewBuilder
-    private func seerrInfoArea(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
-        if let seerrMedia = success.seerrMedia {
-            let infoItems = buildInfoItems(item: seerrMedia)
-            if !infoItems.isEmpty {
-                VStack(spacing: 8) {
-                    ForEach(infoItems, id: \.0) { label, value in
-                        HStack(alignment: .top) {
-                            Text(label)
-                                .font(.subheadline.bold())
-                                .frame(width: 120, alignment: .leading)
-                            Text(value)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                        }
-                    }
-                }
-                .padding(16)
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
+    private func unifiedInfoArea(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
+        let infoItems = buildUnifiedInfoItems(success: success)
+        if !infoItems.isEmpty {
+            MediaInfoArea(infoItems: infoItems)
         }
     }
     
-    private func buildInfoItems(item: RequestMediaDetails) -> [(String, String)] {
-        var items: [(String, String)] = []
-        items.append((MR.strings().status.localized(), item.status))
+    private func buildUnifiedInfoItems(success: UnifiedMediaDetailsUiStateSuccess) -> [InfoItem] {
+        var items: [InfoItem] = []
         
-        if let movie = item as? MovieDetails {
-            if let releaseDate = movie.releaseDate {
-                items.append((MR.strings().release_date.localized(), releaseDate.format(pattern: "MMM dd, yyyy")))
+        // Arr fields — only when actually in the arr library
+        if success.hasArrId, let arrMedia = success.arrMedia {
+            let arrItems = buildArrInfoItems(
+                arrMedia: arrMedia,
+                qualityProfiles: viewModel.qualityProfiles,
+                tags: viewModel.tags
+            )
+            items.append(contentsOf: arrItems)
+        }
+        
+        // Seerr fields — always shown when seerr data is available
+        if let seerrMedia = success.seerrMedia {
+            items.append(InfoItem(label: MR.strings().status.localized(), value: seerrMedia.status))
+            
+            if let movie = seerrMedia as? MovieDetails {
+                if let releaseDate = movie.releaseDate {
+                    items.append(InfoItem(label: MR.strings().release_date.localized(), value: releaseDate.format(pattern: "MMM dd, yyyy")))
+                }
             }
-        }
-        
-        let countries = item.productionCountries.map { $0.name }.joined(separator: "\n")
-        if !countries.isEmpty {
-            items.append((MR.strings().production_countries.localized(), countries))
-        }
-        
-        let studios = item.productionCompanies.map { $0.name }.joined(separator: "\n")
-        if !studios.isEmpty {
-            items.append((MR.strings().studios.localized(), studios))
+            
+            let countries = seerrMedia.productionCountries.map { $0.name }.joined(separator: "\n")
+            if !countries.isEmpty {
+                items.append(InfoItem(label: MR.strings().production_countries.localized(), value: countries))
+            }
+            
+            let studios = seerrMedia.productionCompanies.map { $0.name }.joined(separator: "\n")
+            if !studios.isEmpty {
+                items.append(InfoItem(label: MR.strings().studios.localized(), value: studios))
+            }
         }
         
         return items
     }
+    
+    private func buildArrInfoItems(arrMedia: ArrMedia, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
+        if let series = arrMedia as? ArrSeries {
+            return seriesInfoItems(series, qualityProfiles: qualityProfiles, tags: tags)
+        } else if let movie = arrMedia as? ArrMovie {
+            return movieInfoItems(movie, qualityProfiles: qualityProfiles, tags: tags)
+        } else if let artist = arrMedia as? Arrtist {
+            return artistInfoItems(artist, qualityProfiles: qualityProfiles, tags: tags)
+        } else if let author = arrMedia as? Author {
+            return authorInfoItems(author, qualityProfiles: qualityProfiles, tags: tags)
+        } else if let audiobook = arrMedia as? Audiobook {
+            return audiobookInfoItems(audiobook)
+        }
+        return []
+    }
+    
+    private func seriesInfoItems(_ series: ArrSeries, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
+        let unknown = MR.strings().unknown.localized()
+        let qualityLabel = qualityProfiles.first(where: { $0.id == series.qualityProfileId })?.name ?? unknown
+        let tagsLabel = series.formatTags(availableTags: tags) ?? MR.strings().none.localized()
+        let monitorLabel = series.monitorNewItems == .all ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized()
+        let seasonFolderLabel = series.seasonFolder ? MR.strings().yes.localized() : MR.strings().no.localized()
+        return [
+            InfoItem(label: MR.strings().status.localized(), value: series.status.resource.localized()),
+            InfoItem(label: MR.strings().series_type.localized(), value: series.seriesType.name),
+            InfoItem(label: MR.strings().size_on_disk.localized(), value: series.fileSize.bytesAsFileSizeString()),
+            InfoItem(label: MR.strings().root_folder.localized(), value: series.rootFolderPath ?? unknown),
+            InfoItem(label: MR.strings().path.localized(), value: series.path ?? unknown),
+            InfoItem(label: MR.strings().new_seasons.localized(), value: monitorLabel),
+            InfoItem(label: MR.strings().season_folders.localized(), value: seasonFolderLabel),
+            InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
+            InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
+        ]
+    }
+    
+    private func movieInfoItems(_ movie: ArrMovie, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
+        let unknown = MR.strings().unknown.localized()
+        let qualityLabel = qualityProfiles.first(where: { $0.id == movie.qualityProfileId })?.name ?? unknown
+        let tagsLabel = movie.formatTags(availableTags: tags) ?? MR.strings().none.localized()
+        let rootFolderValue = movie.rootFolderPath.isEmpty ? unknown : movie.rootFolderPath
+        var info: [InfoItem] = [
+            InfoItem(label: MR.strings().status.localized(), value: movie.status.resource.localized()),
+            InfoItem(label: MR.strings().minimum_availability.localized(), value: movie.minimumAvailability.name),
+            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
+            InfoItem(label: MR.strings().path.localized(), value: movie.path ?? unknown)
+        ]
+        if let inCinemas = movie.inCinemas?.format(pattern: "MMM d, yyyy") {
+            info.append(InfoItem(label: MR.strings().in_cinemas.localized(), value: inCinemas))
+        }
+        if let physicalRelease = movie.physicalRelease?.format(pattern: "MMM d, yyyy") {
+            info.append(InfoItem(label: MR.strings().physical_release.localized(), value: physicalRelease))
+        }
+        if let digitalRelease = movie.digitalRelease?.format(pattern: "MMM d, yyyy") {
+            info.append(InfoItem(label: MR.strings().digital_release.localized(), value: digitalRelease))
+        }
+        info.append(InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel))
+        info.append(InfoItem(label: MR.strings().tags.localized(), value: tagsLabel))
+        return info
+    }
+    
+    private func artistInfoItems(_ artist: Arrtist, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
+        let unknown = MR.strings().unknown.localized()
+        let qualityLabel = qualityProfiles.first(where: { $0.id == artist.qualityProfileId })?.name ?? unknown
+        let tagsLabel = artist.formatTags(availableTags: tags) ?? MR.strings().none.localized()
+        let monitorLabel = artist.monitorNewItems == .all ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized()
+        let rootFolderValue = (artist.rootFolderPath?.isEmpty == false) ? artist.rootFolderPath! : unknown
+        return [
+            InfoItem(label: MR.strings().status.localized(), value: artist.status.resource.localized()),
+            InfoItem(label: MR.strings().size_on_disk.localized(), value: artist.fileSize.bytesAsFileSizeString()),
+            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
+            InfoItem(label: MR.strings().path.localized(), value: artist.path ?? unknown),
+            InfoItem(label: MR.strings().new_albums.localized(), value: monitorLabel),
+            InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
+            InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
+        ]
+    }
+    
+    private func authorInfoItems(_ author: Author, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
+        let unknown = MR.strings().unknown.localized()
+        let qualityLabel = qualityProfiles.first(where: { $0.id == author.qualityProfileId })?.name ?? unknown
+        let tagsLabel = author.formatTags(availableTags: tags) ?? MR.strings().none.localized()
+        let monitorLabel = author.monitorNewItems == .all ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized()
+        let rootFolderValue = (author.rootFolderPath?.isEmpty == false) ? author.rootFolderPath! : unknown
+        return [
+            InfoItem(label: MR.strings().status.localized(), value: author.status.resource.localized()),
+            InfoItem(label: MR.strings().size_on_disk.localized(), value: author.fileSize.bytesAsFileSizeString()),
+            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
+            InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown),
+            InfoItem(label: MR.strings().new_books.localized(), value: monitorLabel),
+            InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
+            InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
+        ]
+    }
+    
+    private func audiobookInfoItems(_ audiobook: Audiobook) -> [InfoItem] {
+        let unknown = MR.strings().unknown.localized()
+        let authorString = audiobook.authors.joined(separator: " • ")
+        let narratorsString = audiobook.narrators.joined(separator: " • ")
+        var info: [InfoItem] = [
+            InfoItem(label: MR.strings().audiobook_info_authors.localized(), value: authorString),
+            InfoItem(label: MR.strings().audiobook_info_narrators.localized(), value: narratorsString),
+            InfoItem(label: MR.strings().publisher.localized(), value: audiobook.publisher ?? unknown)
+        ]
+        if let language = audiobook.language {
+            info.append(InfoItem(label: MR.strings().language.localized(), value: language.capitalized))
+        }
+        info.append(InfoItem(label: MR.strings().size_on_disk.localized(), value: audiobook.fileSize.bytesAsFileSizeString()))
+        info.append(InfoItem(label: MR.strings().path.localized(), value: audiobook.path ?? unknown))
+        return info
+    }
 }
+
 
 // MARK: - Modals and Sheets
 extension UnifiedMediaDetailsScreen {
@@ -384,7 +509,7 @@ extension UnifiedMediaDetailsScreen {
                     },
                     onDismiss: { showAddSheet = false },
                     instances: viewModel.addSheetUiState.availableInstances,
-                    selectedInstance: viewModel.addSheetUiState.targetInstance ?? viewModel.addSheetUiState.availableInstances.first,
+                    selectedInstance: viewModel.addSheetUiState.targetInstance,
                     onInstanceSelected: { viewModel.setAddSheetTargetInstance(instance: $0) }
                 )
             case let movie as ArrMovie:
@@ -402,7 +527,7 @@ extension UnifiedMediaDetailsScreen {
                     },
                     onDismiss: { showAddSheet = false },
                     instances: viewModel.addSheetUiState.availableInstances,
-                    selectedInstance: viewModel.addSheetUiState.targetInstance ?? viewModel.addSheetUiState.availableInstances.first,
+                    selectedInstance: viewModel.addSheetUiState.targetInstance,
                     onInstanceSelected: { viewModel.setAddSheetTargetInstance(instance: $0) }
                 )
             case let artist as Arrtist:
@@ -420,7 +545,7 @@ extension UnifiedMediaDetailsScreen {
                     },
                     onDismiss: { showAddSheet = false },
                     instances: viewModel.addSheetUiState.availableInstances,
-                    selectedInstance: viewModel.addSheetUiState.targetInstance ?? viewModel.addSheetUiState.availableInstances.first,
+                    selectedInstance: viewModel.addSheetUiState.targetInstance,
                     onInstanceSelected: { viewModel.setAddSheetTargetInstance(instance: $0) }
                 )
             case let author as Author:
@@ -438,7 +563,7 @@ extension UnifiedMediaDetailsScreen {
                     },
                     onDismiss: { showAddSheet = false },
                     instances: viewModel.addSheetUiState.availableInstances,
-                    selectedInstance: viewModel.addSheetUiState.targetInstance ?? viewModel.addSheetUiState.availableInstances.first,
+                    selectedInstance: viewModel.addSheetUiState.targetInstance,
                     onInstanceSelected: { viewModel.setAddSheetTargetInstance(instance: $0) }
                 )
             case let audiobook as Audiobook:
@@ -457,7 +582,7 @@ extension UnifiedMediaDetailsScreen {
                     },
                     onDismiss: { showAddSheet = false },
                     instances: viewModel.addSheetUiState.availableInstances,
-                    selectedInstance: viewModel.addSheetUiState.targetInstance ?? viewModel.addSheetUiState.availableInstances.first,
+                    selectedInstance: viewModel.addSheetUiState.targetInstance,
                     onInstanceSelected: { viewModel.setAddSheetTargetInstance(instance: $0) }
                 )
             default: EmptyView()
@@ -716,18 +841,23 @@ extension UnifiedMediaDetailsScreen {
 extension UnifiedMediaDetailsScreen {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
-            HStack(spacing: 12) {
-                if viewModel.buttonState.showReportIssueButton {
-                    Button(action: { viewModel.showReportIssueSheet() }) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.orange)
-                    }
-                }
-                
-                if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
-                    if success.hasArrId {
-                        if viewModel.isArrConfigured {
+        if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
+            let canAddDirectly = success.arrMedia != nil && viewModel.isArrConfigured
+            let showArrActions = success.hasArrId && viewModel.isArrConfigured
+            let showAddActions = !success.hasArrId && canAddDirectly
+            let showReportIssue = viewModel.buttonState.showReportIssueButton
+            
+            if showReportIssue || showArrActions || showAddActions {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack(spacing: 12) {
+                        if showReportIssue {
+                            Button(action: { viewModel.showReportIssueSheet() }) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                        
+                        if showArrActions {
                             Button(action: { viewModel.toggleMonitored() }) {
                                 Image(systemName: viewModel.isMonitored ? "bookmark.fill" : "bookmark")
                             }
@@ -769,37 +899,28 @@ extension UnifiedMediaDetailsScreen {
                             } label: {
                                 Image(systemName: "ellipsis.circle")
                             }
-                        }
-                    } else {
-                        let canAddDirectly = success.arrMedia != nil && viewModel.isArrConfigured
-                        if canAddDirectly {
+                        } else if showAddActions {
                             if viewModel.isSeerrConfigured {
                                 Menu {
                                     Button(action: { showAddSheet = true }) {
-                                        Label(MR.strings().add_to_arr.formatted(args: [viewModel.resolvedInstanceType?.resource.localized() ?? ""]), systemImage: "plus")
+                                        Label(MR.strings().add_to_arr.formatted(args: [viewModel.resolvedInstanceType?.name ?? "Arr"]), systemImage: "plus")
                                     }
                                     
-                                    if viewModel.buttonState.showRequestButton {
+                                    if let _ = viewModel.buttonState.pendingRequestId {
+                                        Button(action: { viewModel.showViewRequestSheet() }) {
+                                            Label(MR.strings().view_request.localized(), systemImage: "clock")
+                                        }
+                                    } else {
                                         Button(action: { viewModel.showRequestSheet(is4k: false) }) {
                                             Label(MR.strings().request.localized(), systemImage: "paperplane")
                                         }
-                                        
-                                        if viewModel.buttonState.showRequest4kButton {
-                                            Button(action: { viewModel.showRequestSheet(is4k: true) }) {
-                                                Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
-                                            }
-                                        }
-                                    } else if viewModel.buttonState.showViewRequestButton {
-                                        Button(action: { viewModel.showViewRequestSheet() }) {
-                                            Label(MR.strings().view_request.localized(), systemImage: "eye")
-                                        }
                                     }
                                 } label: {
-                                    Image(systemName: "plus.circle")
+                                    Image(systemName: "plus")
                                 }
                             } else {
                                 Button(action: { showAddSheet = true }) {
-                                    Image(systemName: "plus.circle")
+                                    Image(systemName: "plus")
                                 }
                             }
                         }
@@ -898,21 +1019,23 @@ struct UnifiedMediaDetailsHeader: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .onPreferenceChange(ViewHeightKey.self) { height in
+                    self.infoHeight = height
+                }
             }
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
         }
-        .frame(height: 350)
-        .onPreferenceChange(ViewHeightKey.self) { height in
-            self.infoHeight = height
-        }
+//        .frame(height: 350)
+//        .onPreferenceChange(ViewHeightKey.self) { height in
+//            self.infoHeight = height
+//        }
     }
 }
 
 // MARK: - Actions
 struct UnifiedMediaDetailsActions: View {
     let buttonState: MediaButtonState
-    let isSeerrConfigured: Bool
     let onWatch: (String) -> Void
     let onWatchTrailer: (String) -> Void
     let onRequest: () -> Void
@@ -924,21 +1047,50 @@ struct UnifiedMediaDetailsActions: View {
     
     var body: some View {
         HStack(spacing: 12) {
+            // Watch Button / Trailer Button
             if buttonState.showWatchButton, let url = buttonState.watchButtonUrl {
-                Button(action: { onWatch(url) }) {
-                    HStack {
-                        Image(systemName: "play.fill")
-                        Text(buttonState.watchButtonLabel.localized())
+                if buttonState.showWatchTrailerOption, let trailerUrl = buttonState.trailerUrl {
+                    HStack(spacing: 0) {
+                        Button(action: { onWatch(url) }) {
+                            HStack {
+                                Image(systemName: "play.fill")
+                                Text(buttonState.watchButtonLabel.localized())
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                        }
+                        
+                        Divider()
+                            .frame(height: 24)
+                            .background(Color.white.opacity(0.5))
+                        
+                        Menu {
+                            Button(action: { onWatchTrailer(trailerUrl) }) {
+                                Label(MR.strings().watch_trailer.localized(), systemImage: "film")
+                            }
+                        } label: {
+                            Image(systemName: "chevron.down")
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 12)
+                        }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
                     .background(Color.accentColor)
                     .foregroundColor(.white)
                     .cornerRadius(8)
+                } else {
+                    Button(action: { onWatch(url) }) {
+                        HStack {
+                            Image(systemName: "play.fill")
+                            Text(buttonState.watchButtonLabel.localized())
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.accentColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
                 }
-            }
-            
-            if buttonState.showWatchTrailerOption, let url = buttonState.trailerUrl {
+            } else if buttonState.showWatchTrailerOption, let url = buttonState.trailerUrl {
                 Button(action: { onWatchTrailer(url) }) {
                     HStack {
                         Image(systemName: "film")
@@ -952,34 +1104,77 @@ struct UnifiedMediaDetailsActions: View {
                 }
             }
             
-            if isSeerrConfigured {
-                if buttonState.showRequestButton {
-                    if buttonState.showRequest4kButton {
-                        HStack(spacing: 0) {
-                            Button(action: onRequest) {
-                                Text(MR.strings().request.localized())
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
+            // View Request Button
+            if buttonState.showViewRequestButton {
+                if buttonState.showApproveRequestButton || buttonState.showDeclineRequestButton {
+                    HStack(spacing: 0) {
+                        Button(action: onViewRequest) {
+                            HStack {
+                                Image(systemName: "clock")
+                                Text(MR.strings().view_request.localized())
                             }
-                            
-                            Divider()
-                                .frame(height: 24)
-                                .background(Color.white.opacity(0.5))
-                            
-                            Menu {
-                                Button(action: onRequest4k) {
-                                    Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
-                                }
-                            } label: {
-                                Image(systemName: "chevron.down")
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 12)
-                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
                         }
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
+                        
+                        Divider()
+                            .frame(height: 24)
+                            .background(Color.primary.opacity(0.2))
+                        
+                        Menu {
+                            if buttonState.showApproveRequestButton {
+                                Button(action: onApproveRequest) {
+                                    Label(MR.strings().approve_request.localized(), systemImage: "checkmark")
+                                }
+                            }
+                            if buttonState.showDeclineRequestButton {
+                                Button(role: .destructive, action: onDeclineRequest) {
+                                    Label(MR.strings().decline_request.localized(), systemImage: "xmark")
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "chevron.down")
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 12)
+                        }
+                    }
+                    .background(Color(.secondarySystemBackground))
+                    .foregroundColor(.primary)
+                    .cornerRadius(8)
+                } else {
+                    Button(action: onViewRequest) {
+                        HStack {
+                            Image(systemName: "clock")
+                            Text(MR.strings().view_request.localized())
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(.secondarySystemBackground))
+                        .foregroundColor(.primary)
                         .cornerRadius(8)
-                    } else {
+                    }
+                }
+            }
+            
+            // Request More Button
+            if buttonState.showRequestMoreButton {
+                Button(action: onRequest) {
+                    HStack {
+                        Image(systemName: "plus")
+                        Text(MR.strings().request_more.localized())
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
+            }
+            
+            // Request Button
+            if buttonState.showRequestButton {
+                if buttonState.showRequest4kButton {
+                    HStack(spacing: 0) {
                         Button(action: onRequest) {
                             HStack {
                                 Image(systemName: "plus")
@@ -987,21 +1182,35 @@ struct UnifiedMediaDetailsActions: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Color.accentColor)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
+                        }
+                        
+                        Divider()
+                            .frame(height: 24)
+                            .background(Color.white.opacity(0.5))
+                        
+                        Menu {
+                            Button(action: onRequest4k) {
+                                Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
+                            }
+                        } label: {
+                            Image(systemName: "chevron.down")
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 12)
                         }
                     }
-                } else if buttonState.showViewRequestButton {
-                    Button(action: onViewRequest) {
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                } else {
+                    Button(action: onRequest) {
                         HStack {
-                            Image(systemName: "eye")
-                            Text(MR.strings().view_request.localized())
+                            Image(systemName: "plus")
+                            Text(MR.strings().request.localized())
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Color(.secondarySystemBackground))
-                        .foregroundColor(.primary)
+                        .background(Color.accentColor)
+                        .foregroundColor(.white)
                         .cornerRadius(8)
                     }
                 }

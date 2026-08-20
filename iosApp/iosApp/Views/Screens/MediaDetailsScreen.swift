@@ -138,7 +138,8 @@ struct MediaDetailsScreen: View {
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
                 
-                MediaInfoArea(item: item, qualityProfiles: viewModel.qualityProfiles, tags: viewModel.tags)
+                let infoItems = buildInfoItems(for: item, qualityProfiles: viewModel.qualityProfiles, tags: viewModel.tags)
+                MediaInfoArea(infoItems: infoItems)
                     .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 24, trailing: 24))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
@@ -366,6 +367,94 @@ struct MediaDetailsScreen: View {
             
         default: EmptyView()
         }
+    }
+    
+    private func buildInfoItems(for item: ArrMedia, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
+        let unknown = MR.strings().unknown.localized()
+        let none = MR.strings().none.localized()
+        
+        if let series = item as? ArrSeries {
+            let qualityLabel = qualityProfiles.first(where: { $0.id == series.qualityProfileId })?.name ?? unknown
+            let tagsLabel = series.formatTags(availableTags: tags) ?? none
+            let monitorLabel = series.monitorNewItems == .all ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized()
+            let seasonFolderLabel = series.seasonFolder ? MR.strings().yes.localized() : MR.strings().no.localized()
+            return [
+                InfoItem(label: MR.strings().status.localized(), value: series.status.resource.localized()),
+                InfoItem(label: MR.strings().series_type.localized(), value: series.seriesType.name),
+                InfoItem(label: MR.strings().size_on_disk.localized(), value: series.fileSize.bytesAsFileSizeString()),
+                InfoItem(label: MR.strings().root_folder.localized(), value: series.rootFolderPath ?? unknown),
+                InfoItem(label: MR.strings().path.localized(), value: series.path ?? unknown),
+                InfoItem(label: MR.strings().new_seasons.localized(), value: monitorLabel),
+                InfoItem(label: MR.strings().season_folders.localized(), value: seasonFolderLabel),
+                InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
+                InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
+            ]
+        } else if let movie = item as? ArrMovie {
+            let qualityLabel = qualityProfiles.first(where: { $0.id == movie.qualityProfileId })?.name ?? unknown
+            let tagsLabel = movie.formatTags(availableTags: tags) ?? none
+            let rootFolderValue = movie.rootFolderPath.isEmpty ? unknown : movie.rootFolderPath
+            var info: [InfoItem] = [
+                InfoItem(label: MR.strings().status.localized(), value: movie.status.resource.localized()),
+                InfoItem(label: MR.strings().minimum_availability.localized(), value: movie.minimumAvailability.name),
+                InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
+                InfoItem(label: MR.strings().path.localized(), value: movie.path ?? unknown)
+            ]
+            if let inCinemas = movie.inCinemas?.format(pattern: "MMM d, yyyy") {
+                info.append(InfoItem(label: MR.strings().in_cinemas.localized(), value: inCinemas))
+            }
+            if let physicalRelease = movie.physicalRelease?.format(pattern: "MMM d, yyyy") {
+                info.append(InfoItem(label: MR.strings().physical_release.localized(), value: physicalRelease))
+            }
+            if let digitalRelease = movie.digitalRelease?.format(pattern: "MMM d, yyyy") {
+                info.append(InfoItem(label: MR.strings().digital_release.localized(), value: digitalRelease))
+            }
+            info.append(InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel))
+            info.append(InfoItem(label: MR.strings().tags.localized(), value: tagsLabel))
+            return info
+        } else if let artist = item as? Arrtist {
+            let qualityLabel = qualityProfiles.first(where: { $0.id == artist.qualityProfileId })?.name ?? unknown
+            let tagsLabel = artist.formatTags(availableTags: tags) ?? none
+            let monitorLabel = artist.monitorNewItems == .all ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized()
+            let rootFolderValue = (artist.rootFolderPath?.isEmpty == false) ? artist.rootFolderPath! : unknown
+            return [
+                InfoItem(label: MR.strings().status.localized(), value: artist.status.resource.localized()),
+                InfoItem(label: MR.strings().size_on_disk.localized(), value: artist.fileSize.bytesAsFileSizeString()),
+                InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
+                InfoItem(label: MR.strings().path.localized(), value: artist.path ?? unknown),
+                InfoItem(label: MR.strings().new_albums.localized(), value: monitorLabel),
+                InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
+                InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
+            ]
+        } else if let author = item as? Author {
+            let qualityLabel = qualityProfiles.first(where: { $0.id == author.qualityProfileId })?.name ?? unknown
+            let tagsLabel = author.formatTags(availableTags: tags) ?? none
+            let monitorLabel = author.monitorNewItems == .all ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized()
+            let rootFolderValue = (author.rootFolderPath?.isEmpty == false) ? author.rootFolderPath! : unknown
+            return [
+                InfoItem(label: MR.strings().status.localized(), value: author.status.resource.localized()),
+                InfoItem(label: MR.strings().size_on_disk.localized(), value: author.fileSize.bytesAsFileSizeString()),
+                InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
+                InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown),
+                InfoItem(label: MR.strings().new_books.localized(), value: monitorLabel),
+                InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
+                InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
+            ]
+        } else if let audiobook = item as? Audiobook {
+            let authorString = audiobook.authors.joined(separator: " • ")
+            let narratorsString = audiobook.narrators.joined(separator: " • ")
+            var info: [InfoItem] = [
+                InfoItem(label: MR.strings().audiobook_info_authors.localized(), value: authorString),
+                InfoItem(label: MR.strings().audiobook_info_narrators.localized(), value: narratorsString),
+                InfoItem(label: MR.strings().publisher.localized(), value: audiobook.publisher ?? unknown)
+            ]
+            if let language = audiobook.language {
+                info.append(InfoItem(label: MR.strings().language.localized(), value: language.capitalized))
+            }
+            info.append(InfoItem(label: MR.strings().size_on_disk.localized(), value: audiobook.fileSize.bytesAsFileSizeString()))
+            info.append(InfoItem(label: MR.strings().path.localized(), value: audiobook.path ?? unknown))
+            return info
+        }
+        return []
     }
     
 }

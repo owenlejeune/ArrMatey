@@ -285,12 +285,16 @@ class UnifiedMediaDetailsViewModel(
         // we should still allow requesting through Seerr.
         if (localInstances.isEmpty()) return@combine true
 
-        if (instance == null) return@combine false
         val services = when (resolvedRequestType) {
             RequestType.Movie -> radarrServices
             RequestType.Tv -> sonarrServices
             else -> emptyList()
         }
+
+        if (instance == null) return@combine true
+
+        if (services.isEmpty()) return@combine true
+
         services.any { service ->
             val cleanService = service.name.trim().lowercase()
             val cleanInstance = instance.label.trim().lowercase()
@@ -427,8 +431,11 @@ class UnifiedMediaDetailsViewModel(
                 _addSheetUiState.update { it.copy(availableInstances = filteredInstances) }
 
                 val currentTarget = _addSheetUiState.value.targetInstance
+                val activeInst = current.availableInstances.find { it.id == current.selectedInstanceId }
                 val newTarget = if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
                     currentTarget
+                } else if (activeInst != null && filteredInstances.any { it.id == activeInst.id }) {
+                    activeInst
                 } else {
                     filteredInstances.firstOrNull()
                 }
@@ -457,8 +464,11 @@ class UnifiedMediaDetailsViewModel(
                 _addSheetUiState.update { it.copy(availableInstances = filteredInstances) }
 
                 val currentTarget = _addSheetUiState.value.targetInstance
+                val activeInst = activeRepo?.instance
                 val newTarget = if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
                     currentTarget
+                } else if (activeInst != null && filteredInstances.any { it.id == activeInst.id }) {
+                    activeInst
                 } else {
                     filteredInstances.firstOrNull()
                 }

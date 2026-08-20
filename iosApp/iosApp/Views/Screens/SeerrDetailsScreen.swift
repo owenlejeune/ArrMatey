@@ -433,3 +433,50 @@ struct CastMemberView: View {
         .buttonStyle(.plain)
     }
 }
+
+// MARK: - Crew Member
+
+struct CrewMemberView: View {
+    let member: CrewMember
+    let onPersonClick: (Int64) -> Void
+    
+    var body: some View {
+        Button {
+            onPersonClick(member.id)
+        } label: {
+            VStack(spacing: 4) {
+                if let profilePath = member.fullProfilePath,
+                   let url = URL(string: profilePath) {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Color(.systemGray4)
+                    }
+                    .frame(width: 80, height: 80)
+                    .clipShape(Circle())
+                } else {
+                    Circle()
+                        .fill(Color(.systemGray4))
+                        .frame(width: 80, height: 80)
+                        .overlay {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.gray)
+                        }
+                }
+                
+                Text(member.name)
+                    .font(.caption)
+                    .lineLimit(1)
+                
+                Text(member.job)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            .frame(width: 80)
+        }
+        .buttonStyle(.plain)
+    }
+}

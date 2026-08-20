@@ -179,6 +179,7 @@ fun UnifiedMediaDetailsScreen(
     val automaticSearchIds by viewModel.automaticSearchIds.collectAsStateWithLifecycle()
     val lastSearchResult by viewModel.lastSearchResult.collectAsStateWithLifecycle()
     val addSheetUiState by viewModel.addSheetUiState.collectAsStateWithLifecycle()
+    val activeInstance by viewModel.activeInstance.collectAsStateWithLifecycle()
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
     val itemEditedSuccessfullyMessage = mokoString(MR.strings.item_edited_successfully)
@@ -612,7 +613,7 @@ fun UnifiedMediaDetailsScreen(
                                     addInProgress = editStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                    selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
@@ -630,7 +631,7 @@ fun UnifiedMediaDetailsScreen(
                                     addInProgress = editStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                    selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
@@ -648,7 +649,7 @@ fun UnifiedMediaDetailsScreen(
                                     addInProgress = editStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                    selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
@@ -666,7 +667,7 @@ fun UnifiedMediaDetailsScreen(
                                     addInProgress = editStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                    selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
@@ -684,7 +685,7 @@ fun UnifiedMediaDetailsScreen(
                                     addInProgress = editStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                    selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
@@ -709,7 +710,7 @@ fun UnifiedMediaDetailsScreen(
                                         addInProgress = editStatus is OperationStatus.InProgress,
                                         preferences = preferences,
                                         instances = addSheetUiState.availableInstances,
-                                        selectedInstance = addSheetUiState.targetInstance ?: addSheetUiState.availableInstances.firstOrNull(),
+                                        selectedInstance = addSheetUiState.targetInstance,
                                         onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                         onAddItem = { newItem, searchOnAdd ->
                                             viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)

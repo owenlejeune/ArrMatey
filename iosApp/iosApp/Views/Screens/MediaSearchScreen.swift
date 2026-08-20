@@ -80,8 +80,14 @@ struct MediaSearchScreen: View {
                             if let id = item.id?.int64Value {
                                 navigation.go(to: .details(id: id, type: type), of: type)
                             } else {
-                                let json = item.toJson()
-                                navigation.go(to: .preview(json, type: type), of: type)
+                                if type == .radarr || type == .sonarr {
+                                    let tmdbId = (item as? ArrMovie)?.tmdbId ?? (item as? ArrSeries)?.tmdbId?.int64Value
+                                    let tvdbId = (item as? ArrSeries)?.tvdbId
+                                    navigation.go(to: .details(arrId: nil, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, requestType: nil), of: type)
+                                } else {
+                                    let json = item.toJson()
+                                    navigation.go(to: .preview(json, type: type), of: type)
+                                }
                             }
                         }
                 }
