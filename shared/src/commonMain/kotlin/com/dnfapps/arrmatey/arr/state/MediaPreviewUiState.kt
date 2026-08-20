@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.datastore.InstancePreferences
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.OperationStatus
 
 data class MediaPreviewUiState(
@@ -13,7 +14,9 @@ data class MediaPreviewUiState(
     val addItemStatus: OperationStatus = OperationStatus.Idle,
     val lastAddedItemId: Long? = null,
     val relativePath: String = "",
-    val preferences: InstancePreferences = InstancePreferences()
+    val preferences: InstancePreferences = InstancePreferences(),
+    val instances: List<Instance> = emptyList(),
+    val selectedInstance: Instance? = null
 ) {
     constructor(): this(emptyList())
 }

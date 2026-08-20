@@ -390,7 +390,7 @@ val viewModelModule = module {
         ArrSearchViewModel(type, get(), get(), get())
     }
     factory { (preview: ArrMedia, type: InstanceType) ->
-        MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get())
+        MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
         InteractiveSearchViewModel(type, defaultFilter, get(), get(), get(), get())

@@ -41,6 +41,7 @@ import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
@@ -156,6 +157,7 @@ fun MediaPreviewScreen(
                         viewModel.addItem(newItem, searchOnAdd)
                     },
                     onUpdatePreferences = viewModel::updatePreferences,
+                    onInstanceSelected = { viewModel.selectInstance(it) },
                     onDismiss = { showBottomSheet = false }
                 )
             }
@@ -170,6 +172,7 @@ private fun AddMediaSheet(
     uiState: MediaPreviewUiState,
     onAddItem: (ArrMedia, Boolean) -> Unit,
     onUpdatePreferences: (InstancePreferences) -> Unit,
+    onInstanceSelected: (Instance) -> Unit,
     onDismiss: () -> Unit
 ) {
     when (item) {
@@ -182,7 +185,10 @@ private fun AddMediaSheet(
             uiState.preferences,
             onUpdatePreferences,
             onAddItem,
-            onDismiss
+            onDismiss,
+            instances = uiState.instances,
+            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+            onInstanceSelected = onInstanceSelected
         )
         is ArrMovie -> AddMovieSheet(
             item,
@@ -193,7 +199,10 @@ private fun AddMediaSheet(
             uiState.preferences,
             onUpdatePreferences,
             onAddItem,
-            onDismiss
+            onDismiss,
+            instances = uiState.instances,
+            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+            onInstanceSelected = onInstanceSelected
         )
         is Arrtist -> AddArtistSheet(
             item,
@@ -204,7 +213,10 @@ private fun AddMediaSheet(
             uiState.preferences,
             onUpdatePreferences,
             onAddItem,
-            onDismiss
+            onDismiss,
+            instances = uiState.instances,
+            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+            onInstanceSelected = onInstanceSelected
         )
         is Author -> AddAuthorSheet(
             item,
@@ -215,7 +227,10 @@ private fun AddMediaSheet(
             uiState.preferences,
             onUpdatePreferences,
             onAddItem,
-            onDismiss
+            onDismiss,
+            instances = uiState.instances,
+            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+            onInstanceSelected = onInstanceSelected
         )
         is SearchAudiobook -> AddAudiobookSheet(
             item,
@@ -226,7 +241,10 @@ private fun AddMediaSheet(
             uiState.preferences,
             onUpdatePreferences,
             onAddItem,
-            onDismiss
+            onDismiss,
+            instances = uiState.instances,
+            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+            onInstanceSelected = onInstanceSelected
         )
         is Audiobook,
         is MockMedia -> {}

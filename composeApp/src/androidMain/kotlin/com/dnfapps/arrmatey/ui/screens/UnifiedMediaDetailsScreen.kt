@@ -446,7 +446,7 @@ fun UnifiedMediaDetailsScreen(
                                     )
                                 }
 
-                                if (state.instancePresences.size > 1) {
+                                if (state.instancePresences.size > 1 && state.instancePresences.any { it.isPresent }) {
                                     InstanceChipsRow(
                                         presences = state.instancePresences,
                                         selectedInstanceId = state.selectedInstanceId,
