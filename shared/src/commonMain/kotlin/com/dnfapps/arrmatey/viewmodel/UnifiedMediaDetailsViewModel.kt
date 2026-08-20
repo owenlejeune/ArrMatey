@@ -305,8 +305,10 @@ class UnifiedMediaDetailsViewModel(
     val buttonState: StateFlow<MediaButtonState> = combine(
         uiState,
         _currentUser,
-        isSeerrConfigured
-    ) { state, user, isConfigured ->
+        isSeerrConfigured,
+        _radarrServices,
+        _sonarrServices
+    ) { state, user, isConfigured, radarr, sonarr ->
         when (state) {
             is UnifiedMediaDetailsUiState.Success -> {
                 val isAdmin = user?.hasPermission(UserPermission.ADMIN) == true
@@ -324,7 +326,16 @@ class UnifiedMediaDetailsViewModel(
                         showRequest4kButton = false
                     )
                 } else {
-                    rawButtonState
+                    val has4kServer = when (resolvedRequestType) {
+                        RequestType.Movie -> radarr.any { it.is4k }
+                        RequestType.Tv -> sonarr.any { it.is4k }
+                        else -> false
+                    }
+                    rawButtonState.copy(
+                        showRequest4kButton = has4kServer && (
+                            rawButtonState.showRequestButton || rawButtonState.showRequest4kButton
+                        )
+                    )
                 }
             }
 

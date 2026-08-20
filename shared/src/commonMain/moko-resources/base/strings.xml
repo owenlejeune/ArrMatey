@@ -580,6 +580,7 @@
     <string name="view_request">View Request</string>
     <string name="request">Request</string>
     <string name="request_more">Request More</string>
+    <string name="request_in_4k">Request in 4K</string>
     <string name="requested_by">Requested by</string>
     <string name="appearances">Appearances</string>
     <string name="also_known_as">Also Known As</string>

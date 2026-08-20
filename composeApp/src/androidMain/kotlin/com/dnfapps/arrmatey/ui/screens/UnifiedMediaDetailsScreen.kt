@@ -321,15 +321,19 @@ fun UnifiedMediaDetailsScreen(
                                     }
                                 } else {
                                     val canAddDirectly = success.arrMedia != null && isArrConfigured
-                                    ToolbarAddButton(
-                                        canAddDirectly = canAddDirectly,
-                                        isSeerrConfigured = isSeerrConfigured,
-                                        pendingRequestId = buttonState.pendingRequestId,
-                                        resolvedInstanceType = viewModel.resolvedInstanceType,
-                                        onAddDirectlyClicked = { showAddSheet = true },
-                                        onViewRequestClicked = { viewModel.showViewRequestSheet() },
-                                        onRequestClicked = { viewModel.showRequestSheet() }
-                                    )
+                                    if (canAddDirectly) {
+                                        ToolbarAddButton(
+                                            canAddDirectly = canAddDirectly,
+                                            isSeerrConfigured = isSeerrConfigured,
+                                            pendingRequestId = buttonState.pendingRequestId,
+                                            resolvedInstanceType = viewModel.resolvedInstanceType,
+                                            onAddDirectlyClicked = { showAddSheet = true },
+                                            onViewRequestClicked = { viewModel.showViewRequestSheet() },
+                                            onRequestClicked = { viewModel.showRequestSheet(is4k = false) },
+                                            showRequest4kButton = buttonState.showRequest4kButton,
+                                            onRequest4kClicked = { viewModel.showRequestSheet(is4k = true) }
+                                        )
+                                    }
                                 }
                             }
                         }

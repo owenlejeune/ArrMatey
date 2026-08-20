@@ -5,36 +5,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.HighQuality
-import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SplitButtonDefaults
 import androidx.compose.material3.SplitButtonLayout
 import androidx.compose.material3.Text
@@ -48,21 +38,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.isDebug
-import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
-import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
-import com.dnfapps.arrmatey.seerr.api.model.TvDetails
-import com.dnfapps.arrmatey.seerr.api.model.UserPermission
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.seerr.state.MediaProvider
-import com.dnfapps.arrmatey.seerr.state.toButtonState
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MediaDetailsActions(
     buttonState: MediaButtonState,
@@ -77,7 +61,8 @@ fun MediaDetailsActions(
 ) {
     if (
         buttonState.showWatchButton || buttonState.showWatchTrailerOption ||
-        buttonState.showViewRequestButton || buttonState.showRequestMoreButton
+        buttonState.showViewRequestButton || buttonState.showRequestMoreButton ||
+        buttonState.showRequestButton
     ) {
         Row(
             modifier = modifier,
@@ -99,6 +84,69 @@ fun MediaDetailsActions(
                     label = mokoString(MR.strings.request_more),
                     onClick = onRequestClicked
                 )
+            }
+            if (buttonState.showRequestButton) {
+                if (buttonState.showRequest4kButton) {
+                    var showRequestMenu by remember { mutableStateOf(false) }
+                    SplitButtonLayout(
+                        modifier = Modifier,
+                        leadingButton = {
+                            SplitButtonDefaults.LeadingButton(
+                                onClick = onRequestClicked,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Add, null)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(mokoString(MR.strings.request))
+                                }
+                            }
+                        },
+                        trailingButton = {
+                            Box {
+                                SplitButtonDefaults.TrailingButton(
+                                    onClick = { showRequestMenu = true },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Icon(Icons.Default.ArrowDropDown, null)
+                                }
+                                DropdownMenuPopup(
+                                    expanded = showRequestMenu,
+                                    onDismissRequest = { showRequestMenu = false }
+                                ) {
+                                    DropdownMenuGroup(
+                                        shapes = MenuDefaults.groupShape(0, 1)
+                                    ) {
+                                        DropdownMenuItem(
+                                            selected = false,
+                                            text = { Text(mokoString(MR.strings.request_in_4k)) },
+                                            onClick = {
+                                                showRequestMenu = false
+                                                onRequest4kClicked()
+                                            },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.Default.HighQuality,
+                                                    contentDescription = null
+                                                )
+                                            },
+                                            shapes = MenuDefaults.itemShape(0, 1)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    )
+                } else {
+                    RequestButton(
+                        label = mokoString(MR.strings.request),
+                        onClick = onRequestClicked
+                    )
+                }
             }
         }
     }
