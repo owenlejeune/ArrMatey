@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.FormDataContent
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.Parameters
@@ -23,7 +24,17 @@ class QBittorrentClient(
     private var authenticated: Boolean = false
 
     override suspend fun testConnection(): NetworkResult<Unit> {
-        return ensureAuthenticated()
+        // Probe a real endpoint: /auth/login is unused with API keys and can pass even when data calls are rejected.
+        return when (val authResult = ensureAuthenticated()) {
+            is NetworkResult.Success -> {
+                httpClient.safeCall<Unit> {
+                    get("api/v2/app/version")
+                    Unit
+                }
+            }
+            is NetworkResult.Error -> authResult
+            is NetworkResult.Loading -> NetworkResult.Loading
+        }
     }
 
     override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> {
@@ -94,6 +105,18 @@ class QBittorrentClient(
 
     private suspend fun ensureAuthenticated(): NetworkResult<Unit> {
         if (authenticated) return NetworkResult.Success(Unit)
+
+        // API-key auth is stateless via Authorization: Bearer; /auth/login rejects keys and repeated failures IP-ban.
+        if (downloadClient.apiKey.value.isNotEmpty()) {
+            authenticated = true
+            return NetworkResult.Success(Unit)
+        }
+
+        // Nothing to log in with; rely on WebUI subnet whitelist / disabled auth.
+        if (downloadClient.username.value.isEmpty() && downloadClient.password.value.isEmpty()) {
+            authenticated = true
+            return NetworkResult.Success(Unit)
+        }
 
         val loginResult = httpClient.safeCall {
             post("api/v2/auth/login") {

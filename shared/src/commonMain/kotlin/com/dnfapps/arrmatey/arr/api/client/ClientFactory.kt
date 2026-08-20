@@ -2,10 +2,12 @@ package com.dnfapps.arrmatey.arr.api.client
 
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.HttpTimeout
@@ -17,6 +19,7 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.basicAuth
 import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -99,6 +102,7 @@ class HttpClientFactory(private val json: Json, private val logger: Logger) {
 
     fun createDownloadClient(downloadClient: DownloadClient): HttpClient =
         HttpClient {
+            expectSuccess = true
             install(ContentNegotiation) {
                 json(json)
             }
@@ -109,7 +113,11 @@ class HttpClientFactory(private val json: Json, private val logger: Logger) {
             }
 
             install(HttpRequestRetry) {
-                retryOnExceptionOrServerErrors(maxRetries = 3)
+                // Never retry 4xx: repeated failed auth triggers qBittorrent's IP ban.
+                retryOnServerErrors(maxRetries = 3)
+                retryOnExceptionIf(maxRetries = 3) { _, cause ->
+                    cause !is ClientRequestException
+                }
                 exponentialDelay()
             }
 
@@ -130,7 +138,13 @@ class HttpClientFactory(private val json: Json, private val logger: Logger) {
                     url.password = null
                 }
                 if (!downloadClient.noApiKeyRequired && downloadClient.apiKey.value.isNotEmpty()) {
-                    header(HEADER_X_API_KEY, downloadClient.apiKey.value)
+                    when (downloadClient.type) {
+                        // qBittorrent >= 5.2 only accepts API keys via Authorization: Bearer.
+                        DownloadClientType.QBittorrent ->
+                            header(HttpHeaders.Authorization, "Bearer ${downloadClient.apiKey.value}")
+                        else ->
+                            header(HEADER_X_API_KEY, downloadClient.apiKey.value)
+                    }
                 }
                 downloadClient.headers.forEach { header ->
                     val shouldSend = when (header.restrictionType) {
