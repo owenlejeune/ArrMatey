@@ -271,36 +271,10 @@ class UnifiedMediaDetailsViewModel(
             initialValue = null
         )
 
-    val isSeerrConfigured: StateFlow<Boolean> = combine(
-        seerrRepositoryFlow,
-        activeInstance,
-        availableInstances,
-        _radarrServices,
-        _sonarrServices
-    ) { seerrRepo, instance, localInstances, radarrServices, sonarrServices ->
-        if (seerrRepo == null) return@combine false
-        if (resolvedRequestType != RequestType.Movie && resolvedRequestType != RequestType.Tv) return@combine false
-
-        // If there are no local instances configured for this media type in ArrMatey,
-        // we should still allow requesting through Seerr.
-        if (localInstances.isEmpty()) return@combine true
-
-        val services = when (resolvedRequestType) {
-            RequestType.Movie -> radarrServices
-            RequestType.Tv -> sonarrServices
-            else -> emptyList()
+    val isSeerrConfigured: StateFlow<Boolean> = seerrRepositoryFlow
+        .map { repo ->
+            repo != null && (resolvedRequestType == RequestType.Movie || resolvedRequestType == RequestType.Tv)
         }
-
-        if (instance == null) return@combine true
-
-        if (services.isEmpty()) return@combine true
-
-        services.any { service ->
-            val cleanService = service.name.trim().lowercase()
-            val cleanInstance = instance.label.trim().lowercase()
-            cleanService == cleanInstance
-        }
-    }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -324,7 +298,7 @@ class UnifiedMediaDetailsViewModel(
                     user?.id,
                     isAdmin
                 )
-                if (!isConfigured) {
+                if (!isConfigured || state.hasArrId) {
                     rawButtonState.copy(
                         showRequestButton = false,
                         showRequestMoreButton = false,
@@ -369,17 +343,11 @@ class UnifiedMediaDetailsViewModel(
         if (currentSuccess != null) {
             val targetMedia = _instancePresencesMap.value[instanceId]
                 ?: currentSuccess.instancePresences.firstOrNull { it.instance.id == instanceId }?.arrMedia
-            if (targetMedia != null) {
-                _isMonitored.value = targetMedia.monitored
-                _uiState.value = currentSuccess.copy(
-                    arrMedia = targetMedia,
-                    selectedInstanceId = instanceId
-                )
-            } else {
-                _uiState.value = currentSuccess.copy(
-                    selectedInstanceId = instanceId
-                )
-            }
+            _isMonitored.value = targetMedia?.monitored == true
+            _uiState.value = currentSuccess.copy(
+                arrMedia = targetMedia,
+                selectedInstanceId = instanceId
+            )
         }
     }
 

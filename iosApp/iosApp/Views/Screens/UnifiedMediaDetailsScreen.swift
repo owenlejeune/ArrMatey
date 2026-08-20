@@ -900,28 +900,8 @@ extension UnifiedMediaDetailsScreen {
                                 Image(systemName: "ellipsis.circle")
                             }
                         } else if showAddActions {
-                            if viewModel.isSeerrConfigured {
-                                Menu {
-                                    Button(action: { showAddSheet = true }) {
-                                        Label(MR.strings().add_to_arr.formatted(args: [viewModel.resolvedInstanceType?.name ?? "Arr"]), systemImage: "plus")
-                                    }
-                                    
-                                    if let _ = viewModel.buttonState.pendingRequestId {
-                                        Button(action: { viewModel.showViewRequestSheet() }) {
-                                            Label(MR.strings().view_request.localized(), systemImage: "clock")
-                                        }
-                                    } else {
-                                        Button(action: { viewModel.showRequestSheet(is4k: false) }) {
-                                            Label(MR.strings().request.localized(), systemImage: "paperplane")
-                                        }
-                                    }
-                                } label: {
-                                    Image(systemName: "plus")
-                                }
-                            } else {
-                                Button(action: { showAddSheet = true }) {
-                                    Image(systemName: "plus")
-                                }
+                            Button(action: { showAddSheet = true }) {
+                                Image(systemName: "plus")
                             }
                         }
                     }

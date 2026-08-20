@@ -89,7 +89,6 @@ import com.dnfapps.arrmatey.ui.components.MovieFileView
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
-import com.dnfapps.arrmatey.ui.components.ToolbarAddButton
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.components.buildUnifiedInfoItems
@@ -323,17 +322,15 @@ fun UnifiedMediaDetailsScreen(
                                 } else {
                                     val canAddDirectly = success.arrMedia != null && isArrConfigured
                                     if (canAddDirectly) {
-                                        ToolbarAddButton(
-                                            canAddDirectly = canAddDirectly,
-                                            isSeerrConfigured = isSeerrConfigured,
-                                            pendingRequestId = buttonState.pendingRequestId,
-                                            resolvedInstanceType = viewModel.resolvedInstanceType,
-                                            onAddDirectlyClicked = { showAddSheet = true },
-                                            onViewRequestClicked = { viewModel.showViewRequestSheet() },
-                                            onRequestClicked = { viewModel.showRequestSheet(is4k = false) },
-                                            showRequest4kButton = buttonState.showRequest4kButton,
-                                            onRequest4kClicked = { viewModel.showRequestSheet(is4k = true) }
-                                        )
+                                        IconButton(
+                                            onClick = { showAddSheet = true },
+                                            colors = IconButtonDefaults.headerBarColors()
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Add,
+                                                contentDescription = mokoString(MR.strings.add)
+                                            )
+                                        }
                                     }
                                 }
                             }
