@@ -421,12 +421,12 @@ struct CastMemberView: View {
                 
                 Text(member.name)
                     .font(.caption)
-                    .lineLimit(1)
+                    .lineLimit(2, reservesSpace: true)
                 
                 Text(member.character)
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                    .lineLimit(1)
+                    .lineLimit(2, reservesSpace: true)
             }
             .frame(width: 80)
         }

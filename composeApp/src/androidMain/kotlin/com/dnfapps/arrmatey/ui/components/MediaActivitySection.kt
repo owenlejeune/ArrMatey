@@ -18,8 +18,6 @@ fun MediaActivitySection(
     onQueueItemClicked: (QueueItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (queueItems.isEmpty()) return
-
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier

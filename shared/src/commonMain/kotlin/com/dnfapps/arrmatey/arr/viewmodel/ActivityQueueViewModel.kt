@@ -3,27 +3,23 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.api.model.LidarrQueueItem
-import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
-import com.dnfapps.arrmatey.arr.api.model.RadarrQueueItem
-import com.dnfapps.arrmatey.arr.api.model.ReadarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
+import com.dnfapps.arrmatey.arr.api.model.groupByTask
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.arr.state.ActivityQueueUiState
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
-import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.QueueSortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.extensions.orderedSortedBy
+import com.dnfapps.networking.OperationStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -78,7 +74,7 @@ class ActivityQueueViewModel(
         activityTasks,
         _activityQueueUiState
     ) { tasks, (instanceId, sortBy, sortOrder) ->
-        val grouped = groupByTask(tasks)
+        val grouped = tasks.groupByTask()
         val filtered = filterByInstance(grouped, instanceId)
         applySorting(filtered, sortBy, sortOrder)
     }.stateIn(
@@ -151,21 +147,6 @@ class ActivityQueueViewModel(
         super.onCleared()
         activityQueueService.stopPolling()
     }
-
-    private fun groupByTask(items: List<QueueItem>): List<QueueItem> =
-        items.groupBy { it.taskGroup }
-            .map { (_, groupItems) ->
-                val first = groupItems.first()
-                groupItems.size.takeIf { it > 0 }?.let { size ->
-                    when (first) {
-                        is SonarrQueueItem -> first.copy(taskGroupCount = size)
-                        is RadarrQueueItem -> first.copy(taskGroupCount = size)
-                        is LidarrQueueItem -> first.copy(taskGroupCount = size)
-                        is ReadarrQueueItem -> first.copy(taskGroupCount = size)
-                        is ListenarrQueueItem -> first
-                    }
-                } ?: first
-            }
 
     private fun filterByInstance(items: List<QueueItem>, instanceId: Long?): List<QueueItem> =
         instanceId?.let { items.filter { it.instanceId == instanceId } } ?: items

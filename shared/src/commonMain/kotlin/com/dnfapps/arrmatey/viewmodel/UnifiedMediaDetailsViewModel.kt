@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
@@ -104,7 +105,8 @@ class UnifiedMediaDetailsViewModel(
     private val updateInstancePreferencesUseCase: UpdateInstancePreferencesUseCase,
     private val observeScopedReposByTypeUseCase: ObserveScopedReposByTypeUseCase,
     private val getInstancePresencesUseCase: GetInstancePresencesUseCase,
-    private val deleteQueueItemUseCase: DeleteQueueItemUseCase
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
+    private val activityQueueService: ActivityQueueService
 ) : ViewModel() {
 
     private var seerrMediaId: Long? = null
@@ -333,6 +335,9 @@ class UnifiedMediaDetailsViewModel(
 
     init {
         observeData()
+        viewModelScope.launch {
+            activityQueueService.manualRefresh()
+        }
     }
 
     fun selectInstance(instanceId: Long) {
@@ -346,8 +351,12 @@ class UnifiedMediaDetailsViewModel(
             _isMonitored.value = targetMedia?.monitored == true
             _uiState.value = currentSuccess.copy(
                 arrMedia = targetMedia,
-                selectedInstanceId = instanceId
+                selectedInstanceId = instanceId,
+                queueItems = if (targetMedia == null) emptyList() else currentSuccess.queueItems
             )
+        }
+        viewModelScope.launch {
+            activityQueueService.manualRefresh()
         }
     }
 
@@ -612,6 +621,7 @@ class UnifiedMediaDetailsViewModel(
             launch { repository.refreshQualityProfiles() }
             launch { repository.refreshRootFolders() }
             launch { repository.refreshTags() }
+            launch { activityQueueService.manualRefresh() }
         }
         observeData()
     }
@@ -621,7 +631,12 @@ class UnifiedMediaDetailsViewModel(
             val repository =
                 activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
             val effectiveId = getEffectiveArrId() ?: return@launch
-            performRefreshUseCase(effectiveId, resolvedInstanceType ?: return@launch, repository)
+            launch {
+                performRefreshUseCase(effectiveId, resolvedInstanceType ?: return@launch, repository)
+            }
+            launch {
+                activityQueueService.manualRefresh()
+            }
         }
     }
 

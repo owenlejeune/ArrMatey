@@ -270,7 +270,6 @@ fun UnifiedMediaDetailsScreen(
                             label = "ToolbarActionsAnimation"
                         ) { hasArrId ->
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 if (hasArrId) {
@@ -457,7 +456,11 @@ fun UnifiedMediaDetailsScreen(
                                     )
                                 }
 
-                                if (state.queueItems.isNotEmpty()) {
+                                AnimatedVisibility(
+                                    visible = state.queueItems.isNotEmpty(),
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
                                     MediaActivitySection(
                                         queueItems = state.queueItems,
                                         onQueueItemClicked = { item ->

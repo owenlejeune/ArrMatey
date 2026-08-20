@@ -191,6 +191,7 @@ extension UnifiedMediaDetailsScreen {
                                 ActivityQueueItem(item: item, onClick: { selectedQueueItem = item })
                             }
                         }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                     
                     seasonsArea(success)

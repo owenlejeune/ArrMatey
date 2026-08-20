@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.RadarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReadarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
+import com.dnfapps.arrmatey.arr.api.model.groupByTask
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.bazarr.state.BazarrDetails
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrEpisodesUseCase
@@ -139,7 +140,7 @@ class GetUnifiedMediaDetailsUseCase(
                 activityTasksFlow,
                 bazarrFlow
             ) { (seerrState, ratings), activityTasks, bazarr ->
-                buildUnifiedState(arrState, seerrState, ratings, activityTasks, bazarr)
+                buildUnifiedState(arrState, seerrState, ratings, activityTasks, bazarr, arrRepository)
             }
         }
     }
@@ -149,7 +150,8 @@ class GetUnifiedMediaDetailsUseCase(
         seerrState: SeerrDetailsState,
         ratings: CombinedRatings?,
         activityTasks: List<QueueItem>,
-        bazarr: BazarrDetails
+        bazarr: BazarrDetails,
+        arrRepository: ArrInstanceRepository? = null
     ): UnifiedMediaDetailsUiState {
         if (arrState is MediaDetailsUiState.Loading || seerrState is SeerrDetailsState.Loading) {
             return UnifiedMediaDetailsUiState.Loading
@@ -242,16 +244,18 @@ class GetUnifiedMediaDetailsUseCase(
         val targetItem = arrSuccess?.item
         val targetId = targetItem?.id
         val mediaQueueItems = if (targetId != null && targetId > 0) {
+            val targetInstanceId = arrRepository?.instance?.id
             activityTasks.filter { task ->
-                task.mediaId == targetId ||
-                    (task as? SonarrQueueItem)?.calcSeriesId == targetId ||
-                    (task as? RadarrQueueItem)?.movieId == targetId ||
-                    (task as? LidarrQueueItem)?.artistId == targetId ||
-                    (task as? LidarrQueueItem)?.albumId == targetId ||
-                    (task as? ReadarrQueueItem)?.authorId == targetId ||
-                    (task as? ReadarrQueueItem)?.bookId == targetId ||
-                    (task as? ListenarrQueueItem)?.audiobookId == targetId
-            }
+                (targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId) &&
+                    (task.mediaId == targetId ||
+                        (task as? SonarrQueueItem)?.calcSeriesId == targetId ||
+                        (task as? RadarrQueueItem)?.movieId == targetId ||
+                        (task as? LidarrQueueItem)?.artistId == targetId ||
+                        (task as? LidarrQueueItem)?.albumId == targetId ||
+                        (task as? ReadarrQueueItem)?.authorId == targetId ||
+                        (task as? ReadarrQueueItem)?.bookId == targetId ||
+                        (task as? ListenarrQueueItem)?.audiobookId == targetId)
+            }.groupByTask()
         } else {
             emptyList()
         }
