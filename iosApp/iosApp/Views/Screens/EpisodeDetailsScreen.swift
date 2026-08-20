@@ -26,7 +26,7 @@ struct EpisodeDetailsScreen: View {
         self.series = ArrMediaCompanion().fromJson(value: seriesJson) as! ArrSeries
         
         let episode = Episode.companion.fromJson(json: episodeJson)
-        self.viewModel = EpisodeDetailsViewModelS(seriesId: series.id as! Int64, episode: episode)
+        self.viewModel = EpisodeDetailsViewModelS(seriesId: series.id?.int64Value ?? 0, episode: episode)
     }
     
     var body: some View {
@@ -76,7 +76,7 @@ struct EpisodeDetailsScreen: View {
 
                     BazarrSubtitlesSection(
                         target: BazarrMediaTargetEpisode(
-                            seriesId: series.id as! Int64,
+                            seriesId: series.id?.int64Value ?? 0,
                             episodeId: episode.id
                         )
                     )

@@ -18,6 +18,9 @@ struct AddArtistForm: View {
     let onUpdatePreferences: (InstancePreferences) -> Void
     let onAddItem: (Arrtist, Bool) -> Void
     let onDismiss: () -> Void
+    let instances: [Instance]
+    let selectedInstance: Instance?
+    let onInstanceSelected: (Instance) -> Void
     
     @State private var monitor: ArtistMonitorType
     @State private var monitorNew: ArtistMonitorType
@@ -26,7 +29,20 @@ struct AddArtistForm: View {
     @State private var selectedTags: Set<Int> = Set()
     @State private var searchOnAdd: Bool
     
-    init(artist: Arrtist, addItemStatus: NetworkingOperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (Arrtist, Bool) -> Void, onDismiss: @escaping () -> Void) {
+    init(
+        artist: Arrtist,
+        addItemStatus: NetworkingOperationStatus,
+        qualityProfiles: [QualityProfile],
+        rootFolders: [RootFolder],
+        tags: [Tag],
+        preferences: InstancePreferences,
+        onUpdatePreferences: @escaping (InstancePreferences) -> Void,
+        onAddItem: @escaping (Arrtist, Bool) -> Void,
+        onDismiss: @escaping () -> Void,
+        instances: [Instance] = [],
+        selectedInstance: Instance? = nil,
+        onInstanceSelected: @escaping (Instance) -> Void = { _ in }
+    ) {
         self.artist = artist
         self.addItemStatus = addItemStatus
         self.qualityProfiles = qualityProfiles
@@ -36,6 +52,9 @@ struct AddArtistForm: View {
         self.onUpdatePreferences = onUpdatePreferences
         self.onAddItem = onAddItem
         self.onDismiss = onDismiss
+        self.instances = instances
+        self.selectedInstance = selectedInstance
+        self.onInstanceSelected = onInstanceSelected
         
         self._monitor = State(initialValue: preferences.addArtistMonitor)
         self._monitorNew = State(initialValue: preferences.addArtistMonitorNew)
@@ -80,6 +99,18 @@ struct AddArtistForm: View {
     @ViewBuilder
     private var content: some View {
         Form {
+            if instances.count > 1, let selectedInstance = selectedInstance {
+                Section {
+                    Picker(MR.strings().instances.localized(), selection: Binding(
+                        get: { selectedInstance },
+                        set: { onInstanceSelected($0) }
+                    )) {
+                        ForEach(instances, id: \.id) { instance in
+                            Text(instance.label).tag(instance)
+                        }
+                    }
+                }
+            }
             Section {
                 Picker(MR.strings().monitor.localized(), selection: $monitor) {
                     ForEach(ArtistMonitorType.allCases, id: \.self) { status in

@@ -268,7 +268,13 @@ class NavigationManager: ObservableObject {
 }
 
 enum MediaRoute: Hashable {
-    case details(id: Int64, type: InstanceType)
+    case details(
+        arrId: Int64? = nil,
+        tmdbId: Int64? = nil,
+        tvdbId: Int64? = nil,
+        instanceType: InstanceType? = nil,
+        requestType: RequestType? = nil
+    )
     case search(query: String, type: InstanceType)
     case preview(_ json : String, type: InstanceType)
     case movieRelease(Int64)
@@ -309,4 +315,14 @@ enum SettingsRoute : Hashable {
 enum BazarrRoute: Hashable {
     case library
     case details(Int64, BazarrMediaType)
+}
+
+extension MediaRoute {
+    static func details(id: Int64, type: InstanceType) -> MediaRoute {
+        return .details(arrId: id, tmdbId: nil, tvdbId: nil, instanceType: type, requestType: nil)
+    }
+
+    static func details(tmdbId: Int64, requestType: RequestType) -> MediaRoute {
+        return .details(arrId: nil, tmdbId: tmdbId, tvdbId: nil, instanceType: nil, requestType: requestType)
+    }
 }

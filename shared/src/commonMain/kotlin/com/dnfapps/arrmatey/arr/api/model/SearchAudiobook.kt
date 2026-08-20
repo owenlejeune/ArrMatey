@@ -125,3 +125,12 @@ data class SearchAudiobook(
         relativePath = relativePath
     )
 }
+
+fun createSearchAudiobook(audiobook: Audiobook): SearchAudiobook {
+    return SearchAudiobook(
+        asin = audiobook.asin ?: "",
+        title = audiobook.title ?: "",
+        summary = audiobook.overview,
+        authors = audiobook.authors.map { SearchAuthor(name = it) }
+    )
+}

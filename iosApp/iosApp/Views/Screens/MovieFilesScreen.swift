@@ -17,7 +17,7 @@ struct MovieFilesScreen: View {
     
     init(json: String) {
         self.movie = ArrMediaCompanion().fromJson(value: json) as! ArrMovie
-        self.viewModel = MovieFilesViewModelS(movieId: self.movie.id as! Int64)
+        self.viewModel = MovieFilesViewModelS(movieId: self.movie.id?.int64Value ?? 0)
     }
     
     private var uiState: MovieFilesState {

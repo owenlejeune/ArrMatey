@@ -32,26 +32,7 @@ struct MusicTabContent: View {
     var body: some View {
         ArrTab(type: .lidarr, viewModel: viewModel)
             .navigationDestination(for: MediaRoute.self) { value in
-                destination(for: value)
+                MediaRouteDestination(route: value)
             }
-    }
-    
-    @ViewBuilder
-    private func destination(for route: MediaRoute) -> some View {
-        switch route {
-        case .details(let id, _):
-            MediaDetailsScreen(id: id, type: .lidarr)
-        case .search(let query, _):
-            MediaSearchScreen(query: query, type: .lidarr)
-        case .preview(let json, _):
-            MediaPreviewScreen(json: json, type: .lidarr)
-        case .albumReleases(let albumId, let artistId):
-            let releaseParams = ReleaseParamsAlbum(mediaId: albumId, artistId: artistId?.asKotlinLong)
-            InteractiveSearchScreen(type: .lidarr, releaseParams: releaseParams)
-            
-        // unused
-        default:
-            EmptyView()
-        }
     }
 }

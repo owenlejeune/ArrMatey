@@ -45,7 +45,7 @@ actual fun Instant.format(pattern: String): String {
 actual fun LocalDate.format(pattern: String): String {
     val date = NSDate.dateWithTimeIntervalSince1970(toEpochDays().toDouble() * 86_400)
     val formatter = NSDateFormatter().apply {
-        timeZone = NSTimeZone.timeZoneForSecondsFromGMT(0)
+        timeZone = NSTimeZone.timeZoneWithName("GMT", null)!!
         dateStyle = NSDateFormatterMediumStyle
         dateFormat = pattern
     }

@@ -11,8 +11,9 @@ struct SeerrRequestSheet: View {
     let serviceDetails: ServiceDetails?
     let currentUser: SeerrUser?
     let users: [SeerrUser]
+    let is4k: Bool
     let onDismiss: () -> Void
-    let onSubmit: (Int64?, String?, Int64?, [KotlinInt]?, Int64?) -> Void
+    let onSubmit: (Int64?, String?, Int64?, [KotlinInt]?, Bool, Int64?) -> Void
     
     @State private var selectedProfileId: Int64?
     @State private var selectedRootFolder: String?
@@ -24,13 +25,15 @@ struct SeerrRequestSheet: View {
         serviceDetails: ServiceDetails?,
         currentUser: SeerrUser?,
         users: [SeerrUser],
+        is4k: Bool = false,
         onDismiss: @escaping () -> Void,
-        onSubmit: @escaping (Int64?, String?, Int64?, [KotlinInt]?, Int64?) -> Void
+        onSubmit: @escaping (Int64?, String?, Int64?, [KotlinInt]?, Bool, Int64?) -> Void
     ) {
         self.details = details
         self.serviceDetails = serviceDetails
         self.currentUser = currentUser
         self.users = users
+        self.is4k = is4k
         self.onDismiss = onDismiss
         self.onSubmit = onSubmit
         
@@ -135,7 +138,7 @@ struct SeerrRequestSheet: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(MR.strings().request.localized()) {
                         let seasons = details is TvDetails ? selectedSeasons.map { KotlinInt(value: $0) } : nil
-                        onSubmit(selectedProfileId, selectedRootFolder, nil, seasons, selectedUserId)
+                        onSubmit(selectedProfileId, selectedRootFolder, nil, seasons, is4k, selectedUserId)
                     }
                     .disabled(details is TvDetails && selectedSeasons.isEmpty)
                 }

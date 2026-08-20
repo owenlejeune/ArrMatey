@@ -11,4 +11,6 @@ data class AddSheetUiState(
     val rootFolders: List<RootFolder> = emptyList(),
     val tags: List<Tag> = emptyList(),
     val availableInstances: List<Instance> = emptyList()
-)
+) {
+    constructor(): this(null) // empty ios constructor
+}

@@ -33,28 +33,7 @@ struct MoviesTabContent: View {
     var body: some View {
         ArrTab(type: .radarr, viewModel: viewModel)
             .navigationDestination(for: MediaRoute.self) { value in
-                destination(for: value)
+                MediaRouteDestination(route: value)
             }
-    }
-    
-    @ViewBuilder
-    private func destination(for route: MediaRoute) -> some View {
-        switch route {
-        case .details(let id, _):
-            MediaDetailsScreen(id: id, type: .radarr)
-        case .search(let query, _):
-            MediaSearchScreen(query: query, type: .radarr)
-        case .preview(let json, _):
-            MediaPreviewScreen(json: json, type: .radarr)
-        case .movieFiles(let json):
-            MovieFilesScreen(json: json)
-        case .movieRelease(let id):
-            let releaseParams = ReleaseParamsMovie(mediaId: id)
-            InteractiveSearchScreen(type: .radarr, releaseParams: releaseParams)
-            
-        // unused
-        default:
-            EmptyView()
-        }
     }
 }

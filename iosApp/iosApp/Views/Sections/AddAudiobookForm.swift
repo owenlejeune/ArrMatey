@@ -18,6 +18,9 @@ struct AddAudiobookForm: View {
     let onUpdatePreferences: (InstancePreferences) -> Void
     let onAddItem: (SearchAudiobook, Bool) -> Void
     let onDismiss: () -> Void
+    let instances: [Instance]
+    let selectedInstance: Instance?
+    let onInstanceSelected: (Instance) -> Void
     
     @State private var monitored: Bool
     @State private var selectedQualityProfileId: Int32?
@@ -42,7 +45,10 @@ struct AddAudiobookForm: View {
         preferences: InstancePreferences,
         onUpdatePreferences: @escaping (InstancePreferences) -> Void,
         onAddItem: @escaping (SearchAudiobook, Bool) -> Void,
-        onDismiss: @escaping () -> Void
+        onDismiss: @escaping () -> Void,
+        instances: [Instance] = [],
+        selectedInstance: Instance? = nil,
+        onInstanceSelected: @escaping (Instance) -> Void = { _ in }
     ) {
         self.audiobook = audiobook
         self.addItemStatus = addItemStatus
@@ -53,6 +59,9 @@ struct AddAudiobookForm: View {
         self.onUpdatePreferences = onUpdatePreferences
         self.onAddItem = onAddItem
         self.onDismiss = onDismiss
+        self.instances = instances
+        self.selectedInstance = selectedInstance
+        self.onInstanceSelected = onInstanceSelected
         
         self._monitored = State(initialValue: preferences.addAudiobookMonitored)
         self._searchOnAdd = State(initialValue: preferences.addSearchOnAdd)
@@ -88,6 +97,18 @@ struct AddAudiobookForm: View {
     @ViewBuilder
     private var content: some View {
         Form {
+            if instances.count > 1, let selectedInstance = selectedInstance {
+                Section {
+                    Picker(MR.strings().instances.localized(), selection: Binding(
+                        get: { selectedInstance },
+                        set: { onInstanceSelected($0) }
+                    )) {
+                        ForEach(instances, id: \.id) { instance in
+                            Text(instance.label).tag(instance)
+                        }
+                    }
+                }
+            }
             Section {
                 Toggle(MR.strings().monitored.localized(), isOn: $monitored)
                 

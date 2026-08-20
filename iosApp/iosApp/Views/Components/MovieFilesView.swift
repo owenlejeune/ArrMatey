@@ -24,7 +24,7 @@ struct MovieFilesView: View {
                 if let id = movie.id?.int64Value {
                     navigation.go(to: .movieRelease(id), of: .radarr)
                 }
-            }, automaticSearchEnabled: movie.monitored, onAutomaticClicked: onAutomaticSearch, automaticSearchInProgress: searchIds.contains(movie.id as! Int64))
+            }, automaticSearchEnabled: movie.monitored, onAutomaticClicked: onAutomaticSearch, automaticSearchInProgress: searchIds.contains(movie.id?.int64Value ?? 0))
             
             if let file = movie.movieFile {
                 MediaFileCard(file: file, onDelete: onDeleteFile)

@@ -133,7 +133,7 @@ fun SeerrReportIssueSheet(
                 onClick = { onSubmit() },
                 enabled = state.saveButtonEnabled
             ){
-                Text(mokoString(MR.strings.save))
+                Text(mokoString(MR.strings.submit))
             }
         }
     }

@@ -41,8 +41,21 @@ struct SeerrDetailsScreen: View {
         .toolbar {
             if viewModel.buttonState.showRequestButton {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { viewModel.showRequestSheet() }) {
-                        Image(systemName: "plus.circle")
+                    if viewModel.buttonState.showRequest4kButton {
+                        Menu {
+                            Button(action: { viewModel.showRequestSheet(is4k: false) }) {
+                                Label(MR.strings().request.localized(), systemImage: "plus")
+                            }
+                            Button(action: { viewModel.showRequestSheet(is4k: true) }) {
+                                Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
+                            }
+                        } label: {
+                            Image(systemName: "plus.circle")
+                        }
+                    } else {
+                        Button(action: { viewModel.showRequestSheet(is4k: false) }) {
+                            Image(systemName: "plus.circle")
+                        }
                     }
                 }
             } else {
@@ -63,13 +76,15 @@ struct SeerrDetailsScreen: View {
                     serviceDetails: viewModel.serviceDetails,
                     currentUser: viewModel.currentUser,
                     users: viewModel.users,
+                    is4k: viewModel.isRequest4k,
                     onDismiss: { viewModel.hideRequestSheet() },
-                    onSubmit: { profileId, rootFolder, langId, seasons, userId in
+                    onSubmit: { profileId, rootFolder, langId, seasons, is4k, userId in
                         viewModel.submitRequest(
                             profileId: profileId,
                             rootFolder: rootFolder,
                             languageProfileId: langId,
                             seasons: seasons,
+                            is4k: is4k,
                             userId: userId
                         )
                     }
@@ -257,7 +272,7 @@ struct SeerrDetailsScreen: View {
 
 // MARK: - Data Types
 
-private struct SeerrEpisodeData: Identifiable {
+struct SeerrEpisodeData: Identifiable {
     let episodeNumber: Int32
     let name: String
     let airDate: LocalDate?
@@ -268,7 +283,7 @@ private struct SeerrEpisodeData: Identifiable {
 
 // MARK: - Season Disclosure Row
 
-private struct SeasonDisclosureRow: View {
+struct SeasonDisclosureRow: View {
     let seasonNumber: Int32
     let episodeCount: Int32
     let episodes: [SeerrEpisodeData]
@@ -374,7 +389,7 @@ private struct SeerrEpisodeRow: View {
 
 // MARK: - Cast Member
 
-private struct CastMemberView: View {
+struct CastMemberView: View {
     let member: CastMember
     let onPersonClick: (Int64) -> Void
     

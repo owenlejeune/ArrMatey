@@ -99,7 +99,10 @@ struct MediaPreviewScreen: View {
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },
-                onDismiss: { sheetPresented = false }
+                onDismiss: { sheetPresented = false },
+                instances: viewModel.uiState.instances,
+                selectedInstance: viewModel.uiState.selectedInstance,
+                onInstanceSelected: { viewModel.selectInstance($0) }
             )
                 .presentationDetents([.medium])
                 .presentationBackground(.ultraThinMaterial)
@@ -115,7 +118,10 @@ struct MediaPreviewScreen: View {
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },
-                onDismiss: { sheetPresented = false }
+                onDismiss: { sheetPresented = false },
+                instances: viewModel.uiState.instances,
+                selectedInstance: viewModel.uiState.selectedInstance,
+                onInstanceSelected: { viewModel.selectInstance($0) }
             )
                 .presentationDetents([.medium])
                 .presentationBackground(.ultraThinMaterial)
@@ -131,7 +137,10 @@ struct MediaPreviewScreen: View {
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },
-                onDismiss: { sheetPresented = false }
+                onDismiss: { sheetPresented = false },
+                instances: viewModel.uiState.instances,
+                selectedInstance: viewModel.uiState.selectedInstance,
+                onInstanceSelected: { viewModel.selectInstance($0) }
             )
             .presentationDetents([.medium])
             .presentationBackground(.ultraThinMaterial)
@@ -147,7 +156,10 @@ struct MediaPreviewScreen: View {
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },
-                onDismiss: { sheetPresented = false }
+                onDismiss: { sheetPresented = false },
+                instances: viewModel.uiState.instances,
+                selectedInstance: viewModel.uiState.selectedInstance,
+                onInstanceSelected: { viewModel.selectInstance($0) }
             )
         case let audiobook as SearchAudiobook:
             AddAudiobookForm(
@@ -161,7 +173,10 @@ struct MediaPreviewScreen: View {
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },
-                onDismiss: { sheetPresented = false }
+                onDismiss: { sheetPresented = false },
+                instances: viewModel.uiState.instances,
+                selectedInstance: viewModel.uiState.selectedInstance,
+                onInstanceSelected: { viewModel.selectInstance($0) }
             )
         default: EmptyView()
         }

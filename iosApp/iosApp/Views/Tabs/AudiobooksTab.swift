@@ -32,28 +32,7 @@ struct AudiobooksTabContent: View {
     var body: some View {
         ArrTab(type: .listenarr, viewModel: viewModel)
             .navigationDestination(for: MediaRoute.self) { value in
-                destination(for: value)
+                MediaRouteDestination(route: value)
             }
-    }
-    
-    @ViewBuilder
-    private func destination(for route: MediaRoute) -> some View {
-        switch route {
-        case .details(let id, _):
-            MediaDetailsScreen(id: id, type: .listenarr)
-        case .search(let query, _):
-            MediaSearchScreen(query: query, type: .listenarr)
-        case .preview(let json, _):
-            MediaPreviewScreen(json: json, type: .listenarr)
-        case .audiobookReleases(let id, let query):
-            let releaseParams = ReleaseParamsAudiobook(mediaId: id?.asKotlinLong, query: query)
-            InteractiveSearchScreen(type: .listenarr, releaseParams: releaseParams)
-        case .audiobookFiles(let audiobookJson):
-            AudiobookFilesScreen(audiobookJson: audiobookJson)
-            
-            // unused
-        default:
-            EmptyView()
-        }
     }
 }

@@ -44,6 +44,7 @@ import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
+import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
 import org.koin.core.component.KoinComponent
@@ -98,6 +99,15 @@ object KoinBridge: KoinComponent {
 
     fun getSeerrMediaDetailsViewModel(tmdbId: Long, mediaType: RequestType): SeerrMediaDetailsViewModel =
         getKoin().get { parametersOf(tmdbId, mediaType) }
+
+    fun getUnifiedMediaDetailsViewModel(
+        arrId: Long?,
+        tmdbId: Long?,
+        tvdbId: Long?,
+        instanceType: InstanceType?,
+        requestType: RequestType?
+    ): UnifiedMediaDetailsViewModel =
+        getKoin().get { parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType) }
 
     fun getIssueDetailsViewModel(issuePackage: MediaIssuePackage): IssueDetailsViewModel =
         getKoin().get { parametersOf(issuePackage) }

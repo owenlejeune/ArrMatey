@@ -93,6 +93,9 @@ class SeerrMediaDetailsViewModel(
     private val _isRequestSheetVisible = MutableStateFlow(false)
     val isRequestSheetVisible: StateFlow<Boolean> = _isRequestSheetVisible.asStateFlow()
 
+    private val _isRequest4k = MutableStateFlow(false)
+    val isRequest4k: StateFlow<Boolean> = _isRequest4k.asStateFlow()
+
     private var seerrMediaId: Long? = null
 
     private val _reportIssueState = MutableStateFlow(ReportIssueUiState())
@@ -295,7 +298,8 @@ class SeerrMediaDetailsViewModel(
         _isViewRequestSheetVisible.value = false
     }
 
-    fun showRequestSheet() {
+    fun showRequestSheet(is4k: Boolean = false) {
+        _isRequest4k.value = is4k
         _isRequestSheetVisible.value = true
     }
 

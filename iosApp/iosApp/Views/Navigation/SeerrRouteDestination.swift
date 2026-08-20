@@ -16,7 +16,7 @@ struct SeerrRouteDestination: View {
             if requestType == .person {
                 SeerrPersonDetailsScreen(personId: tmdbId)
             } else {
-                SeerrDetailsScreen(tmdbId: tmdbId, requestType: requestType)
+                UnifiedMediaDetailsScreen(tmdbId: tmdbId, requestType: requestType)
             }
         }
     }

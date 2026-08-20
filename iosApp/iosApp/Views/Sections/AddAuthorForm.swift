@@ -18,6 +18,9 @@ struct AddAuthorForm: View {
     let onUpdatePreferences: (InstancePreferences) -> Void
     let onAddItem: (Author, Bool) -> Void
     let onDismiss: () -> Void
+    let instances: [Instance]
+    let selectedInstance: Instance?
+    let onInstanceSelected: (Instance) -> Void
     
     @State private var monitor: AuthorMonitorType
     @State private var monitorNewBooks: AuthorMonitorType
@@ -26,7 +29,20 @@ struct AddAuthorForm: View {
     @State private var selectedTags: Set<Int> = Set()
     @State private var searchOnAdd: Bool
     
-    init(author: Author, addItemStatus: NetworkingOperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (Author, Bool) -> Void, onDismiss: @escaping () -> Void) {
+    init(
+        author: Author,
+        addItemStatus: NetworkingOperationStatus,
+        qualityProfiles: [QualityProfile],
+        rootFolders: [RootFolder],
+        tags: [Tag],
+        preferences: InstancePreferences,
+        onUpdatePreferences: @escaping (InstancePreferences) -> Void,
+        onAddItem: @escaping (Author, Bool) -> Void,
+        onDismiss: @escaping () -> Void,
+        instances: [Instance] = [],
+        selectedInstance: Instance? = nil,
+        onInstanceSelected: @escaping (Instance) -> Void = { _ in }
+    ) {
         self.author = author
         self.addItemStatus = addItemStatus
         self.qualityProfiles = qualityProfiles
@@ -36,6 +52,9 @@ struct AddAuthorForm: View {
         self.onUpdatePreferences = onUpdatePreferences
         self.onAddItem = onAddItem
         self.onDismiss = onDismiss
+        self.instances = instances
+        self.selectedInstance = selectedInstance
+        self.onInstanceSelected = onInstanceSelected
         
         self._monitor = State(initialValue: preferences.addAuthorMonitor)
         self._monitorNewBooks = State(initialValue: preferences.addAuthorMonitorNew)
@@ -80,6 +99,18 @@ struct AddAuthorForm: View {
     @ViewBuilder
     private var content: some View {
         Form {
+            if instances.count > 1, let selectedInstance = selectedInstance {
+                Section {
+                    Picker(MR.strings().instances.localized(), selection: Binding(
+                        get: { selectedInstance },
+                        set: { onInstanceSelected($0) }
+                    )) {
+                        ForEach(instances, id: \.id) { instance in
+                            Text(instance.label).tag(instance)
+                        }
+                    }
+                }
+            }
             Section {
                 Picker(MR.strings().monitor.localized(), selection: $monitor) {
                     ForEach(AuthorMonitorType.allCases, id: \.self) { status in

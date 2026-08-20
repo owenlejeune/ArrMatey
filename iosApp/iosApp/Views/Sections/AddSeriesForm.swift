@@ -18,6 +18,9 @@ struct AddSeriesForm: View {
     let onUpdatePreferences: (InstancePreferences) -> Void
     let onAddItem: (ArrMedia, Bool) -> Void
     let onDismiss: () -> Void
+    let instances: [Instance]
+    let selectedInstance: Instance?
+    let onInstanceSelected: (Instance) -> Void
     
     
     @State private var monitorType: SeriesMonitorType
@@ -28,7 +31,20 @@ struct AddSeriesForm: View {
     @State private var selectedTags: Set<Int> = Set()
     @State private var searchOnAdd: Bool
     
-    init(series: ArrSeries, addItemStatus: NetworkingOperationStatus, qualityProfiles: [QualityProfile], rootFolders: [RootFolder], tags: [Tag], preferences: InstancePreferences, onUpdatePreferences: @escaping (InstancePreferences) -> Void, onAddItem: @escaping (ArrMedia, Bool) -> Void, onDismiss: @escaping () -> Void) {
+    init(
+        series: ArrSeries,
+        addItemStatus: NetworkingOperationStatus,
+        qualityProfiles: [QualityProfile],
+        rootFolders: [RootFolder],
+        tags: [Tag],
+        preferences: InstancePreferences,
+        onUpdatePreferences: @escaping (InstancePreferences) -> Void,
+        onAddItem: @escaping (ArrMedia, Bool) -> Void,
+        onDismiss: @escaping () -> Void,
+        instances: [Instance] = [],
+        selectedInstance: Instance? = nil,
+        onInstanceSelected: @escaping (Instance) -> Void = { _ in }
+    ) {
         self.series = series
         self.addItemStatus = addItemStatus
         self.qualityProfiles = qualityProfiles
@@ -38,6 +54,9 @@ struct AddSeriesForm: View {
         self.onUpdatePreferences = onUpdatePreferences
         self.onAddItem = onAddItem
         self.onDismiss = onDismiss
+        self.instances = instances
+        self.selectedInstance = selectedInstance
+        self.onInstanceSelected = onInstanceSelected
         
         self._monitorType = State(initialValue: preferences.addSeriesMonitor)
         self._selectedSeriesType = State(initialValue: preferences.addSeriesType)
@@ -85,6 +104,19 @@ struct AddSeriesForm: View {
     @ViewBuilder
     private var content: some View {
         Form {
+            if instances.count > 1, let selectedInstance = selectedInstance {
+                Section {
+                    Picker(MR.strings().instances.localized(), selection: Binding(
+                        get: { selectedInstance },
+                        set: { onInstanceSelected($0) }
+                    )) {
+                        ForEach(instances, id: \.id) { instance in
+                            Text(instance.label).tag(instance)
+                        }
+                    }
+                }
+            }
+
             Section {
                 Picker(MR.strings().monitor.localized(), selection: $monitorType) {
                     ForEach(selectableMonitorTypes, id: \.self) { type in

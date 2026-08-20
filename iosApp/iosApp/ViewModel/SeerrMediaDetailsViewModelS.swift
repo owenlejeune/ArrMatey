@@ -16,6 +16,7 @@ class SeerrMediaDetailsViewModelS: ObservableObject {
     @Published var isReportIssueSheetVisible: Bool = false
     @Published var isViewRequestSheetVisible: Bool = false
     @Published var isRequestSheetVisible: Bool = false
+    @Published private(set) var isRequest4k: Bool = false
     @Published private(set) var currentUser: SeerrUser? = nil
     @Published private(set) var users: [SeerrUser] = []
     @Published private(set) var serviceDetails: ServiceDetails? = nil
@@ -38,6 +39,9 @@ class SeerrMediaDetailsViewModelS: ObservableObject {
         }
         viewModel.isRequestSheetVisible.observeAsync(on: self) { owner, visible in
             owner.isRequestSheetVisible = visible.boolValue
+        }
+        viewModel.isRequest4k.observeAsync(on: self) { owner, visible in
+            owner.isRequest4k = visible.boolValue
         }
         viewModel.currentUser.observeAsync(on: self, to: \.currentUser)
         viewModel.users.observeAsync(on: self, to: \.users)
@@ -65,8 +69,8 @@ class SeerrMediaDetailsViewModelS: ObservableObject {
         viewModel.hideViewRequestSheet()
     }
 
-    func showRequestSheet() {
-        viewModel.showRequestSheet()
+    func showRequestSheet(is4k: Bool = false) {
+        viewModel.showRequestSheet(is4k: is4k)
     }
 
     func hideRequestSheet() {
@@ -82,6 +86,7 @@ class SeerrMediaDetailsViewModelS: ObservableObject {
         rootFolder: String?,
         languageProfileId: Int64?,
         seasons: [KotlinInt]?,
+        is4k: Bool = false,
         userId: Int64?
     ) {
         viewModel.submitRequest(
@@ -89,7 +94,7 @@ class SeerrMediaDetailsViewModelS: ObservableObject {
             rootFolder: rootFolder,
             languageProfileId: languageProfileId.map { KotlinLong(value: $0) },
             seasons: seasons,
-            is4k: false,
+            is4k: is4k,
             userId: userId.map { KotlinLong(value: $0) }
         )
     }
