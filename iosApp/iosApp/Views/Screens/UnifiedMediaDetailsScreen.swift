@@ -1015,23 +1015,21 @@ struct UnifiedMediaDetailsHeader: View {
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
                             .lineLimit(2)
-                            .background(GeometryReader { geometry in
-                                Color.clear.preference(key: ViewHeightKey.self, value: geometry.size.height)
-                            })
                     }
                 }
+                .background(GeometryReader { geometry in
+                    Color.clear.preference(key: ViewHeightKey.self, value: geometry.size.height)
+                })
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .onPreferenceChange(ViewHeightKey.self) { height in
-                    self.infoHeight = height
+                    if height > 0 {
+                        self.infoHeight = height
+                    }
                 }
             }
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
         }
-//        .frame(height: 350)
-//        .onPreferenceChange(ViewHeightKey.self) { height in
-//            self.infoHeight = height
-//        }
     }
 }
 
