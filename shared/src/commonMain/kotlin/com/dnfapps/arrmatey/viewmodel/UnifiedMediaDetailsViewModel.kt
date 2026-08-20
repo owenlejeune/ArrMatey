@@ -409,17 +409,16 @@ class UnifiedMediaDetailsViewModel(
                     val isPresent = arrMedia?.let { it.id != null && it.id != 0L } ?: false
                     !isPresent
                 }
-                _addSheetUiState.update { state ->
-                    val currentTarget = state.targetInstance
-                    val newTarget = if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
-                        currentTarget
-                    } else {
-                        filteredInstances.firstOrNull()
-                    }
-                    state.copy(
-                        availableInstances = filteredInstances,
-                        targetInstance = newTarget
-                    )
+                _addSheetUiState.update { it.copy(availableInstances = filteredInstances) }
+
+                val currentTarget = _addSheetUiState.value.targetInstance
+                val newTarget = if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
+                    currentTarget
+                } else {
+                    filteredInstances.firstOrNull()
+                }
+                if (newTarget?.id != currentTarget?.id || _addSheetUiState.value.qualityProfiles.isEmpty()) {
+                    setAddSheetTargetInstance(newTarget)
                 }
             }
         }
@@ -440,17 +439,16 @@ class UnifiedMediaDetailsViewModel(
                     val isPresent = arrMedia?.let { it.id != null && it.id != 0L } ?: false
                     !isPresent
                 }
-                _addSheetUiState.update { state ->
-                    val currentTarget = state.targetInstance
-                    val newTarget = if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
-                        currentTarget
-                    } else {
-                        filteredInstances.firstOrNull()
-                    }
-                    state.copy(
-                        availableInstances = filteredInstances,
-                        targetInstance = newTarget
-                    )
+                _addSheetUiState.update { it.copy(availableInstances = filteredInstances) }
+
+                val currentTarget = _addSheetUiState.value.targetInstance
+                val newTarget = if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
+                    currentTarget
+                } else {
+                    filteredInstances.firstOrNull()
+                }
+                if (newTarget?.id != currentTarget?.id || _addSheetUiState.value.qualityProfiles.isEmpty()) {
+                    setAddSheetTargetInstance(newTarget)
                 }
                 if (activeRepo != null) {
                     if (_selectedInstanceId.value == null) {
@@ -467,10 +465,6 @@ class UnifiedMediaDetailsViewModel(
                     }
                     launch {
                         activeRepo.editItemStatus.collect { _editStatus.value = it }
-                    }
-                    if (_addSheetUiState.value.targetInstance == null) {
-                        val defaultTarget = if (filteredInstances.any { it.id == activeRepo.instance.id }) activeRepo.instance else filteredInstances.firstOrNull()
-                        setAddSheetTargetInstance(defaultTarget)
                     }
                 }
 
