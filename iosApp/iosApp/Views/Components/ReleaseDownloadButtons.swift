@@ -13,45 +13,64 @@ struct ReleaseDownloadButtons: View {
     var automaticSearchEnabled: Bool
     var onAutomaticClicked: () -> Void
     var automaticSearchInProgress: Bool = false
+    var deleteInProgress: Bool = false
+    var onDelete: (() -> Void)? = nil
     
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
+            if let onDelete = onDelete {
+                Button(action: onDelete) {
+                    if deleteInProgress {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(.white)
+                            .frame(width: 20, height: 20)
+                    } else {
+                        Image(systemName: "trash")
+                            .font(.system(size: 15))
+                            .frame(width: 20, height: 20)
+                    }
+                }
+                .tint(.red)
+                .buttonStyle(.borderedProminent)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .disabled(deleteInProgress)
+            }
+            
             Button(action: onInteractiveClicked) {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     Image(systemName: "person.fill")
-                        .font(.system(size: 11))
+                        .font(.system(size: 14))
                     Text(MR.strings().interactive.localized())
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 14, weight: .medium))
                         .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                        .minimumScaleFactor(0.7)
                 }
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .tint(.themePrimary)
-            .controlSize(.small)
             .clipShape(Capsule())
             
             Button(action: onAutomaticClicked) {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     if automaticSearchInProgress {
                         ProgressView()
                             .controlSize(.small)
                             .tint(.white)
                     } else {
                         Image(systemName: "magnifyingglass")
-                            .font(.system(size: 11))
+                            .font(.system(size: 14))
                         Text(MR.strings().automatic.localized())
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                             .lineLimit(1)
-                            .minimumScaleFactor(0.5)
+                            .minimumScaleFactor(0.7)
                     }
                 }
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .tint(.themePrimary)
-            .controlSize(.small)
             .clipShape(Capsule())
             .disabled(!automaticSearchEnabled || automaticSearchInProgress)
         }

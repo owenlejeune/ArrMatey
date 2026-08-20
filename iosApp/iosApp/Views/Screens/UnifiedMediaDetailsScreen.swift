@@ -222,12 +222,10 @@ extension UnifiedMediaDetailsScreen {
 // MARK: - Components and Sections
 extension UnifiedMediaDetailsScreen {
     
-    /// Shows seasons using the unified SeasonsArea component.
-    /// Mirrors Android: SeasonsArea takes List<SeasonWrapper> combining arr + seerr data,
-    /// and shows arr controls only when arrSeason is present and seriesId > 0.
     @ViewBuilder
     private func seasonsArea(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
-        let seriesId = (success.arrMedia as? ArrSeries)?.id?.int64Value
+        let arrSeries = success.arrMedia as? ArrSeries
+        let seriesId = arrSeries?.id?.int64Value
         SeasonsArea(
             seasons: success.seasons,
             seriesId: seriesId,
@@ -237,7 +235,18 @@ extension UnifiedMediaDetailsScreen {
             onEpisodeAutomaticSearch: { viewModel.performEpisodeAutomaticLookup(episodeId: $0) },
             onSeasonAutomaticSearch: { viewModel.performSeasonAutomaticLookup(seasonNumber: $0) },
             deleteSeasonFiles: { confirmDeleteSeasonNumber = $0 },
-            seasonDeleteInProgress: viewModel.deleteSeasonStatus is NetworkingOperationStatusInProgress
+            seasonDeleteInProgress: viewModel.deleteSeasonStatus is NetworkingOperationStatusInProgress,
+            onNavigateToEpisodeDetails: { episode in
+                if let series = arrSeries {
+                    navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
+                }
+            },
+            onNavigateToSeriesRelease: { sId, seasonNum in
+                if let sId = sId {
+                    let route: MediaRoute = .seriesReleases(seriesId: sId, seasonNumber: seasonNum, episodeId: nil)
+                    navigationManager.go(to: route, of: .sonarr)
+                }
+            }
         )
     }
 
