@@ -143,11 +143,16 @@ class CombinedDashboardViewModel(
                         flowOf(emptyList())
                     } else {
                         val flows = prowlarrRepos.map { repo ->
-                            combine(repo.indexerStatus, repo.indexers) { status, indexers ->
+                            combine(
+                                repo.softwareStatus,
+                                repo.indexerStatus,
+                                repo.indexers
+                            ) { software, status, indexers ->
                                 val failureCount = status.count { it.hasFailure }
                                 ProwlarrDashboardState(
                                     instance = repo.instance,
-                                    totalIndexers = status.size,
+                                    softwareStatus = software,
+                                    totalIndexers = indexers.size,
                                     healthyIndexers = indexers.size - failureCount,
                                     failingIndexers = failureCount
                                 )
@@ -305,7 +310,7 @@ class CombinedDashboardViewModel(
                     isLocal = state.instance.isUsingLocalNetwork(),
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
                     icon = state.instance.type.icon,
-                    isOnline = state.totalIndexers > 0 || state.failingIndexers > 0,
+                    isOnline = state.softwareStatus != null,
                     isLocalSwitchingEnabled = state.instance.localNetworkEnabled
                 )
             )
@@ -374,6 +379,7 @@ class CombinedDashboardViewModel(
             val prowlarrRepos = instanceManager.instanceRepositories.value.values.filterIsInstance<ProwlarrInstanceRepository>()
             prowlarrRepos.forEach { repo ->
                 try {
+                    repo.refreshStatus()
                     repo.getIndexerStatus()
                     repo.getIndexers()
                 } catch (e: Exception) {

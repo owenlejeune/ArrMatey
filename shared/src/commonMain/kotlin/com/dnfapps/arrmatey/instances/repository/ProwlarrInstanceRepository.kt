@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.instances.repository
 
 import androidx.room.Index
 import com.dnfapps.arrmatey.arr.api.client.ProwlarrClient
+import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.IndexerStatus
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
@@ -21,6 +22,9 @@ class ProwlarrInstanceRepository(
 
     private val prowlarrClient = ProwlarrClient(instance, httpClient)
 
+    private val _softwareStatus = MutableStateFlow<ArrSoftwareStatus?>(null)
+    val softwareStatus: StateFlow<ArrSoftwareStatus?> = _softwareStatus.asStateFlow()
+
     private val _indexerStatus = MutableStateFlow<List<IndexerStatus>>(emptyList())
     val indexerStatus: StateFlow<List<IndexerStatus>> = _indexerStatus.asStateFlow()
 
@@ -29,6 +33,11 @@ class ProwlarrInstanceRepository(
 
     override suspend fun testConnection(): NetworkResult<Unit> =
         prowlarrClient.testConnection()
+
+    suspend fun refreshStatus() {
+        prowlarrClient.getStatus()
+            .onSuccess { _softwareStatus.value = it }
+    }
 
     suspend fun getIndexers(): NetworkResult<List<ProwlarrIndexer>> =
         prowlarrClient.getIndexers().onSuccess { _indexers.value = it }

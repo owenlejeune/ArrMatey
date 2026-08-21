@@ -10,7 +10,7 @@ import com.dnfapps.arrmatey.compose.utils.SortOrder
 
 data class InteractiveSearchUiState(
     val sortBy: ReleaseSortBy = ReleaseSortBy.Weight,
-    val sortOrder: SortOrder = SortOrder.Desc,
+    val sortOrder: SortOrder = SortOrder.Asc,
     val filterBy: ReleaseFilterBy = ReleaseFilterBy.Any,
     val language: Language? = null,
     val indexer: String? = null,

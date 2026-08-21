@@ -110,7 +110,7 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
                 }
 
                 val timestamp = dateFormatter.stringFromDate(
-                    NSDate.dateWithTimeIntervalSince1970((event.timestamp ?: 0L) / 1000.0)
+                    NSDate.dateWithTimeIntervalSince1970(event.timestamp / 1000.0)
                 )
                 val line = "[$timestamp] [${event.level}] ${event.loggerName}: ${event.message}\n"
 

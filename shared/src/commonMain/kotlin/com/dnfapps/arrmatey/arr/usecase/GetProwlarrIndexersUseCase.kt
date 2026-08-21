@@ -28,7 +28,6 @@ class GetProwlarrIndexersUseCase(
                 )
             )
             is NetworkResult.Loading -> emit(ProwlarrIndexersState.Loading)
-            else -> emit(ProwlarrIndexersState.Error("Unexpected state", ErrorType.Unexpected))
         }
     }
 }
