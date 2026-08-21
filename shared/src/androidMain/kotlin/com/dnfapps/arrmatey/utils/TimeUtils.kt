@@ -5,6 +5,7 @@ import android.icu.util.Calendar
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Instant
@@ -33,8 +34,8 @@ actual fun formatLocalDateTime(
 ): String {
     val cal = Calendar.getInstance(JavaTimeZone.getTimeZone(timeZone.id), Locale.getDefault()).apply {
         set(Calendar.YEAR, localDateTime.year)
-        set(Calendar.MONTH, localDateTime.monthNumber - 1) // Calendar months are 0-based
-        set(Calendar.DAY_OF_MONTH, localDateTime.dayOfMonth)
+        set(Calendar.MONTH, localDateTime.month.number - 1) // Calendar months are 0-based
+        set(Calendar.DAY_OF_MONTH, localDateTime.day)
         set(Calendar.HOUR_OF_DAY, localDateTime.hour)
         set(Calendar.MINUTE, localDateTime.minute)
         set(Calendar.SECOND, localDateTime.second)
