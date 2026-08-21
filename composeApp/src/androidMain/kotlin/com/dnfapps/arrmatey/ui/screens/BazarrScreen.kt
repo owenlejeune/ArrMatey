@@ -70,8 +70,6 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.BazarrSection
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.LocalBazarrNavigator
-import com.dnfapps.arrmatey.navigation.openDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.BannerView
@@ -94,10 +92,9 @@ import org.koin.compose.koinInject
 fun BazarrScreen(
     wideRailIsVisible: Boolean,
     viewModel: BazarrViewModel = koinInject(),
-    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Bazarr)
+    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Bazarr),
+    onNavigateToDetails: (Long, BazarrMediaType) -> Unit = { _, _ -> }
 ) {
-    val navigator = LocalBazarrNavigator.current
-
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val section by viewModel.selectedSection.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -216,14 +213,14 @@ fun BazarrScreen(
                                     BazarrSection.Series -> BazarrSeriesList(
                                         series = state.series,
                                         onClick = { series ->
-                                            navigator.openDetails(series.serviceId, BazarrMediaType.Series)
+                                            onNavigateToDetails(series.serviceId, BazarrMediaType.Series)
                                         }
                                     )
 
                                     BazarrSection.Movies -> BazarrMoviesList(
                                         movies = state.movies,
                                         onClick = { movie ->
-                                            navigator.openDetails(movie.serviceId, BazarrMediaType.Movie)
+                                            onNavigateToDetails(movie.serviceId, BazarrMediaType.Movie)
                                         }
                                     )
 

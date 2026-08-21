@@ -50,7 +50,6 @@ import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.entensions.androidIcon
-import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -67,9 +66,9 @@ private const val MAX_TABS = 5
 @Composable
 fun TabCustomizationScreen(
     preferenceStore: PreferencesStore = koinInject(),
-    tabManager: TabManager = koinInject()
+    tabManager: TabManager = koinInject(),
+    onBack: () -> Unit = {}
 ) {
-    val navigation = settingsNavigator
     val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle()
     val useServiceNavLogos by preferenceStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
 
@@ -77,7 +76,7 @@ fun TabCustomizationScreen(
         topBar = {
             TopAppBar(
                 title = { Text(mokoString(MR.strings.customize_navigation)) },
-                navigationIcon = { BackButton(navigation) },
+                navigationIcon = { BackButton(onClick = onBack) },
                 actions = {
                     IconButton(onClick = { preferenceStore.resetTabPreferences() }) {
                         Icon(Icons.Default.RestartAlt, contentDescription = "Reset")

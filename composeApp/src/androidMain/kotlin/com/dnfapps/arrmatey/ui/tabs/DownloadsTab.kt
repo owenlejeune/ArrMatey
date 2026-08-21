@@ -117,7 +117,8 @@ import org.koin.compose.koinInject
 fun DownloadsTab(
     wideRailIsVisible: Boolean,
     viewModel: DownloadQueueViewModel = koinInject(),
-    clientsViewModel: DownloadClientsViewModel = koinInject()
+    clientsViewModel: DownloadClientsViewModel = koinInject(),
+    navigationManager: NavigationManager = koinInject()
 ) {
     val queueState by viewModel.downloadQueueState.collectAsStateWithLifecycle()
     val filterState by viewModel.filterState.collectAsStateWithLifecycle()
@@ -228,7 +229,11 @@ fun DownloadsTab(
             contentAlignment = Alignment.Center
         ) {
             if (downloadClientState.downloadClients.isEmpty()) {
-                NoDownloadClientsView()
+                NoDownloadClientsView(
+                    onAddDownloadClientClick = {
+                        navigationManager.openNewDownloadClientScreen()
+                    }
+                )
             } else if (!hasLoaded || (queueState.queueItems.isEmpty() && isRefreshing)) {
                 LoadingIndicator(
                     modifier = Modifier.size(96.dp)
@@ -692,7 +697,7 @@ private fun DeleteDownloadDialog(
 @Composable
 private fun NoDownloadClientsView(
     modifier: Modifier = Modifier,
-    navigationManager: NavigationManager = koinInject()
+    onAddDownloadClientClick: () -> Unit = {}
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -713,9 +718,7 @@ private fun NoDownloadClientsView(
         Spacer(modifier = Modifier.height(4.dp))
 
         Button(
-            onClick = {
-                navigationManager.openNewDownloadClientScreen()
-            },
+            onClick = onAddDownloadClientClick,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer

@@ -74,9 +74,6 @@ import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
 import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.model.toInfoList
-import com.dnfapps.arrmatey.navigation.BazarrScreen
-import com.dnfapps.arrmatey.navigation.LocalBazarrNavigator
-import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BasePosterItem
 import com.dnfapps.arrmatey.ui.components.ContainerCard
@@ -96,7 +93,7 @@ fun BazarrDetailsScreen(
     id: Long,
     type: BazarrMediaType,
     viewModel: BazarrDetailsViewModel = koinInjectParams(id, type),
-    navigator: Navigator<BazarrScreen> = LocalBazarrNavigator.current
+    onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val operationState by viewModel.operationState.collectAsStateWithLifecycle()
@@ -149,7 +146,7 @@ fun BazarrDetailsScreen(
                 scrollState = scrollState,
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigator.popBackStack() },
+                        onClick = onBack,
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(imageVector = Icons.AutoMirrored.Default.ArrowBack, contentDescription = null)

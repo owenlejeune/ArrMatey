@@ -32,7 +32,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.InstanceInfoCard
@@ -44,9 +43,9 @@ import org.koin.compose.koinInject
 @Composable
 fun AddInstanceScreen(
     initialType: InstanceType = InstanceType.Sonarr,
-    viewModel: AddInstanceViewModel = koinInject()
+    viewModel: AddInstanceViewModel = koinInject(),
+    onBack: () -> Unit = {}
 ) {
-    val navigation = settingsNavigator
     val scope = rememberCoroutineScope()
     var selectedInstanceType by remember { mutableStateOf(initialType) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -64,7 +63,7 @@ fun AddInstanceScreen(
 
     LaunchedEffect(uiState.createResult) {
         if (uiState.createResult is InsertResult.Success) {
-            navigation.popBackStack()
+            onBack()
         }
     }
 
@@ -75,7 +74,7 @@ fun AddInstanceScreen(
                 title = { Text(text = mokoString(MR.strings.add_instance)) },
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() }
+                        onClick = onBack
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,

@@ -36,7 +36,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.database.dao.InsertResult
-import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -51,9 +50,9 @@ import org.koin.compose.koinInject
 fun AddEditCustomWebpageScreen(
     webpageId: Long? = null,
     viewModel: CustomWebpageConfigurationViewModel = koinInjectParams(webpageId),
-    moko: MokoStrings = koinInject()
+    moko: MokoStrings = koinInject(),
+    onBack: () -> Unit = {}
 ) {
-    val navigation = settingsNavigator
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -63,7 +62,7 @@ fun AddEditCustomWebpageScreen(
         when (val state = uiState.saveResult) {
             is InsertResult.Success -> {
                 viewModel.reset()
-                navigation.popBackStack()
+                onBack()
             }
             is InsertResult.Error -> {
                 Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
@@ -86,7 +85,7 @@ fun AddEditCustomWebpageScreen(
                 title = {
                     Text(titleText)
                 },
-                navigationIcon = { BackButton(navigation) },
+                navigationIcon = { BackButton(onClick = onBack) },
                 actions = {
                     if (uiState.isEditing) {
                         IconButton(

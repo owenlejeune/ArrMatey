@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,7 +21,6 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.LocalArrNavigator
 import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
@@ -56,41 +54,39 @@ fun ArrTab(
         label = "DetailsWeight"
     )
 
-    CompositionLocalProvider(LocalArrNavigator provides navigation) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.weight(1f)) {
-                NavDisplay(
-                    backStack = if (showDetails) listOf(baseScreen) else navigation.backStack,
-                    onBack = { navigation.popBackStack() },
-                    transitionSpec = { forwardSlideTransform() },
-                    popTransitionSpec = { popSlideTransform() },
-                    predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-                    entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation)
-                )
-            }
+    Row(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f)) {
+            NavDisplay(
+                backStack = if (showDetails) listOf(baseScreen) else navigation.backStack,
+                onBack = { navigation.popBackStack() },
+                transitionSpec = { forwardSlideTransform() },
+                popTransitionSpec = { popSlideTransform() },
+                predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
+                entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation)
+            )
+        }
 
-            val lastValidDetailBackStack = remember { mutableStateOf<List<NavKey>>(emptyList()) }
-            if (detailBackStack.isNotEmpty()) {
-                lastValidDetailBackStack.value = detailBackStack
-            }
+        val lastValidDetailBackStack = remember { mutableStateOf<List<NavKey>>(emptyList()) }
+        if (detailBackStack.isNotEmpty()) {
+            lastValidDetailBackStack.value = detailBackStack
+        }
 
-            AnimatedVisibility(
-                visible = showDetails,
-                enter = slideInHorizontally { it },
-                exit = slideOutHorizontally { it },
-                modifier = Modifier.weight(detailsWeight)
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    if (lastValidDetailBackStack.value.isNotEmpty()) {
-                        NavDisplay(
-                            backStack = lastValidDetailBackStack.value,
-                            onBack = { navigation.popBackStack() },
-                            transitionSpec = { forwardSlideTransform() },
-                            popTransitionSpec = { popSlideTransform() },
-                            predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-                            entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation)
-                        )
-                    }
+        AnimatedVisibility(
+            visible = showDetails,
+            enter = slideInHorizontally { it },
+            exit = slideOutHorizontally { it },
+            modifier = Modifier.weight(detailsWeight)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (lastValidDetailBackStack.value.isNotEmpty()) {
+                    NavDisplay(
+                        backStack = lastValidDetailBackStack.value,
+                        onBack = { navigation.popBackStack() },
+                        transitionSpec = { forwardSlideTransform() },
+                        popTransitionSpec = { popSlideTransform() },
+                        predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
+                        entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation)
+                    )
                 }
             }
         }

@@ -64,12 +64,8 @@ import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.entensions.PaddingValues
-import com.dnfapps.arrmatey.navigation.DashboardScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.Navigator
-import com.dnfapps.arrmatey.navigation.dashboardNavigator
 import com.dnfapps.arrmatey.navigation.navigationManager
-import com.dnfapps.arrmatey.navigation.openArrDashboard
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -87,7 +83,8 @@ import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
 fun CombinedDashboard(
     windowSizeClass: WindowSizeClass,
     viewModel: CombinedDashboardViewModel = koinInject(),
-    moko: MokoStrings = koinInject()
+    moko: MokoStrings = koinInject(),
+    onNavigateToArrDashboard: (Long) -> Unit = {}
 ) {
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
     val hapticFeedback = LocalHapticFeedback.current
@@ -266,7 +263,8 @@ fun CombinedDashboard(
                                             DashboardCardContent(
                                                 cardType = dashboardCard,
                                                 currentState = currentState,
-                                                isEditing = isEditing
+                                                isEditing = isEditing,
+                                                onNavigateToArrDashboard = onNavigateToArrDashboard
                                             )
                                         }
                                         if (isEditing) {
@@ -340,7 +338,8 @@ fun CombinedDashboard(
                                     enabled = false,
                                     cardType = card,
                                     currentState = CombinedDashboardState.Mock,
-                                    isEditing = false
+                                    isEditing = false,
+                                    onNavigateToArrDashboard = onNavigateToArrDashboard
                                 )
                             }
                         }
@@ -358,7 +357,7 @@ private fun DashboardCardContent(
     isEditing: Boolean,
     enabled: Boolean = true,
     navManager: NavigationManager = navigationManager,
-    navigator: Navigator<DashboardScreen> = dashboardNavigator
+    onNavigateToArrDashboard: (Long) -> Unit = {}
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
@@ -426,7 +425,7 @@ private fun DashboardCardContent(
                 state = currentState,
                 enabled = !isEditing && enabled,
                 onInstanceClicked = { id ->
-                    navigator.openArrDashboard(id)
+                    onNavigateToArrDashboard(id)
                 }
             )
     }

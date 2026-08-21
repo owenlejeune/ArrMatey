@@ -73,22 +73,13 @@ import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.extensions.nowTimestamp
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.navigation.navigationManager
-import com.dnfapps.arrmatey.navigation.onInstanceTap
-import com.dnfapps.arrmatey.navigation.settingsNavigator
-import com.dnfapps.arrmatey.navigation.toAddCustomWebpage
-import com.dnfapps.arrmatey.navigation.toAddDownloadClient
-import com.dnfapps.arrmatey.navigation.toAddInstance
-import com.dnfapps.arrmatey.navigation.toDev
-import com.dnfapps.arrmatey.navigation.toEditCustomWebpage
-import com.dnfapps.arrmatey.navigation.toEditDownloadClient
-import com.dnfapps.arrmatey.navigation.toShortcutsPreferences
-import com.dnfapps.arrmatey.navigation.toTabPreferences
 import com.dnfapps.arrmatey.permissions.rememberLocalNetworkPermissionHandler
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
@@ -114,10 +105,18 @@ import org.koin.compose.koinInject
 fun SettingsScreen(
     viewModel: MoreScreenViewModel = koinInject(),
     backupViewModel: BackupViewModel = koinInject(),
-    moko: MokoStrings = koinInject()
+    moko: MokoStrings = koinInject(),
+    onNavigateToInstance: (Long, InstanceType) -> Unit = { _, _ -> },
+    onNavigateToAddInstance: () -> Unit = {},
+    onNavigateToEditDownloadClient: (Long) -> Unit = {},
+    onNavigateToAddDownloadClient: () -> Unit = {},
+    onNavigateToEditCustomWebpage: (Long) -> Unit = {},
+    onNavigateToAddCustomWebpage: () -> Unit = {},
+    onNavigateToTabPreferences: () -> Unit = {},
+    onNavigateToShortcutsPreferences: () -> Unit = {},
+    onNavigateToDev: () -> Unit = {}
 ) {
     val navManager = navigationManager
-    val settingsNav = settingsNavigator
     val context = LocalContext.current
 
     val allInstances by viewModel.instances.collectAsStateWithLifecycle()
@@ -278,7 +277,7 @@ fun SettingsScreen(
                             )
                         },
                         onClick = {
-                            settingsNav.onInstanceTap(instance.id, instance.type)
+                            onNavigateToInstance(instance.id, instance.type)
                         },
                         titleExtraContent = {
                             Box(
@@ -299,7 +298,7 @@ fun SettingsScreen(
                     backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                     icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                     onClick = {
-                        settingsNav.toAddInstance()
+                        onNavigateToAddInstance()
                     }
                 )
             )
@@ -319,7 +318,7 @@ fun SettingsScreen(
                             )
                         },
                         onClick = {
-                            settingsNav.toEditDownloadClient(downloadClient.id)
+                            onNavigateToEditDownloadClient(downloadClient.id)
                         },
                         titleExtraContent = {
                             Box(
@@ -340,7 +339,7 @@ fun SettingsScreen(
                     backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                     icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                     onClick = {
-                        settingsNav.toAddDownloadClient()
+                        onNavigateToAddDownloadClient()
                     }
                 )
             )
@@ -353,7 +352,7 @@ fun SettingsScreen(
                         subtitle = webpage.url,
                         icon = IconSource.Vector(Icons.Default.Language),
                         onClick = {
-                            settingsNav.toEditCustomWebpage(webpage.id)
+                            onNavigateToEditCustomWebpage(webpage.id)
                         },
                         trailingContent = {
                             Icon(
@@ -368,7 +367,7 @@ fun SettingsScreen(
                     backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                     icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                     onClick = {
-                        settingsNav.toAddCustomWebpage()
+                        onNavigateToAddCustomWebpage()
                     }
                 )
             )
@@ -430,14 +429,14 @@ fun SettingsScreen(
                         icon = IconSource.Vector(Icons.Default.Navigation),
                         title = mokoString(MR.strings.navigation_bar_configuration),
                         onClick = {
-                            settingsNav.toTabPreferences()
+                            onNavigateToTabPreferences()
                         }
                     ),
                     SettingItem(
                         icon = IconSource.Vector(Icons.AutoMirrored.Default.Shortcut),
                         title = mokoString(MR.strings.shortcuts_configuration),
                         onClick = {
-                            settingsNav.toShortcutsPreferences()
+                            onNavigateToShortcutsPreferences()
                         }
                     ),
                     SettingItem(
@@ -516,7 +515,7 @@ fun SettingsScreen(
                     shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        settingsNav.toDev()
+                        onNavigateToDev()
                     },
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer

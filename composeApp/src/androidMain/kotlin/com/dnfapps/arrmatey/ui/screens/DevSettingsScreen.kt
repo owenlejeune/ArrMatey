@@ -44,7 +44,6 @@ import com.dnfapps.arrmatey.arr.api.client.LoggerLevel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.logging.LogReader
-import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.utils.mokoString
@@ -58,9 +57,9 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DevSettingsScreen(
-    preferenceStore: PreferencesStore = koinInject<PreferencesStore>()
+    preferenceStore: PreferencesStore = koinInject<PreferencesStore>(),
+    onBack: () -> Unit = {}
 ) {
-    val settingsNav = settingsNavigator
     val context = LocalContext.current
 
     val showInfoCardMap by preferenceStore.showInfoCards.collectAsState(emptyMap())
@@ -74,7 +73,7 @@ fun DevSettingsScreen(
                 title = { Text("Developer Settings") },
                 navigationIcon = {
                     IconButton(
-                        onClick = { settingsNav.popBackStack() }
+                        onClick = onBack
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,

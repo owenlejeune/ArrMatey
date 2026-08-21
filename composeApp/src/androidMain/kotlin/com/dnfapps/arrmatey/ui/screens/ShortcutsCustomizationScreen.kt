@@ -40,7 +40,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.datastore.AndroidPreferencesStore
-import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import com.dnfapps.arrmatey.ui.components.ContainerCard
@@ -56,9 +55,9 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun ShortcutsCustomizationScreen(
     preferenceStore: AndroidPreferencesStore = koinInject(),
-    shortcutManager: AppShortcutManager = koinInject()
+    shortcutManager: AppShortcutManager = koinInject(),
+    onBack: () -> Unit = {}
 ) {
-    val navigation = settingsNavigator
     val scope = rememberCoroutineScope()
     
     var shortcutItems by remember { mutableStateOf<List<AppShortcutManager.ShortcutItem>>(emptyList()) }
@@ -84,7 +83,7 @@ fun ShortcutsCustomizationScreen(
         topBar = {
             TopAppBar(
                 title = { Text(mokoString(MR.strings.customize_shortcuts)) },
-                navigationIcon = { BackButton(navigation) }
+                navigationIcon = { BackButton(onClick = onBack) }
             )
         }
     ) { padding ->

@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.database.dao.InsertResult
-import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
@@ -47,9 +46,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditInstanceScreen(
     id: Long,
-    viewModel: EditInstanceViewModel = koinInjectParams(id)
+    viewModel: EditInstanceViewModel = koinInjectParams(id),
+    onBack: () -> Unit = {}
 ) {
-    val settingsNav = settingsNavigator
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -67,7 +66,7 @@ fun EditInstanceScreen(
 
     LaunchedEffect(uiState.editResult) {
         if (uiState.editResult is InsertResult.Success) {
-            settingsNav.popBackStack()
+            onBack()
         }
     }
 
@@ -79,7 +78,7 @@ fun EditInstanceScreen(
                 title = { Text(text = mokoString(MR.strings.edit_instance)) },
                 navigationIcon = {
                     IconButton(
-                        onClick = { settingsNav.popBackStack() }
+                        onClick = onBack
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -158,7 +157,7 @@ fun EditInstanceScreen(
                                 scope.launch {
                                     instance?.let { instance ->
                                         viewModel.deleteInstance(instance)
-                                        settingsNav.popBackStack()
+                                        onBack()
                                     }
                                 }
                             }

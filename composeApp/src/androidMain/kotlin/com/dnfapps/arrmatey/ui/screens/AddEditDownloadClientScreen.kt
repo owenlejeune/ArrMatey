@@ -68,7 +68,6 @@ import com.dnfapps.arrmatey.downloadclient.state.DownloadClientMutationState
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
 import com.dnfapps.arrmatey.entensions.openAppSettings
 import com.dnfapps.arrmatey.isDebug
-import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.permissions.rememberLocationPermissionHandler
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
@@ -89,9 +88,9 @@ import org.koin.compose.koinInject
 @Composable
 fun AddEditDownloadClientScreen(
     clientId: Long? = null,
-    viewModel: DownloadClientSettingsViewModel = koinInjectParams(clientId)
+    viewModel: DownloadClientSettingsViewModel = koinInjectParams(clientId),
+    onBack: () -> Unit = {}
 ) {
-    val navigation = settingsNavigator
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -109,7 +108,7 @@ fun AddEditDownloadClientScreen(
         when (val state = uiState.mutationState) {
             is DownloadClientMutationState.Success -> {
                 viewModel.resetMutationState()
-                navigation.popBackStack()
+                onBack()
             }
             is DownloadClientMutationState.Conflict -> {
                 conflictFields = state.fields
@@ -141,7 +140,7 @@ fun AddEditDownloadClientScreen(
             TopAppBar(
                 title = { Text(text = titleText) },
                 navigationIcon = {
-                    BackButton(navigation)
+                    BackButton(onClick = onBack)
                 },
                 actions = {
                     if (uiState.isEditing) {

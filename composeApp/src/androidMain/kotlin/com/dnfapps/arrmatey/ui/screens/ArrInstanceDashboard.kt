@@ -46,10 +46,6 @@ import com.dnfapps.arrmatey.arr.state.ArrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.model.InfoItem
-import com.dnfapps.arrmatey.navigation.Navigator
-import com.dnfapps.arrmatey.navigation.navigationManager
-import com.dnfapps.arrmatey.navigation.settingsNavigator
-import com.dnfapps.arrmatey.navigation.toEditInstance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrHealthCard
 import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
@@ -66,14 +62,14 @@ import org.koin.compose.koinInject
 @Composable
 fun ArrInstanceDashboard(
     id: Long,
-    navigation: Navigator<*>,
     windowSizeClass: WindowSizeClass,
     viewModel: ArrInstanceDashboardViewModel = koinInjectParams(id),
-    moko: MokoStrings = koinInject()
+    moko: MokoStrings = koinInject(),
+    onBack: () -> Unit = {},
+    onNavigateToEditInstance: (Long) -> Unit = {}
 ) {
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
 
-    val navManager = navigationManager
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -90,12 +86,12 @@ fun ArrInstanceDashboard(
                     Text(instance.label)
                 }},
                 navigationIcon = {
-                    BackButton(navigation)
+                    BackButton(onClick = onBack)
                 },
                 actions = {
                     IconButton(
                         onClick = {
-                            navManager.openEditInstanceScreen(id)
+                            onNavigateToEditInstance(id)
                         }
                     ) {
                         Icon(Icons.Default.Edit, null)
@@ -126,7 +122,7 @@ fun ArrInstanceDashboard(
                         onRetry = { viewModel.refresh() },
                         onOpenSettings = {
                             instance?.let {
-                                navManager.openEditInstanceScreen(it.id)
+                                onNavigateToEditInstance(it.id)
                             }
                         }
                     )

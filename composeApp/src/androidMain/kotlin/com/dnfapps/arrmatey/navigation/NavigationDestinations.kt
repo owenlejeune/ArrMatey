@@ -11,12 +11,6 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 
-sealed interface HomeTab : NavKey {
-    data object SeriesTab : HomeTab
-    data object MoviesTab: HomeTab
-    data object SettingsTab : HomeTab
-}
-
 sealed interface MediaScreen : NavKey {
     data class Details(
         val id: Long? = null,
