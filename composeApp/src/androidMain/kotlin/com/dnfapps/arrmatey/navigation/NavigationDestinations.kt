@@ -19,8 +19,7 @@ sealed interface HomeTab : NavKey {
 
 sealed interface ArrScreen : NavKey {
     data object Library: ArrScreen
-    data class Details(val id: Long): ArrScreen
-    data class UnifiedDetails(
+    data class Details(
         val id: Long? = null,
         val tmdbId: Long? = null,
         val tvdbId: Long? = null,
@@ -47,20 +46,12 @@ sealed interface SeerrScreen: NavKey {
         val tmdbId: Long,
         val requestType: RequestType
     ): SeerrScreen
-    data class UnifiedDetails(
-        val tmdbId: Long,
-        val requestType: RequestType
-    ): SeerrScreen
     data class PersonDetails(val personId: Long): SeerrScreen
 }
 
 sealed interface DiscoverScreen: NavKey {
     data object Home: DiscoverScreen
     data class Details(
-        val tmdbId: Long,
-        val requestType: RequestType
-    ): DiscoverScreen
-    data class UnifiedDetails(
         val tmdbId: Long,
         val requestType: RequestType
     ): DiscoverScreen

@@ -51,9 +51,7 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toPersonDetails
-import com.dnfapps.arrmatey.navigation.toUnifiedDetails
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
-import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
@@ -101,20 +99,12 @@ fun DiscoverTab(
                     onPersonClick = { navigation.toPersonDetails(it) }
                 )
             }
-            entry<DiscoverScreen.UnifiedDetails> { details ->
-                UnifiedMediaDetailsScreen(
-                    tmdbId = details.tmdbId,
-                    requestType = details.requestType,
-                    onBack = { navigation.popBackStack() },
-                    onPersonClick = { navigation.toPersonDetails(it) }
-                )
-            }
             entry<DiscoverScreen.PersonDetails> { details ->
                 SeerrPersonDetailsScreen(
                     personId = details.personId,
                     onBack = { navigation.popBackStack() },
                     onMediaClick = { tmdbId, type ->
-                        navigation.toUnifiedDetails(tmdbId, type)
+                        navigation.toDetails(tmdbId, type)
                     }
                 )
             }

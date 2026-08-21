@@ -40,7 +40,6 @@ import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toSearch
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
-import com.dnfapps.arrmatey.navigation.toUnifiedDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
@@ -134,7 +133,7 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
                     else -> null
                 }
                 val tvdbId = (media as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
-                navigation.toUnifiedDetails(
+                navigation.toDetails(
                     id = media.id,
                     tmdbId = tmdbId,
                     tvdbId = tvdbId,
@@ -144,25 +143,6 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
         )
     }
     entry<ArrScreen.Details> { details ->
-        UnifiedMediaDetailsScreen(
-            arrId = details.id,
-            instanceType = type,
-            isExpanded = isExpanded,
-            onBack = { navigation.popBackStack() },
-            onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },
-            onNavigateToSeriesRelease = { seriesId, seasonNumber -> navigation.toSeriesRelease(seriesId, seasonNumber) },
-            onNavigateToMovieFiles = { navigation.toMovieFiles(it) },
-            onNavigateToMovieReleases = { navigation.toMovieReleases(it) },
-            onNavigateToAuthorFiles = { navigation.toAuthorFiles(it) },
-            onNavigateToBookDetails = { author, book -> navigation.toBookDetails(author, book) },
-            onNavigateToBookRelease = { navigation.toBookRelease(it) },
-            onNavigateToAudiobookFiles = { navigation.toAudiobookFiles(it) },
-            onNavigateToAudiobookRelease = { id, query -> navigation.toAudiobookRelease(id, query ?: "") },
-            onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) },
-            onPersonClick = { navigation.toPersonDetails(it) }
-        )
-    }
-    entry<ArrScreen.UnifiedDetails> { details ->
         UnifiedMediaDetailsScreen(
             arrId = details.id,
             tmdbId = details.tmdbId,
@@ -190,7 +170,7 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             onBack = { navigation.popBackStack() },
             onNavigateToDetails = { navigation.toDetails(it) },
             onNavigateToUnifiedDetails = { arrId, tmdbId, tvdbId, instanceType ->
-                navigation.toUnifiedDetails(arrId, tmdbId, tvdbId, instanceType)
+                navigation.toDetails(arrId, tmdbId, tvdbId, instanceType)
             },
             onNavigateToPreview = { navigation.navigateTo(ArrScreen.Preview(it)) }
         )
@@ -262,7 +242,7 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             personId = params.personId,
             onBack = { navigation.popBackStack() },
             onMediaClick = { tmdbId, requestType ->
-                navigation.toUnifiedDetails(
+                navigation.toDetails(
                     tmdbId = tmdbId,
                     type = when (requestType) {
                         RequestType.Movie -> InstanceType.Radarr
