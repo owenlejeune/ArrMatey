@@ -27,6 +27,9 @@ class DownloadClientManager(
     private val _downloadClientApis = MutableStateFlow<Map<Long, DownloadClientApi>>(emptyMap())
     val downloadClientApis: StateFlow<Map<Long, DownloadClientApi>> = _downloadClientApis
 
+    // Tracks the DownloadClient row backing each cached API so edits trigger a rebuild.
+    private val cachedClients: MutableMap<Long, DownloadClient> = mutableMapOf()
+
     init {
         observeDownloadClients()
     }
@@ -41,22 +44,23 @@ class DownloadClientManager(
     }
 
     private fun updateClientApis(downloadClients: List<DownloadClient>) {
-        val currentClients = _downloadClientApis.value.toMutableMap()
-        val downloadClientIds = downloadClients.map { it.id }.toSet()
+        val currentApis = _downloadClientApis.value.toMutableMap()
+        val incomingIds = downloadClients.mapTo(mutableSetOf()) { it.id }
 
-        currentClients.keys
-            .filterNot { it in downloadClientIds }
-            .forEach { id ->
-                currentClients.remove(id)
-            }
+        (currentApis.keys - incomingIds).forEach { id ->
+            currentApis.remove(id)
+            cachedClients.remove(id)
+        }
 
         downloadClients.forEach { downloadClient ->
-            if (!currentClients.containsKey(downloadClient.id)) {
-                currentClients[downloadClient.id] = createApi(downloadClient)
+            val cached = cachedClients[downloadClient.id]
+            if (cached == null || cached != downloadClient) {
+                currentApis[downloadClient.id] = createApi(downloadClient)
+                cachedClients[downloadClient.id] = downloadClient
             }
         }
 
-        _downloadClientApis.value = currentClients
+        _downloadClientApis.value = currentApis
     }
 
     fun observeAllDownloadClients(): Flow<List<DownloadClient>> =
@@ -88,23 +92,27 @@ class DownloadClientManager(
         val api = createApi(client)
 
         _downloadClientApis.value += (id to api)
+        cachedClients[id] = client
 
         return api
     }
 
     suspend fun refreshApi(id: Long): DownloadClientApi? {
         _downloadClientApis.value -= id
+        cachedClients.remove(id)
 
         val client = downloadClientRepository.getDownloadClientById(id) ?: return null
         val api = createApi(client)
 
         _downloadClientApis.value += (id to api)
+        cachedClients[id] = client
 
         return api
     }
 
     fun removeApi(id: Long) {
         _downloadClientApis.value -= id
+        cachedClients.remove(id)
     }
 
     fun createApiFromClient(client: DownloadClient): DownloadClientApi {

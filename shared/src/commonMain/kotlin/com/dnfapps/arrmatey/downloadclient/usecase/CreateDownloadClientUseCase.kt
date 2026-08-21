@@ -13,7 +13,6 @@ class CreateDownloadClientUseCase(
             is DownloadClientInsertResult.Success -> DownloadClientMutationState.Success(result.id)
             is DownloadClientInsertResult.Conflict -> DownloadClientMutationState.Conflict(result.fields)
             is DownloadClientInsertResult.Error -> DownloadClientMutationState.Error(result.message)
-            else -> DownloadClientMutationState.Error("Unexpected create result")
         }
     }
 }

@@ -93,6 +93,7 @@ sealed interface CombinedDashboardState {
             val prowlarrStats = instances.filter { it.type == InstanceType.Prowlarr }.map {
                 ProwlarrDashboardState(
                     instance = it,
+                    softwareStatus = ArrSoftwareStatus(version = "1.0.0", appName = it.label),
                     totalIndexers = 10,
                     healthyIndexers = 8,
                     failingIndexers = 2
@@ -267,6 +268,7 @@ data class DownloadClientDashboardState(
 
 data class ProwlarrDashboardState(
     val instance: Instance,
+    val softwareStatus: ArrSoftwareStatus? = null,
     val totalIndexers: Int,
     val healthyIndexers: Int,
     val failingIndexers: Int
