@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.client
 
+import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.IndexerStatus
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrGrabPayload
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrIndexer
@@ -32,6 +33,9 @@ class ProwlarrClient(
         val url = "$baseUrl/${instance.type.testEndpoint}"
         return httpClient.safeGet(url)
     }
+
+    suspend fun getStatus(): NetworkResult<ArrSoftwareStatus> =
+        httpClient.safeGet("$baseUrl/system/status")
 
     suspend fun getIndexers(): NetworkResult<List<ProwlarrIndexer>> {
         val url = "$baseUrl/indexer"
