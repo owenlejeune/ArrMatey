@@ -417,7 +417,7 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    state.upcomingDateString?.let { airingString ->
+                                    state.upcomingDateString?.unlessEmpty { airingString ->
                                         Text(
                                             text = airingString,
                                             style = MaterialTheme.typography.bodyLarge,
@@ -491,7 +491,7 @@ fun UnifiedMediaDetailsScreen(
                                 }
 
                                 AnimatedVisibility(
-                                    visible = state.hasArrId,
+                                    visible = state.hasArrId && state.arrMedia !is ArrSeries,
                                     enter = expandVertically() + fadeIn(),
                                     exit = shrinkVertically() + fadeOut()
                                 ) {
