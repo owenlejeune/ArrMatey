@@ -7,7 +7,6 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
-import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
@@ -56,9 +55,6 @@ object KoinBridge: KoinComponent {
 
     fun getArrMediaViewModel(type: InstanceType): ArrMediaViewModel =
         getKoin().get { parametersOf(type) }
-
-    fun getArrMediaDetailsViewModel(id: Long, type: InstanceType): ArrMediaDetailsViewModel =
-        getKoin().get { parametersOf(id, type) }
 
     fun getInstancesViewModel(type: InstanceType): InstancesViewModel =
         getKoin().get { parametersOf(type) }

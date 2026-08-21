@@ -29,9 +29,6 @@ struct RequestsTab: View {
     
     @ViewBuilder
     private func seerrDestination(for route: SeerrRoute) -> some View {
-        switch route {
-        case .details(let tmdbId, let requestType):
-            SeerrDetailsScreen(tmdbId: tmdbId, requestType: requestType)
-        }
+        SeerrRouteDestination(route: route)
     }
 }
