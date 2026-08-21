@@ -209,16 +209,16 @@ class UnifiedMediaDetailsViewModel(
     val automaticSearchIds: StateFlow<Set<Long>> = _automaticSearchIds.asStateFlow()
 
 
-    val resolvedInstanceType = instanceType ?: when (requestType) {
+    val resolvedInstanceType = when (requestType) {
         RequestType.Movie -> InstanceType.Radarr
         RequestType.Tv -> InstanceType.Sonarr
-        else -> null
+        else -> instanceType
     }
 
-    val resolvedRequestType = requestType ?: when (resolvedInstanceType) {
+    val resolvedRequestType = when (resolvedInstanceType) {
         InstanceType.Radarr -> RequestType.Movie
         InstanceType.Sonarr -> RequestType.Tv
-        else -> null
+        else -> requestType
     }
 
     val preferences: StateFlow<InstancePreferences> = if (resolvedInstanceType != null) {

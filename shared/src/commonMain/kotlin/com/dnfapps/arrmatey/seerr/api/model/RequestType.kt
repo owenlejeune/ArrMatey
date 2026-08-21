@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.seerr.api.model
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.SerialName
 
 enum class RequestType {
@@ -10,5 +11,12 @@ enum class RequestType {
     Tv,
 
     @SerialName("person")
-    Person
+    Person;
+
+    val associatedInstanceType: InstanceType?
+        get() = when(this) {
+            Movie -> InstanceType.Radarr
+            Tv -> InstanceType.Sonarr
+            Person -> null
+        }
 }

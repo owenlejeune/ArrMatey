@@ -263,7 +263,7 @@ fun UnifiedMediaDetailsScreen(
                     (uiState as? UnifiedMediaDetailsUiState.Success)?.let { success ->
                         val showArrActions = success.hasArrId && isArrConfigured
                         val canAddDirectly = !success.hasArrId && success.arrMedia != null && isArrConfigured
-                        val resolvedType = instanceType ?: viewModel.resolvedInstanceType
+                        val resolvedType = viewModel.resolvedInstanceType ?: instanceType
 
                         AnimatedVisibility(
                             visible = buttonState.showReportIssueButton,
@@ -299,14 +299,11 @@ fun UnifiedMediaDetailsScreen(
                             ) {
                                 AnimatedContent(
                                     targetState = isMonitored,
-                                    transitionSpec = {
-                                        (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
-                                    },
-                                    label = "BookmarkIconAnimation"
+                                    label = "MonitoredIcon"
                                 ) { monitored ->
                                     Icon(
                                         imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                        contentDescription = null
+                                        contentDescription = mokoString(if (monitored) MR.strings.unmonitored else MR.strings.monitored)
                                     )
                                 }
                             }
@@ -327,8 +324,8 @@ fun UnifiedMediaDetailsScreen(
                         UnifiedMediaDetailsToolbarMenu(
                             success = success,
                             buttonState = buttonState,
-                            instanceType = instanceType,
-                            requestType = requestType ?: viewModel.resolvedRequestType,
+                            instanceType = resolvedType,
+                            requestType = viewModel.resolvedRequestType ?: requestType,
                             isArrConfigured = isArrConfigured,
                             isSeerrConfigured = isSeerrConfigured,
                             isMonitored = isMonitored,
@@ -1044,21 +1041,6 @@ private fun UnifiedMediaDetailsToolbarMenu(
                             }
                         )
                     }
-                    for (missingInstance in success.missingInstances) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onAddMissingInstance(missingInstance)
-                            }
-                        )
-                    }
                 }
 
                 Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
@@ -1099,6 +1081,22 @@ private fun UnifiedMediaDetailsToolbarMenu(
                             onDelete()
                         }
                     )
+
+                    for (missingInstance in success.missingInstances) {
+                        DropdownMenuItem(
+                            text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onAddMissingInstance(missingInstance)
+                            }
+                        )
+                    }
                 }
             } else if (showMissingInstances) {
                 DropdownMenuGroup(

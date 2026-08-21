@@ -6,6 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.database.EncryptedString
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBazarr
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
@@ -96,7 +97,8 @@ enum class InstanceType(
     val getApiKeyEndpoint: String? = null,
     val mockCover: ImageResource? = null,
     val mockMedia: MockMedia = MockMedia.Default,
-    val associatedColor: Color
+    val associatedColor: Color,
+    val associatedRequestType: RequestType? = null
 ) {
     Sonarr(
         resource = MR.strings.sonarr_description,
@@ -114,7 +116,8 @@ enum class InstanceType(
         supportsNotifications = true,
         mockCover = MR.images.sonarr_mock_poster,
         mockMedia = MockMedia.Sonarr,
-        associatedColor = ArrBlue
+        associatedColor = ArrBlue,
+        associatedRequestType = RequestType.Tv
     ),
     Radarr(
         resource = MR.strings.radarr_description,
@@ -132,7 +135,8 @@ enum class InstanceType(
         supportsNotifications = true,
         mockCover = MR.images.radarr_mock_poster,
         mockMedia = MockMedia.Radarr,
-        associatedColor = ArrOrange
+        associatedColor = ArrOrange,
+        associatedRequestType = RequestType.Movie
     ),
     Lidarr(
         resource = MR.strings.lidarr_description,

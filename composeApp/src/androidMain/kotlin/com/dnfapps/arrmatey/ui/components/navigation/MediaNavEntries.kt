@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.toAlbumRelease
@@ -38,12 +39,14 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
     defaultInstanceType: InstanceType? = null
 ) {
     entry<MediaScreen.Details> { details ->
+        val resolvedInstanceType = details.type ?: details.requestType?.associatedInstanceType ?: defaultInstanceType
+
         UnifiedMediaDetailsScreen(
             arrId = details.id,
             tmdbId = details.tmdbId,
             tvdbId = details.tvdbId,
             requestType = details.requestType,
-            instanceType = details.type ?: defaultInstanceType,
+            instanceType = resolvedInstanceType,
             isExpanded = isExpanded,
             onBack = { navigation.popBackStack() },
             onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },
@@ -76,7 +79,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
     entry<MediaScreen.MovieReleases> { params ->
         val releaseParams = ReleaseParams.Movie(params.movieId)
         InteractiveSearchScreen(
-            instanceType = defaultInstanceType ?: InstanceType.Radarr,
+            instanceType = InstanceType.Radarr,
             releaseParams = releaseParams,
             onBack = { navigation.popBackStack() }
         )
@@ -88,7 +91,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             params.episodeId
         )
         InteractiveSearchScreen(
-            instanceType = defaultInstanceType ?: InstanceType.Sonarr,
+            instanceType = InstanceType.Sonarr,
             releaseParams = releaseParams,
             defaultFilter = if (params.episodeId != null) {
                 ReleaseFilterBy.SingleEpisode
@@ -102,7 +105,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             mediaId = params.albumId
         )
         InteractiveSearchScreen(
-            instanceType = defaultInstanceType ?: InstanceType.Lidarr,
+            instanceType = InstanceType.Lidarr,
             releaseParams = releaseParams,
             onBack = { navigation.popBackStack() }
         )
@@ -112,7 +115,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             mediaId = params.bookId
         )
         InteractiveSearchScreen(
-            instanceType = defaultInstanceType ?: InstanceType.Booksehelf,
+            instanceType = InstanceType.Booksehelf,
             releaseParams = releaseParams,
             onBack = { navigation.popBackStack() }
         )
@@ -161,7 +164,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             query = params.query
         )
         InteractiveSearchScreen(
-            instanceType = defaultInstanceType ?: InstanceType.Listenarr,
+            instanceType = InstanceType.Listenarr,
             releaseParams = releaseParams,
             onBack = { navigation.popBackStack() }
         )
