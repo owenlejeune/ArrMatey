@@ -14,6 +14,8 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +38,8 @@ fun InstancePicker(
     currentInstance: Instance?,
     typeInstances: List<Instance>,
     onInstanceSelected: (Instance) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    buttonColors: IconButtonColors = IconButtonDefaults.iconButtonColors()
 ) {
     val navManager = navigationManager
     var isExpanded by remember { mutableStateOf(false) }
@@ -44,7 +47,8 @@ fun InstancePicker(
 
     Box(modifier = modifier) {
         IconButton(
-            onClick = { isExpanded = true }
+            onClick = { isExpanded = true },
+            colors = buttonColors
         ) {
             Icon(Hard_drive, null)
         }

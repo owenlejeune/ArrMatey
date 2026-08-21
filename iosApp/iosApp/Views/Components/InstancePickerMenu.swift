@@ -10,6 +10,7 @@ import Shared
 
 struct InstancePickerMenu: View {
     let instances: [Instance]
+    var selectedInstanceId: Int64? = nil
     let onChangeInstance: (Instance) -> Void
     let onAddNewInstance: () -> Void
     
@@ -24,7 +25,8 @@ struct InstancePickerMenu: View {
                     HStack {
                         Text(i.label)
                         Spacer()
-                        if i.selected {
+                        let isSelected = selectedInstanceId != nil ? (i.id == selectedInstanceId) : i.selected
+                        if isSelected {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.themePrimary)
                         }

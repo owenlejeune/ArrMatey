@@ -97,7 +97,7 @@ import com.dnfapps.arrmatey.ui.components.AudiobookFileView
 import com.dnfapps.arrmatey.ui.components.BooksArea
 import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
 import com.dnfapps.arrmatey.ui.components.InfoArea
-import com.dnfapps.arrmatey.ui.components.InstanceChipsRow
+import com.dnfapps.arrmatey.ui.components.InstancePicker
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.MovieFileView
@@ -263,6 +263,17 @@ fun UnifiedMediaDetailsScreen(
                     (uiState as? UnifiedMediaDetailsUiState.Success)?.let { success ->
                         val showArrActions = success.hasArrId && isArrConfigured
                         val canAddDirectly = !success.hasArrId && success.arrMedia != null && isArrConfigured
+                        val resolvedType = instanceType ?: viewModel.resolvedInstanceType
+
+                        if (resolvedType != null && success.availableInstances.size > 1) {
+                            InstancePicker(
+                                type = resolvedType,
+                                currentInstance = success.availableInstances.firstOrNull { it.id == success.selectedInstanceId },
+                                typeInstances = success.availableInstances,
+                                onInstanceSelected = { viewModel.selectInstance(it.id) },
+                                buttonColors = IconButtonDefaults.headerBarColors()
+                            )
+                        }
 
                         AnimatedVisibility(
                             visible = buttonState.showReportIssueButton,
@@ -440,17 +451,6 @@ fun UnifiedMediaDetailsScreen(
                                 state.overview?.unlessEmpty {
                                     ItemDescriptionCard(
                                         overview = it,
-                                        modifier = Modifier.padding(horizontal = 24.dp)
-                                    )
-                                }
-
-                                if (state.instancePresences.size > 1 && state.instancePresences.any { it.isPresent }) {
-                                    InstanceChipsRow(
-                                        presences = state.instancePresences,
-                                        selectedInstanceId = state.selectedInstanceId,
-                                        onInstanceSelected = { instanceId ->
-                                            viewModel.selectInstance(instanceId)
-                                        },
                                         modifier = Modifier.padding(horizontal = 24.dp)
                                     )
                                 }

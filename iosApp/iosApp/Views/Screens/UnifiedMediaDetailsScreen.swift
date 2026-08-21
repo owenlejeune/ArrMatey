@@ -150,19 +150,6 @@ extension UnifiedMediaDetailsScreen {
                         ItemDescriptionCard(overview: overview)
                     }
                     
-                    let hasPresence = success.instancePresences.contains { $0.isPresent }
-                    if success.instancePresences.count > 1 && hasPresence {
-                        InstanceChipsRow(
-                            presences: success.instancePresences,
-                            selectedInstanceId: success.selectedInstanceId?.int64Value,
-                            onInstanceSelected: { id in
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    viewModel.selectInstance(instanceId: id.id)
-                                }
-                            }
-                        )
-                    }
-                    
                     if !success.queueItems.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             Text(MR.strings().activity.localized())
@@ -838,10 +825,25 @@ extension UnifiedMediaDetailsScreen {
             let showMissingInstances = !success.missingInstances.isEmpty
             let showMenuButton = showArrActions || showSeerrActions || showMissingInstances
             let showReportIssue = viewModel.buttonState.showReportIssueButton
+            let showInstancePicker = success.availableInstances.count > 1
             
-            if showReportIssue || showArrActions || canAddDirectly || showMenuButton {
+            if showReportIssue || showArrActions || canAddDirectly || showMenuButton || showInstancePicker {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
+                        if showInstancePicker, let resolvedType = viewModel.resolvedInstanceType {
+                            InstancePickerMenu(
+                                instances: success.availableInstances,
+                                selectedInstanceId: success.selectedInstanceId?.int64Value,
+                                onChangeInstance: { inst in
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        viewModel.selectInstance(instanceId: inst.id)
+                                    }
+                                },
+                                onAddNewInstance: { navigationManager.goToNewInstance(of: resolvedType) }
+                            )
+                            .menuIndicator(.hidden)
+                        }
+
                         if showReportIssue {
                             Button(action: { viewModel.showReportIssueSheet() }) {
                                 Image(systemName: "exclamationmark.triangle.fill")
@@ -1225,39 +1227,6 @@ struct UnifiedMediaDetailsActions: View {
                     .background(Color.accentColor)
                     .foregroundColor(.white)
                     .cornerRadius(8)
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Switcher Chips
-struct InstanceChipsRow: View {
-    let presences: [InstanceMediaPresence]
-    let selectedInstanceId: Int64?
-    let onInstanceSelected: (Instance) -> Void
-    
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(presences, id: \.instance.id) { presence in
-                    let isSelected = presence.instance.id == selectedInstanceId
-                    Button(action: { onInstanceSelected(presence.instance) }) {
-                        HStack(spacing: 4) {
-                            Text(presence.instance.label)
-                                .font(.system(size: 14, weight: isSelected ? .bold : .regular))
-                            if presence.isPresent {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(isSelected ? .white : .green)
-                            }
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
-                        .foregroundColor(isSelected ? .white : .primary)
-                        .cornerRadius(16)
-                    }
                 }
             }
         }
