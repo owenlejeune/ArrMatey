@@ -99,6 +99,7 @@ class HttpClientFactory(private val json: Json, private val logger: Logger) {
 
     fun createDownloadClient(downloadClient: DownloadClient): HttpClient =
         HttpClient {
+            expectSuccess = true
             install(ContentNegotiation) {
                 json(json)
             }
