@@ -14,6 +14,7 @@ sealed interface RequestMediaDetails {
     val productionCompanies: List<ProductionCompany>
     val productionCountries: List<ProductionCountry>
     val spokenLanguages: List<SpokenLanguage>
+    val keywords: List<Keyword>
     val status: String
     val tagline: String?
     val voteAverage: Double

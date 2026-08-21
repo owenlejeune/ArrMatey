@@ -276,7 +276,8 @@ class GetUnifiedMediaDetailsUseCase(
             books = arrSuccess?.books ?: emptyList(),
             extraFiles = arrSuccess?.extraFiles ?: emptyList(),
             isMonitored = arrSuccess?.item?.monitored ?: false,
-            queueItems = mediaQueueItems
+            queueItems = mediaQueueItems,
+            keywords = seerrSuccess?.item?.keywords ?: emptyList()
         )
     }
 

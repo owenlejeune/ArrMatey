@@ -30,6 +30,7 @@ data class PersonDetails(
     override val productionCompanies: List<ProductionCompany> = emptyList(),
     override val productionCountries: List<ProductionCountry> = emptyList(),
     override val spokenLanguages: List<SpokenLanguage> = emptyList(),
+    override val keywords: List<Keyword> = emptyList(),
     override val status: String = "",
     override val tagline: String? = null,
     override val voteAverage: Double = 0.0,

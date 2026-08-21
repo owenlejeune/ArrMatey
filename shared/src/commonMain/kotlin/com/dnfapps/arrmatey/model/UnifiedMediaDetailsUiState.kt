@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrDetails
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.getUpcomingDateString
 import com.dnfapps.arrmatey.seerr.api.model.ImdbRating
+import com.dnfapps.arrmatey.seerr.api.model.Keyword
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
@@ -47,6 +48,8 @@ sealed interface UnifiedMediaDetailsUiState {
         val bookFiles: List<BookFile> = emptyList(),
         val books: List<Book> = emptyList(),
         val extraFiles: List<ExtraFile> = emptyList(),
+
+        val keywords: List<Keyword> = emptyList(),
 
         val isMonitored: Boolean = false,
 

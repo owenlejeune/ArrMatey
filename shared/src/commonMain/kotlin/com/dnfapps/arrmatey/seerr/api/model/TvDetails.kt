@@ -17,6 +17,7 @@ data class TvDetails(
     override val productionCompanies: List<ProductionCompany> = emptyList(),
     override val productionCountries: List<ProductionCountry> = emptyList(),
     override val spokenLanguages: List<SpokenLanguage> = emptyList(),
+    override val keywords: List<Keyword> = emptyList(),
     override val status: String,
     override val tagline: String? = null,
     override val voteAverage: Double = 0.0,
@@ -44,8 +45,7 @@ data class TvDetails(
     val originCountry: List<String> = emptyList(),
     val originalName: String,
     val seasons: List<Season> = emptyList(),
-    val type: String,
-    val keywords: List<Keyword> = emptyList()
+    val type: String
 ): RequestMediaDetails {
 
     override fun getCertification(localeCode: String): String? =

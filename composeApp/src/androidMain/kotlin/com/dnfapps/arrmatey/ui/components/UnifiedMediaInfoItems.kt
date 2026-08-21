@@ -26,7 +26,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
 
 @Composable
-fun buildUnifiedInfoItems(
+fun buildArrInfoItems(
     state: UnifiedMediaDetailsUiState.Success,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>
@@ -43,7 +43,12 @@ fun buildUnifiedInfoItems(
         }.toInfoList()
         addAll(arrMap)
     }
+}
 
+@Composable
+fun buildSeerrInfoItems(
+    state: UnifiedMediaDetailsUiState.Success
+): List<InfoItem> = buildList {
     val seerrMedia = state.seerrMedia
     if (seerrMedia != null && seerrMedia !is PersonDetails) {
         val statusLabel = mokoString(MR.strings.status)
@@ -71,6 +76,13 @@ fun buildUnifiedInfoItems(
         }
     }
 }
+
+@Composable
+fun buildUnifiedInfoItems(
+    state: UnifiedMediaDetailsUiState.Success,
+    qualityProfiles: List<QualityProfile>,
+    tags: List<Tag>
+): List<InfoItem> = buildArrInfoItems(state, qualityProfiles, tags) + buildSeerrInfoItems(state)
 
 @Composable
 fun seriesInfo(

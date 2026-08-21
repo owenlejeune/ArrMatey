@@ -16,6 +16,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var isArrConfigured: Bool = false
     @Published private(set) var isSeerrConfigured: Bool = false
     @Published private(set) var activeInstance: Instance? = nil
+    @Published private(set) var activeSeerrInstance: Instance? = nil
     
     @Published var isReportIssueSheetVisible: Bool = false
     @Published var isViewRequestSheetVisible: Bool = false
@@ -85,6 +86,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
             owner.isSeerrConfigured = configured.boolValue
         }
         viewModel.activeInstance.observeAsync(on: self, to: \.activeInstance)
+        viewModel.activeSeerrInstance.observeAsync(on: self, to: \.activeSeerrInstance)
         viewModel.isReportIssueSheetVisible.observeAsync(on: self) { owner, visible in
             owner.isReportIssueSheetVisible = visible.boolValue
         }

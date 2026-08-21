@@ -173,6 +173,10 @@ extension UnifiedMediaDetailsScreen {
                     }
                     
                     unifiedInfoArea(success)
+                    
+                    if !success.keywords.isEmpty {
+                        keywordsSection(success.keywords)
+                    }
                 }
                 .padding(.top, 12)
                 .padding(.horizontal, 24)
@@ -310,26 +314,60 @@ extension UnifiedMediaDetailsScreen {
     
     @ViewBuilder
     private func unifiedInfoArea(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
-        let infoItems = buildUnifiedInfoItems(success: success)
-        if !infoItems.isEmpty {
-            MediaInfoArea(infoItems: infoItems)
+        let arrItems = buildArrInfoItems(success: success)
+        let seerrItems = buildSeerrInfoItems(success: success)
+        let arrInstance = success.availableInstances.first(where: { $0.id == success.selectedInstanceId?.int64Value }) ?? viewModel.activeInstance
+        let seerrInstance = viewModel.activeSeerrInstance
+        if !arrItems.isEmpty || !seerrItems.isEmpty {
+            MediaInfoArea(
+                arrItems: arrItems,
+                seerrItems: seerrItems,
+                arrInstance: arrInstance,
+                seerrInstance: seerrInstance
+            )
         }
     }
     
-    private func buildUnifiedInfoItems(success: UnifiedMediaDetailsUiStateSuccess) -> [InfoItem] {
-        var items: [InfoItem] = []
+    @ViewBuilder
+    private func keywordsSection(_ keywords: [Keyword]) -> some View {
+        let rowCount = min(3, max(1, keywords.count))
+        let rows = (0..<rowCount).map { rowIndex in
+            keywords.enumerated().filter { $0.offset % rowCount == rowIndex }.map { $0.element }
+        }
         
-        // Arr fields — only when actually in the arr library
+        ScrollView(.horizontal, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(0..<rows.count, id: \.self) { rowIndex in
+                    HStack(spacing: 8) {
+                        ForEach(rows[rowIndex], id: \.id) { keyword in
+                            Text(keyword.name)
+                                .font(.system(size: 14))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule()
+                                        .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                                )
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private func buildArrInfoItems(success: UnifiedMediaDetailsUiStateSuccess) -> [InfoItem] {
         if success.hasArrId, let arrMedia = success.arrMedia {
-            let arrItems = buildArrInfoItems(
+            return buildArrInfoItems(
                 arrMedia: arrMedia,
                 qualityProfiles: viewModel.qualityProfiles,
                 tags: viewModel.tags
             )
-            items.append(contentsOf: arrItems)
         }
-        
-        // Seerr fields — always shown when seerr data is available
+        return []
+    }
+    
+    private func buildSeerrInfoItems(success: UnifiedMediaDetailsUiStateSuccess) -> [InfoItem] {
+        var items: [InfoItem] = []
         if let seerrMedia = success.seerrMedia {
             items.append(InfoItem(label: MR.strings().status.localized(), value: seerrMedia.status))
             
@@ -349,8 +387,11 @@ extension UnifiedMediaDetailsScreen {
                 items.append(InfoItem(label: MR.strings().studios.localized(), value: studios))
             }
         }
-        
         return items
+    }
+    
+    private func buildUnifiedInfoItems(success: UnifiedMediaDetailsUiStateSuccess) -> [InfoItem] {
+        buildArrInfoItems(success: success) + buildSeerrInfoItems(success: success)
     }
     
     private func buildArrInfoItems(arrMedia: ArrMedia, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {

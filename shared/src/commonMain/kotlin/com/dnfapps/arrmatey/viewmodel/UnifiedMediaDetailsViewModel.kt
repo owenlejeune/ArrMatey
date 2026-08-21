@@ -279,6 +279,14 @@ class UnifiedMediaDetailsViewModel(
             initialValue = null
         )
 
+    val activeSeerrInstance: StateFlow<Instance?> = seerrRepositoryFlow
+        .map { it?.instance }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
     val isSeerrConfigured: StateFlow<Boolean> = seerrRepositoryFlow
         .map { repo ->
             repo != null && (resolvedRequestType == RequestType.Movie || resolvedRequestType == RequestType.Tv)

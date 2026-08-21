@@ -222,6 +222,7 @@
     <string name="continuing">Continuing</string>
     <string name="no_activity">Your queue is empty</string>
     <string name="tags">Tags</string>
+    <string name="keywords">Keywords</string>
     <string name="monitor_new_seasons">Monitor New Seasons</string>
     <string name="move_files">Move files</string>
     <string name="move_files_description">Whether to automatically move files to the new folder or not.</string>

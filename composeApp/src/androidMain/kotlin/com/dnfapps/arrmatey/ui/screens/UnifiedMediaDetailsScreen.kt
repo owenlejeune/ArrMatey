@@ -7,15 +7,14 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,6 +51,7 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -97,6 +97,8 @@ import com.dnfapps.arrmatey.ui.components.AudiobookFileView
 import com.dnfapps.arrmatey.ui.components.BooksArea
 import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
 import com.dnfapps.arrmatey.ui.components.InfoArea
+import com.dnfapps.arrmatey.ui.components.InfoCardData
+import com.dnfapps.arrmatey.ui.components.InfoCardInstanceFooter
 import com.dnfapps.arrmatey.ui.components.InstancePicker
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.MediaActivitySection
@@ -106,7 +108,8 @@ import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
-import com.dnfapps.arrmatey.ui.components.buildUnifiedInfoItems
+import com.dnfapps.arrmatey.ui.components.buildArrInfoItems
+import com.dnfapps.arrmatey.ui.components.buildSeerrInfoItems
 import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
 import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
@@ -198,6 +201,7 @@ fun UnifiedMediaDetailsScreen(
     val lastSearchResult by viewModel.lastSearchResult.collectAsStateWithLifecycle()
     val addSheetUiState by viewModel.addSheetUiState.collectAsStateWithLifecycle()
     val activeInstance by viewModel.activeInstance.collectAsStateWithLifecycle()
+    val activeSeerrInstance by viewModel.activeSeerrInstance.collectAsStateWithLifecycle()
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
     val itemEditedSuccessfullyMessage = mokoString(MR.strings.item_edited_successfully)
@@ -263,7 +267,7 @@ fun UnifiedMediaDetailsScreen(
                     (uiState as? UnifiedMediaDetailsUiState.Success)?.let { success ->
                         val showArrActions = success.hasArrId && isArrConfigured
                         val canAddDirectly = !success.hasArrId && success.arrMedia != null && isArrConfigured
-                        val resolvedType = viewModel.resolvedInstanceType ?: instanceType
+                        val resolvedType = viewModel.resolvedInstanceType
 
                         AnimatedVisibility(
                             visible = buttonState.showReportIssueButton,
@@ -560,12 +564,59 @@ fun UnifiedMediaDetailsScreen(
                                     SeerrCreditsSection(credits) { onPersonClick(it) }
                                 }
 
-                                val infoItems = buildUnifiedInfoItems(state, qualityProfiles, tags)
-                                if (infoItems.isNotEmpty()) {
+                                val arrInfoItems = buildArrInfoItems(state, qualityProfiles, tags)
+                                val seerrInfoItems = buildSeerrInfoItems(state)
+                                val showBothCards = arrInfoItems.isNotEmpty() && seerrInfoItems.isNotEmpty()
+
+                                val selectedArrInstance = state.availableInstances.firstOrNull { it.id == state.selectedInstanceId } ?: activeInstance
+                                val selectedSeerrInstance = activeSeerrInstance
+
+                                if (arrInfoItems.isNotEmpty() || seerrInfoItems.isNotEmpty()) {
                                     InfoArea(
-                                        infoItems,
+                                        cards = listOf(
+                                            InfoCardData(
+                                                items = arrInfoItems,
+                                                footer = if (showBothCards && selectedArrInstance != null) {
+                                                    { InfoCardInstanceFooter(selectedArrInstance) }
+                                                } else null
+                                            ),
+                                            InfoCardData(
+                                                items = seerrInfoItems,
+                                                footer = if (showBothCards && selectedSeerrInstance != null) {
+                                                    { InfoCardInstanceFooter(selectedSeerrInstance) }
+                                                } else null
+                                            )
+                                        ),
                                         modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
                                     )
+                                }
+
+                                state.keywords.unlessEmpty { keywords ->
+                                    val rowCount = minOf(3, maxOf(1, keywords.size))
+                                    val rows = (0 until rowCount).map { rowIndex ->
+                                        keywords.filterIndexed { index, _ -> index % rowCount == rowIndex }
+                                    }
+
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(0.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .horizontalScroll(rememberScrollState())
+                                            .padding(horizontal = 24.dp)
+                                    ) {
+                                        rows.forEach { rowKeywords ->
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                rowKeywords.forEach { keyword ->
+                                                    SuggestionChip(
+                                                        onClick = {},
+                                                        label = { Text(keyword.name) }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
