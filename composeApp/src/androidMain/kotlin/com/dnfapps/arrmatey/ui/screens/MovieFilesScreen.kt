@@ -34,7 +34,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
-import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ExtraFileCard
 import com.dnfapps.arrmatey.ui.components.FileCard
@@ -51,9 +50,9 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun MovieFilesScreen(
     movie: ArrMovie,
+    onBack: () -> Unit = {},
     viewModel: MovieFilesViewModel = koinInjectParams(movie.id ?: 0L)
 ) {
-    val navigation = arrNavigator
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
@@ -67,7 +66,7 @@ fun MovieFilesScreen(
                 title = {},
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() }
+                        onClick = onBack
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,

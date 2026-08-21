@@ -139,20 +139,20 @@ fun UnifiedMediaDetailsScreen(
     instanceType: InstanceType? = null,
     requestType: RequestType? = null,
     isExpanded: Boolean = false,
+    onBack: () -> Unit,
+    onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit,
+    onNavigateToSeriesRelease: (Long?, Int) -> Unit,
+    onNavigateToMovieFiles: (ArrMovie) -> Unit,
+    onNavigateToMovieReleases: (Long) -> Unit,
+    onNavigateToAuthorFiles: (Author) -> Unit,
+    onNavigateToBookDetails: (Author, Book) -> Unit,
+    onNavigateToBookRelease: (Long) -> Unit,
+    onNavigateToAudiobookFiles: (Audiobook) -> Unit,
+    onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
+    onNavigateToAlbumRelease: (Long, Long) -> Unit,
+    onPersonClick: (Long) -> Unit,
     viewModel: UnifiedMediaDetailsViewModel = koinInjectParams(arrId, tmdbId, tvdbId, instanceType, requestType),
     moko: MokoStrings = koinInject(),
-    onBack: () -> Unit,
-    onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit = { _, _ -> },
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> },
-    onNavigateToMovieFiles: (ArrMovie) -> Unit = {},
-    onNavigateToMovieReleases: (Long) -> Unit = {},
-    onNavigateToAuthorFiles: (Author) -> Unit = {},
-    onNavigateToBookDetails: (Author, Book) -> Unit = { _, _ -> },
-    onNavigateToBookRelease: (Long) -> Unit = {},
-    onNavigateToAudiobookFiles: (Audiobook) -> Unit = {},
-    onNavigateToAudiobookRelease: (Long?, String?) -> Unit = { _, _ -> },
-    onNavigateToAlbumRelease: (Long, Long) -> Unit = { _, _ -> },
-    onPersonClick: (Long) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
@@ -265,16 +265,6 @@ fun UnifiedMediaDetailsScreen(
                         val canAddDirectly = !success.hasArrId && success.arrMedia != null && isArrConfigured
                         val resolvedType = instanceType ?: viewModel.resolvedInstanceType
 
-                        if (resolvedType != null && success.availableInstances.size > 1) {
-                            InstancePicker(
-                                type = resolvedType,
-                                currentInstance = success.availableInstances.firstOrNull { it.id == success.selectedInstanceId },
-                                typeInstances = success.availableInstances,
-                                onInstanceSelected = { viewModel.selectInstance(it.id) },
-                                buttonColors = IconButtonDefaults.headerBarColors()
-                            )
-                        }
-
                         AnimatedVisibility(
                             visible = buttonState.showReportIssueButton,
                             enter = fadeIn() + expandHorizontally(),
@@ -290,6 +280,16 @@ fun UnifiedMediaDetailsScreen(
                                     tint = ArrOrange
                                 )
                             }
+                        }
+
+                        if (resolvedType != null && success.availableInstances.size > 1) {
+                            InstancePicker(
+                                type = resolvedType,
+                                currentInstance = success.availableInstances.firstOrNull { it.id == success.selectedInstanceId },
+                                typeInstances = success.availableInstances,
+                                onInstanceSelected = { viewModel.selectInstance(it.id) },
+                                buttonColors = IconButtonDefaults.headerBarColors()
+                            )
                         }
 
                         if (showArrActions) {
@@ -584,7 +584,14 @@ fun UnifiedMediaDetailsScreen(
                                 users = users,
                                 onDismissRequest = { viewModel.hideRequestSheet() },
                                 onSubmitRequest = { profileId, rootFolder, langId, seasons, userId ->
-                                    viewModel.submitRequest(profileId, rootFolder, langId, seasons, is4k = isRequest4k, userId = userId)
+                                    viewModel.submitRequest(
+                                        profileId,
+                                        rootFolder,
+                                        langId,
+                                        seasons,
+                                        is4k = isRequest4k,
+                                        userId = userId
+                                    )
                                 }
                             )
                         }
@@ -886,7 +893,8 @@ fun UnifiedMediaDetailsScreen(
                     }
 
                     if (confirmRemoveFromService) {
-                        val serviceName = buttonState.serviceName ?: if (requestType == RequestType.Movie) "Radarr" else "Sonarr"
+                        val serviceName =
+                            buttonState.serviceName ?: if (requestType == RequestType.Movie) "Radarr" else "Sonarr"
                         AlertDialog(
                             onDismissRequest = { confirmRemoveFromService = false },
                             title = {
@@ -972,7 +980,8 @@ private fun UnifiedMediaDetailsToolbarMenu(
     modifier: Modifier = Modifier
 ) {
     val showArrActions = success.hasArrId && isArrConfigured
-    val showSeerrActions = isSeerrConfigured && (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
+    val showSeerrActions =
+        isSeerrConfigured && (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
     val showMissingInstances = success.missingInstances.isNotEmpty()
     val showMenuButton = showArrActions || showSeerrActions || showMissingInstances
 

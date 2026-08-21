@@ -56,8 +56,7 @@ import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.extensions.formatAgeMinutes
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
@@ -67,6 +66,7 @@ import com.dnfapps.arrmatey.ui.menu.InteractiveSearchMenu
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.flow.distinctUntilChanged
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -74,11 +74,11 @@ fun InteractiveSearchScreen(
     instanceType: InstanceType,
     releaseParams: ReleaseParams,
     defaultFilter: ReleaseFilterBy = ReleaseFilterBy.Any,
+    onBack: () -> Unit = {},
     viewModel: InteractiveSearchViewModel = koinInjectParams(instanceType, defaultFilter),
-    instanceViewModel: InstancesViewModel = koinInjectParams(instanceType)
+    instanceViewModel: InstancesViewModel = koinInjectParams(instanceType),
+    navigationManager: NavigationManager = koinInject()
 ) {
-    val navigation = arrNavigator
-    val navManager = navigationManager
     val context = LocalContext.current
     val releaseUiState by viewModel.releaseUiState.collectAsStateWithLifecycle()
     val downloadState by viewModel.downloadReleaseState.collectAsStateWithLifecycle()
@@ -118,7 +118,7 @@ fun InteractiveSearchScreen(
         topBar = {
             ArrAppBarWithSearch(
                 textFieldState = textFieldState,
-                navigationIcon =  { BackButton(navigation) },
+                navigationIcon =  { BackButton(onClick = onBack) },
                 actions = {
                     InteractiveSearchMenu(
                         type = instanceType,
@@ -204,7 +204,7 @@ fun InteractiveSearchScreen(
                         message = state.message,
                         onOpenSettings = {
                             instanceState.selectedInstance?.let {
-                                navManager.openEditInstanceScreen(it.id)
+                                navigationManager.openEditInstanceScreen(it.id)
                             }
                         },
                         onRetry = { viewModel.getRelease(releaseParams) }

@@ -36,7 +36,6 @@ import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
-import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
@@ -52,9 +51,9 @@ import com.dnfapps.networking.OperationStatus
 @Composable
 fun AudiobookFilesScreen(
     audiobook: Audiobook,
+    onBack: () -> Unit = {},
     viewModel: AudiobookFilesViewModel = koinInjectParams(audiobook.id ?: 0L)
 ) {
-    val navigation = arrNavigator
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
@@ -68,7 +67,7 @@ fun AudiobookFilesScreen(
                 title = {},
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() }
+                        onClick = onBack
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,

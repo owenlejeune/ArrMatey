@@ -63,8 +63,6 @@ import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toBookRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
@@ -83,9 +81,10 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun BookDetailsScreen(
     book: Book,
     author: Author,
+    onBack: () -> Unit = {},
+    onNavigateToBookRelease: (Long) -> Unit = {},
     viewModel: BookDetailsViewModel = koinInjectParams(author.id, book)
 ) {
-    val navigation = arrNavigator
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -135,7 +134,7 @@ fun BookDetailsScreen(
                 scrollState = scrollState,
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() },
+                        onClick = onBack,
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(
@@ -169,7 +168,7 @@ fun BookDetailsScreen(
                     }
                 }
             )
-        },
+        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -197,7 +196,7 @@ fun BookDetailsScreen(
 
                     ReleaseDownloadButtons(
                         onInteractiveClicked = {
-                            navigation.toBookRelease(bookId = currentBook.id)
+                            onNavigateToBookRelease(currentBook.id)
                         },
                         onAutomaticClicked = {
                             viewModel.executeAutomaticSearch()

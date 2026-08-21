@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,8 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,11 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
-import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.utils.mokoString
-import dev.icerock.moko.resources.compose.painterResource
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -59,15 +53,17 @@ fun MovieFileView(
 //                modifier = Modifier.size(24.dp)
 //            )
             Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = mokoString(MR.strings.history),
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.clickable {
-                    onNavigateToMovieFiles(movie)
-                }
-            )
+            if (movie.movieFile != null || movieExtraFiles.isNotEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.history),
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable {
+                        onNavigateToMovieFiles(movie)
+                    }
+                )
+            }
         }
         ReleaseDownloadButtons(
             onInteractiveClicked = {

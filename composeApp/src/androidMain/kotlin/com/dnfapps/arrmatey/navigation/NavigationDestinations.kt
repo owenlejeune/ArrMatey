@@ -47,6 +47,16 @@ sealed interface SeerrScreen: NavKey {
         val requestType: RequestType
     ): SeerrScreen
     data class PersonDetails(val personId: Long): SeerrScreen
+    data class MovieReleases(val movieId: Long): SeerrScreen
+    data class MovieFiles(val movie: ArrMovie): SeerrScreen
+    data class AuthorFiles(val author: Author): SeerrScreen
+    data class AudiobookFiles(val audiobook: Audiobook): SeerrScreen
+    data class EpisodeDetails(val series: ArrSeries, val episode: Episode): SeerrScreen
+    data class BookDetails(val author: Author, val book: Book): SeerrScreen
+    data class SeriesRelease(val seriesId: Long? = null, val seasonNumber: Int? = null, val episodeId: Long? = null): SeerrScreen
+    data class AlbumRelease(val albumId: Long, val artistId: Long? = null): SeerrScreen
+    data class BookRelease(val bookId: Long): SeerrScreen
+    data class AudiobookRelease(val audiobookId: Long?, val query: String): SeerrScreen
 }
 
 sealed interface DiscoverScreen: NavKey {
@@ -56,6 +66,16 @@ sealed interface DiscoverScreen: NavKey {
         val requestType: RequestType
     ): DiscoverScreen
     data class PersonDetails(val personId: Long): DiscoverScreen
+    data class MovieReleases(val movieId: Long): DiscoverScreen
+    data class MovieFiles(val movie: ArrMovie): DiscoverScreen
+    data class AuthorFiles(val author: Author): DiscoverScreen
+    data class AudiobookFiles(val audiobook: Audiobook): DiscoverScreen
+    data class EpisodeDetails(val series: ArrSeries, val episode: Episode): DiscoverScreen
+    data class BookDetails(val author: Author, val book: Book): DiscoverScreen
+    data class SeriesRelease(val seriesId: Long? = null, val seasonNumber: Int? = null, val episodeId: Long? = null): DiscoverScreen
+    data class AlbumRelease(val albumId: Long, val artistId: Long? = null): DiscoverScreen
+    data class BookRelease(val bookId: Long): DiscoverScreen
+    data class AudiobookRelease(val audiobookId: Long?, val query: String): DiscoverScreen
 }
 
 sealed interface SettingsScreen : NavKey {

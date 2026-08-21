@@ -31,7 +31,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
-import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.ui.components.MediaActivitySection
@@ -45,12 +44,12 @@ import com.dnfapps.networking.OperationStatus
 @Composable
 fun AuthorFilesScreen(
     author: Author,
+    onBack: () -> Unit = {},
     viewModel: AuthorFilesViewModel = koinInjectParams(author.id ?: 0L)
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
-    val navigation = arrNavigator
 
     var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
     var showConfirmRemoveQueueItem by remember { mutableStateOf(false) }
@@ -61,7 +60,7 @@ fun AuthorFilesScreen(
                 title = {},
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() }
+                        onClick = onBack
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,

@@ -48,8 +48,6 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.EpisodeDetailsHeader
 import com.dnfapps.arrmatey.ui.components.FileCard
@@ -68,11 +66,12 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun EpisodeDetailsScreen(
     series: ArrSeries,
     episode: Episode,
+    onBack: () -> Unit = {},
+    onNavigateToSeriesRelease: (Long) -> Unit = {},
     viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode)
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    val navigation = arrNavigator
 
     val currentEpisode by viewModel.episode.collectAsStateWithLifecycle()
     val history by viewModel.history.collectAsStateWithLifecycle()
@@ -121,7 +120,7 @@ fun EpisodeDetailsScreen(
                 scrollState = scrollState,
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() },
+                        onClick = onBack,
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(
@@ -183,7 +182,7 @@ fun EpisodeDetailsScreen(
 
                     ReleaseDownloadButtons(
                         onInteractiveClicked = {
-                            navigation.toSeriesRelease(episodeId = currentEpisode.id)
+                            onNavigateToSeriesRelease(currentEpisode.id)
                         },
                         onAutomaticClicked = {
                             viewModel.executeAutomaticSearch()

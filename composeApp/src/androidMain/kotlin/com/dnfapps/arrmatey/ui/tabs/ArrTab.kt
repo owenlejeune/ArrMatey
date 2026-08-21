@@ -186,7 +186,11 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
     }
     entry<ArrScreen.MovieReleases> { params ->
         val releaseParams = ReleaseParams.Movie(params.movieId)
-        InteractiveSearchScreen(type, releaseParams)
+        InteractiveSearchScreen(
+            instanceType = type,
+            releaseParams = releaseParams,
+            onBack = { navigation.popBackStack() }
+        )
     }
     entry<ArrScreen.SeriesRelease> { params ->
         val releaseParams = ReleaseParams.Series(
@@ -195,11 +199,12 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             params.episodeId
         )
         InteractiveSearchScreen(
-            type,
+            instanceType = type,
             releaseParams = releaseParams,
             defaultFilter = if (params.episodeId != null) {
                 ReleaseFilterBy.SingleEpisode
-            } else ReleaseFilterBy.SeasonPack
+            } else ReleaseFilterBy.SeasonPack,
+            onBack = { navigation.popBackStack() }
         )
     }
     entry<ArrScreen.AlbumRelease> { params ->
@@ -207,35 +212,70 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             artistId = params.artistId,
             mediaId = params.albumId
         )
-        InteractiveSearchScreen(type, releaseParams)
+        InteractiveSearchScreen(
+            instanceType = type,
+            releaseParams = releaseParams,
+            onBack = { navigation.popBackStack() }
+        )
     }
     entry<ArrScreen.BookRelease> { params ->
         val releaseParams = ReleaseParams.Book(
             mediaId = params.bookId
         )
-        InteractiveSearchScreen(type, releaseParams)
+        InteractiveSearchScreen(
+            instanceType = type,
+            releaseParams = releaseParams,
+            onBack = { navigation.popBackStack() }
+        )
     }
     entry<ArrScreen.MovieFiles> { params ->
-        MovieFilesScreen(movie = params.movie)
+        MovieFilesScreen(
+            movie = params.movie,
+            onBack = { navigation.popBackStack() }
+        )
     }
     entry<ArrScreen.AuthorFiles> { params ->
-        AuthorFilesScreen(author = params.author)
+        AuthorFilesScreen(
+            author = params.author,
+            onBack = { navigation.popBackStack() }
+        )
     }
     entry<ArrScreen.EpisodeDetails> { params ->
-        EpisodeDetailsScreen(params.series, params.episode)
+        EpisodeDetailsScreen(
+            series = params.series,
+            episode = params.episode,
+            onBack = { navigation.popBackStack() },
+            onNavigateToSeriesRelease = { episodeId ->
+                navigation.toSeriesRelease(episodeId = episodeId)
+            }
+        )
     }
     entry<ArrScreen.BookDetails> { params ->
-        BookDetailsScreen(params.book, params.author)
+        BookDetailsScreen(
+            book = params.book,
+            author = params.author,
+            onBack = { navigation.popBackStack() },
+            onNavigateToBookRelease = { bookId ->
+                navigation.toBookRelease(bookId = bookId)
+            }
+        )
     }
     entry<ArrScreen.AudiobookFiles> { params ->
-        AudiobookFilesScreen(audiobook = params.audiobook)
+        AudiobookFilesScreen(
+            audiobook = params.audiobook,
+            onBack = { navigation.popBackStack() }
+        )
     }
     entry<ArrScreen.AudiobookRelease> { params ->
         val releaseParams = ReleaseParams.Audiobook(
             mediaId = params.audiobookId,
             query = params.query
         )
-        InteractiveSearchScreen(type, releaseParams)
+        InteractiveSearchScreen(
+            instanceType = type,
+            releaseParams = releaseParams,
+            onBack = { navigation.popBackStack() }
+        )
     }
     entry<ArrScreen.PersonDetails> { params ->
         SeerrPersonDetailsScreen(
