@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.navigation
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.NavKey
-import kotlin.jvm.JvmName
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
@@ -13,7 +12,6 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
-import com.dnfapps.arrmatey.ui.screens.SettingsScreen
 
 /**
  * A generic navigator that manages a reactive backstack of screens.
@@ -71,98 +69,48 @@ open class BaseNavigator<T : NavKey>(initialScreen: T) : Navigator<T> {
 }
 
 // Marker classes for type-safe DI
-class SeriesTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
-class MoviesTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
-class MusicTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
-class RequestsTabNavigator : BaseNavigator<SeerrScreen>(SeerrScreen.Home)
-class DiscoverTabNavigator : BaseNavigator<DiscoverScreen>(DiscoverScreen.Home)
-class BooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
-class AudiobooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
+class SeriesTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
+class MoviesTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
+class MusicTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
+class RequestsTabNavigator : BaseNavigator<NavKey>(SeerrScreen.Home)
+class DiscoverTabNavigator : BaseNavigator<NavKey>(DiscoverScreen.Home)
+class BooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
+class AudiobooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
 class DashboardTabNavigator : BaseNavigator<DashboardScreen>(DashboardScreen.Main)
 class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
 
 /**
- * Domain-specific navigation extensions for Arr feature set.
+ * Shared media navigation extensions.
  */
-fun Navigator<ArrScreen>.toLibrary() = navigateTo(ArrScreen.Library)
-fun Navigator<ArrScreen>.toDetails(
+@Suppress("UNCHECKED_CAST")
+private fun Navigator<*>.nav(): Navigator<NavKey> = this as Navigator<NavKey>
+
+fun Navigator<*>.toLibrary() = nav().navigateTo(ArrScreen.Library)
+fun Navigator<*>.toHome() = nav().navigateTo(SeerrScreen.Home)
+fun Navigator<*>.toDiscover() = nav().navigateTo(DiscoverScreen.Home)
+
+fun Navigator<*>.toDetails(
     id: Long? = null,
     tmdbId: Long? = null,
     tvdbId: Long? = null,
+    requestType: RequestType? = null,
     type: InstanceType? = null
-) = navigateTo(ArrScreen.Details(id, tmdbId, tvdbId, type))
-fun <T> Navigator<ArrScreen>.toPreview(item: T) = navigateTo(ArrScreen.Preview(item))
-fun Navigator<ArrScreen>.toSearch(query: String = "") = navigateTo(ArrScreen.Search(query))
-fun Navigator<ArrScreen>.toMovieReleases(movieId: Long) = navigateTo(ArrScreen.MovieReleases(movieId))
-fun Navigator<ArrScreen>.toMovieFiles(movie: ArrMovie) = navigateTo(ArrScreen.MovieFiles(movie))
-fun Navigator<ArrScreen>.toAuthorFiles(author: Author) = navigateTo(ArrScreen.AuthorFiles(author))
-fun Navigator<ArrScreen>.toAudiobookFiles(audiobook: Audiobook) = navigateTo(ArrScreen.AudiobookFiles(audiobook))
-fun Navigator<ArrScreen>.toEpisodeDetails(series: ArrSeries, episode: Episode) = navigateTo(ArrScreen.EpisodeDetails(series, episode))
-fun Navigator<ArrScreen>.toBookDetails(author: Author, book: Book) = navigateTo(ArrScreen.BookDetails(author, book))
-fun Navigator<ArrScreen>.toSeriesRelease(seriesId: Long? = null, seasonNumber: Int? = null, episodeId: Long? = null) = navigateTo(ArrScreen.SeriesRelease(seriesId, seasonNumber, episodeId))
-fun Navigator<ArrScreen>.toAlbumRelease(albumId: Long, artistId: Long? = null) = navigateTo(ArrScreen.AlbumRelease(albumId, artistId))
-fun Navigator<ArrScreen>.toBookRelease(bookId: Long) = navigateTo(ArrScreen.BookRelease(bookId))
-fun Navigator<ArrScreen>.toAudiobookRelease(audiobookId: Long?, query: String) = navigateTo(ArrScreen.AudiobookRelease(audiobookId, query))
-fun Navigator<ArrScreen>.toPersonDetails(personId: Long) = navigateTo(ArrScreen.PersonDetails(personId))
+) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type))
 
-/**
- * Domain-specific navigation extensions for Seerr feature set.
- */
-fun Navigator<SeerrScreen>.toHome() = navigateTo(SeerrScreen.Home)
-@JvmName("toSeerrDetails")
-fun Navigator<SeerrScreen>.toDetails(tmdbId: Long, requestType: RequestType) = navigateTo(SeerrScreen.Details(tmdbId, requestType))
-@JvmName("toSeerrPersonDetails")
-fun Navigator<SeerrScreen>.toPersonDetails(personId: Long) = navigateTo(SeerrScreen.PersonDetails(personId))
-@JvmName("toSeerrMovieReleases")
-fun Navigator<SeerrScreen>.toMovieReleases(movieId: Long) = navigateTo(SeerrScreen.MovieReleases(movieId))
-@JvmName("toSeerrMovieFiles")
-fun Navigator<SeerrScreen>.toMovieFiles(movie: ArrMovie) = navigateTo(SeerrScreen.MovieFiles(movie))
-@JvmName("toSeerrAuthorFiles")
-fun Navigator<SeerrScreen>.toAuthorFiles(author: Author) = navigateTo(SeerrScreen.AuthorFiles(author))
-@JvmName("toSeerrAudiobookFiles")
-fun Navigator<SeerrScreen>.toAudiobookFiles(audiobook: Audiobook) = navigateTo(SeerrScreen.AudiobookFiles(audiobook))
-@JvmName("toSeerrEpisodeDetails")
-fun Navigator<SeerrScreen>.toEpisodeDetails(series: ArrSeries, episode: Episode) = navigateTo(SeerrScreen.EpisodeDetails(series, episode))
-@JvmName("toSeerrBookDetails")
-fun Navigator<SeerrScreen>.toBookDetails(author: Author, book: Book) = navigateTo(SeerrScreen.BookDetails(author, book))
-@JvmName("toSeerrSeriesRelease")
-fun Navigator<SeerrScreen>.toSeriesRelease(seriesId: Long? = null, seasonNumber: Int? = null, episodeId: Long? = null) = navigateTo(SeerrScreen.SeriesRelease(seriesId, seasonNumber, episodeId))
-@JvmName("toSeerrAlbumRelease")
-fun Navigator<SeerrScreen>.toAlbumRelease(albumId: Long, artistId: Long? = null) = navigateTo(SeerrScreen.AlbumRelease(albumId, artistId))
-@JvmName("toSeerrBookRelease")
-fun Navigator<SeerrScreen>.toBookRelease(bookId: Long) = navigateTo(SeerrScreen.BookRelease(bookId))
-@JvmName("toSeerrAudiobookRelease")
-fun Navigator<SeerrScreen>.toAudiobookRelease(audiobookId: Long?, query: String) = navigateTo(SeerrScreen.AudiobookRelease(audiobookId, query))
-
-/**
- * Domain-specific navigation extensions for Discover tab
- */
-fun Navigator<DiscoverScreen>.toDiscover() = navigateTo(DiscoverScreen.Home)
-@JvmName("toDiscoverDetails")
-fun Navigator<DiscoverScreen>.toDetails(tmdbId: Long, requestType: RequestType) = navigateTo(DiscoverScreen.Details(tmdbId, requestType))
-@JvmName("toDiscoverPersonDetails")
-fun Navigator<DiscoverScreen>.toPersonDetails(personId: Long) = navigateTo(DiscoverScreen.PersonDetails(personId))
-@JvmName("toDiscoverMovieReleases")
-fun Navigator<DiscoverScreen>.toMovieReleases(movieId: Long) = navigateTo(DiscoverScreen.MovieReleases(movieId))
-@JvmName("toDiscoverMovieFiles")
-fun Navigator<DiscoverScreen>.toMovieFiles(movie: ArrMovie) = navigateTo(DiscoverScreen.MovieFiles(movie))
-@JvmName("toDiscoverAuthorFiles")
-fun Navigator<DiscoverScreen>.toAuthorFiles(author: Author) = navigateTo(DiscoverScreen.AuthorFiles(author))
-@JvmName("toDiscoverAudiobookFiles")
-fun Navigator<DiscoverScreen>.toAudiobookFiles(audiobook: Audiobook) = navigateTo(DiscoverScreen.AudiobookFiles(audiobook))
-@JvmName("toDiscoverEpisodeDetails")
-fun Navigator<DiscoverScreen>.toEpisodeDetails(series: ArrSeries, episode: Episode) = navigateTo(DiscoverScreen.EpisodeDetails(series, episode))
-@JvmName("toDiscoverBookDetails")
-fun Navigator<DiscoverScreen>.toBookDetails(author: Author, book: Book) = navigateTo(DiscoverScreen.BookDetails(author, book))
-@JvmName("toDiscoverSeriesRelease")
-fun Navigator<DiscoverScreen>.toSeriesRelease(seriesId: Long? = null, seasonNumber: Int? = null, episodeId: Long? = null) = navigateTo(DiscoverScreen.SeriesRelease(seriesId, seasonNumber, episodeId))
-@JvmName("toDiscoverAlbumRelease")
-fun Navigator<DiscoverScreen>.toAlbumRelease(albumId: Long, artistId: Long? = null) = navigateTo(DiscoverScreen.AlbumRelease(albumId, artistId))
-@JvmName("toDiscoverBookRelease")
-fun Navigator<DiscoverScreen>.toBookRelease(bookId: Long) = navigateTo(DiscoverScreen.BookRelease(bookId))
-@JvmName("toDiscoverAudiobookRelease")
-fun Navigator<DiscoverScreen>.toAudiobookRelease(audiobookId: Long?, query: String) = navigateTo(DiscoverScreen.AudiobookRelease(audiobookId, query))
+fun <T> Navigator<*>.toPreview(item: T) = nav().navigateTo(MediaScreen.Preview(item))
+fun Navigator<*>.toSearch(query: String = "") = nav().navigateTo(MediaScreen.Search(query))
+fun Navigator<*>.toMovieReleases(movieId: Long) = nav().navigateTo(MediaScreen.MovieReleases(movieId))
+fun Navigator<*>.toMovieFiles(movie: ArrMovie) = nav().navigateTo(MediaScreen.MovieFiles(movie))
+fun Navigator<*>.toAuthorFiles(author: Author) = nav().navigateTo(MediaScreen.AuthorFiles(author))
+fun Navigator<*>.toAudiobookFiles(audiobook: Audiobook) = nav().navigateTo(MediaScreen.AudiobookFiles(audiobook))
+fun Navigator<*>.toEpisodeDetails(series: ArrSeries, episode: Episode) = nav().navigateTo(MediaScreen.EpisodeDetails(series, episode))
+fun Navigator<*>.toBookDetails(author: Author, book: Book) = nav().navigateTo(MediaScreen.BookDetails(author, book))
+fun Navigator<*>.toSeriesRelease(seriesId: Long? = null, seasonNumber: Int? = null, episodeId: Long? = null) = nav().navigateTo(MediaScreen.SeriesRelease(seriesId, seasonNumber, episodeId))
+fun Navigator<*>.toAlbumRelease(albumId: Long, artistId: Long? = null) = nav().navigateTo(MediaScreen.AlbumRelease(albumId, artistId))
+fun Navigator<*>.toBookRelease(bookId: Long) = nav().navigateTo(MediaScreen.BookRelease(bookId))
+fun Navigator<*>.toAudiobookRelease(audiobookId: Long?, query: String) = nav().navigateTo(MediaScreen.AudiobookRelease(audiobookId, query))
+fun Navigator<*>.toPersonDetails(personId: Long) = nav().navigateTo(MediaScreen.PersonDetails(personId))
 
 /**
  * Domain-specific navigation extensions for Settings feature set.
@@ -185,9 +133,23 @@ fun Navigator<SettingsScreen>.onInstanceTap(id: Long, type: InstanceType) =
         InstanceType.Lidarr,
         InstanceType.Booksehelf,
         InstanceType.Listenarr -> toArrDashboard(id)
-        else -> toEditInstance(id)
+        InstanceType.Seerr,
+        InstanceType.Bazarr,
+        InstanceType.Prowlarr -> toEditInstance(id)
     }
 
-fun Navigator<DashboardScreen>.openArrDashboard(id: Long) = navigateTo(DashboardScreen.ArrDashboard(id))
+/**
+ * Domain-specific navigation extensions for Dashboard feature set.
+ */
+fun Navigator<DashboardScreen>.toMain() = navigateTo(DashboardScreen.Main)
+@JvmName("toDashboardArrDashboard")
+fun Navigator<DashboardScreen>.toArrDashboard(id: Long) = navigateTo(DashboardScreen.ArrDashboard(id))
+fun Navigator<DashboardScreen>.openArrDashboard(id: Long) = toArrDashboard(id)
 
-fun Navigator<BazarrScreen>.openDetails(id: Long, type: BazarrMediaType) = navigateTo(BazarrScreen.Details(id, type))
+/**
+ * Domain-specific navigation extensions for Bazarr feature set.
+ */
+@JvmName("toBazarrLibrary")
+fun Navigator<BazarrScreen>.toLibrary() = navigateTo(BazarrScreen.Library)
+fun Navigator<BazarrScreen>.toDetails(id: Long, type: BazarrMediaType) = navigateTo(BazarrScreen.Details(id, type))
+fun Navigator<BazarrScreen>.openDetails(id: Long, type: BazarrMediaType) = toDetails(id, type)

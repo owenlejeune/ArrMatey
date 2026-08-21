@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.navigation3.runtime.NavKey
 
 /**
  * CompositionLocals to provide navigation components throughout the UI tree.
@@ -11,15 +12,15 @@ val LocalNavigationManager = staticCompositionLocalOf<NavigationManager> {
     error("No NavigationManager provided")
 }
 
-val LocalArrNavigator = staticCompositionLocalOf<Navigator<ArrScreen>> {
+val LocalArrNavigator = staticCompositionLocalOf<Navigator<NavKey>> {
     error("No ArrNavigator provided")
 }
 
-val LocalSeerrNavigator = staticCompositionLocalOf<Navigator<SeerrScreen>> {
+val LocalSeerrNavigator = staticCompositionLocalOf<Navigator<NavKey>> {
     error("No SeerrNavigator provided")
 }
 
-val LocalDiscoverNavigator = staticCompositionLocalOf<Navigator<DiscoverScreen>> {
+val LocalDiscoverNavigator = staticCompositionLocalOf<Navigator<NavKey>> {
     error("No DiscoverNavigator provided")
 }
 
@@ -43,15 +44,15 @@ val navigationManager: NavigationManager
     @Composable
     get() = LocalNavigationManager.current
 
-val arrNavigator: Navigator<ArrScreen>
+val arrNavigator: Navigator<NavKey>
     @Composable
     get() = LocalArrNavigator.current
 
-val seerrNavigator: Navigator<SeerrScreen>
+val seerrNavigator: Navigator<NavKey>
     @Composable
     get() = LocalSeerrNavigator.current
 
-val discoverNavigator: Navigator<DiscoverScreen>
+val discoverNavigator: Navigator<NavKey>
     @Composable
     get() = LocalDiscoverNavigator.current
 

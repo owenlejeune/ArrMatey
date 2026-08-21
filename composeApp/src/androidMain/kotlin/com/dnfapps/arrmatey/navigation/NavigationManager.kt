@@ -49,7 +49,7 @@ class NavigationManager(
     /**
      * Returns the [Navigator] for a specific [InstanceType].
      */
-    fun arr(type: InstanceType): Navigator<ArrScreen> {
+    fun arr(type: InstanceType): Navigator<NavKey> {
         return navigatorFor(tabFor(type))
     }
 
@@ -132,6 +132,6 @@ class NavigationManager(
     }
 
     fun openSeerrDetails(tmdbId: Long, requestType: RequestType) {
-        discover.navigateTo(DiscoverScreen.Details(tmdbId, requestType))
+        discover.toDetails(tmdbId = tmdbId, requestType = requestType)
     }
 }

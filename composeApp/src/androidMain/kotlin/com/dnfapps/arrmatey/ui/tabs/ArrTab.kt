@@ -15,46 +15,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
-import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.LocalArrNavigator
+import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
-import com.dnfapps.arrmatey.navigation.toAlbumRelease
-import com.dnfapps.arrmatey.navigation.toAudiobookFiles
-import com.dnfapps.arrmatey.navigation.toAudiobookRelease
-import com.dnfapps.arrmatey.navigation.toAuthorFiles
-import com.dnfapps.arrmatey.navigation.toBookDetails
-import com.dnfapps.arrmatey.navigation.toBookRelease
 import com.dnfapps.arrmatey.navigation.toDetails
-import com.dnfapps.arrmatey.navigation.toEpisodeDetails
-import com.dnfapps.arrmatey.navigation.toMovieFiles
-import com.dnfapps.arrmatey.navigation.toMovieReleases
-import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toSearch
-import com.dnfapps.arrmatey.navigation.toSeriesRelease
-import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.ArrLibraryScreen
-import com.dnfapps.arrmatey.ui.screens.ArrSearchScreen
-import com.dnfapps.arrmatey.ui.screens.AudiobookFilesScreen
-import com.dnfapps.arrmatey.ui.screens.AuthorFilesScreen
-import com.dnfapps.arrmatey.ui.screens.BookDetailsScreen
-import com.dnfapps.arrmatey.ui.screens.EpisodeDetailsScreen
-import com.dnfapps.arrmatey.ui.screens.InteractiveSearchScreen
-import com.dnfapps.arrmatey.ui.screens.MediaPreviewScreen
-import com.dnfapps.arrmatey.ui.screens.MovieFilesScreen
-import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
-import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
 import org.koin.compose.koinInject
 
 @Composable
@@ -63,11 +41,11 @@ fun ArrTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
     navigationManager: NavigationManager = koinInject(),
-    navigation: Navigator<ArrScreen> = navigationManager.arr(type)
+    navigation: Navigator<NavKey> = navigationManager.arr(type)
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
-    val baseIndex = navigation.backStack.indexOfLast { it is ArrScreen.Library || it is ArrScreen.Search }.coerceAtLeast(0)
+    val baseIndex = navigation.backStack.indexOfLast { it is ArrScreen.Library || it is MediaScreen.Search }.coerceAtLeast(0)
     val baseScreen = navigation.backStack[baseIndex]
 
     val detailBackStack = navigation.backStack.filterIndexed { index, _ -> index > baseIndex }
@@ -91,7 +69,7 @@ fun ArrTab(
                 )
             }
 
-            val lastValidDetailBackStack = remember { mutableStateOf<List<ArrScreen>>(emptyList()) }
+            val lastValidDetailBackStack = remember { mutableStateOf<List<NavKey>>(emptyList()) }
             if (detailBackStack.isNotEmpty()) {
                 lastValidDetailBackStack.value = detailBackStack
             }
@@ -119,7 +97,7 @@ fun ArrTab(
     }
 }
 
-private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIsVisible: Boolean, navigation: Navigator<ArrScreen>) = entryProvider {
+private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIsVisible: Boolean, navigation: Navigator<*>) = entryProvider {
     entry<ArrScreen.Library> {
         ArrLibraryScreen(
             type = type,
@@ -142,155 +120,5 @@ private fun arrEntryProvider(type: InstanceType, isExpanded: Boolean, wideRailIs
             }
         )
     }
-    entry<ArrScreen.Details> { details ->
-        UnifiedMediaDetailsScreen(
-            arrId = details.id,
-            tmdbId = details.tmdbId,
-            tvdbId = details.tvdbId,
-            instanceType = details.type ?: type,
-            isExpanded = isExpanded,
-            onBack = { navigation.popBackStack() },
-            onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },
-            onNavigateToSeriesRelease = { seriesId, seasonNumber -> navigation.toSeriesRelease(seriesId, seasonNumber) },
-            onNavigateToMovieFiles = { navigation.toMovieFiles(it) },
-            onNavigateToMovieReleases = { navigation.toMovieReleases(it) },
-            onNavigateToAuthorFiles = { navigation.toAuthorFiles(it) },
-            onNavigateToBookDetails = { author, book -> navigation.toBookDetails(author, book) },
-            onNavigateToBookRelease = { navigation.toBookRelease(it) },
-            onNavigateToAudiobookFiles = { navigation.toAudiobookFiles(it) },
-            onNavigateToAudiobookRelease = { id, query -> navigation.toAudiobookRelease(id, query ?: "") },
-            onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) },
-            onPersonClick = { navigation.toPersonDetails(it) }
-        )
-    }
-    entry<ArrScreen.Search> { search ->
-        ArrSearchScreen(
-            initialQuery = search.query,
-            type = type,
-            onBack = { navigation.popBackStack() },
-            onNavigateToDetails = { navigation.toDetails(it) },
-            onNavigateToUnifiedDetails = { arrId, tmdbId, tvdbId, instanceType ->
-                navigation.toDetails(arrId, tmdbId, tvdbId, instanceType)
-            },
-            onNavigateToPreview = { navigation.navigateTo(ArrScreen.Preview(it)) }
-        )
-    }
-    entry<ArrScreen.Preview<ArrMedia>> { preview ->
-        MediaPreviewScreen(
-            item = preview.item,
-            type = type,
-            isExpanded = isExpanded,
-            onBack = { navigation.popBackStack() },
-            onItemAdded = { navigation.toDetails(it) }
-        )
-    }
-    entry<ArrScreen.MovieReleases> { params ->
-        val releaseParams = ReleaseParams.Movie(params.movieId)
-        InteractiveSearchScreen(
-            instanceType = type,
-            releaseParams = releaseParams,
-            onBack = { navigation.popBackStack() }
-        )
-    }
-    entry<ArrScreen.SeriesRelease> { params ->
-        val releaseParams = ReleaseParams.Series(
-            params.seriesId,
-            params.seasonNumber,
-            params.episodeId
-        )
-        InteractiveSearchScreen(
-            instanceType = type,
-            releaseParams = releaseParams,
-            defaultFilter = if (params.episodeId != null) {
-                ReleaseFilterBy.SingleEpisode
-            } else ReleaseFilterBy.SeasonPack,
-            onBack = { navigation.popBackStack() }
-        )
-    }
-    entry<ArrScreen.AlbumRelease> { params ->
-        val releaseParams = ReleaseParams.Album(
-            artistId = params.artistId,
-            mediaId = params.albumId
-        )
-        InteractiveSearchScreen(
-            instanceType = type,
-            releaseParams = releaseParams,
-            onBack = { navigation.popBackStack() }
-        )
-    }
-    entry<ArrScreen.BookRelease> { params ->
-        val releaseParams = ReleaseParams.Book(
-            mediaId = params.bookId
-        )
-        InteractiveSearchScreen(
-            instanceType = type,
-            releaseParams = releaseParams,
-            onBack = { navigation.popBackStack() }
-        )
-    }
-    entry<ArrScreen.MovieFiles> { params ->
-        MovieFilesScreen(
-            movie = params.movie,
-            onBack = { navigation.popBackStack() }
-        )
-    }
-    entry<ArrScreen.AuthorFiles> { params ->
-        AuthorFilesScreen(
-            author = params.author,
-            onBack = { navigation.popBackStack() }
-        )
-    }
-    entry<ArrScreen.EpisodeDetails> { params ->
-        EpisodeDetailsScreen(
-            series = params.series,
-            episode = params.episode,
-            onBack = { navigation.popBackStack() },
-            onNavigateToSeriesRelease = { episodeId ->
-                navigation.toSeriesRelease(episodeId = episodeId)
-            }
-        )
-    }
-    entry<ArrScreen.BookDetails> { params ->
-        BookDetailsScreen(
-            book = params.book,
-            author = params.author,
-            onBack = { navigation.popBackStack() },
-            onNavigateToBookRelease = { bookId ->
-                navigation.toBookRelease(bookId = bookId)
-            }
-        )
-    }
-    entry<ArrScreen.AudiobookFiles> { params ->
-        AudiobookFilesScreen(
-            audiobook = params.audiobook,
-            onBack = { navigation.popBackStack() }
-        )
-    }
-    entry<ArrScreen.AudiobookRelease> { params ->
-        val releaseParams = ReleaseParams.Audiobook(
-            mediaId = params.audiobookId,
-            query = params.query
-        )
-        InteractiveSearchScreen(
-            instanceType = type,
-            releaseParams = releaseParams,
-            onBack = { navigation.popBackStack() }
-        )
-    }
-    entry<ArrScreen.PersonDetails> { params ->
-        SeerrPersonDetailsScreen(
-            personId = params.personId,
-            onBack = { navigation.popBackStack() },
-            onMediaClick = { tmdbId, requestType ->
-                navigation.toDetails(
-                    tmdbId = tmdbId,
-                    type = when (requestType) {
-                        RequestType.Movie -> InstanceType.Radarr
-                        RequestType.Tv -> InstanceType.Sonarr
-                        else -> null
-                    }
-                )
-            }
-        )
-    }
+    mediaNavEntries(navigation = navigation, isExpanded = isExpanded, defaultInstanceType = type)
 }
