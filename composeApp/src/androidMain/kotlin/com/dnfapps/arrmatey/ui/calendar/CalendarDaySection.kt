@@ -36,7 +36,8 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun CalendarDaySection(
     date: LocalDate,
-    items: List<CalendarItem>
+    items: List<CalendarItem>,
+    onItemClick: (CalendarItem) -> Unit = {}
 ) {
     val today = remember {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -89,12 +90,12 @@ fun CalendarDaySection(
 
         items.forEach { item ->
             when (item) {
-                is ArrMovie -> MovieCalendarItem(date, item)
-                is EpisodeGroup -> EpisodeCalendarItem(item.first, item.additional)
-                is Episode -> EpisodeCalendarItem(item)
-                is ArrAlbum -> AlbumCalendarItem(item)
-                is Book -> BookCalendarItem(item)
-                is Audiobook -> AudiobookCalendarItem(item)
+                is ArrMovie -> MovieCalendarItem(date, item, onClick = { onItemClick(item) })
+                is EpisodeGroup -> EpisodeCalendarItem(item.first, item.additional, onClick = { onItemClick(item) })
+                is Episode -> EpisodeCalendarItem(item, onClick = { onItemClick(item) })
+                is ArrAlbum -> AlbumCalendarItem(item, onClick = { onItemClick(item) })
+                is Book -> BookCalendarItem(item, onClick = { onItemClick(item) })
+                is Audiobook -> AudiobookCalendarItem(item, onClick = { onItemClick(item) })
             }
         }
     }

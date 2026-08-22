@@ -86,6 +86,12 @@ class EpisodeDetailsViewModel(
 
     private fun observeData(repository: ArrInstanceRepository) {
         viewModelScope.launch {
+            repository.getMediaDetails(seriesId)
+        }
+        viewModelScope.launch {
+            repository.getEpisodes(seriesId)
+        }
+        viewModelScope.launch {
             repository.episodes
                 .map { episodesMap ->
                     episodesMap[seriesId]?.firstOrNull { it.id == episode.value.id }

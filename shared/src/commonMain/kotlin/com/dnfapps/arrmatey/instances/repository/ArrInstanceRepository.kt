@@ -933,6 +933,23 @@ class ArrInstanceRepository(
                 }
         }
 
+    suspend fun getAuthorBooks(authorId: Long): NetworkResult<List<Book>> =
+        safePerformReadarr { client ->
+            client.getBooks(authorId)
+                .onSuccess { result ->
+                    val currentBooks = _booksLibrary.value.toMutableList()
+                    result.forEach { book ->
+                        val index = currentBooks.indexOfFirst { it.id == book.id }
+                        if (index != -1) {
+                            currentBooks[index] = book
+                        } else {
+                            currentBooks.add(book)
+                        }
+                    }
+                    _booksLibrary.value = currentBooks
+                }
+        }
+
     suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
         safePerformReadarr { client ->
             client.deleteBookFiles(bookFilesIds)

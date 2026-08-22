@@ -34,9 +34,11 @@ import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun AudiobookCalendarItem(
-    audiobook: Audiobook
+    audiobook: Audiobook,
+    onClick: () -> Unit = {}
 ) {
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),

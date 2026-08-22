@@ -46,6 +46,14 @@ sealed interface DiscoverScreen: NavKey {
     data object Home: DiscoverScreen
 }
 
+sealed interface CalendarScreen: NavKey {
+    data object Calendar: CalendarScreen
+}
+
+sealed interface ActivityScreen: NavKey {
+    data object Queue: ActivityScreen
+}
+
 sealed interface SettingsScreen : NavKey {
     data object Landing : SettingsScreen
     data class AddInstance(val type: InstanceType = InstanceType.Sonarr) : SettingsScreen

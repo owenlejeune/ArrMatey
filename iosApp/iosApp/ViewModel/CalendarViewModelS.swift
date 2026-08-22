@@ -60,4 +60,17 @@ class CalendarViewModelS: ObservableObject {
     func setFilterInstanceId(_ instanceId: Int64?) {
         viewModel.setFilterInstanceId(id: instanceId?.asKotlinLong)
     }
+    
+    func resolveDestination(item: CalendarItem) async -> [ResolvedMediaDestination] {
+        await withCheckedContinuation { continuation in
+            Task { @MainActor in
+                let result = try? await viewModel.resolveDestination(item: item)
+                continuation.resume(returning: result as? [ResolvedMediaDestination] ?? [])
+            }
+        }
+    }
+    
+    func selectInstance(instance: Instance) async {
+        try? await viewModel.selectInstance(instance: instance)
+    }
 }

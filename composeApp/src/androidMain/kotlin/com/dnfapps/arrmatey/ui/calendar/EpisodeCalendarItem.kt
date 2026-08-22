@@ -46,9 +46,11 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun EpisodeCalendarItem(
     episode: Episode,
-    additional: List<Episode> = emptyList()
+    additional: List<Episode> = emptyList(),
+    onClick: () -> Unit = {}
 ) {
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),

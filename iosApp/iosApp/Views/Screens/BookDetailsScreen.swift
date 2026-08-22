@@ -48,13 +48,25 @@ struct BookDetailsScreen: View {
     @ViewBuilder
     private func contentForState() -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                BookDetailsHeader(author: author, book: viewModel.book)
+            VStack(alignment: .leading, spacing: 0) {
+                MediaHeaderBanner(bannerUrl: URL(string: book.getCover()?.remoteUrl ?? ""), height: 250, gradientHeight: 100)
                 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(book.title.breakable())
-                        .font(.title)
-                        .bold()
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(book.title.breakable())
+                            .font(.title)
+                            .bold()
+                        
+                        if let authorTitle = author.title {
+                            Text(authorTitle)
+                                .font(.body)
+                        }
+                        
+                        if let pageCount = book.pageCount {
+                            Text("\(pageCount) pages")
+                                .font(.caption)
+                        }
+                    }
 
                     if let overview = viewModel.bookEdition?.overview {
                         ItemDescriptionCard(overview: overview)
@@ -108,19 +120,20 @@ struct BookDetailsScreen: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .primaryAction) {
-            Image(systemName: viewModel.book.monitored ? "bookmark.fill" : "bookmark")
-                .imageScale(.medium)
-                .onTapGesture {
-                    viewModel.toggleMonitor()
-                }
+            Button {
+                viewModel.toggleMonitor()
+            } label: {
+                Image(systemName: viewModel.book.monitored ? "bookmark.fill" : "bookmark")
+            }
         }
         ToolbarItem(placement: .primaryAction) {
-            Image(systemName: "trash")
-                .imageScale(.medium)
-                .tint(.red)
-                .onTapGesture {
-                    confirmDelete = true
-                }
+            Button {
+                confirmDelete = true
+            } label: {
+                Image(systemName: "trash")
+            }
+            .tint(.red)
+            .disabled(viewModel.bookFiles.isEmpty)
         }
     }
 }

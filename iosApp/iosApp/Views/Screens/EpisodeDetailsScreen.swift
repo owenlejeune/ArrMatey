@@ -48,13 +48,27 @@ struct EpisodeDetailsScreen: View {
     @ViewBuilder
     private func contentForState() -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                EpisodeDetailsHeader(series: series, episode: episode)
+            VStack(alignment: .leading, spacing: 0) {
+                MediaHeaderBanner(bannerUrl: URL(string: episode.getBanner()?.remoteUrl ?? ""), height: 250, gradientHeight: 100)
                 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(episode.displayTitle)
-                        .font(.title)
-                        .bold()
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(episode.displayTitle)
+                            .font(.title)
+                            .bold()
+                        
+                        Text(series.title ?? MR.strings().unknown.localized())
+                            .font(.body)
+                        
+                        let statusRow = [
+                            episode.seasonEpLabel,
+                            episode.runtimeString,
+                            episode.formatAirDateUtc()
+                        ].compactMap { $0 }.joined(separator: " • ")
+                        
+                        Text(statusRow)
+                            .font(.caption)
+                    }
 
                     ItemDescriptionCard(overview: episode.overview)
                     
@@ -114,19 +128,20 @@ struct EpisodeDetailsScreen: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .primaryAction) {
-            Image(systemName: viewModel.episode.monitored ? "bookmark.fill" : "bookmark")
-                .imageScale(.medium)
-                .onTapGesture {
-                    viewModel.toggleMonitor()
-                }
+            Button {
+                viewModel.toggleMonitor()
+            } label: {
+                Image(systemName: viewModel.episode.monitored ? "bookmark.fill" : "bookmark")
+            }
         }
         ToolbarItem(placement: .primaryAction) {
-            Image(systemName: "trash")
-                .imageScale(.medium)
-                .tint(.red)
-                .onTapGesture {
-                    confirmDelete = true
-                }
+            Button {
+                confirmDelete = true
+            } label: {
+                Image(systemName: "trash")
+            }
+            .tint(.red)
+            .disabled(viewModel.episode.episodeFile == nil)
         }
     }
 }

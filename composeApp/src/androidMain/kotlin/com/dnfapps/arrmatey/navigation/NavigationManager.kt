@@ -18,6 +18,7 @@ class NavigationManager(
     val discover: DiscoverTabNavigator,
     val dashboard: DashboardTabNavigator,
     val bazarr: BazarrTabNavigator,
+    val calendar: CalendarTabNavigator,
     private val appState: AppState,
     private val tabManager: TabManager
 ) {

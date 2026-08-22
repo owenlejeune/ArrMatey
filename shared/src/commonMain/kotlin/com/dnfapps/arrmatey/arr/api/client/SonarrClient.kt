@@ -34,20 +34,7 @@ class SonarrClient(
 ) : BaseArrClient(httpClient), ArrClient {
 
     override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> =
-        get<List<ArrSeries>>("series")
-            .onSuccess { shows ->
-                shows.map { series ->
-                    series.copy(
-                        images = series.images.map { image ->
-                            if (image.remoteUrl?.startsWith("/") == true) {
-                                image.copy(remoteUrl = "$baseUrl${image.remoteUrl}")
-                            } else {
-                                image
-                            }
-                        }
-                    )
-                }
-            }
+        get("series")
 
     override suspend fun getDetail(id: Long): NetworkResult<ArrSeries> =
         get("series/$id")

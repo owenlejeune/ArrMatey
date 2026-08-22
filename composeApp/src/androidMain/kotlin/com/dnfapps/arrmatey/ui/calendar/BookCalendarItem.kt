@@ -33,9 +33,11 @@ import com.dnfapps.arrmatey.ui.theme.surfaceDark
 
 @Composable
 fun BookCalendarItem(
-    book: Book
+    book: Book,
+    onClick: () -> Unit = {}
 ) {
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),

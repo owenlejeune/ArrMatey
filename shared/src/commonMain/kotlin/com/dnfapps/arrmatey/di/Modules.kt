@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DownloadReleaseUseCase
+import com.dnfapps.arrmatey.arr.usecase.FindMatchingInstancesForMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookMetadataUseCase
@@ -301,6 +302,7 @@ val useCaseModule = module {
     factory { GetProwlarrIndexersUseCase(get()) }
     factory { PerformProwlarrSearchUseCase(get()) }
     factory { GrabProwlarrReleaseUseCase(get()) }
+    factory { FindMatchingInstancesForMediaUseCase(get()) }
     factory { UpdateCalendarFilterPreferenceUseCase(get()) }
     factory { GetSeerrInstanceRepositoryUseCase(get()) }
     factory { SmartAddMediaUseCase(get(), get()) }
@@ -379,7 +381,7 @@ val useCaseModule = module {
 
 val viewModelModule = module {
     factory { TrendingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
-    factory { ActivityQueueViewModel(get(), get(), get(), get()) }
+    factory { ActivityQueueViewModel(get(), get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
         ArrMediaViewModel(type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),get())
     }
@@ -412,7 +414,7 @@ val viewModelModule = module {
     factory { (instanceId: Long) ->
         ArrInstanceDashboardViewModel(instanceId, get())
     }
-    factory { CalendarViewModel(get(), get(), get(), get()) }
+    factory { CalendarViewModel(get(), get(), get(), get(), get()) }
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { (tmdbId: Long, mediaType: RequestType) ->
         SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get(), get(), get())
@@ -440,7 +442,7 @@ val viewModelModule = module {
         IssueDetailsViewModel(issuePackage, get(), get(), get())
     }
     factory { (authorId: Long, book: Book) ->
-        BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get())
+        BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get(), get())
     }
     factory { (authorId: Long) ->
         AuthorFilesViewModel(authorId, get(), get(), get())

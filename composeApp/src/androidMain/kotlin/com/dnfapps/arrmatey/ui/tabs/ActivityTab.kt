@@ -44,8 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,15 +61,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dnfapps.arrmatey.arr.api.model.LidarrQueueItem
-import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.QueueDownloadState
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
-import com.dnfapps.arrmatey.arr.api.model.RadarrQueueItem
-import com.dnfapps.arrmatey.arr.api.model.ReadarrQueueItem
-import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
-import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.isDebug
@@ -79,14 +71,10 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
-import com.dnfapps.arrmatey.ui.theme.ArrBlue
-import com.dnfapps.arrmatey.ui.theme.ArrGreen
-import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
-import com.dnfapps.arrmatey.ui.theme.ArrOrange
-import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.ui.theme.surfaceDark
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.networking.OperationStatus
 import org.koin.compose.koinInject
 import kotlin.time.ExperimentalTime
 
@@ -131,7 +119,7 @@ fun ActivityTab(
                             sortBy = uiState.sortBy,
                             onSortByChanged = { viewModel.setSortBy(it) },
                             sortOrder = uiState.sortOrder,
-                            onSortOrderChanged = { viewModel.setSortOrder(it)}
+                            onSortOrderChanged = { viewModel.setSortOrder(it) }
                         )
                     }
                 },
@@ -162,9 +150,11 @@ fun ActivityTab(
                     onRefresh = { viewModel.refresh() }
                 ) {
                     if (queueItems.isEmpty()) {
-                        EmptyActivityState(modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()))
+                        EmptyActivityState(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                        )
                     } else {
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -216,6 +206,7 @@ fun ActivityItem(
             containerColor = MaterialTheme.colorScheme.errorContainer,
             contentColor = MaterialTheme.colorScheme.onErrorContainer
         )
+
         else -> CardDefaults.cardColors(
             containerColor = item.type.associatedColor,
             contentColor = surfaceDark
@@ -305,10 +296,12 @@ fun QueueItemInfoSheet(
             )
 
             val statusRow = buildAnnotatedString {
-                withStyle(SpanStyle(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontWeight = FontWeight.Medium
-                )) {
+                withStyle(
+                    SpanStyle(
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontWeight = FontWeight.Medium
+                    )
+                ) {
                     append(item.statusLabel)
                 }
                 bullet()
@@ -357,9 +350,11 @@ fun QueueItemInfoSheet(
                         modifier = Modifier.border(
                             width = 1.dp,
                             color = MaterialTheme.colorScheme.outlineVariant,
-                            shape = RoundedCornerShape(8.dp))
+                            shape = RoundedCornerShape(8.dp)
+                        )
                     ) {
-                        Text(chipItem,
+                        Text(
+                            chipItem,
                             modifier = Modifier.padding(vertical = 2.dp, horizontal = 6.dp),
                             fontSize = 12.sp
                         )
@@ -375,10 +370,12 @@ fun QueueItemInfoSheet(
                     ),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 ) {
-                    Text(errorMessage, modifier = Modifier.padding(
-                        horizontal = 16.dp,
-                        vertical = 8.dp
-                    ))
+                    Text(
+                        errorMessage, modifier = Modifier.padding(
+                            horizontal = 16.dp,
+                            vertical = 8.dp
+                        )
+                    )
                 }
             } ?: item.statusMessages.forEach { status ->
                 Card(

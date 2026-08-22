@@ -107,6 +107,7 @@
     <string name="success">Success</string>
     <string name="failure">Failure</string>
     <string name="instance_type">Instance type</string>
+    <string name="select_instance">Select Instance</string>
     <string name="github">GitHub</string>
     <string name="website">Website</string>
     <string name="sort">Sort</string>

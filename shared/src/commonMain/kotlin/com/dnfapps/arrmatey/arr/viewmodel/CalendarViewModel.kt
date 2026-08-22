@@ -22,6 +22,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import com.dnfapps.arrmatey.arr.usecase.FindMatchingInstancesForMediaUseCase
+import com.dnfapps.arrmatey.arr.usecase.ResolvedMediaDestination
+import com.dnfapps.arrmatey.instances.model.Instance
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -30,9 +33,17 @@ import kotlinx.datetime.LocalDate
 class CalendarViewModel(
     private val getCalendarUseCase: GetCalendarUseCase,
     private val updateCalendarFilterStateUseCase: UpdateCalendarFilterPreferenceUseCase,
+    private val findMatchingInstancesForMediaUseCase: FindMatchingInstancesForMediaUseCase,
     preferencesStore: PreferencesStore,
-    instanceRepository: InstanceRepository
+    private val instanceRepository: InstanceRepository
 ) : ViewModel() {
+
+    suspend fun resolveDestination(item: CalendarItem): List<ResolvedMediaDestination> =
+        findMatchingInstancesForMediaUseCase.resolve(item)
+
+    suspend fun selectInstance(instance: Instance) {
+        instanceRepository.setInstanceActive(instance)
+    }
 
     val calendarState = combine(
         getCalendarUseCase(),
