@@ -99,6 +99,24 @@ fun Navigator<*>.toDetails(
     type: InstanceType? = null
 ) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type))
 
+fun Navigator<*>.toMediaDetails(
+    media: com.dnfapps.arrmatey.arr.api.model.ArrMedia,
+    type: InstanceType? = null
+) {
+    val tmdbId = when (media) {
+        is ArrMovie -> media.tmdbId.takeIf { it > 0 }
+        is ArrSeries -> media.tmdbId?.takeIf { it > 0 }
+        else -> null
+    }
+    val tvdbId = (media as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
+    toDetails(
+        id = media.id,
+        tmdbId = tmdbId,
+        tvdbId = tvdbId,
+        type = type
+    )
+}
+
 fun <T> Navigator<*>.toPreview(item: T) = nav().navigateTo(MediaScreen.Preview(item))
 fun Navigator<*>.toSearch(query: String = "") = nav().navigateTo(MediaScreen.Search(query))
 fun Navigator<*>.toMovieReleases(movieId: Long) = nav().navigateTo(MediaScreen.MovieReleases(movieId))
