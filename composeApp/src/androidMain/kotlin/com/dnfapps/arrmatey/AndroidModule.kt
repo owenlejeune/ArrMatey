@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.navigation.BazarrTabNavigator
 import com.dnfapps.arrmatey.navigation.BooksTabNavigator
 import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
 import com.dnfapps.arrmatey.navigation.DiscoverTabNavigator
+import com.dnfapps.arrmatey.navigation.LibraryTabNavigator
 import com.dnfapps.arrmatey.navigation.MoviesTabNavigator
 import com.dnfapps.arrmatey.navigation.MusicTabNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
@@ -32,6 +33,7 @@ val androidModule = module {
 
     // Navigators
     single { SettingsTabNavigator() }
+    single { LibraryTabNavigator() }
     single { SeriesTabNavigator() }
     single { MoviesTabNavigator() }
     single { MusicTabNavigator() }
@@ -45,6 +47,7 @@ val androidModule = module {
     // Navigation Manager
     single {
         val registry: Map<TabItem, Navigator<*>> = mapOf(
+            TabItem.Standard.LIBRARY to get<LibraryTabNavigator>(),
             TabItem.Standard.SHOWS to get<SeriesTabNavigator>(),
             TabItem.Standard.MOVIES to get<MoviesTabNavigator>(),
             TabItem.Standard.MUSIC to get<MusicTabNavigator>(),

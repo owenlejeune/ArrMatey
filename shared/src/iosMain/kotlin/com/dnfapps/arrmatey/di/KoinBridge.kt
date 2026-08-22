@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
@@ -165,6 +166,9 @@ object KoinBridge: KoinComponent {
         getKoin().get()
 
     fun getMokoStrings(): MokoStrings =
+        getKoin().get()
+
+    fun getUnifiedLibraryViewModel(): UnifiedLibraryViewModel =
         getKoin().get()
 
 }

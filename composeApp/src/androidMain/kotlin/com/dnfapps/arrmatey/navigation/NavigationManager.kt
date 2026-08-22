@@ -73,6 +73,8 @@ class NavigationManager(
             ?: throw IllegalArgumentException("No navigator registered for tab: $tab")
     }
 
+    fun getNavigator(tab: TabItem?): Navigator<*>? = tab?.let { tabNavigators[it] }
+
     // Convenience methods for specific feature transitions
     fun openSettings() {
         openOverlay(TabItem.Settings)

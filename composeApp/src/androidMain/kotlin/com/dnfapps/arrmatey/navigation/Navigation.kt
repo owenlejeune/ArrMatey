@@ -69,6 +69,7 @@ open class BaseNavigator<T : NavKey>(initialScreen: T) : Navigator<T> {
 }
 
 // Marker classes for type-safe DI
+class LibraryTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class SeriesTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class MoviesTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class MusicTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)

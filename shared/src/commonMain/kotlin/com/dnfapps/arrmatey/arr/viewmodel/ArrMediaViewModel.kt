@@ -273,23 +273,26 @@ class ArrMediaViewModel(
     }
 
     fun updateSortBy(sortBy: SortBy) {
-        safeSavePreference { it.copy(sortBy = sortBy) }
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val updatedPreferences = preferences.value.copy(sortBy = sortBy)
+            updatePreferencesUseCase(repository.instance.id, updatedPreferences)
+        }
     }
 
     fun updateSortOrder(sortOrder: SortOrder) {
-        safeSavePreference { it.copy(sortOrder = sortOrder) }
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            val updatedPreferences = preferences.value.copy(sortOrder = sortOrder)
+            updatePreferencesUseCase(repository.instance.id, updatedPreferences)
+        }
     }
 
     fun updateFilterBy(filterBy: FilterBy) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
             val updatedPreferences = preferences.value.copy(filterBy = filterBy, customFilterId = null)
-
-            if (updatedPreferences.applyGlobally) {
-                updateAllPreferencesUseCase(updatedPreferences)
-            } else {
-                updatePreferencesUseCase(repository.instance.id, updatedPreferences)
-            }
+            updatePreferencesUseCase(repository.instance.id, updatedPreferences)
         }
     }
 
@@ -300,12 +303,7 @@ class ArrMediaViewModel(
                 customFilterId = customFilterId,
                 filterBy = if (customFilterId != null) FilterBy.All else preferences.value.filterBy
             )
-
-            if (updatedPreferences.applyGlobally) {
-                updateAllPreferencesUseCase(updatedPreferences)
-            } else {
-                updatePreferencesUseCase(repository.instance.id, updatedPreferences)
-            }
+            updatePreferencesUseCase(repository.instance.id, updatedPreferences)
         }
     }
 

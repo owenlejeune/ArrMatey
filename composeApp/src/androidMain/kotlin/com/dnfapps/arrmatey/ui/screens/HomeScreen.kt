@@ -74,6 +74,7 @@ import com.dnfapps.arrmatey.ui.tabs.BazarrTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost
+import com.dnfapps.arrmatey.ui.tabs.UnifiedLibraryTab
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -105,8 +106,8 @@ fun HomeScreen(
     val drawerTabs = tabConfig.drawerTabs
 
     val pagerState = rememberPagerState(
-        initialPage = remember(visibleTabs, selectedTab) { 
-            visibleTabs.indexOf(selectedTab).coerceAtLeast(0) 
+        initialPage = remember(visibleTabs, selectedTab) {
+            visibleTabs.indexOf(selectedTab).coerceAtLeast(0)
         }
     ) { visibleTabs.size }
 
@@ -225,14 +226,13 @@ fun HomeScreen(
                                     }
 
                                     val currentTab = overlayTab ?: selectedTab
-                                    val associatedType = currentTab?.associatedType
-                                    val navigator =
-                                        associatedType?.takeIf { it in InstanceType.arrs() }
-                                            ?.let { navigationManager.arr(it) }
-
-                                    val hasInstances = associatedType?.let { type ->
-                                        allInstances.any { it.type == type }
-                                    } ?: false
+                                    val isLibrary = currentTab == TabItem.Standard.LIBRARY
+                                    val hasInstances = if (isLibrary) {
+                                        allInstances.any { it.type in InstanceType.arrs() }
+                                    } else {
+                                        currentTab?.associatedType?.let { type -> allInstances.any { it.type == type } } == true
+                                    }
+                                    val navigator = navigationManager.getNavigator(currentTab)
 
                                     if (hasInstances && navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
                                         FloatingActionButton(
@@ -376,9 +376,11 @@ private fun DrawerContent(
                         is TabItem.Standard -> {
                             TabItemIconView(item, useServiceNavIcons, activityQueueIssuesCount)
                         }
+
                         is TabItem.CustomWebpage -> {
                             Icon(Icons.Default.Language, contentDescription = null)
                         }
+
                         else -> {}
                     }
                 },
@@ -404,11 +406,13 @@ private fun TabItemContent(tab: TabItem, windowSizeClass: WindowSizeClass, wideR
         is TabItem.Standard -> {
             StandardTabContent(tab, windowSizeClass, wideRailIsVisible)
         }
+
         is TabItem.CustomWebpage -> {
             key(tab.id) {
                 CustomWebpageViewerScreen(webpageId = tab.id, wideRailIsVisible = wideRailIsVisible)
             }
         }
+
         is TabItem.Settings -> SettingsTabNavHost(windowSizeClass)
     }
 }
@@ -416,6 +420,7 @@ private fun TabItemContent(tab: TabItem, windowSizeClass: WindowSizeClass, wideR
 @Composable
 private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSizeClass, wideRailIsVisible: Boolean) {
     when (tab) {
+        TabItem.Standard.LIBRARY -> UnifiedLibraryTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr, windowSizeClass, wideRailIsVisible)
         TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr, windowSizeClass, wideRailIsVisible)
         TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr, windowSizeClass, wideRailIsVisible)

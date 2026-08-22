@@ -55,6 +55,7 @@ val ContentFilter.imageVector: ImageVector
 val TabItem.androidIcon: ImageVector
     get() = when(this) {
         is TabItem.Standard -> when (this) {
+            TabItem.Standard.LIBRARY -> Icons.Default.VideoLibrary
             TabItem.Standard.SHOWS -> Icons.Default.Tv
             TabItem.Standard.MOVIES -> Icons.Default.Movie
             TabItem.Standard.MUSIC -> Icons.Default.MusicNote

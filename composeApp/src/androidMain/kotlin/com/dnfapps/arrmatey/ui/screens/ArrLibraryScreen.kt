@@ -2,6 +2,16 @@ package com.dnfapps.arrmatey.ui.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -204,74 +214,89 @@ fun ArrLibraryScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
-            if (!isExpanded && !isInSelectionMode) {
-                instancesState.selectedInstance?.let {
-                    FloatingActionButton(
-                        onClick = { onNavigateToSearch("") }
-                    ) {
-                        Icon(Icons.Default.Add, null)
-                    }
+            AnimatedVisibility(
+                visible = !isExpanded && !isInSelectionMode && instancesState.selectedInstance != null,
+                enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
+                exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200))
+            ) {
+                FloatingActionButton(
+                    onClick = { onNavigateToSearch("") }
+                ) {
+                    Icon(Icons.Default.Add, null)
                 }
             }
         },
         topBar = {
-            if (isInSelectionMode) {
-                SelectionTopBar(
-                    count = selectionCount,
-                    onClose = { arrMediaViewModel.exitSelectionMode() },
-                    onSelectAll = {
-                        if (arrMediaViewModel.areAllItemsSelected()) {
-                            arrMediaViewModel.clearSelection()
-                        } else {
-                            arrMediaViewModel.selectAllItems()
-                        }
-                    },
-                    isAllSelected = arrMediaViewModel.areAllItemsSelected()
-                )
-            } else {
-                ArrAppBarWithSearch(
-                    textFieldState = textFieldState,
-                    textFieldEnabled = instancesState.selectedInstance != null,
-                    searchPlaceholder = mokoString(
-                        MR.strings.search_placeholder,
-                        instancesState.selectedInstance?.label ?: ""
-                    ),
-                    trailingIcon = {
-                        Image(
-                            painter = painterResource(type.icon),
-                            contentDescription = mokoString(type.resource),
-                            modifier = Modifier.size(24.dp)
+            AnimatedContent(
+                targetState = isInSelectionMode,
+                transitionSpec = {
+                    (fadeIn(animationSpec = tween(200, delayMillis = 50)) +
+                        slideInVertically(animationSpec = tween(200, delayMillis = 50)) { -it / 2 })
+                        .togetherWith(
+                            fadeOut(animationSpec = tween(150)) +
+                                slideOutVertically(animationSpec = tween(150)) { -it / 2 }
                         )
-                    },
-                    navigationIcon = {
-                        if (!wideRailIsVisible) {
-                            NavigationDrawerButton()
-                        }
-                    },
-                    actions = {
-                        if (!hideInstancePicker || instancesState.instances.size > 1) {
-                            InstancePicker(
+                },
+                label = "SelectionTopBarAnimation"
+            ) { inSelection ->
+                if (inSelection) {
+                    SelectionTopBar(
+                        count = selectionCount,
+                        onClose = { arrMediaViewModel.exitSelectionMode() },
+                        onSelectAll = {
+                            if (arrMediaViewModel.areAllItemsSelected()) {
+                                arrMediaViewModel.clearSelection()
+                            } else {
+                                arrMediaViewModel.selectAllItems()
+                            }
+                        },
+                        isAllSelected = arrMediaViewModel.areAllItemsSelected()
+                    )
+                } else {
+                    ArrAppBarWithSearch(
+                        textFieldState = textFieldState,
+                        textFieldEnabled = instancesState.selectedInstance != null,
+                        searchPlaceholder = mokoString(
+                            MR.strings.search_placeholder,
+                            instancesState.selectedInstance?.label ?: ""
+                        ),
+                        trailingIcon = {
+                            Image(
+                                painter = painterResource(type.icon),
+                                contentDescription = mokoString(type.resource),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
+                        navigationIcon = {
+                            if (!wideRailIsVisible) {
+                                NavigationDrawerButton()
+                            }
+                        },
+                        actions = {
+                            if (!hideInstancePicker || instancesState.instances.size > 1) {
+                                InstancePicker(
+                                    type = type,
+                                    currentInstance = instancesState.selectedInstance,
+                                    typeInstances = instancesState.instances,
+                                    onInstanceSelected = { instancesViewModel.setInstanceActive(it) }
+                                )
+                            }
+                            LibraryFilterMenu(
                                 type = type,
-                                currentInstance = instancesState.selectedInstance,
-                                typeInstances = instancesState.instances,
-                                onInstanceSelected = { instancesViewModel.setInstanceActive(it) }
+                                filterBy = preferences.filterBy,
+                                onFilterByChanged = { arrMediaViewModel.updateFilterBy(it) },
+                                customFilters = instanceData?.customFilters ?: emptyList(),
+                                selectedCustomFilterId = preferences.customFilterId,
+                                onCustomFilterChanged = { arrMediaViewModel.updateCustomFilter(it) },
+                                sortBy = preferences.sortBy,
+                                onSortByChanged = { arrMediaViewModel.updateSortBy(it) },
+                                sortOrder = preferences.sortOrder,
+                                onSortOrderChanged = { arrMediaViewModel.updateSortOrder(it) },
+                                onOpenViewCustomization = { showViewCustomizationSheet = true }
                             )
                         }
-                        LibraryFilterMenu(
-                            type = type,
-                            filterBy = preferences.filterBy,
-                            onFilterByChanged = { arrMediaViewModel.updateFilterBy(it) },
-                            customFilters = instanceData?.customFilters ?: emptyList(),
-                            selectedCustomFilterId = preferences.customFilterId,
-                            onCustomFilterChanged = { arrMediaViewModel.updateCustomFilter(it) },
-                            sortBy = preferences.sortBy,
-                            onSortByChanged = { arrMediaViewModel.updateSortBy(it) },
-                            sortOrder = preferences.sortOrder,
-                            onSortOrderChanged = { arrMediaViewModel.updateSortOrder(it) },
-                            onOpenViewCustomization = { showViewCustomizationSheet = true }
-                        )
-                    }
-                )
+                    )
+                }
             }
         },
         contentWindowInsets = WindowInsets.statusBars
@@ -485,7 +510,7 @@ fun ArrLibraryScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SelectionTopBar(
+internal fun SelectionTopBar(
     count: Int,
     onClose: () -> Unit,
     onSelectAll: () -> Unit,
@@ -514,7 +539,7 @@ private fun SelectionTopBar(
 }
 
 @Composable
-private fun SelectionBottomBar(
+internal fun SelectionBottomBar(
     count: Int,
     type: InstanceType,
     hasBazarr: Boolean,
@@ -618,7 +643,7 @@ private fun SelectionActionItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ConfirmDeleteAlert(
+internal fun ConfirmDeleteAlert(
     deleteInProgress: Boolean,
     initialAddExclusion: Boolean = false,
     initialDeleteFiles: Boolean = false,
@@ -673,7 +698,7 @@ private fun ConfirmDeleteAlert(
 }
 
 @Composable
-private fun EditMediaSheet(
+internal fun EditMediaSheet(
     item: ArrMedia,
     qualityProfiles: List<QualityProfile>,
     rootFolders: List<RootFolder>,
@@ -734,7 +759,7 @@ private fun EditMediaSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MonitorOptionsSheet(
+internal fun MonitorOptionsSheet(
     type: InstanceType,
     onDismissRequest: () -> Unit,
     onOptionSelected: (Any) -> Unit
@@ -876,7 +901,7 @@ private fun BookshelfMonitorOptionsSheet(
 }
 
 @Composable
-private fun EmptySearchResultsView(
+internal fun EmptySearchResultsView(
     type: InstanceType,
     query: String,
     onShouldSearch: () -> Unit
@@ -922,7 +947,7 @@ private fun EmptySearchResultsView(
 }
 
 @Composable
-private fun EmptyLibraryView(
+internal fun EmptyLibraryView(
     modifier: Modifier = Modifier
 ) {
     Column(

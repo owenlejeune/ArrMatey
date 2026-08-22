@@ -63,6 +63,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.backup.AesTransportEncryptor
 import com.dnfapps.arrmatey.backup.TransportEncryptor
@@ -123,6 +124,7 @@ import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
+import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
@@ -267,6 +269,7 @@ val useCaseModule = module {
     factory { AddMediaItemUseCase(get()) }
     factory { GetActivityTasksUseCase(get()) }
     factory { ObserveAllInstancesByTypeUseCase(get()) }
+    factory { ObserveAllInstancesUseCase(get()) }
     factory { ObserveScopedReposByTypeUseCase(get()) }
     factory { ObserveSelectedInstanceScopedRepoUseCase(get()) }
     factory { ObserveSelectedInstanceUseCase(get()) }
@@ -450,6 +453,7 @@ val viewModelModule = module {
     }
     factory { CombinedDashboardViewModel(get(), get(), get(), get(), get(), get()) }
     factory { BackupViewModel(get(), get(), get(), get()) }
+    factory { UnifiedLibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 }
 
 val resourcesModule = module {

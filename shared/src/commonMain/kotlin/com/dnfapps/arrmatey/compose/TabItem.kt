@@ -31,6 +31,7 @@ sealed interface TabItem {
         override val isDisabled: Boolean = false,
         override val associatedType: InstanceType? = null
     ) : TabItem {
+        LIBRARY("books.vertical", MR.strings.library),
         SHOWS("tv", MR.strings.series, associatedType = InstanceType.Sonarr),
         MOVIES("movieclapper", MR.strings.movies, associatedType = InstanceType.Radarr),
         MUSIC("music.quarternote.3", MR.strings.music, associatedType = InstanceType.Lidarr),

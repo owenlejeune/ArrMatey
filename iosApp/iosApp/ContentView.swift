@@ -176,6 +176,7 @@ struct LauncherTabView: View {
         Group {
             if let standard = tabItem as? TabItemStandard {
                 switch standard {
+                case .library: LibraryTab().environment(\.navigationContext, .launcher)
                 case .shows: SeriesTab().environment(\.navigationContext, .launcher)
                 case .movies: MoviesTab().environment(\.navigationContext, .launcher)
                 case .music: MusicTab().environment(\.navigationContext, .launcher)

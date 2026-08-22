@@ -16,6 +16,7 @@ struct TabItemContent: View {
         Group {
             if let standard = tabItem as? TabItemStandard {
                 switch standard {
+                case .library: LibraryTab().environment(\.navigationContext, .mainTab)
                 case .shows: SeriesTab().environment(\.navigationContext, .mainTab)
                 case .movies: MoviesTab().environment(\.navigationContext, .mainTab)
                 case .music: MusicTab().environment(\.navigationContext, .mainTab)

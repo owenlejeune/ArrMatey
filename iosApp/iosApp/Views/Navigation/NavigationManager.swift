@@ -21,6 +21,7 @@ class NavigationManager: ObservableObject {
     @Published var launcherPath = NavigationPath()
     @Published var dashboardPath = NavigationPath()
     @Published var bazarrPath = NavigationPath()
+    @Published var libraryPath = NavigationPath()
     
     @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemSettings.shared)
     @Published var selectedDrawerTab: AnyTabItem? = nil
@@ -32,6 +33,11 @@ class NavigationManager: ObservableObject {
     func go(to route: MediaRoute, of type: InstanceType) {
         if showLauncher {
             launcherPath.append(route)
+            return
+        }
+
+        if selectedTab.key == TabItemStandard.library.key {
+            libraryPath.append(route)
             return
         }
 
@@ -53,6 +59,12 @@ class NavigationManager: ObservableObject {
         if showLauncher {
             if !launcherPath.isEmpty { launcherPath.removeLast() }
             launcherPath.append(route)
+            return
+        }
+
+        if selectedTab.key == TabItemStandard.library.key {
+            if !libraryPath.isEmpty { libraryPath.removeLast() }
+            libraryPath.append(route)
             return
         }
 
@@ -139,6 +151,7 @@ class NavigationManager: ObservableObject {
         seerrPath = NavigationPath()
         launcherPath = NavigationPath()
         bazarrPath = NavigationPath()
+        libraryPath = NavigationPath()
     }
     
     func maybeEditInstance(of type: InstanceType, _ instance: Instance?) {
@@ -165,6 +178,7 @@ class NavigationManager: ObservableObject {
         self.musicPath = NavigationPath()
         self.bookPath = NavigationPath()
         self.audiobookPath = NavigationPath()
+        self.libraryPath = NavigationPath()
         
         self.seerrPath = NavigationPath()
     }
