@@ -66,9 +66,14 @@ class BookDetailsViewModel(
     }
 
     private fun observeSelectedInstance() {
-        viewModelScope.launch {
+        val repoFlow = if (book.value.instanceId != null) {
+            getArrInstanceRepositoryUseCase.observeById(book.value.instanceId!!)
+        } else {
             getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Booksehelf)
-                .filterNotNull()
+        }
+
+        viewModelScope.launch {
+            repoFlow.filterNotNull()
                 .collectLatest { repository ->
                     currentRepository = repository
                     observeData(repository)

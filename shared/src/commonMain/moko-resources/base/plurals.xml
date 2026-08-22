@@ -11,7 +11,7 @@
         <item quantity="one">%d tag</item>
         <item quantity="other">%d tags</item>
     </plurals>
-    <plurals name="episodes">
+    <plurals name="episodes_count">
         <item quantity="one">%d episode</item>
         <item quantity="other">%d episodes</item>
     </plurals>

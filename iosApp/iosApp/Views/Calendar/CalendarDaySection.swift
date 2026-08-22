@@ -60,8 +60,11 @@ struct CalendarDaySection: View {
                     MovieCalendarItem(movie: movie, date: date)
                         .onTapGesture { onItemClick?(movie) }
                 case let epGroup as EpisodeGroup:
-                    EpisodeCalendarItem(episodeGroup: epGroup)
+                    EpisodeCalendarItem(item: epGroup)
                         .onTapGesture { onItemClick?(epGroup) }
+                case let episode as Episode:
+                    EpisodeCalendarItem(item: episode)
+                        .onTapGesture { onItemClick?(episode) }
                 case let album as ArrAlbum:
                     AlbumCalendarItem(album: album)
                         .onTapGesture { onItemClick?(album) }

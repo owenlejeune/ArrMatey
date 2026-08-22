@@ -36,13 +36,10 @@ import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.usecase.ResolvedMediaDestination
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
-import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.CalendarScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
-import com.dnfapps.arrmatey.navigation.toBookDetails
-import com.dnfapps.arrmatey.navigation.toDetails
-import com.dnfapps.arrmatey.navigation.toEpisodeDetails
+import com.dnfapps.arrmatey.navigation.toResolvedDestination
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.calendar.CalendarListView
 import com.dnfapps.arrmatey.ui.calendar.CalendarMonthView
@@ -98,7 +95,6 @@ private fun CalendarContentScreen(
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val calendarState by viewModel.calendarState.collectAsStateWithLifecycle()
-    val instances by viewModel.instances.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
     var pendingDestinations by remember { mutableStateOf<List<ResolvedMediaDestination>?>(null) }
@@ -106,39 +102,7 @@ private fun CalendarContentScreen(
     fun navigateToDestination(destination: ResolvedMediaDestination) {
         scope.launch {
             viewModel.selectInstance(destination.instance)
-            when (destination) {
-                is ResolvedMediaDestination.Movie -> {
-                    navigation.toDetails(
-                        id = destination.movieId,
-                        tmdbId = destination.tmdbId,
-                        type = InstanceType.Radarr
-                    )
-                }
-                is ResolvedMediaDestination.EpisodeDetails -> {
-                    navigation.toEpisodeDetails(
-                        series = destination.series,
-                        episode = destination.episode
-                    )
-                }
-                is ResolvedMediaDestination.Artist -> {
-                    navigation.toDetails(
-                        id = destination.artistId ?: destination.albumId,
-                        type = InstanceType.Lidarr
-                    )
-                }
-                is ResolvedMediaDestination.BookDetails -> {
-                    navigation.toBookDetails(
-                        author = destination.author,
-                        book = destination.book
-                    )
-                }
-                is ResolvedMediaDestination.AudiobookDetails -> {
-                    navigation.toDetails(
-                        id = destination.audiobookId,
-                        type = InstanceType.Listenarr
-                    )
-                }
-            }
+            navigation.toResolvedDestination(destination)
         }
     }
 
@@ -192,9 +156,7 @@ private fun CalendarContentScreen(
                     }
 
                     CalendarFilterMenu(
-                        instances = instances,
                         filterState = calendarState.filterState,
-                        onInstanceChanged = { viewModel.setFilterInstanceId(it) },
                         onContentFilterChanged = { viewModel.setContentFilter(it) },
                         onToggleFilterMonitored = { viewModel.toggleShowMonitoredOnly() },
                         onToggleFilterPremiersOnly = { viewModel.toggleShowPremiersOnly() },

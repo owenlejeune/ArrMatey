@@ -21,6 +21,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.asSuccess
 
 sealed interface ResolvedMediaDestination {
     val instance: Instance
@@ -29,6 +30,13 @@ sealed interface ResolvedMediaDestination {
         override val instance: Instance,
         val movieId: Long?,
         val tmdbId: Long?
+    ) : ResolvedMediaDestination
+
+    data class Series(
+        override val instance: Instance,
+        val seriesId: Long?,
+        val tmdbId: Long?,
+        val tvdbId: Long?
     ) : ResolvedMediaDestination
 
     data class EpisodeDetails(
@@ -61,7 +69,7 @@ class FindMatchingInstancesForMediaUseCase(
     suspend fun resolve(item: CalendarItem): List<ResolvedMediaDestination> {
         return when (item) {
             is ArrMovie -> resolveMovie(item, item.instanceId)
-            is EpisodeGroup -> resolveEpisode(item.first, item.instanceId)
+            is EpisodeGroup -> resolveSeries(item.first.series, item.instanceId)
             is Episode -> resolveEpisode(item, item.instanceId)
             is ArrAlbum -> resolveAlbum(item, item.instanceId)
             is Book -> resolveBook(item, item.instanceId)
@@ -183,6 +191,48 @@ class FindMatchingInstancesForMediaUseCase(
                         tmdbId = movie.tmdbId.takeIf { it > 0 }
                     )
                 )
+            }
+        }
+
+        return matches
+    }
+
+    private fun resolveSeries(series: ArrSeries?, fallbackInstanceId: Long?): List<ResolvedMediaDestination> {
+        val seriesId = series?.id
+        val tmdbId = series?.tmdbId
+        val tvdbId = series?.tvdbId
+
+        val repos = instanceManager.getRepositoriesByType(InstanceType.Sonarr).filterIsInstance<ArrInstanceRepository>()
+        if (repos.isEmpty()) return emptyList()
+
+        val matches = mutableListOf<ResolvedMediaDestination>()
+        repos.forEach { repo ->
+            val lib = repo.library.value
+            val items = if (lib is NetworkResult.Success) lib.data.filterIsInstance<ArrSeries>() else emptyList()
+            val found = items.firstOrNull { s ->
+                (seriesId != null && s.id == seriesId) ||
+                (tvdbId != null && tvdbId > 0 && s.tvdbId == tvdbId) ||
+                (tmdbId != null && tmdbId > 0 && s.tmdbId == tmdbId)
+            }
+            if (found != null) {
+                matches.add(ResolvedMediaDestination.Series(
+                    instance = repo.instance,
+                    seriesId = found.id,
+                    tmdbId = found.tmdbId?.takeIf { it > 0L },
+                    tvdbId = found.tvdbId.takeIf { it > 0 }
+                ))
+            }
+        }
+
+        if (matches.isEmpty() && fallbackInstanceId != null) {
+            val repo = repos.firstOrNull { it.instance.id == fallbackInstanceId } ?: repos.firstOrNull()
+            if (repo != null) {
+                matches.add(ResolvedMediaDestination.Series(
+                    instance = repo.instance,
+                    seriesId = seriesId,
+                    tmdbId = tmdbId,
+                    tvdbId = tvdbId
+                ))
             }
         }
 

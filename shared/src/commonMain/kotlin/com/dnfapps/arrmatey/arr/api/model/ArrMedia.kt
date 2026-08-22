@@ -58,6 +58,7 @@ sealed interface ArrMedia {
     val statistics: ArrStatistics?
     @Contextual val added: Instant?
     val status: MediaStatus
+    val instanceId: Long?
 
     /**
      * Computed properties + helpers

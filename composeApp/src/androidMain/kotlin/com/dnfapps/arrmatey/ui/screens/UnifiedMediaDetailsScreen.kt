@@ -141,6 +141,7 @@ fun UnifiedMediaDetailsScreen(
     tvdbId: Long? = null,
     instanceType: InstanceType? = null,
     requestType: RequestType? = null,
+    instanceId: Long? = null,
     isExpanded: Boolean = false,
     onBack: () -> Unit,
     onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit,
@@ -154,7 +155,7 @@ fun UnifiedMediaDetailsScreen(
     onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
     onNavigateToAlbumRelease: (Long, Long) -> Unit,
     onPersonClick: (Long) -> Unit,
-    viewModel: UnifiedMediaDetailsViewModel = koinInjectParams(arrId, tmdbId, tvdbId, instanceType, requestType),
+    viewModel: UnifiedMediaDetailsViewModel = koinInjectParams(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId),
     moko: MokoStrings = koinInject(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

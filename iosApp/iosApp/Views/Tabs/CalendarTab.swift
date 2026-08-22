@@ -111,9 +111,21 @@ struct CalendarTabContent: View {
                     tmdbId: movieDest.tmdbId?.int64Value,
                     tvdbId: nil,
                     instanceType: .radarr,
-                    requestType: nil
+                    requestType: nil,
+                    instanceId: destination.instance.id
                 )
                 navigationManager.go(to: route, of: .radarr)
+                
+            case let seriesDest as ResolvedMediaDestinationSeries:
+                let route = MediaRoute.details(
+                    arrId: seriesDest.seriesId?.int64Value,
+                    tmdbId: seriesDest.tmdbId?.int64Value,
+                    tvdbId: seriesDest.tvdbId?.int64Value,
+                    instanceType: .sonarr,
+                    requestType: nil,
+                    instanceId: destination.instance.id
+                )
+                navigationManager.go(to: route, of: .sonarr)
                 
             case let episodeDest as ResolvedMediaDestinationEpisodeDetails:
                 let seriesJson = episodeDest.series.toJson()
@@ -126,7 +138,8 @@ struct CalendarTabContent: View {
                     tmdbId: nil,
                     tvdbId: nil,
                     instanceType: .lidarr,
-                    requestType: nil
+                    requestType: nil,
+                    instanceId: destination.instance.id
                 )
                 navigationManager.go(to: route, of: .lidarr)
                 
@@ -141,7 +154,8 @@ struct CalendarTabContent: View {
                     tmdbId: nil,
                     tvdbId: nil,
                     instanceType: .listenarr,
-                    requestType: nil
+                    requestType: nil,
+                    instanceId: destination.instance.id
                 )
                 navigationManager.go(to: route, of: .listenarr)
                 
@@ -169,10 +183,6 @@ struct CalendarTabContent: View {
             }
         
             CalendarFilterMenu(
-                instanceId: Binding(
-                    get: { viewModel.calendarState.filterState.instanceId?.int64Value },
-                    set: { viewModel.setFilterInstanceId($0) }
-                ),
                 contentFilter: Binding(
                     get: { viewModel.calendarState.filterState.contentFilter },
                     set: { viewModel.setContentFilter($0) }
@@ -188,8 +198,7 @@ struct CalendarTabContent: View {
                 onlyFinales: Binding(
                     get: { viewModel.calendarState.filterState.showFinalesOnly },
                     set: { _ in viewModel.toggleShowFinalesOnly() }
-                ),
-                instances: viewModel.instances
+                )
             )
             .menuIndicator(.hidden)
         }

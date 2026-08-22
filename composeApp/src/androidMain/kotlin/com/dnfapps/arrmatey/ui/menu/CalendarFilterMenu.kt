@@ -41,21 +41,13 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun CalendarFilterMenu(
     filterState: CalendarFilterState,
-    instances: List<Instance>,
-    onInstanceChanged: (Long?) -> Unit,
     onContentFilterChanged: (ContentFilter) -> Unit,
     onToggleFilterMonitored: () -> Unit,
     onToggleFilterPremiersOnly: () -> Unit,
     onToggleFilterFinalesOnly: () -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
-    var instanceMenuExpanded by remember { mutableStateOf(false) }
     val groupInteractionSource = remember { MutableInteractionSource() }
-
-    val indexes = if (instances.size > 1) {
-        listOf(0, 1, 2)
-    } else { listOf(null, 0, 1) }
-    val count = indexes.filterNotNull().size
 
     Box {
         IconButton(onClick = {
@@ -70,67 +62,9 @@ fun CalendarFilterMenu(
             expanded = menuExpanded,
             onDismissRequest = { menuExpanded = false }
         ) {
-            if (instances.size > 1) {
-                DropdownMenuGroup(
-                    shapes = MenuDefaults.groupShape(indexes[0]!!, count),
-                    interactionSource = groupInteractionSource
-                ) {
-                    Box {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = instances.firstOrNull { it.id == filterState.instanceId }?.label
-                                        ?: mokoString(MR.strings.instances)
-                                )
-                            },
-                            onClick = { instanceMenuExpanded = true },
-                            trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-                            leadingIcon = { Icon(Hard_drive, null) }
-                        )
-
-                        DropdownMenuPopup(
-                            expanded = instanceMenuExpanded,
-                            onDismissRequest = { instanceMenuExpanded = false },
-                            offset = DpOffset(x = 350.dp, y = 0.dp)
-                        ) {
-                            DropdownMenuGroup(
-                                shapes = MenuDefaults.groupShape(0, 1),
-                                interactionSource = groupInteractionSource,
-                                containerColor = MenuDefaults.groupVibrantContainerColor
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text(mokoString(MR.strings.all)) },
-                                    selected = filterState.instanceId == null,
-                                    onClick = { onInstanceChanged(null) },
-                                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
-                                    shapes = MenuDefaults.itemShape(0, instances.size + 1),
-                                    colors = MenuDefaults.selectableItemVibrantColors()
-                                )
-                                HorizontalDivider(Modifier.padding(MenuDefaults.HorizontalDividerPadding))
-                                instances.forEachIndexed { index, instance ->
-                                    DropdownMenuItem(
-                                        text = { Text(instance.label) },
-                                        selected = filterState.instanceId == instance.id,
-                                        onClick = { onInstanceChanged(instance.id) },
-                                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
-                                        shapes = MenuDefaults.itemShape(
-                                            index + 1,
-                                            instances.size + 1
-                                        ),
-                                        colors = MenuDefaults.selectableItemVibrantColors()
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
-            }
-
             val contentFilters = ContentFilter.entries
             DropdownMenuGroup(
-                shapes = MenuDefaults.groupShape(indexes[1]!!, count),
+                shapes = MenuDefaults.groupShape(0, 2),
                 interactionSource = groupInteractionSource
             ) {
                 contentFilters.forEachIndexed { index, contentFilter ->
@@ -166,7 +100,7 @@ fun CalendarFilterMenu(
             )
 
             DropdownMenuGroup(
-                shapes = MenuDefaults.groupShape(indexes[2]!!, count),
+                shapes = MenuDefaults.groupShape(1, 2),
                 interactionSource = groupInteractionSource
             ) {
                 toggles.forEachIndexed { index, (resource, pair, icon) ->

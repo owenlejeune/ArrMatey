@@ -102,9 +102,10 @@ object KoinBridge: KoinComponent {
         tmdbId: Long?,
         tvdbId: Long?,
         instanceType: InstanceType?,
-        requestType: RequestType?
+        requestType: RequestType?,
+        instanceId: Long?
     ): UnifiedMediaDetailsViewModel =
-        getKoin().get { parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType) }
+        getKoin().get { parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId) }
 
     fun getIssueDetailsViewModel(issuePackage: MediaIssuePackage): IssueDetailsViewModel =
         getKoin().get { parametersOf(issuePackage) }

@@ -57,7 +57,6 @@ class PreferencesStore(
     private val calendarMonitorOnlyKey = booleanPreferencesKey("calendarMonitorOnly")
     private val calendarPremiersOnlyKey = booleanPreferencesKey("calendarPremiersOnly")
     private val calendarFinalesOnlyKey = booleanPreferencesKey("calendarFinalesOnly")
-    private val calendarInstanceIdKey = longPreferencesKey("calendarInstanceId")
     private val activityPollingKey = booleanPreferencesKey("enableActivityPolling")
     private val httpLogLevelKey = stringPreferencesKey("httpLogLevel")
     private val useDynamicThemeKey = booleanPreferencesKey("useDynamicTheme")
@@ -167,11 +166,6 @@ class PreferencesStore(
             preferences[calendarFinalesOnlyKey] ?: false
         }
 
-    private val calendarInstanceId: Flow<Long?> = dataStore.data
-        .map { preferences ->
-            preferences[calendarInstanceIdKey]?.takeIf { it > 0 }
-        }
-
     private val downloadClientSortBy: Flow<SortBy> = dataStore.data
         .map { preferences ->
             val sortBy = preferences[downloadClientSortByKey]?.let {
@@ -194,9 +188,9 @@ class PreferencesStore(
         ) { viewMode, contentFiler, monitorOnly ->
             Triple(viewMode, contentFiler, monitorOnly)
         },
-        calendarShowPremiersOnly, calendarShowFinalesOnly, calendarInstanceId
-    ) { (viewMode, contentFilter, monitorOnly), premiersOnly, finalesOnly, instanceId ->
-        CalendarFilterState(viewMode, contentFilter, monitorOnly, premiersOnly, finalesOnly, instanceId)
+        calendarShowPremiersOnly, calendarShowFinalesOnly
+    ) { (viewMode, contentFilter, monitorOnly), premiersOnly, finalesOnly ->
+        CalendarFilterState(viewMode, contentFilter, monitorOnly, premiersOnly, finalesOnly)
     }
 
     suspend fun saveCalendarFilterState(state: CalendarFilterState) {
@@ -206,7 +200,6 @@ class PreferencesStore(
             preferences[calendarMonitorOnlyKey] = state.showMonitoredOnly
             preferences[calendarPremiersOnlyKey] = state.showPremiersOnly
             preferences[calendarFinalesOnlyKey] = state.showFinalesOnly
-            preferences[calendarInstanceIdKey] = state.instanceId ?: -1
         }
     }
 

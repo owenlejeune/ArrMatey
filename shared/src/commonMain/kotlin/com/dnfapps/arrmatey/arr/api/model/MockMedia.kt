@@ -41,6 +41,7 @@ sealed class MockMedia(
     @Transient override val statusString: String = "Continuing"
     override fun setMonitored(monitored: Boolean): ArrMedia = this
     @Transient override val isMissing: Boolean = false
+    override val instanceId: Long? = null
 
     @Transient val detailString = "Reprehenderit • Et Laboris • ${42069L.bytesAsFileSizeString()}"
 

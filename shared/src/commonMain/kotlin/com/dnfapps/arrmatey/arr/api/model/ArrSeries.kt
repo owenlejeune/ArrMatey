@@ -56,7 +56,8 @@ data class ArrSeries(
     val remotePoster: String? = null,
     val firstAired: String? = null,
     val lastAired: String? = null,
-    val episodesChanged: String? = null
+    val episodesChanged: String? = null,
+    override val instanceId: Long? = null
 ): ArrMedia, HasArrImages<ArrSeries>, InstanceTypeIdentifiable {
 
     override fun withLocalImages(instanceUrl: String): ArrSeries {

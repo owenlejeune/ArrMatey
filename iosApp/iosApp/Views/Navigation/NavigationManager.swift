@@ -301,7 +301,8 @@ enum MediaRoute: Hashable {
         tmdbId: Int64? = nil,
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
-        requestType: RequestType? = nil
+        requestType: RequestType? = nil,
+        instanceId: Int64? = nil
     )
     case search(query: String, type: InstanceType)
     case preview(_ json : String, type: InstanceType)
