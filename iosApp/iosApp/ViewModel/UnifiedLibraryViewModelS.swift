@@ -36,25 +36,56 @@ class UnifiedLibraryViewModelS: ObservableObject {
     @Published private(set) var selectedItem: ArrMedia? = nil
     
     init() {
-        self.viewModel = KoinBridge.shared.getUnifiedLibraryViewModel()
+        let vm = KoinBridge.shared.getUnifiedLibraryViewModel()
+        self.viewModel = vm
+        self.arrInstances = vm.arrInstances.value
+        self.selectedInstance = vm.selectedInstance.value
+        self.offlineInstanceIds = Set(vm.offlineInstanceIds.value.compactMap { ($0 as? NSNumber)?.int64Value })
+        self.currentLibraryState = vm.currentLibraryState.value
+        self.instanceData = vm.instanceData.value
+        self.preferences = vm.preferences.value
+        self.hasBazarr = vm.hasBazarr.value.boolValue
+        self.deleteStatus = vm.deleteStatus.value
+        self.editItemStatus = vm.editItemStatus.value
+        self.errorMessage = vm.errorMessage.value
+        self.isInSelectionMode = vm.selectionState.isInSelectionMode.value.boolValue
+        self.selectionCount = vm.selectionState.selectionCount.value.int32Value
+        self.selectedItems = Set(vm.selectionState.selectedItems.value.compactMap { ($0 as? NSNumber)?.int64Value })
+        self.selectedItem = vm.selectedItem.value
         startObserving()
     }
     
     private func startObserving() {
-        viewModel.arrInstances.observeAsync(on: self, to: \.arrInstances)
-        viewModel.selectedInstance.observeAsync(on: self, to: \.selectedInstance)
+        viewModel.arrInstances.observeAsync(on: self) { owner, instances in
+            owner.arrInstances = instances
+        }
+        viewModel.selectedInstance.observeAsync(on: self) { owner, selected in
+            owner.selectedInstance = selected
+        }
         viewModel.offlineInstanceIds.observeAsync(on: self) { owner, offlineInstanceIds in
             owner.offlineInstanceIds = Set(offlineInstanceIds.compactMap { ($0 as? NSNumber)?.int64Value })
         }
-        viewModel.currentLibraryState.observeAsync(on: self, to: \.currentLibraryState)
-        viewModel.instanceData.observeAsync(on: self, to: \.instanceData)
-        viewModel.preferences.observeAsync(on: self, to: \.preferences)
+        viewModel.currentLibraryState.observeAsync(on: self) { owner, state in
+            owner.currentLibraryState = state
+        }
+        viewModel.instanceData.observeAsync(on: self) { owner, data in
+            owner.instanceData = data
+        }
+        viewModel.preferences.observeAsync(on: self) { owner, prefs in
+            owner.preferences = prefs
+        }
         viewModel.hasBazarr.observeAsync(on: self) { owner, hasBazarr in
             owner.hasBazarr = hasBazarr.boolValue
         }
-        viewModel.deleteStatus.observeAsync(on: self, to: \.deleteStatus)
-        viewModel.editItemStatus.observeAsync(on: self, to: \.editItemStatus)
-        viewModel.errorMessage.observeAsync(on: self, to: \.errorMessage)
+        viewModel.deleteStatus.observeAsync(on: self) { owner, status in
+            owner.deleteStatus = status
+        }
+        viewModel.editItemStatus.observeAsync(on: self) { owner, status in
+            owner.editItemStatus = status
+        }
+        viewModel.errorMessage.observeAsync(on: self) { owner, message in
+            owner.errorMessage = message
+        }
         viewModel.selectionState.isInSelectionMode.observeAsync(on: self) { owner, isInSelectionMode in
             owner.isInSelectionMode = isInSelectionMode.boolValue
         }
@@ -64,7 +95,9 @@ class UnifiedLibraryViewModelS: ObservableObject {
         viewModel.selectionState.selectedItems.observeAsync(on: self) { owner, selectedItems in
             owner.selectedItems = Set(selectedItems.compactMap { ($0 as? NSNumber)?.int64Value })
         }
-        viewModel.selectedItem.observeAsync(on: self, to: \.selectedItem)
+        viewModel.selectedItem.observeAsync(on: self) { owner, item in
+            owner.selectedItem = item
+        }
     }
     
     func selectInstance(_ instance: Instance) {
@@ -84,14 +117,14 @@ class UnifiedLibraryViewModelS: ObservableObject {
     }
     
     func updateCustomFilter(_ customFilterId: Int64?) {
-        viewModel.updateCustomFilter(customFilterId: customFilterId?.toKotlinLong())
+        viewModel.updateCustomFilter(customFilterId: customFilterId?.asKotlinLong)
     }
     
     func updateSortBy(_ sortBy: SortBy) {
         viewModel.updateSortBy(sortBy: sortBy)
     }
     
-    func updateSortOrder(_ sortOrder: SortOrder) {
+    func updateSortOrder(_ sortOrder: Shared.SortOrder) {
         viewModel.updateSortOrder(sortOrder: sortOrder)
     }
     
@@ -137,6 +170,30 @@ class UnifiedLibraryViewModelS: ObservableObject {
     
     func updateApplyGlobally(_ applyGlobally: Bool) {
         viewModel.updateApplyGlobally(applyGlobally: applyGlobally)
+    }
+    
+    func toggleItemSelection(_ id: Int64) {
+        viewModel.toggleItemSelection(id: id)
+    }
+    
+    func enterSelectionMode() {
+        viewModel.enterSelectionMode()
+    }
+    
+    func toggleMonitored(_ item: ArrMedia) {
+        viewModel.toggleMonitored(item: item)
+    }
+    
+    func performRefresh(_ item: ArrMedia) {
+        viewModel.performRefresh(item: item)
+    }
+    
+    func performAutomaticLookup(_ item: ArrMedia) {
+        viewModel.performAutomaticLookup(item: item)
+    }
+    
+    func performSubtitleSearch(_ item: ArrMedia) {
+        viewModel.performSubtitleSearch(item: item)
     }
     
     func deleteMedia(_ item: ArrMedia, deleteFiles: Bool, addExclusion: Bool) {

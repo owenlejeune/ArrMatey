@@ -8,9 +8,27 @@
 import SwiftUI
 import Shared
 
-struct ArrViewCustomizationSheet: View {
+protocol ArrViewCustomizationViewModel: ObservableObject {
+    var preferences: InstancePreferences { get }
+    func updateViewType(_ viewType: ViewType)
+    func updateApplyGlobally(_ applyGlobally: Bool)
+    func updateShowBannerBackground(_ show: Bool)
+    func updateIncludeOverview(_ show: Bool)
+    func updateBannerBlur(_ blur: Blur)
+    func updateShowFullDetails(_ show: Bool)
+    func updateShowOverlay(_ show: Bool)
+    func updateGridDensity(_ density: GridDensity)
+    func updateGridSpacing(_ spacing: GridSpacing)
+    func updatePosterElevation(_ elevation: PosterElevation)
+    func updatePosterRadius(_ radius: PosterRadius)
+}
+
+extension ArrMediaViewModelS: ArrViewCustomizationViewModel {}
+extension UnifiedLibraryViewModelS: ArrViewCustomizationViewModel {}
+
+struct ArrViewCustomizationSheet<VM: ArrViewCustomizationViewModel>: View {
     let type: InstanceType
-    @ObservedObject var viewModel: ArrMediaViewModelS
+    @ObservedObject var viewModel: VM
     @Environment(\.dismiss) var dismiss
 
     private var preferences: InstancePreferences {

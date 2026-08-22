@@ -10,19 +10,10 @@ import SwiftUI
 import Shared
 
 struct LibraryTab: View {
-    @Environment(\.navigationContext) private var context
-    @EnvironmentObject private var navigationManager: NavigationManager
     @StateObject private var libraryViewModel = UnifiedLibraryViewModelS()
     
     var body: some View {
-        switch context {
-        case .mainTab:
-            NavigationStack(path: $navigationManager.libraryPath) {
-                LibraryTabContent(libraryViewModel: libraryViewModel)
-            }
-        case .launcher:
-            LibraryTabContent(libraryViewModel: libraryViewModel)
-        }
+        LibraryTabContent(libraryViewModel: libraryViewModel)
     }
 }
 
@@ -35,9 +26,9 @@ struct LibraryTabContent: View {
     @State private var searchPresented: Bool = false
     @State private var customizationSheetPresented: Bool = false
     @State private var confirmDelete: Bool = false
-    @State private var showEditSheet: ArrMedia? = nil
-    @State private var moveFilesItem: ArrMedia? = nil
-    @State private var confirmBulkDelete: Bool = false
+    @State private var showEditSheet: Bool = false
+    @State private var selectedItemForEdit: ArrMedia? = nil
+    @State private var selectedItemForAction: ArrMedia? = nil
     @State private var showMonitorOptions: Bool = false
     
     private var selectedInstance: Instance? {
@@ -55,58 +46,67 @@ struct LibraryTabContent: View {
     private var preferences: InstancePreferences {
         libraryViewModel.preferences
     }
+    
+    private var queueItems: [QueueItem] {
+        activityQueueViewModel.queueItems
+    }
 
     var body: some View {
-        Group {
+        VStack(spacing: 0) {
             if libraryViewModel.arrInstances.isEmpty || selectedInstance == nil {
-                VStack {
-                    NoInstanceView(type: .sonarr)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .navigationTitle(MR.strings().library.localized())
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            navigationManager.showLauncher = true
-                        } label: {
-                            Image(systemName: "line.3.horizontal")
-                        }
-                    }
-                }
+                NoInstanceView(type: .sonarr)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let instance = selectedInstance {
-                VStack(spacing: 0) {
-                    if libraryViewModel.arrInstances.count > 1 {
-                        topTabsRow
-                    }
-                    
-                    contentForState(instance: instance)
+                if libraryViewModel.arrInstances.count > 1 && !libraryViewModel.isInSelectionMode {
+                    topTabsRow
                 }
-                .navigationTitle(instance.label)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    toolbarContent
+                
+                contentForState(instance: instance)
+            }
+        }
+        .searchable(
+            text: $libraryViewModel.searchQuery,
+            isPresented: $searchPresented,
+            placement: .navigationBarDrawer(displayMode: .automatic)
+        )
+        .navigationTitle(selectedInstance?.label ?? MR.strings().library.localized())
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            toolbarContent
+        }
+        .refreshable {
+            libraryViewModel.refreshSelected()
+        }
+        .sheet(isPresented: $customizationSheetPresented) {
+            ArrViewCustomizationSheet(
+                type: currentType,
+                viewModel: libraryViewModel
+            )
+        }
+        .sheet(isPresented: $confirmDelete) {
+            DeleteMediaSheet(
+                isLoading: false,
+                initialAddExclusion: preferences.deleteAddExclusion,
+                initialDeleteFiles: preferences.deleteDeleteFiles
+            ) { addExclusion, deleteFiles in
+                if libraryViewModel.isInSelectionMode {
+                    libraryViewModel.deleteSelected(deleteFiles: deleteFiles, addExclusion: addExclusion)
+                } else if let item = selectedItemForAction {
+                    libraryViewModel.deleteMedia(item, deleteFiles: deleteFiles, addExclusion: addExclusion)
                 }
-                .refreshable {
-                    libraryViewModel.refreshSelected()
-                }
-                .sheet(isPresented: $customizationSheetPresented) {
-                    ArrViewCustomizationSheet(
-                        type: currentType,
-                        preferences: preferences,
-                        changeViewType: { libraryViewModel.updateViewType($0) },
-                        changeShowFullDetails: { libraryViewModel.updateShowFullDetails($0) },
-                        changeShowOverlay: { libraryViewModel.updateShowOverlay($0) },
-                        changeShowBannerBackground: { libraryViewModel.updateShowBannerBackground($0) },
-                        changeIncludeOverview: { libraryViewModel.updateIncludeOverview($0) },
-                        changeBannerBlur: { libraryViewModel.updateBannerBlur($0) },
-                        changeGridDensity: { libraryViewModel.updateGridDensity($0) },
-                        changeGridSpacing: { libraryViewModel.updateGridSpacing($0) },
-                        changePosterElevation: { libraryViewModel.updatePosterElevation($0) },
-                        changePosterRadius: { libraryViewModel.updatePosterRadius($0) },
-                        changeApplyGlobally: { libraryViewModel.updateApplyGlobally($0) }
-                    )
-                }
+                confirmDelete = false
+            }
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showMonitorOptions) {
+            MonitorOptionsSheet(type: currentType) { option in
+                // Handled via monitor options
+            }
+            .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showEditSheet) {
+            if let item = selectedItemForEdit {
+                editSheet(for: item)
             }
         }
         .navigationDestination(for: MediaRoute.self) { value in
@@ -120,37 +120,37 @@ struct LibraryTabContent: View {
                 ForEach(libraryViewModel.arrInstances, id: \.id) { tabInstance in
                     let isSelected = tabInstance.id == selectedInstance?.id
                     let isOffline = libraryViewModel.isInstanceOffline(tabInstance.id)
-                    Button {
-                        libraryViewModel.selectInstance(tabInstance)
-                    } label: {
-                        HStack(spacing: 6) {
-                            if let logo = tabInstance.type.tabIcon {
-                                logo.toImage(renderingMode: .template)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 16, height: 16)
-                            }
-                            Text(tabInstance.label)
-                                .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                            
-                            if isOffline {
-                                Image(systemName: "wifi.slash")
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundColor(isSelected ? .white : .red)
-                            }
+                    HStack(spacing: 6) {
+                        if let logo = tabInstance.type.tabIcon {
+                            logo.toImage(renderingMode: .template)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 16, height: 16)
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(isSelected ? Color.accentColor : Color(UIColor.secondarySystemBackground))
-                        .foregroundColor(isSelected ? .white : .primary)
-                        .clipShape(Capsule())
+                        Text(tabInstance.label)
+                            .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                        
+                        if isOffline {
+                            Image(systemName: "wifi.slash")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(isSelected ? .white : .red)
+                        }
                     }
-                    .buttonStyle(.plain)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(isSelected ? Color.themePrimary : Color(UIColor.secondarySystemFill))
+                    .foregroundColor(isSelected ? Color.white : Color.primary)
+                    .clipShape(Capsule())
+                    .contentShape(Capsule())
+                    .onTapGesture {
+                        libraryViewModel.selectInstance(tabInstance)
+                    }
                 }
             }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
         }
+        .frame(height: 48)
         .background(Color(UIColor.systemBackground))
     }
     
@@ -171,7 +171,7 @@ struct LibraryTabContent: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        mediaListOrGrid(items: success.items, prefs: success.preferences)
+                        contentView(items: success.items, prefs: preferences)
                     }
                 }
                 
@@ -181,11 +181,6 @@ struct LibraryTabContent: View {
                         .zIndex(1)
                 }
             }
-            .searchable(
-                text: $libraryViewModel.searchQuery,
-                isPresented: $searchPresented,
-                placement: .navigationBarDrawer(displayMode: .automatic)
-            )
         } else if let error = uiState as? ArrLibraryError {
             ZStack {
                 ErrorView(
@@ -206,61 +201,320 @@ struct LibraryTabContent: View {
         }
     }
     
-    @ViewBuilder
-    private func mediaListOrGrid(items: [ArrMedia], prefs: InstancePreferences) -> some View {
-        MediaGridList(
-            type: currentType,
-            items: items,
-            onItemTapped: { item in
-                navigationManager.go(to: .details(media: item, type: currentType), of: currentType)
-            },
-            preferences: prefs,
-            itemIsActive: { item in
-                activityQueueViewModel.queueItems.contains(where: { $0.mediaId == item.id })
-            },
-            multiSelectEnabled: libraryViewModel.isInSelectionMode,
-            selectedItems: libraryViewModel.selectedItems,
-            onToggleItemSelection: { id in
-                if libraryViewModel.selectedItems.contains(id) {
-                    libraryViewModel.clearSelection()
-                }
+    private func contentView(
+        items: [ArrMedia],
+        prefs: InstancePreferences
+    ) -> some View {
+        VStack(spacing: 0) {
+            if items.isEmpty {
+                EmptySearchResultsView(type: currentType, query: libraryViewModel.searchQuery, onShouldSearch: {
+                    navigationManager.go(to: .search(query: libraryViewModel.searchQuery, type: currentType), of: currentType)
+                })
+            } else {
+                mediaView(
+                    viewType: prefs.viewType,
+                    aspectRatio: currentType.aspectRatio,
+                    items: items,
+                    prefs: prefs,
+                    onItemClicked: { media in
+                        if libraryViewModel.isInSelectionMode {
+                            if let id = media.id?.int64Value {
+                                libraryViewModel.toggleItemSelection(id)
+                            }
+                        } else {
+                            if let id = media.id?.int64Value {
+                                navigationManager.go(to: .details(id: id, type: currentType), of: currentType)
+                            }
+                        }
+                    },
+                    itemIsActive: { item in
+                        queueItems.contains(where: { $0.mediaId == item.id })
+                    }
+                )
             }
-        )
+        }
+        .id(items.count)
+    }
+    
+    @ViewBuilder
+    private func mediaView(
+        viewType: ViewType,
+        aspectRatio: AspectRatio,
+        items: [ArrMedia],
+        prefs: InstancePreferences,
+        onItemClicked: @escaping (ArrMedia) -> Void,
+        itemIsActive: @escaping (ArrMedia) -> Bool
+    ) -> some View {
+        ScrollView {
+            if viewType == .grid {
+                let columns = [GridItem(.adaptive(minimum: prefs.gridDensity.iosSize), spacing: prefs.gridSpacing.iosSpacing)]
+                
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(items, id: \.id) { item in
+                        let isSelected = libraryViewModel.selectedItems.contains(item.id?.int64Value ?? -1)
+                        
+                        ZStack(alignment: .topTrailing) {
+                            PosterItem(
+                                item: item,
+                                instanceType: currentType,
+                                aspectRatio: aspectRatio,
+                                elevation: prefs.posterElevation,
+                                radius: prefs.posterRadius,
+                                showFooter: prefs.showFullDetails,
+                                onItemClick: { item in onItemClicked(item) }
+                            ) {
+                                if prefs.showOverlay {
+                                    VStack {
+                                        HStack {
+                                            if item.id != nil {
+                                                Image(systemName: item.monitored ? "bookmark.fill" : "bookmark")
+                                                    .foregroundColor(.white)
+                                                    .padding(8)
+                                            }
+                                            Spacer()
+                                        }
+                                        Spacer()
+                                        if item.id != nil {
+                                            ProgressView(value: Double(item.statusProgress))
+                                                .tint(itemIsActive(item) ? Color.blue : Color(argb: item.statusColor))
+                                                .padding(8)
+                                        }
+                                    }
+                                }
+                            }
+                            .contextMenu {
+                                itemContextMenu(item)
+                            }
+                            
+                            if libraryViewModel.isInSelectionMode {
+                                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(isSelected ? .blue : .white)
+                                    .background(Circle().fill(isSelected ? .white : .black.opacity(0.3)))
+                                    .padding(8)
+                            }
+                        }
+                    }
+                }
+                .padding(16)
+                .padding(.bottom, libraryViewModel.isInSelectionMode ? 100 : 0)
+            } else {
+                LazyVStack(spacing: 12) {
+                    ForEach(items, id: \.id) { item in
+                        let isSelected = libraryViewModel.selectedItems.contains(item.id?.int64Value ?? -1)
+
+                        HStack {
+                            if libraryViewModel.isInSelectionMode {
+                                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(isSelected ? .blue : .secondary)
+                                    .onTapGesture {
+                                        if let id = item.id?.int64Value {
+                                            libraryViewModel.toggleItemSelection(id)
+                                        }
+                                    }
+                            }
+                            
+                            MediaItemView(
+                                item: item,
+                                aspectRatio: aspectRatio,
+                                instanceType: currentType,
+                                isActive: itemIsActive(item),
+                                showBannerBackground: prefs.showBannerBackground,
+                                includeOverview: prefs.includeOverview,
+                                bannerBlur: prefs.bannerBlur,
+                                posterElevation: prefs.posterElevation,
+                                posterRadius: prefs.posterRadius
+                            )
+                            .onTapGesture {
+                                onItemClicked(item)
+                            }
+                            .contextMenu {
+                                itemContextMenu(item)
+                            }
+                        }
+                    }
+                }
+                .padding(16)
+                .padding(.bottom, libraryViewModel.isInSelectionMode ? 100 : 0)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func itemContextMenu(_ item: ArrMedia) -> some View {
+        Button(action: {
+            if let id = item.id?.int64Value {
+                libraryViewModel.toggleItemSelection(id)
+                libraryViewModel.enterSelectionMode()
+            }
+        }) {
+            Label("Select", systemImage: "checkmark.circle")
+        }
+        
+        Divider()
+        
+        Button(action: {
+            selectedItemForEdit = item
+            showEditSheet = true
+        }) {
+            Label(MR.strings().edit.localized(), systemImage: "pencil")
+        }
+        
+        Button(action: {
+            libraryViewModel.toggleMonitored(item)
+        }) {
+            Label(item.monitored ? MR.strings().unmonitored.localized() : MR.strings().monitored.localized(),
+                  systemImage: item.monitored ? "bookmark" : "bookmark.fill")
+        }
+        
+        Button(action: {
+            libraryViewModel.performRefresh(item)
+        }) {
+            Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
+        }
+        
+        Button(action: {
+            libraryViewModel.performAutomaticLookup(item)
+        }) {
+            Label(MR.strings().search.localized(), systemImage: "magnifyingglass")
+        }
+        
+        if libraryViewModel.hasBazarr && (currentType == .sonarr || currentType == .radarr) {
+            Button(action: {
+                libraryViewModel.performSubtitleSearch(item)
+            }) {
+                Label(MR.strings().bazarr_search_subtitles.localized(), systemImage: "captions.bubble")
+            }
+        }
+        
+        if currentType != .radarr {
+            Button(action: {
+                if let id = item.id?.int64Value {
+                    libraryViewModel.toggleItemSelection(id)
+                    showMonitorOptions = true
+                }
+            }) {
+                Label(MR.strings().update_monitoring.localized(), systemImage: "bookmark.circle")
+            }
+        }
+        
+        Divider()
+        
+        Button(role: .destructive, action: {
+            selectedItemForAction = item
+            confirmDelete = true
+        }) {
+            Label(MR.strings().delete.localized(), systemImage: "trash")
+        }
     }
     
     private var selectionBottomBar: some View {
-        SelectionBottomBar(
-            type: currentType,
-            selectedCount: libraryViewModel.selectionCount,
-            isMonitored: libraryViewModel.selectedItem?.monitored == true,
-            hasBazarr: libraryViewModel.hasBazarr,
-            onEdit: {
-                showEditSheet = libraryViewModel.selectedItem
-            },
-            onDelete: {
-                confirmBulkDelete = true
-            },
-            onToggleMonitor: {
-                libraryViewModel.toggleMonitoringForSelected()
-            },
-            onRefresh: {
-                libraryViewModel.refreshSelectedItems()
-            },
-            onAutomaticSearch: {
-                libraryViewModel.performAutomaticLookupSelected()
-            },
-            onSubtitleSearch: {
-                libraryViewModel.performSubtitleSearchSelected()
-            },
-            onShowMonitorOptions: {
-                showMonitorOptions = true
+        HStack {
+            if libraryViewModel.selectionCount == 1 {
+                Button(action: {
+                    selectedItemForEdit = libraryViewModel.selectedItem
+                    showEditSheet = true
+                }) {
+                    Label(MR.strings().edit.localized(), systemImage: "pencil")
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    libraryViewModel.toggleMonitoringForSelected()
+                }) {
+                    let isMonitored = libraryViewModel.selectedItem?.monitored == true
+                    Label(isMonitored ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized(),
+                          systemImage: isMonitored ? "bookmark.fill" : "bookmark")
+                }
+                
+                Spacer()
             }
+            
+            Menu {
+                Button(action: { libraryViewModel.refreshSelectedItems() }) {
+                    Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
+                }
+                
+                Button(action: { libraryViewModel.performAutomaticLookupSelected() }) {
+                    Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
+                }
+                
+                if libraryViewModel.hasBazarr && (currentType == .sonarr || currentType == .radarr) {
+                    Button(action: { libraryViewModel.performSubtitleSearchSelected() }) {
+                        Label(MR.strings().bazarr_search_subtitles.localized(), systemImage: "captions.bubble")
+                    }
+                }
+                
+                if currentType != .radarr {
+                    Button(action: { showMonitorOptions = true }) {
+                        Label(MR.strings().update_monitoring.localized(), systemImage: "bookmark.circle")
+                    }
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+            
+            Spacer()
+            
+            Button(role: .destructive, action: {
+                confirmDelete = true
+            }) {
+                Label(MR.strings().delete.localized(), systemImage: "trash")
+            }
+            .foregroundColor(.red)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 15)
+                .fill(Color(uiColor: .systemBackground))
+                .shadow(radius: 10)
         )
+        .padding(.horizontal, 16)
+        .padding(.bottom, 20)
+    }
+    
+    @ViewBuilder
+    private func editSheet(for item: ArrMedia) -> some View {
+        let profiles = libraryViewModel.instanceData?.qualityProfiles ?? []
+        let folders = libraryViewModel.instanceData?.rootFolders ?? []
+        let tags = libraryViewModel.instanceData?.tags ?? []
+        let isInProgress = libraryViewModel.editItemStatus is NetworkingOperationStatusInProgress
+
+        if let series = item as? ArrSeries {
+            EditSeriesSheet(item: series, qualityProfiles: profiles, rootFolders: folders, tags: tags, editInProgress: isInProgress) { newItem, moveFiles in
+                libraryViewModel.editItem(newItem, moveFiles: moveFiles)
+            }
+        } else if let movie = item as? ArrMovie {
+            EditMovieSheet(item: movie, qualityProfiles: profiles, rootFolders: folders, tags: tags, editInProgress: isInProgress) { newItem, moveFiles in
+                libraryViewModel.editItem(newItem, moveFiles: moveFiles)
+            }
+        } else if let artist = item as? Arrtist {
+            EditArtistSheet(item: artist, qualityProfiles: profiles, rootFolders: folders, tags: tags, editInProgress: isInProgress) { newItem, moveFiles in
+                libraryViewModel.editItem(newItem, moveFiles: moveFiles)
+            }
+        } else if let author = item as? Author {
+            EditAuthorSheet(item: author, qualityProfiles: profiles, rootFolders: folders, tags: tags, editInProgress: isInProgress) { newItem, moveFiles in
+                libraryViewModel.editItem(newItem, moveFiles: moveFiles)
+            }
+        } else if let audiobook = item as? Audiobook {
+            EditAudiobookSheet(item: audiobook, qualityProfiles: profiles, rootFolders: folders, editInProgress: isInProgress) { newItem in
+                libraryViewModel.editItem(newItem)
+            }
+        }
     }
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if !libraryViewModel.isInSelectionMode {
+        if libraryViewModel.arrInstances.isEmpty || selectedInstance == nil {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    navigationManager.showLauncher = true
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                }
+            }
+        } else if !libraryViewModel.isInSelectionMode {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
                     navigationManager.showLauncher = true
@@ -274,17 +528,25 @@ struct LibraryTabContent: View {
             }
         } else {
             ToolbarItem(placement: .topBarLeading) {
-                Button(MR.strings().cancel.localized()) {
+                Button(MR.strings().close.localized()) {
                     libraryViewModel.exitSelectionMode()
                 }
             }
+            
+            ToolbarItem(placement: .principal) {
+                Text(MR.strings().selected_count.format(args: [libraryViewModel.selectionCount]).localized())
+                    .font(.headline)
+            }
+            
             ToolbarItem(placement: .topBarTrailing) {
-                Button(libraryViewModel.areAllItemsSelected() ? MR.strings().deselect_all.localized() : MR.strings().select_all.localized()) {
+                Button(action: {
                     if libraryViewModel.areAllItemsSelected() {
                         libraryViewModel.clearSelection()
                     } else {
                         libraryViewModel.selectAllItems()
                     }
+                }) {
+                    Image(systemName: libraryViewModel.areAllItemsSelected() ? "checkmark.circle.fill" : "circle")
                 }
             }
         }

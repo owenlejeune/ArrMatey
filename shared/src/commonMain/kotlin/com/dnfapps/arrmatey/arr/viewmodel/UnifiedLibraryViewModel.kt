@@ -32,6 +32,8 @@ import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.networking.OperationStatus
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -70,7 +72,7 @@ class UnifiedLibraryViewModel(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = emptyList()
         )
 
@@ -94,7 +96,7 @@ class UnifiedLibraryViewModel(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = emptyMap()
         )
 
@@ -104,7 +106,7 @@ class UnifiedLibraryViewModel(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = emptySet()
         )
 
@@ -130,7 +132,7 @@ class UnifiedLibraryViewModel(
         .map { it != null }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = false
         )
 
@@ -140,7 +142,7 @@ class UnifiedLibraryViewModel(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = null
         )
 
@@ -151,7 +153,7 @@ class UnifiedLibraryViewModel(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = InstancePreferences()
         )
 
@@ -174,7 +176,7 @@ class UnifiedLibraryViewModel(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = null
         )
 
@@ -195,7 +197,7 @@ class UnifiedLibraryViewModel(
         }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.Eagerly,
         initialValue = ArrLibrary.Initial
     )
 
@@ -211,7 +213,7 @@ class UnifiedLibraryViewModel(
         }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.Eagerly,
         initialValue = null
     )
 
@@ -396,6 +398,14 @@ class UnifiedLibraryViewModel(
         }
     }
 
+    fun toggleItemSelection(id: Long) {
+        selectionState.toggle(id)
+    }
+
+    fun enterSelectionMode() {
+        selectionState.enterSelectionMode()
+    }
+
     fun selectAllItems() {
         val success = currentLibraryState.value as? ArrLibrary.Success ?: return
         selectionState.selectAll(success.items.mapNotNull { it.id })
@@ -412,6 +422,48 @@ class UnifiedLibraryViewModel(
 
     fun exitSelectionMode() {
         selectionState.exitSelectionMode()
+    }
+
+    fun toggleMonitored(item: ArrMedia) {
+        viewModelScope.launch {
+            val instance = _selectedInstance.value ?: return@launch
+            val repository = instanceManager.getArrRepository(instance.id) ?: return@launch
+            toggleMonitorUseCase.toggleMedia(item, repository)
+        }
+    }
+
+    fun performRefresh(item: ArrMedia) {
+        val mediaId = item.id ?: return
+        viewModelScope.launch {
+            val instance = _selectedInstance.value ?: return@launch
+            val repository = instanceManager.getArrRepository(instance.id) ?: return@launch
+            performRefreshUseCase(mediaId, instance.type, repository)
+        }
+    }
+
+    fun performAutomaticLookup(item: ArrMedia) {
+        val mediaId = item.id ?: return
+        viewModelScope.launch {
+            val instance = _selectedInstance.value ?: return@launch
+            val repository = instanceManager.getArrRepository(instance.id) ?: return@launch
+            performAutomaticSearchUseCase(mediaId, instance.type, repository)
+                .onSuccess { _lastSearchResult.value = true }
+                .onError { _, _, _ -> _lastSearchResult.value = false }
+            _lastSearchResult.value = null
+        }
+    }
+
+    fun performSubtitleSearch(item: ArrMedia) {
+        val mediaId = item.id ?: return
+        viewModelScope.launch {
+            val instance = _selectedInstance.value ?: return@launch
+            val bazarrRepo = instanceManager.getAllBazarrRepositories().firstOrNull() ?: return@launch
+            when (instance.type) {
+                InstanceType.Sonarr -> bazarrRepo.autoSearchSeriesSubtitles(mediaId)
+                InstanceType.Radarr -> bazarrRepo.autoSearchMovieSubtitles(mediaId)
+                else -> {}
+            }
+        }
     }
 
     fun refreshSelectedItems() {
