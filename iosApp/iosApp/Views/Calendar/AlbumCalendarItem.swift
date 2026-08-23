@@ -61,7 +61,7 @@ struct AlbumCalendarItem: View {
         }
         .swipeActions(edge: .trailing) {
             if album.instanceIds.count > 1 {
-                ForEach(instances.filter { album.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
+                ForEach(instances.filter { album.instanceIds.contains($0.id.asKotlinLong) }, id: \.id) { instance in
                     Button {
                         onNavigate(instance.id)
                     } label: {

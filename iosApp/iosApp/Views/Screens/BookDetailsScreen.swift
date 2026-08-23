@@ -10,56 +10,68 @@ import Shared
 
 struct BookDetailsScreen: View {
     let author: Author
-    
+
     @ObservedObject private var viewModel: BookDetailsViewModelS
-    
+
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var navigation: NavigationManager
-    
+
     @State private var confirmDelete: Bool = false
-    
+
     private var book: Book {
         viewModel.book
     }
-    
+
     init(bookJson: String, authorJson: String) {
         let book = Book.companion.fromJson(value: bookJson)
         let author = Author.companion.fromJson(value: authorJson)
         self.author = author
         self.viewModel = BookDetailsViewModelS(authorId: author.id?.int64Value ?? 0, book: book)
     }
-    
+
     var body: some View {
         contentForState()
-            .toolbar { toolbarContent }
-            .alert(MR.strings().are_you_sure.localized(), isPresented: $confirmDelete) {
-                Button(MR.strings().yes.localized(), role: .destructive) {
-                    viewModel.deleteBook()
-                    confirmDelete = false
-                }
-                Button(MR.strings().no.localized(), role: .cancel) {
-                    confirmDelete = false
-                }
-            } message: {
-                Text(MR.strings().book_delete_message.localized())
+        .toolbar { toolbarContent }
+        .alert(MR.strings().are_you_sure.localized(), isPresented: $confirmDelete) {
+            Button(MR.strings().yes.localized(), role: .destructive) {
+                viewModel.deleteBook()
+                confirmDelete = false
             }
+            Button(MR.strings().no.localized(), role: .cancel) {
+                confirmDelete = false
+            }
+        } message: {
+            Text(MR.strings().book_delete_message.localized())
+        }
     }
-    
+
     @ViewBuilder
     private func contentForState() -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                BookDetailsHeader(author: author, book: viewModel.book)
-                
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(book.title.breakable())
-                        .font(.title)
-                        .bold()
+            VStack(alignment: .leading, spacing: 0) {
+                MediaHeaderBanner(bannerUrl: URL(string: book.getCover()?.remoteUrl ?? ""), height: 250, gradientHeight: 100)
+
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(book.title.breakable())
+                            .font(.title)
+                            .bold()
+
+                        if let authorTitle = author.title {
+                            Text(authorTitle)
+                                .font(.body)
+                        }
+
+                        if let pageCount = book.pageCount {
+                            Text("\(pageCount) pages")
+                                .font(.caption)
+                        }
+                    }
 
                     if let overview = viewModel.bookEdition?.overview {
                         ItemDescriptionCard(overview: overview)
                     }
-                    
+
                     ReleaseDownloadButtons(
                         onInteractiveClicked: {
                             navigation.go(to: .bookReleases(bookId: viewModel.book.id), of: .booksehelf)
@@ -68,14 +80,14 @@ struct BookDetailsScreen: View {
                         onAutomaticClicked: {
                             viewModel.executeAutomaticSearch()
                         })
-                    
+
                     Text(MR.strings().files.localized())
                         .font(.system(size: 20, weight: .bold))
-                    
+
                     ForEach(viewModel.bookFiles, id: \.id) { file in
                         BookFileCard(file: file)
                     }
-                    
+
                     switch viewModel.history {
                     case is HistoryStateLoading:
                         ProgressView()
@@ -94,7 +106,7 @@ struct BookDetailsScreen: View {
                     default:
                         EmptyView()
                     }
-                    
+
                     Spacer()
                         .frame(height: 12)
                 }
@@ -104,23 +116,24 @@ struct BookDetailsScreen: View {
         }
         .ignoresSafeArea(edges: .top)
     }
-    
+
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .primaryAction) {
-            Image(systemName: viewModel.book.monitored ? "bookmark.fill" : "bookmark")
-                .imageScale(.medium)
-                .onTapGesture {
-                    viewModel.toggleMonitor()
-                }
+            Button {
+                viewModel.toggleMonitor()
+            } label: {
+                Image(systemName: viewModel.book.monitored ? "bookmark.fill" : "bookmark")
+            }
         }
         ToolbarItem(placement: .primaryAction) {
-            Image(systemName: "trash")
-                .imageScale(.medium)
-                .tint(.red)
-                .onTapGesture {
-                    confirmDelete = true
-                }
+            Button {
+                confirmDelete = true
+            } label: {
+                Image(systemName: "trash")
+            }
+            .tint(.red)
+            .disabled(viewModel.bookFiles.isEmpty)
         }
     }
 }

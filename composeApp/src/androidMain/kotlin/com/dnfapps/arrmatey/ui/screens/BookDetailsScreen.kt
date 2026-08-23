@@ -177,18 +177,37 @@ fun BookDetailsScreen(
         ) {
             Column(
                 modifier = Modifier.verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                BookDetailsHeader(currentBook, author)
+                Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+                    DetailHeaderBanner(
+                        bannerUrl = currentBook.getCover()?.remoteUrl,
+                        gradientHeight = 100.dp
+                    )
+                }
 
                 Column(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    Text(
-                        text = book.title.breakable(),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
+                    Column {
+                        Text(
+                            text = currentBook.title.breakable(),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        currentBook.author?.title?.let { title ->
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        currentBook.pageCount?.let { pageCount ->
+                            Text(
+                                text = "$pageCount pages",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
 
                     bookEdition?.overview?.let { overview ->
                         ItemDescriptionCard(overview)
@@ -209,8 +228,17 @@ fun BookDetailsScreen(
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Medium
                     )
-                    bookFiles.forEach { file ->
-                        BookFileCard(file)
+                    if (bookFiles.isNotEmpty()) {
+                        bookFiles.forEach { file ->
+                            BookFileCard(file)
+                        }
+                    } else {
+                        Text(
+                            text = mokoString(MR.strings.no_files),
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
 
                     when (val historyResult = history) {
@@ -271,76 +299,6 @@ fun BookDetailsScreen(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun BookDetailsHeader(
-    book: Book,
-    author: Author
-) {
-    var detailHeight by remember { mutableIntStateOf(0) }
-    Box(modifier = Modifier.fillMaxSize()) {
-        DetailHeaderBanner(
-            bannerUrl = book.getCover()?.remoteUrl,
-            gradientHeight = detailHeight.times(2).dp()
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 170.dp)
-                .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalAlignment = Alignment.Bottom
-        ) {
-            BookCover(book)
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.onGloballyPositioned {
-                    detailHeight = it.size.height
-                }
-            ) {
-                book.seriesTitle?.let { seriesTitle ->
-                    Text(
-                        text = seriesTitle
-                    )
-                }
-                Text(
-                    text = buildString {
-                        author.title?.let { authorName ->
-                            append(authorName)
-                            append(Bullet)
-                        }
-                        book.pageCount?.let { pageCount ->
-                            append("$pageCount pages")
-                        }
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun BookCover(
-    book: Book
-) {
-    Card(
-        shape = RoundedCornerShape(10.dp),
-        elevation = CardDefaults.cardElevation(12.dp),
-        modifier = Modifier
-            .height(220.dp)
-            .aspectRatio(AspectRatio.Poster.ratio, true)
-    ) {
-        AsyncImage(
-            model = rememberRemoteImageData(
-                url = book.getCover()?.remoteUrl
-            ),
-            contentDescription = null,
-            contentScale = ContentScale.FillHeight,
-            modifier = Modifier.fillMaxSize()
-        )
     }
 }
 

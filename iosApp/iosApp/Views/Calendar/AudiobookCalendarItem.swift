@@ -67,7 +67,7 @@ struct AudiobookCalendarItem: View {
         }
         .swipeActions(edge: .trailing) {
             if audiobook.instanceIds.count > 1 {
-                ForEach(instances.filter { audiobook.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
+                ForEach(instances.filter { audiobook.instanceIds.contains($0.id.asKotlinLong) }, id: \.id) { instance in
                     Button {
                         onNavigate(instance.id)
                     } label: {
