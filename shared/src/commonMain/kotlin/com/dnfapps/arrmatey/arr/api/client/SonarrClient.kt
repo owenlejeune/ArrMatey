@@ -141,7 +141,9 @@ class SonarrClient(
             "start" to start.toString(),
             "end" to end.toString(),
             "unmonitored" to true,
-            "includeSeries" to true
+            "includeSeries" to true,
+            "includeEpisodeFile" to true,
+            "includeEpisodeImages" to true
         )).map { it.map { ep -> ep.copy(instanceId = instance.id) } }
 
     override suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> =

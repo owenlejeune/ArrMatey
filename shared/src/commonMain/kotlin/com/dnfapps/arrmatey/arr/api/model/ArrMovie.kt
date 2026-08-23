@@ -65,7 +65,8 @@ data class ArrMovie(
     val popularity: Double = 0.toDouble(),
     val lastSearchTime: String? = null,
 
-    override val instanceId: Long? = null
+    override val instanceId: Long? = null,
+    override val instanceIds: List<Long> = listOfNotNull(instanceId)
 ): ArrMedia, CalendarItem, InstanceTypeIdentifiable {
 
     override val calendarId: Long

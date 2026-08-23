@@ -28,7 +28,8 @@ data class Book(
     @Contextual val lastSearchTime: Instant? = null,
     val grabbed: Boolean = false,
 
-    override val instanceId: Long? = null
+    override val instanceId: Long? = null,
+    override val instanceIds: List<Long> = listOfNotNull(instanceId)
 ): CalendarItem {
 
     override val calendarId: Long

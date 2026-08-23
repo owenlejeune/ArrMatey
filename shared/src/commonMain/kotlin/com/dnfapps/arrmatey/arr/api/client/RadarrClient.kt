@@ -119,7 +119,8 @@ class RadarrClient(
         get<List<ArrMovie>>("calendar", mapOf(
             "start" to start.toString(),
             "end" to end.toString(),
-            "unmonitored" to true
+            "unmonitored" to true,
+            "includeMoveiFile" to true
         )).map { it.map { movie -> movie.copy(instanceId = instance.id) } }
 
     suspend fun getMovieExtraFile(id: Long): NetworkResult<List<ExtraFile>> =

@@ -45,7 +45,8 @@ data class Episode(
     val images: List<ArrImage> = emptyList(),
 
     val series: ArrSeries? = null,
-    override var instanceId: Long? = null
+    override var instanceId: Long? = null,
+    override val instanceIds: List<Long> = listOfNotNull(instanceId)
 ): CalendarItem, InstanceTypeIdentifiable {
     override val calendarId: Long 
         get() = tvdbId ?: id

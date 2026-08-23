@@ -7,7 +7,8 @@ import kotlin.time.Instant
 data class EpisodeGroup(
     val first: Episode,
     val additional: List<Episode>,
-    val totalCount: Int = 1 + additional.size
+    val totalCount: Int = 1 + additional.size,
+    override val instanceIds: List<Long> = (listOf(first) + additional).flatMap { it.instanceIds }.distinct()
 ): CalendarItem, InstanceTypeIdentifiable {
 
     override val instanceId: Long?

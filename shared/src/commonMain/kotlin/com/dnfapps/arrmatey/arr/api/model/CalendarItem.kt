@@ -6,6 +6,8 @@ import kotlin.time.Instant
 
 sealed interface CalendarItem {
     val instanceId: Long?
+    val instanceIds: List<Long>
+        get() = listOfNotNull(instanceId)
     val calendarId: Long
     fun getCalendarDates(): List<Instant>
     val notificationScheduledTime: Instant?

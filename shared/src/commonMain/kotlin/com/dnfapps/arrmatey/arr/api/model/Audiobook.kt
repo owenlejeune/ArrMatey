@@ -55,7 +55,8 @@ data class Audiobook(
     @Serializable(with =  ListenarrNullableInstantSerializer::class)
     val publishedDate: Instant? = null,
 
-    override val instanceId: Long? = null
+    override val instanceId: Long? = null,
+    override val instanceIds: List<Long> = listOfNotNull(instanceId)
 ) : ArrMedia, HasArrImages<Audiobook>, CalendarItem, InstanceTypeIdentifiable {
 
     companion object {
