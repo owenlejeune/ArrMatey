@@ -73,10 +73,6 @@ struct CalendarTabContent: View {
             }
         
             CalendarFilterMenu(
-                instanceId: Binding(
-                    get: { viewModel.calendarState.filterState.instanceId?.int64Value },
-                    set: { viewModel.setFilterInstanceId($0) }
-                ),
                 contentFilter: Binding(
                     get: { viewModel.calendarState.filterState.contentFilter },
                     set: { viewModel.setContentFilter($0) }
@@ -92,8 +88,7 @@ struct CalendarTabContent: View {
                 onlyFinales: Binding(
                     get: { viewModel.calendarState.filterState.showFinalesOnly },
                     set: { _ in viewModel.toggleShowFinalesOnly() }
-                ),
-                instances: viewModel.instances
+                )
             )
             .menuIndicator(.hidden)
         }

@@ -56,8 +56,4 @@ class CalendarViewModelS: ObservableObject {
     func toggleShowFinalesOnly() {
         viewModel.toggleShowFinalesOnly()
     }
-    
-    func setFilterInstanceId(_ instanceId: Int64?) {
-        viewModel.setFilterInstanceId(id: instanceId?.asKotlinLong)
-    }
 }

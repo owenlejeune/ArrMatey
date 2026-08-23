@@ -116,12 +116,6 @@ class CalendarViewModel(
         }
     }
 
-    fun setFilterInstanceId(id: Long?) {
-        safeSaveFilter {
-            it.copy(instanceId = id)
-        }
-    }
-
     private fun safeSaveFilter(transform: (CalendarFilterState) -> CalendarFilterState) {
         viewModelScope.launch {
             val filterState = calendarState.value.filterState
@@ -188,29 +182,24 @@ class CalendarViewModel(
     }
 
     private fun filterMovie(movie: ArrMovie, filter: CalendarFilterState): Boolean {
-        return (!filter.showMonitoredOnly || movie.monitored) &&
-                (filter.instanceId == null || movie.instanceId == filter.instanceId)
+        return (!filter.showMonitoredOnly || movie.monitored)
     }
 
     private fun filterEpisode(episode: Episode, filter: CalendarFilterState): Boolean {
         return (!filter.showMonitoredOnly || episode.monitored) &&
                 (!filter.showPremiersOnly || (episode.seasonNumber == 1 && episode.episodeNumber == 1)) &&
-                (!filter.showFinalesOnly || episode.finaleType != null) &&
-                (filter.instanceId == null || episode.instanceId == filter.instanceId)
+                (!filter.showFinalesOnly || episode.finaleType != null)
     }
 
     private fun filterAlbum(album: ArrAlbum, filter: CalendarFilterState): Boolean {
-        return (!filter.showMonitoredOnly || album.monitored) &&
-                (filter.instanceId == null || album.instanceId == filter.instanceId)
+        return (!filter.showMonitoredOnly || album.monitored)
     }
 
     private fun filterBook(book: Book, filter: CalendarFilterState): Boolean {
-        return (!filter.showMonitoredOnly || book.monitored) &&
-                (filter.instanceId == null || book.instanceId == filter.instanceId)
+        return (!filter.showMonitoredOnly || book.monitored)
     }
 
     private fun filterAudiobook(audiobook: Audiobook, filter: CalendarFilterState): Boolean {
-        return (!filter.showMonitoredOnly || audiobook.monitored) &&
-                (filter.instanceId == null || audiobook.instanceId == filter.instanceId)
+        return (!filter.showMonitoredOnly || audiobook.monitored)
     }
 }
