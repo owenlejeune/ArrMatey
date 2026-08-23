@@ -35,16 +35,14 @@ struct UnifiedMediaDetailsScreen: View {
         tmdbId: Int64? = nil,
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
-        requestType: RequestType? = nil,
-        instanceId: Int64? = nil
+        requestType: RequestType? = nil
     ) {
         _viewModel = StateObject(wrappedValue: UnifiedMediaDetailsViewModelS(
             arrId: arrId,
             tmdbId: tmdbId,
             tvdbId: tvdbId,
             instanceType: instanceType,
-            requestType: requestType,
-            instanceId: instanceId
+            requestType: requestType
         ))
     }
     

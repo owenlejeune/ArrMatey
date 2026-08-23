@@ -13,33 +13,26 @@ import com.dnfapps.arrmatey.arr.state.CalendarFilterState
 import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.state.ContentFilter
-import com.dnfapps.arrmatey.arr.usecase.FindMatchingInstancesForMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetCalendarUseCase
-import com.dnfapps.arrmatey.arr.usecase.ResolvedMediaDestination
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
-import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.usecase.UpdateCalendarFilterPreferenceUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
 class CalendarViewModel(
     private val getCalendarUseCase: GetCalendarUseCase,
     private val updateCalendarFilterStateUseCase: UpdateCalendarFilterPreferenceUseCase,
-    private val findMatchingInstancesForMediaUseCase: FindMatchingInstancesForMediaUseCase,
     preferencesStore: PreferencesStore,
-    private val instanceRepository: InstanceRepository
+    instanceRepository: InstanceRepository
 ) : ViewModel() {
-
-    suspend fun resolveDestination(item: CalendarItem): List<ResolvedMediaDestination> =
-        findMatchingInstancesForMediaUseCase.resolve(item)
-
-    suspend fun selectInstance(instance: Instance) {
-        instanceRepository.setInstanceActive(instance)
-    }
 
     val calendarState = combine(
         getCalendarUseCase(),
@@ -54,6 +47,13 @@ class CalendarViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = CalendarState()
     )
+
+    val instances = instanceRepository.observeAllInstances()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     init {
         load()
@@ -113,6 +113,12 @@ class CalendarViewModel(
                 showFinalesOnly = !current,
                 showPremiersOnly = if (!current) false else it.showPremiersOnly
             )
+        }
+    }
+
+    fun setFilterInstanceId(id: Long?) {
+        safeSaveFilter {
+            it.copy(instanceId = id)
         }
     }
 
@@ -182,24 +188,29 @@ class CalendarViewModel(
     }
 
     private fun filterMovie(movie: ArrMovie, filter: CalendarFilterState): Boolean {
-        return (!filter.showMonitoredOnly || movie.monitored)
+        return (!filter.showMonitoredOnly || movie.monitored) &&
+                (filter.instanceId == null || movie.instanceId == filter.instanceId)
     }
 
     private fun filterEpisode(episode: Episode, filter: CalendarFilterState): Boolean {
         return (!filter.showMonitoredOnly || episode.monitored) &&
                 (!filter.showPremiersOnly || (episode.seasonNumber == 1 && episode.episodeNumber == 1)) &&
-                (!filter.showFinalesOnly || episode.finaleType != null)
+                (!filter.showFinalesOnly || episode.finaleType != null) &&
+                (filter.instanceId == null || episode.instanceId == filter.instanceId)
     }
 
     private fun filterAlbum(album: ArrAlbum, filter: CalendarFilterState): Boolean {
-        return (!filter.showMonitoredOnly || album.monitored)
+        return (!filter.showMonitoredOnly || album.monitored) &&
+                (filter.instanceId == null || album.instanceId == filter.instanceId)
     }
 
     private fun filterBook(book: Book, filter: CalendarFilterState): Boolean {
-        return (!filter.showMonitoredOnly || book.monitored)
+        return (!filter.showMonitoredOnly || book.monitored) &&
+                (filter.instanceId == null || book.instanceId == filter.instanceId)
     }
 
     private fun filterAudiobook(audiobook: Audiobook, filter: CalendarFilterState): Boolean {
-        return (!filter.showMonitoredOnly || audiobook.monitored)
+        return (!filter.showMonitoredOnly || audiobook.monitored) &&
+                (filter.instanceId == null || audiobook.instanceId == filter.instanceId)
     }
 }

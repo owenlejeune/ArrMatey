@@ -13,6 +13,7 @@ class CalendarViewModelS: ObservableObject {
     private let viewModel: CalendarViewModel
     
     @Published private(set) var calendarState: CalendarState = CalendarState()
+    @Published private(set) var instances: [Instance] = []
     
     init() {
         self.viewModel = KoinBridge.shared.getCalendarViewModel()
@@ -21,6 +22,7 @@ class CalendarViewModelS: ObservableObject {
     
     private func startObserving() {
         viewModel.calendarState.observeAsync(on: self, to: \.calendarState)
+        viewModel.instances.observeAsync(on: self, to: \.instances)
     }
     
     func load() {
@@ -55,16 +57,7 @@ class CalendarViewModelS: ObservableObject {
         viewModel.toggleShowFinalesOnly()
     }
     
-    func resolveDestination(item: CalendarItem) async -> [ResolvedMediaDestination] {
-        await withCheckedContinuation { continuation in
-            Task { @MainActor in
-                let result = try? await viewModel.resolveDestination(item: item)
-                continuation.resume(returning: result ?? [])
-            }
-        }
-    }
-    
-    func selectInstance(instance: Instance) async {
-        try? await viewModel.selectInstance(instance: instance)
+    func setFilterInstanceId(_ instanceId: Int64?) {
+        viewModel.setFilterInstanceId(id: instanceId?.asKotlinLong)
     }
 }

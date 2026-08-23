@@ -12,7 +12,6 @@ struct CalendarDaySection: View {
     let date: LocalDate
     let items: [CalendarItem]
     let isToday: Bool
-    var onItemClick: ((CalendarItem) -> Void)? = nil
     
     private var totalItems: Int {
         items.count(where: { !($0 is EpisodeGroup) })
@@ -56,24 +55,11 @@ struct CalendarDaySection: View {
             
             ForEach(items, id: \.calendarId) { item in
                 switch item {
-                case let movie as ArrMovie:
-                    MovieCalendarItem(movie: movie, date: date)
-                        .onTapGesture { onItemClick?(movie) }
-                case let epGroup as EpisodeGroup:
-                    EpisodeCalendarItem(item: epGroup)
-                        .onTapGesture { onItemClick?(epGroup) }
-                case let episode as Episode:
-                    EpisodeCalendarItem(item: episode)
-                        .onTapGesture { onItemClick?(episode) }
-                case let album as ArrAlbum:
-                    AlbumCalendarItem(album: album)
-                        .onTapGesture { onItemClick?(album) }
-                case let book as Book:
-                    BookCalendarItem(book: book)
-                        .onTapGesture { onItemClick?(book) }
-                case let audiobook as Audiobook:
-                    AudiobookCalendarItem(audiobook: audiobook)
-                        .onTapGesture { onItemClick?(audiobook) }
+                case let movie as ArrMovie: MovieCalendarItem(movie: movie, date: date)
+                case let epGroup as EpisodeGroup: EpisodeCalendarItem(episodeGroup: epGroup)
+                case let album as ArrAlbum: AlbumCalendarItem(album: album)
+                case let book as Book: BookCalendarItem(book: book)
+                case let audiobook as Audiobook: AudiobookCalendarItem(audiobook: audiobook)
                 default: EmptyView()
                 }
             }

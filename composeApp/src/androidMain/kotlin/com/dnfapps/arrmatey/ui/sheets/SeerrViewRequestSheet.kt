@@ -183,7 +183,7 @@ private fun SeasonTable(
                     } else {
                         mokoString(MR.strings.season_label, season.seasonNumber)
                     },
-                    sublabel = mokoPlural(MR.plurals.episodes_count, season.episodeCount),
+                    sublabel = mokoPlural(MR.plurals.episodes, season.episodeCount),
                     checked = isSelected,
                     onCheckedChange = { checked ->
                         if (checked) {

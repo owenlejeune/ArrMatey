@@ -37,7 +37,6 @@ data class Arrtist(
     override val statistics: LidarrStatistics? = null,
     @Contextual override val added: Instant? = null,
     override val status: MediaStatus,
-    override val instanceId: Long? = null,
 
     val monitorNewItems: ArtistMonitorType,
     val metadataProfileId: Int,

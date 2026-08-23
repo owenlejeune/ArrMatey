@@ -43,7 +43,6 @@ data class SearchAudiobook(
     @Serializable(with = ListenarrInstantSerializer::class)
     val updatedAt: Instant? = null,
     override val images: List<ArrImage> = emptyList(),
-    override val instanceId: Long? = null,
 
     override val monitored: Boolean = false,
     override val qualityProfileId: Int = 0,

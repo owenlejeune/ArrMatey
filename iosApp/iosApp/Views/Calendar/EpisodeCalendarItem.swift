@@ -9,20 +9,10 @@ import SwiftUI
 import Shared
 
 struct EpisodeCalendarItem: View {
-    let item: CalendarItem
+    let episodeGroup: EpisodeGroup
     
     private var episode: Episode {
-        if let group = item as? EpisodeGroup {
-            return group.first
-        }
-        return item as! Episode
-    }
-    
-    private var additionalCount: Int {
-        if let group = item as? EpisodeGroup {
-            return Int(group.additional.count)
-        }
-        return 0
+        episodeGroup.first
     }
     
     private var isPremier: Bool {
@@ -87,8 +77,8 @@ struct EpisodeCalendarItem: View {
                         BadgeView(text: finaleType.resource.localized(), color: .arrGrey)
                     }
                     
-                    if additionalCount > 0 {
-                        Text(MR.strings().additional_items_count.formatted(args: [additionalCount]))
+                    if !episodeGroup.additional.isEmpty {
+                        Text(MR.strings().additional_items_count.formatted(args: [episodeGroup.additional.count]))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }

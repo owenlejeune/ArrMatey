@@ -117,10 +117,8 @@ class BookshelfClient(
     suspend fun getBookFiles(bookId: Long): NetworkResult<List<BookFile>> =
         get("bookFile", mapOf("bookId" to bookId))
 
-    suspend fun getBooks(authorId: Long? = null): NetworkResult<List<Book>> =
-        get("book", buildMap {
-            authorId?.let { put("authorId", it) }
-        })
+    suspend fun getBooks(): NetworkResult<List<Book>> =
+        get("book")
 
     suspend fun updateBook(book: Book): NetworkResult<Book> =
         put("book/${book.id}", book)

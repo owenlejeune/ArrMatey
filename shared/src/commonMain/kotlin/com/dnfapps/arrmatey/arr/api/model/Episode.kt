@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.arr.api.model
 
-import com.dnfapps.arrmatey.arr.api.client.HasArrImages
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.isBeforeToday
 import com.dnfapps.arrmatey.extensions.padStart
@@ -43,18 +42,11 @@ data class Episode(
     val unverifiedSceneNumbering: Boolean,
     val endTime: String? = null,
     val grabDate: String? = null,
-    override val images: List<ArrImage> = emptyList(),
+    val images: List<ArrImage> = emptyList(),
 
     val series: ArrSeries? = null,
     override var instanceId: Long? = null
-): CalendarItem, HasArrImages<Episode>, InstanceTypeIdentifiable {
-
-    override fun withLocalImages(instanceUrl: String): Episode =
-        copy(
-            images = images.map { it.rebuildWithLocalUrls(instanceUrl) },
-            series = series?.withLocalImages(instanceUrl)
-        )
-
+): CalendarItem, InstanceTypeIdentifiable {
     override val calendarId: Long 
         get() = tvdbId ?: id
     override fun getCalendarDates(): List<Instant> = 

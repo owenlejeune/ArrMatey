@@ -9,7 +9,6 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.usecase.ResolvedMediaDestination
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -78,7 +77,6 @@ class RequestsTabNavigator : BaseNavigator<NavKey>(SeerrScreen.Home)
 class DiscoverTabNavigator : BaseNavigator<NavKey>(DiscoverScreen.Home)
 class BooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class AudiobooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
-class CalendarTabNavigator : BaseNavigator<NavKey>(CalendarScreen.Calendar)
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
 class DashboardTabNavigator : BaseNavigator<DashboardScreen>(DashboardScreen.Main)
 class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
@@ -98,9 +96,8 @@ fun Navigator<*>.toDetails(
     tmdbId: Long? = null,
     tvdbId: Long? = null,
     requestType: RequestType? = null,
-    type: InstanceType? = null,
-    instanceId: Long? = null
-) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type, instanceId))
+    type: InstanceType? = null
+) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type))
 
 fun Navigator<*>.toMediaDetails(
     media: com.dnfapps.arrmatey.arr.api.model.ArrMedia,
@@ -116,8 +113,7 @@ fun Navigator<*>.toMediaDetails(
         id = media.id,
         tmdbId = tmdbId,
         tvdbId = tvdbId,
-        type = type,
-        instanceId = media.instanceId
+        type = type
     )
 }
 
@@ -134,42 +130,6 @@ fun Navigator<*>.toAlbumRelease(albumId: Long, artistId: Long? = null) = nav().n
 fun Navigator<*>.toBookRelease(bookId: Long) = nav().navigateTo(MediaScreen.BookRelease(bookId))
 fun Navigator<*>.toAudiobookRelease(audiobookId: Long?, query: String) = nav().navigateTo(MediaScreen.AudiobookRelease(audiobookId, query))
 fun Navigator<*>.toPersonDetails(personId: Long) = nav().navigateTo(MediaScreen.PersonDetails(personId))
-
-fun Navigator<*>.toResolvedDestination(destination: ResolvedMediaDestination) {
-    when (destination) {
-        is ResolvedMediaDestination.Movie -> toDetails(
-            id = destination.movieId,
-            tmdbId = destination.tmdbId,
-            type = InstanceType.Radarr,
-            instanceId = destination.instance.id
-        )
-        is ResolvedMediaDestination.Series -> toDetails(
-            id = destination.seriesId,
-            tmdbId = destination.tmdbId,
-            tvdbId = destination.tvdbId,
-            type = InstanceType.Sonarr,
-            instanceId = destination.instance.id
-        )
-        is ResolvedMediaDestination.EpisodeDetails -> toEpisodeDetails(
-            series = destination.series,
-            episode = destination.episode
-        )
-        is ResolvedMediaDestination.Artist -> toDetails(
-            id = destination.artistId ?: destination.albumId,
-            type = InstanceType.Lidarr,
-            instanceId = destination.instance.id
-        )
-        is ResolvedMediaDestination.BookDetails -> toBookDetails(
-            author = destination.author,
-            book = destination.book
-        )
-        is ResolvedMediaDestination.AudiobookDetails -> toDetails(
-            id = destination.audiobookId,
-            type = InstanceType.Listenarr,
-            instanceId = destination.instance.id
-        )
-    }
-}
 
 /**
  * Domain-specific navigation extensions for Settings feature set.

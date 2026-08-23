@@ -111,7 +111,7 @@ fun SeasonsArea(
                                 )
                                 val statsText = season.episodeFileCount?.let {
                                     "$it/${season.totalEpisodeCount}"
-                                } ?: mokoPlural(MR.plurals.episodes_count, season.totalEpisodeCount)
+                                } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
 
                                 AnimatedContent(
                                     targetState = statsText,

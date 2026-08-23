@@ -40,11 +40,9 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun MovieCalendarItem(
     date: LocalDate,
-    movie: ArrMovie,
-    onClick: () -> Unit = {}
+    movie: ArrMovie
 ) {
     Card(
-        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),

@@ -17,8 +17,7 @@ sealed interface MediaScreen : NavKey {
         val tmdbId: Long? = null,
         val tvdbId: Long? = null,
         val requestType: RequestType? = null,
-        val type: InstanceType? = null,
-        val instanceId: Long? = null
+        val type: InstanceType? = null
     ): MediaScreen
     data class Preview<T>(val item: T): MediaScreen
     data class Search(val query: String = ""): MediaScreen
@@ -45,14 +44,6 @@ sealed interface SeerrScreen: NavKey {
 
 sealed interface DiscoverScreen: NavKey {
     data object Home: DiscoverScreen
-}
-
-sealed interface CalendarScreen: NavKey {
-    data object Calendar: CalendarScreen
-}
-
-sealed interface ActivityScreen: NavKey {
-    data object Queue: ActivityScreen
 }
 
 sealed interface SettingsScreen : NavKey {

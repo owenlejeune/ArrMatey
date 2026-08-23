@@ -45,11 +45,11 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.HistoryState
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
+import com.dnfapps.arrmatey.ui.components.EpisodeDetailsHeader
 import com.dnfapps.arrmatey.ui.components.FileCard
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
@@ -61,7 +61,6 @@ import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.networking.OperationStatus
 
 @Composable
 fun EpisodeDetailsScreen(
@@ -146,7 +145,7 @@ fun EpisodeDetailsScreen(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
                             contentColor = MaterialTheme.colorScheme.onErrorContainer
                         ),
-                        enabled = currentEpisode.episodeFile != null
+                        enabled = episode.episodeFile != null
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -166,38 +165,16 @@ fun EpisodeDetailsScreen(
                 modifier = Modifier.verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
-                    DetailHeaderBanner(
-                        bannerUrl = currentEpisode.getBanner()?.remoteUrl,
-                        gradientHeight = 100.dp
-                    )
-                }
+                EpisodeDetailsHeader(currentEpisode, series)
 
                 Column(
                     modifier = Modifier.padding(horizontal = 24.dp).padding(top = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column {
-                        Text(
-                            text = currentEpisode.displayTitle,
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                        series.title?.let { title ->
-                            Text(
-                                text = title,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                        val statusRow = listOfNotNull(
-                            currentEpisode.seasonEpLabel,
-                            currentEpisode.runtimeString,
-                            currentEpisode.formatAirDateUtc()
-                        ).joinToString(Bullet)
-                        Text(
-                            text = statusRow,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
+                    Text(
+                        text = episode.displayTitle,
+                        style = MaterialTheme.typography.headlineMedium
+                    )
 
                     currentEpisode.overview?.let { overview ->
                         ItemDescriptionCard(overview)

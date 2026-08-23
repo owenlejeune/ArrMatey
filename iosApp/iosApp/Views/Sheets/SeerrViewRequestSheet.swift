@@ -80,7 +80,7 @@ struct SeerrViewRequestSheet: View {
                                 )) {
                                     VStack(alignment: .leading) {
                                         Text(season.seasonNumber == 0 ? MR.strings().specials.localized() : MR.strings().season_label.formatted(args: [season.seasonNumber]))
-                                        Text(MR.plurals().episodes_count.localized(season.episodeCount))
+                                        Text(MR.plurals().episodes.localized(season.episodeCount))
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }

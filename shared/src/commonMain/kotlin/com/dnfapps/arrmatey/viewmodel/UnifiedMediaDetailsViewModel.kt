@@ -87,7 +87,6 @@ class UnifiedMediaDetailsViewModel(
     private val tvdbId: Long?,
     private val instanceType: InstanceType?,
     private val requestType: RequestType?,
-    private val initialInstanceIdFromNav: Long? = null,
     private val getUnifiedMediaDetailsUseCase: GetUnifiedMediaDetailsUseCase,
     private val smartAddMediaUseCase: SmartAddMediaUseCase,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
@@ -253,10 +252,9 @@ class UnifiedMediaDetailsViewModel(
         defaultSelectedArrRepoFlow,
         _selectedInstanceId
     ) { allRepos, defaultRepo, selectedId ->
-        val targetId = selectedId ?: initialInstanceIdFromNav
-        if (targetId != null) {
-            allRepos.firstOrNull { it.instance.id == targetId }
-                ?: getArrInstanceRepositoryUseCase(targetId)
+        if (selectedId != null) {
+            allRepos.firstOrNull { it.instance.id == selectedId }
+                ?: getArrInstanceRepositoryUseCase(selectedId)
                 ?: defaultRepo
         } else {
             defaultRepo ?: allRepos.firstOrNull()
@@ -369,10 +367,6 @@ class UnifiedMediaDetailsViewModel(
         )
 
     init {
-        initialInstanceIdFromNav?.let { 
-            _selectedInstanceId.value = it
-            initialInstanceId = it
-        }
         observeData()
         viewModelScope.launch {
             activityQueueService.manualRefresh()

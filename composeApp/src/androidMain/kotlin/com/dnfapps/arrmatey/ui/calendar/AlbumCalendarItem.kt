@@ -37,11 +37,9 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 @Composable
 fun AlbumCalendarItem(
-    album: ArrAlbum,
-    onClick: () -> Unit = {}
+    album: ArrAlbum
 ) {
     Card(
-        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),

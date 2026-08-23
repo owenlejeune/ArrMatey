@@ -9,9 +9,10 @@ data class CalendarFilterState(
     val contentFilter: ContentFilter = ContentFilter.All,
     val showMonitoredOnly: Boolean = false,
     val showPremiersOnly: Boolean = false,
-    val showFinalesOnly: Boolean = false
+    val showFinalesOnly: Boolean = false,
+    val instanceId: Long? = null
 ) {
-    constructor(): this(CalendarViewMode.List, ContentFilter.All, false, false, false)
+    constructor(): this(CalendarViewMode.List, ContentFilter.All, false, false, false, null)
 }
 
 enum class CalendarViewMode {

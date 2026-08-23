@@ -38,7 +38,6 @@ data class Author(
     override val statistics: BookshelfStatistics? = null,
     @Contextual override val added: Instant? = null,
     override val status: MediaStatus,
-    override val instanceId: Long? = null,
 
     val sortNameLastFirst: String? = null,
     val monitorNewItems: AuthorMonitorType,

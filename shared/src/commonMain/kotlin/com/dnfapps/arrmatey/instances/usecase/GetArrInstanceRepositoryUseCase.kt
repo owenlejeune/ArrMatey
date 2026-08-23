@@ -14,7 +14,4 @@ class GetArrInstanceRepositoryUseCase(
 
     fun observeSelected(type: InstanceType): Flow<ArrInstanceRepository?> =
         instanceManager.getSelectedArrRepository(type)
-
-    fun observeById(instanceId: Long): Flow<ArrInstanceRepository?> =
-        instanceManager.instanceRepositories.map { it[instanceId] as? ArrInstanceRepository }
 }

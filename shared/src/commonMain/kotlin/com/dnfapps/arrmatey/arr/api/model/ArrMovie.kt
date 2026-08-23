@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
-import com.dnfapps.arrmatey.arr.api.client.HasArrImages
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
@@ -67,10 +66,7 @@ data class ArrMovie(
     val lastSearchTime: String? = null,
 
     override val instanceId: Long? = null
-): ArrMedia, HasArrImages<ArrMovie>, CalendarItem, InstanceTypeIdentifiable {
-
-    override fun withLocalImages(instanceUrl: String): ArrMovie =
-        copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
+): ArrMedia, CalendarItem, InstanceTypeIdentifiable {
 
     override val calendarId: Long
         get() = tmdbId

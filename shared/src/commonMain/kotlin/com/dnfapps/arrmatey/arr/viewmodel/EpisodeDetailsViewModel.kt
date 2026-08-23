@@ -73,14 +73,9 @@ class EpisodeDetailsViewModel(
     }
 
     private fun observeSelectedInstance() {
-        val repoFlow = if (episode.value.instanceId != null) {
-            getArrInstanceRepositoryUseCase.observeById(episode.value.instanceId!!)
-        } else {
-            getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Sonarr)
-        }
-
         viewModelScope.launch {
-            repoFlow.filterNotNull()
+            getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Sonarr)
+                .filterNotNull()
                 .collectLatest { repository ->
                     currentRepository = repository
                     observeData(repository)
@@ -90,12 +85,6 @@ class EpisodeDetailsViewModel(
     }
 
     private fun observeData(repository: ArrInstanceRepository) {
-        viewModelScope.launch {
-            repository.getMediaDetails(seriesId)
-        }
-        viewModelScope.launch {
-            repository.getEpisodes(seriesId)
-        }
         viewModelScope.launch {
             repository.episodes
                 .map { episodesMap ->

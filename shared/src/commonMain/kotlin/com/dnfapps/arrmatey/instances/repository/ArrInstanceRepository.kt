@@ -203,22 +203,11 @@ class ArrInstanceRepository(
 
     suspend fun refreshLibrary() {
         _library.value = NetworkResult.Loading
-        _library.value = client.getLibrary().map { list ->
-            list.map { item ->
-                when (item) {
-                    is ArrSeries -> item
-                    is ArrMovie -> item.copy(instanceId = instance.id)
-                    is Arrtist -> item
-                    is Author -> item
-                    is Audiobook -> item.copy(instanceId = instance.id)
-                    else -> item
-                }
-            }
-        }
+        _library.value = client.getLibrary()
         safePerformReadarr { client ->
             client.getBooks()
-                .onSuccess { books ->
-                    _booksLibrary.value = books.map { it.copy(instanceId = instance.id) }
+                .onSuccess {
+                    _booksLibrary.value = it
                 }
         }
         safePerformListenarr { client ->
@@ -233,16 +222,8 @@ class ArrInstanceRepository(
         return client.getDetail(id)
             .onSuccess { media ->
                 logger.info { "Media details for $id: $media" }
-                val updatedMedia = when (media) {
-                    is ArrSeries -> media.copy(instanceId = instance.id)
-                    is ArrMovie -> media.copy(instanceId = instance.id)
-                    is Arrtist -> media.copy(instanceId = instance.id)
-                    is Author -> media.copy(instanceId = instance.id)
-                    is Audiobook -> media.copy(instanceId = instance.id)
-                    else -> media
-                }
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache[id] = updatedMedia
+                currentCache[id] = media
                 _mediaDetailsCache.value = currentCache
             }
             .onError { code, message, cause ->
@@ -807,9 +788,8 @@ class ArrInstanceRepository(
         safePerformSonarr { client ->
             client.getEpisodes(seriesId, seasonNumber)
                 .onSuccess { episodes ->
-                    val updatedEpisodes = episodes.map { it.copy(instanceId = instance.id) }
                     val currentMap = _episodes.value.toMutableMap()
-                    currentMap[seriesId] = updatedEpisodes
+                    currentMap[seriesId] = episodes
                     _episodes.value = currentMap
                 }
         }
@@ -875,9 +855,8 @@ class ArrInstanceRepository(
         safePerformLidarr { client ->
             client.getAlbums(artistId)
                 .onSuccess { albums ->
-                    val updatedAlbums = albums.map { it.copy(instanceId = instance.id) }
                     val currentMap = _artistAlbums.value.toMutableMap()
-                    currentMap[artistId] = updatedAlbums.sortedByDescending { it.releaseDate }
+                    currentMap[artistId] = albums.sortedByDescending { it.releaseDate }
                     _artistAlbums.value = currentMap
                 }
         }
@@ -954,24 +933,6 @@ class ArrInstanceRepository(
                 }
         }
 
-    suspend fun getAuthorBooks(authorId: Long): NetworkResult<List<Book>> =
-        safePerformReadarr { client ->
-            client.getBooks(authorId)
-                .onSuccess { result ->
-                    val updatedBooks = result.map { it.copy(instanceId = instance.id) }
-                    val currentBooks = _booksLibrary.value.toMutableList()
-                    updatedBooks.forEach { book ->
-                        val index = currentBooks.indexOfFirst { it.id == book.id }
-                        if (index != -1) {
-                            currentBooks[index] = book
-                        } else {
-                            currentBooks.add(book)
-                        }
-                    }
-                    _booksLibrary.value = currentBooks
-                }
-        }
-
     suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
         safePerformReadarr { client ->
             client.deleteBookFiles(bookFilesIds)
@@ -1030,11 +991,6 @@ class ArrInstanceRepository(
         safePerformListenarr { client ->
             client.getDetail(audiobookId)
                 .onSuccess { result ->
-                    val updatedAudiobook = result.copy(instanceId = instance.id)
-                    val currentCache = _mediaDetailsCache.value.toMutableMap()
-                    currentCache[audiobookId] = updatedAudiobook
-                    _mediaDetailsCache.value = currentCache
-
                     val currentMap = _audiobookFiles.value.toMutableMap()
                     currentMap[audiobookId] = result.files
                     _audiobookFiles.value = currentMap

@@ -79,7 +79,7 @@ struct SeasonAreaRow: View {
         if let fileCount = season.episodeFileCount {
             "\(fileCount)/\(season.totalEpisodeCount)"
         } else {
-            MR.plurals().episodes_count.localized(Int32(season.totalEpisodeCount))
+            MR.plurals().episodes.localized(Int32(season.totalEpisodeCount))
         }
     }
 

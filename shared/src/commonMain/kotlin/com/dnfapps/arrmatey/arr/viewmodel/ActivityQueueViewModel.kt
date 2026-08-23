@@ -22,17 +22,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import com.dnfapps.arrmatey.arr.usecase.FindMatchingInstancesForMediaUseCase
-import com.dnfapps.arrmatey.arr.usecase.ResolvedMediaDestination
-import com.dnfapps.arrmatey.instances.model.Instance
 import kotlinx.coroutines.launch
 
 class ActivityQueueViewModel(
     private val activityQueueService: ActivityQueueService,
     getActivityTasksUseCase: GetActivityTasksUseCase,
-    private val instanceRepository: InstanceRepository,
-    private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
-    private val findMatchingInstancesForMediaUseCase: FindMatchingInstancesForMediaUseCase
+    instanceRepository: InstanceRepository,
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase
 ): ViewModel() {
 
     val activityTasks = getActivityTasksUseCase()
@@ -139,13 +135,6 @@ class ActivityQueueViewModel(
                     _removeItemState.value = state
                 }
         }
-    }
-
-    suspend fun resolveDestination(item: QueueItem): List<ResolvedMediaDestination> =
-        findMatchingInstancesForMediaUseCase.resolve(item)
-
-    suspend fun selectInstance(instance: Instance) {
-        instanceRepository.setInstanceActive(instance)
     }
 
     fun refresh() {

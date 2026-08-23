@@ -9,9 +9,25 @@ import SwiftUI
 import Shared
 
 struct ActivityTab: View {
+    @Environment(\.navigationContext) private var context
+    
+    var body: some View {
+        switch context {
+        case .mainTab:
+            NavigationStack {
+                ActivityTabContent()
+            }
+        case .launcher:
+            ActivityTabContent()
+        }
+    }
+}
 
+struct ActivityTabContent: View {
+    
     @ObservedObject private var viewModel = ActivityQueueViewModelS()
-
+    @EnvironmentObject private var navigationManager: NavigationManager
+    
     @State private var selectedItem: IdentifiableQueueItem? = nil
     
     private var titleText: String {
@@ -24,6 +40,14 @@ struct ActivityTab: View {
             .navigationTitle(titleText)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigationManager.showLauncher = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     ActivityFilterMenu(
                         sortBy: Binding(
@@ -66,6 +90,9 @@ struct ActivityTab: View {
                 VStack(spacing: 12) {
                     ForEach(viewModel.queueItems, id: \.id) { item in
                         ActivityQueueItem(item: item, onClick: { selectedItem = IdentifiableQueueItem(item: item) })
+                    }
+                    if viewModel.queueItems.isEmpty {
+                        emptyActivityView
                     }
                 }
                 .padding(.vertical, 12)

@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.tabs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
@@ -10,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarViewDay
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -22,113 +22,29 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.ui.NavDisplay
-import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
-import com.dnfapps.arrmatey.arr.usecase.ResolvedMediaDestination
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
-import com.dnfapps.arrmatey.navigation.CalendarScreen
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.Navigator
-import com.dnfapps.arrmatey.navigation.toResolvedDestination
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.calendar.CalendarListView
 import com.dnfapps.arrmatey.ui.calendar.CalendarMonthView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
-import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
-import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
-import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
-import com.dnfapps.arrmatey.ui.dialogs.SelectInstanceDialog
 import com.dnfapps.arrmatey.ui.menu.CalendarFilterMenu
 import com.dnfapps.arrmatey.utils.mokoString
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
-    viewModel: CalendarViewModel = koinInject(),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigator<NavKey> = navigationManager.calendar
-) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
-
-    NavDisplay(
-        backStack = navigation.backStack,
-        onBack = { navigation.popBackStack() },
-        transitionSpec = { forwardSlideTransform() },
-        popTransitionSpec = { popSlideTransform() },
-        predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-        entryProvider = entryProvider {
-            entry<CalendarScreen.Calendar> {
-                CalendarContentScreen(
-                    windowSizeClass = windowSizeClass,
-                    wideRailIsVisible = wideRailIsVisible,
-                    viewModel = viewModel,
-                    navigation = navigation
-                )
-            }
-            mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CalendarContentScreen(
-    windowSizeClass: WindowSizeClass,
-    wideRailIsVisible: Boolean,
-    viewModel: CalendarViewModel,
-    navigation: Navigator<NavKey>
+    viewModel: CalendarViewModel = koinInject()
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val calendarState by viewModel.calendarState.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
-
-    var pendingDestinations by remember { mutableStateOf<List<ResolvedMediaDestination>?>(null) }
-
-    fun navigateToDestination(destination: ResolvedMediaDestination) {
-        scope.launch {
-            viewModel.selectInstance(destination.instance)
-            navigation.toResolvedDestination(destination)
-        }
-    }
-
-    fun handleItemClick(item: CalendarItem) {
-        scope.launch {
-            val destinations = viewModel.resolveDestination(item)
-            if (destinations.size > 1) {
-                pendingDestinations = destinations
-            } else if (destinations.size == 1) {
-                navigateToDestination(destinations.first())
-            }
-        }
-    }
-
-    if (pendingDestinations != null) {
-        SelectInstanceDialog(
-            destinations = pendingDestinations ?: emptyList(),
-            onSelect = { dest ->
-                pendingDestinations = null
-                navigateToDestination(dest)
-            },
-            onDismiss = {
-                pendingDestinations = null
-            }
-        )
-    }
+    val instances by viewModel.instances.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -156,7 +72,9 @@ private fun CalendarContentScreen(
                     }
 
                     CalendarFilterMenu(
+                        instances = instances,
                         filterState = calendarState.filterState,
+                        onInstanceChanged = { viewModel.setFilterInstanceId(it) },
                         onContentFilterChanged = { viewModel.setContentFilter(it) },
                         onToggleFilterMonitored = { viewModel.toggleShowMonitoredOnly() },
                         onToggleFilterPremiersOnly = { viewModel.toggleShowPremiersOnly() },
@@ -179,16 +97,14 @@ private fun CalendarContentScreen(
                     Box(modifier = Modifier.weight(1f)) {
                         CalendarMonthView(
                             state = calendarState,
-                            onLoadMore = { viewModel.loadMore() },
-                            onItemClick = { handleItemClick(it) }
+                            onLoadMore = { viewModel.loadMore() }
                         )
                     }
                     VerticalDivider(modifier = Modifier.padding(horizontal = 8.dp))
                     Box(modifier = Modifier.weight(1f)) {
                         CalendarListView(
                             state = calendarState,
-                            onLoadMore = { viewModel.loadMore() },
-                            onItemClick = { handleItemClick(it) }
+                            onLoadMore = { viewModel.loadMore() }
                         )
                     }
                 }
@@ -197,16 +113,14 @@ private fun CalendarContentScreen(
                     CalendarViewMode.List -> {
                         CalendarListView(
                             state = calendarState,
-                            onLoadMore = { viewModel.loadMore() },
-                            onItemClick = { handleItemClick(it) }
+                            onLoadMore = { viewModel.loadMore() }
                         )
                     }
 
                     CalendarViewMode.Month -> {
                         CalendarMonthView(
                             state = calendarState,
-                            onLoadMore = { viewModel.loadMore() },
-                            onItemClick = { handleItemClick(it) }
+                            onLoadMore = { viewModel.loadMore() }
                         )
                     }
                 }

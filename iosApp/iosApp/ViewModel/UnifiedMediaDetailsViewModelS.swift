@@ -61,16 +61,14 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         tmdbId: Int64?,
         tvdbId: Int64?,
         instanceType: InstanceType?,
-        requestType: RequestType?,
-        instanceId: Int64? = nil
+        requestType: RequestType?
     ) {
         self.viewModel = KoinBridge.shared.getUnifiedMediaDetailsViewModel(
             arrId: arrId.map { KotlinLong(value: $0) },
             tmdbId: tmdbId.map { KotlinLong(value: $0) },
             tvdbId: tvdbId.map { KotlinLong(value: $0) },
             instanceType: instanceType,
-            requestType: requestType,
-            instanceId: instanceId.map { KotlinLong(value: $0) }
+            requestType: requestType
         )
         startObserving()
     }

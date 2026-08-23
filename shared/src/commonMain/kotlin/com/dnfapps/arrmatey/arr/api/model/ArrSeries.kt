@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
-import com.dnfapps.arrmatey.arr.api.client.HasArrImages
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
@@ -56,18 +55,8 @@ data class ArrSeries(
     val remotePoster: String? = null,
     val firstAired: String? = null,
     val lastAired: String? = null,
-    val episodesChanged: String? = null,
-    override val instanceId: Long? = null
-): ArrMedia, HasArrImages<ArrSeries>, InstanceTypeIdentifiable {
-
-    override fun withLocalImages(instanceUrl: String): ArrSeries {
-        return copy(
-            images = images.map { it.rebuildWithLocalUrls(instanceUrl) },
-            seasons = seasons.map { season ->
-                season.copy(images = season.images.map { it.rebuildWithLocalUrls(instanceUrl) })
-            }
-        )
-    }
+    val episodesChanged: String? = null
+): ArrMedia, InstanceTypeIdentifiable {
 
     override val guid: Long
         get() = id ?: tvdbId.plus(100_000)
