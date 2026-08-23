@@ -47,71 +47,59 @@ struct EpisodeCalendarItem: View {
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            if let series = episode.series {
-                PosterItem(item: series)
-                    .frame(width: 50)
-            }
-            
-            VStack(alignment: .leading, spacing: 6) {
-                Text(episode.series?.title ?? MR.strings().unknown.localized())
-                    .font(.headline)
-                    .foregroundColor(.black)
+        SlidableCalendarItem(
+            instanceIds: episode.instanceIds,
+            instances: instances,
+            onInstanceSelected: onNavigate
+        ) {
+            HStack(spacing: 12) {
+                if let series = episode.series {
+                    PosterItem(item: series)
+                        .frame(width: 50)
+                }
                 
-                Text("S\(episode.seasonNumber)E\(episode.episodeNumber) • \(episode.title ?? "")")
-                    .font(.subheadline)
-                
-                HStack(spacing: 8) {
-                    if let airTime = airTime {
-                        Text(airTime)
-                            .font(.footnote)
-                            .foregroundColor(.black)
-                    }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(episode.series?.title ?? MR.strings().unknown.localized())
+                        .font(.headline)
+                        .foregroundColor(.black)
                     
-                    if isPremier {
-                        BadgeView(text: MR.strings().premier.localized(), color: .arrGrey)
-                    }
+                    Text("S\(episode.seasonNumber)E\(episode.episodeNumber) • \(episode.title ?? "")")
+                        .font(.subheadline)
                     
-                    if let finaleType = episode.finaleType {
-                        BadgeView(text: finaleType.resource.localized(), color: .arrGrey)
-                    }
-                    
-                    if !additional.isEmpty {
-                        Text(MR.strings().additional_items_count.formatted(args: [additional.count]))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    HStack(spacing: 8) {
+                        if let airTime = airTime {
+                            Text(airTime)
+                                .font(.footnote)
+                                .foregroundColor(.black)
+                        }
+                        
+                        if isPremier {
+                            BadgeView(text: MR.strings().premier.localized(), color: .arrGrey)
+                        }
+                        
+                        if let finaleType = episode.finaleType {
+                            BadgeView(text: finaleType.resource.localized(), color: .arrGrey)
+                        }
+                        
+                        if !additional.isEmpty {
+                            Text(MR.strings().additional_items_count.formatted(args: [additional.count]))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
-            }
-            
-            Spacer()
-            
-            if let icon = statusIcon {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.black)
-            }
-        }
-        .padding()
-        .background(.arrBlue)
-        .cornerRadius(12)
-        .onTapGesture {
-            if episode.instanceIds.count > 1 {
-                // Handled by swipe actions
-            } else {
-                onNavigate(episode.instanceIds.first?.int64Value)
-            }
-        }
-        .swipeActions(edge: .trailing) {
-            if episode.instanceIds.count > 1 {
-                ForEach(instances.filter { episode.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
-                    Button {
-                        onNavigate(instance.id)
-                    } label: {
-                        Text(instance.label)
-                    }
+                
+                Spacer()
+                
+                if let icon = statusIcon {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(.black)
                 }
             }
+            .padding()
+            .background(.arrBlue)
+            .cornerRadius(12)
         }
     }
 }

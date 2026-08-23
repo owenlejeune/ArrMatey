@@ -33,48 +33,36 @@ struct AudiobookCalendarItem: View {
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            GenericPosterItem(posterUrl: audiobook.getPoster()?.remoteUrl, aspectRatio: .cover)
-                .frame(width: 50)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(audiobook.title ?? "")
-                    .font(.headline)
-                    .foregroundColor(.black)
+        SlidableCalendarItem(
+            instanceIds: audiobook.instanceIds,
+            instances: instances,
+            onInstanceSelected: onNavigate
+        ) {
+            HStack(spacing: 12) {
+                GenericPosterItem(posterUrl: audiobook.getPoster()?.remoteUrl, aspectRatio: .cover)
+                    .frame(width: 50)
                 
-                Text(statusText)
-                    .font(.subheadline)
-                    .foregroundColor(.black)
-            }
-            
-            Spacer()
-            
-            if let icon = statusIcon {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.black)
-            }
-        }
-        .padding()
-        .background(.arrLightPurple)
-        .cornerRadius(12)
-        .onTapGesture {
-            if audiobook.instanceIds.count > 1 {
-                // Handled by swipe actions
-            } else {
-                onNavigate(audiobook.instanceIds.first?.int64Value)
-            }
-        }
-        .swipeActions(edge: .trailing) {
-            if audiobook.instanceIds.count > 1 {
-                ForEach(instances.filter { audiobook.instanceIds.contains($0.id.asKotlinLong) }, id: \.id) { instance in
-                    Button {
-                        onNavigate(instance.id)
-                    } label: {
-                        Text(instance.label)
-                    }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(audiobook.title ?? "")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                    
+                    Text(statusText)
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                }
+                
+                Spacer()
+                
+                if let icon = statusIcon {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(.black)
                 }
             }
+            .padding()
+            .background(.arrLightPurple)
+            .cornerRadius(12)
         }
     }
 }

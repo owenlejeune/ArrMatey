@@ -10,12 +10,16 @@ import SwiftUI
 
 struct CalendarTab: View {
     @Environment(\.navigationContext) private var context
-    
+    @EnvironmentObject private var navigationManager: NavigationManager
+
     var body: some View {
         switch context {
         case .mainTab:
-            NavigationStack {
+            NavigationStack(path: $navigationManager.calendarPath) {
                 CalendarTabContent()
+                    .navigationDestination(for: MediaRoute.self) { route in
+                        MediaRouteDestination(route: route)
+                    }
             }
         case .launcher:
             CalendarTabContent()
@@ -36,9 +40,13 @@ struct CalendarTabContent: View {
         Group {
             ZStack {
                 if viewModel.calendarState.filterState.viewMode == .list {
-                    CalendarListView(state: viewModel.calendarState, instances: viewModel.instances, navigationManager: navigationManager, onLoadMore: { viewModel.loadMore() })
+                    CalendarListView(state: viewModel.calendarState, instances: viewModel.instances, onItemClick: { item, instanceId in
+                        handleItemClick(item, instanceId: instanceId)
+                    }, onLoadMore: { viewModel.loadMore() })
                 } else {
-                    CalendarMonthView(state: viewModel.calendarState, instances: viewModel.instances, navigationManager: navigationManager, onLoadMore: { viewModel.loadMore() })
+                    CalendarMonthView(state: viewModel.calendarState, instances: viewModel.instances, onItemClick: { item, instanceId in
+                        handleItemClick(item, instanceId: instanceId)
+                    }, onLoadMore: { viewModel.loadMore() })
                 }
             }
         }
@@ -52,6 +60,31 @@ struct CalendarTabContent: View {
         }
         .onAppear {
             viewModel.load()
+        }
+    }
+
+    private func handleItemClick(_ item: CalendarItem, instanceId: Int64?) {
+        let instanceType = (item as? InstanceTypeIdentifiable)?.instanceType ?? .sonarr
+        switch item {
+        case let movie as ArrMovie:
+            navigationManager.go(to: .details(arrId: movie.id?.int64Value, tmdbId: movie.tmdbId, instanceType: instanceType, instanceId: instanceId), of: instanceType)
+        case let epGroup as EpisodeGroup:
+            navigationManager.go(to: .details(arrId: epGroup.first.seriesId, instanceType: instanceType, instanceId: instanceId), of: instanceType)
+        case let episode as Episode:
+            if let series = episode.series {
+                navigationManager.go(to: .details(arrId: series.id?.int64Value, tmdbId: series.tmdbId?.int64Value, instanceType: instanceType, instanceId: instanceId), of: instanceType)
+                navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: instanceType)
+            }
+        case let album as ArrAlbum:
+            navigationManager.go(to: .details(arrId: album.id, instanceType: instanceType, instanceId: instanceId), of: instanceType)
+        case let book as Book:
+            if let author = book.author {
+                navigationManager.go(to: .details(arrId: author.id?.int64Value, instanceType: instanceType, instanceId: instanceId), of: instanceType)
+                navigationManager.go(to: .bookDetails(bookJson: book.toJson(), authorJson: author.toJson()), of: instanceType)
+            }
+        case let audiobook as Audiobook:
+            navigationManager.go(to: .details(arrId: audiobook.id?.int64Value, instanceType: instanceType, instanceId: instanceId), of: instanceType)
+        default: break
         }
     }
     

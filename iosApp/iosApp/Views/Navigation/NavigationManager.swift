@@ -22,6 +22,7 @@ class NavigationManager: ObservableObject {
     @Published var dashboardPath = NavigationPath()
     @Published var bazarrPath = NavigationPath()
     @Published var libraryPath = NavigationPath()
+    @Published var calendarPath = NavigationPath()
     
     @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemSettings.shared)
     @Published var selectedDrawerTab: AnyTabItem? = nil
@@ -287,7 +288,8 @@ enum MediaRoute: Hashable {
         tmdbId: Int64? = nil,
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
-        requestType: RequestType? = nil
+        requestType: RequestType? = nil,
+        instanceId: Int64? = nil
     )
     case search(query: String, type: InstanceType)
     case preview(_ json : String, type: InstanceType)

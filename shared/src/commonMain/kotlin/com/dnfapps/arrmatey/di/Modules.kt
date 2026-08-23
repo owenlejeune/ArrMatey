@@ -385,12 +385,12 @@ val viewModelModule = module {
     }
     factory { params ->
         UnifiedMediaDetailsViewModel(
-            arrId = params[0],
-            tmdbId = params[1],
-            tvdbId = params[2],
-            instanceType = params[3],
-            requestType = params[4],
-            initialForcedInstanceId = params[5],
+            arrId = if (params.size() > 0) params[0] else null,
+            tmdbId = if (params.size() > 1) params[1] else null,
+            tvdbId = if (params.size() > 2) params[2] else null,
+            instanceType = if (params.size() > 3) params[3] else null,
+            requestType = if (params.size() > 4) params[4] else null,
+            initialForcedInstanceId = if (params.size() > 5) params[5] else null,
             getUnifiedMediaDetailsUseCase = get(),
             smartAddMediaUseCase = get(),
             getArrInstanceRepositoryUseCase = get(),

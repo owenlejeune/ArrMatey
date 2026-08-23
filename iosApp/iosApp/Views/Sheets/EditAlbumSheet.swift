@@ -133,7 +133,8 @@ struct EditAlbumSheet: View {
             duration: selectedRelease?.duration ?? album.duration,
             ratings: album.ratings,
             releases: updatedReleases,
-            instanceId: album.instanceId
+            instanceId: album.instanceId,
+            instanceIds: album.instanceIds
         )
         
         onEditAlbum(updatedAlbum)

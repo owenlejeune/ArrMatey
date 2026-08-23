@@ -34,48 +34,36 @@ struct BookCalendarItem: View {
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            GenericPosterItem(posterUrl: book.getCover()?.remoteUrl, aspectRatio: .poster)
-                .frame(width: 50)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(book.title)
-                    .font(.headline)
-                    .foregroundColor(.black)
+        SlidableCalendarItem(
+            instanceIds: book.instanceIds,
+            instances: instances,
+            onInstanceSelected: onNavigate
+        ) {
+            HStack(spacing: 12) {
+                GenericPosterItem(posterUrl: book.getCover()?.remoteUrl, aspectRatio: .poster)
+                    .frame(width: 50)
                 
-                Text(statusText)
-                    .font(.subheadline)
-                    .foregroundColor(.black)
-            }
-            
-            Spacer()
-            
-            if let icon = statusIcon {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.black)
-            }
-        }
-        .padding()
-        .background(.arrRed)
-        .cornerRadius(12)
-        .onTapGesture {
-            if book.instanceIds.count > 1 {
-                // Handled by swipe actions
-            } else {
-                onNavigate(book.instanceIds.first?.int64Value)
-            }
-        }
-        .swipeActions(edge: .trailing) {
-            if book.instanceIds.count > 1 {
-                ForEach(instances.filter { book.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
-                    Button {
-                        onNavigate(instance.id)
-                    } label: {
-                        Text(instance.label)
-                    }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(book.title)
+                        .font(.headline)
+                        .foregroundColor(.black)
+                    
+                    Text(statusText)
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                }
+                
+                Spacer()
+                
+                if let icon = statusIcon {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(.black)
                 }
             }
+            .padding()
+            .background(.arrRed)
+            .cornerRadius(12)
         }
     }
 }

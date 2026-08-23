@@ -21,9 +21,6 @@ struct DiscoverTab: View {
             }
         case .launcher:
             DiscoverTabContent()
-                .navigationDestination(for: SeerrRoute.self) { route in
-                    SeerrRouteDestination(route: route)
-                }
         }
     }
 }

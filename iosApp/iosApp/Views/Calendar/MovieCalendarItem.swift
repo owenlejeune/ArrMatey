@@ -46,58 +46,46 @@ struct MovieCalendarItem: View {
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            PosterItem(item: movie)
-                .frame(width: 50)
-            
-            VStack(alignment: .leading, spacing: 6) {
-                Text(movie.title ?? MR.strings().unknown.localized())
-                    .font(.headline)
-                    .foregroundColor(.black)
+        SlidableCalendarItem(
+            instanceIds: movie.instanceIds,
+            instances: instances,
+            onInstanceSelected: onNavigate
+        ) {
+            HStack(spacing: 12) {
+                PosterItem(item: movie)
+                    .frame(width: 50)
                 
-                if let releaseType = releaseTypeText {
-                    HStack(spacing: 8) {
-                        Text(releaseType)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(movie.title ?? MR.strings().unknown.localized())
+                        .font(.headline)
+                        .foregroundColor(.black)
+                    
+                    if let releaseType = releaseTypeText {
+                        HStack(spacing: 8) {
+                            Text(releaseType)
+                                .font(.footnote)
+                                .foregroundColor(.black)
+                        }
+                    }
+                    
+                    if !infoString.isEmpty {
+                        Text(infoString)
                             .font(.footnote)
                             .foregroundColor(.black)
                     }
                 }
                 
-                if !infoString.isEmpty {
-                    Text(infoString)
-                        .font(.footnote)
+                Spacer()
+                
+                if let icon = statusIcon {
+                    Image(systemName: icon)
+                        .font(.system(size: 20))
                         .foregroundColor(.black)
                 }
             }
-            
-            Spacer()
-            
-            if let icon = statusIcon {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(.black)
-            }
-        }
-        .padding()
-        .background(.arrOrange)
-        .cornerRadius(12)
-        .onTapGesture {
-            if movie.instanceIds.count > 1 {
-                // Handled by swipe actions
-            } else {
-                onNavigate(movie.instanceIds.first?.int64Value)
-            }
-        }
-        .swipeActions(edge: .trailing) {
-            if movie.instanceIds.count > 1 {
-                ForEach(instances.filter { movie.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
-                    Button {
-                        onNavigate(instance.id)
-                    } label: {
-                        Text(instance.label)
-                    }
-                }
-            }
+            .padding()
+            .background(.arrOrange)
+            .cornerRadius(12)
         }
     }
 }

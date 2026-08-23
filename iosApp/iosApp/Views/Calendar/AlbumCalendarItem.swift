@@ -27,48 +27,36 @@ struct AlbumCalendarItem: View {
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            AlbumCoverView(album: album)
-                .frame(width: 50, height: 50)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(album.title ?? MR.strings().unknown.localized())
-                    .font(.headline)
-                    .foregroundColor(.white)
+        SlidableCalendarItem(
+            instanceIds: album.instanceIds,
+            instances: instances,
+            onInstanceSelected: onNavigate
+        ) {
+            HStack(spacing: 12) {
+                AlbumCoverView(album: album)
+                    .frame(width: 50, height: 50)
                 
-                Text(album.artist?.title ?? MR.strings().unknown.localized())
-                    .font(.subheadline)
-                    .foregroundColor(.white)
-            }
-            
-            Spacer()
-            
-            if let icon = statusIcon {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.white)
-            }
-        }
-        .padding()
-        .background(.arrGreen)
-        .cornerRadius(12)
-        .onTapGesture {
-            if album.instanceIds.count > 1 {
-                // Handled by swipe actions
-            } else {
-                onNavigate(album.instanceIds.first?.int64Value)
-            }
-        }
-        .swipeActions(edge: .trailing) {
-            if album.instanceIds.count > 1 {
-                ForEach(instances.filter { album.instanceIds.contains($0.id.asKotlinLong) }, id: \.id) { instance in
-                    Button {
-                        onNavigate(instance.id)
-                    } label: {
-                        Text(instance.label)
-                    }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(album.title ?? MR.strings().unknown.localized())
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    
+                    Text(album.artist?.title ?? MR.strings().unknown.localized())
+                        .font(.subheadline)
+                        .foregroundColor(.white)
+                }
+                
+                Spacer()
+                
+                if let icon = statusIcon {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(.white)
                 }
             }
+            .padding()
+            .background(.arrGreen)
+            .cornerRadius(12)
         }
     }
 }

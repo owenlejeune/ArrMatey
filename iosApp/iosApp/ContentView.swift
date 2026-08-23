@@ -197,12 +197,6 @@ struct LauncherTabView: View {
                 SettingsScreen()
             }
         }
-        .navigationDestination(for: SeerrRoute.self) { route in
-            SeerrRouteDestination(route: route)
-        }
-        .navigationDestination(for: BazarrRoute.self) { route in
-            BazarrRouteDestination(route: route)
-        }
     }
 }
 
