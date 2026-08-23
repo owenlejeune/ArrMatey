@@ -10,6 +10,8 @@ import Shared
 
 struct BookCalendarItem: View {
     let book: Book
+    let instances: [Instance]
+    let onNavigate: (Int64?) -> Void
     
     private var statusIcon: String? {
         if book.isDownloaded {
@@ -57,5 +59,23 @@ struct BookCalendarItem: View {
         .padding()
         .background(.arrRed)
         .cornerRadius(12)
+        .onTapGesture {
+            if book.instanceIds.count > 1 {
+                // Handled by swipe actions
+            } else {
+                onNavigate(book.instanceIds.first?.int64Value)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            if book.instanceIds.count > 1 {
+                ForEach(instances.filter { book.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
+                    Button {
+                        onNavigate(instance.id)
+                    } label: {
+                        Text(instance.label)
+                    }
+                }
+            }
+        }
     }
 }

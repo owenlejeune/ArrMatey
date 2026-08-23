@@ -10,6 +10,8 @@ import Shared
 
 struct AlbumCalendarItem: View {
     let album: ArrAlbum
+    let instances: [Instance]
+    let onNavigate: (Int64?) -> Void
     
     private var statusIcon: String? {
         if album.isDownloaded {
@@ -50,5 +52,23 @@ struct AlbumCalendarItem: View {
         .padding()
         .background(.arrGreen)
         .cornerRadius(12)
+        .onTapGesture {
+            if album.instanceIds.count > 1 {
+                // Handled by swipe actions
+            } else {
+                onNavigate(album.instanceIds.first?.int64Value)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            if album.instanceIds.count > 1 {
+                ForEach(instances.filter { album.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
+                    Button {
+                        onNavigate(instance.id)
+                    } label: {
+                        Text(instance.label)
+                    }
+                }
+            }
+        }
     }
 }

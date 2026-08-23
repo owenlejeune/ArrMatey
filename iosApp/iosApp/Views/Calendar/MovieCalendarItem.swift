@@ -11,6 +11,8 @@ import Shared
 struct MovieCalendarItem: View {
     let movie: ArrMovie
     let date: LocalDate
+    let instances: [Instance]
+    let onNavigate: (Int64?) -> Void
     
     private var statusIcon: String? {
         if movie.isDownloaded {
@@ -79,5 +81,23 @@ struct MovieCalendarItem: View {
         .padding()
         .background(.arrOrange)
         .cornerRadius(12)
+        .onTapGesture {
+            if movie.instanceIds.count > 1 {
+                // Handled by swipe actions
+            } else {
+                onNavigate(movie.instanceIds.first?.int64Value)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            if movie.instanceIds.count > 1 {
+                ForEach(instances.filter { movie.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
+                    Button {
+                        onNavigate(instance.id)
+                    } label: {
+                        Text(instance.label)
+                    }
+                }
+            }
+        }
     }
 }

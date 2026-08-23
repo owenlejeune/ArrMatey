@@ -10,6 +10,8 @@ import Shared
 
 struct AudiobookCalendarItem: View {
     let audiobook: Audiobook
+    let instances: [Instance]
+    let onNavigate: (Int64?) -> Void
     
     private var statusIcon: String? {
         if audiobook.isDownloaded {
@@ -56,5 +58,23 @@ struct AudiobookCalendarItem: View {
         .padding()
         .background(.arrLightPurple)
         .cornerRadius(12)
+        .onTapGesture {
+            if audiobook.instanceIds.count > 1 {
+                // Handled by swipe actions
+            } else {
+                onNavigate(audiobook.instanceIds.first?.int64Value)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            if audiobook.instanceIds.count > 1 {
+                ForEach(instances.filter { audiobook.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
+                    Button {
+                        onNavigate(instance.id)
+                    } label: {
+                        Text(instance.label)
+                    }
+                }
+            }
+        }
     }
 }

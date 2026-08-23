@@ -75,6 +75,7 @@ class MoviesTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class MusicTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class RequestsTabNavigator : BaseNavigator<NavKey>(SeerrScreen.Home)
 class DiscoverTabNavigator : BaseNavigator<NavKey>(DiscoverScreen.Home)
+class CalendarTabNavigator : BaseNavigator<NavKey>(CalendarScreen.Home)
 class BooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class AudiobooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
@@ -96,8 +97,9 @@ fun Navigator<*>.toDetails(
     tmdbId: Long? = null,
     tvdbId: Long? = null,
     requestType: RequestType? = null,
-    type: InstanceType? = null
-) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type))
+    type: InstanceType? = null,
+    instanceId: Long? = null
+) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type, instanceId))
 
 fun Navigator<*>.toMediaDetails(
     media: com.dnfapps.arrmatey.arr.api.model.ArrMedia,

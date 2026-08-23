@@ -21,6 +21,7 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.datetime.DateTimeUnit
@@ -36,7 +37,9 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun CalendarDaySection(
     date: LocalDate,
-    items: List<CalendarItem>
+    items: List<CalendarItem>,
+    instances: List<Instance>,
+    onItemClick: (CalendarItem, Long?) -> Unit,
 ) {
     val today = remember {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -88,13 +91,48 @@ fun CalendarDaySection(
         }
 
         items.forEach { item ->
+            val onNavigate: (Long?) -> Unit = { instanceId ->
+                onItemClick(item, instanceId)
+            }
+
             when (item) {
-                is ArrMovie -> MovieCalendarItem(date, item)
-                is EpisodeGroup -> EpisodeCalendarItem(item.first, item.additional)
-                is Episode -> EpisodeCalendarItem(item)
-                is ArrAlbum -> AlbumCalendarItem(item)
-                is Book -> BookCalendarItem(item)
-                is Audiobook -> AudiobookCalendarItem(item)
+                is ArrMovie -> MovieCalendarItem(
+                    date = date,
+                    movie = item,
+                    instances = instances,
+                    onNavigate = onNavigate
+                )
+
+                is EpisodeGroup -> EpisodeCalendarItem(
+                    episode = item.first,
+                    additional = item.additional,
+                    instances = instances,
+                    onNavigate = onNavigate
+                )
+
+                is Episode -> EpisodeCalendarItem(
+                    episode = item,
+                    instances = instances,
+                    onNavigate = onNavigate
+                )
+
+                is ArrAlbum -> AlbumCalendarItem(
+                    album = item,
+                    instances = instances,
+                    onNavigate = onNavigate
+                )
+
+                is Book -> BookCalendarItem(
+                    book = item,
+                    instances = instances,
+                    onNavigate = onNavigate
+                )
+
+                is Audiobook -> AudiobookCalendarItem(
+                    audiobook = item,
+                    instances = instances,
+                    onNavigate = onNavigate
+                )
             }
         }
     }

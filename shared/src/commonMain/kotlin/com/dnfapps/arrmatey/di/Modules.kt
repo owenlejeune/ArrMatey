@@ -383,8 +383,41 @@ val viewModelModule = module {
     factory { (type: InstanceType) ->
         ArrMediaViewModel(type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),get())
     }
-    factory { (arrId: Long?, tmdbId: Long?, tvdbId: Long?, instanceType: InstanceType?, requestType: RequestType?) ->
-        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+    factory { params ->
+        UnifiedMediaDetailsViewModel(
+            arrId = params[0],
+            tmdbId = params[1],
+            tvdbId = params[2],
+            instanceType = params[3],
+            requestType = params[4],
+            initialForcedInstanceId = params[5],
+            getUnifiedMediaDetailsUseCase = get(),
+            smartAddMediaUseCase = get(),
+            getArrInstanceRepositoryUseCase = get(),
+            getSeerrInstanceRepositoryUseCase = get(),
+            getBazarrInstanceRepositoryUseCase = get(),
+            toggleMonitorUseCase = get(),
+            updateMediaUseCase = get(),
+            deleteMediaUseCase = get(),
+            performRefreshUseCase = get(),
+            performAutomaticSearchUseCase = get(),
+            submitRequestUseCase = get(),
+            cancelRequestUseCase = get(),
+            setRequestApprovalStatusUseCase = get(),
+            deleteSeasonFilesUseCase = get(),
+            deleteAlbumFilesUseCase = get(),
+            deleteMovieFileUseCase = get(),
+            submitIssueUseCase = get(),
+            observeInstancePreferencesUseCase = get(),
+            updateInstancePreferencesUseCase = get(),
+            observeScopedReposByTypeUseCase = get(),
+            getInstancePresencesUseCase = get(),
+            deleteQueueItemUseCase = get(),
+            activityQueueService = get(),
+            removeSeerrMediaFileUseCase = get(),
+            clearSeerrMediaDataUseCase = get(),
+            markSeerrMediaAsAvailableUseCase = get()
+        )
     }
     factory { (type: InstanceType) ->
         InstancesViewModel(type, get(), get(), get())

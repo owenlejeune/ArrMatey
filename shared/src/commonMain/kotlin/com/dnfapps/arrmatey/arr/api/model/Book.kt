@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -28,9 +29,13 @@ data class Book(
     @Contextual val lastSearchTime: Instant? = null,
     val grabbed: Boolean = false,
 
+    val author: Author? = null,
     override val instanceId: Long? = null,
     override val instanceIds: List<Long> = listOfNotNull(instanceId)
-): CalendarItem {
+): CalendarItem, InstanceTypeIdentifiable {
+
+    override val instanceType: InstanceType
+        get() = InstanceType.Booksehelf
 
     override val calendarId: Long
         get() = id

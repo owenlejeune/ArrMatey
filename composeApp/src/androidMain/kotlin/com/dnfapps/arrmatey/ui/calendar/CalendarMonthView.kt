@@ -28,8 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.extensions.localToday
+import com.dnfapps.arrmatey.instances.model.Instance
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
@@ -41,7 +43,9 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun CalendarMonthView(
     state: CalendarState,
-    onLoadMore: () -> Unit
+    instances: List<Instance>,
+    onItemClick: (CalendarItem, Long?) -> Unit,
+    onLoadMore: () -> Unit,
 ) {
     val today = remember { Clock.localToday() }
     var currentMonth by remember { mutableStateOf(today) }
@@ -97,7 +101,9 @@ fun CalendarMonthView(
                 item {
                     CalendarDaySection(
                         date = selectedDate,
-                        items = state.items[selectedDate] ?: emptyList()
+                        items = state.items[selectedDate] ?: emptyList(),
+                        instances = instances,
+                        onItemClick = onItemClick
                     )
                 }
             }

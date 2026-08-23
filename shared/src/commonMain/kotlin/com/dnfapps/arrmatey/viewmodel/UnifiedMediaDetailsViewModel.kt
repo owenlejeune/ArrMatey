@@ -87,6 +87,7 @@ class UnifiedMediaDetailsViewModel(
     private val tvdbId: Long?,
     private val instanceType: InstanceType?,
     private val requestType: RequestType?,
+    private val initialForcedInstanceId: Long? = null,
     private val getUnifiedMediaDetailsUseCase: GetUnifiedMediaDetailsUseCase,
     private val smartAddMediaUseCase: SmartAddMediaUseCase,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
@@ -367,6 +368,8 @@ class UnifiedMediaDetailsViewModel(
         )
 
     init {
+        _selectedInstanceId.value = initialForcedInstanceId
+        initialInstanceId = initialForcedInstanceId
         observeData()
         viewModelScope.launch {
             activityQueueService.manualRefresh()

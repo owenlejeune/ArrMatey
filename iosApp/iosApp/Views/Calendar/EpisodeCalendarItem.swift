@@ -9,11 +9,10 @@ import SwiftUI
 import Shared
 
 struct EpisodeCalendarItem: View {
-    let episodeGroup: EpisodeGroup
-    
-    private var episode: Episode {
-        episodeGroup.first
-    }
+    let episode: Episode
+    let additional: [Episode]
+    let instances: [Instance]
+    let onNavigate: (Int64?) -> Void
     
     private var isPremier: Bool {
         episode.seasonNumber == 1 && episode.episodeNumber == 1
@@ -77,8 +76,8 @@ struct EpisodeCalendarItem: View {
                         BadgeView(text: finaleType.resource.localized(), color: .arrGrey)
                     }
                     
-                    if !episodeGroup.additional.isEmpty {
-                        Text(MR.strings().additional_items_count.formatted(args: [episodeGroup.additional.count]))
+                    if !additional.isEmpty {
+                        Text(MR.strings().additional_items_count.formatted(args: [additional.count]))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -96,5 +95,23 @@ struct EpisodeCalendarItem: View {
         .padding()
         .background(.arrBlue)
         .cornerRadius(12)
+        .onTapGesture {
+            if episode.instanceIds.count > 1 {
+                // Handled by swipe actions
+            } else {
+                onNavigate(episode.instanceIds.first?.int64Value)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            if episode.instanceIds.count > 1 {
+                ForEach(instances.filter { episode.instanceIds.contains(Int64(truncating: $0.id as NSNumber)) }, id: \.id) { instance in
+                    Button {
+                        onNavigate(instance.id)
+                    } label: {
+                        Text(instance.label)
+                    }
+                }
+            }
+        }
     }
 }

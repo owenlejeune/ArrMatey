@@ -26,12 +26,12 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.extensions.isEqual
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.surfaceContainerLowDark
 import com.dnfapps.arrmatey.ui.theme.surfaceDark
-import com.dnfapps.arrmatey.ui.theme.surfaceVariantDark
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
@@ -40,79 +40,87 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun MovieCalendarItem(
     date: LocalDate,
-    movie: ArrMovie
+    movie: ArrMovie,
+    instances: List<Instance>,
+    onNavigate: (Long?) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = ArrOrange,
-            contentColor = surfaceDark
-        )
+    SlidableCalendarItem(
+        instanceIds = movie.instanceIds,
+        instances = instances,
+        onInstanceSelected = onNavigate
     ) {
-        Row(
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(vertical = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = ArrOrange,
+                contentColor = surfaceDark
+            )
         ) {
-            PosterItem(movie, Modifier.width(50.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = movie.title?.breakable() ?: mokoString(MR.strings.unknown),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PosterItem(movie, Modifier.width(50.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = movie.title?.breakable() ?: mokoString(MR.strings.unknown),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
 
-                Row(
-                    modifier = Modifier.padding(vertical = 2.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (movie.inCinemas?.isEqual(date) == true) {
-                        Text(
-                            text = mokoString(MR.strings.in_cinemas),
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                    Row(
+                        modifier = Modifier.padding(vertical = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (movie.inCinemas?.isEqual(date) == true) {
+                            Text(
+                                text = mokoString(MR.strings.in_cinemas),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        if (movie.digitalRelease?.isEqual(date) == true) {
+                            Text(
+                                text = mokoString(MR.strings.digital_release),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        if (movie.physicalRelease?.isEqual(date) == true) {
+                            Text(
+                                text = mokoString(MR.strings.physical_release),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
-                    if (movie.digitalRelease?.isEqual(date) == true) {
-                        Text(
-                            text = mokoString(MR.strings.digital_release),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                    if (movie.physicalRelease?.isEqual(date) == true) {
-                        Text(
-                            text = mokoString(MR.strings.physical_release),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
+
+                    Text(
+                        text = listOfNotNull(movie.certification, movie.studio)
+                            .joinToString(Bullet),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = surfaceContainerLowDark
+                    )
                 }
 
-                Text(
-                    text = listOfNotNull(movie.certification, movie.studio)
-                        .joinToString(Bullet),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = surfaceContainerLowDark
-                )
-            }
-
-            val statusIcon = when {
-                movie.isDownloaded -> Icons.Default.FileDownloadDone
-                !movie.monitored -> Icons.Default.BookmarkBorder
-                movie.isWaiting -> Icons.Default.AccessTimeFilled
-                movie.monitored -> Icons.Default.Bookmark
-                else -> null
-            }
-            statusIcon?.let { icon ->
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = surfaceContainerLowDark,
-                    modifier = Modifier.size(20.dp)
-                )
+                val statusIcon = when {
+                    movie.isDownloaded -> Icons.Default.FileDownloadDone
+                    !movie.monitored -> Icons.Default.BookmarkBorder
+                    movie.isWaiting -> Icons.Default.AccessTimeFilled
+                    movie.monitored -> Icons.Default.Bookmark
+                    else -> null
+                }
+                statusIcon?.let { icon ->
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = surfaceContainerLowDark,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

@@ -36,9 +36,9 @@ struct CalendarTabContent: View {
         Group {
             ZStack {
                 if viewModel.calendarState.filterState.viewMode == .list {
-                    CalendarListView(state: viewModel.calendarState, onLoadMore: { viewModel.loadMore() })
+                    CalendarListView(state: viewModel.calendarState, instances: viewModel.instances, navigationManager: navigationManager, onLoadMore: { viewModel.loadMore() })
                 } else {
-                    CalendarMonthView(state: viewModel.calendarState, onLoadMore: { viewModel.loadMore() })
+                    CalendarMonthView(state: viewModel.calendarState, instances: viewModel.instances, navigationManager: navigationManager, onLoadMore: { viewModel.loadMore() })
                 }
             }
         }

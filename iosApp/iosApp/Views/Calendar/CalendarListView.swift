@@ -10,6 +10,8 @@ import Shared
 
 struct CalendarListView: View {
     let state: CalendarState
+    let instances: [Instance]
+    let navigationManager: NavigationManager
     let onLoadMore: () -> Void
     
     @State private var scrollProxy: ScrollViewProxy?

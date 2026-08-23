@@ -53,8 +53,10 @@ class EpisodeDetailsViewModel(
     val queueItems: StateFlow<List<QueueItem>> = getActivityTasksUseCase()
         .map { tasks ->
             tasks.filterIsInstance<SonarrQueueItem>().filter { task ->
-                task.calcEpisodeId == episode.id ||
+                task.instanceId == episode.instanceId && (
+                    task.calcEpisodeId == episode.id ||
                     (task.calcSeriesId == seriesId && task.seasonNumber == episode.seasonNumber && task.calcEpisodeId == null)
+                )
             }
         }
         .stateIn(
@@ -69,7 +71,16 @@ class EpisodeDetailsViewModel(
     private var currentRepository: ArrInstanceRepository? = null
 
     init {
-        observeSelectedInstance()
+        val forcedInstanceId = episode.instanceId
+        if (forcedInstanceId != null) {
+            getArrInstanceRepositoryUseCase(forcedInstanceId)?.let { repository ->
+                currentRepository = repository
+                observeData(repository)
+                refreshHistory()
+            } ?: observeSelectedInstance()
+        } else {
+            observeSelectedInstance()
+        }
     }
 
     private fun observeSelectedInstance() {

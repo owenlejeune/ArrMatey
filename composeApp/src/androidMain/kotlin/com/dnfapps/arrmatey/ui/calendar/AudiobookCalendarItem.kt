@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BasePosterItem
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -34,57 +35,65 @@ import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun AudiobookCalendarItem(
-    audiobook: Audiobook
+    audiobook: Audiobook,
+    instances: List<Instance>,
+    onNavigate: (Long?) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = ArrLightPurple,
-            contentColor = surfaceDark
-        )
+    SlidableCalendarItem(
+        instanceIds = audiobook.instanceIds,
+        instances = instances,
+        onInstanceSelected = onNavigate
     ) {
-        Row(
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BasePosterItem(
-                model = rememberRemoteImageData(audiobook.getPoster()?.remoteUrl),
-                aspectRatio = AspectRatio.Cover,
-                modifier = Modifier.width(50.dp)
+                .padding(vertical = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = ArrLightPurple,
+                contentColor = surfaceDark
             )
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = audiobook.title ?: mokoString(MR.strings.unknown),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BasePosterItem(
+                    model = rememberRemoteImageData(audiobook.getPoster()?.remoteUrl),
+                    aspectRatio = AspectRatio.Cover,
+                    modifier = Modifier.width(50.dp)
                 )
-                Text(
-                    text = listOfNotNull(
-                        audiobook.authors.joinToString(", "),
-                        audiobook.series?.takeUnless { it.isEmpty() }
-                    ).joinToString(separator = Bullet),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = audiobook.title ?: mokoString(MR.strings.unknown),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = listOfNotNull(
+                            audiobook.authors.joinToString(", "),
+                            audiobook.series?.takeUnless { it.isEmpty() }
+                        ).joinToString(separator = Bullet),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
 
-            val statusIcon = when {
-                audiobook.isDownloaded -> Icons.Default.FileDownloadDone
-                !audiobook.monitored -> Icons.Default.BookmarkBorder
-                audiobook.monitored -> Icons.Default.Bookmark
-                else -> null
-            }
-            statusIcon?.let { icon ->
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = surfaceContainerLowDark,
-                    modifier = Modifier.size(18.dp)
-                )
+                val statusIcon = when {
+                    audiobook.isDownloaded -> Icons.Default.FileDownloadDone
+                    !audiobook.monitored -> Icons.Default.BookmarkBorder
+                    audiobook.monitored -> Icons.Default.Bookmark
+                    else -> null
+                }
+                statusIcon?.let { icon ->
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = surfaceContainerLowDark,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }

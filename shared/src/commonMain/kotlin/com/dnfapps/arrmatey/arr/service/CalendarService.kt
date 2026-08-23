@@ -119,18 +119,30 @@ class CalendarService(
     ) {
         val type = repository.instance.type
         val instance = repository.instance
+        val instanceId = instance.id
+
+        val itemsWithId = items.map { item ->
+            when (item) {
+                is ArrMovie -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                is Episode -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                is ArrAlbum -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                is Book -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                is Audiobook -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                else -> item
+            }
+        }
 
         // Notifications
         scope.launch {
             val enrichedItems = if (type == InstanceType.Booksehelf) {
                 val authors = repository.client.getLibrary().asSuccess()?.data
                     ?.filterIsInstance<Author>()?.associateBy { it.id } ?: emptyMap()
-                items.filterIsInstance<Book>().map { book ->
+                itemsWithId.filterIsInstance<Book>().map { book ->
                     authors[book.authorId]?.let { author ->
-                        book.copy(authorTitle = author.title)
+                        book.copy(authorTitle = author.title, author = author)
                     } ?: book
                 }
-            } else items
+            } else itemsWithId
 
             val fetchedIds = enrichedItems.map { it.calendarId.toInt() }.toSet()
 

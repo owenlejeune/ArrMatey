@@ -29,8 +29,8 @@ fun ItemDescriptionCard(overview: String, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize()
-            .clickable(enabled = !expanded) {
-                expanded = true
+            .clickable {
+                expanded = !expanded
             },
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -39,7 +39,7 @@ fun ItemDescriptionCard(overview: String, modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = parsed,
-                maxLines = if (expanded) Int.MAX_VALUE else 10,
+                maxLines = if (expanded) Int.MAX_VALUE else 5,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 14.sp,
                 onTextLayout = { result ->

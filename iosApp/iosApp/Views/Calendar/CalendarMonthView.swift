@@ -10,6 +10,8 @@ import SwiftUI
 
 struct CalendarMonthView: View {
     let state: CalendarState
+    let instances: [Instance]
+    let navigationManager: NavigationManager
     let onLoadMore: () -> Void
     
     @State private var currentMonth: Date
@@ -19,8 +21,10 @@ struct CalendarMonthView: View {
         Calendar.current.isDate(currentMonth, equalTo: Date(), toGranularity: .month)
     }
         
-    init(state: CalendarState, onLoadMore: @escaping () -> Void) {
+    init(state: CalendarState, instances: [Instance], navigationManager: NavigationManager, onLoadMore: @escaping () -> Void) {
         self.state = state
+        self.instances = instances
+        self.navigationManager = navigationManager
         self.onLoadMore = onLoadMore
         let today = Date()
         _currentMonth = State(initialValue: today)
@@ -68,7 +72,9 @@ struct CalendarMonthView: View {
                     CalendarDaySection(
                         date: selectedDate,
                         items: state.items[selectedDate] ?? [],
-                        isToday: selectedDate.isEqual(state.today)
+                        isToday: selectedDate.isEqual(state.today),
+                        instances: instances,
+                        navigationManager = navigationManager
                     )
                         .padding()
                 }

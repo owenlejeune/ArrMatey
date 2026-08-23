@@ -47,6 +47,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             tvdbId = details.tvdbId,
             requestType = details.requestType,
             instanceType = resolvedInstanceType,
+            instanceId = details.instanceId,
             isExpanded = isExpanded,
             onBack = { navigation.popBackStack() },
             onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },

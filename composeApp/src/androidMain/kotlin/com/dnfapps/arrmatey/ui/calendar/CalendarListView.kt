@@ -27,7 +27,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarState
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
@@ -35,6 +37,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun CalendarListView(
     state: CalendarState,
+    instances: List<Instance>,
+    onItemClick: (CalendarItem, Long?) -> Unit,
     onLoadMore: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -79,7 +83,7 @@ fun CalendarListView(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(
                 items = state.dates,
@@ -87,7 +91,9 @@ fun CalendarListView(
             ) { date ->
                 CalendarDaySection(
                     date = date,
-                    items = state.items[date] ?: emptyList()
+                    items = state.items[date] ?: emptyList(),
+                    instances = instances,
+                    onItemClick = onItemClick
                 )
             }
         }

@@ -25,122 +25,123 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
-import com.dnfapps.arrmatey.compose.TabItem
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
-import com.dnfapps.arrmatey.ui.theme.ArrGreen
-import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.ui.theme.surfaceContainerLowDark
 import com.dnfapps.arrmatey.ui.theme.surfaceDark
-import com.dnfapps.arrmatey.ui.theme.surfaceLight
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 @Composable
 fun EpisodeCalendarItem(
     episode: Episode,
-    additional: List<Episode> = emptyList()
+    additional: List<Episode> = emptyList(),
+    instances: List<Instance>,
+    onNavigate: (Long?) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = ArrBlue,
-            contentColor = surfaceDark
-        )
+    SlidableCalendarItem(
+        instanceIds = episode.instanceIds,
+        instances = instances,
+        onInstanceSelected = onNavigate
     ) {
-        Row(
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(vertical = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = ArrBlue,
+                contentColor = surfaceDark
+            )
         ) {
-            episode.series?.let { series ->
-                PosterItem(item = series, Modifier.width(50.dp))
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = episode.series?.title ?: mokoString(MR.strings.unknown),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "S${episode.seasonNumber}E${episode.episodeNumber} • ${episode.title}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                episode.series?.let { series ->
+                    PosterItem(item = series, Modifier.width(50.dp))
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = episode.series?.title ?: mokoString(MR.strings.unknown),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "S${episode.seasonNumber}E${episode.episodeNumber} • ${episode.title}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
 
-                Row(
-                    modifier = Modifier.padding(top = 2.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    episode.airDateUtc?.format("HH:mm")?.let { airTime ->
-                        Text(
-                            text = airTime,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = surfaceContainerLowDark
-                        )
-                    }
-                    if (episode.seasonNumber == 1 && episode.episodeNumber == 1) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
+                    Row(
+                        modifier = Modifier.padding(top = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        episode.airDateUtc?.format("HH:mm")?.let { airTime ->
                             Text(
-                                text = mokoString(MR.strings.premier),
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary
+                                text = airTime,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = surfaceContainerLowDark
                             )
                         }
-                    }
-                    episode.finaleType?.let { finaleType ->
-                        Surface(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
+                        if (episode.seasonNumber == 1 && episode.episodeNumber == 1) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = mokoString(MR.strings.premier),
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                        episode.finaleType?.let { finaleType ->
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = mokoString(finaleType.resource),
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+
+                        if (additional.isNotEmpty()) {
                             Text(
-                                text = mokoString(finaleType.resource),
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary
+                                text = mokoString(MR.strings.additional_items_count, additional.size),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = surfaceContainerLowDark
                             )
                         }
-                    }
-
-                    if (additional.isNotEmpty()) {
-                        Text(
-                            text = mokoString(MR.strings.additional_items_count, additional.size),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = surfaceContainerLowDark
-                        )
                     }
                 }
-            }
 
-            val statusIcon = when {
-                episode.hasFile -> Icons.Default.FileDownloadDone
-                !episode.monitored -> Icons.Default.BookmarkBorder
-                !episode.hasAired -> Icons.Default.AccessTimeFilled
-                episode.monitored -> Icons.Default.Bookmark
-                else -> null
-            }
-            statusIcon?.let { icon ->
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = surfaceContainerLowDark,
-                    modifier = Modifier.size(18.dp)
-                )
+                val statusIcon = when {
+                    episode.hasFile -> Icons.Default.FileDownloadDone
+                    !episode.monitored -> Icons.Default.BookmarkBorder
+                    !episode.hasAired -> Icons.Default.AccessTimeFilled
+                    episode.monitored -> Icons.Default.Bookmark
+                    else -> null
+                }
+                statusIcon?.let { icon ->
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = surfaceContainerLowDark,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }

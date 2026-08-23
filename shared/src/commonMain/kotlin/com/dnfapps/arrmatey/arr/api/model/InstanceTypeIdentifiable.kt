@@ -16,6 +16,7 @@ sealed interface InstanceTypeIdentifiable {
             is ArrAlbum,
             is MockMedia.Lidarr -> InstanceType.Lidarr
             is Author,
+            is Book,
             is MockMedia.Readarr -> InstanceType.Booksehelf
             is Audiobook,
             is SearchAudiobook,

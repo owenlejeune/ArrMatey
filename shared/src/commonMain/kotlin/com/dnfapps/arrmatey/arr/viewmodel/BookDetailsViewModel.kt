@@ -56,7 +56,16 @@ class BookDetailsViewModel(
     private var currentRepository: ArrInstanceRepository? = null
 
     init {
-        observeSelectedInstance()
+        val forcedInstanceId = book.instanceId
+        if (forcedInstanceId != null) {
+            getArrInstanceRepositoryUseCase(forcedInstanceId)?.let { repository ->
+                currentRepository = repository
+                observeData(repository)
+                refreshHistory()
+            } ?: observeSelectedInstance()
+        } else {
+            observeSelectedInstance()
+        }
     }
 
     private fun observeSelectedInstance() {
