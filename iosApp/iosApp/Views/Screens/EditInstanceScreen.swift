@@ -18,11 +18,13 @@ struct EditInstanceScreen: View {
     @State private var showDeleteConfirmation: Bool = false
     @State private var saveClicked: Bool = false
     private let onSaveSuccess: () -> Void
+    private let onDelete: (() -> Void)?
     
-    init(id: Int64, onSaveSuccess: @escaping () -> Void) {
+    init(id: Int64, onSaveSuccess: @escaping () -> Void, onDelete: (() -> Void)? = nil) {
         self.id = id
         self.viewModel = EditInstanceViewModelS(id)
         self.onSaveSuccess = onSaveSuccess
+        self.onDelete = onDelete
     }
     
     private var uiState: AddInstanceUiState {
@@ -92,7 +94,11 @@ struct EditInstanceScreen: View {
     private func confirmDeleteButtons(_ instance: Instance) -> some View {
         Button(MR.strings().yes.localized(), role: .destructive) {
             viewModel.delete(instance)
-            dismiss()
+            if let onDelete = onDelete {
+                onDelete()
+            } else {
+                dismiss()
+            }
         }
         Button(MR.strings().no.localized(), role: .cancel) {
             showDeleteConfirmation = false

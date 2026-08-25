@@ -5,12 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
+import com.dnfapps.arrmatey.arr.usecase.ExecuteArrCommandUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -62,6 +64,7 @@ class UnifiedLibraryViewModel(
     private val updateMediaUseCase: UpdateMediaUseCase,
     private val deleteMediaUseCase: DeleteMediaUseCase,
     private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
+    private val executeArrCommandUseCase: ExecuteArrCommandUseCase,
     getActivityTasksUseCase: GetActivityTasksUseCase
 ) : ViewModel() {
 
@@ -562,6 +565,38 @@ class UnifiedLibraryViewModel(
             }
 
             selectionState.exitSelectionMode()
+        }
+    }
+
+    fun runRssSync() {
+        val instanceId = _selectedInstance.value?.id ?: return
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.runRssSync(instanceId)
+            _lastSearchResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun searchAllMissing() {
+        val instanceId = _selectedInstance.value?.id ?: return
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.searchAllMissing(instanceId)
+            _lastSearchResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun updateLibrary() {
+        val instanceId = _selectedInstance.value?.id ?: return
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.updateLibrary(instanceId)
+            _lastSearchResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun backupDatabase() {
+        val instanceId = _selectedInstance.value?.id ?: return
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.backupDatabase(instanceId)
+            _lastSearchResult.value = result is NetworkResult.Success
         }
     }
 }

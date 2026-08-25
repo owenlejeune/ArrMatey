@@ -178,6 +178,25 @@ struct ArrTab: View {
             } label: {
                 Image(systemName: "line.3.horizontal.decrease")
             }
+
+            if let instance = instanceState.selectedInstance {
+                InstanceOptionsMenu(
+                    instanceUrl: instance.url,
+                    onRunRssSync: { arrMediaViewModel.runRssSync() },
+                    onSearchAllMissing: { arrMediaViewModel.searchAllMissing() },
+                    onUpdateLibrary: { arrMediaViewModel.updateLibrary() },
+                    onBackupDatabase: { arrMediaViewModel.backupDatabase() }
+                ) {
+                    if let logo = instance.type.tabIcon {
+                        logo.toImage(renderingMode: .template)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                    } else {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
+            }
         }
     }
     

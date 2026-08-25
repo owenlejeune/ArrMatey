@@ -31,13 +31,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,12 +48,14 @@ import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.state.ArrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrHealthCard
 import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InfoArea
+import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -68,6 +73,7 @@ fun ArrInstanceDashboard(
     onBack: () -> Unit = {},
     onNavigateToEditInstance: (Long) -> Unit = {}
 ) {
+    val context = LocalContext.current
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -75,6 +81,18 @@ fun ArrInstanceDashboard(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val instance by viewModel.instance.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val lastCommandResult by viewModel.lastCommandResult.collectAsStateWithLifecycle()
+
+    val commandQueuedMessage = mokoString(MR.strings.command_queued)
+    val commandErrorMessage = mokoString(MR.strings.error_generic_title)
+
+    LaunchedEffect(lastCommandResult) {
+        when (lastCommandResult) {
+            true -> Toast.makeText(context, commandQueuedMessage, Toast.LENGTH_SHORT).show()
+            false -> Toast.makeText(context, commandErrorMessage, Toast.LENGTH_SHORT).show()
+            null -> {}
+        }
+    }
 
     Scaffold(
         modifier = if (isCompact) {
@@ -96,6 +114,16 @@ fun ArrInstanceDashboard(
                     ) {
                         Icon(Icons.Default.Edit, null)
                     }
+
+                    InstanceOptionsMenu(
+                        onViewWebGui = {
+                            instance?.url?.let { context.openLink(it) }
+                        },
+                        onRunRssSync = { viewModel.runRssSync() },
+                        onSearchAllMissing = { viewModel.searchAllMissing() },
+                        onUpdateLibrary = { viewModel.updateLibrary() },
+                        onBackupDatabase = { viewModel.backupDatabase() }
+                    )
                 },
                 scrollBehavior = scrollBehavior
             )

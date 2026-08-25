@@ -79,7 +79,8 @@ fun SettingsTabNavHost(
             entry<SettingsScreen.EditInstance> {
                 EditInstanceScreen(
                     id = it.id,
-                    onBack = { navigation.popBackStack() }
+                    onBack = { navigation.popBackStack() },
+                    onDelete = { navigation.popToRoot() }
                 )
             }
             entry<SettingsScreen.Dev> {

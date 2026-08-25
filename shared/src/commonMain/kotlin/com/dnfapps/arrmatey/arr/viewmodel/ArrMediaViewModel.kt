@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
+import com.dnfapps.arrmatey.arr.usecase.ExecuteArrCommandUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
@@ -21,6 +22,7 @@ import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
 import com.dnfapps.networking.ErrorType
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
@@ -72,6 +74,7 @@ class ArrMediaViewModel(
     private val deleteMediaUseCase: DeleteMediaUseCase,
     private val performRefreshUseCase: PerformRefreshUseCase,
     private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
+    private val executeArrCommandUseCase: ExecuteArrCommandUseCase,
     getActivityTasksUseCase: GetActivityTasksUseCase
 ): ViewModel() {
 
@@ -575,6 +578,38 @@ class ArrMediaViewModel(
 
             repository.refreshLibrary()
             selectionState.exitSelectionMode()
+        }
+    }
+
+    fun runRssSync() {
+        val instanceId = currentRepository?.instance?.id ?: return
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.runRssSync(instanceId)
+            _lastSearchResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun searchAllMissing() {
+        val instanceId = currentRepository?.instance?.id ?: return
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.searchAllMissing(instanceId)
+            _lastSearchResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun updateLibrary() {
+        val instanceId = currentRepository?.instance?.id ?: return
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.updateLibrary(instanceId)
+            _lastSearchResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun backupDatabase() {
+        val instanceId = currentRepository?.instance?.id ?: return
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.backupDatabase(instanceId)
+            _lastSearchResult.value = result is NetworkResult.Success
         }
     }
 }

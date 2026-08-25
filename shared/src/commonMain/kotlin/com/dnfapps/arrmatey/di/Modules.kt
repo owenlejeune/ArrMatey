@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DownloadReleaseUseCase
+import com.dnfapps.arrmatey.arr.usecase.ExecuteArrCommandUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookMetadataUseCase
@@ -296,6 +297,7 @@ val useCaseModule = module {
     factory { DeleteEpisodeFileUseCase() }
     factory { DeleteQueueItemUseCase(get()) }
     factory { PerformRefreshUseCase() }
+    factory { ExecuteArrCommandUseCase(get()) }
     factory { GetCalendarUseCase(get()) }
     factory { DeleteAlbumFilesUseCase() }
     factory { GetProwlarrIndexersUseCase(get()) }
@@ -381,7 +383,22 @@ val viewModelModule = module {
     factory { TrendingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ActivityQueueViewModel(get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
-        ArrMediaViewModel(type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+        ArrMediaViewModel(
+            instanceType = type,
+            getArrInstanceRepositoryUseCase = get(),
+            getLibraryUseCase = get(),
+            updatePreferencesUseCase = get(),
+            updateAllPreferencesUseCase = get(),
+            instancePreferenceStoreRepository = get(),
+            toggleMonitorUseCase = get(),
+            performAutomaticSearchUseCase = get(),
+            updateMediaUseCase = get(),
+            deleteMediaUseCase = get(),
+            performRefreshUseCase = get(),
+            getBazarrInstanceRepositoryUseCase = get(),
+            executeArrCommandUseCase = get(),
+            getActivityTasksUseCase = get()
+        )
     }
     factory { params ->
         UnifiedMediaDetailsViewModel(
@@ -443,7 +460,7 @@ val viewModelModule = module {
         EditInstanceViewModel(instanceId, get(), get(), get(), get(), get())
     }
     factory { (instanceId: Long) ->
-        ArrInstanceDashboardViewModel(instanceId, get())
+        ArrInstanceDashboardViewModel(instanceId, get(), get())
     }
     factory { CalendarViewModel(get(), get(), get(), get()) }
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get(), get()) }
@@ -486,7 +503,24 @@ val viewModelModule = module {
     }
     factory { CombinedDashboardViewModel(get(), get(), get(), get(), get(), get()) }
     factory { BackupViewModel(get(), get(), get(), get()) }
-    factory { UnifiedLibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory {
+        UnifiedLibraryViewModel(
+            observeAllInstancesUseCase = get(),
+            instanceManager = get(),
+            getLibraryUseCase = get(),
+            instancePreferenceStoreRepository = get(),
+            updateInstancePreferencesUseCase = get(),
+            updateAllPreferencesUseCase = get(),
+            toggleMonitorUseCase = get(),
+            performAutomaticSearchUseCase = get(),
+            performRefreshUseCase = get(),
+            updateMediaUseCase = get(),
+            deleteMediaUseCase = get(),
+            getBazarrInstanceRepositoryUseCase = get(),
+            executeArrCommandUseCase = get(),
+            getActivityTasksUseCase = get()
+        )
+    }
 }
 
 val resourcesModule = module {

@@ -786,4 +786,12 @@
     <string name="downloading_file">Downloading %1$s</string>
     <string name="downloading_progress">In progress...</string>
     <string name="download_complete">Download complete</string>
+
+    <!-- Instance Actions Menu -->
+    <string name="view_web_gui">View Web GUI</string>
+    <string name="run_rss_sync">Run RSS Sync</string>
+    <string name="search_all_missing">Search All Missing</string>
+    <string name="update_library">Update Library</string>
+    <string name="backup_database">Backup Database</string>
+    <string name="command_queued">Command queued</string>
 </resources>

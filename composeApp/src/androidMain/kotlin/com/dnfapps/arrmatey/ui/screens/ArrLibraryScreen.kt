@@ -100,11 +100,13 @@ import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
+import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.InstancePicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MediaView
@@ -259,10 +261,23 @@ fun ArrLibraryScreen(
                             instancesState.selectedInstance?.label ?: ""
                         ),
                         trailingIcon = {
-                            Image(
-                                painter = painterResource(type.icon),
-                                contentDescription = mokoString(type.resource),
-                                modifier = Modifier.size(24.dp)
+                            InstanceOptionsMenu(
+                                onViewWebGui = {
+                                    instancesState.selectedInstance?.url?.let { context.openLink(it) }
+                                },
+                                onRunRssSync = { arrMediaViewModel.runRssSync() },
+                                onSearchAllMissing = { arrMediaViewModel.searchAllMissing() },
+                                onUpdateLibrary = { arrMediaViewModel.updateLibrary() },
+                                onBackupDatabase = { arrMediaViewModel.backupDatabase() },
+                                trigger = { onClick ->
+                                    IconButton(onClick = onClick) {
+                                        Image(
+                                            painter = painterResource(type.icon),
+                                            contentDescription = mokoString(type.resource),
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
                             )
                         },
                         navigationIcon = {

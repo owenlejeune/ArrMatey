@@ -256,4 +256,20 @@ class UnifiedLibraryViewModelS: ObservableObject {
     func performSubtitleSearchSelected() {
         viewModel.performSubtitleSearchSelected()
     }
+    
+    func runRssSync() {
+        viewModel.runRssSync()
+    }
+    
+    func searchAllMissing() {
+        viewModel.searchAllMissing()
+    }
+    
+    func updateLibrary() {
+        viewModel.updateLibrary()
+    }
+    
+    func backupDatabase() {
+        viewModel.backupDatabase()
+    }
 }

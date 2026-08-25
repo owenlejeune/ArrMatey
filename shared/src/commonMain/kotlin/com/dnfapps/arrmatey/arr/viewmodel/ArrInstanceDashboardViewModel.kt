@@ -3,7 +3,9 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.state.ArrDashboardState
+import com.dnfapps.arrmatey.arr.usecase.ExecuteArrCommandUseCase
 import com.dnfapps.networking.ErrorType
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
@@ -15,7 +17,8 @@ import kotlinx.coroutines.launch
 
 class ArrInstanceDashboardViewModel(
     private val instanceId: Long,
-    private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase
+    private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
+    private val executeArrCommandUseCase: ExecuteArrCommandUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ArrDashboardState>(ArrDashboardState.Initial)
@@ -26,6 +29,9 @@ class ArrInstanceDashboardViewModel(
 
     private val _instance = MutableStateFlow<Instance?>(null)
     val instance: StateFlow<Instance?> = _instance.asStateFlow()
+
+    private val _lastCommandResult = MutableStateFlow<Boolean?>(null)
+    val lastCommandResult: StateFlow<Boolean?> = _lastCommandResult.asStateFlow()
 
     private var repository: ArrInstanceRepository? = null
 
@@ -82,6 +88,34 @@ class ArrInstanceDashboardViewModel(
             } finally {
                 _isRefreshing.value = false
             }
+        }
+    }
+
+    fun runRssSync() {
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.runRssSync(instanceId)
+            _lastCommandResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun searchAllMissing() {
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.searchAllMissing(instanceId)
+            _lastCommandResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun updateLibrary() {
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.updateLibrary(instanceId)
+            _lastCommandResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun backupDatabase() {
+        viewModelScope.launch {
+            val result = executeArrCommandUseCase.backupDatabase(instanceId)
+            _lastCommandResult.value = result is NetworkResult.Success
         }
     }
 }

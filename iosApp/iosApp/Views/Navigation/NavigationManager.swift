@@ -201,6 +201,15 @@ class NavigationManager: ObservableObject {
     func openSettings() {
         openOverlay(TabItemSettings.shared)
     }
+
+    func popToSettings() {
+        if showLauncher {
+            clearLauncherPath()
+            launcherPath.append(AnyTabItem(item: TabItemSettings.shared))
+        } else {
+            settingsPath = NavigationPath()
+        }
+    }
     
     func goToSeerrDetails(tmdbId: Int64, requestType: RequestType) {
         let route = SeerrRoute.details(tmdbId: tmdbId, requestType: requestType)

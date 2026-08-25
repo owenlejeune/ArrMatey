@@ -215,4 +215,20 @@ class ArrMediaViewModelS: ObservableObject {
     func updateMonitoringSelected(_ monitorType: Any) {
         viewModel.updateMonitoringSelected(monitorType: monitorType)
     }
+
+    func runRssSync() {
+        viewModel.runRssSync()
+    }
+
+    func searchAllMissing() {
+        viewModel.searchAllMissing()
+    }
+
+    func updateLibrary() {
+        viewModel.updateLibrary()
+    }
+
+    func backupDatabase() {
+        viewModel.backupDatabase()
+    }
 }

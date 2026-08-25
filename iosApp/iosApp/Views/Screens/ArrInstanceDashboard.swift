@@ -24,9 +24,19 @@ struct ArrInstanceDashboard: View {
         contentForState()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     NavigationLink(value: SettingsRoute.editInstance(id)) {
                         Image(systemName: "pencil")
+                    }
+                    
+                    InstanceOptionsMenu(
+                        instanceUrl: viewModel.instance?.url,
+                        onRunRssSync: { viewModel.runRssSync() },
+                        onSearchAllMissing: { viewModel.searchAllMissing() },
+                        onUpdateLibrary: { viewModel.updateLibrary() },
+                        onBackupDatabase: { viewModel.backupDatabase() }
+                    ) {
+                        Image(systemName: "ellipsis")
                     }
                 }
             }

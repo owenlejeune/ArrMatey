@@ -19,9 +19,11 @@ struct SettingsRouteView: View {
         case .dev:
             DevSettingsScreen()
         case .editInstance(let id):
-            EditInstanceScreen(id: id) {
+            EditInstanceScreen(id: id, onSaveSuccess: {
                 navigationManager.completeSetupAndDismiss()
-            }
+            }, onDelete: {
+                navigationManager.popToSettings()
+            })
         case .navigationConfig:
             TabConfigurationScreen()
         case .arrDashboard(let id):

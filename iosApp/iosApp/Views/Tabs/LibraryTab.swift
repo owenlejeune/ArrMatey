@@ -114,30 +114,21 @@ struct LibraryTabContent: View {
                 ForEach(libraryViewModel.arrInstances, id: \.id) { tabInstance in
                     let isSelected = tabInstance.id == selectedInstance?.id
                     let isOffline = libraryViewModel.isInstanceOffline(tabInstance.id)
-                    HStack(spacing: 6) {
-                        if let logo = tabInstance.type.tabIcon {
-                            logo.toImage(renderingMode: .template)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 16, height: 16)
+                    if isSelected {
+                        InstanceOptionsMenu(
+                            instanceUrl: tabInstance.url,
+                            onRunRssSync: { libraryViewModel.runRssSync() },
+                            onSearchAllMissing: { libraryViewModel.searchAllMissing() },
+                            onUpdateLibrary: { libraryViewModel.updateLibrary() },
+                            onBackupDatabase: { libraryViewModel.backupDatabase() }
+                        ) {
+                            tabPill(tabInstance: tabInstance, isSelected: isSelected, isOffline: isOffline)
                         }
-                        Text(tabInstance.label)
-                            .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        
-                        if isOffline {
-                            Image(systemName: "wifi.slash")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(isSelected ? .white : .red)
-                        }
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(isSelected ? Color.themePrimary : Color(UIColor.secondarySystemFill))
-                    .foregroundColor(isSelected ? Color.white : Color.primary)
-                    .clipShape(Capsule())
-                    .contentShape(Capsule())
-                    .onTapGesture {
-                        libraryViewModel.selectInstance(tabInstance)
+                    } else {
+                        tabPill(tabInstance: tabInstance, isSelected: isSelected, isOffline: isOffline)
+                            .onTapGesture {
+                                libraryViewModel.selectInstance(tabInstance)
+                            }
                     }
                 }
             }
@@ -146,6 +137,32 @@ struct LibraryTabContent: View {
         }
         .frame(height: 48)
         .background(Color(UIColor.systemBackground))
+    }
+    
+    @ViewBuilder
+    private func tabPill(tabInstance: Instance, isSelected: Bool, isOffline: Bool) -> some View {
+        HStack(spacing: 6) {
+            if let logo = tabInstance.type.tabIcon {
+                logo.toImage(renderingMode: .template)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 16, height: 16)
+            }
+            Text(tabInstance.label)
+                .font(.subheadline.weight(isSelected ? .semibold : .regular))
+            
+            if isOffline {
+                Image(systemName: "wifi.slash")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(isSelected ? .white : .red)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(isSelected ? Color.themePrimary : Color(UIColor.secondarySystemFill))
+        .foregroundColor(isSelected ? Color.white : Color.primary)
+        .clipShape(Capsule())
+        .contentShape(Capsule())
     }
     
     @ViewBuilder

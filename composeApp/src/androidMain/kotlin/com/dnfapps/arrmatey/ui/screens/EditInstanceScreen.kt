@@ -47,7 +47,8 @@ import kotlinx.coroutines.launch
 fun EditInstanceScreen(
     id: Long,
     viewModel: EditInstanceViewModel = koinInjectParams(id),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onDelete: () -> Unit = onBack
 ) {
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -157,7 +158,7 @@ fun EditInstanceScreen(
                                 scope.launch {
                                     instance?.let { instance ->
                                         viewModel.deleteInstance(instance)
-                                        onBack()
+                                        onDelete()
                                     }
                                 }
                             }

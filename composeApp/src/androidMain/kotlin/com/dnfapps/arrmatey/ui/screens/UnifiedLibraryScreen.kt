@@ -34,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -57,11 +58,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
+import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
+import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.MediaView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -236,10 +239,23 @@ fun UnifiedLibraryScreen(
                                 currentInstance.label
                             ),
                             trailingIcon = {
-                                Image(
-                                    painter = painterResource(currentType.icon),
-                                    contentDescription = mokoString(currentType.resource),
-                                    modifier = Modifier.size(24.dp)
+                                InstanceOptionsMenu(
+                                    onViewWebGui = {
+                                        context.openLink(currentInstance.url)
+                                    },
+                                    onRunRssSync = { unifiedLibraryViewModel.runRssSync() },
+                                    onSearchAllMissing = { unifiedLibraryViewModel.searchAllMissing() },
+                                    onUpdateLibrary = { unifiedLibraryViewModel.updateLibrary() },
+                                    onBackupDatabase = { unifiedLibraryViewModel.backupDatabase() },
+                                    trigger = { onClick ->
+                                        IconButton(onClick = onClick) {
+                                            Image(
+                                                painter = painterResource(currentType.icon),
+                                                contentDescription = mokoString(currentType.resource),
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                    }
                                 )
                             },
                             navigationIcon = {

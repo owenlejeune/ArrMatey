@@ -33,4 +33,19 @@ class ArrInstanceDashboardViewModelS: ObservableObject {
         viewModel.refresh()
     }
     
+    func runRssSync() {
+        viewModel.runRssSync()
+    }
+    
+    func searchAllMissing() {
+        viewModel.searchAllMissing()
+    }
+    
+    func updateLibrary() {
+        viewModel.updateLibrary()
+    }
+    
+    func backupDatabase() {
+        viewModel.backupDatabase()
+    }
 }
