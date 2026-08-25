@@ -71,7 +71,7 @@ struct EditPathView: View {
     
     private func save() {
         let rf = selectedRootFolder.path
-        let updatedItem = item.copyWithNewRoot(rootFolderPath: rf, currentRootFolderPath: initialRootFolder?.path)
+        let updatedItem = item.withNewRoot(rootFolderPath: rf, currentRootFolderPath: initialRootFolder?.path)
         onEdit(updatedItem, moveFiles)
         dismiss()
     }

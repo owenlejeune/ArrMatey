@@ -114,7 +114,7 @@ data class Arrtist(
         tags = tags
     )
 
-    override fun copyWithNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
+    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
         copy(rootFolderPath = rootFolderPath)
 
     override fun withLocalImages(instanceUrl: String): Arrtist  =

@@ -91,7 +91,7 @@ fun EditPathSheet(
             Button(
                 onClick = {
                     val rootFolderPath = selectedRootFolder?.path ?: ""
-                    val updatedItem = item.copyWithNewRoot(rootFolderPath, initialRootFolder?.path)
+                    val updatedItem = item.withNewRoot(rootFolderPath, initialRootFolder?.path)
                     onEditItem(updatedItem, moveFiles)
                 },
                 modifier = Modifier.fillMaxWidth(),

@@ -133,7 +133,7 @@ data class ArrSeries(
         tags = tags
     )
 
-    override fun copyWithNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
+    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
         copy(rootFolderPath = rootFolderPath)
 
 }

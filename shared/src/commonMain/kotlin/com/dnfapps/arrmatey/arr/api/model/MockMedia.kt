@@ -40,7 +40,7 @@ sealed class MockMedia(
     @Transient override val releasedBy: String? = null
     @Transient override val statusString: String = "Continuing"
     override fun setMonitored(monitored: Boolean): ArrMedia = this
-    override fun copyWithNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia = this
+    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia = this
     @Transient override val isMissing: Boolean = false
 
     @Transient val detailString = "Reprehenderit • Et Laboris • ${42069L.bytesAsFileSizeString()}"

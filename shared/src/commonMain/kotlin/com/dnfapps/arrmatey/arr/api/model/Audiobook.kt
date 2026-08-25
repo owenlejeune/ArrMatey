@@ -201,7 +201,7 @@ data class Audiobook(
     override fun findCurrentRoot(rootFolders: List<RootFolder>): RootFolder? =
         rootFolders.firstOrNull { path?.startsWith(it.path) == true }
 
-    override fun copyWithNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia {
+    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia {
         val currentPath = basePath ?: ""
         val currentRoot = currentRootFolderPath ?: ""
         val relativePath = if (currentRoot.isNotEmpty() && currentPath.startsWith(currentRoot)) {

@@ -61,6 +61,7 @@ struct UnifiedMediaDetailsScreen: View {
         .modifier(UnifiedMediaDetailsSheetsModifier(
             viewModel: viewModel,
             showEditSheet: $showEditSheet,
+            showEditPathSheet: $showEditPathSheet,
             showAddSheet: $showAddSheet,
             showConfirmSheet: $showConfirmSheet,
             editAlbum: $editAlbum,
@@ -1299,6 +1300,7 @@ struct UnifiedMediaDetailsActions: View {
 fileprivate struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
     @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
     @Binding var showEditSheet: Bool
+    @Binding var showEditPathSheet: Bool
     @Binding var showAddSheet: Bool
     @Binding var showConfirmSheet: Bool
     @Binding var editAlbum: ArrAlbum?
