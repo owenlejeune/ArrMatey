@@ -10,6 +10,7 @@ androidx-core = "1.18.0"
 androidx-core-splashscreen = "1.0.1"
 androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.10.0"
+androidx-test-monitor = "1.7.2"
 androidx-testExt = "1.3.0"
 composeMultiplatform = "1.11.0"
 junit = "4.13.2"
@@ -17,6 +18,7 @@ kotlin = "2.3.21"
 ktor = "3.5.0"
 kotlinx-coroutines = "1.11.0"
 kotlinx-datetime = "0.8.0"
+mockk = "1.13.17"
 resourcesGenerator = "0.26.4"
 skie = "0.10.12"
 koin-bom = "4.2.1"
@@ -38,6 +40,8 @@ kmp-logger = "1.4.0"
 google-fonts = "1.11.2"
 adaptive = "1.2.0"
 flexible-bottomsheet = "0.3.0"
+turbine = "1.2.0"
+robolectric = "4.14.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -56,6 +60,7 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -94,6 +99,15 @@ compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.
 kmp-logger = { module = "io.github.shivathapaa:logger", version.ref = "kmp-logger" }
 google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "google-fonts" }
 flexible-bottomsheet = { module = "com.github.skydoves:flexible-bottomsheet-material3", version.ref = "flexible-bottomsheet" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockk-common = { module = "io.mockk:mockk-common", version.ref = "mockk" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+koin-test = { module = "io.insert-koin:koin-test" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-monitor = { module = "androidx.test:monitor", version.ref = "androidx-test-monitor" }
+androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

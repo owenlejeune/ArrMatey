@@ -60,7 +60,7 @@ fun ArrMedia.getUpcomingDateString(
     }
 }
 
-private fun formatAirTime(airTime: String?): String? {
+internal fun formatAirTime(airTime: String?): String? {
     if (airTime.isNullOrBlank()) return null
     val parts = airTime.split(":")
     if (parts.size < 2) return null

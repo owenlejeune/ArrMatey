@@ -1,0 +1,68 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build iOS App
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build and Test Shared
+        run: ./gradlew :shared:allTests
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: "**/build/test-results/**/*.xml"
+
+      - name: Build iOS App
+        run: |
+          xcodebuild -scheme iosApp \
+            -project iosApp/iosApp.xcodeproj \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            build
+
+      - name: Compress App
+        run: |
+          cd ~/Library/Developer/Xcode/DerivedData
+          APP_PATH=$(find . -name "iosApp.app" -type d | head -n 1)
+          if [ -n "$APP_PATH" ]; then
+            zip -r iosApp.zip "$APP_PATH"
+            mv iosApp.zip $GITHUB_WORKSPACE/
+          else
+            echo "App not found"
+            exit 1
+          fi
+
+      - name: Upload App
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-app
+          path: iosApp.zip
