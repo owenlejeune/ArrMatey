@@ -2,11 +2,11 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.BazarrDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.arr.state.DashboardCalendarItem
 import com.dnfapps.arrmatey.arr.state.DownloadClientDashboardState
 import com.dnfapps.arrmatey.arr.state.InstanceNetworkStatus
 import com.dnfapps.arrmatey.arr.state.NetworkStatusState
@@ -182,9 +182,10 @@ class CombinedDashboardViewModel(
                 downloadClientManager.downloadClientApis,
                 calendarService.items.map { itemsByDate ->
                     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-                    val todayItems = itemsByDate[today] ?: emptyList()
-                    val upcomingItems = (1..7).flatMap {
-                        itemsByDate[today.plus(it, DateTimeUnit.DAY)] ?: emptyList()
+                    val todayItems = (itemsByDate[today] ?: emptyList()).map { DashboardCalendarItem(it, today) }
+                    val upcomingItems = (1..7).flatMap { offset ->
+                        val date = today.plus(offset, DateTimeUnit.DAY)
+                        (itemsByDate[date] ?: emptyList()).map { DashboardCalendarItem(it, date) }
                     }
                     todayItems to upcomingItems
                 },
@@ -202,7 +203,7 @@ class CombinedDashboardViewModel(
                 @Suppress("UNCHECKED_CAST")
                 val clientApis = args[5] as Map<Long, *>
                 @Suppress("UNCHECKED_CAST")
-                val calendarPair = args[6] as Pair<List<CalendarItem>, List<CalendarItem>>
+                val calendarPair = args[6] as Pair<List<DashboardCalendarItem>, List<DashboardCalendarItem>>
                 val todayCalendar = calendarPair.first
                 val upcomingCalendar = calendarPair.second
                 val refreshing = args[7] as Boolean

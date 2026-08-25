@@ -9,14 +9,21 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class GetLookupResultsUseCase(
     private val instanceManager: InstanceManager
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(type: InstanceType): Flow<ArrLibrary> =
-        instanceManager.getSelectedArrRepository(type)
+    operator fun invoke(type: InstanceType, instanceId: Long? = null): Flow<ArrLibrary> {
+        val repoFlow = if (instanceId != null) {
+            flowOf(instanceManager.getArrRepository(instanceId))
+        } else {
+            instanceManager.getSelectedArrRepository(type)
+        }
+
+        return repoFlow
             .filterNotNull()
             .flatMapLatest { repository ->
                 repository.lookupResults.map { result ->
@@ -29,4 +36,5 @@ class GetLookupResultsUseCase(
                     }
                 }
             }
+    }
 }

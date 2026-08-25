@@ -65,13 +65,13 @@ class RadarrClient(
     override suspend fun delete(
         id: Long,
         deleteFiles: Boolean,
-        addImportListExclusion: Boolean
+        addImportExclusion: Boolean
     ): NetworkResult<Unit> =
         delete(
             endpoint = "movie/$id",
             params = mapOf(
                 "deleteFiles" to deleteFiles,
-                "addImportListExclusion" to addImportListExclusion
+                "addImportExclusion" to addImportExclusion
             )
         )
 

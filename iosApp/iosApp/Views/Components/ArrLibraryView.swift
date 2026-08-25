@@ -218,7 +218,7 @@ struct ArrLibraryView: View {
         VStack(spacing: 0) {
             if items.isEmpty {
                 EmptySearchResultsView(type: type, query: searchQuery, onShouldSearch: {
-                    navigation.go(to: .search(query: searchQuery, type: type), of: type)
+                    navigation.go(to: .search(query: searchQuery, type: type, instanceId: viewModel.selectedInstance?.id), of: type)
                 })
             } else {
                 mediaView(

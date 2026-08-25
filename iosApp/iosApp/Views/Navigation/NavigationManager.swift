@@ -291,7 +291,7 @@ enum MediaRoute: Hashable {
         requestType: RequestType? = nil,
         instanceId: Int64? = nil
     )
-    case search(query: String, type: InstanceType)
+    case search(query: String, type: InstanceType, instanceId: Int64? = nil)
     case preview(_ json : String, type: InstanceType)
     case movieRelease(Int64)
     case movieFiles(String)

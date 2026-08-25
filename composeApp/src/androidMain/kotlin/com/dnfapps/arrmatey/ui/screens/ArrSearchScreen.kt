@@ -56,7 +56,8 @@ fun ArrSearchScreen(
     onNavigateToDetails: (Long) -> Unit,
     onNavigateToUnifiedDetails: (Long?, Long?, Long?, InstanceType) -> Unit,
     onNavigateToPreview: (ArrMedia) -> Unit,
-    viewModel: ArrSearchViewModel = koinInjectParams(type),
+    instanceId: Long? = null,
+    viewModel: ArrSearchViewModel = koinInjectParams(type, instanceId),
     activityQueueViewModel: ActivityQueueViewModel = koinInject()
 ) {
     val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()

@@ -38,8 +38,8 @@ private fun unifiedLibraryEntryProvider(isExpanded: Boolean, wideRailIsVisible: 
         UnifiedLibraryScreen(
             isExpanded = isExpanded,
             wideRailIsVisible = wideRailIsVisible,
-            onNavigateToSearch = { query, _ -> navigation.toSearch(query) },
-            onNavigateToDetails = { media, type -> navigation.toMediaDetails(media, type) }
+            onNavigateToSearch = { query, type, instanceId -> navigation.toSearch(query, type, instanceId) },
+            onNavigateToDetails = { media, type, instanceId -> navigation.toMediaDetails(media, type, instanceId) }
         )
     }
     mediaNavEntries(navigation = navigation, isExpanded = isExpanded, defaultInstanceType = InstanceType.Sonarr)

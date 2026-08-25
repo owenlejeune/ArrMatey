@@ -83,8 +83,8 @@ import org.koin.compose.koinInject
 fun UnifiedLibraryScreen(
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
-    onNavigateToSearch: (String, InstanceType) -> Unit,
-    onNavigateToDetails: (ArrMedia, InstanceType) -> Unit,
+    onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
+    onNavigateToDetails: (ArrMedia, InstanceType, Long?) -> Unit,
     unifiedLibraryViewModel: UnifiedLibraryViewModel = koinInject(),
     activityQueueViewModel: ActivityQueueViewModel = koinInject()
 ) {
@@ -197,7 +197,7 @@ fun UnifiedLibraryScreen(
                     exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200))
                 ) {
                     FloatingActionButton(
-                        onClick = { onNavigateToSearch("", currentType) }
+                        onClick = { onNavigateToSearch("", currentType, currentInstance.id) }
                     ) {
                         Icon(Icons.Default.Add, null)
                     }
@@ -372,7 +372,7 @@ fun UnifiedLibraryScreen(
                                         type = currentType,
                                         items = items,
                                         onItemClick = {
-                                            onNavigateToDetails(it, currentType)
+                                            onNavigateToDetails(it, currentType, currentInstance.id)
                                         },
                                         preferences = preferences,
                                         itemIsActive = { item ->
@@ -382,7 +382,7 @@ fun UnifiedLibraryScreen(
                                     )
                                 } else {
                                     EmptySearchResultsView(currentType, textFieldState.text.toString()) {
-                                        onNavigateToSearch(textFieldState.text.toString(), currentType)
+                                        onNavigateToSearch(textFieldState.text.toString(), currentType, currentInstance.id)
                                     }
                                 }
                             }

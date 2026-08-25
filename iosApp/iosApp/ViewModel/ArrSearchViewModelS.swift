@@ -16,8 +16,8 @@ class ArrSearchViewModelS: ObservableObject {
     @Published private(set) var sortBy: SortBy = .relevance
     @Published private(set) var sortOrder: Shared.SortOrder = .asc
     
-    init(type: InstanceType) {
-        self.viewModel = KoinBridge.shared.getArrSearchViewModel(type: type)
+    init(type: InstanceType, instanceId: Int64? = nil) {
+        self.viewModel = KoinBridge.shared.getArrSearchViewModel(type: type, instanceId: instanceId?.asKotlinLong)
         startObserving()
     }
     

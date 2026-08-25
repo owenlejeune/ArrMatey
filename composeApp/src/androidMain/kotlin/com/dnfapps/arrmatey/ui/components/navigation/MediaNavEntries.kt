@@ -171,10 +171,12 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
         )
     }
     entry<MediaScreen.Search> { search ->
-        if (defaultInstanceType != null) {
+        val type = search.type ?: defaultInstanceType
+        if (type != null) {
             ArrSearchScreen(
                 initialQuery = search.query,
-                type = defaultInstanceType,
+                type = type,
+                instanceId = search.instanceId,
                 onBack = { navigation.popBackStack() },
                 onNavigateToDetails = { navigation.toDetails(it) },
                 onNavigateToUnifiedDetails = { arrId, tmdbId, tvdbId, instanceType ->

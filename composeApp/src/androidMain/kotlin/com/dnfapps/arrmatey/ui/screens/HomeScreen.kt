@@ -237,7 +237,7 @@ fun HomeScreen(
 
                                     if (hasInstances && navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
                                         FloatingActionButton(
-                                            onClick = { navigator.toSearch() }
+                                            onClick = { navigator.toSearch(type = currentTab?.associatedType) }
                                         ) {
                                             Icon(Icons.Default.Add, contentDescription = null)
                                         }

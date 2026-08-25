@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 
 class ArrSearchViewModel(
     private val instanceType: InstanceType,
+    private val instanceId: Long? = null,
     private val getLookupResultsUseCase: GetLookupResultsUseCase,
     private val getLibraryUseCase: GetLibraryUseCase,
     private val performLookupUseCase: PerformLookupUseCase
@@ -41,9 +42,15 @@ class ArrSearchViewModel(
 
     private fun observeLookupResults() {
         viewModelScope.launch {
+            val libraryFlow = if (instanceId != null) {
+                getLibraryUseCase(instanceId)
+            } else {
+                getLibraryUseCase.byType(instanceType)
+            }
+
             combine(
-                getLookupResultsUseCase(instanceType),
-                getLibraryUseCase.byType(instanceType),
+                getLookupResultsUseCase(instanceType, instanceId),
+                libraryFlow,
                 _sortBy,
                 _sortOrder
             ) { state, library, sortBy, sortOrder ->
@@ -82,7 +89,7 @@ class ArrSearchViewModel(
 
     fun performLookup(query: String) {
         viewModelScope.launch {
-            performLookupUseCase(instanceType, query)
+            performLookupUseCase(instanceType, query, instanceId)
         }
     }
 
@@ -96,7 +103,7 @@ class ArrSearchViewModel(
 
     fun clearLookup() {
         viewModelScope.launch {
-            performLookupUseCase.clear(instanceType)
+            performLookupUseCase.clear(instanceType, instanceId)
         }
     }
 

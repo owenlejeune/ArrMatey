@@ -60,8 +60,8 @@ object KoinBridge: KoinComponent {
     fun getInstancesViewModel(type: InstanceType): InstancesViewModel =
         getKoin().get { parametersOf(type) }
 
-    fun getArrSearchViewModel(type: InstanceType): ArrSearchViewModel =
-        getKoin().get { parametersOf(type) }
+    fun getArrSearchViewModel(type: InstanceType, instanceId: Long?): ArrSearchViewModel =
+        getKoin().get { parametersOf(type, instanceId) }
 
     fun getMediaPreviewViewModel(preview: ArrMedia, type: InstanceType): MediaPreviewViewModel =
         getKoin().get { parametersOf(preview, type) }

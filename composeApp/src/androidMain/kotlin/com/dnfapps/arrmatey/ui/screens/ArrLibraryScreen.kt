@@ -134,8 +134,8 @@ fun ArrLibraryScreen(
     type: InstanceType,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
-    onNavigateToSearch: (String) -> Unit,
-    onNavigateToDetails: (ArrMedia) -> Unit,
+    onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
+    onNavigateToDetails: (ArrMedia, Long?) -> Unit,
     arrMediaViewModel: ArrMediaViewModel = koinInjectParams(type),
     instancesViewModel: InstancesViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject(),
@@ -220,7 +220,7 @@ fun ArrLibraryScreen(
                 exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200))
             ) {
                 FloatingActionButton(
-                    onClick = { onNavigateToSearch("") }
+                    onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) }
                 ) {
                     Icon(Icons.Default.Add, null)
                 }
@@ -352,7 +352,7 @@ fun ArrLibraryScreen(
                                     type = type,
                                     items = items,
                                     onItemClick = {
-                                        onNavigateToDetails(it)
+                                        onNavigateToDetails(it, instancesState.selectedInstance?.id)
                                     },
                                     preferences = preferences,
                                     itemIsActive = { item ->
@@ -362,7 +362,7 @@ fun ArrLibraryScreen(
                                 )
                             } else {
                                 EmptySearchResultsView(type, textFieldState.text.toString()) {
-                                    onNavigateToSearch(textFieldState.text.toString())
+                                    onNavigateToSearch(textFieldState.text.toString(), type, instancesState.selectedInstance?.id)
                                 }
                             }
                         }
@@ -923,7 +923,8 @@ internal fun EmptySearchResultsView(
         Text(
             text = mokoString(MR.strings.no_query_results, query),
             fontSize = 18.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
         )
         Text(
             text = buildAnnotatedString {

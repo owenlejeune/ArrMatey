@@ -29,6 +29,7 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import dev.icerock.moko.resources.ImageResource
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
@@ -44,8 +45,8 @@ sealed interface CombinedDashboardState {
         val recentlyAdded: List<ArrMedia> = emptyList(),
         val downloadTransfers: List<DownloadTransferInfo> = emptyList(),
         val activeDownloads: List<DownloadItem> = emptyList(),
-        val calendarItems: List<CalendarItem> = emptyList(),
-        val upcomingCalendarItems: List<CalendarItem> = emptyList(),
+        val calendarItems: List<DashboardCalendarItem> = emptyList(),
+        val upcomingCalendarItems: List<DashboardCalendarItem> = emptyList(),
         val prowlarrStats: List<ProwlarrDashboardState> = emptyList(),
         val bazarrStats: List<BazarrDashboardState> = emptyList(),
         val networkStatus: NetworkStatusState? = null,
@@ -205,8 +206,8 @@ sealed interface CombinedDashboardState {
                         eta = 100
                     )
                 ),
-                calendarItems = listOf(mockEpisode),
-                upcomingCalendarItems = listOf(mockEpisode),
+                calendarItems = listOf(DashboardCalendarItem(mockEpisode, today)),
+                upcomingCalendarItems = listOf(DashboardCalendarItem(mockEpisode, today)),
                 networkStatus = NetworkStatusState(
                     ssid = "Mock-WiFi",
                     isWifi = true,
@@ -279,3 +280,11 @@ data class BazarrDashboardState(
     val wantedEpisodesCount: Int,
     val wantedMoviesCount: Int
 )
+
+data class DashboardCalendarItem(
+    val item: CalendarItem,
+    val date: LocalDate
+) {
+    val uniqueId: String
+        get() = "${item.calendarId}_${date}"
+}

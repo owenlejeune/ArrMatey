@@ -21,7 +21,7 @@ sealed interface MediaScreen : NavKey {
         val instanceId: Long? = null
     ): MediaScreen
     data class Preview<T>(val item: T): MediaScreen
-    data class Search(val query: String = ""): MediaScreen
+    data class Search(val query: String = "", val type: InstanceType? = null, val instanceId: Long? = null): MediaScreen
     data class MovieReleases(val movieId: Long): MediaScreen
     data class MovieFiles(val movie: ArrMovie): MediaScreen
     data class AuthorFiles(val author: Author): MediaScreen

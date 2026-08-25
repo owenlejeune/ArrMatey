@@ -19,21 +19,20 @@ import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
-import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
-import com.dnfapps.arrmatey.arr.api.model.InstanceTypeIdentifiable
+import com.dnfapps.arrmatey.arr.state.DashboardCalendarItem
+import com.dnfapps.arrmatey.extensions.isEqual
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun DashboardCalendarItemRow(
-    item: CalendarItem,
+    dashboardItem: DashboardCalendarItem,
     showDate: Boolean = false
 ) {
+    val item = dashboardItem.item
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -54,11 +53,10 @@ fun DashboardCalendarItemRow(
             }
             is ArrAlbum -> item.title ?: ""
             is ArrMovie -> {
-                val date = item.releaseDate ?: item.digitalRelease ?: item.physicalRelease ?: item.inCinemas
-                val label = when (date) {
-                    item.physicalRelease -> mokoString(MR.strings.physical_release)
-                    item.digitalRelease -> mokoString(MR.strings.digital_release)
-                    item.inCinemas -> mokoString(MR.strings.in_cinemas)
+                val label = when {
+                    item.physicalRelease?.isEqual(dashboardItem.date) == true -> mokoString(MR.strings.physical_release)
+                    item.digitalRelease?.isEqual(dashboardItem.date) == true -> mokoString(MR.strings.digital_release)
+                    item.inCinemas?.isEqual(dashboardItem.date) == true -> mokoString(MR.strings.in_cinemas)
                     else -> mokoString(MR.strings.release_date)
                 }
                 label
@@ -76,15 +74,11 @@ fun DashboardCalendarItemRow(
                 Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (showDate) {
-                val firstDate = item.getCalendarDates().firstOrNull()
-                firstDate?.let {
-                    val date = it.toLocalDateTime(TimeZone.currentSystemDefault()).date
-                    Text(
-                        text = date.format("EEE, MMM d"),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                Text(
+                    text = dashboardItem.date.format("EEE, MMM d"),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

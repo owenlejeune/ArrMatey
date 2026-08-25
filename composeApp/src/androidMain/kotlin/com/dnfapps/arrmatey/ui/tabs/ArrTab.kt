@@ -44,8 +44,8 @@ private fun arrEntryProvider(
             type = type,
             isExpanded = isExpanded,
             wideRailIsVisible = wideRailIsVisible,
-            onNavigateToSearch = { navigation.toSearch(it) },
-            onNavigateToDetails = { media -> navigation.toMediaDetails(media, type) }
+            onNavigateToSearch = { query, resolvedType, instanceId -> navigation.toSearch(query, resolvedType, instanceId) },
+            onNavigateToDetails = { media, instanceId -> navigation.toMediaDetails(media, type, instanceId) }
         )
     }
     mediaNavEntries(navigation = navigation, isExpanded = isExpanded, defaultInstanceType = type)

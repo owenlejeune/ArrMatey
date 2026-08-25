@@ -20,10 +20,10 @@ struct MediaSearchScreen: View {
     @State private var searchQuery: String
     @State private var searchPresented: Bool = false
     
-    init(query: String, type: InstanceType) {
+    init(query: String, type: InstanceType, instanceId: Int64? = nil) {
         self.searchQuery = query
         self.type = type
-        self.viewModel = ArrSearchViewModelS(type: type)
+        self.viewModel = ArrSearchViewModelS(type: type, instanceId: instanceId)
     }
     
     private var uiState: ArrLibrary {

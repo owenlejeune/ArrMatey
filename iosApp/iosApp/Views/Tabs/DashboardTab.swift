@@ -695,8 +695,8 @@ struct DashboardTodaySection: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical)
             } else {
-                ForEach(state.calendarItems, id: \.calendarId) { item in
-                    CalendarItemRow(item: item)
+                ForEach(state.calendarItems, id: \.uniqueId) { item in
+                    CalendarItemRow(dashboardItem: item)
                 }
             }
         }
@@ -722,8 +722,8 @@ struct DashboardUpcomingSection: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical)
             } else {
-                ForEach(state.upcomingCalendarItems.prefix(5), id: \.calendarId) { item in
-                    CalendarItemRow(item: item, showDate: true)
+                ForEach(state.upcomingCalendarItems.prefix(5), id: \.uniqueId) { item in
+                    CalendarItemRow(dashboardItem: item, showDate: true)
                 }
             }
         }
@@ -731,8 +731,10 @@ struct DashboardUpcomingSection: View {
 }
 
 struct CalendarItemRow: View {
-    let item: CalendarItem
+    let dashboardItem: DashboardCalendarItem
     var showDate: Bool = false
+    
+    private var item: CalendarItem { dashboardItem.item }
     
     var body: some View {
         HStack(spacing: 12) {
@@ -761,8 +763,8 @@ struct CalendarItemRow: View {
                         .lineLimit(1)
                 }
                 
-                if showDate, let firstDate = item.getCalendarDates().first {
-                    Text(formatDate(firstDate))
+                if showDate {
+                    Text(formatDate(dashboardItem.date))
                         .font(.system(size: 10))
                         .foregroundColor(.accentColor)
                 }
@@ -800,26 +802,25 @@ struct CalendarItemRow: View {
         } else if let album = item as? ArrAlbum {
             return album.title ?? ""
         } else if let movie = item as? ArrMovie {
-            let date = movie.releaseDate ?? movie.digitalRelease ?? movie.physicalRelease ?? movie.inCinemas
-            if let date = date {
-                if date == movie.physicalRelease {
-                    return MR.strings().physical_release.localized()
-                } else if date == movie.digitalRelease {
-                    return MR.strings().digital_release.localized()
-                } else if date == movie.inCinemas {
-                    return MR.strings().in_cinemas.localized()
-                }
+            if let physical = movie.physicalRelease, physical.isEqual(to: dashboardItem.date) {
+                return MR.strings().physical_release.localized()
+            } else if let digital = movie.digitalRelease, digital.isEqual(to: dashboardItem.date) {
+                return MR.strings().digital_release.localized()
+            } else if let cinemas = movie.inCinemas, cinemas.isEqual(to: dashboardItem.date) {
+                return MR.strings().in_cinemas.localized()
+            } else {
+                return MR.strings().release_date.localized()
             }
             return MR.strings().release_date.localized()
         }
         return ""
     }
     
-    private func formatDate(_ instant: KotlinInstant) -> String {
-        let date = Date(timeIntervalSince1970: Double(instant.epochSeconds))
+    private func formatDate(_ date: Kotlinx_datetimeLocalDate) -> String {
+        let date = Date(year: Int(date.year), month: Int(date.monthNumber), day: Int(date.dayOfMonth))
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE, MMM d"
-        return formatter.string(from: date)
+        return formatter.string(from: date ?? Date())
     }
 }
 

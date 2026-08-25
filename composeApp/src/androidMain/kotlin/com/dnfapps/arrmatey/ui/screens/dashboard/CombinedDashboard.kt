@@ -94,7 +94,6 @@ fun CombinedDashboard(
     val showFirstLaunchToast by viewModel.showFirstLaunchToast.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val cards by viewModel.cards.collectAsStateWithLifecycle()
     val isEditing by viewModel.isEditing.collectAsStateWithLifecycle()
     val availableCards = remember(cards) { DashboardCards.entries.filter { it !in cards } }
@@ -112,13 +111,9 @@ fun CombinedDashboard(
     }
 
     Scaffold(
-        modifier = if (isCompact) {
-            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
-        } else Modifier,
         topBar = {
             TopAppBar(
                 title = { Text(mokoString(MR.strings.dashboard)) },
-                scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     if (isEditing) {
                         IconButton(onClick = { viewModel.toggleEditing() }) {
@@ -127,9 +122,6 @@ fun CombinedDashboard(
                     } else if (isCompact) NavigationDrawerButton()
                 },
                 windowInsets = TopAppBarDefaults.windowInsets,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                ),
                 actions = {
                     if (isEditing) {
                         IconButton(onClick = {
