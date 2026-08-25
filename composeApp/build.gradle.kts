@@ -45,6 +45,7 @@ kotlin {
             implementation(libs.kmp.logger)
         }
         commonMain.dependencies {
+            implementation(project.dependencies.platform(libs.koin.bom))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
