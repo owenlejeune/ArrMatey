@@ -46,18 +46,22 @@ jobs:
             -project iosApp/iosApp.xcodeproj \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            -derivedDataPath derived_data \
             build
 
       - name: Compress App
         run: |
-          cd ~/Library/Developer/Xcode/DerivedData
-          APP_PATH=$(find . -name "iosApp.app" -type d | head -n 1)
+          APP_PATH=$(find derived_data -name "iosApp.app" -type d | head -n 1)
           if [ -n "$APP_PATH" ]; then
-            zip -r iosApp.zip "$APP_PATH"
-            mv iosApp.zip $GITHUB_WORKSPACE/
+            PARENT_DIR=$(dirname "$APP_PATH")
+            APP_NAME=$(basename "$APP_PATH")
+            pushd "$PARENT_DIR"
+            zip -r "$GITHUB_WORKSPACE/iosApp.zip" "$APP_NAME"
+            popd
           else
-            echo "App not found"
+            echo "App not found in derived_data"
+            find derived_data -maxdepth 4
             exit 1
           fi
 
