@@ -78,13 +78,13 @@ class SonarrClient(
     override suspend fun delete(
         id: Long,
         deleteFiles: Boolean,
-        addImportListExclusion: Boolean
+        addImportExclusion: Boolean
     ): NetworkResult<Unit> =
         delete(
             endpoint = "series/$id",
             params = mapOf(
                 "deleteFiles" to deleteFiles,
-                "addImportListExclusion" to addImportListExclusion
+                "addImportListExclusion" to addImportExclusion
             )
         )
 

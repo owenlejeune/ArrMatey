@@ -63,13 +63,13 @@ class LidarrClient(
     override suspend fun delete(
         id: Long,
         deleteFiles: Boolean,
-        addImportListExclusion: Boolean
+        addImportExclusion: Boolean
     ): NetworkResult<Unit> =
         delete(
             endpoint = "artist/$id",
             params = mapOf(
                 "deleteFiles" to deleteFiles,
-                "addImportListExclusion" to addImportListExclusion
+                "addImportExclusion" to addImportExclusion
             )
         )
 

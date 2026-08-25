@@ -72,7 +72,7 @@ class ListenarrClient(
     override suspend fun delete(
         id: Long,
         deleteFiles: Boolean,
-        addImportListExclusion: Boolean
+        addImportExclusion: Boolean
     ): NetworkResult<Unit> =
         delete(
             endpoint = "library/$id",

@@ -61,13 +61,13 @@ class BookshelfClient(
     override suspend fun delete(
         id: Long,
         deleteFiles: Boolean,
-        addImportListExclusion: Boolean
+        addImportExclusion: Boolean
     ): NetworkResult<Unit> =
         delete(
             endpoint = "author/$id",
             params = mapOf(
                 "deleteFiles" to deleteFiles,
-                "addImportExclusion" to addImportListExclusion
+                "addImportExclusion" to addImportExclusion
             )
         )
 
