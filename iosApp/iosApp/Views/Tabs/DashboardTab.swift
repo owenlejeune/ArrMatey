@@ -801,15 +801,16 @@ struct CalendarItemRow: View {
             return album.title ?? ""
         } else if let movie = item as? ArrMovie {
             let date = movie.releaseDate ?? movie.digitalRelease ?? movie.physicalRelease ?? movie.inCinemas
-            if date != nil && date == movie.physicalRelease {
-                return MR.strings().physical_release.localized()
-            } else if date != nil && date == movie.digitalRelease {
-                return MR.strings().digital_release.localized()
-            } else if date != nil && date == movie.inCinemas {
-                return MR.strings().in_cinemas.localized()
-            } else {
-                return MR.strings().release_date.localized()
+            if let date = date {
+                if date == movie.physicalRelease {
+                    return MR.strings().physical_release.localized()
+                } else if date == movie.digitalRelease {
+                    return MR.strings().digital_release.localized()
+                } else if date == movie.inCinemas {
+                    return MR.strings().in_cinemas.localized()
+                }
             }
+            return MR.strings().release_date.localized()
         }
         return ""
     }

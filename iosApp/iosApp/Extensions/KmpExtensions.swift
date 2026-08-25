@@ -66,6 +66,12 @@ extension Binding where Value == Int32? {
     }
 }
 
+extension KotlinInstant: @retroactive Equatable {
+    public static func == (lhs: KotlinInstant, rhs: KotlinInstant) -> Bool {
+        return lhs.epochSeconds == rhs.epochSeconds && lhs.nanosecondsOfSecond == rhs.nanosecondsOfSecond
+    }
+}
+
 typealias LocalDate = Kotlinx_datetimeLocalDate
 
 extension Kotlinx_datetimeLocalDate {
