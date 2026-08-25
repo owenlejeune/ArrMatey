@@ -39,7 +39,7 @@ struct CalendarMonthGrid: View {
                     if let date = calendarDay.date {
                         CalendarDayCell(
                             date: date,
-                            isSelected: date.isEqual(to: selectedDate),
+                            isSelected: date == selectedDate,
                             items: state.items[date] ?? [],
                             onClick: {
                                 onDateSelected(date)

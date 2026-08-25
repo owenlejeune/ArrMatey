@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build iOS App
+    name: Build and Test iOS
     runs-on: macos-latest
     steps:
       - name: Checkout code
@@ -33,40 +33,11 @@ jobs:
       - name: Build and Test Shared
         run: ./gradlew :shared:allTests
 
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-test-results
-          path: "**/build/test-results/**/*.xml"
-
-      - name: Build iOS App
+      - name: Build and Test iOS App
         run: |
-          xcodebuild -scheme iosApp \
+          xcodebuild test -scheme iosApp \
             -project iosApp/iosApp.xcodeproj \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
-            -derivedDataPath derived_data \
-            build
-
-      - name: Compress App
-        run: |
-          APP_PATH=$(find derived_data/Build/Products -name "*.app" -type d | head -n 1)
-          if [ -n "$APP_PATH" ]; then
-            PARENT_DIR=$(dirname "$APP_PATH")
-            APP_NAME=$(basename "$APP_PATH")
-            pushd "$PARENT_DIR"
-            zip -r "$GITHUB_WORKSPACE/iosApp.zip" "$APP_NAME"
-            popd
-          else
-            echo "App not found in derived_data/Build/Products"
-            find derived_data -maxdepth 4
-            exit 1
-          fi
-
-      - name: Upload App
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-app
-          path: iosApp.zip
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -derivedDataPath derived_data

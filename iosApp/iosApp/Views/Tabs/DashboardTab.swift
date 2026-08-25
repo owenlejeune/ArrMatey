@@ -802,11 +802,11 @@ struct CalendarItemRow: View {
         } else if let album = item as? ArrAlbum {
             return album.title ?? ""
         } else if let movie = item as? ArrMovie {
-            if let physical = movie.physicalRelease, physical.isEqual(to: dashboardItem.date) {
+            if let physical = movie.physicalRelease, physical.isEqual(date: dashboardItem.date) {
                 return MR.strings().physical_release.localized()
-            } else if let digital = movie.digitalRelease, digital.isEqual(to: dashboardItem.date) {
+            } else if let digital = movie.digitalRelease, digital.isEqual(date: dashboardItem.date) {
                 return MR.strings().digital_release.localized()
-            } else if let cinemas = movie.inCinemas, cinemas.isEqual(to: dashboardItem.date) {
+            } else if let cinemas = movie.inCinemas, cinemas.isEqual(date: dashboardItem.date) {
                 return MR.strings().in_cinemas.localized()
             } else {
                 return MR.strings().release_date.localized()
@@ -817,7 +817,8 @@ struct CalendarItemRow: View {
     }
     
     private func formatDate(_ date: Kotlinx_datetimeLocalDate) -> String {
-        let date = Date(year: Int(date.year), month: Int(date.monthNumber), day: Int(date.dayOfMonth))
+        let components = date.toDateComponents()
+        let date = Calendar.current.date(from: components)
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE, MMM d"
         return formatter.string(from: date ?? Date())

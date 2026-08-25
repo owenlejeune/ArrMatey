@@ -83,7 +83,7 @@ struct CalendarListView: View {
     
     @ViewBuilder
     private func daySectionView(for date: LocalDate, at index: Int) -> some View {
-        let isToday = date.isEqual(state.today)
+        let isToday = date == state.today
         let key = dateKey(date)
         
         CalendarDaySection(

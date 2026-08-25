@@ -66,21 +66,9 @@ extension Binding where Value == Int32? {
     }
 }
 
-extension KotlinInstant: @retroactive Equatable {
-    public static func == (lhs: KotlinInstant, rhs: KotlinInstant) -> Bool {
-        return lhs.epochSeconds == rhs.epochSeconds && lhs.nanosecondsOfSecond == rhs.nanosecondsOfSecond
-    }
-}
-
 typealias LocalDate = Kotlinx_datetimeLocalDate
 
 extension Kotlinx_datetimeLocalDate {
-    func isEqual(to other: Kotlinx_datetimeLocalDate) -> Bool {
-        return self.year == other.year &&
-               self.month == other.month &&
-               self.day == other.day
-    }
-    
     func toDateComponents() -> DateComponents {
         return DateComponents(
             year: Int(self.year),
@@ -109,12 +97,6 @@ extension Kotlinx_datetimeLocalDate {
             return self.month.number() > other.month.number()
         }
         return self.day >= other.day
-    }
-    
-    func isEqual(_ other: LocalDate) -> Bool {
-        return self.year == other.year &&
-                self.month.number() == other.month.number() &&
-                self.day == other.day
     }
 }
 

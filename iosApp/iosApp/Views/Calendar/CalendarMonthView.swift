@@ -72,7 +72,7 @@ struct CalendarMonthView: View {
                     CalendarDaySection(
                         date: selectedDate,
                         items: state.items[selectedDate] ?? [],
-                        isToday: selectedDate.isEqual(state.today),
+                        isToday: selectedDate == state.today,
                         instances: instances,
                         onItemClick: onItemClick
                     )
