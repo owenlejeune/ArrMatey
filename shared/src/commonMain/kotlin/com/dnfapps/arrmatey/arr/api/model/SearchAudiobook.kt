@@ -110,6 +110,8 @@ data class SearchAudiobook(
         get() = "Search Result"
 
     override fun setMonitored(monitored: Boolean): ArrMedia = this
+    override fun copyWithNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
+        copy(rootFolderPath = rootFolderPath)
     override val isMissing: Boolean
         get() = true
 

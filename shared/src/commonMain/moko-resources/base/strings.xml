@@ -175,6 +175,8 @@
     <string name="genres">Genres</string>
     <string name="path">Path</string>
     <string name="relative_path">Relative Path</string>
+    <string name="move_files">Move files</string>
+    <string name="edit_path">Edit Path</string>
     <string name="error">Error</string>
     <string name="relevance">Relevance</string>
     <string name="quality_profile">Quality profile</string>

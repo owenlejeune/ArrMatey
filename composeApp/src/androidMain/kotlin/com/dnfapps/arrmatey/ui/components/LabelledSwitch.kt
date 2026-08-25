@@ -4,13 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -23,12 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.navigation.SettingsScreen
-import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -37,13 +30,15 @@ fun LabelledSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    sublabel: String? = null
+    sublabel: String? = null,
+    enabled: Boolean = true
 ) {
     Row(
         modifier
             .fillMaxWidth()
             .selectable(
                 selected = checked,
+                enabled = enabled,
                 onClick = { onCheckedChange(!checked) },
                 role = Role.Switch
             ),
@@ -58,21 +53,24 @@ fun LabelledSwitch(
                 text = label,
                 style = MaterialTheme.typography.titleMediumEmphasized,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
             sublabel?.let {
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                 )
             }
         }
 
         Switch(
             checked = checked,
-            onCheckedChange = null
+            onCheckedChange = null,
+            enabled = enabled
         )
     }
 }
@@ -84,7 +82,8 @@ fun LargeLabelledSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    sublabel: String? = null
+    sublabel: String? = null,
+    enabled: Boolean = true
 ) {
     Card(
         shape = MaterialTheme.shapes.extraLarge,
@@ -92,11 +91,12 @@ fun LargeLabelledSwitch(
             .fillMaxWidth()
             .selectable(
                 selected = checked,
+                enabled = enabled,
                 onClick = { onCheckedChange(!checked) },
                 role = Role.Switch
             ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (enabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -129,6 +129,7 @@ fun LargeLabelledSwitch(
             Switch(
                 checked = checked,
                 onCheckedChange = null,
+                enabled = enabled,
                 thumbContent = {
                     if (checked) {
                         Icon(

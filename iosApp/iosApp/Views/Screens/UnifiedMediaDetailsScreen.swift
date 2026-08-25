@@ -14,6 +14,7 @@ struct UnifiedMediaDetailsScreen: View {
     
     @State private var showConfirmSheet = false
     @State private var showEditSheet = false
+    @State private var showEditPathSheet = false
     @State private var showAddSheet = false
     @State private var editAlbum: ArrAlbum? = nil
     
@@ -422,8 +423,8 @@ extension UnifiedMediaDetailsScreen {
             InfoItem(label: MR.strings().status.localized(), value: series.status.resource.localized()),
             InfoItem(label: MR.strings().series_type.localized(), value: series.seriesType.name),
             InfoItem(label: MR.strings().size_on_disk.localized(), value: series.fileSize.bytesAsFileSizeString()),
-            InfoItem(label: MR.strings().root_folder.localized(), value: series.rootFolderPath ?? unknown),
-            InfoItem(label: MR.strings().path.localized(), value: series.path ?? unknown),
+            InfoItem(label: MR.strings().root_folder.localized(), value: series.rootFolderPath ?? unknown, onClick: { showEditPathSheet = true }),
+            InfoItem(label: MR.strings().path.localized(), value: series.path ?? unknown, onClick: { showEditPathSheet = true }),
             InfoItem(label: MR.strings().new_seasons.localized(), value: monitorLabel),
             InfoItem(label: MR.strings().season_folders.localized(), value: seasonFolderLabel),
             InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
@@ -439,8 +440,8 @@ extension UnifiedMediaDetailsScreen {
         var info: [InfoItem] = [
             InfoItem(label: MR.strings().status.localized(), value: movie.status.resource.localized()),
             InfoItem(label: MR.strings().minimum_availability.localized(), value: movie.minimumAvailability.name),
-            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
-            InfoItem(label: MR.strings().path.localized(), value: movie.path ?? unknown)
+            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue, onClick: { showEditPathSheet = true }),
+            InfoItem(label: MR.strings().path.localized(), value: movie.path ?? unknown, onClick: { showEditPathSheet = true })
         ]
         if let inCinemas = movie.inCinemas?.format(pattern: "MMM d, yyyy") {
             info.append(InfoItem(label: MR.strings().in_cinemas.localized(), value: inCinemas))
@@ -465,8 +466,8 @@ extension UnifiedMediaDetailsScreen {
         return [
             InfoItem(label: MR.strings().status.localized(), value: artist.status.resource.localized()),
             InfoItem(label: MR.strings().size_on_disk.localized(), value: artist.fileSize.bytesAsFileSizeString()),
-            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
-            InfoItem(label: MR.strings().path.localized(), value: artist.path ?? unknown),
+            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue, onClick: { showEditPathSheet = true }),
+            InfoItem(label: MR.strings().path.localized(), value: artist.path ?? unknown, onClick: { showEditPathSheet = true }),
             InfoItem(label: MR.strings().new_albums.localized(), value: monitorLabel),
             InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
             InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
@@ -482,8 +483,8 @@ extension UnifiedMediaDetailsScreen {
         return [
             InfoItem(label: MR.strings().status.localized(), value: author.status.resource.localized()),
             InfoItem(label: MR.strings().size_on_disk.localized(), value: author.fileSize.bytesAsFileSizeString()),
-            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
-            InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown),
+            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue, onClick: { showEditPathSheet = true }),
+            InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown, onClick: { showEditPathSheet = true }),
             InfoItem(label: MR.strings().new_books.localized(), value: monitorLabel),
             InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
             InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
@@ -503,7 +504,7 @@ extension UnifiedMediaDetailsScreen {
             info.append(InfoItem(label: MR.strings().language.localized(), value: language.capitalized))
         }
         info.append(InfoItem(label: MR.strings().size_on_disk.localized(), value: audiobook.fileSize.bytesAsFileSizeString()))
-        info.append(InfoItem(label: MR.strings().path.localized(), value: audiobook.path ?? unknown))
+        info.append(InfoItem(label: MR.strings().path.localized(), value: audiobook.path ?? unknown, onClick: { showEditPathSheet = true }))
         return info
     }
 }
@@ -608,6 +609,22 @@ extension UnifiedMediaDetailsScreen {
                 )
             default: EmptyView()
             }
+        } else {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    fileprivate var editPathSheetContent: some View {
+        if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess, let arrMedia = success.arrMedia {
+            EditPathView(
+                item: arrMedia,
+                rootFolders: viewModel.rootFolders,
+                onEdit: { updatedItem, moveFiles in
+                    viewModel.editItem(item: updatedItem, moveFiles: moveFiles)
+                }
+            )
+            .presentationDetents([.medium])
         } else {
             EmptyView()
         }
@@ -1291,6 +1308,7 @@ fileprivate struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .sheet(isPresented: $showEditSheet) { screen.editSheetContent }
+            .sheet(isPresented: $showEditPathSheet) { screen.editPathSheetContent }
             .sheet(isPresented: $showAddSheet) { screen.addSheetContent }
             .sheet(isPresented: $showConfirmSheet) { screen.confirmSheetContent }
             .sheet(item: $editAlbum) { screen.editAlbumSheetContent($0) }

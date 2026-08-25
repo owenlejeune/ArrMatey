@@ -118,6 +118,7 @@ import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAlbumSheet
 import com.dnfapps.arrmatey.ui.sheets.EditMediaSheet
+import com.dnfapps.arrmatey.ui.sheets.EditPathSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrReportIssueSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrRequestSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
@@ -164,6 +165,7 @@ fun UnifiedMediaDetailsScreen(
 
     var confirmDelete by remember { mutableStateOf(false) }
     var showEditSheet by remember { mutableStateOf(false) }
+    var showEditPathSheet by remember { mutableStateOf(false) }
     var showAddSheet by remember { mutableStateOf(false) }
     var moveFilesItem by remember { mutableStateOf<ArrMedia?>(null) }
     var confirmDeleteSeasonNumber by remember { mutableStateOf<Int?>(null) }
@@ -594,7 +596,7 @@ fun UnifiedMediaDetailsScreen(
                                     SeerrCreditsSection(credits) { onPersonClick(it) }
                                 }
 
-                                val arrInfoItems = buildArrInfoItems(state, qualityProfiles, tags)
+                                val arrInfoItems = buildArrInfoItems(state, qualityProfiles, tags, onEditPath = { showEditPathSheet = true })
                                 val seerrInfoItems = buildSeerrInfoItems(state)
                                 val showBothCards = arrInfoItems.isNotEmpty() && seerrInfoItems.isNotEmpty()
 
@@ -823,6 +825,21 @@ fun UnifiedMediaDetailsScreen(
                                     viewModel.declineRequest(requestId)
                                     viewModel.hideViewRequestSheet()
                                 }
+                            )
+                        }
+                    }
+
+                    if (showEditPathSheet) {
+                        state.arrMedia?.let { arrMedia ->
+                            EditPathSheet(
+                                item = arrMedia,
+                                rootFolders = rootFolders,
+                                editInProgress = editStatus is OperationStatus.InProgress,
+                                onEditItem = { updatedItem, moveFiles ->
+                                    viewModel.editItem(updatedItem, moveFiles = moveFiles)
+                                    showEditPathSheet = false
+                                },
+                                onDismiss = { showEditPathSheet = false }
                             )
                         }
                     }

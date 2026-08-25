@@ -56,20 +56,28 @@ struct MediaInfoArea: View {
     
     @ViewBuilder
     private func infoCard(items: [InfoItem], instance: Instance?) -> some View {
-        VStack(spacing: 12) {
-            ForEach(Array(items), id: \.self) { info in
-                HStack(alignment: .center) {
-                    Text(info.label)
-                        .font(.system(size: 14))
-                    Spacer(minLength: 2.0)
-                    Text(info.value)
-                        .font(.system(size: 14))
-                        .foregroundColor(.themePrimary)
-                        .lineLimit(2)
-                        .truncationMode(.tail)
-                        .multilineTextAlignment(.trailing)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
+        VStack(spacing: 0) {
+            ForEach(items) { info in
+                Button(action: {
+                    info.onClick?()
+                }) {
+                    HStack(alignment: .center) {
+                        Text(info.label)
+                            .font(.system(size: 14))
+                            .foregroundColor(.primary)
+                        Spacer(minLength: 2.0)
+                        Text(info.value)
+                            .font(.system(size: 14))
+                            .foregroundColor(.themePrimary)
+                            .lineLimit(2)
+                            .truncationMode(.tail)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
                 }
+                .disabled(info.onClick == nil)
                 
                 if info != items.last || instance != nil {
                     Divider()
@@ -85,9 +93,9 @@ struct MediaInfoArea: View {
                         .foregroundColor(.secondary)
                     Spacer()
                 }
+                .padding(.top, 12)
             }
         }
-        .padding(.vertical, 12)
         .padding(.horizontal, 18)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)

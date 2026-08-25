@@ -96,6 +96,10 @@ sealed interface ArrMedia {
                 .takeUnless { it.isEmpty() }
         }
     }
+    fun copyWithNewRoot(rootFolderPath: String, currentRootFolderPath: String? = null): ArrMedia
+
+    fun findCurrentRoot(rootFolders: List<RootFolder>): RootFolder? =
+        rootFolders.firstOrNull { it.path == rootFolderPath }
 
     /**
      * Filtering props

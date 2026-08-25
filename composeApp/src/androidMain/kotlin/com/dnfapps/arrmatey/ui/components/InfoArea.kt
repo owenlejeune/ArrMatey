@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.Image
-import com.dnfapps.arrmatey.shared.MR
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,20 +17,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dnfapps.arrmatey.entensions.forEachIndexed
-import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.InfoItem
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
-
-import androidx.compose.ui.text.font.FontWeight
-import com.dnfapps.arrmatey.instances.model.Instance
 
 data class InfoCardData(
     val items: List<InfoItem>,
@@ -80,11 +77,19 @@ fun InfoAreaCard(
             if (header != null) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             }
-            infoItems.forEachIndexed { index, (key, value) ->
+            infoItems.forEachIndexed { index, item ->
+                val (key, value) = item
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (item.onClick != null) {
+                                Modifier.clickable { item.onClick.invoke() }
+                            } else Modifier
+                        )
+                        .padding(vertical = 4.dp)
                 ) {
                     Text(text = key, fontSize = 14.sp)
                     Text(

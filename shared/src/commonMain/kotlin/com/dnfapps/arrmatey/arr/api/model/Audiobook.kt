@@ -198,6 +198,27 @@ data class Audiobook(
         basePath = "${rootFolderPath}/${relativePath.trimStart('/')}"
     )
 
+    override fun findCurrentRoot(rootFolders: List<RootFolder>): RootFolder? =
+        rootFolders.firstOrNull { path?.startsWith(it.path) == true }
+
+    override fun copyWithNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia {
+        val currentPath = basePath ?: ""
+        val currentRoot = currentRootFolderPath ?: ""
+        val relativePath = if (currentRoot.isNotEmpty() && currentPath.startsWith(currentRoot)) {
+            currentPath.removePrefix(currentRoot).trimStart('/', '\\')
+        } else {
+            currentPath
+        }
+
+        val separator = if (rootFolderPath.contains('\\')) "\\" else "/"
+        val newPath = if (rootFolderPath.endsWith(separator) || relativePath.startsWith(separator)) {
+            rootFolderPath + relativePath
+        } else {
+            rootFolderPath + separator + relativePath
+        }
+        return copy(basePath = newPath)
+    }
+
     val releaseQuery: String
         get() = "$title $${authors.joinToString(" ")}"
 }
