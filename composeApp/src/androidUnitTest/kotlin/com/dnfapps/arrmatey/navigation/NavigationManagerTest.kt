@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.navigation
 
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
+import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import io.mockk.every
 import io.mockk.mockk
@@ -17,6 +18,7 @@ class NavigationManagerTest {
         every { overlayTab } returns MutableStateFlow(null)
     }
     private val tabManager = mockk<TabManager>()
+    private val instanceRepository = mockk<InstanceRepository>()
     
     private val navigationManager = NavigationManager(
         tabNavigators = emptyMap(),
@@ -27,7 +29,8 @@ class NavigationManagerTest {
         dashboard = mockk(),
         bazarr = mockk(),
         appState = appState,
-        tabManager = tabManager
+        tabManager = tabManager,
+        instanceRepository = instanceRepository
     )
 
     @Test
