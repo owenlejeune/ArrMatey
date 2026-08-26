@@ -496,6 +496,7 @@
     <string name="navigation_items_hidden">Hidden</string>
     <string name="customize_navigation">Customize Navigation</string>
     <string name="customize_navigation_description">Drag items to reorder your navigation bar. Items moved to the 'Drawer' section will be accessible via the drawer menu. You can have at most five items in the navigation bar, and must have at least one item. If there is only one item in the navigation bar section, the navigation bar will be hidden.</string>
+    <string name="remove_navigation_tab_confirm">Are you sure you want to remove this tab? It will be moved to the hidden section.</string>
 
     <!-- Shortcuts Configuration -->
     <string name="shortcuts_configuration">App shortcuts configuration</string>

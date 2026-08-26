@@ -2,36 +2,53 @@ package com.dnfapps.arrmatey.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
@@ -44,10 +61,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
@@ -70,15 +91,17 @@ import com.dnfapps.arrmatey.ui.tabs.CalendarTab
 import com.dnfapps.arrmatey.ui.tabs.DashboardTab
 import com.dnfapps.arrmatey.ui.tabs.DiscoverTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
-import com.dnfapps.arrmatey.ui.tabs.BazarrTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost
 import com.dnfapps.arrmatey.ui.tabs.UnifiedLibraryTab
 import com.dnfapps.arrmatey.utils.mokoString
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun HomeScreen(
@@ -184,6 +207,8 @@ fun HomeScreen(
             drawerContent = {
                 ModalDrawerSheet(drawerState = drawerState) {
                     DrawerContent(
+                        tabManager = tabManager,
+                        tabConfig = tabConfig,
                         drawerTabs = drawerTabs,
                         overlayTab = overlayTab,
                         useServiceNavIcons = useServiceNavIcons,
@@ -340,8 +365,11 @@ fun HomeScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DrawerContent(
+    tabManager: TabManager,
+    tabConfig: TabManager.TabConfiguration,
     useServiceNavIcons: Boolean,
     activityQueueIssuesCount: Int,
     drawerTabs: List<TabItem>,
@@ -350,8 +378,49 @@ private fun DrawerContent(
     onDrawerTabClick: (TabItem) -> Unit,
     onSettingsClick: () -> Unit
 ) {
+    var isEditMode by remember { mutableStateOf(false) }
+    var showHiddenSection by remember { mutableStateOf(false) }
+    var tabToHide by remember { mutableStateOf<TabItem?>(null) }
+
+    LaunchedEffect(showHiddenSection) {
+        if (showHiddenSection) {
+            delay(10.seconds)
+            showHiddenSection = false
+        }
+    }
+
+    if (tabToHide != null) {
+        AlertDialog(
+            onDismissRequest = { tabToHide = null },
+            title = { Text(mokoString(MR.strings.remove)) },
+            text = { Text(mokoString(MR.strings.remove_navigation_tab_confirm)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    tabToHide?.let { tabManager.hideTab(it) }
+                    tabToHide = null
+                }) {
+                    Text(mokoString(MR.strings.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { tabToHide = null }) {
+                    Text(mokoString(MR.strings.cancel))
+                }
+            }
+        )
+    }
+
     Column(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = {
+                        showHiddenSection = true
+                    }
+                )
+            }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         NavigationDrawerItem(
@@ -371,7 +440,7 @@ private fun DrawerContent(
                         else -> {}
                     }
                 },
-                selected = overlayTab == item,
+                selected = overlayTab == item && !isEditMode,
                 icon = {
                     when (item) {
                         is TabItem.Standard -> {
@@ -385,19 +454,108 @@ private fun DrawerContent(
                         else -> {}
                     }
                 },
-                onClick = { onDrawerTabClick(item) },
+                badge = {
+                    AnimatedVisibility(
+                        visible = isEditMode
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.VisibilityOff,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                },
+                onClick = {
+                    if (isEditMode) tabToHide = item
+                    else onDrawerTabClick(item) }
             )
         }
 
         Spacer(Modifier.weight(1f))
 
+        AnimatedVisibility(
+            visible = showHiddenSection && tabConfig.hiddenTabs.isNotEmpty(),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Text(
+                    text = mokoString(MR.strings.navigation_items_hidden),
+                    modifier = Modifier.padding(start = 12.dp, bottom = 4.dp)
+                )
+                tabConfig.hiddenTabs.forEach { item ->
+                    NavigationDrawerItem(
+                        label = {
+                            when (item) {
+                                is TabItem.Standard -> Text(mokoString(item.resource))
+                                is TabItem.CustomWebpage -> Text(item.name)
+                                else -> {}
+                            }
+                        },
+                        selected = false,
+                        icon = {
+                            when (item) {
+                                is TabItem.Standard -> {
+                                    TabItemIconView(item, useServiceNavIcons, activityQueueIssuesCount)
+                                }
+                                is TabItem.CustomWebpage -> {
+                                    Icon(Icons.Default.Language, contentDescription = null)
+                                }
+                                else -> {}
+                            }
+                        },
+                        onClick = {
+                            tabManager.restoreTab(item)
+                            showHiddenSection = false
+                        }
+                    )
+                }
+            }
+        }
+
         HorizontalDivider()
-        NavigationDrawerItem(
-            selected = overlayTab == TabItem.Settings,
-            icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-            label = { Text(mokoString(MR.strings.settings)) },
-            onClick = onSettingsClick
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            NavigationDrawerItem(
+                selected = overlayTab == TabItem.Settings,
+                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                label = { Text(mokoString(MR.strings.settings)) },
+                onClick = onSettingsClick,
+                modifier = Modifier.weight(1f)
+            )
+            Box(
+                modifier = Modifier.size(48.dp).clip(CircleShape).clickable {
+                    isEditMode = !isEditMode
+                },
+                contentAlignment = Alignment.Center
+            ) {
+                AnimatedContent(
+                    targetState = isEditMode,
+                    transitionSpec = {
+                        (fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.92f))
+                            .togetherWith(
+                                fadeOut(animationSpec = tween(220)) + scaleOut(targetScale = 0.92f)
+                            )
+                    },
+                    label = "IconTransition"
+                ) { isEditMode ->
+                    if (isEditMode) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

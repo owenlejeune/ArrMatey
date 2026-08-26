@@ -7,15 +7,16 @@ import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class TabManager(
-    preferencesStore: PreferencesStore,
+    private val preferencesStore: PreferencesStore,
     customWebpageRepository: CustomWebpageRepository
 ) {
     private val tabPreferencesFlow = preferencesStore.tabPreferences
@@ -46,6 +47,34 @@ class TabManager(
             started = SharingStarted.Eagerly,
             initialValue = TabConfiguration(isInitialValue = true)
         )
+
+    fun hideTab(item: TabItem) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val currentPrefs = tabPreferencesFlow.first()
+            if (item.key !in currentPrefs.orderedRemovedKeys) {
+                val newPrefs = currentPrefs.copy(
+                    orderedVisibleKeys = currentPrefs.orderedVisibleKeys - item.key,
+                    orderedHiddenKeys = currentPrefs.orderedHiddenKeys - item.key,
+                    orderedRemovedKeys = currentPrefs.orderedRemovedKeys + item.key
+                )
+                preferencesStore.updateTabPreferences(newPrefs)
+            }
+        }
+    }
+
+    fun restoreTab(item: TabItem) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val currentPrefs = tabPreferencesFlow.first()
+            if (item.key in currentPrefs.orderedRemovedKeys) {
+                val newPrefs = currentPrefs.copy(
+                    orderedVisibleKeys = currentPrefs.orderedVisibleKeys,
+                    orderedHiddenKeys = currentPrefs.orderedHiddenKeys + item.key,
+                    orderedRemovedKeys = currentPrefs.orderedRemovedKeys - item.key
+                )
+                preferencesStore.updateTabPreferences(newPrefs)
+            }
+        }
+    }
 
     fun getVisibleTabs(): Flow<List<TabItem>> {
         return combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
