@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.runBlocking
 
 /**
  * Orchestrates navigation across the application.
@@ -20,7 +21,8 @@ class NavigationManager(
     val dashboard: DashboardTabNavigator,
     val bazarr: BazarrTabNavigator,
     private val appState: AppState,
-    private val tabManager: TabManager
+    private val tabManager: TabManager,
+    private val instanceRepository: com.dnfapps.arrmatey.database.InstanceRepository
 ) {
     // Reactive UI state properties
     val drawerExpandedState: StateFlow<Boolean> = appState.drawerExpanded
@@ -136,5 +138,55 @@ class NavigationManager(
 
     fun openSeerrDetails(tmdbId: Long, requestType: RequestType) {
         discover.toDetails(tmdbId = tmdbId, requestType = requestType)
+    }
+
+    fun navigateToMediaDetails(tmdbId: Long, requestType: RequestType) {
+        val tabConfig = tabManager.tabConfiguration.value
+        val visibleTabs = tabConfig.visibleTabs
+        val drawerTabs = tabConfig.drawerTabs
+
+        val selectedTab = when (requestType) {
+            RequestType.Movie -> {
+                when {
+                    visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                    visibleTabs.any { it == TabItem.Standard.MOVIES } -> TabItem.Standard.MOVIES
+                    visibleTabs.any { it == TabItem.Standard.DISCOVER } -> TabItem.Standard.DISCOVER
+                    drawerTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                    drawerTabs.any { it == TabItem.Standard.MOVIES } -> TabItem.Standard.MOVIES
+                    else -> TabItem.Standard.DISCOVER
+                }
+            }
+            RequestType.Tv -> {
+                when {
+                    visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                    visibleTabs.any { it == TabItem.Standard.SHOWS } -> TabItem.Standard.SHOWS
+                    visibleTabs.any { it == TabItem.Standard.DISCOVER } -> TabItem.Standard.DISCOVER
+                    drawerTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                    drawerTabs.any { it == TabItem.Standard.SHOWS } -> TabItem.Standard.SHOWS
+                    else -> TabItem.Standard.DISCOVER
+                }
+            }
+            else -> {
+                when {
+                    visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                    visibleTabs.any { it == TabItem.Standard.DISCOVER } -> TabItem.Standard.DISCOVER
+                    drawerTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                    else -> TabItem.Standard.DISCOVER
+                }
+            }
+        }
+
+        navigateToTab(selectedTab)
+        navigatorFor<NavKey>(selectedTab).toDetails(tmdbId = tmdbId, requestType = requestType)
+    }
+
+    fun navigateToPersonDetails(personId: Long) {
+        val hasSeerr = runBlocking { instanceRepository.getInstancesByType(InstanceType.Seerr).isNotEmpty() }
+        navigateToTab(TabItem.Standard.DISCOVER)
+        if (hasSeerr) {
+            discover.toPersonDetails(personId)
+        } else {
+            discover.toPersonWebView("https://www.themoviedb.org/person/$personId")
+        }
     }
 }

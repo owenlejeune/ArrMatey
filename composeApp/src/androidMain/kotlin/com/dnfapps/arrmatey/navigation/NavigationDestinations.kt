@@ -33,6 +33,7 @@ sealed interface MediaScreen : NavKey {
     data class BookRelease(val bookId: Long): MediaScreen
     data class AudiobookRelease(val audiobookId: Long?, val query: String): MediaScreen
     data class PersonDetails(val personId: Long): MediaScreen
+    data class PersonWebView(val url: String): MediaScreen
 }
 
 sealed interface ArrScreen : NavKey {

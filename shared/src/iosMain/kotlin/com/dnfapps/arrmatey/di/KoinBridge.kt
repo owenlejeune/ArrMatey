@@ -33,6 +33,7 @@ import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
+import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
@@ -43,6 +44,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
+import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
@@ -91,7 +93,7 @@ object KoinBridge: KoinComponent {
     fun getRequestsViewModel(): RequestsViewModel =
         getKoin().get()
 
-    fun getTrendingViewModel(): com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel =
+    fun getTrendingViewModel(): TrendingViewModel =
         getKoin().get()
 
     fun getSeerrMediaDetailsViewModel(tmdbId: Long, mediaType: RequestType): SeerrMediaDetailsViewModel =
@@ -170,6 +172,9 @@ object KoinBridge: KoinComponent {
         getKoin().get()
 
     fun getUnifiedLibraryViewModel(): UnifiedLibraryViewModel =
+        getKoin().get()
+
+    fun getInstanceRepository(): InstanceRepository =
         getKoin().get()
 
 }

@@ -6,9 +6,9 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.toAlbumRelease
 import com.dnfapps.arrmatey.navigation.toAudiobookFiles
 import com.dnfapps.arrmatey.navigation.toAudiobookRelease
@@ -22,6 +22,7 @@ import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toPreview
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.ArrSearchScreen
 import com.dnfapps.arrmatey.ui.screens.AudiobookFilesScreen
 import com.dnfapps.arrmatey.ui.screens.AuthorFilesScreen
@@ -32,6 +33,8 @@ import com.dnfapps.arrmatey.ui.screens.MediaPreviewScreen
 import com.dnfapps.arrmatey.ui.screens.MovieFilesScreen
 import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
+import com.dnfapps.arrmatey.ui.screens.WebViewScreen
+import com.dnfapps.arrmatey.utils.mokoString
 
 fun EntryProviderScope<NavKey>.mediaNavEntries(
     navigation: Navigator<*>,
@@ -75,6 +78,16 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onMediaClick = { tmdbId, type ->
                 navigation.toDetails(tmdbId = tmdbId, requestType = type)
             }
+        )
+    }
+    entry<MediaScreen.PersonWebView> { details ->
+        val navManager = navigationManager
+        WebViewScreen(
+            url = details.url,
+            bannerMessage = mokoString(MR.strings.setup_seerr_for_in_app_details),
+            onBannerClick = { navManager.openNewInstanceScreen(InstanceType.Seerr) },
+            wideRailIsVisible = isExpanded,
+            onBack = { navigation.popBackStack() }
         )
     }
     entry<MediaScreen.MovieReleases> { params ->

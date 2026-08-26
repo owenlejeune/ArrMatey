@@ -1,6 +1,8 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import android.content.Intent
+import android.content.pm.verify.domain.DomainVerificationManager
+import android.content.pm.verify.domain.DomainVerificationUserState
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -23,11 +25,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
@@ -99,6 +103,7 @@ import com.mikepenz.aboutlibraries.util.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -462,6 +467,72 @@ fun SettingsScreen(
                             )
                         },
                         onClick = { viewModel.toggleInstanceSwitcher() }
+                    )
+                )
+            )
+
+            SettingsGroup(
+                title = mokoString(MR.strings.deep_links_title),
+                items = listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Link),
+                        title = mokoString(MR.strings.tmdb_links),
+                        subtitle = mokoString(MR.strings.tmdb_links_description),
+                        onClick = {
+                            val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                Intent(
+                                    Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                                    "package:${context.packageName}".toUri()
+                                )
+                            } else {
+                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.fromParts("package", context.packageName, null)
+                                }
+                            }
+                            context.startActivity(intent)
+                        },
+                        trailingContent = {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                val isVerified = remember(context) {
+                                    val manager = context.getSystemService(DomainVerificationManager::class.java)
+                                    val userState = manager.getDomainVerificationUserState(context.packageName)
+                                    userState?.hostToStateMap?.entries?.any { (host, state) ->
+                                        host.contains("themoviedb.org") && (state == DomainVerificationUserState.DOMAIN_STATE_VERIFIED || state == DomainVerificationUserState.DOMAIN_STATE_SELECTED)
+                                    } == true
+                                }
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        text = if (isVerified) mokoString(MR.strings.links_verified) else mokoString(MR.strings.links_not_verified),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isVerified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                    )
+                                    if (isVerified) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.ChevronRight,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
                     )
                 )
             )

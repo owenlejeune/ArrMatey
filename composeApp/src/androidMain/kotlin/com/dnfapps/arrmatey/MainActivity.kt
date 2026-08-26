@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.toSearch
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
@@ -85,6 +86,28 @@ class MainActivity : ComponentActivity() {
                         navigator.popToRoot()
                         navigator.toSearch()
                         navigationManager.navigateToTab(navigationManager.tabFor(it))
+                    }
+                }
+                Intent.ACTION_VIEW -> {
+                    val data = intent.data ?: return
+                    val pathSegments = data.pathSegments
+                    if (pathSegments.size >= 2) {
+                        val type = pathSegments[0] // "movie", "tv", or "person"
+                        val idWithSlug = pathSegments[1]
+                        val tmdbId = idWithSlug.split("-").firstOrNull()?.toLongOrNull()
+
+                        if (type == "person") {
+                            tmdbId?.let { navigationManager.navigateToPersonDetails(it) }
+                        } else {
+                            val requestType = when (type) {
+                                "movie" -> RequestType.Movie
+                                "tv" -> RequestType.Tv
+                                else -> null
+                            }
+                            if (tmdbId != null && requestType != null) {
+                                navigationManager.navigateToMediaDetails(tmdbId, requestType)
+                            }
+                        }
                     }
                 }
             }

@@ -134,6 +134,7 @@ fun Navigator<*>.toAlbumRelease(albumId: Long, artistId: Long? = null) = nav().n
 fun Navigator<*>.toBookRelease(bookId: Long) = nav().navigateTo(MediaScreen.BookRelease(bookId))
 fun Navigator<*>.toAudiobookRelease(audiobookId: Long?, query: String) = nav().navigateTo(MediaScreen.AudiobookRelease(audiobookId, query))
 fun Navigator<*>.toPersonDetails(personId: Long) = nav().navigateTo(MediaScreen.PersonDetails(personId))
+fun Navigator<*>.toPersonWebView(url: String) = nav().navigateTo(MediaScreen.PersonWebView(url))
 
 /**
  * Domain-specific navigation extensions for Settings feature set.

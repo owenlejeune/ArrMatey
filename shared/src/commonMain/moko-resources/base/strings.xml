@@ -19,6 +19,8 @@
     <string name="home">Home</string>
     <string name="requests">Requests</string>
     <string name="discover">Discover</string>
+    <string name="deep_links">Deep Links</string>
+    <string name="setup_seerr_for_in_app_details">Setup Seerr (Overseerr/Jellyseerr) to view person and media details directly in the app.</string>
     <string name="issues">Issues</string>
 
     <string name="type_series">series</string>
@@ -40,6 +42,13 @@
     <string name="popular_series">Popular Series</string>
     <string name="upcoming_movies">Upcoming Movies</string>
     <string name="upcoming_series">Upcoming Series</string>
+    <string name="deep_links_title">Deep Links</string>
+    <string name="deep_links_description">Configure how the app handles web links from external sources.</string>
+    <string name="tmdb_links">TMDB Links</string>
+    <string name="tmdb_links_description">Opening TMDB links directly in-app provides a better experience. On Android 12+, this must be enabled manually in system settings.</string>
+    <string name="configure_links">Configure Links</string>
+    <string name="links_verified">Links Verified</string>
+    <string name="links_not_verified">Links Not Verified</string>
 
     <!-- Messages -->
     <string name="confirm_delete_instance">Are you sure you want to delete %1$s?</string>
