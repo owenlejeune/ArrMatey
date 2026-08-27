@@ -241,7 +241,7 @@ struct EpisodeSubtitlesRow: View {
     private var existingSubs: [BazarrSubtitle] {
         var seen = Set<String>()
         return bazarrEpisode.subtitles.filter { !$0.isEmbedded }.filter { sub in
-            let key = "\(sub.code2.lowercased())_\(sub.hi)_\(sub.forced)"
+            let key = "\((sub.code2 ?? "").lowercased())_\(sub.hi)_\(sub.forced)"
             if seen.contains(key) { return false }
             seen.insert(key)
             return true
@@ -251,7 +251,7 @@ struct EpisodeSubtitlesRow: View {
     private var missingSubs: [BazarrSubtitleLanguage] {
         var seen = Set<String>()
         return bazarrEpisode.missingSubtitles.filter { missing in
-            let key = "\(missing.code2.lowercased())_\(missing.hi)_\(missing.forced)"
+            let key = "\((missing.code2 ?? "").lowercased())_\(missing.hi)_\(missing.forced)"
             if seen.contains(key) { return false }
             seen.insert(key)
             return true
@@ -298,14 +298,16 @@ struct EpisodeSubtitlesRow: View {
     }
     
     private func subtitleLabel(_ subtitle: BazarrSubtitle) -> String {
-        var label = subtitle.code2.isEmpty ? subtitle.name : subtitle.code2.uppercased()
+        let code2 = subtitle.code2 ?? ""
+        var label = code2.isEmpty ? subtitle.name : code2.uppercased()
         if subtitle.hi { label += " · HI" }
         if subtitle.forced { label += " · Forced" }
         return label
     }
     
     private func missingLabel(_ lang: BazarrSubtitleLanguage) -> String {
-        var label = lang.code2.isEmpty ? lang.name : lang.code2.uppercased()
+        let code2 = lang.code2 ?? ""
+        var label = code2.isEmpty ? lang.name : code2.uppercased()
         if lang.hi { label += " · HI" }
         if lang.forced { label += " · Forced" }
         return label

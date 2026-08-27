@@ -218,7 +218,8 @@ private struct MissingSubtitleRow: View {
 }
 
 private func subtitleLabel(_ subtitle: BazarrSubtitle) -> String {
-    var label = subtitle.code2.isEmpty ? subtitle.name : subtitle.code2.uppercased()
+    let code2 = subtitle.code2 ?? ""
+    var label = code2.isEmpty ? subtitle.name : code2.uppercased()
     if subtitle.forced { label += " · Forced" }
     if subtitle.hi { label += " · HI" }
     return label

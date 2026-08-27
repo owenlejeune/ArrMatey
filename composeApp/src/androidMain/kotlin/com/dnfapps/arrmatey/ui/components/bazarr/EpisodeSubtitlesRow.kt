@@ -31,8 +31,8 @@ fun EpisodeSubtitlesRow(
 ) {
     val existingSubs = bazarrEpisode.subtitles
         .filter { !it.isEmbedded }
-        .distinctBy { it.code2.lowercase() to it.hi to it.forced }
-    val missingSubs = bazarrEpisode.missingSubtitles.distinctBy { it.code2.lowercase() to it.hi to it.forced }
+        .distinctBy { it.code2.orEmpty().lowercase() to it.hi to it.forced }
+    val missingSubs = bazarrEpisode.missingSubtitles.distinctBy { it.code2.orEmpty().lowercase() to it.hi to it.forced }
 
     if (existingSubs.isEmpty() && missingSubs.isEmpty()) return
 
@@ -51,7 +51,7 @@ fun EpisodeSubtitlesRow(
 
         existingSubs.forEach { sub ->
             val label = buildString {
-                append(sub.code2.uppercase().ifBlank { sub.name })
+                append(sub.code2.orEmpty().uppercase().ifBlank { sub.name })
                 if (sub.hi) append(" · HI")
                 if (sub.forced) append(" · Forced")
             }

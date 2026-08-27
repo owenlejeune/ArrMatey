@@ -8,8 +8,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BazarrSubtitleLanguage(
     val name: String = "",
-    val code2: String = "",
-    val code3: String = "",
+    val code2: String? = null,
+    val code3: String? = null,
     val forced: Boolean = false,
     val hi: Boolean = false
 )

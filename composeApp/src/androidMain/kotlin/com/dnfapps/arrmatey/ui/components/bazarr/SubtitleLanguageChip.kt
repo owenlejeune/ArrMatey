@@ -41,7 +41,7 @@ fun SubtitleLanguageChip(
 }
 
 fun BazarrSubtitleLanguage.chipLabel(): String = buildString {
-    append(code2.uppercase().ifBlank { name })
+    append(code2.orEmpty().uppercase().ifBlank { name })
     if (forced) append(" · Forced")
     if (hi) append(" · HI")
 }

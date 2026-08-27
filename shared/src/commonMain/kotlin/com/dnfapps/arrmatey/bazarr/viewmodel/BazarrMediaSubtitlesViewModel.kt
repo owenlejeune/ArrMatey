@@ -97,10 +97,10 @@ class BazarrMediaSubtitlesViewModel(
             _operationState.value = OperationStatus.InProgress
             val op = when (target) {
                 is BazarrMediaTarget.Episode -> repo.autoSearchEpisodeSubtitles(
-                    target.seriesId, target.episodeId, language.code2, language.forced, language.hi
+                    target.seriesId, target.episodeId, language.code2.orEmpty(), language.forced, language.hi
                 )
                 is BazarrMediaTarget.Movie -> repo.autoSearchMovieSubtitles(
-                    target.radarrId, language.code2, language.forced, language.hi
+                    target.radarrId, language.code2.orEmpty(), language.forced, language.hi
                 )
             }
             op
@@ -118,10 +118,10 @@ class BazarrMediaSubtitlesViewModel(
             _operationState.value = OperationStatus.InProgress
             val op = when (target) {
                 is BazarrMediaTarget.Episode -> repo.deleteEpisodeSubtitle(
-                    target.seriesId, target.episodeId, subtitle.code2, subtitle.forced, subtitle.hi, path
+                    target.seriesId, target.episodeId, subtitle.code2.orEmpty(), subtitle.forced, subtitle.hi, path
                 )
                 is BazarrMediaTarget.Movie -> repo.deleteMovieSubtitle(
-                    target.radarrId, subtitle.code2, subtitle.forced, subtitle.hi, path
+                    target.radarrId, subtitle.code2.orEmpty(), subtitle.forced, subtitle.hi, path
                 )
             }
             op

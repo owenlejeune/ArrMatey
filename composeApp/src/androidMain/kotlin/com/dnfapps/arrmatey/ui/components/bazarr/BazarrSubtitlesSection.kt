@@ -213,7 +213,7 @@ private fun EmbeddedSubtitlesCard(
             embedded.forEach { subtitle ->
                 SubtitleLanguageChip(
                     label = buildString {
-                        append(subtitle.code2.uppercase().ifBlank { subtitle.name })
+                        append(subtitle.code2.orEmpty().uppercase().ifBlank { subtitle.name })
                         if (subtitle.forced) append(" · Forced")
                         if (subtitle.hi) append(" · HI")
                     }
@@ -247,7 +247,7 @@ private fun PresentSubtitleRow(
             )
             SubtitleLanguageChip(
                 label = buildString {
-                    append(subtitle.code2.uppercase().ifBlank { subtitle.name })
+                    append(subtitle.code2.orEmpty().uppercase().ifBlank { subtitle.name })
                     if (subtitle.forced) append(" · Forced")
                     if (subtitle.hi) append(" · HI")
                 }

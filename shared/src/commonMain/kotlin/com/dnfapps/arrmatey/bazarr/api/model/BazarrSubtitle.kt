@@ -11,8 +11,8 @@ import kotlinx.serialization.Serializable
 data class BazarrSubtitle(
     val path: String? = null,
     val name: String = "",
-    val code2: String = "",
-    val code3: String = "",
+    val code2: String? = null,
+    val code3: String? = null,
     val forced: Boolean = false,
     val hi: Boolean = false,
     @SerialName("file_size") val fileSize: Long = 0

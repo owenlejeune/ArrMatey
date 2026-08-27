@@ -192,7 +192,7 @@ private struct BazarrEpisodeRow: View {
                     SubtitleChip(label: lang.name.uppercased())
                 }
 
-                ForEach(Array(Set(episode.subtitles.map { "\($0.code2.uppercased())\($0.hi ? ":HI" : "")" }).sorted()), id: \.self) { sub in
+                ForEach(Array(Set(episode.subtitles.map { "\(($0.code2 ?? "").uppercased())\($0.hi ? ":HI" : "")" }).sorted()), id: \.self) { sub in
                     Text(sub)
                         .font(.caption2)
                         .padding(.horizontal, 6)

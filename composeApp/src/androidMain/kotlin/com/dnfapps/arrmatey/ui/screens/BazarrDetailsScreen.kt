@@ -420,7 +420,7 @@ private fun SubtitleItem(
                 ) {
                     Text(
                         text = buildString {
-                            append(subtitle.code2.uppercase())
+                            append(subtitle.code2.orEmpty().uppercase().ifBlank { subtitle.name })
                             if (subtitle.hi) append(" HI")
                         },
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -562,11 +562,11 @@ private fun BazarrEpisodeItem(
                 }
 
                 episode.subtitles
-                    .distinctBy { it.code2 to it.hi }
+                    .distinctBy { it.code2.orEmpty() to it.hi }
                     .forEach { sub ->
                     LanguageTag(
                         text = buildString {
-                            append(sub.code2.uppercase())
+                            append(sub.code2.orEmpty().uppercase().ifBlank { sub.name })
                             if (sub.hi) append(":HI")
                         },
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,

@@ -397,7 +397,8 @@ struct SubtitleChip: View {
 }
 
 func chipLabel(_ language: BazarrSubtitleLanguage) -> String {
-    var label = language.code2.isEmpty ? language.name : language.code2.uppercased()
+    let code2 = language.code2 ?? ""
+    var label = code2.isEmpty ? language.name : code2.uppercased()
     if language.forced { label += " · Forced" }
     if language.hi { label += " · HI" }
     return label
