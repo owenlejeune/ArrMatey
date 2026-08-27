@@ -54,8 +54,11 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
@@ -110,6 +113,224 @@ fun <T : ArrMedia> MediaList(
                 posterRadius = posterRadius,
                 multiSelectState = multiSelectState
             )
+        }
+    }
+}
+
+@Composable
+fun SearchResultList(
+    items: List<SearchResult>,
+    onItemClick: (SearchResult) -> Unit,
+    modifier: Modifier = Modifier,
+    includeOverview: Boolean = true
+) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(vertical = 12.dp)
+    ) {
+        items(items, key = { it.id }) { item ->
+            SearchResultItem(
+                item = item,
+                onItemClick = onItemClick,
+                includeOverview = includeOverview
+            )
+        }
+    }
+}
+
+@Composable
+fun SearchResultItem(
+    item: SearchResult,
+    onItemClick: (SearchResult) -> Unit,
+    includeOverview: Boolean = true
+) {
+    when (item) {
+        is SearchResult.ArrMediaResult -> {
+            MediaItem(
+                aspectRatio = AspectRatio.Poster,
+                item = item.media,
+                onItemClick = { onItemClick(item) },
+                includeOverview = includeOverview,
+                isActive = false
+            )
+        }
+        is SearchResult.SeerrMediaResult -> {
+            SeerrMediaItem(
+                result = item,
+                onItemClick = onItemClick,
+                includeOverview = includeOverview
+            )
+        }
+        is SearchResult.SeerrPersonResult -> {
+            SeerrPersonItem(
+                result = item,
+                onItemClick = onItemClick,
+                includeOverview = includeOverview
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SeerrMediaItem(
+    result: SearchResult.SeerrMediaResult,
+    onItemClick: (SearchResult) -> Unit,
+    includeOverview: Boolean = true
+) {
+    val item = result.result
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .combinedClickable(onClick = { onItemClick(result) }),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            BannerView(
+                bannerModel = item.fullBackdropPath?.let { rememberRemoteImageData(it) },
+                modifier = Modifier.matchParentSize()
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(TranslucentBlack)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                ) {
+                    PosterItem(
+                        item = item,
+                        aspectRatio = AspectRatio.Poster,
+                        modifier = Modifier.height(defaultHeight)
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentHeight(),
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        Text(
+                            text = buildString {
+                                append(item.title ?: item.name ?: mokoString(MR.strings.unknown))
+                                (item.releaseDate ?: item.firstAirDate)?.take(4)?.let { year ->
+                                    append(" ($year)")
+                                }
+                            },
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        
+                        item.overview?.let {
+                            Text(
+                                text = it,
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 14.sp,
+                                lineHeight = 18.sp,
+                                maxLines = 3,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SeerrPersonItem(
+    result: SearchResult.SeerrPersonResult,
+    onItemClick: (SearchResult) -> Unit,
+    includeOverview: Boolean = true
+) {
+    val item = result.result
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .combinedClickable(onClick = { onItemClick(result) }),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            PosterItem(
+                item = item,
+                aspectRatio = AspectRatio.Poster,
+                modifier = Modifier.height(defaultHeight)
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentHeight(),
+                verticalArrangement = Arrangement.Top
+            ) {
+                Text(
+                    text = item.name ?: mokoString(MR.strings.unknown),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                
+                // Known for
+                if (item.knownFor.isNotEmpty()) {
+                    val knownFor = item.knownFor.joinToString(", ") { it.title ?: it.name ?: "" }
+                    Text(
+                        text = "Known for: $knownFor",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                item.overview?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
         }
     }
 }

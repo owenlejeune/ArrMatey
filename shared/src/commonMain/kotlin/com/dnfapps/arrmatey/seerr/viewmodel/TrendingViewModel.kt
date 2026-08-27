@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
+import com.dnfapps.arrmatey.discover.model.SearchResult
+import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -40,7 +42,8 @@ class TrendingViewModel(
     private val getDiscoverTvUseCase: GetDiscoverTvUseCase,
     private val getUpcomingMoviesUseCase: GetUpcomingMoviesUseCase,
     private val getUpcomingTvUseCase: GetUpcomingTvUseCase,
-    private val searchSeerrUseCase: SearchSeerrUseCase
+    private val searchSeerrUseCase: SearchSeerrUseCase,
+    private val globalSearchUseCase: GlobalSearchUseCase
 ) : ViewModel() {
 
     private val seerrRepository: StateFlow<SeerrInstanceRepository?> = instanceManager.getSelectedSeerrRepository()
@@ -83,8 +86,11 @@ class TrendingViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _searchState = MutableStateFlow(PagedData<DiscoverResult>())
-    val searchState: StateFlow<PagedData<DiscoverResult>> = _searchState.asStateFlow()
+    private val _searchState = MutableStateFlow<List<SearchResult>>(emptyList())
+    val searchState: StateFlow<List<SearchResult>> = _searchState.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
     init {
         observeRepository()
@@ -160,8 +166,7 @@ class TrendingViewModel(
                     if (query.isNotEmpty()) {
                         performSearch(query)
                     } else {
-                        searchPagingController = null
-                        _searchState.value = PagedData()
+                        _searchState.value = emptyList()
                     }
                 }
         }
@@ -170,14 +175,9 @@ class TrendingViewModel(
     private fun performSearch(query: String) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            seerrRepository.value?.let { repo ->
-                val controller = searchSeerrUseCase.createPagingController(query, repo, viewModelScope)
-                searchPagingController = controller
-                controller.loadInitialPage()
-                controller.state.collect {
-                    _searchState.value = it
-                }
-            }
+            _isSearching.value = true
+            _searchState.value = globalSearchUseCase(query)
+            _isSearching.value = false
         }
     }
 
@@ -203,10 +203,6 @@ class TrendingViewModel(
 
     fun loadNextUpcomingTvPage() {
         upcomingTvPagingController?.loadNextPage()
-    }
-
-    fun loadNextSearchPage() {
-        searchPagingController?.loadNextPage()
     }
 
     fun refresh() {

@@ -353,13 +353,13 @@ class ArrInstanceRepository(
                 }
                 _lastAddedItemId.value = addedItem.id
                 refreshLibrary()
-                delay(1500)
+                delay(1500.milliseconds)
                 _addItemStatus.value = OperationStatus.Idle
                 _lastAddedItemId.value = null
             }
             .onError { code, error, cause ->
                 _addItemStatus.value = OperationStatus.Error(code, error, cause)
-                delay(1500)
+                delay(1500.milliseconds)
                 _addItemStatus.value = OperationStatus.Idle
                 _lastAddedItemId.value = null
             }
