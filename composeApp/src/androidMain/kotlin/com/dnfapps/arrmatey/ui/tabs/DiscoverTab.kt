@@ -45,7 +45,7 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
-import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
+import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.DiscoverSection
@@ -63,7 +63,7 @@ import org.koin.compose.koinInject
 fun DiscoverTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
-    viewModel: TrendingViewModel = koinInject(),
+    viewModel: DiscoverViewModel = koinInject(),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.discover
 ) {
@@ -107,7 +107,7 @@ fun DiscoverTab(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DiscoverHomeScreen(
-    viewModel: TrendingViewModel,
+    viewModel: DiscoverViewModel,
     wideRailIsVisible: Boolean,
     onItemClick: (SearchResult) -> Unit
 ) {

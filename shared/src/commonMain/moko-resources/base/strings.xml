@@ -327,6 +327,7 @@
     <string name="done">Done</string>
     <string name="born_on"> Born: %1$s  |  %2$s</string>
     <string name="add_to_arr">Add to %1$s</string>
+    <string name="known_for">Known for: %1$s</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

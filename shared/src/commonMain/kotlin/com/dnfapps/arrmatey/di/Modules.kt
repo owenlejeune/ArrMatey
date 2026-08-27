@@ -159,7 +159,7 @@ import com.dnfapps.arrmatey.seerr.usecase.SearchSeerrUseCase
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
-import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
+import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.seerr.usecase.ClearSeerrMediaDataUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
@@ -382,7 +382,7 @@ val useCaseModule = module {
 }
 
 val viewModelModule = module {
-    factory { TrendingViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { DiscoverViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ActivityQueueViewModel(get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
         ArrMediaViewModel(

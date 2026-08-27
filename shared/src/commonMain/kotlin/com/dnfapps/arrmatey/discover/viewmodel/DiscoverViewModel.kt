@@ -1,4 +1,4 @@
-package com.dnfapps.arrmatey.seerr.viewmodel
+package com.dnfapps.arrmatey.discover.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-class TrendingViewModel(
+class DiscoverViewModel(
     private val instanceManager: InstanceManager,
     private val instanceRepository: InstanceRepository,
     private val getTrendingUseCase: GetTrendingUseCase,

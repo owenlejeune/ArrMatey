@@ -1,11 +1,10 @@
 package com.dnfapps.arrmatey.discover.usecase
 
-import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.discover.model.SearchResult
+import com.dnfapps.arrmatey.discover.model.SearchResultWeaver
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
-import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.async
@@ -24,41 +23,50 @@ class GlobalSearchUseCase(
         val arrDeferred = arrRepos.map { repo ->
             async {
                 val result = repo.directLookup(query)
-                if (result is NetworkResult.Success) result.data else emptyList()
+                val data = if (result is NetworkResult.Success) result.data else emptyList()
+                data.mapIndexed { index, media ->
+                    SearchResult.ArrMediaResult(media, originalRank = index)
+                }
             }
         }
 
         val seerrDeferred = seerrRepos.map { repo ->
             async {
                 val result = repo.client.search(query, page = 1)
-                if (result is NetworkResult.Success) result.data.results else emptyList()
+                val data = if (result is NetworkResult.Success) result.data.results else emptyList()
+                data.mapIndexed { index, res ->
+                    if (res.mediaType == RequestType.Person) {
+                        SearchResult.SeerrPersonResult(res, originalRank = index)
+                    } else {
+                        SearchResult.SeerrMediaResult(res, originalRank = index)
+                    }
+                }
             }
         }
 
-        val allArrResults: List<ArrMedia> = arrDeferred.awaitAll().flatten()
-        val allSeerrResults: List<DiscoverResult> = seerrDeferred.awaitAll().flatten()
+        val allResults: List<SearchResult> = (arrDeferred + seerrDeferred).awaitAll().flatten()
 
         val resultsByTmdbId = mutableMapOf<Long, MutableList<SearchResult>>()
         val resultsByTvdbId = mutableMapOf<Long, MutableList<SearchResult>>()
-        val persons = mutableListOf<SearchResult.SeerrPersonResult>()
+        val others = mutableListOf<SearchResult>()
 
-        allArrResults.forEach { item ->
-            val result = SearchResult.ArrMediaResult(item)
-            when (item) {
-                is ArrMovie -> resultsByTmdbId.getOrPut(item.tmdbId) { mutableListOf() }.add(result)
-                is ArrSeries -> {
-                    resultsByTvdbId.getOrPut(item.tvdbId) { mutableListOf() }.add(result)
-                    item.tmdbId?.let { resultsByTmdbId.getOrPut(it) { mutableListOf() }.add(result) }
+        allResults.forEach { result ->
+            when (result) {
+                is SearchResult.ArrMediaResult -> {
+                    val item = result.media
+                    when (item) {
+                        is ArrMovie -> resultsByTmdbId.getOrPut(item.tmdbId) { mutableListOf() }.add(result)
+                        is ArrSeries -> {
+                            resultsByTvdbId.getOrPut(item.tvdbId) { mutableListOf() }.add(result)
+                            item.tmdbId?.let { resultsByTmdbId.getOrPut(it) { mutableListOf() }.add(result) }
+                        }
+                        else -> others.add(result)
+                    }
                 }
-                else -> {} 
-            }
-        }
-
-        allSeerrResults.forEach { res ->
-            when (res.mediaType) {
-                RequestType.Movie -> resultsByTmdbId.getOrPut(res.id) { mutableListOf() }.add(SearchResult.SeerrMediaResult(res))
-                RequestType.Tv -> resultsByTmdbId.getOrPut(res.id) { mutableListOf() }.add(SearchResult.SeerrMediaResult(res))
-                RequestType.Person -> persons.add(SearchResult.SeerrPersonResult(res))
+                is SearchResult.SeerrMediaResult -> {
+                    resultsByTmdbId.getOrPut(result.result.id) { mutableListOf() }.add(result)
+                }
+                is SearchResult.SeerrPersonResult -> others.add(result)
             }
         }
 
@@ -82,23 +90,16 @@ class GlobalSearchUseCase(
         resultsByTvdbId.forEach { (tvdbId, items) ->
             if (tvdbId !in processedTvdbIds) {
                 val bestItem = selectBestItem(items)
-                combined.add(bestItem)
+                if (bestItem !in combined) {
+                    combined.add(bestItem)
+                }
                 processedTvdbIds.add(tvdbId)
             }
         }
 
-        combined.addAll(persons)
+        combined.addAll(others)
 
-        combined.sortedBy {
-            when (it) {
-                is SearchResult.ArrMediaResult -> {
-                    val media = it.media
-                    if (media is ArrMovie) media.popularity else 0.0
-                }
-                is SearchResult.SeerrMediaResult -> it.result.popularity
-                is SearchResult.SeerrPersonResult -> it.result.popularity
-            }
-        }
+        SearchResultWeaver.weave(query, combined)
     }
 
     private fun selectBestItem(items: List<SearchResult>): SearchResult {

@@ -26,7 +26,7 @@ struct DiscoverTab: View {
 }
 
 private struct DiscoverTabContent: View {
-    @StateObject private var viewModel = TrendingViewModelS()
+    @StateObject private var viewModel = DiscoverViewModelS()
     @StateObject private var instancesViewModel = InstancesViewModelS(type: .seerr)
     @EnvironmentObject private var navigationManager: NavigationManager
     @Environment(\.navigationContext) private var context

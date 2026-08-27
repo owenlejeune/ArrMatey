@@ -105,23 +105,7 @@ fun CastCrewItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .size(88.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Default.Person, contentDescription = null)
-            AsyncImage(
-                model = rememberRemoteImageData(profilePath),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(88.dp)
-                    .clip(CircleShape)
-            )
-        }
+        PersonProfileImage(profilePath)
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.Start,
@@ -152,5 +136,26 @@ fun CastCrewItem(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun PersonProfileImage(profilePath: String?) {
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .size(88.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(Icons.Default.Person, contentDescription = null)
+        AsyncImage(
+            model = rememberRemoteImageData(profilePath),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(88.dp)
+                .clip(CircleShape)
+        )
     }
 }

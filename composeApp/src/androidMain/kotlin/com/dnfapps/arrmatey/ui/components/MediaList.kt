@@ -54,11 +54,9 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
-import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.Bullet
-import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
-import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
@@ -95,9 +93,9 @@ fun <T : ArrMedia> MediaList(
 ) {
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
         userScrollEnabled = userScrollEnabled,
-        contentPadding = PaddingValues(vertical = 12.dp)
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp)
     ) {
         items(items) { item ->
             val isActive = itemIsActive(item)
@@ -126,8 +124,8 @@ fun SearchResultList(
 ) {
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(vertical = 12.dp)
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp)
     ) {
         items(items, key = { it.id }) { item ->
             SearchResultItem(
@@ -151,8 +149,7 @@ fun SearchResultItem(
                 aspectRatio = AspectRatio.Poster,
                 item = item.media,
                 onItemClick = { onItemClick(item) },
-                includeOverview = includeOverview,
-                isActive = false
+                includeOverview = includeOverview
             )
         }
         is SearchResult.SeerrMediaResult -> {
@@ -177,7 +174,8 @@ fun SearchResultItem(
 fun SeerrMediaItem(
     result: SearchResult.SeerrMediaResult,
     onItemClick: (SearchResult) -> Unit,
-    includeOverview: Boolean = true
+    includeOverview: Boolean = true,
+    showBannerBackground: Boolean = true
 ) {
     val item = result.result
     Card(
@@ -193,15 +191,17 @@ fun SeerrMediaItem(
                 .fillMaxWidth()
                 .wrapContentHeight()
         ) {
-            BannerView(
-                bannerModel = item.fullBackdropPath?.let { rememberRemoteImageData(it) },
-                modifier = Modifier.matchParentSize()
-            )
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(TranslucentBlack)
-            )
+            if (showBannerBackground && item.fullBackdropPath != null) {
+                BannerView(
+                    bannerModel = item.fullBackdropPath?.let { rememberRemoteImageData(it) },
+                    modifier = Modifier.matchParentSize()
+                )
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(TranslucentBlack)
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -228,6 +228,9 @@ fun SeerrMediaItem(
                             .wrapContentHeight(),
                         verticalArrangement = Arrangement.Top
                     ) {
+                        val titleColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
+                        val contentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+
                         Text(
                             text = buildString {
                                 append(item.title ?: item.name ?: mokoString(MR.strings.unknown))
@@ -237,7 +240,7 @@ fun SeerrMediaItem(
                             },
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White,
+                            color = titleColor,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -245,7 +248,7 @@ fun SeerrMediaItem(
                         item.overview?.let {
                             Text(
                                 text = it,
-                                color = Color.White.copy(alpha = 0.8f),
+                                color = contentColor,
                                 fontSize = 14.sp,
                                 lineHeight = 18.sp,
                                 maxLines = 3,
@@ -284,11 +287,7 @@ fun SeerrPersonItem(
                 .fillMaxWidth()
                 .wrapContentHeight()
         ) {
-            PosterItem(
-                item = item,
-                aspectRatio = AspectRatio.Poster,
-                modifier = Modifier.height(defaultHeight)
-            )
+            PersonProfileImage(item.fullPosterPath)
 
             Column(
                 modifier = Modifier
@@ -304,12 +303,11 @@ fun SeerrPersonItem(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                
-                // Known for
+
                 if (item.knownFor.isNotEmpty()) {
-                    val knownFor = item.knownFor.joinToString(", ") { it.title ?: it.name ?: "" }
+                    val knownFor = item.knownFor.take(5).joinToString(", ") { it.title ?: it.name ?: "" }
                     Text(
-                        text = "Known for: $knownFor",
+                        text = mokoString(MR.strings.known_for, knownFor),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
                         lineHeight = 18.sp,
@@ -391,11 +389,13 @@ fun <T : ArrMedia> MediaItem(
                     },
                     modifier = Modifier.matchParentSize()
                 )
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(TranslucentBlack)
-                )
+                if (bannerModel != null || item.getBanner()?.remoteUrl != null) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(TranslucentBlack)
+                    )
+                }
             }
 
             Column(

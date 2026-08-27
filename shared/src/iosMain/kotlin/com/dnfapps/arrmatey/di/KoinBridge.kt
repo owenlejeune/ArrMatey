@@ -44,7 +44,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
-import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
+import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
@@ -93,7 +93,7 @@ object KoinBridge: KoinComponent {
     fun getRequestsViewModel(): RequestsViewModel =
         getKoin().get()
 
-    fun getTrendingViewModel(): TrendingViewModel =
+    fun getDiscoverViewModel(): DiscoverViewModel =
         getKoin().get()
 
     fun getSeerrMediaDetailsViewModel(tmdbId: Long, mediaType: RequestType): SeerrMediaDetailsViewModel =

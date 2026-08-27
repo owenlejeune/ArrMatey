@@ -7,8 +7,8 @@ import Shared
 import SwiftUI
 
 @MainActor
-class TrendingViewModelS: ObservableObject {
-    private let viewModel: TrendingViewModel
+class DiscoverViewModelS: ObservableObject {
+    private let viewModel: DiscoverViewModel
     
     @Published private(set) var trendingState = PagedData<DiscoverResult>()
     @Published private(set) var moviesState = PagedData<DiscoverResult>()
@@ -20,7 +20,7 @@ class TrendingViewModelS: ObservableObject {
     @Published private(set) var isRefreshing: Bool = false
     
     init() {
-        self.viewModel = KoinBridge.shared.getTrendingViewModel()
+        self.viewModel = KoinBridge.shared.getDiscoverViewModel()
         startObserving()
     }
     
