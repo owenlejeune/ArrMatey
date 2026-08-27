@@ -45,14 +45,15 @@ fun <T> DropdownPicker(
     onAllSelected: () -> Unit = {},
     allDivider: (@Composable () -> Unit)? = { HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp)) },
     unknownValueLabel: String = mokoString(MR.strings.unknown),
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    enabled: Boolean = true
 ) {
     var isDropDownExpanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         modifier = modifier,
-        expanded = isDropDownExpanded,
-        onExpandedChange = { isDropDownExpanded = it }
+        expanded = isDropDownExpanded && enabled,
+        onExpandedChange = { if (enabled) isDropDownExpanded = it }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -72,14 +73,17 @@ fun <T> DropdownPicker(
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant
                 ),
                 shape = MaterialTheme.shapes.large,
-                singleLine = singleLine
+                singleLine = singleLine,
+                enabled = enabled
             )
         }
         ExposedDropdownMenu(
-            expanded = isDropDownExpanded,
+            expanded = isDropDownExpanded && enabled,
             onDismissRequest = { isDropDownExpanded = false },
             shape = MaterialTheme.shapes.extraLarge,
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -144,13 +148,14 @@ fun <T> MultiSelectDropdownPicker(
     modifier: Modifier = Modifier,
     label: @Composable () -> Unit = {},
     getOptionLabel: @Composable (T) -> String = { it.toString() },
+    enabled: Boolean = true
 ) {
     var isDropDownExpanded  by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         modifier = modifier,
-        expanded = isDropDownExpanded,
-        onExpandedChange = { isDropDownExpanded = it }
+        expanded = isDropDownExpanded && enabled,
+        onExpandedChange = { if (enabled) isDropDownExpanded = it }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -166,14 +171,17 @@ fun <T> MultiSelectDropdownPicker(
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant
                 ),
                 shape = MaterialTheme.shapes.large,
-                singleLine = true
+                singleLine = true,
+                enabled = enabled
             )
         }
         ExposedDropdownMenu(
-            expanded = isDropDownExpanded,
+            expanded = isDropDownExpanded && enabled,
             onDismissRequest = { isDropDownExpanded = false },
             shape = MaterialTheme.shapes.extraLarge,
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh

@@ -160,6 +160,13 @@ fun UnifiedMediaDetailsScreen(
     moko: MokoStrings = koinInject(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var lastSuccessState by remember { mutableStateOf<UnifiedMediaDetailsUiState.Success?>(null) }
+    LaunchedEffect(uiState) {
+        if (uiState is UnifiedMediaDetailsUiState.Success) {
+            lastSuccessState = uiState as UnifiedMediaDetailsUiState.Success
+        }
+    }
+
     val scrollState = rememberScrollState()
     val context = LocalContext.current
 
@@ -187,6 +194,7 @@ fun UnifiedMediaDetailsScreen(
     val deleteAlbumStatus by viewModel.deleteAlbumStatus.collectAsStateWithLifecycle()
     val deleteMovieFileStatus by viewModel.deleteMovieFileStatus.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
+    val requestStatus by viewModel.requestStatus.collectAsStateWithLifecycle()
 
     val isRequestSheetVisible by viewModel.isRequestSheetVisible.collectAsStateWithLifecycle()
     val isReportIssueSheetVisible by viewModel.isReportIssueSheetVisible.collectAsStateWithLifecycle()
@@ -296,7 +304,8 @@ fun UnifiedMediaDetailsScreen(
                     }
                 },
                 actions = {
-                    (uiState as? UnifiedMediaDetailsUiState.Success)?.let { success ->
+                    val success = uiState as? UnifiedMediaDetailsUiState.Success ?: lastSuccessState
+                    if (success != null) {
                         val showArrActions = success.hasArrId && isArrConfigured
                         val canAddDirectly = !success.hasArrId && success.arrMedia != null && isArrConfigured
                         val resolvedType = viewModel.resolvedInstanceType
@@ -653,114 +662,141 @@ fun UnifiedMediaDetailsScreen(
                             }
                         }
                     }
-
-                    if (isRequestSheetVisible) {
-                        state.seerrMedia?.let { seerrMedia ->
-                            val isRequest4k by viewModel.isRequest4k.collectAsStateWithLifecycle()
-                            SeerrRequestSheet(
-                                details = seerrMedia,
-                                serviceDetails = serviceDetails,
-                                currentUser = currentUser,
-                                users = users,
-                                onDismissRequest = { viewModel.hideRequestSheet() },
-                                onSubmitRequest = { profileId, rootFolder, langId, seasons, userId ->
-                                    viewModel.submitRequest(
-                                        profileId,
-                                        rootFolder,
-                                        langId,
-                                        seasons,
-                                        is4k = isRequest4k,
-                                        userId = userId
-                                    )
-                                }
-                            )
-                        }
-                    }
-                    if (isReportIssueSheetVisible) {
-                        SeerrReportIssueSheet(
-                            state = reportIssueState,
-                            updateIssueType = { viewModel.setIssueType(it) },
-                            updateMessage = { viewModel.setIssueMessage(it) },
-                            updateProblemSeason = { viewModel.setProblemSeason(it) },
-                            updateProblemEpisode = { viewModel.setProblemEpisode(it) },
-                            onReset = { viewModel.resetIssueState() },
-                            onSubmit = { viewModel.submitIssue() },
-                            onDismiss = { viewModel.hideReportIssueSheet() }
+                }
+            }
+            lastSuccessState?.let { state ->
+                if (isRequestSheetVisible) {
+                    state.seerrMedia?.let { seerrMedia ->
+                        val isRequest4k by viewModel.isRequest4k.collectAsStateWithLifecycle()
+                        SeerrRequestSheet(
+                            details = seerrMedia,
+                            serviceDetails = serviceDetails,
+                            currentUser = currentUser,
+                            users = users,
+                            requestInProgress = requestStatus is OperationStatus.InProgress,
+                            onDismissRequest = { viewModel.hideRequestSheet() },
+                            onSubmitRequest = { profileId, rootFolder, langId, seasons, userId ->
+                                viewModel.submitRequest(
+                                    profileId,
+                                    rootFolder,
+                                    langId,
+                                    seasons,
+                                    is4k = isRequest4k,
+                                    userId = userId
+                                )
+                            }
                         )
                     }
-                    if (showAddSheet) {
-                        state.arrMedia?.let { arrMedia ->
-                            when (arrMedia) {
-                                is ArrSeries -> AddSeriesSheet(
-                                    item = arrMedia,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false }
-                                )
+                }
+                if (isReportIssueSheetVisible) {
+                    SeerrReportIssueSheet(
+                        state = reportIssueState,
+                        updateIssueType = { viewModel.setIssueType(it) },
+                        updateMessage = { viewModel.setIssueMessage(it) },
+                        updateProblemSeason = { viewModel.setProblemSeason(it) },
+                        updateProblemEpisode = { viewModel.setProblemEpisode(it) },
+                        onReset = { viewModel.resetIssueState() },
+                        onSubmit = { viewModel.submitIssue() },
+                        onDismiss = { viewModel.hideReportIssueSheet() }
+                    )
+                }
+                if (showAddSheet) {
+                    state.arrMedia?.let { arrMedia ->
+                        when (arrMedia) {
+                            is ArrSeries -> AddSeriesSheet(
+                                item = arrMedia,
+                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                tags = addSheetUiState.tags.ifEmpty { tags },
+                                addInProgress = addItemStatus is OperationStatus.InProgress,
+                                preferences = preferences,
+                                instances = addSheetUiState.availableInstances,
+                                selectedInstance = addSheetUiState.targetInstance,
+                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                onAddItem = { newItem, searchOnAdd ->
+                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                },
+                                onUpdatePreferences = viewModel::updatePreferences,
+                                onDismiss = { showAddSheet = false }
+                            )
 
-                                is ArrMovie -> AddMovieSheet(
-                                    item = arrMedia,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false }
-                                )
+                            is ArrMovie -> AddMovieSheet(
+                                item = arrMedia,
+                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                tags = addSheetUiState.tags.ifEmpty { tags },
+                                addInProgress = addItemStatus is OperationStatus.InProgress,
+                                preferences = preferences,
+                                instances = addSheetUiState.availableInstances,
+                                selectedInstance = addSheetUiState.targetInstance,
+                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                onAddItem = { newItem, searchOnAdd ->
+                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                },
+                                onUpdatePreferences = viewModel::updatePreferences,
+                                onDismiss = { showAddSheet = false }
+                            )
 
-                                is Arrtist -> AddArtistSheet(
-                                    item = arrMedia,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false }
-                                )
+                            is Arrtist -> AddArtistSheet(
+                                item = arrMedia,
+                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                tags = addSheetUiState.tags.ifEmpty { tags },
+                                addInProgress = addItemStatus is OperationStatus.InProgress,
+                                preferences = preferences,
+                                instances = addSheetUiState.availableInstances,
+                                selectedInstance = addSheetUiState.targetInstance,
+                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                onAddItem = { newItem, searchOnAdd ->
+                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                },
+                                onUpdatePreferences = viewModel::updatePreferences,
+                                onDismiss = { showAddSheet = false }
+                            )
 
-                                is Author -> AddAuthorSheet(
-                                    item = arrMedia,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false }
-                                )
+                            is Author -> AddAuthorSheet(
+                                item = arrMedia,
+                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                tags = addSheetUiState.tags.ifEmpty { tags },
+                                addInProgress = addItemStatus is OperationStatus.InProgress,
+                                preferences = preferences,
+                                instances = addSheetUiState.availableInstances,
+                                selectedInstance = addSheetUiState.targetInstance,
+                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                onAddItem = { newItem, searchOnAdd ->
+                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                },
+                                onUpdatePreferences = viewModel::updatePreferences,
+                                onDismiss = { showAddSheet = false }
+                            )
 
-                                is SearchAudiobook -> AddAudiobookSheet(
-                                    item = arrMedia,
+                            is SearchAudiobook -> AddAudiobookSheet(
+                                item = arrMedia,
+                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                relativePath = "",
+                                addInProgress = addItemStatus is OperationStatus.InProgress,
+                                preferences = preferences,
+                                instances = addSheetUiState.availableInstances,
+                                selectedInstance = addSheetUiState.targetInstance,
+                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                onAddItem = { newItem, searchOnAdd ->
+                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                },
+                                onUpdatePreferences = viewModel::updatePreferences,
+                                onDismiss = { showAddSheet = false }
+                            )
+
+                            is Audiobook -> {
+                                val searchAudiobook = SearchAudiobook(
+                                    asin = arrMedia.asin ?: "",
+                                    title = arrMedia.title ?: "",
+                                    summary = arrMedia.overview,
+                                    authors = arrMedia.authors.map { SearchAuthor(name = it) }
+                                )
+                                AddAudiobookSheet(
+                                    item = searchAudiobook,
                                     qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
                                     rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
                                     relativePath = "",
@@ -775,305 +811,279 @@ fun UnifiedMediaDetailsScreen(
                                     onUpdatePreferences = viewModel::updatePreferences,
                                     onDismiss = { showAddSheet = false }
                                 )
-
-                                is Audiobook -> {
-                                    val searchAudiobook = SearchAudiobook(
-                                        asin = arrMedia.asin ?: "",
-                                        title = arrMedia.title ?: "",
-                                        summary = arrMedia.overview,
-                                        authors = arrMedia.authors.map { SearchAuthor(name = it) }
-                                    )
-                                    AddAudiobookSheet(
-                                        item = searchAudiobook,
-                                        qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                        rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                        relativePath = "",
-                                        addInProgress = addItemStatus is OperationStatus.InProgress,
-                                        preferences = preferences,
-                                        instances = addSheetUiState.availableInstances,
-                                        selectedInstance = addSheetUiState.targetInstance,
-                                        onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                        onAddItem = { newItem, searchOnAdd ->
-                                            viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                        },
-                                        onUpdatePreferences = viewModel::updatePreferences,
-                                        onDismiss = { showAddSheet = false }
-                                    )
-                                }
-
-                                else -> {}
                             }
-                        }
-                    }
-                    if (isViewRequestSheetVisible) {
-                        state.seerrMedia?.let { seerrMedia ->
-                            SeerrViewRequestSheet(
-                                details = seerrMedia,
-                                serviceDetails = serviceDetails,
-                                onDismissRequest = { viewModel.hideViewRequestSheet() },
-                                onApproveRequest = { requestId, profileId, rootFolder, languageProfileId, seasons ->
-                                    viewModel.approveRequest(
-                                        requestId = requestId,
-                                        profileId = profileId,
-                                        rootFolder = rootFolder,
-                                        languageProfileId = languageProfileId,
-                                        seasons = seasons
-                                    )
-                                    viewModel.hideViewRequestSheet()
-                                },
-                                onDeclineRequest = { requestId ->
-                                    viewModel.declineRequest(requestId)
-                                    viewModel.hideViewRequestSheet()
-                                }
-                            )
-                        }
-                    }
 
-                    if (showEditPathSheet) {
-                        state.arrMedia?.let { arrMedia ->
-                            EditPathSheet(
-                                item = arrMedia,
-                                rootFolders = rootFolders,
-                                editInProgress = editStatus is OperationStatus.InProgress,
-                                onEditItem = { updatedItem, moveFiles ->
-                                    viewModel.editItem(updatedItem, moveFiles = moveFiles)
-                                    showEditPathSheet = false
-                                },
-                                onDismiss = { showEditPathSheet = false }
-                            )
+                            else -> {}
                         }
                     }
-
-                    if (showEditSheet) {
-                        state.arrMedia?.let { arrMedia ->
-                            EditMediaSheet(
-                                item = arrMedia,
-                                qualityProfiles = qualityProfiles,
-                                rootFolders = rootFolders,
-                                tags = tags,
-                                editInProgress = editStatus is OperationStatus.InProgress,
-                                onEditItem = {
-                                    if (arrMedia.rootFolderPath != it.rootFolderPath) {
-                                        moveFilesItem = it
-                                    } else {
-                                        viewModel.editItem(it)
-                                    }
-                                },
-                                onDismiss = { showEditSheet = false }
-                            )
-                        }
-                    }
-
-                    moveFilesItem?.let { item ->
-                        AlertDialog(
-                            onDismissRequest = { moveFilesItem = null },
-                            title = {
-                                Text(mokoString(MR.strings.move_files_confirm, item.rootFolderPath ?: ""))
+                }
+                if (isViewRequestSheetVisible) {
+                    state.seerrMedia?.let { seerrMedia ->
+                        SeerrViewRequestSheet(
+                            details = seerrMedia,
+                            serviceDetails = serviceDetails,
+                            requestInProgress = requestStatus is OperationStatus.InProgress,
+                            onDismissRequest = { viewModel.hideViewRequestSheet() },
+                            onApproveRequest = { requestId, profileId, rootFolder, languageProfileId, seasons ->
+                                viewModel.approveRequest(
+                                    requestId = requestId,
+                                    profileId = profileId,
+                                    rootFolder = rootFolder,
+                                    languageProfileId = languageProfileId,
+                                    seasons = seasons
+                                )
                             },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.editItem(item, moveFiles = true)
-                                        moveFilesItem = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.yes))
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.editItem(item)
-                                        moveFilesItem = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.no))
-                                }
+                            onDeclineRequest = { requestId ->
+                                viewModel.declineRequest(requestId)
                             }
                         )
                     }
+                }
 
-                    if (confirmDelete) {
-                        ConfirmDeleteAlert(
-                            deleteInProgress = deleteStatus is OperationStatus.InProgress,
-                            onDismiss = { confirmDelete = false },
-                            onDelete = { deleteFiles, addExclusion ->
-                                viewModel.deleteMedia(deleteFiles, addExclusion)
-                            }
-                        )
-                    }
-
-                    confirmDeleteSeasonNumber?.let { seasonNumber ->
-                        AlertDialog(
-                            onDismissRequest = { confirmDeleteSeasonNumber = null },
-                            title = {
-                                Text(mokoString(MR.strings.delete_season, seasonNumber))
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.deleteSeasonFiles(seasonNumber)
-                                        confirmDeleteSeasonNumber = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.yes))
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(
-                                    onClick = {
-                                        confirmDeleteSeasonNumber = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.no))
-                                }
-                            }
-                        )
-                    }
-
-                    confirmDeleteAlbum?.let { albumId ->
-                        AlertDialog(
-                            onDismissRequest = { confirmDeleteAlbum = null },
-                            title = {
-                                Text(mokoString(MR.strings.delete_album))
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.deleteAlbumFiles(albumId)
-                                        confirmDeleteAlbum = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.yes))
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(
-                                    onClick = {
-                                        confirmDeleteAlbum = null
-                                    }
-                                ) {
-                                    Text(mokoString(MR.strings.no))
-                                }
-                            }
-                        )
-                    }
-
-                    editAlbum?.let { album ->
-                        EditAlbumSheet(
-                            album = album,
+                if (showEditPathSheet) {
+                    state.arrMedia?.let { arrMedia ->
+                        EditPathSheet(
+                            item = arrMedia,
+                            rootFolders = rootFolders,
                             editInProgress = editStatus is OperationStatus.InProgress,
-                            onEditAlbum = {
-                                viewModel.updateAlbum(it)
+                            onEditItem = { updatedItem, moveFiles ->
+                                viewModel.editItem(updatedItem, moveFiles = moveFiles)
+                                showEditPathSheet = false
                             },
-                            onDismiss = { editAlbum = null }
+                            onDismiss = { showEditPathSheet = false }
                         )
                     }
+                }
 
-                    if (confirmDeleteMovie) {
-                        AlertDialog(
-                            onDismissRequest = { confirmDeleteMovie = false },
-                            title = { Text(mokoString(MR.strings.confirm_delete)) },
-                            text = { Text(text = mokoString(MR.strings.confirm_delete_file)) },
-                            dismissButton = {
-                                TextButton(onClick = { confirmDeleteMovie = false }) {
-                                    Text(mokoString(MR.strings.cancel))
+                if (showEditSheet) {
+                    state.arrMedia?.let { arrMedia ->
+                        EditMediaSheet(
+                            item = arrMedia,
+                            qualityProfiles = qualityProfiles,
+                            rootFolders = rootFolders,
+                            tags = tags,
+                            editInProgress = editStatus is OperationStatus.InProgress,
+                            onEditItem = {
+                                if (arrMedia.rootFolderPath != it.rootFolderPath) {
+                                    moveFilesItem = it
+                                } else {
+                                    viewModel.editItem(it)
                                 }
                             },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    confirmDeleteMovie = false
-                                    viewModel.deleteMovieFile()
-                                }) {
-                                    Text(mokoString(MR.strings.confirm))
+                            onDismiss = { showEditSheet = false }
+                        )
+                    }
+                }
+
+                moveFilesItem?.let { item ->
+                    AlertDialog(
+                        onDismissRequest = { moveFilesItem = null },
+                        title = {
+                            Text(mokoString(MR.strings.move_files_confirm, item.rootFolderPath ?: ""))
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.editItem(item, moveFiles = true)
+                                    moveFilesItem = null
                                 }
+                            ) {
+                                Text(mokoString(MR.strings.yes))
                             }
-                        )
-                    }
-                    selectedQueueItem?.let { item ->
-                        QueueItemInfoSheet(
-                            item = item,
-                            onDismiss = { selectedQueueItem = null },
-                            onRemove = { showConfirmRemoveQueueItem = true }
-                        )
-                    }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.editItem(item)
+                                    moveFilesItem = null
+                                }
+                            ) {
+                                Text(mokoString(MR.strings.no))
+                            }
+                        }
+                    )
+                }
 
-                    if (showConfirmRemoveQueueItem && selectedQueueItem != null) {
-                        ConfirmDeleteItemSheet(
-                            onDismiss = { showConfirmRemoveQueueItem = false },
-                            deleteInProgress = removeQueueItemStatus is OperationStatus.InProgress,
-                            onDelete = { clientRemove, blocklist, skipRedownload ->
-                                viewModel.removeQueueItem(
-                                    queueItem = selectedQueueItem!!,
-                                    removeFromClient = clientRemove,
-                                    addToBlocklist = blocklist,
-                                    skipRedownload = skipRedownload
+                if (confirmDelete) {
+                    ConfirmDeleteAlert(
+                        deleteInProgress = deleteStatus is OperationStatus.InProgress,
+                        onDismiss = { confirmDelete = false },
+                        onDelete = { deleteFiles, addExclusion ->
+                            viewModel.deleteMedia(deleteFiles, addExclusion)
+                        }
+                    )
+                }
+
+                confirmDeleteSeasonNumber?.let { seasonNumber ->
+                    AlertDialog(
+                        onDismissRequest = { confirmDeleteSeasonNumber = null },
+                        title = {
+                            Text(mokoString(MR.strings.delete_season, seasonNumber))
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.deleteSeasonFiles(seasonNumber)
+                                    confirmDeleteSeasonNumber = null
+                                }
+                            ) {
+                                Text(mokoString(MR.strings.yes))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    confirmDeleteSeasonNumber = null
+                                }
+                            ) {
+                                Text(mokoString(MR.strings.no))
+                            }
+                        }
+                    )
+                }
+
+                confirmDeleteAlbum?.let { albumId ->
+                    AlertDialog(
+                        onDismissRequest = { confirmDeleteAlbum = null },
+                        title = {
+                            Text(mokoString(MR.strings.delete_album))
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.deleteAlbumFiles(albumId)
+                                    confirmDeleteAlbum = null
+                                }
+                            ) {
+                                Text(mokoString(MR.strings.yes))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    confirmDeleteAlbum = null
+                                }
+                            ) {
+                                Text(mokoString(MR.strings.no))
+                            }
+                        }
+                    )
+                }
+
+                editAlbum?.let { album ->
+                    EditAlbumSheet(
+                        album = album,
+                        editInProgress = editStatus is OperationStatus.InProgress,
+                        onEditAlbum = {
+                            viewModel.updateAlbum(it)
+                        },
+                        onDismiss = { editAlbum = null }
+                    )
+                }
+
+                if (confirmDeleteMovie) {
+                    AlertDialog(
+                        onDismissRequest = { confirmDeleteMovie = false },
+                        title = { Text(mokoString(MR.strings.confirm_delete)) },
+                        text = { Text(text = mokoString(MR.strings.confirm_delete_file)) },
+                        dismissButton = {
+                            TextButton(onClick = { confirmDeleteMovie = false }) {
+                                Text(mokoString(MR.strings.cancel))
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                confirmDeleteMovie = false
+                                viewModel.deleteMovieFile()
+                            }) {
+                                Text(mokoString(MR.strings.confirm))
+                            }
+                        }
+                    )
+                }
+                selectedQueueItem?.let { item ->
+                    QueueItemInfoSheet(
+                        item = item,
+                        onDismiss = { selectedQueueItem = null },
+                        onRemove = { showConfirmRemoveQueueItem = true }
+                    )
+                }
+
+                if (showConfirmRemoveQueueItem && selectedQueueItem != null) {
+                    ConfirmDeleteItemSheet(
+                        onDismiss = { showConfirmRemoveQueueItem = false },
+                        deleteInProgress = removeQueueItemStatus is OperationStatus.InProgress,
+                        onDelete = { clientRemove, blocklist, skipRedownload ->
+                            viewModel.removeQueueItem(
+                                queueItem = selectedQueueItem!!,
+                                removeFromClient = clientRemove,
+                                addToBlocklist = blocklist,
+                                skipRedownload = skipRedownload
+                            )
+                        }
+                    )
+                }
+
+                if (confirmRemoveFromService) {
+                    val serviceName =
+                        buttonState.serviceName ?: if (requestType == RequestType.Movie) "Radarr" else "Sonarr"
+                    AlertDialog(
+                        onDismissRequest = { confirmRemoveFromService = false },
+                        title = {
+                            Text(mokoString(MR.strings.are_you_sure))
+                        },
+                        text = {
+                            Text(mokoString(MR.strings.remove_from_service_confirm, serviceName))
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.deleteSeerrMediaFile(is4k = false)
+                                    confirmRemoveFromService = false
+                                }
+                            ) {
+                                Text(
+                                    text = mokoString(MR.strings.yes),
+                                    color = MaterialTheme.colorScheme.error
                                 )
                             }
-                        )
-                    }
-
-                    if (confirmRemoveFromService) {
-                        val serviceName =
-                            buttonState.serviceName ?: if (requestType == RequestType.Movie) "Radarr" else "Sonarr"
-                        AlertDialog(
-                            onDismissRequest = { confirmRemoveFromService = false },
-                            title = {
-                                Text(mokoString(MR.strings.are_you_sure))
-                            },
-                            text = {
-                                Text(mokoString(MR.strings.remove_from_service_confirm, serviceName))
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.deleteSeerrMediaFile(is4k = false)
-                                        confirmRemoveFromService = false
-                                    }
-                                ) {
-                                    Text(
-                                        text = mokoString(MR.strings.yes),
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = { confirmRemoveFromService = false }) {
-                                    Text(mokoString(MR.strings.no))
-                                }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { confirmRemoveFromService = false }) {
+                                Text(mokoString(MR.strings.no))
                             }
-                        )
-                    }
+                        }
+                    )
+                }
 
-                    if (confirmClearData) {
-                        AlertDialog(
-                            onDismissRequest = { confirmClearData = false },
-                            title = {
-                                Text(mokoString(MR.strings.are_you_sure))
-                            },
-                            text = {
-                                Text(mokoString(MR.strings.clear_data_confirm))
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        viewModel.clearSeerrMediaData()
-                                        confirmClearData = false
-                                    }
-                                ) {
-                                    Text(
-                                        text = mokoString(MR.strings.yes),
-                                        color = MaterialTheme.colorScheme.error
-                                    )
+                if (confirmClearData) {
+                    AlertDialog(
+                        onDismissRequest = { confirmClearData = false },
+                        title = {
+                            Text(mokoString(MR.strings.are_you_sure))
+                        },
+                        text = {
+                            Text(mokoString(MR.strings.clear_data_confirm))
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.clearSeerrMediaData()
+                                    confirmClearData = false
                                 }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = { confirmClearData = false }) {
-                                    Text(mokoString(MR.strings.no))
-                                }
+                            ) {
+                                Text(
+                                    text = mokoString(MR.strings.yes),
+                                    color = MaterialTheme.colorScheme.error
+                                )
                             }
-                        )
-                    }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { confirmClearData = false }) {
+                                Text(mokoString(MR.strings.no))
+                            }
+                        }
+                    )
                 }
             }
         }

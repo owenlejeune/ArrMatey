@@ -111,13 +111,15 @@ fun AddAudiobookSheet(
                     selectedOption = selectedInstance,
                     onOptionSelected = onInstanceSelected,
                     getOptionLabel = { it.label },
-                    label = { Text(mokoString(MR.strings.instances)) }
+                    label = { Text(mokoString(MR.strings.instances)) },
+                    enabled = !addInProgress
                 )
             }
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,
-                onCheckedChange = { monitored = it }
+                onCheckedChange = { monitored = it },
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -127,7 +129,8 @@ fun AddAudiobookSheet(
                 onOptionSelected = { qualityProfile = it },
                 getOptionLabel = { it.name ?: "" },
                 label = { Text(mokoString(MR.strings.quality_profile)) },
-                unknownValueLabel = mokoString(MR.strings.default_label)
+                unknownValueLabel = mokoString(MR.strings.default_label),
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -143,20 +146,23 @@ fun AddAudiobookSheet(
                             append(" (${mokoString(MR.strings.default_label)})")
                         }
                     }
-                }
+                },
+                enabled = !addInProgress
             )
 
             AMOutlinedTextField(
                 value = relativePath,
                 onValueChange = { relativePath = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = mokoString(MR.strings.relative_path)
+                label = mokoString(MR.strings.relative_path),
+                enabled = !addInProgress
             )
 
             LabelledSwitch(
                 label = mokoString(MR.strings.search_on_add_label),
                 checked = searchOnAdd,
-                onCheckedChange = { searchOnAdd = it }
+                onCheckedChange = { searchOnAdd = it },
+                enabled = !addInProgress
             )
 
             Button(

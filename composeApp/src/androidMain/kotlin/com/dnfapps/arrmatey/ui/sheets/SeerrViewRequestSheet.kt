@@ -50,6 +50,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun SeerrViewRequestSheet(
     details: RequestMediaDetails,
     serviceDetails: ServiceDetails?,
+    requestInProgress: Boolean,
     onDismissRequest: () -> Unit,
     onApproveRequest: (Long, Long?, String?, Long?, List<Int>?) -> Unit,
     onDeclineRequest: (Long) -> Unit
@@ -76,8 +77,15 @@ fun SeerrViewRequestSheet(
     var selectedSeasons by remember { mutableStateOf(initialSeasons) }
 
     ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        onDismissRequest = {
+            if (!requestInProgress) {
+                onDismissRequest()
+            }
+        },
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !requestInProgress }
+        )
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -105,7 +113,8 @@ fun SeerrViewRequestSheet(
                 SeasonTable(
                     details = details,
                     selectedSeasons = selectedSeasons,
-                    onSeasonsChanged = { selectedSeasons = it }
+                    onSeasonsChanged = { selectedSeasons = it },
+                    enabled = !requestInProgress
                 )
             }
 
@@ -117,6 +126,7 @@ fun SeerrViewRequestSheet(
                 onProfileSelected = { selectedProfileId = it },
                 selectedRootFolder = selectedRootFolder,
                 onRootFolderSelected = { selectedRootFolder = it },
+                requestInProgress = requestInProgress,
                 onApproveRequest = {
                     val seasons = if (details is TvDetails) selectedSeasons.toList() else null
                     onApproveRequest(
@@ -137,7 +147,8 @@ fun SeerrViewRequestSheet(
 private fun SeasonTable(
     details: TvDetails,
     selectedSeasons: Set<Int>,
-    onSeasonsChanged: (Set<Int>) -> Unit
+    onSeasonsChanged: (Set<Int>) -> Unit,
+    enabled: Boolean = true
 ) {
     ContainerCard(
         modifier = Modifier.fillMaxWidth(),
@@ -154,7 +165,8 @@ private fun SeasonTable(
                 } else {
                     onSeasonsChanged(emptySet())
                 }
-            }
+            },
+            enabled = enabled
         )
         HorizontalDivider()
 
@@ -191,7 +203,8 @@ private fun SeasonTable(
                         } else {
                             onSeasonsChanged(selectedSeasons - season.seasonNumber)
                         }
-                    }
+                    },
+                    enabled = enabled
                 )
             }
         }
@@ -205,6 +218,7 @@ private fun AdvancedSection(
     onProfileSelected: (Long?) -> Unit,
     selectedRootFolder: String?,
     onRootFolderSelected: (String?) -> Unit,
+    requestInProgress: Boolean,
     onApproveRequest: () -> Unit,
     onDeclineRequest: () -> Unit
 ) {
@@ -219,7 +233,8 @@ private fun AdvancedSection(
             onOptionSelected = { onProfileSelected(it) },
             getOptionLabel = { profileId ->
                 profiles.find { it.id == profileId }?.name ?: profileId.toString()
-            }
+            },
+            enabled = !requestInProgress
         )
 
         DropdownPicker(
@@ -227,23 +242,30 @@ private fun AdvancedSection(
             options = rootFolders.map { it.path }.ifEmpty { listOfNotNull(selectedRootFolder) },
             selectedOption = selectedRootFolder,
             onOptionSelected = { onRootFolderSelected(it) },
-            getOptionLabel = { it }
+            getOptionLabel = { it },
+            enabled = !requestInProgress
         )
 
         Button(
             onClick = onApproveRequest,
             modifier = Modifier.fillMaxWidth(),
+            enabled = !requestInProgress,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF4CAF50),
                 contentColor = Color.White
             )
         ) {
-            Text(mokoString(MR.strings.approve_request))
+            if (requestInProgress) {
+                androidx.compose.material3.CircularProgressIndicator(Modifier.size(24.dp))
+            } else {
+                Text(mokoString(MR.strings.approve_request))
+            }
         }
 
         OutlinedButton(
             onClick = onDeclineRequest,
             modifier = Modifier.fillMaxWidth(),
+            enabled = !requestInProgress,
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.error
             )

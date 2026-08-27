@@ -79,7 +79,8 @@ fun EditSeriesSheet(
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitor,
-                onCheckedChange = { monitor = it }
+                onCheckedChange = { monitor = it },
+                enabled = !editInProgress
             )
 
             LabelledSwitch(
@@ -87,13 +88,15 @@ fun EditSeriesSheet(
                 checked = monitorNewSeasons,
                 onCheckedChange = {
                     monitorNewSeasons = it
-                }
+                },
+                enabled = !editInProgress
             )
 
             LabelledSwitch(
                 label = mokoString(MR.strings.season_folders),
                 checked = seasonFolders,
-                onCheckedChange = { seasonFolders = it }
+                onCheckedChange = { seasonFolders = it },
+                enabled = !editInProgress
             )
 
             DropdownPicker(
@@ -102,7 +105,8 @@ fun EditSeriesSheet(
                 selectedOption = seriesType,
                 onOptionSelected = { seriesType = it },
                 getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.series_type)) }
+                label = { Text(mokoString(MR.strings.series_type)) },
+                enabled = !editInProgress
             )
 
             qualityProfiles
@@ -114,7 +118,8 @@ fun EditSeriesSheet(
                         selectedOption = profile,
                         onOptionSelected = { qualityProfileId = it.id },
                         getOptionLabel = { it.name ?: "" },
-                        label = { Text(mokoString(MR.strings.quality_profile)) }
+                        label = { Text(mokoString(MR.strings.quality_profile)) },
+                        enabled = !editInProgress
                     )
                 }
 
@@ -134,7 +139,8 @@ fun EditSeriesSheet(
                         tags.firstOrNull { tag == it.id }?.label
                             ?: mokoString(MR.strings.unknown)
                     },
-                    label = { Text(mokoString(MR.strings.tags)) }
+                    label = { Text(mokoString(MR.strings.tags)) },
+                    enabled = !editInProgress
                 )
             }
 
@@ -148,7 +154,8 @@ fun EditSeriesSheet(
                             selectedOption = folder,
                             onOptionSelected = { rootFolder = it.path },
                             label = { Text(mokoString(MR.strings.root_folder)) },
-                            getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" }
+                            getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
+                            enabled = !editInProgress
                         )
                     }
             }

@@ -121,7 +121,8 @@ fun AddAuthorSheet(
                     selectedOption = selectedInstance,
                     onOptionSelected = onInstanceSelected,
                     getOptionLabel = { it.label },
-                    label = { Text(mokoString(MR.strings.instances)) }
+                    label = { Text(mokoString(MR.strings.instances)) },
+                    enabled = !addInProgress
                 )
             }
             DropdownPicker(
@@ -130,7 +131,8 @@ fun AddAuthorSheet(
                 selectedOption = monitor,
                 onOptionSelected = { monitor = it },
                 getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.monitor)) }
+                label = { Text(mokoString(MR.strings.monitor)) },
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -143,7 +145,8 @@ fun AddAuthorSheet(
                 selectedOption = monitorNewBooks,
                 onOptionSelected = { monitorNewBooks = it },
                 getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.monitor_new_books)) }
+                label = { Text(mokoString(MR.strings.monitor_new_books)) },
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -152,7 +155,8 @@ fun AddAuthorSheet(
                 selectedOption = qualityProfile,
                 onOptionSelected = { qualityProfile = it },
                 getOptionLabel = { it.name ?: "" },
-                label = { Text(mokoString(MR.strings.quality_profile)) }
+                label = { Text(mokoString(MR.strings.quality_profile)) },
+                enabled = !addInProgress
             )
 
             if (tags.isNotEmpty()) {
@@ -171,7 +175,8 @@ fun AddAuthorSheet(
                         tags.firstOrNull { tag == it.id }?.label
                             ?: mokoString(MR.strings.unknown)
                     },
-                    label = { Text(mokoString(MR.strings.tags)) }
+                    label = { Text(mokoString(MR.strings.tags)) },
+                    enabled = !addInProgress
                 )
             }
 
@@ -182,14 +187,16 @@ fun AddAuthorSheet(
                     selectedOption = rootFolder,
                     onOptionSelected = { rootFolder = it },
                     label = { Text(mokoString(MR.strings.root_folder)) },
-                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" }
+                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
+                    enabled = !addInProgress
                 )
             }
 
             LabelledSwitch(
                 label = mokoString(MR.strings.search_on_add_label),
                 checked = searchOnAdd,
-                onCheckedChange = { searchOnAdd = it }
+                onCheckedChange = { searchOnAdd = it },
+                enabled = !addInProgress
             )
 
             Button(

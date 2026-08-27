@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +51,7 @@ fun SeerrRequestSheet(
     serviceDetails: ServiceDetails?,
     currentUser: SeerrUser?,
     users: List<SeerrUser>,
+    requestInProgress: Boolean,
     onDismissRequest: () -> Unit,
     onSubmitRequest: (Long?, String?, Long?, List<Int>?, Long?) -> Unit
 ) {
@@ -79,8 +81,15 @@ fun SeerrRequestSheet(
     val isAdmin = currentUser?.hasPermission(UserPermission.ADMIN) == true
 
     ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        onDismissRequest = {
+            if (!requestInProgress) {
+                onDismissRequest()
+            }
+        },
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !requestInProgress }
+        )
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -111,7 +120,8 @@ fun SeerrRequestSheet(
                 SeasonSelector(
                     details = details,
                     selectedSeasons = selectedSeasons,
-                    onSeasonsChanged = { selectedSeasons = it }
+                    onSeasonsChanged = { selectedSeasons = it },
+                    enabled = !requestInProgress
                 )
             }
 
@@ -132,7 +142,8 @@ fun SeerrRequestSheet(
                     onOptionSelected = { selectedProfileId = it },
                     getOptionLabel = { profileId ->
                         profiles.find { it.id == profileId }?.name ?: profileId.toString()
-                    }
+                    },
+                    enabled = !requestInProgress
                 )
 
                 DropdownPicker(
@@ -140,7 +151,8 @@ fun SeerrRequestSheet(
                     options = rootFolders.map { it.path }.ifEmpty { listOfNotNull(selectedRootFolder) },
                     selectedOption = selectedRootFolder,
                     onOptionSelected = { selectedRootFolder = it },
-                    getOptionLabel = { it }
+                    getOptionLabel = { it },
+                    enabled = !requestInProgress
                 )
 
                 if (isAdmin && users.isNotEmpty()) {
@@ -151,7 +163,8 @@ fun SeerrRequestSheet(
                         onOptionSelected = { selectedUserId = it },
                         getOptionLabel = { userId ->
                             users.find { it.id == userId }?.displayName ?: userId.toString()
-                        }
+                        },
+                        enabled = !requestInProgress
                     )
                 }
 
@@ -161,7 +174,8 @@ fun SeerrRequestSheet(
                 ) {
                     OutlinedButton(
                         onClick = onDismissRequest,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        enabled = !requestInProgress
                     ) {
                         Text(mokoString(MR.strings.cancel))
                     }
@@ -175,12 +189,15 @@ fun SeerrRequestSheet(
                                 seasons,
                                 selectedUserId
                             )
-                            onDismissRequest()
                         },
                         modifier = Modifier.weight(1f),
-                        enabled = if (details is TvDetails) selectedSeasons.isNotEmpty() else true
+                        enabled = !requestInProgress && if (details is TvDetails) selectedSeasons.isNotEmpty() else true
                     ) {
-                        Text(mokoString(MR.strings.request))
+                        if (requestInProgress) {
+                            CircularProgressIndicator(Modifier.size(24.dp))
+                        } else {
+                            Text(mokoString(MR.strings.request))
+                        }
                     }
                 }
             }
@@ -192,7 +209,8 @@ fun SeerrRequestSheet(
 private fun SeasonSelector(
     details: TvDetails,
     selectedSeasons: Set<Int>,
-    onSeasonsChanged: (Set<Int>) -> Unit
+    onSeasonsChanged: (Set<Int>) -> Unit,
+    enabled: Boolean = true
 ) {
     ContainerCard(
         modifier = Modifier.fillMaxWidth(),
@@ -209,7 +227,8 @@ private fun SeasonSelector(
                 } else {
                     onSeasonsChanged(emptySet())
                 }
-            }
+            },
+            enabled = enabled
         )
         HorizontalDivider()
 
@@ -230,7 +249,8 @@ private fun SeasonSelector(
                     } else {
                         onSeasonsChanged(selectedSeasons - season.seasonNumber)
                     }
-                }
+                },
+                enabled = enabled
             )
         }
     }

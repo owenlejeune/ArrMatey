@@ -77,7 +77,8 @@ fun EditPathSheet(
                     selectedOption = folder,
                     onOptionSelected = { selectedRootFolder = it },
                     label = { Text(mokoString(MR.strings.root_folder)) },
-                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" }
+                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
+                    enabled = !editInProgress
                 )
             }
 
@@ -85,7 +86,7 @@ fun EditPathSheet(
                 label = mokoString(MR.strings.move_files),
                 checked = moveFiles,
                 onCheckedChange = { moveFiles = it },
-                enabled = isPathChanged
+                enabled = !editInProgress && isPathChanged
             )
 
             Button(

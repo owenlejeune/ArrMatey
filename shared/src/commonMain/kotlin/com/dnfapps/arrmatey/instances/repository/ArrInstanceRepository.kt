@@ -61,6 +61,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class ArrInstanceRepository(
     override val instance: Instance,
@@ -330,7 +332,7 @@ class ArrInstanceRepository(
 
     suspend fun addItem(item: ArrMedia, searchOnAdd: Boolean) {
         _addItemStatus.value = OperationStatus.InProgress
-        delay(100)
+        delay(100.milliseconds)
 
         val result = client.addItemToLibrary(item)
         processAddResult(result, searchOnAdd)

@@ -120,7 +120,8 @@ fun AddSeriesSheet(
                     selectedOption = selectedInstance,
                     onOptionSelected = onInstanceSelected,
                     getOptionLabel = { it.label },
-                    label = { Text(mokoString(MR.strings.instances)) }
+                    label = { Text(mokoString(MR.strings.instances)) },
+                    enabled = !addInProgress
                 )
             }
             DropdownPicker(
@@ -133,13 +134,15 @@ fun AddSeriesSheet(
                 selectedOption = monitor,
                 onOptionSelected = { monitor = it },
                 getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.monitor)) }
+                label = { Text(mokoString(MR.strings.monitor)) },
+                enabled = !addInProgress
             )
 
             LabelledSwitch(
                 label = mokoString(MR.strings.season_folders),
                 checked = seasonFolders,
-                onCheckedChange = { seasonFolders = it }
+                onCheckedChange = { seasonFolders = it },
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -148,7 +151,8 @@ fun AddSeriesSheet(
                 selectedOption = qualityProfile,
                 onOptionSelected = { qualityProfile = it },
                 getOptionLabel = { it.name ?: "" },
-                label = { Text(mokoString(MR.strings.quality_profile)) }
+                label = { Text(mokoString(MR.strings.quality_profile)) },
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -157,7 +161,8 @@ fun AddSeriesSheet(
                 selectedOption = seriesType,
                 onOptionSelected = { seriesType = it },
                 getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.series_type)) }
+                label = { Text(mokoString(MR.strings.series_type)) },
+                enabled = !addInProgress
             )
 
             if (tags.isNotEmpty()) {
@@ -176,7 +181,8 @@ fun AddSeriesSheet(
                         tags.firstOrNull { tag == it.id }?.label
                             ?: mokoString(MR.strings.unknown)
                     },
-                    label = { Text(mokoString(MR.strings.tags)) }
+                    label = { Text(mokoString(MR.strings.tags)) },
+                    enabled = !addInProgress
                 )
             }
 
@@ -187,14 +193,16 @@ fun AddSeriesSheet(
                     selectedOption = rootFolder,
                     onOptionSelected = { rootFolder = it },
                     label = { Text(mokoString(MR.strings.root_folder)) },
-                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" }
+                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
+                    enabled = !addInProgress
                 )
             }
 
             LabelledSwitch(
                 label = mokoString(MR.strings.search_on_add_label),
                 checked = searchOnAdd,
-                onCheckedChange = { searchOnAdd = it }
+                onCheckedChange = { searchOnAdd = it },
+                enabled = !addInProgress
             )
 
             Button(

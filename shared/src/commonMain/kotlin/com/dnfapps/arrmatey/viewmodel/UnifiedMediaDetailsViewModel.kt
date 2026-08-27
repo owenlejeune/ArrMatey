@@ -163,6 +163,9 @@ class UnifiedMediaDetailsViewModel(
     private val _removeQueueItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val removeQueueItemStatus: StateFlow<OperationStatus> = _removeQueueItemStatus.asStateFlow()
 
+    private val _requestStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val requestStatus: StateFlow<OperationStatus> = _requestStatus.asStateFlow()
+
     private val _lastSearchResult = MutableStateFlow<Boolean?>(null)
     val lastSearchResult: StateFlow<Boolean?> = _lastSearchResult.asStateFlow()
 
@@ -722,6 +725,7 @@ class UnifiedMediaDetailsViewModel(
 
     // Sheet Visibility Actions
     fun showRequestSheet(is4k: Boolean = false) {
+        _requestStatus.value = OperationStatus.Idle
         _isRequest4k.value = is4k
         _isRequestSheetVisible.value = true
     }
@@ -818,9 +822,13 @@ class UnifiedMediaDetailsViewModel(
                 seasons = seasons,
                 userId = userId
             )
+            _requestStatus.value = OperationStatus.InProgress
             submitRequestUseCase(body, repository).onSuccess {
+                _requestStatus.value = OperationStatus.Success()
                 hideRequestSheet()
                 refresh()
+            }.onError { code, message, cause ->
+                _requestStatus.value = OperationStatus.Error(code, message, cause)
             }
         }
     }
@@ -834,6 +842,7 @@ class UnifiedMediaDetailsViewModel(
     ) {
         viewModelScope.launch {
             val repository = getSeerrRepository() ?: return@launch
+            _requestStatus.value = OperationStatus.InProgress
             setRequestApprovalStatusUseCase(
                 requestId = requestId,
                 approvalStatus = ApprovalStatus.Approve,
@@ -842,22 +851,41 @@ class UnifiedMediaDetailsViewModel(
                 rootFolder = rootFolder,
                 languageProfileId = languageProfileId,
                 seasons = seasons
-            ).onSuccess { refresh() }
+            ).onSuccess {
+                _requestStatus.value = OperationStatus.Success()
+                hideViewRequestSheet()
+                refresh()
+            }.onError { code, message, cause ->
+                _requestStatus.value = OperationStatus.Error(code, message, cause)
+            }
         }
     }
 
     fun cancelRequest(requestId: Long) {
         viewModelScope.launch {
             val repository = getSeerrRepository() ?: return@launch
-            cancelRequestUseCase(requestId, repository).onSuccess { refresh() }
+            _requestStatus.value = OperationStatus.InProgress
+            cancelRequestUseCase(requestId, repository).onSuccess {
+                _requestStatus.value = OperationStatus.Success()
+                refresh()
+            }.onError { code, message, cause ->
+                _requestStatus.value = OperationStatus.Error(code, message, cause)
+            }
         }
     }
 
     fun declineRequest(requestId: Long) {
         viewModelScope.launch {
             val repository = getSeerrRepository() ?: return@launch
+            _requestStatus.value = OperationStatus.InProgress
             setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Decline, repository)
-                .onSuccess { refresh() }
+                .onSuccess {
+                    _requestStatus.value = OperationStatus.Success()
+                    hideViewRequestSheet()
+                    refresh()
+                }.onError { code, message, cause ->
+                    _requestStatus.value = OperationStatus.Error(code, message, cause)
+                }
         }
     }
 

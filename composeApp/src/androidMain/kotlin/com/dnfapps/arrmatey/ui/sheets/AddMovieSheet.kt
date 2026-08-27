@@ -118,14 +118,16 @@ fun AddMovieSheet(
                     selectedOption = selectedInstance,
                     onOptionSelected = onInstanceSelected,
                     getOptionLabel = { it.label },
-                    label = { Text(mokoString(MR.strings.instances)) }
+                    label = { Text(mokoString(MR.strings.instances)) },
+                    enabled = !addInProgress
                 )
             }
 
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,
-                onCheckedChange = { monitored = it }
+                onCheckedChange = { monitored = it },
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -134,7 +136,8 @@ fun AddMovieSheet(
                 selectedOption = qualityProfile,
                 onOptionSelected = { qualityProfile = it },
                 getOptionLabel = { it.name ?: "" },
-                label = { Text(mokoString(MR.strings.quality_profile)) }
+                label = { Text(mokoString(MR.strings.quality_profile)) },
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -147,7 +150,8 @@ fun AddMovieSheet(
                 selectedOption = minimumAvailability,
                 onOptionSelected = { minimumAvailability = it },
                 getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.minimum_availability)) }
+                label = { Text(mokoString(MR.strings.minimum_availability)) },
+                enabled = !addInProgress
             )
 
             if (tags.isNotEmpty()) {
@@ -166,7 +170,8 @@ fun AddMovieSheet(
                         tags.firstOrNull { tag == it.id }?.label
                             ?: mokoString(MR.strings.unknown)
                     },
-                    label = { Text(mokoString(MR.strings.tags)) }
+                    label = { Text(mokoString(MR.strings.tags)) },
+                    enabled = !addInProgress
                 )
             }
 
@@ -177,14 +182,16 @@ fun AddMovieSheet(
                     selectedOption = rootFolder,
                     onOptionSelected = { rootFolder = it },
                     label = { Text(mokoString(MR.strings.root_folder)) },
-                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" }
+                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
+                    enabled = !addInProgress
                 )
             }
 
             LabelledSwitch(
                 label = mokoString(MR.strings.search_on_add_label),
                 checked = searchOnAdd,
-                onCheckedChange = { searchOnAdd = it }
+                onCheckedChange = { searchOnAdd = it },
+                enabled = !addInProgress
             )
 
             Button(

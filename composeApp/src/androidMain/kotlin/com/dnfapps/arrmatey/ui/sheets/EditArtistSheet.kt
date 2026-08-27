@@ -75,7 +75,8 @@ fun EditArtistSheet(
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitor,
-                onCheckedChange = { monitor = it }
+                onCheckedChange = { monitor = it },
+                enabled = !editInProgress
             )
 
             DropdownPicker(
@@ -88,7 +89,8 @@ fun EditArtistSheet(
                 selectedOption = monitorNewAlbums,
                 onOptionSelected = { monitorNewAlbums = it },
                 getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.monitor_new_albums)) }
+                label = { Text(mokoString(MR.strings.monitor_new_albums)) },
+                enabled = !editInProgress
             )
 
             qualityProfiles
@@ -100,7 +102,8 @@ fun EditArtistSheet(
                         selectedOption = profile,
                         onOptionSelected = { qualityProfileId = it.id },
                         getOptionLabel = { it.name ?: "" },
-                        label = { Text(mokoString(MR.strings.quality_profile)) }
+                        label = { Text(mokoString(MR.strings.quality_profile)) },
+                        enabled = !editInProgress
                     )
                 }
 
@@ -120,7 +123,8 @@ fun EditArtistSheet(
                         tags.firstOrNull { tag == it.id }?.label
                             ?: mokoString(MR.strings.unknown)
                     },
-                    label = { Text(mokoString(MR.strings.tags)) }
+                    label = { Text(mokoString(MR.strings.tags)) },
+                    enabled = !editInProgress
                 )
             }
 
@@ -134,7 +138,8 @@ fun EditArtistSheet(
                             selectedOption = folder,
                             onOptionSelected = { rootFolder = it.path },
                             label = { Text(mokoString(MR.strings.root_folder)) },
-                            getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" }
+                            getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
+                            enabled = !editInProgress
                         )
                     }
             }

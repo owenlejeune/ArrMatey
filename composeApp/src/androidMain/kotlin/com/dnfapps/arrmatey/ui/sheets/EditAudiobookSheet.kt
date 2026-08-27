@@ -66,7 +66,8 @@ fun EditAudiobookSheet(
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,
-                onCheckedChange = { monitored = it }
+                onCheckedChange = { monitored = it },
+                enabled = !editInProgress
             )
 
             DropdownPicker(
@@ -75,7 +76,8 @@ fun EditAudiobookSheet(
                 selectedOption = qualityProfiles.firstOrNull { it.id == selectedQualityProfileId } ?: qualityProfiles.firstOrNull(),
                 onOptionSelected = { selectedQualityProfileId = it.id },
                 getOptionLabel = { it.name ?: "" },
-                label = { Text(mokoString(MR.strings.quality_profile)) }
+                label = { Text(mokoString(MR.strings.quality_profile)) },
+                enabled = !editInProgress
             )
 
             if (rootFolders.isNotEmpty()) {
@@ -85,7 +87,8 @@ fun EditAudiobookSheet(
                     selectedOption = selectedRootFolder,
                     onOptionSelected = { selectedRootFolder = it },
                     getOptionLabel = { it.path },
-                    label = { Text(mokoString(MR.strings.root_folder)) }
+                    label = { Text(mokoString(MR.strings.root_folder)) },
+                    enabled = !editInProgress
                 )
             }
 
@@ -93,7 +96,8 @@ fun EditAudiobookSheet(
                 value = relativePath,
                 onValueChange = { relativePath = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = mokoString(MR.strings.relative_path)
+                label = mokoString(MR.strings.relative_path),
+                enabled = !editInProgress
             )
 
             Button(

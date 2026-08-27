@@ -117,7 +117,8 @@ fun AddArtistSheet(
                     selectedOption = selectedInstance,
                     onOptionSelected = onInstanceSelected,
                     getOptionLabel = { it.label },
-                    label = { Text(mokoString(MR.strings.instances)) }
+                    label = { Text(mokoString(MR.strings.instances)) },
+                    enabled = !addInProgress
                 )
             }
             DropdownPicker(
@@ -126,7 +127,8 @@ fun AddArtistSheet(
                 selectedOption = monitor,
                 onOptionSelected = { monitor = it },
                 getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.monitor)) }
+                label = { Text(mokoString(MR.strings.monitor)) },
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -139,7 +141,8 @@ fun AddArtistSheet(
                 selectedOption = monitorNew,
                 onOptionSelected = { monitorNew = it },
                 getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.monitor_new_albums)) }
+                label = { Text(mokoString(MR.strings.monitor_new_albums)) },
+                enabled = !addInProgress
             )
 
             DropdownPicker(
@@ -148,7 +151,8 @@ fun AddArtistSheet(
                 selectedOption = qualityProfile,
                 onOptionSelected = { qualityProfile = it },
                 getOptionLabel = { it.name ?: "" },
-                label = { Text(mokoString(MR.strings.quality_profile)) }
+                label = { Text(mokoString(MR.strings.quality_profile)) },
+                enabled = !addInProgress
             )
 
             if (tags.isNotEmpty()) {
@@ -167,7 +171,8 @@ fun AddArtistSheet(
                         tags.firstOrNull { tag == it.id }?.label
                             ?: mokoString(MR.strings.unknown)
                     },
-                    label = { Text(mokoString(MR.strings.tags)) }
+                    label = { Text(mokoString(MR.strings.tags)) },
+                    enabled = !addInProgress
                 )
             }
 
@@ -178,14 +183,16 @@ fun AddArtistSheet(
                     selectedOption = rootFolder,
                     onOptionSelected = { rootFolder = it },
                     label = { Text(mokoString(MR.strings.root_folder)) },
-                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" }
+                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
+                    enabled = !addInProgress
                 )
             }
 
             LabelledSwitch(
                 label = mokoString(MR.strings.search_on_add_label),
                 checked = searchOnAdd,
-                onCheckedChange = { searchOnAdd = it }
+                onCheckedChange = { searchOnAdd = it },
+                enabled = !addInProgress
             )
 
             Button(
