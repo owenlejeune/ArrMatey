@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.toAlbumRelease
+import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toAudiobookFiles
 import com.dnfapps.arrmatey.navigation.toAudiobookRelease
 import com.dnfapps.arrmatey.navigation.toAuthorFiles
@@ -191,19 +192,18 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                 type = type,
                 instanceId = search.instanceId,
                 onBack = { navigation.popBackStack() },
-                onNavigateToDetails = { navigation.toDetails(it) },
-                onNavigateToUnifiedDetails = { arrId, tmdbId, tvdbId, instanceType ->
-                    navigation.toDetails(arrId, tmdbId, tvdbId, type = instanceType)
-                },
-                onNavigateToPreview = { navigation.toPreview(it) }
+                onItemClick = {
+                    navigation.toArrDetailsOrPreview(it, type)
+                }
             )
         }
     }
     entry<MediaScreen.Preview<ArrMedia>> { preview ->
-        if (defaultInstanceType != null) {
+        val type = preview.type ?: defaultInstanceType
+        if (type != null) {
             MediaPreviewScreen(
                 item = preview.item,
-                type = defaultInstanceType,
+                type = type,
                 isExpanded = isExpanded,
                 onBack = { navigation.popBackStack() },
                 onItemAdded = { navigation.toDetails(it) }

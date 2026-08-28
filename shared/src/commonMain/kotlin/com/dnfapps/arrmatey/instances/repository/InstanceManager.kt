@@ -1,10 +1,12 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.database.CredentialMigrationUseCase
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.networking.asSuccess
 import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
@@ -153,6 +155,16 @@ class InstanceManager(
             .combine(_instanceRepositories) { instances, repos ->
                 instances.mapNotNull { repos[it.id] }
             }
+
+    fun observeAllArrLibraries(): Flow<List<ArrMedia>> {
+        return _instanceRepositories.flatMapLatest { repos ->
+            val libraries = repos.values.filterIsInstance<ArrInstanceRepository>().map { it.library }
+            if (libraries.isEmpty()) return@flatMapLatest flowOf(emptyList())
+            combine(libraries) { results ->
+                results.flatMap { it?.asSuccess()?.data ?: emptyList() }
+            }
+        }
+    }
 
     fun getRepositoriesByType(type: InstanceType): List<InstanceScopedRepository> {
         return _instanceRepositories.value.values

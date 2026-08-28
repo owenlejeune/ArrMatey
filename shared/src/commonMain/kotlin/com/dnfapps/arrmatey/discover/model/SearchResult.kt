@@ -2,10 +2,18 @@ package com.dnfapps.arrmatey.discover.model
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.LidarrRatings
+import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.MovieRatings
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.SeriesRatings
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.utils.AspectRatio
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -22,6 +30,7 @@ sealed interface SearchResult {
     @Serializable
     data class ArrMediaResult(
         val media: ArrMedia,
+        val instanceId: Long? = null,
         override var originalRank: Int = 0
     ) : SearchResult {
         override val id: String = "arr_${media.guid}"
@@ -38,6 +47,24 @@ sealed interface SearchResult {
         override val popularity: Double = when (media) {
             is ArrMovie -> media.popularity
             else -> 0.0
+        }
+        val aspectRatio: AspectRatio = when(media) {
+            is SearchAudiobook, Audiobook, Author, Arrtist -> AspectRatio.Cover
+            else -> AspectRatio.Poster
+        }
+        val instanceType: InstanceType = when(media) {
+            is ArrSeries,
+            is MockMedia.Sonarr,
+            is MockMedia.Default -> InstanceType.Sonarr
+            is ArrMovie,
+            is MockMedia.Radarr -> InstanceType.Radarr
+            is Arrtist,
+            is MockMedia.Lidarr -> InstanceType.Lidarr
+            is Author,
+            is MockMedia.Readarr -> InstanceType.Booksehelf
+            is Audiobook,
+            is SearchAudiobook,
+            is MockMedia.Listenarr -> InstanceType.Listenarr
         }
     }
 

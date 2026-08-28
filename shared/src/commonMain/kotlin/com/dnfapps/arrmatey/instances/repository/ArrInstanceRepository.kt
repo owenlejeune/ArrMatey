@@ -42,10 +42,12 @@ import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.DownloadState
+import com.dnfapps.arrmatey.extensions.mergeWithLibrary
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.mapValues
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
@@ -62,7 +64,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 class ArrInstanceRepository(
     override val instance: Instance,
@@ -310,7 +311,8 @@ class ArrInstanceRepository(
         client.lookup(queryParams)
             .onSuccess { results ->
                 logger.info { "Lookup results: $results" }
-                _lookupResults.value = NetworkResult.Success(results)
+                val libraryItems = library.value?.asSuccess()?.data ?: emptyList()
+                _lookupResults.value = NetworkResult.Success(results.mergeWithLibrary(libraryItems))
             }
             .onError { code, message, cause ->
                 logger.error(cause) { "Error performing lookup: $message" }
@@ -327,7 +329,13 @@ class ArrInstanceRepository(
         val language = _listenarrConfiguration.value.defaultSearchLanguage
         val region = _listenarrConfiguration.value.defaultSearchRegion
         val queryParams = LookupParams(query, language, region)
-        return client.lookup(queryParams)
+        val result = client.lookup(queryParams)
+        return if (result is NetworkResult.Success) {
+            val libraryItems = library.value?.asSuccess()?.data ?: emptyList()
+            NetworkResult.Success(result.data.mergeWithLibrary(libraryItems))
+        } else {
+            result
+        }
     }
 
     suspend fun addItem(item: ArrMedia, searchOnAdd: Boolean) {

@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -233,7 +234,8 @@ fun PosterItem(
                     text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
                     style = MaterialTheme.typography.labelLarge,
                     minLines = 2,
-                    maxLines = 2
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 val subText = when (item.mediaType) {
                     RequestType.Person -> item.knownForDepartment ?: ""

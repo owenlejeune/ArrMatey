@@ -12,6 +12,8 @@ import com.dnfapps.arrmatey.arr.usecase.GetLookupResultsUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformLookupUseCase
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
+import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.extensions.mergeWithLibrary
 import com.dnfapps.arrmatey.extensions.orderedSortedWith
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +31,7 @@ class ArrSearchViewModel(
     private val getLookupResultsUseCase: GetLookupResultsUseCase,
     private val getLibraryUseCase: GetLibraryUseCase,
     private val performLookupUseCase: PerformLookupUseCase,
+    private val preferencesStore: PreferencesStore,
     getActivityTasksUseCase: GetActivityTasksUseCase
 ): ViewModel() {
 
@@ -56,6 +59,9 @@ class ArrSearchViewModel(
     private val _lookupUiState = MutableStateFlow<ArrLibrary>(ArrLibrary.Initial)
     val lookupUiState: StateFlow<ArrLibrary> = _lookupUiState.asStateFlow()
 
+    val searchShowBanners: StateFlow<Boolean> = preferencesStore.searchShowBanners
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     init {
         observeLookupResults()
     }
@@ -76,14 +82,17 @@ class ArrSearchViewModel(
             ) { state, library, sortBy, sortOrder ->
                 when (state) {
                     is ArrLibrary.Success -> {
+                        val libraryItems = (library as? ArrLibrary.Success)?.items ?: emptyList()
+                        val mergedItems = state.items.mergeWithLibrary(libraryItems)
+
                         val comparator: Comparator<ArrMedia>? = when (sortBy) {
                             SortBy.Year -> compareBy { it.year }
                             SortBy.Rating -> compareBy { it.ratingScore() }
                             else -> null
                         }
                         val sortedList = comparator?.let { comparator ->
-                            state.items.orderedSortedWith(sortOrder, comparator)
-                        } ?: state.items
+                            mergedItems.orderedSortedWith(sortOrder, comparator)
+                        } ?: mergedItems
 
                         val finalList = if (
                             instanceType == InstanceType.Listenarr && library is ArrLibrary.Success
@@ -94,10 +103,13 @@ class ArrSearchViewModel(
                             sortedList.filterNot { item ->
                                 item is SearchAudiobook && item.asin in existingAsins
                             }
-                        } else { sortedList }
+                        } else {
+                            sortedList
+                        }
 
                         ArrLibrary.Success(items = finalList, preferences = state.preferences)
                     }
+
                     else -> state
                 }
             }

@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.navigation
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.NavKey
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
@@ -92,6 +93,23 @@ fun Navigator<*>.toLibrary() = nav().navigateTo(ArrScreen.Library)
 fun Navigator<*>.toHome() = nav().navigateTo(SeerrScreen.Home)
 fun Navigator<*>.toDiscover() = nav().navigateTo(DiscoverScreen.Home)
 
+fun Navigator<*>.toArrDetailsOrPreview(
+    item: ArrMedia,
+    type: InstanceType? = null
+) {
+    if (item.id == null) {
+        if (item is ArrMovie || item is ArrSeries) {
+            val tmdbId = (item as? ArrMovie)?.tmdbId ?: (item as? ArrSeries)?.tmdbId
+            val tvdbId = (item as? ArrSeries)?.tvdbId
+            toDetails(null, tmdbId, tvdbId, type = type)
+        } else {
+            toPreview(item, type)
+        }
+    } else {
+        toDetails(id = item.id, type = type)
+    }
+}
+
 fun Navigator<*>.toDetails(
     id: Long? = null,
     tmdbId: Long? = null,
@@ -102,7 +120,7 @@ fun Navigator<*>.toDetails(
 ) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type, instanceId))
 
 fun Navigator<*>.toMediaDetails(
-    media: com.dnfapps.arrmatey.arr.api.model.ArrMedia,
+    media: ArrMedia,
     type: InstanceType? = null,
     instanceId: Long? = null
 ) {
@@ -121,7 +139,7 @@ fun Navigator<*>.toMediaDetails(
     )
 }
 
-fun <T> Navigator<*>.toPreview(item: T) = nav().navigateTo(MediaScreen.Preview(item))
+fun <T> Navigator<*>.toPreview(item: T, type: InstanceType? = null) = nav().navigateTo(MediaScreen.Preview(item, type))
 fun Navigator<*>.toSearch(query: String = "", type: InstanceType? = null, instanceId: Long? = null) = nav().navigateTo(MediaScreen.Search(query, type, instanceId))
 fun Navigator<*>.toMovieReleases(movieId: Long) = nav().navigateTo(MediaScreen.MovieReleases(movieId))
 fun Navigator<*>.toMovieFiles(movie: ArrMovie) = nav().navigateTo(MediaScreen.MovieFiles(movie))

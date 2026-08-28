@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.entensions
 
+import android.text.Html
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -12,6 +13,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SnackbarVisuals
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 
@@ -83,3 +85,8 @@ fun PaddingValues(
     top = top ?: all,
     bottom = bottom ?: all
 )
+
+@Composable
+fun String.rememberHtml(): String = remember(this) {
+    Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY).toString()
+}

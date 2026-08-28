@@ -18,13 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dnfapps.arrmatey.entensions.rememberHtml
 
 @Composable
 fun ItemDescriptionCard(overview: String, modifier: Modifier = Modifier) {
     var expanded by remember { mutableStateOf(false) }
-    val parsed = remember(overview) {
-        Html.fromHtml(overview, Html.FROM_HTML_MODE_LEGACY).toString().trim()
-    }
+    val parsed = overview.rememberHtml()
     Card(
         modifier = modifier
             .fillMaxWidth()

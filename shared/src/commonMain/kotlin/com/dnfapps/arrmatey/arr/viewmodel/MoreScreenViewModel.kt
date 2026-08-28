@@ -64,6 +64,20 @@ class MoreScreenViewModel(
             initialValue = false
         )
 
+    val searchShowBanners = preferencesStore.searchShowBanners
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = true
+        )
+
+    val searchShowInstanceIndicatorShadow = preferencesStore.searchShowInstanceIndicatorShadow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = true
+        )
+
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
     val testingStatus: StateFlow<Map<Long, OperationStatus>> = _testingStatus.asStateFlow()
 
@@ -169,6 +183,14 @@ class MoreScreenViewModel(
 
     fun dismissLocalNetworkPermissionInfo() {
         preferencesStore.dismissLocalNetworkPermissionInfo()
+    }
+
+    fun toggleSearchShowBanners() {
+        preferencesStore.toggleSearchShowBanners()
+    }
+
+    fun toggleSearchShowInstanceIndicatorShadow() {
+        preferencesStore.toggleSearchShowInstanceIndicatorShadow()
     }
 
 }

@@ -2,11 +2,14 @@ package com.dnfapps.arrmatey.discover.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
+import com.dnfapps.arrmatey.database.InstanceRepository
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
-import com.dnfapps.arrmatey.database.InstanceRepository
+import com.dnfapps.arrmatey.extensions.mergeWithLibrary
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
@@ -26,6 +29,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -43,7 +47,8 @@ class DiscoverViewModel(
     private val getUpcomingMoviesUseCase: GetUpcomingMoviesUseCase,
     private val getUpcomingTvUseCase: GetUpcomingTvUseCase,
     private val searchSeerrUseCase: SearchSeerrUseCase,
-    private val globalSearchUseCase: GlobalSearchUseCase
+    private val globalSearchUseCase: GlobalSearchUseCase,
+    private val preferencesStore: PreferencesStore
 ) : ViewModel() {
 
     private val seerrRepository: StateFlow<SeerrInstanceRepository?> = instanceManager.getSelectedSeerrRepository()
@@ -87,10 +92,29 @@ class DiscoverViewModel(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _searchState = MutableStateFlow<List<SearchResult>>(emptyList())
-    val searchState: StateFlow<List<SearchResult>> = _searchState.asStateFlow()
+    
+    private val allLibraries: StateFlow<List<ArrMedia>> = instanceManager.observeAllArrLibraries()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val searchState: StateFlow<List<SearchResult>> = combine(_searchState, allLibraries) { results, libraries ->
+        results.map { result ->
+            if (result is SearchResult.ArrMediaResult) {
+                val merged = listOf(result.media).mergeWithLibrary(libraries).first()
+                result.copy(media = merged)
+            } else {
+                result
+            }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
+    val searchShowBanners: StateFlow<Boolean> = preferencesStore.searchShowBanners
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val searchShowInstanceIndicatorShadow: StateFlow<Boolean> = preferencesStore.searchShowInstanceIndicatorShadow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     init {
         observeRepository()

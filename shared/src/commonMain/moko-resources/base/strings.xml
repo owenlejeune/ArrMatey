@@ -318,6 +318,10 @@
     <string name="instance_switcher_toggle_description">Automatically hide the switcher when only one instance is configured</string>
     <string name="open_in_browser">Open in Browser</string>
     <string name="replace_url_with_current">Replace saved URL with current</string>
+
+    <string name="search_results">Search Results</string>
+    <string name="search_show_banners">Show banners</string>
+    <string name="search_show_instance_indicator_shadow">Show instance indicator shadow</string>
     <string name="confirm_delete">Confirm delete</string>
     <string name="confirm_delete_file">This file will be deleted</string>
     <string name="audiobook_info_authors">Author(s)</string>

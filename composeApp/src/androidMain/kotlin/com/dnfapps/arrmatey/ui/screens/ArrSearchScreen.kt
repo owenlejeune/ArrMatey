@@ -26,8 +26,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -51,9 +49,7 @@ fun ArrSearchScreen(
     initialQuery: String,
     type: InstanceType,
     onBack: () -> Unit,
-    onNavigateToDetails: (Long) -> Unit,
-    onNavigateToUnifiedDetails: (Long?, Long?, Long?, InstanceType) -> Unit,
-    onNavigateToPreview: (ArrMedia) -> Unit,
+    onItemClick: (ArrMedia) -> Unit,
     instanceId: Long? = null,
     viewModel: ArrSearchViewModel = koinInjectParams(type, instanceId)
 ) {
@@ -62,6 +58,7 @@ fun ArrSearchScreen(
 
     val lookupState by viewModel.lookupUiState.collectAsStateWithLifecycle()
     val activeMediaIds by viewModel.activeMediaIds.collectAsStateWithLifecycle()
+    val showBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
 
     val textFieldState = rememberTextFieldState(initialQuery)
     val searchBarState = rememberSearchBarState()
@@ -110,7 +107,6 @@ fun ArrSearchScreen(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .padding(horizontal = 12.dp)
         ) {
             when (val state = lookupState) {
                 is ArrLibrary.Initial -> {}
@@ -132,21 +128,10 @@ fun ArrSearchScreen(
                         MediaList(
                             aspectRatio = type.aspectRatio,
                             items = state.items,
-                            onItemClick = { item ->
-                                if (item.id == null) {
-                                     if (type == InstanceType.Radarr || type == InstanceType.Sonarr) {
-                                         val tmdbId = (item as? ArrMovie)?.tmdbId ?: (item as? ArrSeries)?.tmdbId
-                                         val tvdbId = (item as? ArrSeries)?.tvdbId
-                                         onNavigateToUnifiedDetails(null, tmdbId, tvdbId, type)
-                                     } else {
-                                         onNavigateToPreview(item)
-                                     }
-                                 } else {
-                                     onNavigateToDetails(item.id!!)
-                                 }
-                            },
+                            onItemClick = onItemClick,
                             itemIsActive = { item -> item.id in activeMediaIds },
-                            includeOverview = true
+                            includeOverview = true,
+                            showBannerBackground = showBanners
                         )
                     }
                 }

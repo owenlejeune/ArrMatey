@@ -13,9 +13,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,17 +35,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.discover.model.SearchResult
+import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.entensions.isExpanded
-import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.DiscoverScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toDetails
-import com.dnfapps.arrmatey.seerr.api.model.RequestType
-import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
+import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.DiscoverSection
@@ -82,18 +80,13 @@ fun DiscoverTab(
                     onItemClick = { result ->
                         when (result) {
                             is SearchResult.ArrMediaResult -> {
-                                val item = result.media
-                                when (item) {
-                                    is ArrMovie -> navigation.toDetails(id = item.id, tmdbId = item.tmdbId, type = InstanceType.Radarr)
-                                    is ArrSeries -> navigation.toDetails(id = item.id, tmdbId = item.tmdbId, tvdbId = item.tvdbId, type = InstanceType.Sonarr)
-                                    else -> {}
-                                }
+                                navigation.toArrDetailsOrPreview(result.media, result.instanceType)
                             }
                             is SearchResult.SeerrMediaResult -> {
                                 navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
                             }
                             is SearchResult.SeerrPersonResult -> {
-                                navigation.toDetails(tmdbId = result.result.id, requestType = RequestType.Person)
+                                navigation.toPersonDetails(result.result.id)
                             }
                         }
                     }
@@ -120,6 +113,8 @@ private fun DiscoverHomeScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
+    val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
+    val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
 
     val textFieldState = rememberTextFieldState(searchQuery)
     val searchBarState = rememberSearchBarState()
@@ -150,7 +145,9 @@ private fun DiscoverHomeScreen(
                 DiscoverSearchOverlay(
                     items = searchState,
                     isLoading = isSearching,
-                    onItemClick = onItemClick
+                    onItemClick = onItemClick,
+                    showBanners = searchShowBanners,
+                    showInstanceIndicatorShadow = searchShowInstanceIndicatorShadow
                 )
             } else {
                 PullToRefreshBox(
@@ -167,7 +164,7 @@ private fun DiscoverHomeScreen(
                     ) {
                         DiscoverSection(
                             title = MR.strings.trending,
-                            icon = Icons.Default.TrendingUp,
+                            icon = Icons.AutoMirrored.Filled.TrendingUp,
                             data = trendingState,
                             onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
                             onLoadMore = { viewModel.loadNextTrendingPage() }
@@ -217,7 +214,9 @@ private fun DiscoverHomeScreen(
 private fun DiscoverSearchOverlay(
     items: List<SearchResult>,
     isLoading: Boolean,
-    onItemClick: (SearchResult) -> Unit
+    onItemClick: (SearchResult) -> Unit,
+    showBanners: Boolean,
+    showInstanceIndicatorShadow: Boolean
 ) {
     if (isLoading && items.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -227,7 +226,9 @@ private fun DiscoverSearchOverlay(
         SearchResultList(
             items = items,
             onItemClick = onItemClick,
-            includeOverview = true
+            includeOverview = true,
+            showBanners = showBanners,
+            showInstanceIndicatorShadow = showInstanceIndicatorShadow
         )
     }
 }

@@ -2,6 +2,10 @@ package com.dnfapps.arrmatey.discover.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.model.SearchResultWeaver
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
@@ -25,7 +29,7 @@ class GlobalSearchUseCase(
                 val result = repo.directLookup(query)
                 val data = if (result is NetworkResult.Success) result.data else emptyList()
                 data.mapIndexed { index, media ->
-                    SearchResult.ArrMediaResult(media, originalRank = index)
+                    SearchResult.ArrMediaResult(media, instanceId = repo.instance.id, originalRank = index)
                 }
             }
         }
@@ -48,18 +52,23 @@ class GlobalSearchUseCase(
 
         val resultsByTmdbId = mutableMapOf<Long, MutableList<SearchResult>>()
         val resultsByTvdbId = mutableMapOf<Long, MutableList<SearchResult>>()
+        val resultsByAsin = mutableMapOf<String, MutableList<SearchResult>>()
+        val resultsByMbId = mutableMapOf<String, MutableList<SearchResult>>()
         val others = mutableListOf<SearchResult>()
 
         allResults.forEach { result ->
             when (result) {
                 is SearchResult.ArrMediaResult -> {
-                    val item = result.media
-                    when (item) {
+                    when (val item = result.media) {
                         is ArrMovie -> resultsByTmdbId.getOrPut(item.tmdbId) { mutableListOf() }.add(result)
                         is ArrSeries -> {
                             resultsByTvdbId.getOrPut(item.tvdbId) { mutableListOf() }.add(result)
                             item.tmdbId?.let { resultsByTmdbId.getOrPut(it) { mutableListOf() }.add(result) }
                         }
+                        is Audiobook -> item.asin?.let { resultsByAsin.getOrPut(it) { mutableListOf() }.add(result) } ?: others.add(result)
+                        is SearchAudiobook -> resultsByAsin.getOrPut(item.asin) { mutableListOf() }.add(result)
+                        is Arrtist -> (item.mbId ?: item.foreignArtistId)?.let { resultsByMbId.getOrPut(it) { mutableListOf() }.add(result) } ?: others.add(result)
+                        is Author -> item.foreignAuthorId?.let { resultsByAsin.getOrPut(it) { mutableListOf() }.add(result) } ?: others.add(result)
                         else -> others.add(result)
                     }
                 }
@@ -73,6 +82,8 @@ class GlobalSearchUseCase(
         val combined = mutableListOf<SearchResult>()
         val processedTmdbIds = mutableSetOf<Long>()
         val processedTvdbIds = mutableSetOf<Long>()
+        val processedAsins = mutableSetOf<String>()
+        val processedMbIds = mutableSetOf<String>()
 
         // Process by TMDB ID
         resultsByTmdbId.forEach { (tmdbId, items) ->
@@ -80,8 +91,11 @@ class GlobalSearchUseCase(
                 val bestItem = selectBestItem(items)
                 combined.add(bestItem)
                 processedTmdbIds.add(tmdbId)
-                if (bestItem is SearchResult.ArrMediaResult && bestItem.media is ArrSeries) {
-                    processedTvdbIds.add(bestItem.media.tvdbId)
+                if (bestItem is SearchResult.ArrMediaResult) {
+                    val media = bestItem.media
+                    if (media is ArrSeries) {
+                        processedTvdbIds.add(media.tvdbId)
+                    }
                 }
             }
         }
@@ -94,6 +108,28 @@ class GlobalSearchUseCase(
                     combined.add(bestItem)
                 }
                 processedTvdbIds.add(tvdbId)
+            }
+        }
+
+        // Process by ASIN
+        resultsByAsin.forEach { (asin, items) ->
+            if (asin !in processedAsins) {
+                val bestItem = selectBestItem(items)
+                if (bestItem !in combined) {
+                    combined.add(bestItem)
+                }
+                processedAsins.add(asin)
+            }
+        }
+
+        // Process by MBID
+        resultsByMbId.forEach { (mbId, items) ->
+            if (mbId !in processedMbIds) {
+                val bestItem = selectBestItem(items)
+                if (bestItem !in combined) {
+                    combined.add(bestItem)
+                }
+                processedMbIds.add(mbId)
             }
         }
 

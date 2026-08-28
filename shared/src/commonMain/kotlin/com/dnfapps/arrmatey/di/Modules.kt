@@ -382,7 +382,7 @@ val useCaseModule = module {
 }
 
 val viewModelModule = module {
-    factory { DiscoverViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { DiscoverViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ActivityQueueViewModel(get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
         ArrMediaViewModel(
@@ -442,7 +442,7 @@ val viewModelModule = module {
         InstancesViewModel(type, get(), get(), get())
     }
     factory { (type: InstanceType, instanceId: Long?) ->
-        ArrSearchViewModel(type, instanceId, get(), get(), get(), get())
+        ArrSearchViewModel(type, instanceId, get(), get(), get(), get(), get())
     }
     factory { (preview: ArrMedia, type: InstanceType) ->
         MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get(), get())

@@ -75,6 +75,8 @@ class PreferencesStore(
     private val credentialsMigratedKey = booleanPreferencesKey("credentialsMigrated")
     private val localNetworkNoticeSeenKey = booleanPreferencesKey("localNetworkNoticeSeen")
     private val localNetworkPermissionInfoDismissedKey = booleanPreferencesKey("localNetworkPermissionInfoDismissed")
+    private val searchShowBannersKey = booleanPreferencesKey("searchShowBanners")
+    private val searchShowInstanceIndicatorShadowKey = booleanPreferencesKey("searchShowInstanceIndicatorShadow")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> sonarrInfoCardKey
@@ -135,6 +137,16 @@ class PreferencesStore(
     val useClearLogo: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[useClearLogoKey] ?: true
+        }
+
+    val searchShowBanners: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[searchShowBannersKey] ?: true
+        }
+
+    val searchShowInstanceIndicatorShadow: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[searchShowInstanceIndicatorShadowKey] ?: true
         }
 
     private val calendarViewMode: Flow<CalendarViewMode> = dataStore.data
@@ -244,6 +256,24 @@ class PreferencesStore(
         scope.launch {
             dataStore.edit { preferences ->
                 preferences[appColorKey] = color.name
+            }
+        }
+    }
+
+    fun toggleSearchShowBanners() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[searchShowBannersKey] ?: true
+                preferences[searchShowBannersKey] = !current
+            }
+        }
+    }
+
+    fun toggleSearchShowInstanceIndicatorShadow() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[searchShowInstanceIndicatorShadowKey] ?: true
+                preferences[searchShowInstanceIndicatorShadowKey] = !current
             }
         }
     }

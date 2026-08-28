@@ -60,6 +60,26 @@ fun ArrMedia.getUpcomingDateString(
     }
 }
 
+fun List<ArrMedia>.mergeWithLibrary(library: List<ArrMedia>): List<ArrMedia> {
+    return this.map { item ->
+        val match = when (item) {
+            is ArrSeries -> library.filterIsInstance<ArrSeries>().firstOrNull {
+                it.tvdbId == item.tvdbId || (it.tmdbId == item.tmdbId && it.tmdbId != null)
+            }
+            is ArrMovie -> library.filterIsInstance<ArrMovie>().firstOrNull { it.tmdbId == item.tmdbId }
+            is Arrtist -> library.filterIsInstance<Arrtist>().firstOrNull {
+                (it.mbId != null && it.mbId == item.mbId) ||
+                        (it.tadbId != 0L && it.tadbId == item.tadbId)
+            }
+
+            is Audiobook -> library.filterIsInstance<Audiobook>().firstOrNull { it.asin == item.asin }
+            is Author -> library.filterIsInstance<Author>().firstOrNull { it.title == item.title }
+            else -> null
+        }
+        match ?: item
+    }
+}
+
 internal fun formatAirTime(airTime: String?): String? {
     if (airTime.isNullOrBlank()) return null
     val parts = airTime.split(":")
