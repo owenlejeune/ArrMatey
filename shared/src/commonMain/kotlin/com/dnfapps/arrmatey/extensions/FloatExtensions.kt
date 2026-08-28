@@ -10,7 +10,7 @@ fun Float.formatAgeMinutes(): String {
             // less than 1 minute (or bad data)
             "Just now"
         }
-        in 1..<119 -> {
+        in 1..<120 -> {
             // less than 120 minutes
             "$minutes minutes"
         }

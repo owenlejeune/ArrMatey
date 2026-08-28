@@ -19,4 +19,43 @@ class ValidatorsTest {
         assertFalse("http://".isValidUrl())
         assertFalse("http://localhost:70000".isValidUrl()) // Port too high
     }
+
+    @Test
+    fun testIsValidUrlAcceptsUppercaseScheme() {
+        assertTrue("HTTP://google.com".isValidUrl())
+        assertTrue("HTTPS://google.com".isValidUrl())
+    }
+
+    @Test
+    fun testIsValidUrlAcceptsBoundaryPorts() {
+        assertTrue("http://localhost:1".isValidUrl())
+        assertTrue("http://localhost:65535".isValidUrl())
+    }
+
+    @Test
+    fun testIsValidUrlRejectsPortZero() {
+        assertFalse("http://localhost:0".isValidUrl())
+    }
+
+    @Test
+    fun testIsValidUrlAcceptsDeepPaths() {
+        assertTrue("https://host.com/api/v1/resource?query=1&other=2".isValidUrl())
+    }
+
+    @Test
+    fun testIsValidUrlRejectsWhitespace() {
+        assertFalse("http://google .com".isValidUrl())
+        assertFalse(" http://google.com".isValidUrl())
+        assertFalse("http://google.com ".isValidUrl())
+    }
+
+    @Test
+    fun testIsValidUrlRejectsMissingHost() {
+        assertFalse("http:///path".isValidUrl())
+    }
+
+    @Test
+    fun testIsValidUrlRejectsEmptyString() {
+        assertFalse("".isValidUrl())
+    }
 }
