@@ -25,11 +25,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.BrightnessLow
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MiscellaneousServices
@@ -478,7 +480,7 @@ fun SettingsScreen(
                 title = mokoString(MR.strings.search_results),
                 items = listOf(
                     SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Search),
+                        icon = IconSource.Vector(Icons.Default.Image),
                         title = mokoString(MR.strings.search_show_banners),
                         trailingContent = {
                             Switch(
@@ -489,7 +491,7 @@ fun SettingsScreen(
                         onClick = { viewModel.toggleSearchShowBanners() }
                     ),
                     SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Search),
+                        icon = IconSource.Vector(Icons.Default.BrightnessLow),
                         title = mokoString(MR.strings.search_show_instance_indicator_shadow),
                         trailingContent = {
                             Switch(

@@ -31,4 +31,16 @@ extension View {
             Text(config(data).message)
         }
     }
+
+    func colouredDropShadow(color: Color?) -> some View {
+        self.background {
+            if let color = color {
+                color
+                    .cornerRadius(12)
+                    .blur(radius: 16)
+                    .padding(.horizontal, 2)
+                    .padding(.top, 40)
+            }
+        }
+    }
 }

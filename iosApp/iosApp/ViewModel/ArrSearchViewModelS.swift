@@ -16,6 +16,7 @@ class ArrSearchViewModelS: ObservableObject {
     @Published private(set) var sortBy: SortBy = .relevance
     @Published private(set) var sortOrder: Shared.SortOrder = .asc
     @Published private(set) var activeMediaIds: Set<Int64> = []
+    @Published private(set) var searchShowBanners: Bool = true
     
     init(type: InstanceType, instanceId: Int64? = nil) {
         self.viewModel = KoinBridge.shared.getArrSearchViewModel(type: type, instanceId: instanceId?.asKotlinLong)
@@ -28,6 +29,9 @@ class ArrSearchViewModelS: ObservableObject {
         viewModel.sortOrder.observeAsync(on: self, to: \.sortOrder)
         viewModel.activeMediaIds.observeAsync(on: self) { owner, activeMediaIds in
             owner.activeMediaIds = Set(activeMediaIds.compactMap { ($0 as? NSNumber)?.int64Value })
+        }
+        viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
+            owner.searchShowBanners = show.boolValue
         }
     }
     

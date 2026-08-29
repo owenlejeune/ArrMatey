@@ -83,3 +83,9 @@ extension Color {
         return Color(.sRGB, red: midRed, green: midGreen, blue: midBlue, opacity: midAlpha)
     }
 }
+
+extension UInt64 {
+    func toSwiftUI() -> Color {
+        return Color(argb: self)
+    }
+}

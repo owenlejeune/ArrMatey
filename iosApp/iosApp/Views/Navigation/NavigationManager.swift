@@ -219,6 +219,58 @@ class NavigationManager: ObservableObject {
             seerrPath.append(route)
         }
     }
+
+    func goToPersonDetails(id: Int64) {
+        goToSeerrDetails(tmdbId: id, requestType: .person)
+    }
+
+    func goToDetails(
+        arrId: Int64? = nil,
+        tmdbId: Int64? = nil,
+        tvdbId: Int64? = nil,
+        instanceType: InstanceType? = nil,
+        requestType: RequestType? = nil,
+        instanceId: Int64? = nil
+    ) {
+        let route = MediaRoute.details(
+            arrId: arrId,
+            tmdbId: tmdbId,
+            tvdbId: tvdbId,
+            instanceType: instanceType,
+            requestType: requestType,
+            instanceId: instanceId
+        )
+        if showLauncher {
+            launcherPath.append(route)
+        } else if let type = instanceType {
+            go(to: route, of: type)
+        } else {
+            seerrPath.append(route)
+        }
+    }
+
+    func goToPreview(_ json: String, type: InstanceType) {
+        let route = MediaRoute.preview(json, type: type)
+        if showLauncher {
+            launcherPath.append(route)
+        } else {
+            go(to: route, of: type)
+        }
+    }
+
+    func goToArrDetailsOrPreview(item: ArrMedia, type: InstanceType? = nil, instanceId: Int64? = nil) {
+        if item.id == nil {
+            if item is ArrMovie || item is ArrSeries {
+                let tmdbId = (item as? ArrMovie)?.tmdbId ?? (item as? ArrSeries)?.tmdbId?.int64Value
+                let tvdbId = (item as? ArrSeries)?.tvdbId
+                goToDetails(arrId: nil, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, instanceId: instanceId)
+            } else if let type = type {
+                goToPreview(item.toJson(), type: type)
+            }
+        } else {
+            goToDetails(arrId: item.id?.int64Value, instanceType: type, instanceId: instanceId)
+        }
+    }
     
     func navigateToTab(_ tab: TabItem) {
         let visibleTabs = tabManager.tabConfiguration.value.visibleTabs

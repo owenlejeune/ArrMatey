@@ -118,6 +118,23 @@ struct SettingsScreen: View {
             }
             
             Section {
+                Toggle(isOn: Binding(
+                    get: { viewModel.searchShowBanners },
+                    set: { _ in viewModel.toggleSearchShowBanners() }
+                )) {
+                    Text(MR.strings().search_show_banners.localized())
+                }
+                Toggle(isOn: Binding(
+                    get: { viewModel.searchShowInstanceIndicatorShadow },
+                    set: { _ in viewModel.toggleSearchShowInstanceIndicatorShadow() }
+                )) {
+                    Text(MR.strings().search_show_instance_indicator_shadow.localized())
+                }
+            } header: {
+                Text(MR.strings().search_results.localized())
+            }
+            
+            Section {
                 Button {
                     showExportSheet = true
                 } label: {

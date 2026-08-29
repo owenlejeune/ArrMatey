@@ -116,6 +116,8 @@ private struct DiscoverTabContent: View {
                         DiscoverSearchOverlay(
                             items: viewModel.searchResults,
                             isLoading: viewModel.isSearching,
+                            showBanners: viewModel.searchShowBanners,
+                            showInstanceIndicatorShadow: viewModel.searchShowInstanceIndicatorShadow,
                             onItemClick: { result in
                                 handleItemClick(result)
                             }
@@ -146,16 +148,11 @@ private struct DiscoverTabContent: View {
     
     private func handleItemClick(_ result: SearchResult) {
         if let arrResult = result as? SearchResultArrMediaResult {
-            let item = arrResult.media
-            if let movie = item as? ArrMovie {
-                navigationManager.goToDetails(id: movie.id, tmdbId: movie.tmdbId, type: .radarr)
-            } else if let series = item as? ArrSeries {
-                navigationManager.goToDetails(id: series.id, tmdbId: series.tmdbId, tvdbId: series.tvdbId, type: .sonarr)
-            }
+            navigationManager.goToArrDetailsOrPreview(item: arrResult.media, type: arrResult.instanceType, instanceId: arrResult.instanceId?.int64Value)
         } else if let seerrMedia = result as? SearchResultSeerrMediaResult {
             navigationManager.goToSeerrDetails(tmdbId: seerrMedia.result.id, requestType: seerrMedia.result.mediaType)
         } else if let seerrPerson = result as? SearchResultSeerrPersonResult {
-            navigationManager.goToSeerrDetails(tmdbId: seerrPerson.result.id, requestType: .person)
+            navigationManager.goToPersonDetails(id: seerrPerson.result.id)
         }
     }
 }
@@ -214,9 +211,9 @@ private struct DiscoverSection: View {
                                 posterHeight: 180,
                                 onItemClick: { result in
                                     if let onItemClickArr = onItemClickArr {
-                                        onItemClickArr(SearchResultSeerrMediaResult(result: result))
+                                        onItemClickArr(SearchResultSeerrMediaResult(result: item, originalRank: 0))
                                     } else {
-                                        onItemClick(result)
+                                        onItemClick(item)
                                     }
                                 },
                                 showOverlays: showOverlays
@@ -248,6 +245,8 @@ private struct DiscoverSection: View {
 private struct DiscoverSearchOverlay: View {
     let items: [SearchResult]
     let isLoading: Bool
+    let showBanners: Bool
+    let showInstanceIndicatorShadow: Bool
     let onItemClick: (SearchResult) -> Void
     
     var body: some View {
@@ -258,8 +257,10 @@ private struct DiscoverSearchOverlay: View {
             } else if !items.isEmpty {
                 List {
                     ForEach(items, id: \.id) { item in
-                        SearchResultRow(
+                        DiscoverSearchResultRow(
                             item: item,
+                            showBanners: showBanners,
+                            showInstanceIndicatorShadow: showInstanceIndicatorShadow,
                             onItemClick: onItemClick
                         )
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -272,25 +273,38 @@ private struct DiscoverSearchOverlay: View {
     }
 }
 
-private struct SearchResultRow: View {
+private struct DiscoverSearchResultRow: View {
     let item: SearchResult
+    let showBanners: Bool
+    let showInstanceIndicatorShadow: Bool
     let onItemClick: (SearchResult) -> Void
     
+    private var shadowColor: Color? {
+        guard showInstanceIndicatorShadow else { return nil }
+        if let arrResult = item as? SearchResultArrMediaResult {
+            return arrResult.instanceType.associatedColor.toSwiftUI()
+        } else {
+            return InstanceType.seerr.associatedColor.toSwiftUI()
+        }
+    }
+
     var body: some View {
         Group {
             if let arrResult = item as? SearchResultArrMediaResult {
                 MediaItemView(
                     item: arrResult.media,
                     aspectRatio: .poster,
-                    showBannerBackground: true,
+                    instanceType: arrResult.instanceType,
+                    showBannerBackground: showBanners,
                     includeOverview: true
                 )
             } else if let seerrMedia = item as? SearchResultSeerrMediaResult {
-                SeerrMediaSearchResultView(result: seerrMedia)
+                SeerrMediaSearchResultView(result: seerrMedia, showBannerBackground: showBanners)
             } else if let seerrPerson = item as? SearchResultSeerrPersonResult {
                 SeerrPersonSearchResultView(result: seerrPerson)
             }
         }
+        .colouredDropShadow(color: shadowColor)
         .onTapGesture {
             onItemClick(item)
         }
@@ -299,6 +313,7 @@ private struct SearchResultRow: View {
 
 struct SeerrMediaSearchResultView: View {
     let result: SearchResultSeerrMediaResult
+    let showBannerBackground: Bool
     
     var body: some View {
         let item = result.result
@@ -313,19 +328,19 @@ struct SeerrMediaSearchResultView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.title ?? item.name ?? MR.strings().unknown.localized())
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(showBannerBackground ? .white : .primary)
                     
                     if let date = item.releaseDate ?? item.firstAirDate {
                         Text(String(date.prefix(4)))
                             .font(.system(size: 14))
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(showBannerBackground ? .white.opacity(0.8) : .secondary)
                     }
                     
                     if let overview = item.overview {
                         Text(overview)
                             .font(.system(size: 14))
                             .lineLimit(3)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(showBannerBackground ? .white.opacity(0.7) : .secondary)
                     }
                 }
             }
@@ -333,15 +348,19 @@ struct SeerrMediaSearchResultView: View {
         }
         .background {
             ZStack {
-                if let backdrop = item.backdropPath {
-                    AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/original\(backdrop)")) { image in
-                        image.resizable().aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Color.gray
+                if showBannerBackground {
+                    if let backdrop = item.backdropPath {
+                        AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/original\(backdrop)")) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Color.gray
+                        }
+                        .blur(radius: 10)
                     }
-                    .blur(radius: 10)
+                    Color.black.opacity(0.5)
+                } else {
+                    Color(.systemBackground)
                 }
-                Color.black.opacity(0.5)
             }
         }
         .cornerRadius(12)
@@ -354,11 +373,18 @@ struct SeerrPersonSearchResultView: View {
     var body: some View {
         let item = result.result
         HStack(alignment: .top, spacing: 18) {
-            GenericPosterItem(
-                posterUrl: item.fullPosterPath,
-                aspectRatio: .poster
-            )
-            .frame(height: 75)
+            AsyncImage(url: URL(string: item.fullPosterPath ?? "")) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                ZStack {
+                    Color(.systemGray4)
+                    Image(systemName: "person.fill")
+                        .foregroundColor(.gray)
+                }
+            }
+            .frame(width: 80, height: 80)
+            .cornerRadius(8)
+            .clipped()
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.name ?? MR.strings().unknown.localized())

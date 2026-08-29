@@ -69,21 +69,16 @@ struct MediaSearchScreen: View {
         ScrollView {
             LazyVStack(spacing: 12) {
                 ForEach(state.items, id: \.guid) { item in
-                    MediaItemView(item: item, aspectRatio: type.aspectRatio, isActive: viewModel.activeMediaIds.contains(item.id?.int64Value ?? 0), includeOverview: true)
+                    MediaItemView(
+                        item: item,
+                        aspectRatio: type.aspectRatio,
+                        isActive: viewModel.activeMediaIds.contains(item.id?.int64Value ?? 0),
+                        showBannerBackground: viewModel.searchShowBanners,
+                        includeOverview: true
+                    )
                         .id(item.guid)
                         .onTapGesture {
-                            if let id = item.id?.int64Value {
-                                navigation.go(to: .details(id: id, type: type), of: type)
-                            } else {
-                                if type == .radarr || type == .sonarr {
-                                    let tmdbId = (item as? ArrMovie)?.tmdbId ?? (item as? ArrSeries)?.tmdbId?.int64Value
-                                    let tvdbId = (item as? ArrSeries)?.tvdbId
-                                    navigation.go(to: .details(arrId: nil, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, requestType: nil), of: type)
-                                } else {
-                                    let json = item.toJson()
-                                    navigation.go(to: .preview(json, type: type), of: type)
-                                }
-                            }
+                            navigation.goToArrDetailsOrPreview(item: item, type: type)
                         }
                 }
             }

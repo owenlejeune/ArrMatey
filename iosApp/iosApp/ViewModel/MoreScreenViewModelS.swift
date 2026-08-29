@@ -18,6 +18,8 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var connectionStatuses: [KotlinLong:OperationStatus] = [:]
     @Published private(set) var useServiceNavLogos: Bool = false
     @Published private(set) var hideInstanceSwitcher: Bool = false
+    @Published private(set) var searchShowBanners: Bool = true
+    @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
     
     init() {
         self.viewModel = KoinBridge.shared.getMoreScreenViewModel()
@@ -32,6 +34,12 @@ class MoreScreenViewModelS: ObservableObject {
         viewModel.hideInstanceSwitcher.observeAsync(on: self) { owner, hide in
             owner.hideInstanceSwitcher = hide.boolValue
         }
+        viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
+            owner.searchShowBanners = show.boolValue
+        }
+        viewModel.searchShowInstanceIndicatorShadow.observeAsync(on: self) { owner, show in
+            owner.searchShowInstanceIndicatorShadow = show.boolValue
+        }
     }
     
     func toggleUseServiceNavLogos() {
@@ -40,5 +48,13 @@ class MoreScreenViewModelS: ObservableObject {
     
     func toggleInstanceSwitcher() {
         viewModel.toggleInstanceSwitcher()
+    }
+    
+    func toggleSearchShowBanners() {
+        viewModel.toggleSearchShowBanners()
+    }
+    
+    func toggleSearchShowInstanceIndicatorShadow() {
+        viewModel.toggleSearchShowInstanceIndicatorShadow()
     }
 }

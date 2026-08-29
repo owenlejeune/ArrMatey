@@ -51,6 +51,11 @@ struct PosterItem<Content: View>: View {
     }
     
     var body: some View {
+        let placeholder: String = {
+            if item is Arrtist || item is Author { return "person.fill" }
+            return "film"
+        }()
+
         BasePosterItem(
             elevation: CGFloat(truncating: elevation.elevation as NSNumber),
             radius: CGFloat(truncating: radius.radius as NSNumber),
@@ -59,6 +64,7 @@ struct PosterItem<Content: View>: View {
             onClick: { onItemClick?(item) },
             enabled: enabled,
             footerVisible: showFooter,
+            placeholderIcon: placeholder,
             posterContent: {
                 posterImageView
             },
@@ -151,6 +157,11 @@ struct DiscoverPosterItem: View {
                 onClick: { onItemClick?(item) }
             )
         } else {
+            let placeholder: String = {
+                if item.mediaType == .person { return "person.fill" }
+                return "film"
+            }()
+
             BasePosterItem(
                 elevation: CGFloat(truncating: elevation.elevation as NSNumber),
                 radius: CGFloat(truncating: radius.radius as NSNumber),
@@ -159,6 +170,7 @@ struct DiscoverPosterItem: View {
                 onClick: { onItemClick?(item) },
                 enabled: true,
                 footerVisible: true,
+                placeholderIcon: placeholder,
                 posterContent: {
                     posterImageView
                 },
@@ -272,11 +284,17 @@ struct RequestPosterItem: View {
                 onClick: { }
             )
         } else {
+            let placeholder: String = {
+                if item.requestType == .person { return "person.fill" }
+                return "film"
+            }()
+
             BasePosterItem(
                 elevation: CGFloat(truncating: elevation.elevation as NSNumber),
                 radius: CGFloat(truncating: radius.radius as NSNumber),
                 aspectRatio: aspectRatio,
                 posterHeight: posterHeight,
+                placeholderIcon: placeholder,
                 posterContent: {
                     GeometryReader { geometry in
                         PosterImageView(
@@ -376,6 +394,7 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
     let onClick: (() -> Void)?
     let enabled: Bool
     let footerVisible: Bool
+    let placeholderIcon: String
     
     let posterContent: () -> Poster
     let errorContent: () -> Error
@@ -390,6 +409,7 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
         onClick: (() -> Void)? = nil,
         enabled: Bool = true,
         footerVisible: Bool = false,
+        placeholderIcon: String = "film",
         @ViewBuilder posterContent: @escaping () -> Poster,
         @ViewBuilder errorContent: @escaping () -> Error = { EmptyView() },
         @ViewBuilder additionalContent: @escaping () -> Additional = { EmptyView() },
@@ -402,6 +422,7 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
         self.onClick = onClick
         self.enabled = enabled
         self.footerVisible = footerVisible
+        self.placeholderIcon = placeholderIcon
         self.posterContent = posterContent
         self.errorContent = errorContent
         self.additionalContent = additionalContent
@@ -414,6 +435,10 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
         Button(action: { onClick?() }) {
             VStack(alignment: .leading, spacing: 0) {
                 ZStack {
+                    Image(systemName: placeholderIcon)
+                        .font(.system(size: 32))
+                        .foregroundColor(.secondary.opacity(0.5))
+
                     posterContent()
                     errorContent()
                     additionalContent()
@@ -537,6 +562,7 @@ struct GenericPosterItem<Content: View>: View {
             radius: CGFloat(truncating: radius.radius as NSNumber),
             aspectRatio: aspectRatio,
             posterHeight: posterHeight,
+            placeholderIcon: "film",
             posterContent: {
                 GeometryReader { geometry in
                     PosterImageView(

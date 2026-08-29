@@ -18,6 +18,8 @@ class DiscoverViewModelS: ObservableObject {
     @Published private(set) var searchResults: [SearchResult] = []
     @Published private(set) var isSearching: Bool = false
     @Published private(set) var isRefreshing: Bool = false
+    @Published private(set) var searchShowBanners: Bool = true
+    @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
     
     init() {
         self.viewModel = KoinBridge.shared.getDiscoverViewModel()
@@ -39,6 +41,12 @@ class DiscoverViewModelS: ObservableObject {
         viewModel.isRefreshing.observeAsync(on: self) { owner, refreshing in
             owner.isRefreshing = refreshing.boolValue
         }
+        viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
+            owner.searchShowBanners = show.boolValue
+        }
+        viewModel.searchShowInstanceIndicatorShadow.observeAsync(on: self) { owner, show in
+            owner.searchShowInstanceIndicatorShadow = show.boolValue
+        }
     }
     
     func loadNextTrendingPage() {
@@ -59,10 +67,6 @@ class DiscoverViewModelS: ObservableObject {
 
     func loadNextUpcomingTvPage() {
         viewModel.loadNextUpcomingTvPage()
-    }
-
-    func loadNextSearchPage() {
-        viewModel.loadNextSearchPage()
     }
     
     func updateSearchQuery(_ query: String) {
