@@ -48,19 +48,22 @@ class DiscoverViewModel(
     private val getUpcomingTvUseCase: GetUpcomingTvUseCase,
     private val searchSeerrUseCase: SearchSeerrUseCase,
     private val globalSearchUseCase: GlobalSearchUseCase,
-    private val preferencesStore: PreferencesStore
+    private val preferencesStore: PreferencesStore,
 ) : ViewModel() {
+    private val seerrRepository: StateFlow<SeerrInstanceRepository?> =
+        instanceManager
+            .getSelectedSeerrRepository()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    private val seerrRepository: StateFlow<SeerrInstanceRepository?> = instanceManager.getSelectedSeerrRepository()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val instances: StateFlow<List<Instance>> =
+        instanceRepository.allInstancesFlow
+            .map { all -> all.filter { it.type == InstanceType.Seerr } }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val instances: StateFlow<List<Instance>> = instanceRepository.allInstancesFlow
-        .map { all -> all.filter { it.type == InstanceType.Seerr } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    val selectedInstance: StateFlow<Instance?> = seerrRepository
-        .map { it?.instance }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val selectedInstance: StateFlow<Instance?> =
+        seerrRepository
+            .map { it?.instance }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -92,29 +95,34 @@ class DiscoverViewModel(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _searchState = MutableStateFlow<List<SearchResult>>(emptyList())
-    
-    private val allLibraries: StateFlow<List<ArrMedia>> = instanceManager.observeAllArrLibraries()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val searchState: StateFlow<List<SearchResult>> = combine(_searchState, allLibraries) { results, libraries ->
-        results.map { result ->
-            if (result is SearchResult.ArrMediaResult) {
-                val merged = listOf(result.media).mergeWithLibrary(libraries).first()
-                result.copy(media = merged)
-            } else {
-                result
+    private val allLibraries: StateFlow<List<ArrMedia>> =
+        instanceManager
+            .observeAllArrLibraries()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val searchState: StateFlow<List<SearchResult>> =
+        combine(_searchState, allLibraries) { results, libraries ->
+            results.map { result ->
+                if (result is SearchResult.ArrMediaResult) {
+                    val merged = listOf(result.media).mergeWithLibrary(libraries).first()
+                    result.copy(media = merged)
+                } else {
+                    result
+                }
             }
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
-    val searchShowBanners: StateFlow<Boolean> = preferencesStore.searchShowBanners
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+    val searchShowBanners: StateFlow<Boolean> =
+        preferencesStore.searchShowBanners
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
-    val searchShowInstanceIndicatorShadow: StateFlow<Boolean> = preferencesStore.searchShowInstanceIndicatorShadow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+    val searchShowInstanceIndicatorShadow: StateFlow<Boolean> =
+        preferencesStore.searchShowInstanceIndicatorShadow
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     init {
         observeRepository()
@@ -198,11 +206,12 @@ class DiscoverViewModel(
 
     private fun performSearch(query: String) {
         searchJob?.cancel()
-        searchJob = viewModelScope.launch {
-            _isSearching.value = true
-            _searchState.value = globalSearchUseCase(query)
-            _isSearching.value = false
-        }
+        searchJob =
+            viewModelScope.launch {
+                _isSearching.value = true
+                _searchState.value = globalSearchUseCase(query)
+                _isSearching.value = false
+            }
     }
 
     fun updateSearchQuery(query: String) {

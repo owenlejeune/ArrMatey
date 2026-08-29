@@ -5,14 +5,13 @@ import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.model.InstanceType
 
 class TestNewInstanceConnectionUseCase(
-    private val client: GenericClient
+    private val client: GenericClient,
 ) {
     suspend operator fun invoke(
         url: String,
         apiKey: String,
         type: InstanceType,
         headers: List<InstanceHeader> = emptyList(),
-        noApiKeyRequired: Boolean = false
-    ): Boolean =
-        client.test(url.trim(), apiKey.trim(), type, headers, noApiKeyRequired)
+        noApiKeyRequired: Boolean = false,
+    ): Boolean = client.test(url.trim(), apiKey.trim(), type, headers, noApiKeyRequired)
 }

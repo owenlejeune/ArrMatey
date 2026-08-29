@@ -11,6 +11,7 @@ import dev.icerock.moko.resources.desc.StringDesc
 
 interface StringResolver {
     fun resolve(stringDesc: StringDesc): String
+
     fun resolve(pluralsDesc: PluralStringDesc): String
 }
 
@@ -22,17 +23,27 @@ class MokoStrings {
         return resolver.resolve(desc)
     }
 
-    fun getString(resource: StringResource, formatArgs: List<Any>): String {
+    fun getString(
+        resource: StringResource,
+        formatArgs: List<Any>,
+    ): String {
         val desc = StringDesc.ResourceFormatted(resource, formatArgs)
         return resolver.resolve(desc)
     }
 
-    fun getPlural(resource: PluralsResource, quantity: Int): String {
+    fun getPlural(
+        resource: PluralsResource,
+        quantity: Int,
+    ): String {
         val desc = StringDesc.Plural(resource, quantity)
         return resolver.resolve(desc)
     }
 
-    fun getPlural(resource: PluralsResource, quantity: Int, formatArgs: List<Any>): String {
+    fun getPlural(
+        resource: PluralsResource,
+        quantity: Int,
+        formatArgs: List<Any>,
+    ): String {
         val desc = StringDesc.PluralFormatted(resource, quantity, formatArgs)
         return resolver.resolve(desc)
     }

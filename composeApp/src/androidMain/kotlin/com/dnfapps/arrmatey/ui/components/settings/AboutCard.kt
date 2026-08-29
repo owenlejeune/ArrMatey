@@ -39,48 +39,52 @@ fun AboutCard(
     onGitHubClick: () -> Unit,
     onDonateClick: () -> Unit,
     onLibrariesClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        ),
-        shape = MaterialTheme.shapes.large
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
+        shape = MaterialTheme.shapes.large,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             AppIcon(
-                modifier = Modifier
-                    .size(48.dp)
-                    .padding(top = 8.dp)
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .padding(top = 8.dp),
             )
 
             Text(
                 text = mokoString(MR.strings.app_name),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp),
             )
 
             Text(
                 text = mokoString(MR.strings.version_label, BuildConfig.VERSION_NAME),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
 
             FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.Center,
-                verticalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterVertically)
+                verticalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterVertically),
             ) {
                 AssistChip(
                     onClick = onChangelogClick,
@@ -89,10 +93,10 @@ fun AboutCard(
                         Icon(
                             imageVector = Icons.Default.PublishedWithChanges,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                     },
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
                 AssistChip(
                     onClick = onBugReportClick,
@@ -101,10 +105,10 @@ fun AboutCard(
                         Icon(
                             imageVector = Icons.Default.BugReport,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                     },
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
                 AssistChip(
                     onClick = onFeatureRequestClick,
@@ -113,10 +117,10 @@ fun AboutCard(
                         Icon(
                             imageVector = Icons.Default.NewReleases,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                     },
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
                 AssistChip(
                     onClick = onDonateClick,
@@ -125,10 +129,10 @@ fun AboutCard(
                         Icon(
                             imageVector = Icons.Default.FavoriteBorder,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                     },
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
 
                 AssistChip(
@@ -138,10 +142,10 @@ fun AboutCard(
                         Icon(
                             painter = painterResource(MR.images.github),
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                     },
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
 
                 AssistChip(
@@ -151,10 +155,10 @@ fun AboutCard(
                         Icon(
                             imageVector = Icons.Default.Code,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                     },
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
             }
         }

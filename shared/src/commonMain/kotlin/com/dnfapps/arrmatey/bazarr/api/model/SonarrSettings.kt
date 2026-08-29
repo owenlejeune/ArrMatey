@@ -23,5 +23,5 @@ data class SonarrSettings(
     val ssl: Boolean,
     val sync_only_monitored_episodes: Boolean,
     val sync_only_monitored_series: Boolean,
-    val use_ffprobe_cache: Boolean
+    val use_ffprobe_cache: Boolean,
 )

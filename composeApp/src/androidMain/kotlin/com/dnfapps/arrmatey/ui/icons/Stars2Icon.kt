@@ -16,14 +16,14 @@ val Stars2: ImageVector
             return _stars_2!!
         }
         _stars_2 =
-            ImageVector.Builder(
-                name = "stars_2",
-                defaultWidth = 24.dp,
-                defaultHeight = 24.dp,
-                viewportWidth = 24f,
-                viewportHeight = 24f,
-            )
-                .apply {
+            ImageVector
+                .Builder(
+                    name = "stars_2",
+                    defaultWidth = 24.dp,
+                    defaultHeight = 24.dp,
+                    viewportWidth = 24f,
+                    viewportHeight = 24f,
+                ).apply {
                     path(
                         fill = SolidColor(Color.Black),
                         fillAlpha = 1f,
@@ -74,8 +74,7 @@ val Stars2: ImageVector
                         moveTo(12f, 11.98f)
                         close()
                     }
-                }
-                .build()
+                }.build()
         return _stars_2!!
     }
 

@@ -41,9 +41,8 @@ data class ListenarrQueueItem(
     val audiobookId: Long? = null,
     val remotePath: String? = null,
     val localPath: String? = null,
-
     override var instanceId: Long? = null,
-    override var instanceName: String? = null
+    override var instanceName: String? = null,
 ) : QueueItem {
     override val type = InstanceType.Listenarr
 
@@ -57,11 +56,12 @@ data class ListenarrQueueItem(
         get() = null
 
     override val protocol: ReleaseProtocol
-        get() = when (downloadClientType?.lowercase()) {
-            "qbittorrent", "transmission", "deluge" -> ReleaseProtocol.Torrent
-            "sabnzbd" -> ReleaseProtocol.Usenet
-            else -> ReleaseProtocol.Unknown
-        }
+        get() =
+            when (downloadClientType?.lowercase()) {
+                "qbittorrent", "transmission", "deluge" -> ReleaseProtocol.Torrent
+                "sabnzbd" -> ReleaseProtocol.Usenet
+                else -> ReleaseProtocol.Unknown
+            }
 
     override val size: Float
         get() = sizeLong.toFloat()
@@ -71,25 +71,29 @@ data class ListenarrQueueItem(
         set(_) {}
 
     override val timeleft: String?
-        get() = if (eta > 0) {
-            val h = eta / 3600
-            val m = (eta % 3600) / 60
-            val s = eta % 60
-            buildString {
-                if (h > 0) append("${h}h ")
-                if (m > 0 || h > 0) append("${m}m ")
-                append("${s}s")
+        get() =
+            if (eta > 0) {
+                val h = eta / 3600
+                val m = (eta % 3600) / 60
+                val s = eta % 60
+                buildString {
+                    if (h > 0) append("${h}h ")
+                    if (m > 0 || h > 0) append("${m}m ")
+                    append("${s}s")
+                }
+            } else {
+                null
             }
-        } else null
 
     override val languages: List<Language>
         get() = emptyList()
 
     override val quality: QualityInfo
-        get() = QualityInfo(
-            quality = Quality(id = 0, name = qualityStr),
-            revision = Revision(version = 1, real = 0, isRepack = false)
-        )
+        get() =
+            QualityInfo(
+                quality = Quality(id = 0, name = qualityStr),
+                revision = Revision(version = 1, real = 0, isRepack = false),
+            )
 
     override val customFormats: List<CustomFormat>
         get() = emptyList()
@@ -105,16 +109,17 @@ data class ListenarrQueueItem(
         set(_) {}
 
     override val status: QueueItemStatus?
-        get() = when (statusStr.lowercase()) {
-            "queued" -> QueueItemStatus.Queued
-            "paused" -> QueueItemStatus.Paused
-            "downloading" -> QueueItemStatus.Downloading
-            "completed" -> QueueItemStatus.Completed
-            "failed" -> QueueItemStatus.Failed
-            "warning" -> QueueItemStatus.Warning
-            "delay" -> QueueItemStatus.Delay
-            else -> QueueItemStatus.Unknown
-        }
+        get() =
+            when (statusStr.lowercase()) {
+                "queued" -> QueueItemStatus.Queued
+                "paused" -> QueueItemStatus.Paused
+                "downloading" -> QueueItemStatus.Downloading
+                "completed" -> QueueItemStatus.Completed
+                "failed" -> QueueItemStatus.Failed
+                "warning" -> QueueItemStatus.Warning
+                "delay" -> QueueItemStatus.Delay
+                else -> QueueItemStatus.Unknown
+            }
 
     override val statusMessages: List<QueueStatusMessage>
         get() = emptyList()
@@ -123,19 +128,21 @@ data class ListenarrQueueItem(
         get() = null
 
     override val trackedDownloadStatus: QueueDownloadStatus
-        get() = when (status) {
-            QueueItemStatus.Warning -> QueueDownloadStatus.Warning
-            QueueItemStatus.Failed -> QueueDownloadStatus.Error
-            else -> QueueDownloadStatus.Ok
-        }
+        get() =
+            when (status) {
+                QueueItemStatus.Warning -> QueueDownloadStatus.Warning
+                QueueItemStatus.Failed -> QueueDownloadStatus.Error
+                else -> QueueDownloadStatus.Ok
+            }
 
     override val trackedDownloadState: QueueDownloadState
-        get() = when (statusStr.lowercase()) {
-            "downloading" -> QueueDownloadState.Downloading
-            "completed" -> QueueDownloadState.Imported
-            "failed" -> QueueDownloadState.Failed
-            else -> QueueDownloadState.Downloading
-        }
+        get() =
+            when (statusStr.lowercase()) {
+                "downloading" -> QueueDownloadState.Downloading
+                "completed" -> QueueDownloadState.Imported
+                "failed" -> QueueDownloadState.Failed
+                else -> QueueDownloadState.Downloading
+            }
 
     override val outputPath: String?
         get() = remotePath

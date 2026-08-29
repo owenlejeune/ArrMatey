@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SeriesRatings(
     val votes: Int,
-    val value: Double
-): ArrRatings
+    val value: Double,
+) : ArrRatings

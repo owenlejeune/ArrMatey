@@ -8,5 +8,5 @@ data class Quality(
     val name: String,
     val source: String? = null,
     val resolution: Int? = null,
-    val modifier: String? = null
+    val modifier: String? = null,
 )

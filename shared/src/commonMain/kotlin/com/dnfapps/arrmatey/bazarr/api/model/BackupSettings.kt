@@ -8,5 +8,5 @@ data class BackupSettings(
     val folder: String,
     val frequency: String,
     val hour: Int,
-    val retention: Int
+    val retention: Int,
 )

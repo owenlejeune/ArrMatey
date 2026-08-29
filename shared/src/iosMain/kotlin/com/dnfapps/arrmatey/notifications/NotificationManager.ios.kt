@@ -5,13 +5,12 @@ import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNTimeIntervalNotificationTrigger
 import platform.UserNotifications.UNUserNotificationCenter
-import kotlin.time.Instant
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 actual class NotificationManager(
-    private val logger: Logger
+    private val logger: Logger,
 ) {
-
     private val notificationCenter = UNUserNotificationCenter.currentNotificationCenter()
 
     actual fun scheduleNotification(
@@ -19,13 +18,14 @@ actual class NotificationManager(
         title: String,
         message: String,
         scheduledTime: Instant,
-        instanceName: String
+        instanceName: String,
     ) {
-        val content = UNMutableNotificationContent().apply {
-            setTitle(title)
-            setBody(message)
-            setUserInfo(mapOf("instanceName" to instanceName))
-        }
+        val content =
+            UNMutableNotificationContent().apply {
+                setTitle(title)
+                setBody(message)
+                setUserInfo(mapOf("instanceName" to instanceName))
+            }
 
         val now = Clock.System.now()
         val timeInterval = (scheduledTime - now).inWholeSeconds.toDouble()
@@ -56,10 +56,11 @@ actual class NotificationManager(
 
     actual fun cancelNotificationsForInstance(instanceName: String) {
         notificationCenter.getPendingNotificationRequestsWithCompletionHandler { requests ->
-            val identifiersToCancel = requests
-                ?.filterIsInstance<UNNotificationRequest>()
-                ?.filter { it.content.userInfo["instanceName"] == instanceName }
-                ?.map { it.identifier }
+            val identifiersToCancel =
+                requests
+                    ?.filterIsInstance<UNNotificationRequest>()
+                    ?.filter { it.content.userInfo["instanceName"] == instanceName }
+                    ?.map { it.identifier }
 
             if (!identifiersToCancel.isNullOrEmpty()) {
                 notificationCenter.removePendingNotificationRequestsWithIdentifiers(identifiersToCancel)
@@ -72,15 +73,16 @@ actual class NotificationManager(
         title: String,
         message: String,
         progress: Float,
-        instanceName: String
+        instanceName: String,
     ) {
         if (progress >= 1f) {
             showNotification(id, title, message, instanceName)
         } else {
-            val content = UNMutableNotificationContent().apply {
-                setTitle(title)
-                setBody("$message (${(progress * 100).toInt()}%)")
-            }
+            val content =
+                UNMutableNotificationContent().apply {
+                    setTitle(title)
+                    setBody("$message (${(progress * 100).toInt()}%)")
+                }
             val request = UNNotificationRequest.requestWithIdentifier(id.toString(), content, null)
             notificationCenter.addNotificationRequest(request, null)
         }
@@ -90,12 +92,13 @@ actual class NotificationManager(
         id: Int,
         title: String,
         message: String,
-        instanceName: String
+        instanceName: String,
     ) {
-        val content = UNMutableNotificationContent().apply {
-            setTitle(title)
-            setBody(message)
-        }
+        val content =
+            UNMutableNotificationContent().apply {
+                setTitle(title)
+                setBody(message)
+            }
         val request = UNNotificationRequest.requestWithIdentifier(id.toString(), content, null)
         notificationCenter.addNotificationRequest(request, null)
     }

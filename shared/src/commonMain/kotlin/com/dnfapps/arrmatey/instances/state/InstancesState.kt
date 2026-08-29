@@ -6,5 +6,5 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 data class InstancesState(
     val type: InstanceType,
     val instances: List<Instance> = emptyList(),
-    val selectedInstance: Instance? = null
+    val selectedInstance: Instance? = null,
 )

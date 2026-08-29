@@ -12,11 +12,12 @@ data class ListenarrSystemInfo(
     val uptime: String,
     val memory: ListenarrDiskSpace,
     @Serializable(with = ListenarrInstantSerializer::class)
-    val startTime: Instant
+    val startTime: Instant,
 ) {
-    fun toArrSoftwareStatus(): ArrSoftwareStatus = ArrSoftwareStatus(
-        version = version,
-        osName = operatingSystem,
-        runtimeName = runtime
-    )
+    fun toArrSoftwareStatus(): ArrSoftwareStatus =
+        ArrSoftwareStatus(
+            version = version,
+            osName = operatingSystem,
+            runtimeName = runtime,
+        )
 }

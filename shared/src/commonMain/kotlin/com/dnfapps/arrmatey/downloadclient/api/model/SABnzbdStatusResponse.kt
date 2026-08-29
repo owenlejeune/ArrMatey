@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SABnzbdStatusResponse(
-    @SerialName("status") val status: Boolean = false
+    @SerialName("status") val status: Boolean = false,
 )

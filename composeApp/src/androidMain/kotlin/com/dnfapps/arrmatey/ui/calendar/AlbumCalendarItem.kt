@@ -36,55 +36,59 @@ import kotlin.time.ExperimentalTime
 fun AlbumCalendarItem(
     album: ArrAlbum,
     instances: List<Instance>,
-    onNavigate: (Long?) -> Unit
+    onNavigate: (Long?) -> Unit,
 ) {
     SlidableCalendarItem(
         instanceIds = album.instanceIds,
         instances = instances,
-        onInstanceSelected = onNavigate
+        onInstanceSelected = onNavigate,
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = ArrGreen,
-                contentColor = surfaceDark
-            )
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = ArrGreen,
+                    contentColor = surfaceDark,
+                ),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 AlbumCover(album, Modifier.size(50.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = album.title ?: mokoString(MR.strings.unknown),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                     Text(
                         text = album.artist?.title ?: mokoString(MR.strings.unknown),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
 
-                val statusIcon = when {
-                    album.isDownloaded -> Icons.Default.FileDownloadDone
-                    album.isPartiallyDownloaded -> Icons.Default.Download
-                    !album.monitored -> Icons.Default.BookmarkBorder
-                    album.monitored -> Icons.Default.Bookmark
-                    else -> null
-                }
+                val statusIcon =
+                    when {
+                        album.isDownloaded -> Icons.Default.FileDownloadDone
+                        album.isPartiallyDownloaded -> Icons.Default.Download
+                        !album.monitored -> Icons.Default.BookmarkBorder
+                        album.monitored -> Icons.Default.Bookmark
+                        else -> null
+                    }
                 statusIcon?.let { icon ->
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = surfaceContainerLowDark,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(18.dp),
                     )
                 }
             }

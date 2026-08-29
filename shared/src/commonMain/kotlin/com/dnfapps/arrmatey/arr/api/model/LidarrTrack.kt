@@ -14,5 +14,5 @@ data class LidarrTrack(
     val trackFileId: Long? = null,
     val trackFile: LidarrTrackFile? = null,
     val artistId: Long,
-    val albumId: Long
+    val albumId: Long,
 )

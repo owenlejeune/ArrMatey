@@ -26,7 +26,7 @@ data class ProviderSubtitle(
     @SerialName("dont_matches") val dontMatches: List<String> = emptyList(),
     val uploader: String? = null,
     val url: String? = null,
-    val subtitle: String = ""
+    val subtitle: String = "",
 ) {
     val isForced: Boolean get() = forced.equals("true", ignoreCase = true)
     val isHearingImpaired: Boolean get() = hearingImpaired.equals("true", ignoreCase = true)
@@ -37,16 +37,16 @@ data class ProviderSubtitle(
 data class ProviderStatus(
     val name: String = "",
     val status: String? = null,
-    val retry: String? = null
+    val retry: String? = null,
 )
 
 @Serializable
 data class ProvidersResponse(
-    val data: List<ProviderStatus> = emptyList()
+    val data: List<ProviderStatus> = emptyList(),
 )
 
 /** Manual provider search results are wrapped in a `data` envelope by Bazarr. */
 @Serializable
 data class ProviderSubtitlesResponse(
-    val data: List<ProviderSubtitle> = emptyList()
+    val data: List<ProviderSubtitle> = emptyList(),
 )

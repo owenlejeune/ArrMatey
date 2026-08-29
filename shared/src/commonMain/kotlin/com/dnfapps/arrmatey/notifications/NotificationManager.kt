@@ -8,11 +8,13 @@ expect class NotificationManager {
         title: String,
         message: String,
         scheduledTime: Instant,
-        instanceName: String
+        instanceName: String,
     )
 
     fun cancelNotification(id: Int)
+
     fun cancelAllNotifications()
+
     fun cancelNotificationsForInstance(instanceName: String)
 
     fun showProgressNotification(
@@ -20,13 +22,13 @@ expect class NotificationManager {
         title: String,
         message: String,
         progress: Float,
-        instanceName: String
+        instanceName: String,
     )
 
     fun showNotification(
         id: Int,
         title: String,
         message: String,
-        instanceName: String
+        instanceName: String,
     )
 }

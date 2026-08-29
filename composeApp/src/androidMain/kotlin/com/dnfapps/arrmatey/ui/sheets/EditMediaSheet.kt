@@ -21,60 +21,66 @@ fun EditMediaSheet(
     tags: List<Tag>,
     editInProgress: Boolean,
     onEditItem: (ArrMedia) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     when (item) {
-        is ArrMovie -> EditMovieSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss,
-        )
+        is ArrMovie ->
+            EditMovieSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                tags = tags,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
 
-        is ArrSeries -> EditSeriesSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
+        is ArrSeries ->
+            EditSeriesSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                tags = tags,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
 
-        is Arrtist -> EditArtistSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
+        is Arrtist ->
+            EditArtistSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                tags = tags,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
 
-        is Author -> EditAuthorSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
+        is Author ->
+            EditAuthorSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                tags = tags,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
 
-        is Audiobook -> EditAudiobookSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
+        is Audiobook ->
+            EditAudiobookSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
 
         is SearchAudiobook,
-        is MockMedia -> {
+        is MockMedia,
+        -> {
         }
     }
 }

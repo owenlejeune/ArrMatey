@@ -26,28 +26,28 @@ fun BoxScope.ScrollToTodayButton(
     visible: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    extended: Boolean = true
+    extended: Boolean = true,
 ) {
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
         exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-        modifier = modifier.align(Alignment.BottomCenter)
+        modifier = modifier.align(Alignment.BottomCenter),
     ) {
         if (extended) {
             ExtendedFloatingActionButton(
                 onClick = onClick,
                 modifier = Modifier.padding(bottom = 16.dp),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ) {
                 Icon(
                     imageVector = Icons.Default.Today,
-                    contentDescription = null
+                    contentDescription = null,
                 )
                 Text(
                     text = mokoString(MR.strings.today),
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier.padding(start = 8.dp),
                 )
             }
         } else {
@@ -55,11 +55,11 @@ fun BoxScope.ScrollToTodayButton(
                 onClick = onClick,
                 modifier = Modifier.padding(bottom = 16.dp),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ) {
                 Icon(
                     imageVector = Icons.Default.Today,
-                    contentDescription = mokoString(MR.strings.today)
+                    contentDescription = mokoString(MR.strings.today),
                 )
             }
         }

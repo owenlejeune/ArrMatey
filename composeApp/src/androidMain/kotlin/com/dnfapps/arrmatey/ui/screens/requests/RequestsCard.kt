@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.dnfapps.arrmatey.ui.screens.requests
 
 import androidx.compose.foundation.background
@@ -50,29 +52,30 @@ fun RequestCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = inverseSurfaceLight,
-            contentColor = inverseOnSurfaceLight
-        ),
-        onClick = onClick
+        colors =
+            CardDefaults.cardColors(
+                containerColor = inverseSurfaceLight,
+                contentColor = inverseOnSurfaceLight,
+            ),
+        onClick = onClick,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BannerView(
                 bannerModel = details?.fullBackdropPath?.let { rememberRemoteImageData(it) },
-                modifier = Modifier.matchParentSize()
+                modifier = Modifier.matchParentSize(),
             )
             Box(modifier = Modifier.matchParentSize().background(TranslucentBlack))
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.padding(18.dp).fillMaxWidth()
+                modifier = Modifier.padding(18.dp).fillMaxWidth(),
             ) {
                 RequestCardHeader(
                     posterUrl = details?.fullPosterPath,
                     year = details?.displayDate?.year?.toString() ?: "",
                     requestType = request.type,
                     title = details?.displayTitle ?: "",
-                    request = request
+                    request = request,
                 )
 
                 if (request.type == RequestType.Tv && request.seasons.isNotEmpty()) {
@@ -89,7 +92,7 @@ fun RequestCard(
                     onDeclineClicked = onDeclineClicked,
                     onEditClicked = onEditClicked,
                     onDeleteClicked = onDeleteClicked,
-                    onRemoveFromServiceClicked = onRemoveFromServiceClicked
+                    onRemoveFromServiceClicked = onRemoveFromServiceClicked,
                 )
             }
         }
@@ -103,41 +106,42 @@ private fun RequestCardHeader(
     year: String,
     requestType: RequestType,
     title: String,
-    request: MediaRequest
+    request: MediaRequest,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
     ) {
         AsyncImage(
             model = rememberRemoteImageData(posterUrl),
             contentDescription = null,
-            modifier = Modifier
-                .height(100.dp)
-                .aspectRatio(AspectRatio.Poster.ratio, true)
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Fit
+            modifier =
+                Modifier
+                    .height(100.dp)
+                    .aspectRatio(AspectRatio.Poster.ratio, true)
+                    .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Fit,
         )
 
         Column(modifier = Modifier.defaultMinSize(minHeight = 100.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
                     text = year,
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
                 )
                 MediaRequestTypeChip(text = requestType.name, requestType)
             }
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLargeEmphasized,
-                modifier = Modifier.padding(top = 2.dp)
+                modifier = Modifier.padding(top = 2.dp),
             )
             Row(
                 verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 StatusChip(request)
                 RequestMetadata(request)
@@ -152,11 +156,11 @@ private fun RequestMetadata(request: MediaRequest) {
         UserInfoRow(
             label = mokoString(MR.strings.requested_by),
             displayName = request.requestedBy.displayName,
-            avatar = request.requestedBy.avatar
+            avatar = request.requestedBy.avatar,
         )
         Text(
             text = request.createdAt.format("HH:mm, MMM d, yyyy"),
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodySmall,
         )
 
         request.modifiedBy?.let { modifiedBy ->
@@ -164,11 +168,11 @@ private fun RequestMetadata(request: MediaRequest) {
             UserInfoRow(
                 label = mokoString(MR.strings.modified_by),
                 displayName = modifiedBy.displayName,
-                avatar = modifiedBy.avatar
+                avatar = modifiedBy.avatar,
             )
             Text(
                 text = request.updatedAt.format("HH:mm, MMM d, yyyy"),
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
             )
         }
     }
@@ -178,17 +182,17 @@ private fun RequestMetadata(request: MediaRequest) {
 private fun RequestCardSeasonInfo(seasons: List<RequestSeason>) {
     Text(
         text = mokoString(MR.strings.seasons_header),
-        style = MaterialTheme.typography.labelSmall
+        style = MaterialTheme.typography.labelSmall,
     )
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = Modifier.padding(top = 2.dp)
+        modifier = Modifier.padding(top = 2.dp),
     ) {
         seasons.forEach {
             Badge(
                 containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                contentColor = MaterialTheme.colorScheme.surfaceVariant
+                contentColor = MaterialTheme.colorScheme.surfaceVariant,
             ) { Text(it.seasonNumber.toString()) }
         }
     }

@@ -5,16 +5,20 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
-import com.dnfapps.arrmatey.arr.api.model.BookSeriesLink
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
 
 sealed interface MediaDetailsUiState {
-    object Initial: MediaDetailsUiState
-    object Loading: MediaDetailsUiState
-    data class Error(val message: String?): MediaDetailsUiState
+    object Initial : MediaDetailsUiState
+
+    object Loading : MediaDetailsUiState
+
+    data class Error(
+        val message: String?,
+    ) : MediaDetailsUiState
+
     data class Success(
         val item: ArrMedia,
         val extraFiles: List<ExtraFile> = emptyList(),
@@ -26,6 +30,6 @@ sealed interface MediaDetailsUiState {
         val trackFiles: Map<Long, List<LidarrTrackFile>> = emptyMap(),
         val bookFiles: List<BookFile> = emptyList(),
         val bookSeries: List<BookSeries> = emptyList(),
-        val books: List<Book> = emptyList()
-    ): MediaDetailsUiState
+        val books: List<Book> = emptyList(),
+    ) : MediaDetailsUiState
 }

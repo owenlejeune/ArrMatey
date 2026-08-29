@@ -28,5 +28,5 @@ data class RequestMedia(
     val ratingKey: String? = null,
     val ratingKey4k: String? = null,
     val jellyfinMediaId: String? = null,
-    val jellyfinMediaId4k: String? = null
+    val jellyfinMediaId4k: String? = null,
 )

@@ -17,62 +17,96 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class BazarrInstanceRepositoryTest {
-
-    private val fakeInstance = Instance(
-        id = 1,
-        label = "Test Bazarr",
-        url = "http://localhost:6767",
-        apiKey = EncryptedString("test-api-key"),
-        type = InstanceType.Bazarr,
-        enabled = true
-    )
-
-    @Test
-    fun testGetSystemStatus() = runTest {
-        val mockEngine = MockEngine { _ ->
-            respond(
-                content = """{"data": {"bazarr_version": "1.4.3", "package_version": "1.4.3", "sonarr_version": "", "radarr_version": "", "operating_system": "", "python_version": "", "database_engine": "", "database_migration": "", "bazarr_directory": "", "bazarr_config_directory": "", "start_time": 0.0, "timezone": "", "cpu_cores": 1}}""",
-                status = HttpStatusCode.OK,
-                headers = headersOf("Content-Type", "application/json")
-            )
-        }
-        val httpClient = HttpClient(mockEngine) {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
-        val repository = BazarrInstanceRepository(fakeInstance, httpClient)
-
-        repository.getSystemStatus()
-
-        assertNotNull(repository.systemStatus.value)
-        assertEquals("1.4.3", repository.systemStatus.value?.data?.bazarr_version)
-    }
+    private val fakeInstance =
+        Instance(
+            id = 1,
+            label = "Test Bazarr",
+            url = "http://localhost:6767",
+            apiKey = EncryptedString("test-api-key"),
+            type = InstanceType.Bazarr,
+            enabled = true,
+        )
 
     @Test
-    fun testRefreshBadges() = runTest {
-        val mockEngine = MockEngine { _ ->
-            respond(
-                content = """{"episodes": 10, "movies": 5, "providers": 2}""",
-                status = HttpStatusCode.OK,
-                headers = headersOf("Content-Type", "application/json")
+    fun testGetSystemStatus() =
+        runTest {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content =
+                            """
+                            {
+                              "data": {
+                                "bazarr_version": "1.4.3",
+                                "package_version": "1.4.3",
+                                "sonarr_version": "",
+                                "radarr_version": "",
+                                "operating_system": "",
+                                "python_version": "",
+                                "database_engine": "",
+                                "database_migration": "",
+                                "bazarr_directory": "",
+                                "bazarr_config_directory": "",
+                                "start_time": 0.0,
+                                "timezone": "",
+                                "cpu_cores": 1
+                              }
+                            }
+                            """.trimIndent(),
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                }
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json(
+                            Json {
+                                ignoreUnknownKeys = true
+                            },
+                        )
+                    }
+                }
+            val repository = BazarrInstanceRepository(fakeInstance, httpClient)
+
+            repository.getSystemStatus()
+
+            assertNotNull(repository.systemStatus.value)
+            assertEquals(
+                "1.4.3",
+                repository.systemStatus.value
+                    ?.data
+                    ?.bazarr_version,
             )
         }
-        val httpClient = HttpClient(mockEngine) {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
+
+    @Test
+    fun testRefreshBadges() =
+        runTest {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = """{"episodes": 10, "movies": 5, "providers": 2}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                }
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json(
+                            Json {
+                                ignoreUnknownKeys = true
+                            },
+                        )
+                    }
+                }
+            val repository = BazarrInstanceRepository(fakeInstance, httpClient)
+
+            repository.refreshBadges()
+
+            assertEquals(10, repository.wantedEpisodesCount.value)
+            assertEquals(5, repository.wantedMoviesCount.value)
+            assertEquals(2, repository.providerIssuesCount.value)
         }
-        val repository = BazarrInstanceRepository(fakeInstance, httpClient)
-
-        repository.refreshBadges()
-
-        assertEquals(10, repository.wantedEpisodesCount.value)
-        assertEquals(5, repository.wantedMoviesCount.value)
-        assertEquals(2, repository.providerIssuesCount.value)
-    }
 }

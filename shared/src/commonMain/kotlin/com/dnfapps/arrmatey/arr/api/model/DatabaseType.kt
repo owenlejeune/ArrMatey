@@ -5,6 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class DatabaseType {
-    @SerialName("sqLite") SQLITE,
-    @SerialName("postgreSQL") POSTGRESQL
+    @SerialName("sqLite")
+    SQLITE,
+
+    @SerialName("postgreSQL")
+    POSTGRESQL,
 }

@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SABnzbdQueueResponse(
-    @SerialName("queue") val queue: SABnzbdQueueData = SABnzbdQueueData()
+    @SerialName("queue") val queue: SABnzbdQueueData = SABnzbdQueueData(),
 )

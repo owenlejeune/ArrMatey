@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ContentRatings(
-    val results: List<ContentRating> = emptyList()
+    val results: List<ContentRating> = emptyList(),
 )

@@ -13,11 +13,12 @@ fun handleWatchClick(
     url: String,
     provider: MediaProvider,
     context: Context,
-    moko: MokoStrings
+    moko: MokoStrings,
 ) {
     when (provider) {
         MediaProvider.Plex,
-        MediaProvider.Jellyfin -> {
+        MediaProvider.Jellyfin,
+        -> {
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             try {
                 context.startActivity(intent)

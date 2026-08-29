@@ -88,6 +88,7 @@ import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
@@ -131,7 +132,6 @@ import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
-import com.dnfapps.arrmatey.model.OperationStatus
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -295,11 +295,11 @@ fun UnifiedMediaDetailsScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = { onBack() },
-                        colors = IconButtonDefaults.headerBarColors()
+                        colors = IconButtonDefaults.headerBarColors(),
                     ) {
                         Icon(
                             imageVector = if (isExpanded) Icons.Default.Close else Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(if (isExpanded) MR.strings.close else MR.strings.back)
+                            contentDescription = mokoString(if (isExpanded) MR.strings.close else MR.strings.back),
                         )
                     }
                 },
@@ -313,16 +313,16 @@ fun UnifiedMediaDetailsScreen(
                         AnimatedVisibility(
                             visible = buttonState.showReportIssueButton,
                             enter = fadeIn() + expandHorizontally(),
-                            exit = fadeOut() + shrinkHorizontally()
+                            exit = fadeOut() + shrinkHorizontally(),
                         ) {
                             IconButton(
                                 onClick = { viewModel.showReportIssueSheet() },
-                                colors = IconButtonDefaults.headerBarColors()
+                                colors = IconButtonDefaults.headerBarColors(),
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Warning,
                                     contentDescription = mokoString(MR.strings.report_issue),
-                                    tint = ArrOrange
+                                    tint = ArrOrange,
                                 )
                             }
                         }
@@ -333,22 +333,22 @@ fun UnifiedMediaDetailsScreen(
                                 currentInstance = success.availableInstances.firstOrNull { it.id == success.selectedInstanceId },
                                 typeInstances = success.availableInstances,
                                 onInstanceSelected = { viewModel.selectInstance(it.id) },
-                                buttonColors = IconButtonDefaults.headerBarColors()
+                                buttonColors = IconButtonDefaults.headerBarColors(),
                             )
                         }
 
                         if (showArrActions) {
                             IconButton(
                                 onClick = { viewModel.toggleMonitored() },
-                                colors = IconButtonDefaults.headerBarColors()
+                                colors = IconButtonDefaults.headerBarColors(),
                             ) {
                                 AnimatedContent(
                                     targetState = isMonitored,
-                                    label = "MonitoredIcon"
+                                    label = "MonitoredIcon",
                                 ) { monitored ->
                                     Icon(
                                         imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                        contentDescription = mokoString(if (monitored) MR.strings.unmonitored else MR.strings.monitored)
+                                        contentDescription = mokoString(if (monitored) MR.strings.unmonitored else MR.strings.monitored),
                                     )
                                 }
                             }
@@ -357,11 +357,11 @@ fun UnifiedMediaDetailsScreen(
                         if (canAddDirectly) {
                             IconButton(
                                 onClick = { showAddSheet = true },
-                                colors = IconButtonDefaults.headerBarColors()
+                                colors = IconButtonDefaults.headerBarColors(),
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Add,
-                                    contentDescription = mokoString(MR.strings.add)
+                                    contentDescription = mokoString(MR.strings.add),
                                 )
                             }
                         }
@@ -384,25 +384,28 @@ fun UnifiedMediaDetailsScreen(
                             onDelete = { confirmDelete = true },
                             onMarkAsAvailable = { viewModel.markSeerrMediaAsAvailable() },
                             onRemoveFromService = { confirmRemoveFromService = true },
-                            onClearData = { confirmClearData = true }
+                            onClearData = { confirmClearData = true },
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
+                    .fillMaxSize(),
         ) {
             when (val state = uiState) {
                 is UnifiedMediaDetailsUiState.Initial,
-                is UnifiedMediaDetailsUiState.Loading -> {
+                is UnifiedMediaDetailsUiState.Loading,
+                -> {
                     LoadingIndicator(
-                        modifier = Modifier
-                            .size(96.dp)
-                            .align(Alignment.Center)
+                        modifier =
+                            Modifier
+                                .size(96.dp)
+                                .align(Alignment.Center),
                     )
                 }
 
@@ -413,11 +416,11 @@ fun UnifiedMediaDetailsScreen(
                 is UnifiedMediaDetailsUiState.Success -> {
                     PullToRefreshBox(
                         isRefreshing = false,
-                        onRefresh = { viewModel.refresh() }
+                        onRefresh = { viewModel.refresh() },
                     ) {
                         Column(
                             modifier = Modifier.verticalScroll(scrollState),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             UnifiedDetailsHeader(
                                 type = instanceType,
@@ -431,22 +434,23 @@ fun UnifiedMediaDetailsScreen(
                                 certification = state.getCertification(LocalLocale.current.platformLocale.country),
                                 releasedBy = state.releasedBy,
                                 seasonCount = state.seasonCount?.let { mokoPlural(MR.plurals.seasons, it) },
-                                genres = state.genres
+                                genres = state.genres,
                             )
 
                             Column(
-                                modifier = Modifier
-                                    .padding(bottom = 24.dp)
-                                    .padding(top = 12.dp),
-                                verticalArrangement = Arrangement.spacedBy(24.dp)
+                                modifier =
+                                    Modifier
+                                        .padding(bottom = 24.dp)
+                                        .padding(top = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(24.dp),
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(horizontal = 24.dp)
+                                    modifier = Modifier.padding(horizontal = 24.dp),
                                 ) {
                                     val title = state.displayTitle ?: mokoString(MR.strings.unknown)
                                     Text(
                                         text = title,
-                                        style = MaterialTheme.typography.headlineMedium
+                                        style = MaterialTheme.typography.headlineMedium,
                                     )
 
                                     state.tagline?.unlessEmpty {
@@ -454,7 +458,7 @@ fun UnifiedMediaDetailsScreen(
                                             text = it,
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontStyle = FontStyle.Italic,
-                                            color = MaterialTheme.colorScheme.tertiary
+                                            color = MaterialTheme.colorScheme.tertiary,
                                         )
                                     }
 
@@ -462,7 +466,7 @@ fun UnifiedMediaDetailsScreen(
                                         Text(
                                             text = airingString,
                                             style = MaterialTheme.typography.bodyLarge,
-                                            color = MaterialTheme.colorScheme.primary
+                                            color = MaterialTheme.colorScheme.primary,
                                         )
                                     }
                                 }
@@ -475,39 +479,39 @@ fun UnifiedMediaDetailsScreen(
                                     },
                                     onWatchTrailerClicked = { trailerUrl ->
                                         context.openLink(
-                                            trailerUrl
+                                            trailerUrl,
                                         )
                                     },
                                     onViewRequestClicked = { requestId -> viewModel.showViewRequestSheet() },
                                     onApproveRequestClicked = { requestId -> viewModel.showViewRequestSheet() },
                                     onDeclineRequestClicked = { requestId ->
                                         viewModel.declineRequest(
-                                            requestId
+                                            requestId,
                                         )
                                     },
                                     onRequestClicked = { viewModel.showRequestSheet(is4k = false) },
                                     onRequest4kClicked = { viewModel.showRequestSheet(is4k = true) },
-                                    modifier = Modifier.padding(horizontal = 24.dp)
+                                    modifier = Modifier.padding(horizontal = 24.dp),
                                 )
 
                                 state.overview?.unlessEmpty {
                                     ItemDescriptionCard(
                                         overview = it,
-                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                        modifier = Modifier.padding(horizontal = 24.dp),
                                     )
                                 }
 
                                 AnimatedVisibility(
                                     visible = state.queueItems.isNotEmpty(),
                                     enter = expandVertically() + fadeIn(),
-                                    exit = shrinkVertically() + fadeOut()
+                                    exit = shrinkVertically() + fadeOut(),
                                 ) {
                                     MediaActivitySection(
                                         queueItems = state.queueItems,
                                         onQueueItemClicked = { item ->
                                             selectedQueueItem = item
                                         },
-                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                        modifier = Modifier.padding(horizontal = 24.dp),
                                     )
                                 }
 
@@ -527,14 +531,14 @@ fun UnifiedMediaDetailsScreen(
                                         onNavigateToEpisodeDetails = { episode ->
                                             arrSeries?.let { series -> onNavigateToEpisodeDetails(series, episode) }
                                         },
-                                        onNavigateToSeriesRelease = onNavigateToSeriesRelease
+                                        onNavigateToSeriesRelease = onNavigateToSeriesRelease,
                                     )
                                 }
 
                                 AnimatedVisibility(
                                     visible = state.hasArrId && state.arrMedia !is ArrSeries,
                                     enter = expandVertically() + fadeIn(),
-                                    exit = shrinkVertically() + fadeOut()
+                                    exit = shrinkVertically() + fadeOut(),
                                 ) {
                                     when (val item = state.arrMedia) {
                                         is ArrMovie -> {
@@ -547,55 +551,58 @@ fun UnifiedMediaDetailsScreen(
                                                     onAutomaticSearch = { viewModel.performAutomaticLookup() },
                                                     onDeleteFile = { confirmDeleteMovie = true },
                                                     onNavigateToMovieFiles = onNavigateToMovieFiles,
-                                                    onNavigateToMovieReleases = onNavigateToMovieReleases
+                                                    onNavigateToMovieReleases = onNavigateToMovieReleases,
                                                 )
                                                 item.id?.let { movieId ->
                                                     BazarrSubtitlesSection(
                                                         target = BazarrMediaTarget.Movie(movieId),
-                                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                                        modifier = Modifier.padding(horizontal = 24.dp),
                                                     )
                                                 }
                                             }
                                         }
 
-                                        is Arrtist -> AlbumsArea(
-                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                            artist = item,
-                                            albums = state.albums,
-                                            tracks = state.tracks,
-                                            trackFiles = state.trackFiles,
-                                            searchIds = automaticSearchIds,
-                                            onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
-                                            onEditAlbum = { editAlbum = it },
-                                            onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
-                                            deleteAlbumFiles = { confirmDeleteAlbum = it },
-                                            albumDeleteInProgress = deleteAlbumStatus is OperationStatus.InProgress,
-                                            onNavigateToAlbumRelease = onNavigateToAlbumRelease
-                                        )
+                                        is Arrtist ->
+                                            AlbumsArea(
+                                                modifier = Modifier.padding(horizontal = 24.dp),
+                                                artist = item,
+                                                albums = state.albums,
+                                                tracks = state.tracks,
+                                                trackFiles = state.trackFiles,
+                                                searchIds = automaticSearchIds,
+                                                onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
+                                                onEditAlbum = { editAlbum = it },
+                                                onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
+                                                deleteAlbumFiles = { confirmDeleteAlbum = it },
+                                                albumDeleteInProgress = deleteAlbumStatus is OperationStatus.InProgress,
+                                                onNavigateToAlbumRelease = onNavigateToAlbumRelease,
+                                            )
 
-                                        is Author -> BooksArea(
-                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                            author = item,
-                                            series = state.bookSeries,
-                                            files = state.bookFiles,
-                                            books = state.books,
-                                            searchIds = automaticSearchIds,
-                                            onToggleMonitor = { viewModel.toggleBookMonitored(it) },
-                                            onToggleSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
-                                            onAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
-                                            onNavigateToAuthorFiles = onNavigateToAuthorFiles,
-                                            onNavigateToBookDetails = onNavigateToBookDetails,
-                                            onNavigateToBookRelease = onNavigateToBookRelease
-                                        )
+                                        is Author ->
+                                            BooksArea(
+                                                modifier = Modifier.padding(horizontal = 24.dp),
+                                                author = item,
+                                                series = state.bookSeries,
+                                                files = state.bookFiles,
+                                                books = state.books,
+                                                searchIds = automaticSearchIds,
+                                                onToggleMonitor = { viewModel.toggleBookMonitored(it) },
+                                                onToggleSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
+                                                onAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
+                                                onNavigateToAuthorFiles = onNavigateToAuthorFiles,
+                                                onNavigateToBookDetails = onNavigateToBookDetails,
+                                                onNavigateToBookRelease = onNavigateToBookRelease,
+                                            )
 
-                                        is Audiobook -> AudiobookFileView(
-                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                            audiobook = item,
-                                            searchIds = automaticSearchIds,
-                                            onAutomaticSearch = { item.id?.let { viewModel.performBookAutomaticLookup(it) } },
-                                            onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
-                                            onNavigateToAudiobookRelease = onNavigateToAudiobookRelease
-                                        )
+                                        is Audiobook ->
+                                            AudiobookFileView(
+                                                modifier = Modifier.padding(horizontal = 24.dp),
+                                                audiobook = item,
+                                                searchIds = automaticSearchIds,
+                                                onAutomaticSearch = { item.id?.let { viewModel.performBookAutomaticLookup(it) } },
+                                                onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
+                                                onNavigateToAudiobookRelease = onNavigateToAudiobookRelease,
+                                            )
 
                                         is ArrSeries, is SearchAudiobook, is MockMedia, null -> {}
                                     }
@@ -605,54 +612,65 @@ fun UnifiedMediaDetailsScreen(
                                     SeerrCreditsSection(credits) { onPersonClick(it) }
                                 }
 
-                                val arrInfoItems = buildArrInfoItems(state, qualityProfiles, tags, onEditPath = { showEditPathSheet = true })
+                                val arrInfoItems =
+                                    buildArrInfoItems(state, qualityProfiles, tags, onEditPath = { showEditPathSheet = true })
                                 val seerrInfoItems = buildSeerrInfoItems(state)
                                 val showBothCards = arrInfoItems.isNotEmpty() && seerrInfoItems.isNotEmpty()
 
-                                val selectedArrInstance = state.availableInstances.firstOrNull { it.id == state.selectedInstanceId } ?: activeInstance
+                                val selectedArrInstance =
+                                    state.availableInstances.firstOrNull { it.id == state.selectedInstanceId } ?: activeInstance
                                 val selectedSeerrInstance = activeSeerrInstance
 
                                 if (arrInfoItems.isNotEmpty() || seerrInfoItems.isNotEmpty()) {
                                     InfoArea(
-                                        cards = listOf(
-                                            InfoCardData(
-                                                items = arrInfoItems,
-                                                footer = if (showBothCards && selectedArrInstance != null) {
-                                                    { InfoCardInstanceFooter(selectedArrInstance) }
-                                                } else null
+                                        cards =
+                                            listOf(
+                                                InfoCardData(
+                                                    items = arrInfoItems,
+                                                    footer =
+                                                        if (showBothCards && selectedArrInstance != null) {
+                                                            { InfoCardInstanceFooter(selectedArrInstance) }
+                                                        } else {
+                                                            null
+                                                        },
+                                                ),
+                                                InfoCardData(
+                                                    items = seerrInfoItems,
+                                                    footer =
+                                                        if (showBothCards && selectedSeerrInstance != null) {
+                                                            { InfoCardInstanceFooter(selectedSeerrInstance) }
+                                                        } else {
+                                                            null
+                                                        },
+                                                ),
                                             ),
-                                            InfoCardData(
-                                                items = seerrInfoItems,
-                                                footer = if (showBothCards && selectedSeerrInstance != null) {
-                                                    { InfoCardInstanceFooter(selectedSeerrInstance) }
-                                                } else null
-                                            )
-                                        ),
-                                        modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
+                                        modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
                                     )
                                 }
 
                                 state.keywords.unlessEmpty { keywords ->
                                     val rowCount = minOf(3, maxOf(1, keywords.size))
-                                    val rows = (0 until rowCount).map { rowIndex ->
-                                        keywords.filterIndexed { index, _ -> index % rowCount == rowIndex }
-                                    }
+                                    val rows =
+                                        (0 until rowCount).map { rowIndex ->
+                                            keywords.filterIndexed { index, _ -> index % rowCount == rowIndex }
+                                        }
 
                                     Column(
                                         verticalArrangement = Arrangement.spacedBy(0.dp),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .horizontalScroll(rememberScrollState())
-                                            .padding(horizontal = 24.dp)
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .horizontalScroll(rememberScrollState())
+                                                .padding(horizontal = 24.dp),
                                     ) {
                                         rows.forEach { rowKeywords ->
                                             Row(
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                                             ) {
                                                 rowKeywords.forEach { keyword ->
                                                     SuggestionChip(
                                                         onClick = {},
-                                                        label = { Text(keyword.name) }
+                                                        label = { Text(keyword.name) },
                                                     )
                                                 }
                                             }
@@ -682,9 +700,9 @@ fun UnifiedMediaDetailsScreen(
                                     langId,
                                     seasons,
                                     is4k = isRequest4k,
-                                    userId = userId
+                                    userId = userId,
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -697,104 +715,110 @@ fun UnifiedMediaDetailsScreen(
                         updateProblemEpisode = { viewModel.setProblemEpisode(it) },
                         onReset = { viewModel.resetIssueState() },
                         onSubmit = { viewModel.submitIssue() },
-                        onDismiss = { viewModel.hideReportIssueSheet() }
+                        onDismiss = { viewModel.hideReportIssueSheet() },
                     )
                 }
                 if (showAddSheet) {
                     state.arrMedia?.let { arrMedia ->
                         when (arrMedia) {
-                            is ArrSeries -> AddSeriesSheet(
-                                item = arrMedia,
-                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                tags = addSheetUiState.tags.ifEmpty { tags },
-                                addInProgress = addItemStatus is OperationStatus.InProgress,
-                                preferences = preferences,
-                                instances = addSheetUiState.availableInstances,
-                                selectedInstance = addSheetUiState.targetInstance,
-                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                onAddItem = { newItem, searchOnAdd ->
-                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                },
-                                onUpdatePreferences = viewModel::updatePreferences,
-                                onDismiss = { showAddSheet = false }
-                            )
+                            is ArrSeries ->
+                                AddSeriesSheet(
+                                    item = arrMedia,
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    tags = addSheetUiState.tags.ifEmpty { tags },
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
+                                    preferences = preferences,
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance,
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                    onAddItem = { newItem, searchOnAdd ->
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                    },
+                                    onUpdatePreferences = viewModel::updatePreferences,
+                                    onDismiss = { showAddSheet = false },
+                                )
 
-                            is ArrMovie -> AddMovieSheet(
-                                item = arrMedia,
-                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                tags = addSheetUiState.tags.ifEmpty { tags },
-                                addInProgress = addItemStatus is OperationStatus.InProgress,
-                                preferences = preferences,
-                                instances = addSheetUiState.availableInstances,
-                                selectedInstance = addSheetUiState.targetInstance,
-                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                onAddItem = { newItem, searchOnAdd ->
-                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                },
-                                onUpdatePreferences = viewModel::updatePreferences,
-                                onDismiss = { showAddSheet = false }
-                            )
+                            is ArrMovie ->
+                                AddMovieSheet(
+                                    item = arrMedia,
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    tags = addSheetUiState.tags.ifEmpty { tags },
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
+                                    preferences = preferences,
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance,
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                    onAddItem = { newItem, searchOnAdd ->
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                    },
+                                    onUpdatePreferences = viewModel::updatePreferences,
+                                    onDismiss = { showAddSheet = false },
+                                )
 
-                            is Arrtist -> AddArtistSheet(
-                                item = arrMedia,
-                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                tags = addSheetUiState.tags.ifEmpty { tags },
-                                addInProgress = addItemStatus is OperationStatus.InProgress,
-                                preferences = preferences,
-                                instances = addSheetUiState.availableInstances,
-                                selectedInstance = addSheetUiState.targetInstance,
-                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                onAddItem = { newItem, searchOnAdd ->
-                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                },
-                                onUpdatePreferences = viewModel::updatePreferences,
-                                onDismiss = { showAddSheet = false }
-                            )
+                            is Arrtist ->
+                                AddArtistSheet(
+                                    item = arrMedia,
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    tags = addSheetUiState.tags.ifEmpty { tags },
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
+                                    preferences = preferences,
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance,
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                    onAddItem = { newItem, searchOnAdd ->
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                    },
+                                    onUpdatePreferences = viewModel::updatePreferences,
+                                    onDismiss = { showAddSheet = false },
+                                )
 
-                            is Author -> AddAuthorSheet(
-                                item = arrMedia,
-                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                tags = addSheetUiState.tags.ifEmpty { tags },
-                                addInProgress = addItemStatus is OperationStatus.InProgress,
-                                preferences = preferences,
-                                instances = addSheetUiState.availableInstances,
-                                selectedInstance = addSheetUiState.targetInstance,
-                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                onAddItem = { newItem, searchOnAdd ->
-                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                },
-                                onUpdatePreferences = viewModel::updatePreferences,
-                                onDismiss = { showAddSheet = false }
-                            )
+                            is Author ->
+                                AddAuthorSheet(
+                                    item = arrMedia,
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    tags = addSheetUiState.tags.ifEmpty { tags },
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
+                                    preferences = preferences,
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance,
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                    onAddItem = { newItem, searchOnAdd ->
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                    },
+                                    onUpdatePreferences = viewModel::updatePreferences,
+                                    onDismiss = { showAddSheet = false },
+                                )
 
-                            is SearchAudiobook -> AddAudiobookSheet(
-                                item = arrMedia,
-                                qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                relativePath = "",
-                                addInProgress = addItemStatus is OperationStatus.InProgress,
-                                preferences = preferences,
-                                instances = addSheetUiState.availableInstances,
-                                selectedInstance = addSheetUiState.targetInstance,
-                                onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                onAddItem = { newItem, searchOnAdd ->
-                                    viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                },
-                                onUpdatePreferences = viewModel::updatePreferences,
-                                onDismiss = { showAddSheet = false }
-                            )
+                            is SearchAudiobook ->
+                                AddAudiobookSheet(
+                                    item = arrMedia,
+                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
+                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
+                                    relativePath = "",
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
+                                    preferences = preferences,
+                                    instances = addSheetUiState.availableInstances,
+                                    selectedInstance = addSheetUiState.targetInstance,
+                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                    onAddItem = { newItem, searchOnAdd ->
+                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                                    },
+                                    onUpdatePreferences = viewModel::updatePreferences,
+                                    onDismiss = { showAddSheet = false },
+                                )
 
                             is Audiobook -> {
-                                val searchAudiobook = SearchAudiobook(
-                                    asin = arrMedia.asin ?: "",
-                                    title = arrMedia.title ?: "",
-                                    summary = arrMedia.overview,
-                                    authors = arrMedia.authors.map { SearchAuthor(name = it) }
-                                )
+                                val searchAudiobook =
+                                    SearchAudiobook(
+                                        asin = arrMedia.asin ?: "",
+                                        title = arrMedia.title ?: "",
+                                        summary = arrMedia.overview,
+                                        authors = arrMedia.authors.map { SearchAuthor(name = it) },
+                                    )
                                 AddAudiobookSheet(
                                     item = searchAudiobook,
                                     qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
@@ -809,7 +833,7 @@ fun UnifiedMediaDetailsScreen(
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false }
+                                    onDismiss = { showAddSheet = false },
                                 )
                             }
 
@@ -830,12 +854,12 @@ fun UnifiedMediaDetailsScreen(
                                     profileId = profileId,
                                     rootFolder = rootFolder,
                                     languageProfileId = languageProfileId,
-                                    seasons = seasons
+                                    seasons = seasons,
                                 )
                             },
                             onDeclineRequest = { requestId ->
                                 viewModel.declineRequest(requestId)
-                            }
+                            },
                         )
                     }
                 }
@@ -850,7 +874,7 @@ fun UnifiedMediaDetailsScreen(
                                 viewModel.editItem(updatedItem, moveFiles = moveFiles)
                                 showEditPathSheet = false
                             },
-                            onDismiss = { showEditPathSheet = false }
+                            onDismiss = { showEditPathSheet = false },
                         )
                     }
                 }
@@ -870,7 +894,7 @@ fun UnifiedMediaDetailsScreen(
                                     viewModel.editItem(it)
                                 }
                             },
-                            onDismiss = { showEditSheet = false }
+                            onDismiss = { showEditSheet = false },
                         )
                     }
                 }
@@ -886,7 +910,7 @@ fun UnifiedMediaDetailsScreen(
                                 onClick = {
                                     viewModel.editItem(item, moveFiles = true)
                                     moveFilesItem = null
-                                }
+                                },
                             ) {
                                 Text(mokoString(MR.strings.yes))
                             }
@@ -896,11 +920,11 @@ fun UnifiedMediaDetailsScreen(
                                 onClick = {
                                     viewModel.editItem(item)
                                     moveFilesItem = null
-                                }
+                                },
                             ) {
                                 Text(mokoString(MR.strings.no))
                             }
-                        }
+                        },
                     )
                 }
 
@@ -910,7 +934,7 @@ fun UnifiedMediaDetailsScreen(
                         onDismiss = { confirmDelete = false },
                         onDelete = { deleteFiles, addExclusion ->
                             viewModel.deleteMedia(deleteFiles, addExclusion)
-                        }
+                        },
                     )
                 }
 
@@ -925,7 +949,7 @@ fun UnifiedMediaDetailsScreen(
                                 onClick = {
                                     viewModel.deleteSeasonFiles(seasonNumber)
                                     confirmDeleteSeasonNumber = null
-                                }
+                                },
                             ) {
                                 Text(mokoString(MR.strings.yes))
                             }
@@ -934,11 +958,11 @@ fun UnifiedMediaDetailsScreen(
                             TextButton(
                                 onClick = {
                                     confirmDeleteSeasonNumber = null
-                                }
+                                },
                             ) {
                                 Text(mokoString(MR.strings.no))
                             }
-                        }
+                        },
                     )
                 }
 
@@ -953,7 +977,7 @@ fun UnifiedMediaDetailsScreen(
                                 onClick = {
                                     viewModel.deleteAlbumFiles(albumId)
                                     confirmDeleteAlbum = null
-                                }
+                                },
                             ) {
                                 Text(mokoString(MR.strings.yes))
                             }
@@ -962,11 +986,11 @@ fun UnifiedMediaDetailsScreen(
                             TextButton(
                                 onClick = {
                                     confirmDeleteAlbum = null
-                                }
+                                },
                             ) {
                                 Text(mokoString(MR.strings.no))
                             }
-                        }
+                        },
                     )
                 }
 
@@ -977,7 +1001,7 @@ fun UnifiedMediaDetailsScreen(
                         onEditAlbum = {
                             viewModel.updateAlbum(it)
                         },
-                        onDismiss = { editAlbum = null }
+                        onDismiss = { editAlbum = null },
                     )
                 }
 
@@ -998,14 +1022,14 @@ fun UnifiedMediaDetailsScreen(
                             }) {
                                 Text(mokoString(MR.strings.confirm))
                             }
-                        }
+                        },
                     )
                 }
                 selectedQueueItem?.let { item ->
                     QueueItemInfoSheet(
                         item = item,
                         onDismiss = { selectedQueueItem = null },
-                        onRemove = { showConfirmRemoveQueueItem = true }
+                        onRemove = { showConfirmRemoveQueueItem = true },
                     )
                 }
 
@@ -1018,9 +1042,9 @@ fun UnifiedMediaDetailsScreen(
                                 queueItem = selectedQueueItem!!,
                                 removeFromClient = clientRemove,
                                 addToBlocklist = blocklist,
-                                skipRedownload = skipRedownload
+                                skipRedownload = skipRedownload,
                             )
-                        }
+                        },
                     )
                 }
 
@@ -1040,11 +1064,11 @@ fun UnifiedMediaDetailsScreen(
                                 onClick = {
                                     viewModel.deleteSeerrMediaFile(is4k = false)
                                     confirmRemoveFromService = false
-                                }
+                                },
                             ) {
                                 Text(
                                     text = mokoString(MR.strings.yes),
-                                    color = MaterialTheme.colorScheme.error
+                                    color = MaterialTheme.colorScheme.error,
                                 )
                             }
                         },
@@ -1052,7 +1076,7 @@ fun UnifiedMediaDetailsScreen(
                             TextButton(onClick = { confirmRemoveFromService = false }) {
                                 Text(mokoString(MR.strings.no))
                             }
-                        }
+                        },
                     )
                 }
 
@@ -1070,11 +1094,11 @@ fun UnifiedMediaDetailsScreen(
                                 onClick = {
                                     viewModel.clearSeerrMediaData()
                                     confirmClearData = false
-                                }
+                                },
                             ) {
                                 Text(
                                     text = mokoString(MR.strings.yes),
-                                    color = MaterialTheme.colorScheme.error
+                                    color = MaterialTheme.colorScheme.error,
                                 )
                             }
                         },
@@ -1082,7 +1106,7 @@ fun UnifiedMediaDetailsScreen(
                             TextButton(onClick = { confirmClearData = false }) {
                                 Text(mokoString(MR.strings.no))
                             }
-                        }
+                        },
                     )
                 }
             }
@@ -1108,11 +1132,12 @@ private fun UnifiedMediaDetailsToolbarMenu(
     onMarkAsAvailable: () -> Unit,
     onRemoveFromService: () -> Unit,
     onClearData: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val showArrActions = success.hasArrId && isArrConfigured
     val showSeerrActions =
-        isSeerrConfigured && (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
+        isSeerrConfigured &&
+            (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
     val showMissingInstances = success.missingInstances.isNotEmpty()
     val showMenuButton = showArrActions || showSeerrActions || showMissingInstances
 
@@ -1124,19 +1149,20 @@ private fun UnifiedMediaDetailsToolbarMenu(
     Box(modifier = modifier) {
         IconButton(
             onClick = { showMenu = !showMenu },
-            colors = IconButtonDefaults.headerBarColors()
+            colors = IconButtonDefaults.headerBarColors(),
         ) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = null
+                contentDescription = null,
             )
         }
 
         DropdownMenuPopup(
             expanded = showMenu,
-            onDismissRequest = { showMenu = false }
+            onDismissRequest = { showMenu = false },
         ) {
-            val totalGroups = (if (showArrActions) 2 else 0) +
+            val totalGroups =
+                (if (showArrActions) 2 else 0) +
                     (if (showMissingInstances && !showArrActions) 1 else 0) +
                     (if (showSeerrActions) 1 else 0)
             var currentGroup = 0
@@ -1144,20 +1170,20 @@ private fun UnifiedMediaDetailsToolbarMenu(
             if (showArrActions) {
                 DropdownMenuGroup(
                     shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
-                    interactionSource = menuInteractionSource
+                    interactionSource = menuInteractionSource,
                 ) {
                     DropdownMenuItem(
                         text = { Text(mokoString(MR.strings.refresh)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = null
+                                contentDescription = null,
                             )
                         },
                         onClick = {
                             showMenu = false
                             onRefresh()
-                        }
+                        },
                     )
                     if (instanceType?.includeTopLevelAutomaticSearchOption == true) {
                         DropdownMenuItem(
@@ -1165,14 +1191,14 @@ private fun UnifiedMediaDetailsToolbarMenu(
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Search,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
                             },
                             enabled = isMonitored,
                             onClick = {
                                 showMenu = false
                                 onAutomaticLookup()
-                            }
+                            },
                         )
                     }
                 }
@@ -1181,39 +1207,39 @@ private fun UnifiedMediaDetailsToolbarMenu(
 
                 DropdownMenuGroup(
                     shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
-                    interactionSource = menuInteractionSource
+                    interactionSource = menuInteractionSource,
                 ) {
                     DropdownMenuItem(
                         text = { Text(mokoString(MR.strings.edit)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = null
+                                contentDescription = null,
                             )
                         },
                         onClick = {
                             showMenu = false
                             onEdit()
-                        }
+                        },
                     )
                     DropdownMenuItem(
                         text = {
                             Text(
                                 text = mokoString(MR.strings.delete),
-                                color = MaterialTheme.colorScheme.error
+                                color = MaterialTheme.colorScheme.error,
                             )
                         },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
+                                tint = MaterialTheme.colorScheme.error,
                             )
                         },
                         onClick = {
                             showMenu = false
                             onDelete()
-                        }
+                        },
                     )
 
                     for (missingInstance in success.missingInstances) {
@@ -1222,20 +1248,20 @@ private fun UnifiedMediaDetailsToolbarMenu(
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Add,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
                             },
                             onClick = {
                                 showMenu = false
                                 onAddMissingInstance(missingInstance)
-                            }
+                            },
                         )
                     }
                 }
             } else if (showMissingInstances) {
                 DropdownMenuGroup(
                     shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
-                    interactionSource = menuInteractionSource
+                    interactionSource = menuInteractionSource,
                 ) {
                     for (missingInstance in success.missingInstances) {
                         DropdownMenuItem(
@@ -1243,13 +1269,13 @@ private fun UnifiedMediaDetailsToolbarMenu(
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Add,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
                             },
                             onClick = {
                                 showMenu = false
                                 onAddMissingInstance(missingInstance)
-                            }
+                            },
                         )
                     }
                 }
@@ -1261,52 +1287,54 @@ private fun UnifiedMediaDetailsToolbarMenu(
                 }
                 DropdownMenuGroup(
                     shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
-                    interactionSource = menuInteractionSource
+                    interactionSource = menuInteractionSource,
                 ) {
                     if (buttonState.showMarkAsAvailableButton) {
-                        val markText = if (requestType == RequestType.Movie) {
-                            mokoString(MR.strings.mark_as_available)
-                        } else {
-                            mokoString(MR.strings.mark_all_seasons_as_available)
-                        }
+                        val markText =
+                            if (requestType == RequestType.Movie) {
+                                mokoString(MR.strings.mark_as_available)
+                            } else {
+                                mokoString(MR.strings.mark_all_seasons_as_available)
+                            }
                         DropdownMenuItem(
                             text = { Text(markText) },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
                             },
                             onClick = {
                                 showMenu = false
                                 onMarkAsAvailable()
-                            }
+                            },
                         )
                     }
                     if (buttonState.showRemoveFromServiceButton) {
-                        val removeText = if (requestType == RequestType.Movie) {
-                            mokoString(MR.strings.remove_from_radarr)
-                        } else {
-                            mokoString(MR.strings.remove_from_sonarr)
-                        }
+                        val removeText =
+                            if (requestType == RequestType.Movie) {
+                                mokoString(MR.strings.remove_from_radarr)
+                            } else {
+                                mokoString(MR.strings.remove_from_sonarr)
+                            }
                         DropdownMenuItem(
                             text = {
                                 Text(
                                     text = removeText,
-                                    color = MaterialTheme.colorScheme.error
+                                    color = MaterialTheme.colorScheme.error,
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.DeleteOutline,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error
+                                    tint = MaterialTheme.colorScheme.error,
                                 )
                             },
                             onClick = {
                                 showMenu = false
                                 onRemoveFromService()
-                            }
+                            },
                         )
                     }
                     if (buttonState.showClearDataButton) {
@@ -1314,20 +1342,20 @@ private fun UnifiedMediaDetailsToolbarMenu(
                             text = {
                                 Text(
                                     text = mokoString(MR.strings.clear_data),
-                                    color = MaterialTheme.colorScheme.error
+                                    color = MaterialTheme.colorScheme.error,
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.CleaningServices,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error
+                                    tint = MaterialTheme.colorScheme.error,
                                 )
                             },
                             onClick = {
                                 showMenu = false
                                 onClearData()
-                            }
+                            },
                         )
                     }
                 }

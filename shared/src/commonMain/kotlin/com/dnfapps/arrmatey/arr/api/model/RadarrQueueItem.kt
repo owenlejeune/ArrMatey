@@ -32,11 +32,9 @@ data class RadarrQueueItem(
     override val outputPath: String? = null,
     override val downloadClientHasPostImportCategory: Boolean = false,
     override var taskGroupCount: Int? = null,
-
     val movieId: Long? = null,
-    val movie: ArrMovie? = null
-): QueueItem {
-
+    val movie: ArrMovie? = null,
+) : QueueItem {
     override val type = InstanceType.Radarr
 
     override val taskGroup: String

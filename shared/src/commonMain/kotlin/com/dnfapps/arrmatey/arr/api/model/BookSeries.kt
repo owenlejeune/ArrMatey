@@ -7,5 +7,5 @@ data class BookSeries(
     val id: Long,
     val title: String? = null,
     val description: String? = null,
-    val links: List<BookSeriesLink> = emptyList()
+    val links: List<BookSeriesLink> = emptyList(),
 )

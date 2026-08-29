@@ -7,5 +7,5 @@ import kotlinx.serialization.json.JsonObject
 @Serializable
 data class TransmissionRpcRequest(
     @SerialName("method") val method: String,
-    @SerialName("arguments") val arguments: JsonObject? = null
+    @SerialName("arguments") val arguments: JsonObject? = null,
 )

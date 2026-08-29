@@ -31,6 +31,5 @@ enum class QueueItemStatus {
     Fallback,
 
     @SerialName("unknown")
-    Unknown
-
+    Unknown,
 }

@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CombinedRatings(
     val rt: RottenTomatoesRating?,
-    val imdb: ImdbRating?
+    val imdb: ImdbRating?,
 )

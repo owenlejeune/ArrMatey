@@ -16,5 +16,5 @@ data class Episode(
     val showId: Long,
     val stillPath: String? = null,
     val voteAverage: Double = 0.0,
-    val voteCount: Int = 0
+    val voteCount: Int = 0,
 )

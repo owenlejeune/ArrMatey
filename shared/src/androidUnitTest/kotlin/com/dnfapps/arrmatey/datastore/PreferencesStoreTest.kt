@@ -14,31 +14,31 @@ import org.junit.rules.TemporaryFolder
 import kotlin.test.assertEquals
 
 class PreferencesStoreTest {
-
     @get:Rule
     val tmpFolder = TemporaryFolder()
 
     private val dataStoreFactory = mockk<DataStoreFactory>()
 
     @Test
-    fun testTabPreferencesMigration() = runTest {
-        val file = tmpFolder.newFile("test.preferences_pb")
-        val dataStore = PreferenceDataStoreFactory.create { file }
-        
-        every { dataStoreFactory.provideDataStore() } returns dataStore
-        every { dataStoreFactory.defaultAppColor } returns AppColor.ArrMatey
+    fun testTabPreferencesMigration() =
+        runTest {
+            val file = tmpFolder.newFile("test.preferences_pb")
+            val dataStore = PreferenceDataStoreFactory.create { file }
 
-        val preferencesStore = PreferencesStore(dataStoreFactory)
+            every { dataStoreFactory.provideDataStore() } returns dataStore
+            every { dataStoreFactory.defaultAppColor } returns AppColor.ArrMatey
 
-        // Set legacy tab preferences
-        dataStore.edit { prefs ->
-            prefs[stringPreferencesKey("tabPreferences")] = """{"bottomTabItems": ["LIBRARY", "SHOWS"]}"""
+            val preferencesStore = PreferencesStore(dataStoreFactory)
+
+            // Set legacy tab preferences
+            dataStore.edit { prefs ->
+                prefs[stringPreferencesKey("tabPreferences")] = """{"bottomTabItems": ["LIBRARY", "SHOWS"]}"""
+            }
+
+            val tabs = preferencesStore.tabPreferences.first()
+            assertEquals(2, tabs.orderedVisibleKeys.size)
+            // Migration logic should add "standard_" prefix
+            assertEquals("standard_LIBRARY", tabs.orderedVisibleKeys[0])
+            assertEquals("standard_SHOWS", tabs.orderedVisibleKeys[1])
         }
-
-        val tabs = preferencesStore.tabPreferences.first()
-        assertEquals(2, tabs.orderedVisibleKeys.size)
-        // Migration logic should add "standard_" prefix
-        assertEquals("standard_LIBRARY", tabs.orderedVisibleKeys[0])
-        assertEquals("standard_SHOWS", tabs.orderedVisibleKeys[1])
-    }
 }

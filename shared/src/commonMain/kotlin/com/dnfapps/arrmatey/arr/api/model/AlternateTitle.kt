@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AlternateTitle(
-    val title: String? = null
+    val title: String? = null,
 )

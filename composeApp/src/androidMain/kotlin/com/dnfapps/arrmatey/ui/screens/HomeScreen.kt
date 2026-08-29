@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.ui.screens
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,7 +11,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -131,11 +128,13 @@ fun HomeScreen(
     val drawerTabs = tabConfig.drawerTabs
 
     val currentSelectedTab = selectedTab ?: visibleTabs.firstOrNull()
-    val pagerState = rememberPagerState(
-        initialPage = remember(visibleTabs, currentSelectedTab) {
-            visibleTabs.indexOf(currentSelectedTab).coerceAtLeast(0)
-        }
-    ) { visibleTabs.size }
+    val pagerState =
+        rememberPagerState(
+            initialPage =
+                remember(visibleTabs, currentSelectedTab) {
+                    visibleTabs.indexOf(currentSelectedTab).coerceAtLeast(0)
+                },
+        ) { visibleTabs.size }
 
     LaunchedEffect(visibleTabs, overlayTab) {
         if (overlayTab == null) {
@@ -181,7 +180,7 @@ fun HomeScreen(
                 transitionSpec = {
                     fadeIn().togetherWith(fadeOut())
                 },
-                label = "OverlayTransition"
+                label = "OverlayTransition",
             ) { currentOverlay ->
                 if (currentOverlay != null) {
                     TabItemContent(currentOverlay, windowSizeClass, false)
@@ -192,7 +191,7 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxSize(),
                             userScrollEnabled = false,
                             beyondViewportPageCount = visibleTabs.size,
-                            key = { page -> visibleTabs[page].key }
+                            key = { page -> visibleTabs[page].key },
                         ) { page ->
                             TabItemContent(visibleTabs[page], windowSizeClass, isExpanded)
                         }
@@ -231,10 +230,10 @@ fun HomeScreen(
                                 navigationManager.openOverlay(TabItem.Settings)
                                 drawerState.close()
                             }
-                        }
+                        },
                     )
                 }
-            }
+            },
         ) {
             if (isExpanded) {
                 Row(modifier = Modifier.fillMaxSize()) {
@@ -243,37 +242,38 @@ fun HomeScreen(
                             header = {
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
                                 ) {
                                     IconButton(
-                                        onClick = { navigationManager.openDrawer() }
+                                        onClick = { navigationManager.openDrawer() },
                                     ) {
                                         Icon(Icons.Default.Menu, contentDescription = null)
                                     }
 
                                     val currentTab = overlayTab ?: selectedTab
                                     val isLibrary = currentTab == TabItem.Standard.LIBRARY
-                                    val hasInstances = if (isLibrary) {
-                                        allInstances.any { it.type in InstanceType.arrs() }
-                                    } else {
-                                        currentTab?.associatedType?.let { type -> allInstances.any { it.type == type } } == true
-                                    }
+                                    val hasInstances =
+                                        if (isLibrary) {
+                                            allInstances.any { it.type in InstanceType.arrs() }
+                                        } else {
+                                            currentTab?.associatedType?.let { type -> allInstances.any { it.type == type } } == true
+                                        }
                                     val navigator = navigationManager.getNavigator(currentTab)
 
                                     if (hasInstances && navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
                                         FloatingActionButton(
-                                            onClick = { navigator.toSearch(type = currentTab?.associatedType) }
+                                            onClick = { navigator.toSearch(type = currentTab?.associatedType) },
                                         ) {
                                             Icon(Icons.Default.Add, contentDescription = null)
                                         }
                                     }
                                 }
-                            }
+                            },
                         ) {
                             Column(
                                 modifier = Modifier.fillMaxHeight(),
                                 verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
                                 visibleTabs.forEach { entry ->
                                     NavigationRailItem(
@@ -285,14 +285,14 @@ fun HomeScreen(
                                                     TabItemIconView(
                                                         tabItem = entry,
                                                         useServiceNavIcons = useServiceNavIcons,
-                                                        activityQueueIssuesCount = activityQueueIssuesCount
+                                                        activityQueueIssuesCount = activityQueueIssuesCount,
                                                     )
                                                 }
 
                                                 is TabItem.CustomWebpage -> {
                                                     Icon(
                                                         Icons.Default.Language,
-                                                        contentDescription = entry.name
+                                                        contentDescription = entry.name,
                                                     )
                                                 }
 
@@ -305,7 +305,7 @@ fun HomeScreen(
                                                 is TabItem.CustomWebpage -> Text(text = entry.name)
                                                 else -> {}
                                             }
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -315,11 +315,12 @@ fun HomeScreen(
                 }
             } else {
                 NavigationSuiteScaffold(
-                    layoutType = if (overlayTab != null) {
-                        NavigationSuiteType.None
-                    } else {
-                        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
-                    },
+                    layoutType =
+                        if (overlayTab != null) {
+                            NavigationSuiteType.None
+                        } else {
+                            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
+                        },
                     navigationSuiteItems = {
                         if (overlayTab == null) {
                             visibleTabs.forEach { entry ->
@@ -332,14 +333,14 @@ fun HomeScreen(
                                                 TabItemIconView(
                                                     tabItem = entry,
                                                     useServiceNavIcons = useServiceNavIcons,
-                                                    activityQueueIssuesCount = activityQueueIssuesCount
+                                                    activityQueueIssuesCount = activityQueueIssuesCount,
                                                 )
                                             }
 
                                             is TabItem.CustomWebpage -> {
                                                 Icon(
                                                     Icons.Default.Language,
-                                                    contentDescription = entry.name
+                                                    contentDescription = entry.name,
                                                 )
                                             }
 
@@ -352,11 +353,11 @@ fun HomeScreen(
                                             is TabItem.CustomWebpage -> Text(text = entry.name)
                                             else -> {}
                                         }
-                                    }
+                                    },
                                 )
                             }
                         }
-                    }
+                    },
                 ) {
                     mainContent()
                 }
@@ -376,7 +377,7 @@ private fun DrawerContent(
     overlayTab: TabItem?,
     onHomeClick: () -> Unit,
     onDrawerTabClick: (TabItem) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
 ) {
     var isEditMode by remember { mutableStateOf(false) }
     var showHiddenSection by remember { mutableStateOf(false) }
@@ -406,28 +407,28 @@ private fun DrawerContent(
                 TextButton(onClick = { tabToHide = null }) {
                     Text(mokoString(MR.strings.cancel))
                 }
-            }
+            },
         )
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onLongPress = {
-                        showHiddenSection = true
-                    }
-                )
-            }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = {
+                            showHiddenSection = true
+                        },
+                    )
+                }.padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         NavigationDrawerItem(
             label = { Text(mokoString(MR.strings.home)) },
             selected = overlayTab == null,
             icon = { Icon(Icons.Default.Home, contentDescription = null) },
-            onClick = onHomeClick
+            onClick = onHomeClick,
         )
         HorizontalDivider()
 
@@ -456,18 +457,22 @@ private fun DrawerContent(
                 },
                 badge = {
                     AnimatedVisibility(
-                        visible = isEditMode
+                        visible = isEditMode,
                     ) {
                         Icon(
                             imageVector = Icons.Default.VisibilityOff,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                     }
                 },
                 onClick = {
-                    if (isEditMode) tabToHide = item
-                    else onDrawerTabClick(item) }
+                    if (isEditMode) {
+                        tabToHide = item
+                    } else {
+                        onDrawerTabClick(item)
+                    }
+                },
             )
         }
 
@@ -476,13 +481,13 @@ private fun DrawerContent(
         AnimatedVisibility(
             visible = showHiddenSection && tabConfig.hiddenTabs.isNotEmpty(),
             enter = fadeIn(),
-            exit = fadeOut()
+            exit = fadeOut(),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 Text(
                     text = mokoString(MR.strings.navigation_items_hidden),
-                    modifier = Modifier.padding(start = 12.dp, bottom = 4.dp)
+                    modifier = Modifier.padding(start = 12.dp, bottom = 4.dp),
                 )
                 tabConfig.hiddenTabs.forEach { item ->
                     NavigationDrawerItem(
@@ -508,7 +513,7 @@ private fun DrawerContent(
                         onClick = {
                             tabManager.restoreTab(item)
                             showHiddenSection = false
-                        }
+                        },
                     )
                 }
             }
@@ -517,40 +522,41 @@ private fun DrawerContent(
         HorizontalDivider()
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             NavigationDrawerItem(
                 selected = overlayTab == TabItem.Settings,
                 icon = { Icon(Icons.Default.Settings, contentDescription = null) },
                 label = { Text(mokoString(MR.strings.settings)) },
                 onClick = onSettingsClick,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Box(
-                modifier = Modifier.size(48.dp).clip(CircleShape).clickable {
-                    isEditMode = !isEditMode
-                },
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier.size(48.dp).clip(CircleShape).clickable {
+                        isEditMode = !isEditMode
+                    },
+                contentAlignment = Alignment.Center,
             ) {
                 AnimatedContent(
                     targetState = isEditMode,
                     transitionSpec = {
                         (fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.92f))
                             .togetherWith(
-                                fadeOut(animationSpec = tween(220)) + scaleOut(targetScale = 0.92f)
+                                fadeOut(animationSpec = tween(220)) + scaleOut(targetScale = 0.92f),
                             )
                     },
-                    label = "IconTransition"
+                    label = "IconTransition",
                 ) { isEditMode ->
                     if (isEditMode) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
                 }
@@ -560,7 +566,11 @@ private fun DrawerContent(
 }
 
 @Composable
-private fun TabItemContent(tab: TabItem, windowSizeClass: WindowSizeClass, wideRailIsVisible: Boolean) {
+private fun TabItemContent(
+    tab: TabItem,
+    windowSizeClass: WindowSizeClass,
+    wideRailIsVisible: Boolean,
+) {
     when (tab) {
         is TabItem.Standard -> {
             StandardTabContent(tab, windowSizeClass, wideRailIsVisible)
@@ -577,7 +587,11 @@ private fun TabItemContent(tab: TabItem, windowSizeClass: WindowSizeClass, wideR
 }
 
 @Composable
-private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSizeClass, wideRailIsVisible: Boolean) {
+private fun StandardTabContent(
+    tab: TabItem.Standard,
+    windowSizeClass: WindowSizeClass,
+    wideRailIsVisible: Boolean,
+) {
     when (tab) {
         TabItem.Standard.LIBRARY -> UnifiedLibraryTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr, windowSizeClass, wideRailIsVisible)

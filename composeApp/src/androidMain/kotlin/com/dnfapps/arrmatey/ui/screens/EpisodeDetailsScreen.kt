@@ -45,9 +45,10 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.HistoryState
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
 import com.dnfapps.arrmatey.ui.components.FileCard
@@ -61,7 +62,6 @@ import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.model.OperationStatus
 
 @Composable
 fun EpisodeDetailsScreen(
@@ -69,7 +69,7 @@ fun EpisodeDetailsScreen(
     episode: Episode,
     onBack: () -> Unit = {},
     onNavigateToSeriesRelease: (Long) -> Unit = {},
-    viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode)
+    viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode),
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -122,80 +122,83 @@ fun EpisodeDetailsScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = onBack,
-                        colors = IconButtonDefaults.headerBarColors()
+                        colors = IconButtonDefaults.headerBarColors(),
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(MR.strings.back)
+                            contentDescription = mokoString(MR.strings.back),
                         )
                     }
                 },
                 actions = {
                     IconButton(
                         onClick = { viewModel.toggleMonitor() },
-                        colors = IconButtonDefaults.headerBarColors()
+                        colors = IconButtonDefaults.headerBarColors(),
                     ) {
                         Icon(
                             imageVector = if (currentEpisode.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
                     IconButton(
                         onClick = { confirmDelete = true },
-                        colors = IconButtonDefaults.headerBarColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
-                        ),
-                        enabled = currentEpisode.episodeFile != null
+                        colors =
+                            IconButtonDefaults.headerBarColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                            ),
+                        enabled = currentEpisode.episodeFile != null,
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .padding(paddingValues.copy(top = 0.dp, bottom = 0.dp))
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .padding(paddingValues.copy(top = 0.dp, bottom = 0.dp))
+                    .fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier.verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
                     DetailHeaderBanner(
                         bannerUrl = currentEpisode.getBanner()?.remoteUrl,
-                        gradientHeight = 100.dp
+                        gradientHeight = 100.dp,
                     )
                 }
 
                 Column(
                     modifier = Modifier.padding(horizontal = 24.dp).padding(top = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     Column {
                         Text(
                             text = currentEpisode.displayTitle,
-                            style = MaterialTheme.typography.headlineMedium
+                            style = MaterialTheme.typography.headlineMedium,
                         )
                         series.title?.let { title ->
                             Text(
                                 text = title,
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodyLarge,
                             )
                         }
-                        val statusRow = listOfNotNull(
-                            currentEpisode.seasonEpLabel,
-                            currentEpisode.runtimeString,
-                            currentEpisode.formatAirDateUtc()
-                        ).joinToString(Bullet)
+                        val statusRow =
+                            listOfNotNull(
+                                currentEpisode.seasonEpLabel,
+                                currentEpisode.runtimeString,
+                                currentEpisode.formatAirDateUtc(),
+                            ).joinToString(BULLET)
                         Text(
                             text = statusRow,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
 
@@ -210,20 +213,20 @@ fun EpisodeDetailsScreen(
                         onAutomaticClicked = {
                             viewModel.executeAutomaticSearch()
                         },
-                        automaticSearchEnabled = currentEpisode.monitored
+                        automaticSearchEnabled = currentEpisode.monitored,
                     )
 
                     if (queueItems.isNotEmpty()) {
                         MediaActivitySection(
                             queueItems = queueItems,
-                            onQueueItemClicked = { selectedQueueItem = it }
+                            onQueueItemClicked = { selectedQueueItem = it },
                         )
                     }
 
                     Text(
                         text = mokoString(MR.strings.files),
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                     currentEpisode.episodeFile?.let { file ->
                         FileCard(file)
@@ -232,13 +235,13 @@ fun EpisodeDetailsScreen(
                             text = mokoString(MR.strings.no_files),
                             fontWeight = FontWeight.Medium,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
 
                     series.id?.let { seriesId ->
                         BazarrSubtitlesSection(
-                            target = BazarrMediaTarget.Episode(seriesId, currentEpisode.id)
+                            target = BazarrMediaTarget.Episode(seriesId, currentEpisode.id),
                         )
                     }
 
@@ -246,7 +249,7 @@ fun EpisodeDetailsScreen(
                         is HistoryState.Loading -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) {
                                 CircularProgressIndicator()
                             }
@@ -255,14 +258,14 @@ fun EpisodeDetailsScreen(
                             Text(
                                 mokoString(MR.strings.history),
                                 fontSize = 22.sp,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
                             )
                             if (historyResult.items.isEmpty()) {
                                 Text(
                                     text = mokoString(MR.strings.no_history),
                                     fontWeight = FontWeight.Medium,
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
                                 )
                             } else {
                                 historyResult.items.forEach { historyItem ->
@@ -285,7 +288,7 @@ fun EpisodeDetailsScreen(
                 text = { Text(mokoString(MR.strings.episode_delete_message)) },
                 dismissButton = {
                     TextButton(
-                        onClick = { confirmDelete = false }
+                        onClick = { confirmDelete = false },
                     ) { Text(mokoString(MR.strings.cancel)) }
                 },
                 confirmButton = {
@@ -293,9 +296,9 @@ fun EpisodeDetailsScreen(
                         onClick = {
                             confirmDelete = false
                             viewModel.deleteEpisode()
-                        }
+                        },
                     ) { Text(mokoString(MR.strings.yes)) }
-                }
+                },
             )
         }
 
@@ -303,7 +306,7 @@ fun EpisodeDetailsScreen(
             QueueItemInfoSheet(
                 item = item,
                 onDismiss = { selectedQueueItem = null },
-                onRemove = { showConfirmRemoveQueueItem = true }
+                onRemove = { showConfirmRemoveQueueItem = true },
             )
         }
 
@@ -316,11 +319,11 @@ fun EpisodeDetailsScreen(
                         queueItem = selectedQueueItem!!,
                         removeFromClient = clientRemove,
                         addToBlocklist = blocklist,
-                        skipRedownload = skipRedownload
+                        skipRedownload = skipRedownload,
                     )
                     showConfirmRemoveQueueItem = false
                     selectedQueueItem = null
-                }
+                },
             )
         }
     }

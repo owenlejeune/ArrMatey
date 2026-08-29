@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class Revision(
     val version: Int,
     val real: Int,
-    val isRepack: Boolean
+    val isRepack: Boolean,
 )

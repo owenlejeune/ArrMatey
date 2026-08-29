@@ -14,18 +14,18 @@ data class BookshelfHistoryItem(
     override val customFormats: List<CustomFormat> = emptyList(),
     override val customFormatScore: Int? = 0,
     override val data: Map<String, String?> = emptyMap(),
-
     val authorId: Long = 0,
     val bookId: Long = 0,
     val author: Author? = null,
-    val book: Book? = null
-): HistoryItem {
+    val book: Book? = null,
+) : HistoryItem {
     override val languages: List<Language>
         get() = emptyList()
 
     override val displayTitle: String?
-        get() = when {
-            book != null -> book.title
-            else -> super.displayTitle
-        }
+        get() =
+            when {
+                book != null -> book.title
+                else -> super.displayTitle
+            }
 }

@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.dnfapps.arrmatey.logging
 
 import dev.shivathapaa.logger.core.LogEvent
@@ -12,14 +14,16 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
 import platform.Foundation.*
 
-
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-actual class FileSink actual constructor(private val filename: String) : LogSink {
+actual class FileSink actual constructor(
+    private val filename: String,
+) : LogSink {
     private val fileManager = NSFileManager.defaultManager
     private var filePath = LogFileManager.getLogFilePath(filename)
-    private val dateFormatter = NSDateFormatter().apply {
-        dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
-    }
+    private val dateFormatter =
+        NSDateFormatter().apply {
+            dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+        }
 
     actual val maxFileSizeBytes: Long = 5 * 1024 * 1024 // 5MB
     actual val maxBackupFiles: Int = 3
@@ -31,7 +35,7 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
                 path = logDir,
                 withIntermediateDirectories = true,
                 attributes = null,
-                error = null
+                error = null,
             )
         }
 
@@ -39,7 +43,7 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
             fileManager.createFileAtPath(
                 path = filePath,
                 contents = null,
-                attributes = null
+                attributes = null,
             )
         }
     }
@@ -73,7 +77,7 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
                         fileManager.moveItemAtPath(
                             srcPath = oldPath,
                             toPath = newPath,
-                            error = null
+                            error = null,
                         )
                     }
                 }
@@ -85,14 +89,14 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
                 fileManager.moveItemAtPath(
                     srcPath = filePath,
                     toPath = backupPath,
-                    error = null
+                    error = null,
                 )
 
                 filePath = LogFileManager.getLogFilePath(filename)
                 fileManager.createFileAtPath(
                     path = filePath,
                     contents = null,
-                    attributes = null
+                    attributes = null,
                 )
 
                 NSLog("Rotated log file: $filename")
@@ -109,9 +113,10 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
                     rotateLogFile()
                 }
 
-                val timestamp = dateFormatter.stringFromDate(
-                    NSDate.dateWithTimeIntervalSince1970(event.timestamp / 1000.0)
-                )
+                val timestamp =
+                    dateFormatter.stringFromDate(
+                        NSDate.dateWithTimeIntervalSince1970(event.timestamp / 1000.0),
+                    )
                 val line = "[$timestamp] [${event.level}] ${event.loggerName}: ${event.message}\n"
 
                 val fileHandle = NSFileHandle.fileHandleForUpdatingAtPath(filePath)
@@ -147,7 +152,7 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
                 fileManager.createFileAtPath(
                     path = filePath,
                     contents = null,
-                    attributes = null
+                    attributes = null,
                 )
 
                 for (i in 1..maxBackupFiles) {
@@ -162,8 +167,8 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
         }
     }
 
-    fun getAllLogFiles(): List<String> {
-        return buildList {
+    fun getAllLogFiles(): List<String> =
+        buildList {
             if (fileManager.fileExistsAtPath(filePath)) {
                 add(filePath)
             }
@@ -174,7 +179,6 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
                 }
             }
         }
-    }
 
     fun getTotalLogSize(): Long {
         var totalSize = 0L
@@ -197,18 +201,17 @@ actual object LogFileManager {
     private val fileManager = NSFileManager.defaultManager
 
     actual fun getLogDirectory(): String {
-        val paths = NSSearchPathForDirectoriesInDomains(
-            directory = NSDocumentDirectory,
-            domainMask = NSUserDomainMask,
-            expandTilde = true
-        )
+        val paths =
+            NSSearchPathForDirectoriesInDomains(
+                directory = NSDocumentDirectory,
+                domainMask = NSUserDomainMask,
+                expandTilde = true,
+            )
         val documentsDirectory = paths.first() as String
         return "$documentsDirectory/logs"
     }
 
-    actual fun getLogFilePath(filename: String): String {
-        return "${getLogDirectory()}/$filename"
-    }
+    actual fun getLogFilePath(filename: String): String = "${getLogDirectory()}/$filename"
 
     fun getAllLogFiles(): List<String> {
         val logDir = getLogDirectory()

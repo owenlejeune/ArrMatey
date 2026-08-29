@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.dnfapps.arrmatey.ui.screens.requests
 
 import androidx.compose.foundation.layout.*
@@ -16,23 +18,24 @@ fun ErrorBanner(
     error: String,
     onRetry: () -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+            ),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = error,
                 modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.onErrorContainer
+                color = MaterialTheme.colorScheme.onErrorContainer,
             )
             TextButton(onClick = onRetry) {
                 Text(mokoString(MR.strings.retry))
@@ -41,7 +44,7 @@ fun ErrorBanner(
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onErrorContainer
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
             }
         }

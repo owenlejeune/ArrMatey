@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BookFileBulkDeleteBody(
-    val bookFilesIds: List<Long>
+    val bookFilesIds: List<Long>,
 )

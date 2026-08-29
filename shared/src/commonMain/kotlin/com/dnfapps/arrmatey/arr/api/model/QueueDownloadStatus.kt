@@ -10,5 +10,5 @@ enum class QueueDownloadStatus {
     Warning,
 
     @SerialName("error")
-    Error
+    Error,
 }

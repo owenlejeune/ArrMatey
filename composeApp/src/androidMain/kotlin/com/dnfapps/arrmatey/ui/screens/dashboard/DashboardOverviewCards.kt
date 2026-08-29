@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.ui.screens.dashboard
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,7 +36,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun DashboardOverviewCards(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean
+    isEditing: Boolean,
 ) {
     val totalSize = state.instances.sumOf { it.sizeOnDisk }
     val totalIssues = state.instances.sumOf { it.healthItems.size }
@@ -45,57 +44,61 @@ fun DashboardOverviewCards(
         state.instances.sumOf { it.healthItems.count { h -> h.type == ArrHealthType.Error } }
 
     val containerColor by animateColorAsState(
-        targetValue = if (isEditing) {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        } else Color.Transparent,
-        label = "ArrOverviewCardBackgroundAnimation"
+        targetValue =
+            if (isEditing) {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            } else {
+                Color.Transparent
+            },
+        label = "ArrOverviewCardBackgroundAnimation",
     )
 
     val internalPadding by animateDpAsState(
         targetValue = if (isEditing) 16.dp else 0.dp,
-        label = "ArrOverviewCardPaddingAnimation"
+        label = "ArrOverviewCardPaddingAnimation",
     )
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = containerColor,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing
+                visible = isEditing,
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Icon(
                         imageVector = Hard_drive,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                     Text(
                         text = mokoString(MR.strings.dashboard_arr_overview),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 StatCard(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.Storage,
                     label = mokoString(MR.strings.total_space),
                     value = totalSize.bytesAsFileSizeString(),
-                    color = MaterialTheme.colorScheme.primaryContainer
+                    color = MaterialTheme.colorScheme.primaryContainer,
                 )
 
                 StatCard(
@@ -103,11 +106,12 @@ fun DashboardOverviewCards(
                     icon = if (totalIssues > 0) Icons.Default.Warning else Icons.Default.CheckCircle,
                     label = mokoString(MR.strings.health),
                     value = if (totalIssues == 0) mokoString(MR.strings.no_issues) else "$totalIssues Issues",
-                    color = when {
-                        criticalIssues > 0 -> MaterialTheme.colorScheme.errorContainer
-                        totalIssues > 0 -> ArrYellow.copy(alpha = 0.2f)
-                        else -> MaterialTheme.colorScheme.secondaryContainer
-                    }
+                    color =
+                        when {
+                            criticalIssues > 0 -> MaterialTheme.colorScheme.errorContainer
+                            totalIssues > 0 -> ArrYellow.copy(alpha = 0.2f)
+                            else -> MaterialTheme.colorScheme.secondaryContainer
+                        },
                 )
             }
         }

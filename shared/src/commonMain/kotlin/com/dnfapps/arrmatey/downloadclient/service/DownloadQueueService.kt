@@ -1,13 +1,13 @@
 package com.dnfapps.arrmatey.downloadclient.service
 
-import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.onError
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,7 +23,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class DownloadQueueService(
-    private val downloadClientManager: DownloadClientManager
+    private val downloadClientManager: DownloadClientManager,
 ) {
     private val pollingDelay = 5_000L
 
@@ -72,12 +72,13 @@ class DownloadQueueService(
     fun startPolling() {
         if (pollingJob?.isActive == true) return
 
-        pollingJob = scope.launch {
-            while(isActive) {
-                pollDownloadQueue()
-                delay(pollingDelay)
+        pollingJob =
+            scope.launch {
+                while (isActive) {
+                    pollDownloadQueue()
+                    delay(pollingDelay)
+                }
             }
-        }
     }
 
     fun stopPolling() {
@@ -96,8 +97,7 @@ class DownloadQueueService(
                 if (apis.isNotEmpty()) {
                     _hasLoaded.value = true
                 }
-            }
-            .onError { _, _, _ ->
+            }.onError { _, _, _ ->
                 if (apis.isNotEmpty()) {
                     _hasLoaded.value = true
                 }
@@ -109,12 +109,13 @@ class DownloadQueueService(
     suspend fun fetchAllDownloadData(): NetworkResult<DownloadQueueBundle> {
         val downloadClients = downloadClientManager.downloadClientApis.value
 
-        val deferredResults = downloadClients.entries.flatMap { (id, api) ->
-            listOf(
-                scope.async { id to api.getDownloads() },
-                scope.async { id to api.getTransferInfo() }
-            )
-        }
+        val deferredResults =
+            downloadClients.entries.flatMap { (id, api) ->
+                listOf(
+                    scope.async { id to api.getDownloads() },
+                    scope.async { id to api.getTransferInfo() },
+                )
+            }
 
         val allResults = deferredResults.awaitAll()
 
@@ -145,8 +146,8 @@ class DownloadQueueService(
             DownloadQueueBundle(
                 queueItems = queueItems,
                 transferInfo = transferInfos,
-                clientErrors = clientErrors
-            )
+                clientErrors = clientErrors,
+            ),
         )
     }
 

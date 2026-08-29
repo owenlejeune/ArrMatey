@@ -13,9 +13,7 @@ import kotlinx.coroutines.flow.collect
 import org.koin.compose.koinInject
 
 @Composable
-fun DoubleBackToExit(
-    moko: MokoStrings = koinInject()
-) {
+fun DoubleBackToExit(moko: MokoStrings = koinInject()) {
     val context = LocalContext.current
     // Track the time of the last back press
     val lastBackPressTime = remember { mutableLongStateOf(0L) }
@@ -31,11 +29,12 @@ fun DoubleBackToExit(
             } else {
                 // Update the timestamp and show the toast
                 lastBackPressTime.longValue = currentTime
-                Toast.makeText(
-                    context,
-                    moko.getString(MR.strings.press_again_to_exit),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast
+                    .makeText(
+                        context,
+                        moko.getString(MR.strings.press_again_to_exit),
+                        Toast.LENGTH_SHORT,
+                    ).show()
             }
         } catch (_: kotlinx.coroutines.CancellationException) {
             // Gesture cancelled

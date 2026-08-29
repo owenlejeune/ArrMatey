@@ -26,7 +26,6 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.extensions.localToday
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
@@ -44,38 +43,48 @@ fun CalendarDayCell(
     isSelected: Boolean,
     items: List<CalendarItem>,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val today = remember { Clock.localToday() }
     val isToday = date == today
 
     Surface(
-        modifier = modifier
-            .aspectRatio(1f)
-            .padding(2.dp),
+        modifier =
+            modifier
+                .aspectRatio(1f)
+                .padding(2.dp),
         onClick = onClick,
-        color = when {
-            isSelected -> MaterialTheme.colorScheme.primary
-            isToday -> MaterialTheme.colorScheme.primaryContainer
-            else -> Color.Transparent
-        },
+        color =
+            when {
+                isSelected -> MaterialTheme.colorScheme.primary
+                isToday -> MaterialTheme.colorScheme.primaryContainer
+                else -> Color.Transparent
+            },
         shape = RoundedCornerShape(8.dp),
-        border = if (isToday && !isSelected) {
-            BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-        } else null
+        border =
+            if (isToday && !isSelected) {
+                BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+            } else {
+                null
+            },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = date.day.toString(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurface,
-                fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal
+                color =
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -84,7 +93,7 @@ fun CalendarDayCell(
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
-                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     val movieCount = items.count { it is ArrMovie }
                     if (movieCount > 0) {

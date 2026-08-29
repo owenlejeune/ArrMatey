@@ -17,9 +17,7 @@ import platform.Foundation.timeIntervalSince1970
 import platform.Foundation.timeZoneWithName
 import kotlin.time.Instant
 
-actual fun getCurrentSystemTimeMillis(): Long {
-    return (NSDate().timeIntervalSince1970 * 1000).toLong()
-}
+actual fun getCurrentSystemTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()
 
 actual fun is24Hour(): Boolean {
     val formatter = NSDateFormatter()
@@ -44,27 +42,29 @@ actual fun Instant.format(pattern: String): String {
 
 actual fun LocalDate.format(pattern: String): String {
     val date = NSDate.dateWithTimeIntervalSince1970(toEpochDays().toDouble() * 86_400)
-    val formatter = NSDateFormatter().apply {
-        timeZone = NSTimeZone.timeZoneWithName("GMT", null)!!
-        dateStyle = NSDateFormatterMediumStyle
-        dateFormat = pattern
-    }
+    val formatter =
+        NSDateFormatter().apply {
+            timeZone = NSTimeZone.timeZoneWithName("GMT", null)!!
+            dateStyle = NSDateFormatterMediumStyle
+            dateFormat = pattern
+        }
     return formatter.stringFromDate(date)
 }
 
 actual fun formatLocalDateTime(
     localDateTime: LocalDateTime,
     pattern: String,
-    timeZone: TimeZone
+    timeZone: TimeZone,
 ): String {
-    val comps = NSDateComponents().apply {
-        year = localDateTime.year.toLong()
-        month = localDateTime.monthNumber.toLong()
-        day = localDateTime.dayOfMonth.toLong()
-        hour = localDateTime.hour.toLong()
-        minute = localDateTime.minute.toLong()
-        second = localDateTime.second.toLong()
-    }
+    val comps =
+        NSDateComponents().apply {
+            year = localDateTime.year.toLong()
+            month = localDateTime.monthNumber.toLong()
+            day = localDateTime.dayOfMonth.toLong()
+            hour = localDateTime.hour.toLong()
+            minute = localDateTime.minute.toLong()
+            second = localDateTime.second.toLong()
+        }
 
     val nsTimeZone = NSTimeZone.timeZoneWithName(timeZone.id, null)!!
     val calendar = NSCalendar.currentCalendar
@@ -72,11 +72,12 @@ actual fun formatLocalDateTime(
 
     val date = calendar.dateFromComponents(comps)!!
 
-    val formatter = NSDateFormatter().apply {
-        dateFormat = pattern
-        this.timeZone = nsTimeZone
-        locale = NSLocale.currentLocale
-    }
+    val formatter =
+        NSDateFormatter().apply {
+            dateFormat = pattern
+            this.timeZone = nsTimeZone
+            locale = NSLocale.currentLocale
+        }
 
     return formatter.stringFromDate(date)
 }

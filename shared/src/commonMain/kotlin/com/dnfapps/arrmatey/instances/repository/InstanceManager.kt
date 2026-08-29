@@ -28,7 +28,7 @@ class InstanceManager(
     private val instanceRepository: InstanceRepository,
     private val httpClientFactory: HttpClientFactory,
     private val credentialMigrationUseCase: CredentialMigrationUseCase,
-    private val logger: Logger
+    private val logger: Logger,
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -45,7 +45,8 @@ class InstanceManager(
 
     private fun observeInstances() {
         scope.launch {
-            instanceRepository.observeAllInstances()
+            instanceRepository
+                .observeAllInstances()
                 .collect { instances ->
                     updateRepositories(instances)
                 }
@@ -75,9 +76,9 @@ class InstanceManager(
     private fun createScopedRepository(
         instance: Instance,
         httpClient: HttpClient,
-        logger: Logger
-    ): InstanceScopedRepository {
-        return when (instance.type) {
+        logger: Logger,
+    ): InstanceScopedRepository =
+        when (instance.type) {
             InstanceType.Seerr -> SeerrInstanceRepository(instance, httpClient)
 
             InstanceType.Prowlarr -> ProwlarrInstanceRepository(instance, httpClient)
@@ -88,15 +89,13 @@ class InstanceManager(
             InstanceType.Radarr,
             InstanceType.Lidarr,
             InstanceType.Booksehelf,
-            InstanceType.Listenarr-> ArrInstanceRepository(instance, httpClient, logger)
+            InstanceType.Listenarr,
+            -> ArrInstanceRepository(instance, httpClient, logger)
         }
-    }
 
-    fun getArrRepository(instanceId: Long): ArrInstanceRepository? =
-        _instanceRepositories.value[instanceId] as? ArrInstanceRepository?
+    fun getArrRepository(instanceId: Long): ArrInstanceRepository? = _instanceRepositories.value[instanceId] as? ArrInstanceRepository?
 
-    fun getSeerrRepository(instanceId: Long): SeerrInstanceRepository? =
-        _instanceRepositories.value[instanceId] as? SeerrInstanceRepository
+    fun getSeerrRepository(instanceId: Long): SeerrInstanceRepository? = _instanceRepositories.value[instanceId] as? SeerrInstanceRepository
 
     fun getProwlarrRepository(instanceId: Long): ProwlarrInstanceRepository? =
         _instanceRepositories.value[instanceId] as? ProwlarrInstanceRepository
@@ -104,54 +103,61 @@ class InstanceManager(
     fun getBazarrRepository(instanceId: Long): BazarrInstanceRepository? =
         _instanceRepositories.value[instanceId] as? BazarrInstanceRepository
 
-    fun getRepository(instanceId: Long): InstanceScopedRepository? =
-        _instanceRepositories.value[instanceId]
+    fun getRepository(instanceId: Long): InstanceScopedRepository? = _instanceRepositories.value[instanceId]
 
     fun getSelectedArrRepository(type: InstanceType): Flow<ArrInstanceRepository?> =
-        instanceRepository.observeSelectedInstance(type)
+        instanceRepository
+            .observeSelectedInstance(type)
             .flatMapLatest { instance ->
-                if (instance == null) flowOf(null)
-                else _instanceRepositories.map { repos -> repos[instance.id] as? ArrInstanceRepository }
+                if (instance == null) {
+                    flowOf(null)
+                } else {
+                    _instanceRepositories.map { repos -> repos[instance.id] as? ArrInstanceRepository }
+                }
             }
 
     fun getSelectedSeerrRepository(): Flow<SeerrInstanceRepository?> =
-        instanceRepository.observeSelectedInstance(InstanceType.Seerr)
+        instanceRepository
+            .observeSelectedInstance(InstanceType.Seerr)
             .map { instance ->
                 instance?.let { getSeerrRepository(it.id) }
             }
 
     fun getSelectedProwlarrRepository(): Flow<ProwlarrInstanceRepository?> =
-        instanceRepository.observeSelectedInstance(InstanceType.Prowlarr)
+        instanceRepository
+            .observeSelectedInstance(InstanceType.Prowlarr)
             .flatMapLatest { instance ->
-                if (instance == null) flowOf(null)
-                else _instanceRepositories.map { repos -> repos[instance.id] as? ProwlarrInstanceRepository }
+                if (instance == null) {
+                    flowOf(null)
+                } else {
+                    _instanceRepositories.map { repos -> repos[instance.id] as? ProwlarrInstanceRepository }
+                }
             }
 
     fun getSelectedBazarrRepository(): Flow<BazarrInstanceRepository?> =
-        instanceRepository.observeSelectedInstance(InstanceType.Bazarr)
+        instanceRepository
+            .observeSelectedInstance(InstanceType.Bazarr)
             .flatMapLatest { instance ->
-                if (instance == null) flowOf(null)
-                else _instanceRepositories.map { repos -> repos[instance.id] as? BazarrInstanceRepository }
+                if (instance == null) {
+                    flowOf(null)
+                } else {
+                    _instanceRepositories.map { repos -> repos[instance.id] as? BazarrInstanceRepository }
+                }
             }
 
-    fun getAllRepositories(): List<InstanceScopedRepository> {
-        return _instanceRepositories.value.values.toList()
-    }
+    fun getAllRepositories(): List<InstanceScopedRepository> = _instanceRepositories.value.values.toList()
 
-    fun getAllArrRepositories(): List<ArrInstanceRepository> {
-        return _instanceRepositories.value.values.filterIsInstance<ArrInstanceRepository>()
-    }
+    fun getAllArrRepositories(): List<ArrInstanceRepository> = _instanceRepositories.value.values.filterIsInstance<ArrInstanceRepository>()
 
-    fun getAllSeerrRepositories(): List<SeerrInstanceRepository> {
-        return _instanceRepositories.value.values.filterIsInstance<SeerrInstanceRepository>()
-    }
+    fun getAllSeerrRepositories(): List<SeerrInstanceRepository> =
+        _instanceRepositories.value.values.filterIsInstance<SeerrInstanceRepository>()
 
-    fun getAllBazarrRepositories(): List<BazarrInstanceRepository> {
-        return _instanceRepositories.value.values.filterIsInstance<BazarrInstanceRepository>()
-    }
+    fun getAllBazarrRepositories(): List<BazarrInstanceRepository> =
+        _instanceRepositories.value.values.filterIsInstance<BazarrInstanceRepository>()
 
     fun repositoriesByType(type: InstanceType): Flow<List<InstanceScopedRepository>> =
-        instanceRepository.observeInstancesByType(type)
+        instanceRepository
+            .observeInstancesByType(type)
             .combine(_instanceRepositories) { instances, repos ->
                 instances.mapNotNull { repos[it.id] }
             }
@@ -166,10 +172,9 @@ class InstanceManager(
         }
     }
 
-    fun getRepositoriesByType(type: InstanceType): List<InstanceScopedRepository> {
-        return _instanceRepositories.value.values
+    fun getRepositoriesByType(type: InstanceType): List<InstanceScopedRepository> =
+        _instanceRepositories.value.values
             .filter { it.instance.type == type }
-    }
 
     fun cleanup() {
         scope.cancel()

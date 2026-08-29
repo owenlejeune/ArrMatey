@@ -17,5 +17,5 @@ data class ListenarrExternalIdentifier(
     @Serializable(with = ListenarrInstantSerializer::class)
     val createdAt: Instant? = null,
     @Serializable(with = ListenarrInstantSerializer::class)
-    val updatedAt: Instant? = null
+    val updatedAt: Instant? = null,
 )

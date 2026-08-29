@@ -7,5 +7,5 @@ import kotlinx.serialization.json.JsonElement
 data class CustomFilterItem(
     val key: String,
     val value: JsonElement,
-    val type: String
+    val type: String,
 )

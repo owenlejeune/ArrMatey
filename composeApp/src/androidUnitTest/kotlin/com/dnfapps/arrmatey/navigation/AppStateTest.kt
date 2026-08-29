@@ -8,7 +8,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class AppStateTest {
-
     private val appState = AppState()
 
     @Test
@@ -22,7 +21,7 @@ class AppStateTest {
     fun testSetDrawerOpen() {
         appState.setDrawerOpen(true)
         assertTrue(appState.drawerExpanded.value)
-        
+
         appState.setDrawerOpen(false)
         assertFalse(appState.drawerExpanded.value)
     }
@@ -38,7 +37,7 @@ class AppStateTest {
     fun testOpenOverlay() {
         appState.setDrawerOpen(true)
         appState.openOverlay(TabItem.Settings)
-        
+
         assertEquals(TabItem.Settings, appState.overlayTab.value)
         assertFalse(appState.drawerExpanded.value) // Should close drawer
     }

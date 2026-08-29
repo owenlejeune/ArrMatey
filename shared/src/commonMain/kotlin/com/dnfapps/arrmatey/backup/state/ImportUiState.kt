@@ -10,7 +10,7 @@ data class ImportUiState(
     val importTabPreferences: Boolean = true,
     val importUiPreferences: Boolean = true,
     val isImporting: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
 ) {
-    constructor(): this("") // empty ios constructor
+    constructor() : this("") // empty ios constructor
 }

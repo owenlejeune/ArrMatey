@@ -27,6 +27,7 @@ import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateAllPreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.Blur
 import com.dnfapps.arrmatey.utils.GridDensity
@@ -35,7 +36,6 @@ import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -66,9 +66,8 @@ class ArrMediaViewModel(
     private val performRefreshUseCase: PerformRefreshUseCase,
     private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
     private val executeArrCommandUseCase: ExecuteArrCommandUseCase,
-    getActivityTasksUseCase: GetActivityTasksUseCase
-): ViewModel() {
-
+    getActivityTasksUseCase: GetActivityTasksUseCase,
+) : ViewModel() {
     private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val addItemStatus: StateFlow<OperationStatus> = _addItemStatus.asStateFlow()
 
@@ -95,149 +94,152 @@ class ArrMediaViewModel(
 
     val selectionState = MultiSelectState<Long>()
 
-    val hasBazarr: StateFlow<Boolean> = getBazarrInstanceRepositoryUseCase
-        .observeSelected()
-        .map { it != null }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+    val hasBazarr: StateFlow<Boolean> =
+        getBazarrInstanceRepositoryUseCase
+            .observeSelected()
+            .map { it != null }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
 
     private var currentRepository: ArrInstanceRepository? = null
     private var currentBazarrRepository: BazarrInstanceRepository? = null
 
-    private val selectedRepository = getArrInstanceRepositoryUseCase
-        .observeSelected(instanceType)
-        .filterNotNull()
-        .distinctUntilChanged { old, new ->
-            // Only emit if the instance ID actually changed
-            old.instance.id == new.instance.id
-        }
-        .stateIn(
+    private val selectedRepository =
+        getArrInstanceRepositoryUseCase
+            .observeSelected(instanceType)
+            .filterNotNull()
+            .distinctUntilChanged { old, new ->
+                // Only emit if the instance ID actually changed
+                old.instance.id == new.instance.id
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null,
+            )
+
+    val selectedInstance: StateFlow<Instance?> =
+        selectedRepository
+            .map { it?.instance }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null,
+            )
+
+    val activeMediaIds: StateFlow<Set<Long>> =
+        combine(
+            selectedRepository.filterNotNull(),
+            getActivityTasksUseCase(),
+        ) { repository, tasks ->
+            val instanceId = repository.instance.id
+            tasks
+                .filter { it.instanceId == instanceId }
+                .mapNotNull { it.mediaId }
+                .toSet()
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
+            initialValue = emptySet(),
         )
 
-    val selectedInstance: StateFlow<Instance?> = selectedRepository
-        .map { it?.instance }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+    fun isItemActive(mediaId: Long): Boolean = activeMediaIds.value.contains(mediaId)
 
-    val activeMediaIds: StateFlow<Set<Long>> = combine(
-        selectedRepository.filterNotNull(),
-        getActivityTasksUseCase()
-    ) { repository, tasks ->
-        val instanceId = repository.instance.id
-        tasks.filter { it.instanceId == instanceId }
-            .mapNotNull { it.mediaId }
-            .toSet()
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptySet()
-    )
+    val preferences: StateFlow<InstancePreferences> =
+        selectedRepository
+            .filterNotNull()
+            .flatMapLatest {
+                instancePreferenceStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = InstancePreferences(),
+            )
 
-    fun isItemActive(mediaId: Long): Boolean =
-        activeMediaIds.value.contains(mediaId)
+    val uiState: StateFlow<ArrLibrary> =
+        selectedRepository
+            .filterNotNull()
+            .flatMapLatest { repository ->
+                currentRepository = repository
+                _searchQuery.value = ""
 
-    val preferences: StateFlow<InstancePreferences> = selectedRepository
-        .filterNotNull()
-        .flatMapLatest {
-            instancePreferenceStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = InstancePreferences()
-        )
+                selectionState.exitSelectionMode()
 
-    val uiState: StateFlow<ArrLibrary> = selectedRepository
-        .filterNotNull()
-        .flatMapLatest { repository ->
-            currentRepository = repository
-            _searchQuery.value = ""
-
-            selectionState.exitSelectionMode()
-
-            viewModelScope.launch {
-                repository.refreshAllMetadata()
-            }
-
-            viewModelScope.launch {
-                repository.monitorStatus.collect { _monitorStatus.value = it }
-            }
-            viewModelScope.launch {
-                repository.editItemStatus.collect { _editItemStatus.value = it }
-            }
-
-            getLibraryUseCase(repository.instance.id)
-                .combine(_searchQuery) { state, query ->
-                    when (state) {
-                        is ArrLibrary.Success -> {
-                            filterSuccessState(state, query)
-                        }
-
-                        is ArrLibrary.Error -> {
-                            handleErrorState(state)
-                            state
-                        }
-
-                        else -> state
-                    }
+                viewModelScope.launch {
+                    repository.refreshAllMetadata()
                 }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ArrLibrary.Initial
-        )
 
-    val selectedItem: StateFlow<ArrMedia?> = combine(
-        selectionState.selectedItems,
-        uiState
-    ) { selectedIds, state ->
-        if (selectedIds.size == 1) {
-            val id = selectedIds.first()
-            (state as? ArrLibrary.Success)?.items?.find { it.id == id }
-        } else {
-            null
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
-    )
+                viewModelScope.launch {
+                    repository.monitorStatus.collect { _monitorStatus.value = it }
+                }
+                viewModelScope.launch {
+                    repository.editItemStatus.collect { _editItemStatus.value = it }
+                }
 
-    val instanceData: StateFlow<InstanceData?> = selectedRepository
-        .filterNotNull()
-        .distinctUntilChanged { old, new ->
-            old.instance.id == new.instance.id
-        }
-        .flatMapLatest { repository ->
-            combine(
-                repository.qualityProfiles,
-                repository.rootFolders,
-                repository.tags,
-                repository.customFilters
-            ) { profiles, folders, tags, filters ->
-                InstanceData(
-                    qualityProfiles = profiles,
-                    rootFolders = folders,
-                    tags = tags,
-                    customFilters = filters
-                )
+                getLibraryUseCase(repository.instance.id)
+                    .combine(_searchQuery) { state, query ->
+                        when (state) {
+                            is ArrLibrary.Success -> {
+                                filterSuccessState(state, query)
+                            }
+
+                            is ArrLibrary.Error -> {
+                                handleErrorState(state)
+                                state
+                            }
+
+                            else -> state
+                        }
+                    }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = ArrLibrary.Initial,
+            )
+
+    val selectedItem: StateFlow<ArrMedia?> =
+        combine(
+            selectionState.selectedItems,
+            uiState,
+        ) { selectedIds, state ->
+            if (selectedIds.size == 1) {
+                val id = selectedIds.first()
+                (state as? ArrLibrary.Success)?.items?.find { it.id == id }
+            } else {
+                null
             }
-        }
-        .stateIn(
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
+            initialValue = null,
         )
+
+    val instanceData: StateFlow<InstanceData?> =
+        selectedRepository
+            .filterNotNull()
+            .distinctUntilChanged { old, new ->
+                old.instance.id == new.instance.id
+            }.flatMapLatest { repository ->
+                combine(
+                    repository.qualityProfiles,
+                    repository.rootFolders,
+                    repository.tags,
+                    repository.customFilters,
+                ) { profiles, folders, tags, filters ->
+                    InstanceData(
+                        qualityProfiles = profiles,
+                        rootFolders = folders,
+                        tags = tags,
+                        customFilters = filters,
+                    )
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null,
+            )
 
     init {
         viewModelScope.launch {
@@ -252,12 +254,15 @@ class ArrMediaViewModel(
         }
     }
 
-    private fun filterSuccessState(state: ArrLibrary.Success, query: String) =
-        state.copy(
-            items = state.items.filter {
+    private fun filterSuccessState(
+        state: ArrLibrary.Success,
+        query: String,
+    ) = state.copy(
+        items =
+            state.items.filter {
                 it.title?.contains(query, ignoreCase = true) == true
-            }
-        )
+            },
+    )
 
     private fun handleErrorState(state: ArrLibrary.Error) {
         _errorMessage.value = state.message
@@ -321,10 +326,11 @@ class ArrMediaViewModel(
     fun updateCustomFilter(customFilterId: Long?) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
-            val updatedPreferences = preferences.value.copy(
-                customFilterId = customFilterId,
-                filterBy = if (customFilterId != null) FilterBy.All else preferences.value.filterBy
-            )
+            val updatedPreferences =
+                preferences.value.copy(
+                    customFilterId = customFilterId,
+                    filterBy = if (customFilterId != null) FilterBy.All else preferences.value.filterBy,
+                )
             updatePreferencesUseCase(repository.instance.id, updatedPreferences)
         }
     }
@@ -412,7 +418,11 @@ class ArrMediaViewModel(
         }
     }
 
-    fun deleteMedia(item: ArrMedia, deleteFiles: Boolean, addImportExclusion: Boolean) {
+    fun deleteMedia(
+        item: ArrMedia,
+        deleteFiles: Boolean,
+        addImportExclusion: Boolean,
+    ) {
         val mediaId = item.id ?: return
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
@@ -427,7 +437,10 @@ class ArrMediaViewModel(
         }
     }
 
-    fun editItem(item: ArrMedia, moveFiles: Boolean = false) {
+    fun editItem(
+        item: ArrMedia,
+        moveFiles: Boolean = false,
+    ) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
             updateMediaUseCase.edit(item, moveFiles, repository)
@@ -484,7 +497,10 @@ class ArrMediaViewModel(
         }
     }
 
-    fun deleteSelected(deleteFiles: Boolean, addExclusion: Boolean) {
+    fun deleteSelected(
+        deleteFiles: Boolean,
+        addExclusion: Boolean,
+    ) {
         viewModelScope.launch {
             val repository = currentRepository ?: return@launch
 

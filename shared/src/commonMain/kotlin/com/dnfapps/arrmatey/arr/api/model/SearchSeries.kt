@@ -11,5 +11,5 @@ data class SearchSeries(
     val region: String? = null,
     val position: String? = null,
     @Serializable(with = ListenarrInstantSerializer::class)
-    val updatedAt: Instant? = null
+    val updatedAt: Instant? = null,
 )

@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class BookEditionImage(
     val url: String,
     val coverType: CoverType,
-    val extension: String
+    val extension: String,
 )

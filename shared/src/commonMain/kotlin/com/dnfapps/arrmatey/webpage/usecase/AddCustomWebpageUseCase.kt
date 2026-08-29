@@ -5,9 +5,7 @@ import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 
 class AddCustomWebpageUseCase(
-    private val webpageRepository: CustomWebpageRepository
+    private val webpageRepository: CustomWebpageRepository,
 ) {
-    suspend operator fun invoke(webpage: CustomWebpage): InsertResult {
-        return webpageRepository.addWebpage(webpage)
-    }
+    suspend operator fun invoke(webpage: CustomWebpage): InsertResult = webpageRepository.addWebpage(webpage)
 }

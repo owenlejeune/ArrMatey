@@ -8,13 +8,14 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class GetCurrentSeerrUserUseCase {
-    operator fun invoke(repository: SeerrInstanceRepository): Flow<SeerrUser?> = flow {
-        coroutineScope {
-            launch {
-                repository.getLoggedInUser()
+    operator fun invoke(repository: SeerrInstanceRepository): Flow<SeerrUser?> =
+        flow {
+            coroutineScope {
+                launch {
+                    repository.getLoggedInUser()
+                }
             }
+            repository.loggedInUser
+                .collect { emit(it) }
         }
-        repository.loggedInUser
-            .collect { emit(it) }
-    }
 }

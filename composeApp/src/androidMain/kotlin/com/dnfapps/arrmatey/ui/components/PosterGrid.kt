@@ -49,7 +49,7 @@ fun PosterGrid(
     gridSpacing: GridSpacing = GridSpacing.Medium,
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
-    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
 ) {
     LazyVerticalGrid(
         modifier = modifier,
@@ -57,7 +57,7 @@ fun PosterGrid(
         contentPadding = PaddingValues(gridSpacing.spacing),
         horizontalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
         verticalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
-        userScrollEnabled = userScrollEnabled
+        userScrollEnabled = userScrollEnabled,
     ) {
         items(items) { item ->
             val isActive = itemIsActive(item)
@@ -72,12 +72,12 @@ fun PosterGrid(
                         PosterGridItemOverlay(
                             monitored = item.monitored,
                             progress = { item.statusProgress },
-                            statusColor = if (isActive) ArrPurple else item.statusColor
+                            statusColor = if (isActive) ArrPurple else item.statusColor,
                         )
                     }
                 },
                 showFooter = showFullDetails,
-                multiSelectState = multiSelectState
+                multiSelectState = multiSelectState,
             )
         }
     }
@@ -87,32 +87,35 @@ fun PosterGrid(
 fun BoxScope.PosterGridItemOverlay(
     monitored: Boolean = true,
     progress: () -> Float = { 0.6f },
-    statusColor: Color = ArrBlue
+    statusColor: Color = ArrBlue,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(.5f)
-            .background(
-                brush = Brush.verticalGradient(
-                    listOf(TranslucentBlackDarker, Color.Transparent)
-                )
-            )
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(.5f)
+                .background(
+                    brush =
+                        Brush.verticalGradient(
+                            listOf(TranslucentBlackDarker, Color.Transparent),
+                        ),
+                ),
     )
     Icon(
         imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
         contentDescription = null,
         modifier = Modifier.padding(8.dp).align(Alignment.TopStart),
-        tint = Color.White
+        tint = Color.White,
     )
     LinearProgressIndicator(
         progress = progress,
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-            .height(6.dp),
+        modifier =
+            Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .height(6.dp),
         color = statusColor,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant
+        trackColor = MaterialTheme.colorScheme.surfaceVariant,
     )
 }

@@ -12,7 +12,7 @@ data class ExportUiState(
     val includeInstancePreferences: Boolean = true,
     val includeTabPreferences: Boolean = true,
     val includeUiPreferences: Boolean = true,
-    val isExporting: Boolean = false
+    val isExporting: Boolean = false,
 ) {
-    constructor(): this(emptyList()) // default ios constructor
+    constructor() : this(emptyList()) // default ios constructor
 }

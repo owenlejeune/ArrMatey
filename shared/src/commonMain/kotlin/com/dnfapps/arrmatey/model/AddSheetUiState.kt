@@ -10,7 +10,7 @@ data class AddSheetUiState(
     val qualityProfiles: List<QualityProfile> = emptyList(),
     val rootFolders: List<RootFolder> = emptyList(),
     val tags: List<Tag> = emptyList(),
-    val availableInstances: List<Instance> = emptyList()
+    val availableInstances: List<Instance> = emptyList(),
 ) {
-    constructor(): this(null) // empty ios constructor
+    constructor() : this(null) // empty ios constructor
 }

@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class TabPreferences(
     val orderedVisibleKeys: List<String> = TabItem.defaultStandardKeys(),
     val orderedHiddenKeys: List<String> = TabItem.defaultHiddenKeys(),
-    val orderedRemovedKeys: List<String> = emptyList()
+    val orderedRemovedKeys: List<String> = emptyList(),
 ) {
-    constructor(): this(TabItem.defaultStandardKeys()) // empty ios constructor
+    constructor() : this(TabItem.defaultStandardKeys()) // empty ios constructor
 }

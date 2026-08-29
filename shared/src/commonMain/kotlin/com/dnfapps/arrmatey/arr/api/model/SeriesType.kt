@@ -4,7 +4,9 @@ import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 
-enum class SeriesType(val resource: StringResource) {
+enum class SeriesType(
+    val resource: StringResource,
+) {
     @SerialName("standard")
     Standard(MR.strings.standard),
 
@@ -12,5 +14,5 @@ enum class SeriesType(val resource: StringResource) {
     Daily(MR.strings.daily),
 
     @SerialName("anime")
-    Anime(MR.strings.anime)
+    Anime(MR.strings.anime),
 }

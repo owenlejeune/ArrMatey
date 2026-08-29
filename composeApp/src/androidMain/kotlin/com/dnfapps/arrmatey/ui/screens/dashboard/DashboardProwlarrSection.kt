@@ -35,7 +35,7 @@ import dev.icerock.moko.resources.compose.painterResource
 @Composable
 fun DashboardProwlarrSection(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean
+    isEditing: Boolean,
 ) {
     val prowlarrStats = state.prowlarrStats
 
@@ -43,50 +43,54 @@ fun DashboardProwlarrSection(
     val totalFailingIndexers = prowlarrStats.sumOf { it.failingIndexers }
 
     val containerColor by animateColorAsState(
-        targetValue = if (isEditing) {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        } else Color.Transparent,
-        label = "ProwlarrCardBackgroundAnimation"
+        targetValue =
+            if (isEditing) {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            } else {
+                Color.Transparent
+            },
+        label = "ProwlarrCardBackgroundAnimation",
     )
 
     val internalPadding by animateDpAsState(
         targetValue = if (isEditing) 16.dp else 0.dp,
-        label = "ProwlarrCardPaddingAnimation"
+        label = "ProwlarrCardPaddingAnimation",
     )
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = containerColor,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing
+                visible = isEditing,
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Image(
                         painter = painterResource(InstanceType.Prowlarr.icon),
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                     Text(
                         text = mokoString(MR.strings.dashboard_prowlarr_overview),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 CountStatItem(
                     icon = Icons.Default.Favorite,
@@ -94,17 +98,18 @@ fun DashboardProwlarrSection(
                     label = mokoString(MR.strings.healthy_indexers),
                     count = totalHealthyIndexers,
                     containerColor = ArrGreen,
-                    contentColor = surfaceLight
+                    contentColor = surfaceLight,
                 )
                 CountStatItem(
                     icon = Icons.Default.Error,
                     modifier = Modifier.weight(1f),
                     label = mokoString(MR.strings.failing_indexers),
                     count = totalFailingIndexers,
-                    containerColor = when {
-                        totalFailingIndexers > 0 -> MaterialTheme.colorScheme.errorContainer
-                        else -> MaterialTheme.colorScheme.secondaryContainer
-                    }
+                    containerColor =
+                        when {
+                            totalFailingIndexers > 0 -> MaterialTheme.colorScheme.errorContainer
+                            else -> MaterialTheme.colorScheme.secondaryContainer
+                        },
                 )
             }
         }

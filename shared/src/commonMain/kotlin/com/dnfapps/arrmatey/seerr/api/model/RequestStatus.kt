@@ -5,15 +5,15 @@ import dev.icerock.moko.resources.StringResource
 
 enum class RequestStatus(
     val value: Int,
-    val resource: StringResource
+    val resource: StringResource,
 ) {
     Pending(1, MR.strings.pending),
     Approved(2, MR.strings.approved),
     Declined(3, MR.strings.declined),
-    Available(5, MR.strings.available);
+    Available(5, MR.strings.available),
+    ;
 
     companion object {
-        fun fromValue(value: Int) =
-            entries.firstOrNull { it.value == value } ?: Pending
+        fun fromValue(value: Int) = entries.firstOrNull { it.value == value } ?: Pending
     }
 }

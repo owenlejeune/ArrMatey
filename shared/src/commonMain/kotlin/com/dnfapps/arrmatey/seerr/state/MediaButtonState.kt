@@ -1,8 +1,6 @@
 package com.dnfapps.arrmatey.seerr.state
 
 import com.dnfapps.arrmatey.seerr.api.model.MediaInfo
-import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
-import com.dnfapps.arrmatey.seerr.api.model.RequestStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.Video
 import com.dnfapps.arrmatey.shared.MR
@@ -17,20 +15,16 @@ data class MediaButtonState(
     @Contextual val watchButtonLabel: StringResource = MR.strings.watch,
     val showWatchTrailerOption: Boolean = false,
     val trailerUrl: String? = null,
-
     val showRequestButton: Boolean = false,
     val showRequestMoreButton: Boolean = false,
     val showRequest4kButton: Boolean = false,
     val availableSeasons: List<Int> = emptyList(),
     val totalSeasons: Int = 0,
-
     val showViewRequestButton: Boolean = false,
     val showApproveRequestButton: Boolean = false,
     val showDeclineRequestButton: Boolean = false,
     val pendingRequestId: Long? = null,
-
     val showReportIssueButton: Boolean = false,
-
     val showManageMenu: Boolean = false,
     val showOpenInServiceButton: Boolean = false,
     val serviceUrl: String? = null,
@@ -38,80 +32,84 @@ data class MediaButtonState(
     val showRemoveFromServiceButton: Boolean = false,
     val showClearDataButton: Boolean = false,
     val showMarkAsAvailableButton: Boolean = false,
-
-    val mediaProvider: MediaProvider = MediaProvider.None
+    val mediaProvider: MediaProvider = MediaProvider.None,
 ) {
-    constructor(): this(false) // empty ios constructor
+    constructor() : this(false) // empty ios constructor
 }
 
 enum class MediaProvider {
     None,
     Plex,
-    Jellyfin
+    Jellyfin,
 }
 
 fun MediaInfo?.toButtonState(
     relatedVideos: List<Video>,
-    totalSeasonCount: Int = 0,  // NEW: Pass from TV details API
+    totalSeasonCount: Int = 0, // NEW: Pass from TV details API
     currentUserId: Long? = null,
-    isAdmin: Boolean = false
+    isAdmin: Boolean = false,
 ): MediaButtonState {
     if (this == null) {
         return MediaButtonState(
             showRequestButton = true,
             showRequest4kButton = true,
             showWatchTrailerOption = getTrailerUrl(relatedVideos) != null,
-            trailerUrl = getTrailerUrl(relatedVideos)
+            trailerUrl = getTrailerUrl(relatedVideos),
         )
     }
 
-    val isAvailable = status == 5  // AVAILABLE
-    val isPartiallyAvailable = status == 4  // PARTIALLY_AVAILABLE
-    val isPending = status == 2  // PENDING
-    val isProcessing = status == 3  // PROCESSING
+    val isAvailable = status == 5 // AVAILABLE
+    val isPartiallyAvailable = status == 4 // PARTIALLY_AVAILABLE
+    val isPending = status == 2 // PENDING
+    val isProcessing = status == 3 // PROCESSING
     val hasContent = isAvailable || isPartiallyAvailable
     val hasSeerrMedia = status != 1
 
     // For TV shows, check if we have all seasons or just some
     val isTvShow = mediaType == RequestType.Tv
-    val availableSeasonNumbers = seasons
-        .filter { it.status == 5 || it.status == 4 }
-        .map { it.seasonNumber }
-    val hasAllSeasons = isTvShow && totalSeasonCount > 0 &&
+    val availableSeasonNumbers =
+        seasons
+            .filter { it.status == 5 || it.status == 4 }
+            .map { it.seasonNumber }
+    val hasAllSeasons =
+        isTvShow &&
+            totalSeasonCount > 0 &&
             availableSeasonNumbers.size >= totalSeasonCount
     val hasPartialContent = isTvShow && hasContent && !hasAllSeasons && totalSeasonCount > 0
 
     // Determine media provider and URLs
-    val (mediaProvider, watchUrl, watchLabel) = when {
-        !mediaUrl.isNullOrEmpty() || !iOSPlexUrl.isNullOrEmpty() -> {
-            Triple(
-                MediaProvider.Plex,
-                iOSPlexUrl ?: mediaUrl,
-                MR.strings.watch_on_plex
-            )
+    val (mediaProvider, watchUrl, watchLabel) =
+        when {
+            !mediaUrl.isNullOrEmpty() || !iOSPlexUrl.isNullOrEmpty() -> {
+                Triple(
+                    MediaProvider.Plex,
+                    iOSPlexUrl ?: mediaUrl,
+                    MR.strings.watch_on_plex,
+                )
+            }
+            !jellyfinMediaId.isNullOrEmpty() -> {
+                Triple(
+                    MediaProvider.Jellyfin,
+                    buildJellyfinUrl(jellyfinMediaId, mediaType),
+                    MR.strings.watch_on_jellyfin,
+                )
+            }
+            else -> Triple(MediaProvider.None, null, MR.strings.watch)
         }
-        !jellyfinMediaId.isNullOrEmpty() -> {
-            Triple(
-                MediaProvider.Jellyfin,
-                buildJellyfinUrl(jellyfinMediaId, mediaType),
-                MR.strings.watch_on_jellyfin
-            )
-        }
-        else -> Triple(MediaProvider.None, null, MR.strings.watch)
-    }
 
     // Find pending request
     val pendingRequest = requests.firstOrNull { it.status == 1 }
     val userHasPendingRequest = pendingRequest?.requestedBy?.id == currentUserId
 
-    val serviceName = when {
-        serviceUrl?.contains("sonarr", ignoreCase = true) == true -> "Sonarr"
-        serviceUrl?.contains("radarr", ignoreCase = true) == true -> "Radarr"
-        serviceUrl?.contains("lidarr", ignoreCase = true) == true -> "Lidarr"
-        mediaType == RequestType.Movie -> "Radarr"
-        mediaType == RequestType.Tv -> "Sonarr"
-        else -> null
-    }
+    val serviceName =
+        when {
+            serviceUrl?.contains("sonarr", ignoreCase = true) == true -> "Sonarr"
+            serviceUrl?.contains("radarr", ignoreCase = true) == true -> "Radarr"
+            serviceUrl?.contains("lidarr", ignoreCase = true) == true -> "Lidarr"
+            mediaType == RequestType.Movie -> "Radarr"
+            mediaType == RequestType.Tv -> "Sonarr"
+            else -> null
+        }
 
     val trailerUrl = getTrailerUrl(relatedVideos)
 
@@ -122,23 +120,19 @@ fun MediaInfo?.toButtonState(
         watchButtonLabel = watchLabel,
         showWatchTrailerOption = trailerUrl != null,
         trailerUrl = trailerUrl,
-
         // Request buttons
-        showRequestButton = status == 1,  // Only if standard not requested yet
-        showRequestMoreButton = hasPartialContent,  // Show for partial TV content
-        showRequest4kButton = status4k == null || status4k == 1,  // Only if 4k not requested yet
+        showRequestButton = status == 1, // Only if standard not requested yet
+        showRequestMoreButton = hasPartialContent, // Show for partial TV content
+        showRequest4kButton = status4k == null || status4k == 1, // Only if 4k not requested yet
         availableSeasons = availableSeasonNumbers,
         totalSeasons = totalSeasonCount,
-
         // Request management
         showViewRequestButton = pendingRequest != null,
         showApproveRequestButton = isAdmin && pendingRequest != null,
         showDeclineRequestButton = (isAdmin || userHasPendingRequest) && pendingRequest != null,
         pendingRequestId = pendingRequest?.id,
-
         // Report Issue
         showReportIssueButton = hasContent,
-
         // Manage menu
         showManageMenu = hasSeerrMedia,
         showOpenInServiceButton = !serviceUrl.isNullOrEmpty(),
@@ -147,19 +141,20 @@ fun MediaInfo?.toButtonState(
         showRemoveFromServiceButton = hasSeerrMedia,
         showClearDataButton = hasSeerrMedia && isAdmin,
         showMarkAsAvailableButton = hasSeerrMedia && !isAvailable,
-
-        mediaProvider = mediaProvider
+        mediaProvider = mediaProvider,
     )
 }
 
 private fun getTrailerUrl(relatedVideos: List<Video>): String? {
-    val trailer = relatedVideos.firstOrNull {
-        it.type.equals("Trailer", ignoreCase = true) ||
+    val trailer =
+        relatedVideos.firstOrNull {
+            it.type.equals("Trailer", ignoreCase = true) ||
                 it.type.equals("Teaser", ignoreCase = true)
-    }
+        }
     return trailer?.url
 }
 
-private fun buildJellyfinUrl(jellyfinMediaId: String, mediaType: RequestType): String {
-    return "jellyfin://media/${mediaType.name.lowercase()}/$jellyfinMediaId"
-}
+private fun buildJellyfinUrl(
+    jellyfinMediaId: String,
+    mediaType: RequestType,
+): String = "jellyfin://media/${mediaType.name.lowercase()}/$jellyfinMediaId"

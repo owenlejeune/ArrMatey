@@ -18,14 +18,13 @@ sealed interface HistoryItem {
     val languages: List<Language>
     val customFormats: List<CustomFormat>
     val customFormatScore: Int?
-    val data: Map<String,String?>
+    val data: Map<String, String?>
 
     val displayTitle: String?
         get() = sourceTitle?.split("/")?.last()
 
     val indexerLabel: String?
         get() = data["indexer"]?.takeUnless { it.isEmpty() }
-
 }
 
 object HistoryItemSerializer : JsonContentPolymorphicSerializer<HistoryItem>(HistoryItem::class) {

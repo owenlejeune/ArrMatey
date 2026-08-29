@@ -1,18 +1,18 @@
 package com.dnfapps.arrmatey.model
 
-import com.dnfapps.arrmatey.arr.api.model.Episode as ArrEpisode
 import com.dnfapps.arrmatey.arr.api.model.FinaleType
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
-import com.dnfapps.arrmatey.seerr.api.model.Episode as SeerrEpisode
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
+import com.dnfapps.arrmatey.arr.api.model.Episode as ArrEpisode
+import com.dnfapps.arrmatey.seerr.api.model.Episode as SeerrEpisode
 
 data class EpisodeWrapper(
     val arrEpisode: ArrEpisode? = null,
     val seerrEpisode: SeerrEpisode? = null,
     val bazarrEpisode: BazarrEpisode? = null,
     val isActive: Boolean = false,
-    val activityProgress: String? = null
+    val activityProgress: String? = null,
 ) {
     val seasonNumber: Int
         get() = arrEpisode?.seasonNumber ?: seerrEpisode?.seasonNumber ?: 0

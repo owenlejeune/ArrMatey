@@ -16,7 +16,7 @@ fun Long.bytesAsFileSizeString(): String {
     // Format to 1 decimal: 9.5 instead of 9.48274
     val decimal = (value * 10.0).let { floor(it) / 10.0 }
 
-    return "${decimal.toInt()}.${(decimal * 10).toInt() % 10} ${units[max(exp-1,0)]}"
+    return "${decimal.toInt()}.${(decimal * 10).toInt() % 10} ${units[max(exp - 1,0)]}"
 }
 
 fun Long.toFormattedDuration(): String {
@@ -60,11 +60,13 @@ fun Long.toFormattedDuration(): String {
 }
 
 fun Long.formatWithCommas(symbol: String = "$"): String {
-    val formatted = this.toString()
-        .reversed()
-        .chunked(3)
-        .joinToString(",")
-        .reversed()
+    val formatted =
+        this
+            .toString()
+            .reversed()
+            .chunked(3)
+            .joinToString(",")
+            .reversed()
     return "$symbol$formatted"
 }
 

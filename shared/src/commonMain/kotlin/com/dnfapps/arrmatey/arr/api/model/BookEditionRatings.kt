@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class BookEditionRatings(
     val votes: Int,
     val value: Double,
-    val popularity: Double
+    val popularity: Double,
 )

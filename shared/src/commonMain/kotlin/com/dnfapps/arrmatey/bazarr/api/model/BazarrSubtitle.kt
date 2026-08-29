@@ -15,7 +15,7 @@ data class BazarrSubtitle(
     val code3: String? = null,
     val forced: Boolean = false,
     val hi: Boolean = false,
-    @SerialName("file_size") val fileSize: Long = 0
+    @SerialName("file_size") val fileSize: Long = 0,
 ) {
     /** Whether this subtitle is an external (downloadable / deletable) file rather than embedded. */
     val isExternal: Boolean get() = !path.isNullOrBlank()

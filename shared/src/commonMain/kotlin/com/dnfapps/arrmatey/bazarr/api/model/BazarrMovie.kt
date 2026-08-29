@@ -23,5 +23,5 @@ data class BazarrMovie(
     @SerialName("missing_subtitles")
     val missingSubtitles: List<BazarrSubtitleLanguage> = emptyList(),
     val sceneName: String? = null,
-    val subtitles: List<BazarrSubtitle> = emptyList()
+    val subtitles: List<BazarrSubtitle> = emptyList(),
 ) : BazarrMedia

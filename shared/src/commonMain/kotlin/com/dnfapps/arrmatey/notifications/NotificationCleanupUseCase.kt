@@ -1,11 +1,11 @@
 package com.dnfapps.arrmatey.notifications
 
 class NotificationCleanupUseCase(
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
 ) {
     /**
      * Cancels notifications for items that are no longer present in the latest fetch.
-     * 
+     *
      * @param instanceId The ID of the instance being processed.
      * @param currentItems All items currently held in memory across all dates.
      * @param fetchedIds The set of IDs returned by the latest API fetch.
@@ -17,7 +17,7 @@ class NotificationCleanupUseCase(
         currentItems: List<T>,
         fetchedIds: Set<Int>,
         getId: (T) -> Int,
-        getInstanceId: (T) -> Long?
+        getInstanceId: (T) -> Long?,
     ) {
         currentItems
             .filter { getInstanceId(it) == instanceId }

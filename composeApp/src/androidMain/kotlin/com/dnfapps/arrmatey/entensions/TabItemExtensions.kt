@@ -12,15 +12,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
-import org.koin.compose.koinInject
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
+import org.koin.compose.koinInject
 
 @Composable
 fun BadgeContent(
     tabItem: TabItem,
     activityQueueIssuesCount: Int,
-    requestsViewModel: RequestsViewModel = koinInject()
+    requestsViewModel: RequestsViewModel = koinInject(),
 ) {
     when (tabItem) {
         TabItem.Standard.ACTIVITY -> {
@@ -44,22 +44,22 @@ fun BadgeContent(
 fun TabItemIconView(
     tabItem: TabItem,
     useServiceNavIcons: Boolean,
-    activityQueueIssuesCount: Int
+    activityQueueIssuesCount: Int,
 ) {
     BadgedBox(
         badge = { BadgeContent(tabItem, activityQueueIssuesCount) },
-        modifier = Modifier.size(24.dp)
+        modifier = Modifier.size(24.dp),
     ) {
         val serviceIcon = tabItem.associatedType?.tabIcon
         if (useServiceNavIcons && serviceIcon != null) {
             Icon(
                 painter = painterResource(serviceIcon),
-                contentDescription = null
+                contentDescription = null,
             )
         } else {
             Icon(
                 imageVector = tabItem.androidIcon,
-                contentDescription = mokoString(tabItem.resource)
+                contentDescription = mokoString(tabItem.resource),
             )
         }
     }

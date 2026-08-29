@@ -14,40 +14,37 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 class DownloadClientRepository(
-    private val downloadClientDao: DownloadClientDao
+    private val downloadClientDao: DownloadClientDao,
 ) {
+    val allDownloadClientsFlow: StateFlow<List<DownloadClient>> =
+        downloadClientDao
+            .observeAllDownloadClients()
+            .stateIn(
+                scope = CoroutineScope(Dispatchers.IO),
+                started = SharingStarted.Eagerly,
+                initialValue = emptyList(),
+            )
 
-    val allDownloadClientsFlow: StateFlow<List<DownloadClient>> = downloadClientDao.observeAllDownloadClients()
-        .stateIn(
-            scope = CoroutineScope(Dispatchers.IO),
-            started = SharingStarted.Eagerly,
-            initialValue = emptyList()
-        )
+    fun observeAllDownloadClients(): Flow<List<DownloadClient>> = downloadClientDao.observeAllDownloadClients()
 
-    fun observeAllDownloadClients(): Flow<List<DownloadClient>> =
-        downloadClientDao.observeAllDownloadClients()
+    fun observeSelectedDownloadClient(): Flow<DownloadClient?> = downloadClientDao.observeSelectedDownloadClient()
 
-    fun observeSelectedDownloadClient(): Flow<DownloadClient?> =
-        downloadClientDao.observeSelectedDownloadClient()
+    suspend fun getDownloadClientById(id: Long): DownloadClient? = downloadClientDao.getDownloadClientById(id)
 
-    suspend fun getDownloadClientById(id: Long): DownloadClient? =
-        downloadClientDao.getDownloadClientById(id)
+    suspend fun getSelectedDownloadClient(): DownloadClient? = downloadClientDao.getAllDownloadClients().firstOrNull { it.selected }
 
-    suspend fun getSelectedDownloadClient(): DownloadClient? =
-        downloadClientDao.getAllDownloadClients().firstOrNull { it.selected }
+    suspend fun getAllDownloadClients(): List<DownloadClient> = downloadClientDao.getAllDownloadClients()
 
-    suspend fun getAllDownloadClients(): List<DownloadClient> =
-        downloadClientDao.getAllDownloadClients()
-
-    suspend fun createDownloadClient(downloadClient: DownloadClient): DownloadClientInsertResult {
-        return try {
+    suspend fun createDownloadClient(downloadClient: DownloadClient): DownloadClientInsertResult =
+        try {
             val urlConflict = downloadClientDao.findByUrl(downloadClient.url) != null
             val labelConflict = downloadClientDao.findByLabel(downloadClient.label) != null
 
-            val conflictFields = buildList {
-                if (urlConflict) add(DownloadClientConflictField.DownloadClientUrl)
-                if (labelConflict) add(DownloadClientConflictField.DownloadClientLabel)
-            }
+            val conflictFields =
+                buildList {
+                    if (urlConflict) add(DownloadClientConflictField.DownloadClientUrl)
+                    if (labelConflict) add(DownloadClientConflictField.DownloadClientLabel)
+                }
 
             if (conflictFields.isNotEmpty()) {
                 DownloadClientInsertResult.Conflict(fields = conflictFields)
@@ -55,35 +52,40 @@ class DownloadClientRepository(
                 val currentClients = downloadClientDao.getAllDownloadClients()
                 val shouldBeSelected = currentClients.none { it.selected }
                 val id = downloadClientDao.insert(downloadClient.copy(selected = shouldBeSelected))
-                if (id > 0L) DownloadClientInsertResult.Success(id)
-                else DownloadClientInsertResult.Error("Failed to save")
+                if (id > 0L) {
+                    DownloadClientInsertResult.Success(id)
+                } else {
+                    DownloadClientInsertResult.Error("Failed to save")
+                }
             }
         } catch (e: Exception) {
             DownloadClientInsertResult.Error(e.message ?: "An error occurred")
         }
-    }
 
-    suspend fun updateDownloadClient(downloadClient: DownloadClient): DownloadClientInsertResult {
-        return try {
+    suspend fun updateDownloadClient(downloadClient: DownloadClient): DownloadClientInsertResult =
+        try {
             val urlConflict = downloadClientDao.findOtherByUrl(downloadClient.url, downloadClient.id) != null
             val labelConflict = downloadClientDao.findOtherByLabel(downloadClient.label, downloadClient.id) != null
 
-            val conflictFields = buildList {
-                if (urlConflict) add(DownloadClientConflictField.DownloadClientUrl)
-                if (labelConflict) add(DownloadClientConflictField.DownloadClientLabel)
-            }
+            val conflictFields =
+                buildList {
+                    if (urlConflict) add(DownloadClientConflictField.DownloadClientUrl)
+                    if (labelConflict) add(DownloadClientConflictField.DownloadClientLabel)
+                }
 
             if (conflictFields.isNotEmpty()) {
                 DownloadClientInsertResult.Conflict(fields = conflictFields)
             } else {
                 val rows = downloadClientDao.update(downloadClient)
-                if (rows > 0) DownloadClientInsertResult.Success(downloadClient.id)
-                else DownloadClientInsertResult.Error("Failed to update")
+                if (rows > 0) {
+                    DownloadClientInsertResult.Success(downloadClient.id)
+                } else {
+                    DownloadClientInsertResult.Error("Failed to update")
+                }
             }
         } catch (e: Exception) {
             DownloadClientInsertResult.Error(e.message ?: "An error occurred")
         }
-    }
 
     suspend fun deleteDownloadClient(downloadClient: DownloadClient) {
         downloadClientDao.deleteAndUpdateSelected(downloadClient)

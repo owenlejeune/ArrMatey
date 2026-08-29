@@ -21,12 +21,13 @@ fun rememberRemoteImageData(
     onError: (ImageRequest, ErrorResult) -> Unit = { _, _ -> },
     onSuccess: (ImageRequest, SuccessResult) -> Unit = { _, _ -> },
     onStart: (ImageRequest) -> Unit = { _ -> },
-    onCancel: (ImageRequest) -> Unit = { _ -> }
+    onCancel: (ImageRequest) -> Unit = { _ -> },
 ): ImageRequest {
     val context = LocalPlatformContext.current
 
     return remember(url) {
-        ImageRequest.Builder(context)
+        ImageRequest
+            .Builder(context)
             .data(url)
             .diskCacheKey(cacheKey)
             .networkCachePolicy(CachePolicy.ENABLED)
@@ -36,14 +37,12 @@ fun rememberRemoteImageData(
                 onError = onError,
                 onSuccess = onSuccess,
                 onStart = onStart,
-                onCancel = onCancel
-            )
-            .apply {
+                onCancel = onCancel,
+            ).apply {
                 if (trim) {
                     bitmapConfig(Bitmap.Config.ARGB_8888)
                     transformations(TrimTransparencyTransformation())
                 }
-            }
-            .build()
+            }.build()
     }
 }

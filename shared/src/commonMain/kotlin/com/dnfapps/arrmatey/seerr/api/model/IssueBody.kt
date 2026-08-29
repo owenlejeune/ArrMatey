@@ -8,5 +8,5 @@ data class IssueBody(
     val message: String,
     val mediaId: Long,
     val problemSeason: Int? = null,
-    val problemEpisode: Int? = null
+    val problemEpisode: Int? = null,
 )

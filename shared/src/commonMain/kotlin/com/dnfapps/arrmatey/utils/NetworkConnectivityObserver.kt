@@ -13,7 +13,9 @@ import org.koin.core.component.inject
 
 interface NetworkConnectivityObserver {
     val isConnected: StateFlow<Boolean>
+
     fun startObserving()
+
     fun stopObserving()
 }
 
@@ -21,7 +23,7 @@ expect class NetworkConnectivityObserverFactory() {
     fun create(): NetworkConnectivityObserver
 }
 
-class NetworkConnectivityRepository: KoinComponent {
+class NetworkConnectivityRepository : KoinComponent {
     private val networkObserver: NetworkConnectivityObserver by inject()
 
     private val _isConnected = MutableStateFlow(false)

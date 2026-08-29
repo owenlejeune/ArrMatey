@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FloatExtensionsTest {
-
     @Test
     fun testFormatAgeMinutesJustNowForZero() {
         assertEquals("Just now", 0f.formatAgeMinutes())
@@ -46,4 +45,3 @@ class FloatExtensionsTest {
         assertEquals("1 years", 525600f.formatAgeMinutes())
     }
 }
-

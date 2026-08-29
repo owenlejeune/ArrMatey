@@ -21,7 +21,6 @@ data class MovieFile(
     override val mediaInfo: MediaInfo? = null,
     override val originalFilePath: String? = null,
     override val qualityCutoffNotMet: Boolean,
-
     val movieId: Int,
-    val edition: String? = null
-): MediaFile
+    val edition: String? = null,
+) : MediaFile

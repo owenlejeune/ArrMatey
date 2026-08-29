@@ -4,5 +4,5 @@ import kotlinx.serialization.SerialName
 
 enum class ApplyTags {
     @SerialName("replace")
-    Replace
+    Replace,
 }

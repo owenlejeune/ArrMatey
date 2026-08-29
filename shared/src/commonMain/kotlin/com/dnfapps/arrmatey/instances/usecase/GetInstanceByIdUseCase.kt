@@ -4,8 +4,7 @@ import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.Instance
 
 class GetInstanceByIdUseCase(
-    private val instanceRepository: InstanceRepository
+    private val instanceRepository: InstanceRepository,
 ) {
-    suspend operator fun invoke(instanceId: Long): Instance? =
-        instanceRepository.getInstanceById(instanceId)
+    suspend operator fun invoke(instanceId: Long): Instance? = instanceRepository.getInstanceById(instanceId)
 }

@@ -12,5 +12,5 @@ data class Specification(
     val negate: Boolean,
     val required: Boolean,
     val fields: List<Field>,
-    val presets: List<String>
+    val presets: List<String>,
 )

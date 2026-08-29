@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class IssuesResponse(
     val pageInfo: PageInfo,
-    val results: List<Issue>
+    val results: List<Issue>,
 )

@@ -28,39 +28,43 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun DashboardTodaySection(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean
+    isEditing: Boolean,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Default.CalendarToday, null,
-                    modifier = Modifier.size(20.dp)
+                    Icons.Default.CalendarToday,
+                    null,
+                    modifier = Modifier.size(20.dp),
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = mokoString(MR.strings.today),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
             if (state.calendarItems.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.nothing_on_today),
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 2.dp, bottom = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
 

@@ -32,35 +32,36 @@ class ArrSearchViewModel(
     private val getLibraryUseCase: GetLibraryUseCase,
     private val performLookupUseCase: PerformLookupUseCase,
     private val preferencesStore: PreferencesStore,
-    getActivityTasksUseCase: GetActivityTasksUseCase
-): ViewModel() {
-
+    getActivityTasksUseCase: GetActivityTasksUseCase,
+) : ViewModel() {
     private val _sortBy = MutableStateFlow(SortBy.Relevance)
     val sortBy: StateFlow<SortBy> = _sortBy.asStateFlow()
 
     private val _sortOrder = MutableStateFlow(SortOrder.Asc)
     val sortOrder: StateFlow<SortOrder> = _sortOrder.asStateFlow()
 
-    val activeMediaIds: StateFlow<Set<Long>> = getActivityTasksUseCase()
-        .map { tasks ->
-            tasks.filter { task ->
-                (instanceId == null || task.instanceId == instanceId) && task.type == instanceType
-            }.mapNotNull { it.mediaId }.toSet()
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptySet()
-        )
+    val activeMediaIds: StateFlow<Set<Long>> =
+        getActivityTasksUseCase()
+            .map { tasks ->
+                tasks
+                    .filter { task ->
+                        (instanceId == null || task.instanceId == instanceId) && task.type == instanceType
+                    }.mapNotNull { it.mediaId }
+                    .toSet()
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptySet(),
+            )
 
-    fun isItemActive(mediaId: Long): Boolean =
-        activeMediaIds.value.contains(mediaId)
+    fun isItemActive(mediaId: Long): Boolean = activeMediaIds.value.contains(mediaId)
 
     private val _lookupUiState = MutableStateFlow<ArrLibrary>(ArrLibrary.Initial)
     val lookupUiState: StateFlow<ArrLibrary> = _lookupUiState.asStateFlow()
 
-    val searchShowBanners: StateFlow<Boolean> = preferencesStore.searchShowBanners
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+    val searchShowBanners: StateFlow<Boolean> =
+        preferencesStore.searchShowBanners
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     init {
         observeLookupResults()
@@ -68,52 +69,56 @@ class ArrSearchViewModel(
 
     private fun observeLookupResults() {
         viewModelScope.launch {
-            val libraryFlow = if (instanceId != null) {
-                getLibraryUseCase(instanceId)
-            } else {
-                getLibraryUseCase.byType(instanceType)
-            }
+            val libraryFlow =
+                if (instanceId != null) {
+                    getLibraryUseCase(instanceId)
+                } else {
+                    getLibraryUseCase.byType(instanceType)
+                }
 
             combine(
                 getLookupResultsUseCase(instanceType, instanceId),
                 libraryFlow,
                 _sortBy,
-                _sortOrder
+                _sortOrder,
             ) { state, library, sortBy, sortOrder ->
                 when (state) {
                     is ArrLibrary.Success -> {
                         val libraryItems = (library as? ArrLibrary.Success)?.items ?: emptyList()
                         val mergedItems = state.items.mergeWithLibrary(libraryItems)
 
-                        val comparator: Comparator<ArrMedia>? = when (sortBy) {
-                            SortBy.Year -> compareBy { it.year }
-                            SortBy.Rating -> compareBy { it.ratingScore() }
-                            else -> null
-                        }
-                        val sortedList = comparator?.let { comparator ->
-                            mergedItems.orderedSortedWith(sortOrder, comparator)
-                        } ?: mergedItems
-
-                        val finalList = if (
-                            instanceType == InstanceType.Listenarr && library is ArrLibrary.Success
-                        ) {
-                            val existingAsins = library.items
-                                .filterIsInstance<Audiobook>()
-                                .mapTo(HashSet()) { it.asin }
-                            sortedList.filterNot { item ->
-                                item is SearchAudiobook && item.asin in existingAsins
+                        val comparator: Comparator<ArrMedia>? =
+                            when (sortBy) {
+                                SortBy.Year -> compareBy { it.year }
+                                SortBy.Rating -> compareBy { it.ratingScore() }
+                                else -> null
                             }
-                        } else {
-                            sortedList
-                        }
+                        val sortedList =
+                            comparator?.let { comparator ->
+                                mergedItems.orderedSortedWith(sortOrder, comparator)
+                            } ?: mergedItems
+
+                        val finalList =
+                            if (
+                                instanceType == InstanceType.Listenarr && library is ArrLibrary.Success
+                            ) {
+                                val existingAsins =
+                                    library.items
+                                        .filterIsInstance<Audiobook>()
+                                        .mapTo(HashSet()) { it.asin }
+                                sortedList.filterNot { item ->
+                                    item is SearchAudiobook && item.asin in existingAsins
+                                }
+                            } else {
+                                sortedList
+                            }
 
                         ArrLibrary.Success(items = finalList, preferences = state.preferences)
                     }
 
                     else -> state
                 }
-            }
-            .collect { state ->
+            }.collect { state ->
                 _lookupUiState.value = state
             }
         }

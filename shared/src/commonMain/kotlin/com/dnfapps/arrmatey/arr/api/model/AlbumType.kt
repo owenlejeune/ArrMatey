@@ -4,5 +4,5 @@ import kotlinx.serialization.SerialName
 
 enum class AlbumType {
     @SerialName("Album")
-    Album
+    Album,
 }

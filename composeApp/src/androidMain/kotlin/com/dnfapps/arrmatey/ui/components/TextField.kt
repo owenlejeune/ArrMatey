@@ -16,7 +16,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.max
 
 @Composable
 fun AMOutlinedTextField(
@@ -39,54 +38,61 @@ fun AMOutlinedTextField(
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         label?.let {
-            val labelText = buildAnnotatedString {
-                if (required) {
-                    withStyle(SpanStyle(color = Color.Red)) {
-                        append("* ")
+            val labelText =
+                buildAnnotatedString {
+                    if (required) {
+                        withStyle(SpanStyle(color = Color.Red)) {
+                            append("* ")
+                        }
                     }
+                    append(label)
                 }
-                append(label)
-            }
             Text(
                 text = labelText,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.5f),
                 fontSize = 14.sp,
-                maxLines = 1
+                maxLines = 1,
             )
         }
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = placeholder?.let { {
-                Text(
-                    text = it,
-                    fontSize = 14.sp,
-                    maxLines = 1
-                )
-            } },
+            placeholder =
+                placeholder?.let {
+                    {
+                        Text(
+                            text = it,
+                            fontSize = 14.sp,
+                            maxLines = 1,
+                        )
+                    }
+                },
             singleLine = singleLine,
             isError = isError,
-            supportingText = if (isError && errorMessage != null) {
-                { Text(text = errorMessage) }
-            } else null,
+            supportingText =
+                if (isError && errorMessage != null) {
+                    { Text(text = errorMessage) }
+                } else {
+                    null
+                },
             enabled = enabled,
             keyboardOptions = keyboardOptions,
             shape = MaterialTheme.shapes.large,
             visualTransformation = visualTransformation,
             trailingIcon = trailingIcon,
             maxLines = maxLines,
-            minLines = minLines
+            minLines = minLines,
         )
         description?.let {
             Text(
                 text = it,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 12.sp,
-                lineHeight = 14.sp
+                lineHeight = 14.sp,
             )
         }
     }

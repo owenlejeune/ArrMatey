@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class RequestResponse(
     val pageInfo: PageInfo,
     val results: List<MediaRequest>,
-    val serviceErrors: ServiceErrors? = null
+    val serviceErrors: ServiceErrors? = null,
 )

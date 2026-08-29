@@ -217,10 +217,10 @@ fun ArrLibraryScreen(
             AnimatedVisibility(
                 visible = !isExpanded && !isInSelectionMode && instancesState.selectedInstance != null,
                 enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
-                exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200))
+                exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
             ) {
                 FloatingActionButton(
-                    onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) }
+                    onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) },
                 ) {
                     Icon(Icons.Default.Add, null)
                 }
@@ -230,14 +230,15 @@ fun ArrLibraryScreen(
             AnimatedContent(
                 targetState = isInSelectionMode,
                 transitionSpec = {
-                    (fadeIn(animationSpec = tween(200, delayMillis = 50)) +
-                        slideInVertically(animationSpec = tween(200, delayMillis = 50)) { -it / 2 })
-                        .togetherWith(
-                            fadeOut(animationSpec = tween(150)) +
-                                slideOutVertically(animationSpec = tween(150)) { -it / 2 }
-                        )
+                    (
+                        fadeIn(animationSpec = tween(200, delayMillis = 50)) +
+                            slideInVertically(animationSpec = tween(200, delayMillis = 50)) { -it / 2 }
+                    ).togetherWith(
+                        fadeOut(animationSpec = tween(150)) +
+                            slideOutVertically(animationSpec = tween(150)) { -it / 2 },
+                    )
                 },
-                label = "SelectionTopBarAnimation"
+                label = "SelectionTopBarAnimation",
             ) { inSelection ->
                 if (inSelection) {
                     SelectionTopBar(
@@ -250,16 +251,17 @@ fun ArrLibraryScreen(
                                 arrMediaViewModel.selectAllItems()
                             }
                         },
-                        isAllSelected = arrMediaViewModel.areAllItemsSelected()
+                        isAllSelected = arrMediaViewModel.areAllItemsSelected(),
                     )
                 } else {
                     ArrAppBarWithSearch(
                         textFieldState = textFieldState,
                         textFieldEnabled = instancesState.selectedInstance != null,
-                        searchPlaceholder = mokoString(
-                            MR.strings.search_placeholder,
-                            instancesState.selectedInstance?.label ?: ""
-                        ),
+                        searchPlaceholder =
+                            mokoString(
+                                MR.strings.search_placeholder,
+                                instancesState.selectedInstance?.label ?: "",
+                            ),
                         trailingIcon = {
                             InstanceOptionsMenu(
                                 onViewWebGui = {
@@ -274,10 +276,10 @@ fun ArrLibraryScreen(
                                         Image(
                                             painter = painterResource(type.icon),
                                             contentDescription = mokoString(type.resource),
-                                            modifier = Modifier.size(24.dp)
+                                            modifier = Modifier.size(24.dp),
                                         )
                                     }
-                                }
+                                },
                             )
                         },
                         navigationIcon = {
@@ -291,7 +293,7 @@ fun ArrLibraryScreen(
                                     type = type,
                                     currentInstance = instancesState.selectedInstance,
                                     typeInstances = instancesState.instances,
-                                    onInstanceSelected = { instancesViewModel.setInstanceActive(it) }
+                                    onInstanceSelected = { instancesViewModel.setInstanceActive(it) },
                                 )
                             }
                             LibraryFilterMenu(
@@ -305,20 +307,21 @@ fun ArrLibraryScreen(
                                 onSortByChanged = { arrMediaViewModel.updateSortBy(it) },
                                 sortOrder = preferences.sortOrder,
                                 onSortOrderChanged = { arrMediaViewModel.updateSortOrder(it) },
-                                onOpenViewCustomization = { showViewCustomizationSheet = true }
+                                onOpenViewCustomization = { showViewCustomizationSheet = true },
                             )
-                        }
+                        },
                     )
                 }
             }
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+            contentAlignment = Alignment.Center,
         ) {
             if (instancesState.selectedInstance == null) {
                 NoInstanceView(type)
@@ -330,7 +333,7 @@ fun ArrLibraryScreen(
 
                     is ArrLibrary.Loading -> {
                         LoadingIndicator(
-                            modifier = Modifier.size(96.dp)
+                            modifier = Modifier.size(96.dp),
                         )
                     }
 
@@ -345,7 +348,7 @@ fun ArrLibraryScreen(
                             },
                             onRetry = {
                                 arrMediaViewModel.refresh()
-                            }
+                            },
                         )
                     }
 
@@ -355,7 +358,7 @@ fun ArrLibraryScreen(
                             onRefresh = {
                                 arrMediaViewModel.refresh()
                             },
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
                         ) {
                             val items = state.items
                             if (items.isEmpty() && textFieldState.text.isEmpty()) {
@@ -371,7 +374,7 @@ fun ArrLibraryScreen(
                                     itemIsActive = { item ->
                                         item.id in activeMediaIds
                                     },
-                                    multiSelectState = arrMediaViewModel.selectionState
+                                    multiSelectState = arrMediaViewModel.selectionState,
                                 )
                             } else {
                                 EmptySearchResultsView(type, textFieldState.text.toString()) {
@@ -399,23 +402,25 @@ fun ArrLibraryScreen(
                 onGridSpacingChanged = { arrMediaViewModel.updateGridSpacing(it) },
                 onPosterElevationChanged = { arrMediaViewModel.updatePosterElevation(it) },
                 onPosterRadiusChanged = { arrMediaViewModel.updatePosterRadius(it) },
-                onApplyGloballyChanged = { arrMediaViewModel.updateApplyGlobally(it) }
+                onApplyGloballyChanged = { arrMediaViewModel.updateApplyGlobally(it) },
             )
         }
 
         if (isInSelectionMode) {
             FlexibleBottomSheet(
                 onDismissRequest = { arrMediaViewModel.exitSelectionMode() },
-                sheetState = rememberFlexibleBottomSheetState(
-                    isModal = false,
-                    initialValue = FlexibleSheetValue.IntermediatelyExpanded,
-                    flexibleSheetSize = FlexibleSheetSize(
-                        fullyExpanded = FlexibleSheetSize.WrapContent,
-                        intermediatelyExpanded = 0.15f,
-                        slightlyExpanded = 0.15f
-                    )
-                ),
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                sheetState =
+                    rememberFlexibleBottomSheetState(
+                        isModal = false,
+                        initialValue = FlexibleSheetValue.IntermediatelyExpanded,
+                        flexibleSheetSize =
+                            FlexibleSheetSize(
+                                fullyExpanded = FlexibleSheetSize.WrapContent,
+                                intermediatelyExpanded = 0.15f,
+                                slightlyExpanded = 0.15f,
+                            ),
+                    ),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
                 SelectionBottomBar(
                     count = selectionCount,
@@ -430,7 +435,7 @@ fun ArrLibraryScreen(
                     onSearchMonitored = { arrMediaViewModel.performAutomaticLookupSelected() },
                     onSearchSubtitles = { arrMediaViewModel.performSubtitleSearchSelected() },
                     onUpdateMonitoring = { showMonitorOptionsSheet = true },
-                    onDelete = { confirmBulkDelete = true }
+                    onDelete = { confirmBulkDelete = true },
                 )
             }
         }
@@ -443,7 +448,7 @@ fun ArrLibraryScreen(
                 onDismiss = { confirmDelete = null },
                 onDelete = { deleteFiles, addExclusion ->
                     arrMediaViewModel.deleteMedia(item, deleteFiles, addExclusion)
-                }
+                },
             )
         }
 
@@ -462,7 +467,7 @@ fun ArrLibraryScreen(
                         arrMediaViewModel.editItem(it)
                     }
                 },
-                onDismiss = { showEditSheet = null }
+                onDismiss = { showEditSheet = null },
             )
         }
 
@@ -477,7 +482,7 @@ fun ArrLibraryScreen(
                         onClick = {
                             arrMediaViewModel.editItem(item, moveFiles = true)
                             moveFilesItem = null
-                        }
+                        },
                     ) {
                         Text(mokoString(MR.strings.yes))
                     }
@@ -487,11 +492,11 @@ fun ArrLibraryScreen(
                         onClick = {
                             arrMediaViewModel.editItem(item)
                             moveFilesItem = null
-                        }
+                        },
                     ) {
                         Text(mokoString(MR.strings.no))
                     }
-                }
+                },
             )
         }
 
@@ -504,7 +509,7 @@ fun ArrLibraryScreen(
                 onDelete = { deleteFiles, addExclusion ->
                     arrMediaViewModel.deleteSelected(deleteFiles, addExclusion)
                     confirmBulkDelete = false
-                }
+                },
             )
         }
 
@@ -515,7 +520,7 @@ fun ArrLibraryScreen(
                 onOptionSelected = {
                     arrMediaViewModel.updateMonitoringSelected(it)
                     showMonitorOptionsSheet = false
-                }
+                },
             )
         }
     }
@@ -527,12 +532,12 @@ internal fun SelectionTopBar(
     count: Int,
     onClose: () -> Unit,
     onSelectAll: () -> Unit,
-    isAllSelected: Boolean
+    isAllSelected: Boolean,
 ) {
     TopAppBar(
         title = {
             Text(
-                text = mokoString(MR.strings.selected_count, count)
+                text = mokoString(MR.strings.selected_count, count),
             )
         },
         navigationIcon = {
@@ -544,10 +549,10 @@ internal fun SelectionTopBar(
             IconButton(onClick = onSelectAll) {
                 Icon(
                     imageVector = if (isAllSelected) Icons.Default.Deselect else Icons.Default.SelectAll,
-                    contentDescription = null
+                    contentDescription = null,
                 )
             }
-        }
+        },
     )
 }
 
@@ -563,13 +568,14 @@ internal fun SelectionBottomBar(
     onSearchMonitored: () -> Unit,
     onSearchSubtitles: () -> Unit,
     onUpdateMonitoring: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
-    FlowRow (
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 24.dp)
-            .fillMaxWidth(),
+    FlowRow(
+        modifier =
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp)
+                .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
@@ -577,26 +583,26 @@ internal fun SelectionBottomBar(
             icon = Icons.Default.Edit,
             label = mokoString(MR.strings.edit),
             onClick = onEdit,
-            enabled = count == 1
+            enabled = count == 1,
         )
         SelectionActionItem(
             icon = if (isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
             label = mokoString(if (isMonitored) MR.strings.monitored else MR.strings.unmonitored),
             onClick = onToggleMonitor,
-            enabled = count == 1
+            enabled = count == 1,
         )
 
         SelectionActionItem(
             icon = Icons.Default.Refresh,
             label = mokoString(MR.strings.refresh),
             onClick = onRefresh,
-            enabled = count > 0
+            enabled = count > 0,
         )
         SelectionActionItem(
             icon = Icons.Default.Search,
             label = mokoString(MR.strings.search_monitored),
             onClick = onSearchMonitored,
-            enabled = count > 0
+            enabled = count > 0,
         )
 
         if (hasBazarr && (type == InstanceType.Sonarr || type == InstanceType.Radarr)) {
@@ -604,7 +610,7 @@ internal fun SelectionBottomBar(
                 icon = Icons.Default.Search,
                 label = mokoString(MR.strings.bazarr_search_subtitles),
                 onClick = onSearchSubtitles,
-                enabled = count > 0
+                enabled = count > 0,
             )
         }
 
@@ -613,7 +619,7 @@ internal fun SelectionBottomBar(
                 icon = Icons.Default.Bookmark,
                 label = mokoString(MR.strings.update_monitoring),
                 onClick = onUpdateMonitoring,
-                enabled = count > 0
+                enabled = count > 0,
             )
         }
 
@@ -622,7 +628,7 @@ internal fun SelectionBottomBar(
             label = mokoString(MR.strings.delete),
             onClick = onDelete,
             isError = true,
-            enabled = count > 0
+            enabled = count > 0,
         )
     }
 }
@@ -633,23 +639,28 @@ private fun SelectionActionItem(
     label: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
-    isError: Boolean = false
+    isError: Boolean = false,
 ) {
     Button(
         onClick = onClick,
-        colors = if (isError) ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError
-        ) else ButtonDefaults.buttonColors(),
-        enabled = enabled
+        colors =
+            if (isError) {
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                )
+            } else {
+                ButtonDefaults.buttonColors()
+            },
+        enabled = enabled,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            modifier = Modifier.padding(end = 4.dp)
+            modifier = Modifier.padding(end = 4.dp),
         )
         Text(
-            text = label.breakable()
+            text = label.breakable(),
         )
     }
 }
@@ -661,47 +672,49 @@ internal fun ConfirmDeleteAlert(
     initialAddExclusion: Boolean = false,
     initialDeleteFiles: Boolean = false,
     onDismiss: () -> Unit,
-    onDelete: (Boolean, Boolean) -> Unit
+    onDelete: (Boolean, Boolean) -> Unit,
 ) {
     var addExclusion by remember { mutableStateOf(initialAddExclusion) }
     var deleteFiles by remember { mutableStateOf(initialDeleteFiles) }
     ModalBottomSheet(
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
+            modifier =
+                Modifier
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.add_exclusion),
                 sublabel = mokoString(MR.strings.add_exclusion_description),
                 checked = addExclusion,
-                onCheckedChange = { addExclusion = !addExclusion }
+                onCheckedChange = { addExclusion = !addExclusion },
             )
             LabelledSwitch(
                 label = mokoString(MR.strings.delete_files),
                 sublabel = mokoString(MR.strings.delete_files_description),
                 checked = deleteFiles,
-                onCheckedChange = { deleteFiles = !deleteFiles }
+                onCheckedChange = { deleteFiles = !deleteFiles },
             )
             Button(
                 onClick = { onDelete(deleteFiles, addExclusion) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
-                enabled = !deleteInProgress
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
+                enabled = !deleteInProgress,
             ) {
                 if (deleteInProgress) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(text = mokoString(MR.strings.delete))
                 }
@@ -718,55 +731,61 @@ internal fun EditMediaSheet(
     tags: List<Tag>,
     editInProgress: Boolean,
     onEditItem: (ArrMedia) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     when (item) {
-        is ArrMovie -> EditMovieSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss,
-        )
-        is ArrSeries -> EditSeriesSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
-        is Arrtist -> EditArtistSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
-        is Author -> EditAuthorSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            tags = tags,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
-        is Audiobook -> EditAudiobookSheet(
-            item = item,
-            qualityProfiles = qualityProfiles,
-            rootFolders = rootFolders,
-            editInProgress = editInProgress,
-            onEditItem = onEditItem,
-            onDismiss = onDismiss
-        )
+        is ArrMovie ->
+            EditMovieSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                tags = tags,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
+        is ArrSeries ->
+            EditSeriesSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                tags = tags,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
+        is Arrtist ->
+            EditArtistSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                tags = tags,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
+        is Author ->
+            EditAuthorSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                tags = tags,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
+        is Audiobook ->
+            EditAudiobookSheet(
+                item = item,
+                qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
         is SearchAudiobook,
-        is MockMedia -> {}
+        is MockMedia,
+        -> {}
     }
 }
 
@@ -775,7 +794,7 @@ internal fun EditMediaSheet(
 internal fun MonitorOptionsSheet(
     type: InstanceType,
     onDismissRequest: () -> Unit,
-    onOptionSelected: (Any) -> Unit
+    onOptionSelected: (Any) -> Unit,
 ) {
     if (type == InstanceType.Booksehelf) {
         BookshelfMonitorOptionsSheet(onDismissRequest, onOptionSelected)
@@ -784,33 +803,36 @@ internal fun MonitorOptionsSheet(
 
     ModalBottomSheet(onDismissRequest = onDismissRequest) {
         Column(
-            modifier = Modifier
-                .padding(bottom = 24.dp)
-                .fillMaxWidth()
+            modifier =
+                Modifier
+                    .padding(bottom = 24.dp)
+                    .fillMaxWidth(),
         ) {
             Text(
                 text = mokoString(MR.strings.monitor),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
             )
             HorizontalDivider()
 
-            val options: List<Any> = when (type) {
-                InstanceType.Sonarr -> SeriesMonitorType.entries.filter { it != SeriesMonitorType.Unknown }
-                InstanceType.Lidarr -> ArtistMonitorType.entries.filter { it != ArtistMonitorType.Unknown }
-                else -> emptyList()
-            }
+            val options: List<Any> =
+                when (type) {
+                    InstanceType.Sonarr -> SeriesMonitorType.entries.filter { it != SeriesMonitorType.Unknown }
+                    InstanceType.Lidarr -> ArtistMonitorType.entries.filter { it != ArtistMonitorType.Unknown }
+                    else -> emptyList()
+                }
 
             options.forEach { option ->
-                val label = when (option) {
-                    is SeriesMonitorType -> mokoString(option.resource)
-                    is ArtistMonitorType -> mokoString(option.resource)
-                    is AuthorMonitorType -> mokoString(option.resource)
-                    else -> ""
-                }
+                val label =
+                    when (option) {
+                        is SeriesMonitorType -> mokoString(option.resource)
+                        is ArtistMonitorType -> mokoString(option.resource)
+                        is AuthorMonitorType -> mokoString(option.resource)
+                        else -> ""
+                    }
                 ListItem(
                     headlineContent = { Text(label) },
-                    modifier = Modifier.clickable { onOptionSelected(option) }
+                    modifier = Modifier.clickable { onOptionSelected(option) },
                 )
             }
         }
@@ -821,45 +843,47 @@ internal fun MonitorOptionsSheet(
 @Composable
 private fun BookshelfMonitorOptionsSheet(
     onDismissRequest: () -> Unit,
-    onOptionSelected: (Any) -> Unit
+    onOptionSelected: (Any) -> Unit,
 ) {
     var monitorAuthor by remember { mutableStateOf<Boolean?>(null) }
     var monitorNewBooks by remember { mutableStateOf<AuthorMonitorType?>(null) }
 
     ModalBottomSheet(onDismissRequest = onDismissRequest) {
         Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 24.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 24.dp)
+                    .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
                 text = mokoString(MR.strings.update_monitoring),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
             HorizontalDivider()
 
             Text(
                 text = mokoString(MR.strings.monitor_author),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
             )
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 listOf(null, true, false).forEach { value ->
-                    val label = when (value) {
-                        null -> mokoString(MR.strings.no_change)
-                        true -> mokoString(MR.strings.monitored)
-                        false -> mokoString(MR.strings.unmonitored)
-                    }
+                    val label =
+                        when (value) {
+                            null -> mokoString(MR.strings.no_change)
+                            true -> mokoString(MR.strings.monitored)
+                            false -> mokoString(MR.strings.unmonitored)
+                        }
                     val isSelected = monitorAuthor == value
                     Button(
                         onClick = { monitorAuthor = value },
                         colors = if (isSelected) ButtonDefaults.buttonColors() else ButtonDefaults.outlinedButtonColors(),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     ) {
                         Text(label, textAlign = TextAlign.Center, fontSize = 12.sp)
                     }
@@ -868,20 +892,21 @@ private fun BookshelfMonitorOptionsSheet(
 
             Text(
                 text = mokoString(MR.strings.monitor_new_books),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
             )
 
             val bookOptions = listOf(null, AuthorMonitorType.All, AuthorMonitorType.None, AuthorMonitorType.New)
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 bookOptions.forEach { value ->
-                    val label = when (value) {
-                        null -> mokoString(MR.strings.no_change)
-                        else -> mokoString(value.resource)
-                    }
+                    val label =
+                        when (value) {
+                            null -> mokoString(MR.strings.no_change)
+                            else -> mokoString(value.resource)
+                        }
                     val isSelected = monitorNewBooks == value
                     Button(
                         onClick = { monitorNewBooks = value },
@@ -899,13 +924,13 @@ private fun BookshelfMonitorOptionsSheet(
                     onOptionSelected(
                         AuthorMonitorOptions(
                             monitored = monitorAuthor,
-                            monitorNewItems = monitorNewBooks
-                        )
+                            monitorNewItems = monitorNewBooks,
+                        ),
                     )
                     onDismissRequest()
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = monitorAuthor != null || monitorNewBooks != null
+                enabled = monitorAuthor != null || monitorNewBooks != null,
             ) {
                 Text(mokoString(MR.strings.save))
             }
@@ -917,70 +942,74 @@ private fun BookshelfMonitorOptionsSheet(
 internal fun EmptySearchResultsView(
     type: InstanceType,
     query: String,
-    onShouldSearch: () -> Unit
+    onShouldSearch: () -> Unit,
 ) {
-    val mediaType = when (type) {
-        InstanceType.Sonarr -> mokoString(MR.strings.type_series)
-        InstanceType.Radarr -> mokoString(MR.strings.type_movie)
-        InstanceType.Lidarr -> mokoString(MR.strings.type_artist)
-        InstanceType.Booksehelf -> mokoString(MR.strings.type_author)
-        else -> mokoString(MR.strings.unknown)
-    }
+    val mediaType =
+        when (type) {
+            InstanceType.Sonarr -> mokoString(MR.strings.type_series)
+            InstanceType.Radarr -> mokoString(MR.strings.type_movie)
+            InstanceType.Lidarr -> mokoString(MR.strings.type_artist)
+            InstanceType.Booksehelf -> mokoString(MR.strings.type_author)
+            else -> mokoString(MR.strings.unknown)
+        }
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxSize(),
     ) {
         Text(
             text = mokoString(MR.strings.no_query_results, query),
             fontSize = 18.sp,
             fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
         Text(
-            text = buildAnnotatedString {
-                append(mokoString(MR.strings.no_query_results_label))
-                append(" ")
-                withLink(
-                    link = LinkAnnotation.Clickable(tag = "new_entry") {
-                        onShouldSearch()
+            text =
+                buildAnnotatedString {
+                    append(mokoString(MR.strings.no_query_results_label))
+                    append(" ")
+                    withLink(
+                        link =
+                            LinkAnnotation.Clickable(tag = "new_entry") {
+                                onShouldSearch()
+                            },
+                    ) {
+                        withStyle(
+                            SpanStyle(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                            ),
+                        ) {
+                            append(mokoString(MR.strings.no_query_results_link, mediaType))
+                        }
                     }
-                ) {
-                    withStyle(SpanStyle(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )) {
-                        append(mokoString(MR.strings.no_query_results_link, mediaType))
-                    }
-                }
-            }
+                },
         )
     }
 }
 
 @Composable
-internal fun EmptyLibraryView(
-    modifier: Modifier = Modifier
-) {
+internal fun EmptyLibraryView(modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        modifier = modifier,
     ) {
         Icon(
             imageVector = Icons.Default.VideoLibrary,
             contentDescription = null,
-            modifier = Modifier.size(128.dp)
+            modifier = Modifier.size(128.dp),
         )
         Text(
             text = mokoString(MR.strings.empty_library),
             fontSize = 20.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
         )
         Text(
-            text = mokoString(MR.strings.empty_library_message)
+            text = mokoString(MR.strings.empty_library_message),
         )
     }
 }

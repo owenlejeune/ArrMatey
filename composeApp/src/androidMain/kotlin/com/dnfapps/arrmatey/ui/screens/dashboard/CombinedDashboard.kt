@@ -32,7 +32,6 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -53,7 +52,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -84,7 +82,7 @@ fun CombinedDashboard(
     windowSizeClass: WindowSizeClass,
     viewModel: CombinedDashboardViewModel = koinInject(),
     moko: MokoStrings = koinInject(),
-    onNavigateToArrDashboard: (Long) -> Unit = {}
+    onNavigateToArrDashboard: (Long) -> Unit = {},
 ) {
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
     val hapticFeedback = LocalHapticFeedback.current
@@ -119,7 +117,9 @@ fun CombinedDashboard(
                         IconButton(onClick = { viewModel.toggleEditing() }) {
                             Icon(Icons.Default.Close, null)
                         }
-                    } else if (isCompact) NavigationDrawerButton()
+                    } else if (isCompact) {
+                        NavigationDrawerButton()
+                    }
                 },
                 windowInsets = TopAppBarDefaults.windowInsets,
                 actions = {
@@ -133,7 +133,7 @@ fun CombinedDashboard(
                             Icon(Icons.Default.Restore, null)
                         }
                     }
-                }
+                },
             )
         },
         floatingActionButton = {
@@ -141,18 +141,19 @@ fun CombinedDashboard(
                 ExtendedFloatingActionButton(
                     onClick = { showAddCardSheet = true },
                     icon = { Icon(Icons.Default.Add, null) },
-                    text = { Text(mokoString(MR.strings.add)) }
+                    text = { Text(mokoString(MR.strings.add)) },
                 )
             }
         },
-        contentWindowInsets = WindowInsets(0.dp)
+        contentWindowInsets = WindowInsets(0.dp),
     ) { contentPadding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = { if (!isEditing) viewModel.refresh() },
-            modifier = Modifier
-                .padding(top = contentPadding.calculateTopPadding())
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .padding(top = contentPadding.calculateTopPadding())
+                    .fillMaxSize(),
         ) {
             when (val currentState = state) {
                 is CombinedDashboardState.Initial -> {}
@@ -162,24 +163,25 @@ fun CombinedDashboard(
                 is CombinedDashboardState.Success -> {
                     if (cards.isEmpty()) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
                             verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(
                                 text = mokoString(MR.strings.empty_library),
-                                style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.titleLarge,
                             )
                             Text(
                                 text = mokoString(MR.strings.empty_dashboard_message),
                                 style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
                             )
                             Button(
                                 onClick = { showAddCardSheet = true },
-                                modifier = Modifier.padding(top = 16.dp)
+                                modifier = Modifier.padding(top = 16.dp),
                             ) {
                                 Text(mokoString(MR.strings.add))
                             }
@@ -187,11 +189,13 @@ fun CombinedDashboard(
                     } else {
                         val reorderableGridState =
                             rememberReorderableLazyStaggeredGridState(gridState) { from, to ->
-                                val newOrder = cards.toMutableList().apply {
-                                    this[to.index] = this[from.index].also {
-                                        this[from.index] = this[to.index]
+                                val newOrder =
+                                    cards.toMutableList().apply {
+                                        this[to.index] =
+                                            this[from.index].also {
+                                                this[from.index] = this[to.index]
+                                            }
                                     }
-                                }
                                 viewModel.saveCardOrder(newOrder)
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                             }
@@ -200,11 +204,12 @@ fun CombinedDashboard(
                             columns = StaggeredGridCells.Fixed(count = if (isCompact) 1 else 2),
                             verticalItemSpacing = 16.dp,
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            contentPadding = PaddingValues(
-                                all = 16.dp,
-                                bottom = 16.dp + navigationBarBottomInset()
-                            ),
-                            modifier = Modifier.fillMaxSize()
+                            contentPadding =
+                                PaddingValues(
+                                    all = 16.dp,
+                                    bottom = 16.dp + navigationBarBottomInset(),
+                                ),
+                            modifier = Modifier.fillMaxSize(),
                         ) {
                             items(cards, key = { it }) { dashboardCard ->
                                 ReorderableItem(reorderableGridState, key = dashboardCard) { isDragging ->
@@ -214,67 +219,85 @@ fun CombinedDashboard(
                                     Box(contentAlignment = Alignment.Center) {
                                         val navManager = navigationManager
 
-                                        val cardOnClick: (() -> Unit)? = when (dashboardCard) {
-                                            DashboardCards.ArrOverview -> { { navManager.openSettings() } }
-                                            DashboardCards.SeerrOverview -> { { navManager.openRequestsTab() } }
-                                            DashboardCards.ProwlarrOverview -> { { navManager.openProwlarrTab() } }
-                                            DashboardCards.DownloadClients -> { { navManager.openDownloadClientsTab() } }
-                                            DashboardCards.ActivityQueue -> { { navManager.openActivityTab() } }
-                                            DashboardCards.OnToday -> { { navManager.openScheduleTab() } }
-                                            DashboardCards.UpcomingReleases -> { { navManager.openScheduleTab() } }
-                                            DashboardCards.BazarrOverview -> { { navManager.openBazarrTab() } }
-                                            else -> null
-                                        }
+                                        val cardOnClick: (() -> Unit)? =
+                                            when (dashboardCard) {
+                                                DashboardCards.ArrOverview -> {
+                                                    { navManager.openSettings() }
+                                                }
+                                                DashboardCards.SeerrOverview -> {
+                                                    { navManager.openRequestsTab() }
+                                                }
+                                                DashboardCards.ProwlarrOverview -> {
+                                                    { navManager.openProwlarrTab() }
+                                                }
+                                                DashboardCards.DownloadClients -> {
+                                                    { navManager.openDownloadClientsTab() }
+                                                }
+                                                DashboardCards.ActivityQueue -> {
+                                                    { navManager.openActivityTab() }
+                                                }
+                                                DashboardCards.OnToday -> {
+                                                    { navManager.openScheduleTab() }
+                                                }
+                                                DashboardCards.UpcomingReleases -> {
+                                                    { navManager.openScheduleTab() }
+                                                }
+                                                DashboardCards.BazarrOverview -> {
+                                                    { navManager.openBazarrTab() }
+                                                }
+                                                else -> null
+                                            }
 
                                         Surface(
                                             shadowElevation = elevation,
-                                            modifier = Modifier
-                                                .padding(innerPadding)
-                                                .clip(MaterialTheme.shapes.large)
-                                                .combinedClickable(
-                                                    enabled = !isEditing,
-                                                    onClick = { cardOnClick?.invoke() }
-                                                )
-                                                .longPressDraggableHandle(
-                                                    onDragStarted = {
-                                                        if (!isEditing) {
-                                                            viewModel.toggleEditing()
-                                                        }
-                                                        hapticFeedback.performHapticFeedback(
-                                                            HapticFeedbackType.GestureThresholdActivate
-                                                        )
-                                                    },
-                                                    onDragStopped = {
-                                                        hapticFeedback.performHapticFeedback(
-                                                            HapticFeedbackType.GestureEnd
-                                                        )
-                                                    },
-                                                    enabled = true
-                                                )
+                                            modifier =
+                                                Modifier
+                                                    .padding(innerPadding)
+                                                    .clip(MaterialTheme.shapes.large)
+                                                    .combinedClickable(
+                                                        enabled = !isEditing,
+                                                        onClick = { cardOnClick?.invoke() },
+                                                    ).longPressDraggableHandle(
+                                                        onDragStarted = {
+                                                            if (!isEditing) {
+                                                                viewModel.toggleEditing()
+                                                            }
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType.GestureThresholdActivate,
+                                                            )
+                                                        },
+                                                        onDragStopped = {
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType.GestureEnd,
+                                                            )
+                                                        },
+                                                        enabled = true,
+                                                    ),
                                         ) {
                                             DashboardCardContent(
                                                 cardType = dashboardCard,
                                                 currentState = currentState,
                                                 isEditing = isEditing,
-                                                onNavigateToArrDashboard = onNavigateToArrDashboard
+                                                onNavigateToArrDashboard = onNavigateToArrDashboard,
                                             )
                                         }
                                         if (isEditing) {
                                             Box(
-                                                modifier = Modifier
-                                                    .align(Alignment.TopEnd)
-                                                    .clip(CircleShape)
-                                                    .clickable {
-                                                        viewModel.removeCard(dashboardCard)
-                                                    }
-                                                    .size(24.dp)
-                                                    .background(ArrRed),
-                                                contentAlignment = Alignment.Center
+                                                modifier =
+                                                    Modifier
+                                                        .align(Alignment.TopEnd)
+                                                        .clip(CircleShape)
+                                                        .clickable {
+                                                            viewModel.removeCard(dashboardCard)
+                                                        }.size(24.dp)
+                                                        .background(ArrRed),
+                                                contentAlignment = Alignment.Center,
                                             ) {
                                                 Icon(
-                                                    Icons.Default.Close, null,
+                                                    Icons.Default.Close,
+                                                    null,
                                                     tint = Color.Black,
-                                                    modifier = Modifier.size(18.dp)
+                                                    modifier = Modifier.size(18.dp),
                                                 )
                                             }
                                         }
@@ -291,47 +314,49 @@ fun CombinedDashboard(
     if (showAddCardSheet) {
         ModalBottomSheet(
             onDismissRequest = { showAddCardSheet = false },
-            sheetState = sheetState
+            sheetState = sheetState,
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
             ) {
                 Text(
                     text = mokoString(MR.strings.add_dashboard_cards),
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 24.dp)
+                    modifier = Modifier.padding(horizontal = 24.dp),
                 )
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Fixed(count = if (isCompact) 1 else 2),
                     verticalItemSpacing = 16.dp,
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(all = 16.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     items(availableCards) { card ->
                         Box(
-                            modifier = Modifier
-                                .clip(MaterialTheme.shapes.large)
-                                .clickable {
-                                    viewModel.addCard(card)
-                                }
+                            modifier =
+                                Modifier
+                                    .clip(MaterialTheme.shapes.large)
+                                    .clickable {
+                                        viewModel.addCard(card)
+                                    },
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
                                 Text(
                                     text = mokoString(card.title),
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
                                 )
                                 DashboardCardContent(
                                     enabled = false,
                                     cardType = card,
                                     currentState = CombinedDashboardState.Mock,
                                     isEditing = false,
-                                    onNavigateToArrDashboard = onNavigateToArrDashboard
+                                    onNavigateToArrDashboard = onNavigateToArrDashboard,
                                 )
                             }
                         }
@@ -349,25 +374,25 @@ private fun DashboardCardContent(
     isEditing: Boolean,
     enabled: Boolean = true,
     navManager: NavigationManager = navigationManager,
-    onNavigateToArrDashboard: (Long) -> Unit = {}
+    onNavigateToArrDashboard: (Long) -> Unit = {},
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
             DashboardOverviewCards(
                 state = currentState,
-                isEditing = isEditing
+                isEditing = isEditing,
             )
 
         DashboardCards.SeerrOverview ->
             SeerrSection(
                 state = currentState,
-                isEditing = isEditing
+                isEditing = isEditing,
             )
 
         DashboardCards.ProwlarrOverview ->
             DashboardProwlarrSection(
                 state = currentState,
-                isEditing = isEditing
+                isEditing = isEditing,
             )
 
         DashboardCards.Network ->
@@ -379,37 +404,37 @@ private fun DashboardCardContent(
                 state = currentState,
                 onOpenItem = { id, type ->
                     navManager.arr(type).toDetails(id)
-                }
+                },
             )
 
         DashboardCards.DownloadClients ->
             DashboardDownloadClientsSection(
                 state = currentState,
-                isEditing = isEditing
+                isEditing = isEditing,
             )
 
         DashboardCards.ActivityQueue ->
             DashboardActivityQueueSection(
                 state = currentState,
-                isEditing = isEditing
+                isEditing = isEditing,
             )
 
         DashboardCards.OnToday ->
             DashboardTodaySection(
                 state = currentState,
-                isEditing = isEditing
+                isEditing = isEditing,
             )
 
         DashboardCards.UpcomingReleases ->
             DashboardUpcomingSection(
                 state = currentState,
-                isEditing = isEditing
+                isEditing = isEditing,
             )
 
         DashboardCards.BazarrOverview ->
             BazarrSection(
                 state = currentState,
-                isEditing = isEditing
+                isEditing = isEditing,
             )
 
         DashboardCards.InstanceDashboard ->
@@ -418,7 +443,7 @@ private fun DashboardCardContent(
                 enabled = !isEditing && enabled,
                 onInstanceClicked = { id ->
                     onNavigateToArrDashboard(id)
-                }
+                },
             )
     }
 }

@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun ConfirmableButton(
     isConfirming: Boolean,
@@ -32,27 +31,31 @@ fun ConfirmableButton(
     modifier: Modifier = Modifier,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     enabled: Boolean = true,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier,//.scale(scale),
+        modifier = modifier, // .scale(scale),
         colors = colors,
-        enabled = enabled
+        enabled = enabled,
     ) {
         AnimatedContent(
             targetState = isConfirming,
             transitionSpec = {
-                (fadeIn(animationSpec = tween(300)) +
-                        scaleIn(initialScale = 0.9f, animationSpec = tween(300))) togetherWith
-                        (fadeOut(animationSpec = tween(200)) +
-                                scaleOut(targetScale = 0.9f, animationSpec = tween(200)))
+                (
+                    fadeIn(animationSpec = tween(300)) +
+                        scaleIn(initialScale = 0.9f, animationSpec = tween(300))
+                ) togetherWith
+                    (
+                        fadeOut(animationSpec = tween(200)) +
+                            scaleOut(targetScale = 0.9f, animationSpec = tween(200))
+                    )
             },
-            label = "ConfirmableButtonContent"
+            label = "ConfirmableButtonContent",
         ) { confirm ->
             Row(
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (confirm) {
                     Icon(Icons.Default.Warning, null)

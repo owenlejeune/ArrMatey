@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AudiobookEditResponse(
     val message: String,
-    val audiobook: Audiobook
+    val audiobook: Audiobook,
 )

@@ -60,24 +60,26 @@ sealed interface ArrRelease {
         get() = indexer ?: "Unknown"
 
     val peerColor: Color
-        get() = when {
-            protocol == ReleaseProtocol.Usenet || protocol == ReleaseProtocol.Soulseek -> ArrGreen
-            rejections.any { it.contains("Not enough seeders") } -> ArrRed
-            seeders >= 50 -> ArrGreen
-            seeders >= 10 -> ArrBlue
-            seeders >= 1 -> ArrOrange
-            else -> ArrRed
-        }
+        get() =
+            when {
+                protocol == ReleaseProtocol.Usenet || protocol == ReleaseProtocol.Soulseek -> ArrGreen
+                rejections.any { it.contains("Not enough seeders") } -> ArrRed
+                seeders >= 50 -> ArrGreen
+                seeders >= 10 -> ArrBlue
+                seeders >= 1 -> ArrOrange
+                else -> ArrRed
+            }
 
     val peerColorHex: String
-        get() = when {
-            protocol == ReleaseProtocol.Usenet || protocol == ReleaseProtocol.Soulseek -> "#01b801"
-            rejections.any { it.contains("Not enough seeders") } -> "#ff3e3e"
-            seeders >= 50 -> "#01b801"
-            seeders >= 10 -> "#00b2ff"
-            seeders >= 1 -> "#FFA505"
-            else -> "#ff3e3e"
-        }
+        get() =
+            when {
+                protocol == ReleaseProtocol.Usenet || protocol == ReleaseProtocol.Soulseek -> "#01b801"
+                rejections.any { it.contains("Not enough seeders") } -> "#ff3e3e"
+                seeders >= 50 -> "#01b801"
+                seeders >= 10 -> "#00b2ff"
+                seeders >= 1 -> "#FFA505"
+                else -> "#ff3e3e"
+            }
 }
 
 enum class ReleaseProtocol {
@@ -91,30 +93,36 @@ enum class ReleaseProtocol {
     Soulseek,
 
     @SerialName("unknown")
-    Unknown
+    Unknown,
 }
 
 sealed interface ReleaseParams {
     val mediaId: Long?
 
-    data class Movie(override val mediaId: Long): ReleaseParams
+    data class Movie(
+        override val mediaId: Long,
+    ) : ReleaseParams
+
     data class Series(
         val seriesId: Long? = null,
         val seasonNumber: Int? = null,
-        val episodeId: Long? = null
-    ): ReleaseParams {
+        val episodeId: Long? = null,
+    ) : ReleaseParams {
         override val mediaId: Long?
             get() = seriesId ?: episodeId
     }
+
     data class Album(
         override val mediaId: Long,
         val artistId: Long? = null,
-    ): ReleaseParams
+    ) : ReleaseParams
+
     data class Book(
-        override val mediaId: Long
-    ): ReleaseParams
+        override val mediaId: Long,
+    ) : ReleaseParams
+
     data class Audiobook(
         override val mediaId: Long?,
-        val query: String
-    ): ReleaseParams
+        val query: String,
+    ) : ReleaseParams
 }

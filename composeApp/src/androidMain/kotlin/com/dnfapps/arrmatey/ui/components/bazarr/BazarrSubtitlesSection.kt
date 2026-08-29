@@ -40,9 +40,9 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitle
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.BazarrSubtitlesUiState
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -59,7 +59,7 @@ import dev.icerock.moko.resources.compose.painterResource
 fun BazarrSubtitlesSection(
     target: BazarrMediaTarget,
     modifier: Modifier = Modifier,
-    viewModel: BazarrMediaSubtitlesViewModel = koinInjectParams(target)
+    viewModel: BazarrMediaSubtitlesViewModel = koinInjectParams(target),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val operationState by viewModel.operationState.collectAsStateWithLifecycle()
@@ -73,43 +73,44 @@ fun BazarrSubtitlesSection(
 
     val context = LocalContext.current
     var pendingSubtitle by remember { mutableStateOf<BazarrSubtitle?>(null) }
-    val createDocumentLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("*/*")
-    ) { uri ->
-        uri?.let {
-            pendingSubtitle?.let { subtitle ->
-                viewModel.downloadToDevice(subtitle) { bytes ->
-                    if (bytes != null) {
-                        context.contentResolver.openOutputStream(it)?.use { outputStream ->
-                            outputStream.write(bytes)
+    val createDocumentLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("*/*"),
+        ) { uri ->
+            uri?.let {
+                pendingSubtitle?.let { subtitle ->
+                    viewModel.downloadToDevice(subtitle) { bytes ->
+                        if (bytes != null) {
+                            context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                                outputStream.write(bytes)
+                            }
+                            Toast.makeText(context, "Subtitle downloaded", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Failed to download subtitle", Toast.LENGTH_SHORT).show()
                         }
-                        Toast.makeText(context, "Subtitle downloaded", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Failed to download subtitle", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         }
-    }
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = mokoString(MR.strings.bazarr_subtitles),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
             InstanceType.Bazarr.tabIcon?.let { icon ->
                 Icon(
                     painter = painterResource(icon),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -142,7 +143,7 @@ fun BazarrSubtitlesSection(
                             val fileName = subtitle.path?.substringAfterLast('/') ?: subtitle.name
                             createDocumentLauncher.launch(fileName)
                         },
-                        onDelete = { viewModel.delete(subtitle) }
+                        onDelete = { viewModel.delete(subtitle) },
                     )
                 }
 
@@ -151,17 +152,17 @@ fun BazarrSubtitlesSection(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             viewModel.autoSearch(language)
-                        }
+                        },
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             SubtitleLanguageChip(language)
                             Text(
                                 text = mokoString(MR.strings.missing),
                                 color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
                             )
                             Spacer(Modifier.weight(1f))
                             Icon(Icons.Default.Search, null)
@@ -189,34 +190,38 @@ fun BazarrSubtitlesSection(
             onDismiss = {
                 showSearch = false
                 viewModel.load()
-            }
+            },
         )
     }
 }
 
 @Composable
-private fun EmbeddedSubtitlesCard(
-    embedded: List<BazarrSubtitle>
-) {
+private fun EmbeddedSubtitlesCard(embedded: List<BazarrSubtitle>) {
     ContainerCard(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
             text = mokoString(MR.strings.bazarr_embedded_count, embedded.count()),
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
         FlowRow(
             verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             embedded.forEach { subtitle ->
                 SubtitleLanguageChip(
-                    label = buildString {
-                        append(subtitle.code2.orEmpty().uppercase().ifBlank { subtitle.name })
-                        if (subtitle.forced) append(" · Forced")
-                        if (subtitle.hi) append(" · HI")
-                    }
+                    label =
+                        buildString {
+                            append(
+                                subtitle.code2
+                                    .orEmpty()
+                                    .uppercase()
+                                    .ifBlank { subtitle.name },
+                            )
+                            if (subtitle.forced) append(" · Forced")
+                            if (subtitle.hi) append(" · HI")
+                        },
                 )
             }
         }
@@ -227,30 +232,37 @@ private fun EmbeddedSubtitlesCard(
 private fun PresentSubtitleRow(
     subtitle: BazarrSubtitle,
     onDownload: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     ContainerCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = buildString {
-                    append(subtitle.name)
-                    subtitle.path?.let { path ->
-                        append(" • ${path.breakable()}")
-                    }
-                },
+                text =
+                    buildString {
+                        append(subtitle.name)
+                        subtitle.path?.let { path ->
+                            append(" • ${path.breakable()}")
+                        }
+                    },
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             SubtitleLanguageChip(
-                label = buildString {
-                    append(subtitle.code2.orEmpty().uppercase().ifBlank { subtitle.name })
-                    if (subtitle.forced) append(" · Forced")
-                    if (subtitle.hi) append(" · HI")
-                }
+                label =
+                    buildString {
+                        append(
+                            subtitle.code2
+                                .orEmpty()
+                                .uppercase()
+                                .ifBlank { subtitle.name },
+                        )
+                        if (subtitle.forced) append(" · Forced")
+                        if (subtitle.hi) append(" · HI")
+                    },
             )
             Row {
                 if (subtitle.isExternal) {
@@ -258,14 +270,14 @@ private fun PresentSubtitleRow(
                         Icon(
                             Icons.Default.Download,
                             contentDescription = mokoString(MR.strings.bazarr_download_subtitle),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                     IconButton(onClick = onDelete) {
                         Icon(
                             Icons.Default.Delete,
                             contentDescription = mokoString(MR.strings.bazarr_delete_subtitle),
-                            tint = MaterialTheme.colorScheme.error
+                            tint = MaterialTheme.colorScheme.error,
                         )
                     }
                 }

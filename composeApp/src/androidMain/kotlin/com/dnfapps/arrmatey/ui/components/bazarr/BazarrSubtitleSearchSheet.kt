@@ -47,7 +47,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun BazarrSubtitleSearchSheet(
     target: BazarrMediaTarget,
     onDismiss: () -> Unit,
-    viewModel: BazarrSubtitleSearchViewModel = koinInjectParams(target)
+    viewModel: BazarrSubtitleSearchViewModel = koinInjectParams(target),
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
@@ -55,20 +55,22 @@ fun BazarrSubtitleSearchSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
         ) {
             Text(
                 text = mokoString(MR.strings.bazarr_search_subtitles),
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.size(12.dp))
 
             when (val state = searchState) {
                 SubtitleSearchState.Idle,
-                SubtitleSearchState.Loading -> {
+                SubtitleSearchState.Loading,
+                -> {
                     Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
@@ -83,13 +85,13 @@ fun BazarrSubtitleSearchSheet(
                         Text(mokoString(MR.strings.bazarr_no_results))
                     } else {
                         LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             items(state.results, key = { "${it.provider}:${it.subtitle}" }) { result ->
                                 SearchResultRow(
                                     result = result,
                                     status = downloadStates["${result.provider}:${result.subtitle}"],
-                                    onDownload = { viewModel.download(result) }
+                                    onDownload = { viewModel.download(result) },
                                 )
                             }
                         }
@@ -104,15 +106,15 @@ fun BazarrSubtitleSearchSheet(
 private fun SearchResultRow(
     result: ProviderSubtitle,
     status: OperationStatus?,
-    onDownload: () -> Unit
+    onDownload: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 SubtitleLanguageChip(label = result.languageLabel())
@@ -126,22 +128,25 @@ private fun SearchResultRow(
         Spacer(Modifier.width(8.dp))
         when (status) {
             OperationStatus.InProgress -> CircularProgressIndicator(modifier = Modifier.size(24.dp))
-            is OperationStatus.Success -> Icon(
-                Icons.Default.Check,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-            else -> Button(onClick = onDownload) {
-                Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(6.dp))
-                Text(mokoString(MR.strings.bazarr_download_subtitle))
-            }
+            is OperationStatus.Success ->
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            else ->
+                Button(onClick = onDownload) {
+                    Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(mokoString(MR.strings.bazarr_download_subtitle))
+                }
         }
     }
 }
 
-private fun ProviderSubtitle.languageLabel(): String = buildString {
-    append(language.uppercase())
-    if (isForced) append(" · Forced")
-    if (isHearingImpaired) append(" · HI")
-}
+private fun ProviderSubtitle.languageLabel(): String =
+    buildString {
+        append(language.uppercase())
+        if (isForced) append(" · Forced")
+        if (isHearingImpaired) append(" · HI")
+    }

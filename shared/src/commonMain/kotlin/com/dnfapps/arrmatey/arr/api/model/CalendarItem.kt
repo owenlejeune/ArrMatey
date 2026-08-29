@@ -9,7 +9,9 @@ sealed interface CalendarItem {
     val instanceIds: List<Long>
         get() = listOfNotNull(instanceId)
     val calendarId: Long
+
     fun getCalendarDates(): List<Instant>
+
     val notificationScheduledTime: Instant?
     val notificationMessage: String
     val notificationReleaseType: StringResource? get() = null

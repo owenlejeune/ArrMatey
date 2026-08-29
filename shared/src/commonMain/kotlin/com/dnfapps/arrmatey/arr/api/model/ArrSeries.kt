@@ -34,7 +34,6 @@ data class ArrSeries(
     override val ratings: SeriesRatings? = null,
     override val statistics: SeriesStatistics? = null,
     @Contextual override val added: Instant? = null,
-
     val addOptions: SeriesAddOptions? = null,
     val ended: Boolean,
     val seasonFolder: Boolean,
@@ -55,15 +54,13 @@ data class ArrSeries(
     val remotePoster: String? = null,
     val firstAired: String? = null,
     val lastAired: String? = null,
-    val episodesChanged: String? = null
-): ArrMedia, InstanceTypeIdentifiable {
-
+    val episodesChanged: String? = null,
+) : ArrMedia,
+    InstanceTypeIdentifiable {
     override val guid: Long
         get() = id ?: tvdbId.plus(100_000)
 
-    override fun ratingScore(): Double {
-        return ratings?.value ?: 0.toDouble()
-    }
+    override fun ratingScore(): Double = ratings?.value ?: 0.toDouble()
 
     val episodeFileCount: Int
         get() = statistics?.episodeFileCount ?: 0
@@ -81,20 +78,19 @@ data class ArrSeries(
         get() = (statistics?.percentOfEpisodes?.toFloat() ?: 0f) / 100f
 
     override val statusColor: Color
-        get() = when {
-            status == MediaStatus.Ended && statistics?.percentOfEpisodes == 100.toDouble() -> ArrGreen
-            status == MediaStatus.Continuing && statistics?.percentOfEpisodes == 100.toDouble() -> ArrBlue
-            statistics?.percentOfEpisodes != 100.toDouble() && monitored -> ArrRed
-            statistics?.percentOfEpisodes != 100.toDouble() && !monitored -> ArrOrange
-            else -> Color.Unspecified
-        }
+        get() =
+            when {
+                status == MediaStatus.Ended && statistics?.percentOfEpisodes == 100.toDouble() -> ArrGreen
+                status == MediaStatus.Continuing && statistics?.percentOfEpisodes == 100.toDouble() -> ArrBlue
+                statistics?.percentOfEpisodes != 100.toDouble() && monitored -> ArrRed
+                statistics?.percentOfEpisodes != 100.toDouble() && !monitored -> ArrOrange
+                else -> Color.Unspecified
+            }
 
     override val releasedBy: String?
         get() = network
 
-    override fun setMonitored(monitored: Boolean): ArrSeries {
-        return copy(monitored = monitored)
-    }
+    override fun setMonitored(monitored: Boolean): ArrSeries = copy(monitored = monitored)
 
     override val isMissing: Boolean
         get() = episodeCount > episodeFileCount
@@ -105,14 +101,14 @@ data class ArrSeries(
         seriesType: SeriesType,
         seasonFolder: Boolean,
         rootFolderPath: String?,
-        tags: List<Int>
+        tags: List<Int>,
     ) = copy(
         id = 0,
         addOptions = SeriesAddOptions(monitor = monitor),
         qualityProfileId = qualityProfileId,
         seriesType = seriesType,
         seasonFolder = seasonFolder,
-        rootFolderPath = rootFolderPath
+        rootFolderPath = rootFolderPath,
     )
 
     fun copyForEdit(
@@ -122,7 +118,7 @@ data class ArrSeries(
         seriesType: SeriesType,
         seasonFolder: Boolean,
         rootFolderPath: String?,
-        tags: List<Int>
+        tags: List<Int>,
     ) = copy(
         monitored = monitored,
         monitorNewItems = monitorNewSeasons,
@@ -130,10 +126,11 @@ data class ArrSeries(
         seriesType = seriesType,
         seasonFolder = seasonFolder,
         rootFolderPath = rootFolderPath,
-        tags = tags
+        tags = tags,
     )
 
-    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
-        copy(rootFolderPath = rootFolderPath)
-
+    override fun withNewRoot(
+        rootFolderPath: String,
+        currentRootFolderPath: String?,
+    ): ArrMedia = copy(rootFolderPath = rootFolderPath)
 }

@@ -7,7 +7,6 @@ import kotlin.math.max
 import kotlin.time.Clock
 
 object SearchResultWeaver {
-
     private const val BASE_RANK_SCORE = 100.0
     private const val RANK_DECAY_FACTOR = 15.0
 
@@ -21,10 +20,12 @@ object SearchResultWeaver {
     private const val RECENCY_BONUS = 10.0
     private const val RECENCY_YEAR_THRESHOLD = 3
 
-    private fun sanitize(input: String): String =
-        input.lowercase().replace("[^a-z0-9]".toRegex(), "")
+    private fun sanitize(input: String): String = input.lowercase().replace("[^a-z0-9]".toRegex(), "")
 
-    fun calculateScore(item: SearchResult, query: String): Double {
+    fun calculateScore(
+        item: SearchResult,
+        query: String,
+    ): Double {
         val cleanQuery = sanitize(query)
         val cleanTitle = sanitize(item.cleanTitle.ifBlank { item.title })
 
@@ -51,9 +52,8 @@ object SearchResultWeaver {
     fun weave(
         query: String,
         results: List<SearchResult>,
-    ): List<SearchResult> {
-        return results
+    ): List<SearchResult> =
+        results
             .distinctBy { it.id }
             .sortedByDescending { calculateScore(it, query) }
-    }
 }

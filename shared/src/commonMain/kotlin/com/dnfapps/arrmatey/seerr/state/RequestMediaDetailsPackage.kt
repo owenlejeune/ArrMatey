@@ -5,5 +5,5 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 
 data class RequestMediaDetailsPackage(
     val item: RequestMediaDetails,
-    val ratings: CombinedRatings? = null
+    val ratings: CombinedRatings? = null,
 )

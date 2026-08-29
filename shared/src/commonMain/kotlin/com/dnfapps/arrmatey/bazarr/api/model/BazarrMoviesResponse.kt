@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BazarrMoviesResponse(
     val data: List<BazarrMovie>,
-    val total: Int
+    val total: Int,
 )

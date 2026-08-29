@@ -8,22 +8,20 @@ data class EpisodeGroup(
     val first: Episode,
     val additional: List<Episode>,
     val totalCount: Int = 1 + additional.size,
-    override val instanceIds: List<Long> = (listOf(first) + additional).flatMap { it.instanceIds }.distinct()
-): CalendarItem, InstanceTypeIdentifiable {
-
+    override val instanceIds: List<Long> = (listOf(first) + additional).flatMap { it.instanceIds }.distinct(),
+) : CalendarItem,
+    InstanceTypeIdentifiable {
     override val instanceId: Long?
         get() = first.instanceId
 
     override val calendarId: Long
         get() = first.calendarId
 
-    override fun getCalendarDates(): List<Instant> =
-        first.getCalendarDates()
+    override fun getCalendarDates(): List<Instant> = first.getCalendarDates()
 
     override val notificationScheduledTime: Instant?
         get() = first.notificationScheduledTime
 
     override val notificationMessage: String
         get() = first.notificationMessage
-
 }

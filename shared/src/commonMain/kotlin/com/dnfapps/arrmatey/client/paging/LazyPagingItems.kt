@@ -6,9 +6,8 @@ class LazyPagingItems<T : Any>(
     private val pagedDataState: State<PagedData<T>>,
     private val onLoadMore: () -> Unit,
     private val onRefresh: () -> Unit,
-    private val prefetchDistance: Int = 3
+    private val prefetchDistance: Int = 3,
 ) {
-
     private val pagedData: PagedData<T>
         get() = pagedDataState.value
 
@@ -42,9 +41,7 @@ class LazyPagingItems<T : Any>(
         return itemList.getOrNull(index)
     }
 
-    fun peek(index: Int): T? {
-        return itemList.getOrNull(index)
-    }
+    fun peek(index: Int): T? = itemList.getOrNull(index)
 
     fun refresh() {
         onRefresh()

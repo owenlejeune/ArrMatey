@@ -12,5 +12,5 @@ data class LidarrTrackFile(
     val sceneName: String? = null,
     val mediaInfo: MediaInfo? = null,
     val albumId: Long,
-    val artistId: Long
+    val artistId: Long,
 )

@@ -36,7 +36,7 @@ fun SeerrReportIssueSheet(
     updateProblemEpisode: (Int?) -> Unit,
     onSubmit: () -> Unit,
     onReset: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     LaunchedEffect(Unit) {
         onReset()
@@ -44,33 +44,35 @@ fun SeerrReportIssueSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column {
                 Text(
                     text = mokoString(MR.strings.report_an_issue),
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineMedium,
                 )
                 Text(
                     text = state.mediaTitle,
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
 
             AnimatedVisibility(
                 visible = state.includeSeriesOptions,
                 enter = expandVertically(),
-                exit = shrinkVertically()
+                exit = shrinkVertically(),
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     if (state.includeSeriesOptions) {
                         DropdownPicker(
@@ -83,17 +85,18 @@ fun SeerrReportIssueSheet(
                             allDivider = null,
                             getOptionLabel = { season ->
                                 mokoString(MR.strings.season_label, season)
-                            }
+                            },
                         )
 
                         AnimatedVisibility(
                             visible = state.problemSeason != null,
                             enter = expandVertically(),
-                            exit = shrinkVertically()
+                            exit = shrinkVertically(),
                         ) {
-                            val episodes = remember(state.problemSeason) {
-                                state.availableSeasons.firstOrNull { it.seasonNumber == state.problemSeason }?.episodes
-                            }
+                            val episodes =
+                                remember(state.problemSeason) {
+                                    state.availableSeasons.firstOrNull { it.seasonNumber == state.problemSeason }?.episodes
+                                }
                             episodes?.let { episodes ->
                                 DropdownPicker(
                                     options = episodes.map { it.episodeNumber },
@@ -105,7 +108,7 @@ fun SeerrReportIssueSheet(
                                     allDivider = null,
                                     getOptionLabel = { episode ->
                                         episodes.first { it.episodeNumber == episode }.name
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -117,7 +120,7 @@ fun SeerrReportIssueSheet(
                 entries = IssueType.entries,
                 onItemSelected = { updateIssueType(it) },
                 isItemSelected = { it == state.issueType },
-                itemLabel = { mokoString(it.label) }
+                itemLabel = { mokoString(it.label) },
             )
 
             AMOutlinedTextField(
@@ -126,13 +129,13 @@ fun SeerrReportIssueSheet(
                 value = state.message,
                 onValueChange = { updateMessage(it) },
                 minLines = 5,
-                maxLines = 5
+                maxLines = 5,
             )
 
             Button(
                 onClick = { onSubmit() },
-                enabled = state.saveButtonEnabled
-            ){
+                enabled = state.saveButtonEnabled,
+            ) {
                 Text(mokoString(MR.strings.submit))
             }
         }

@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class FilterBy(
-    val resource: StringResource
+    val resource: StringResource,
 ) {
     All(MR.strings.all),
     Monitored(MR.strings.monitored),
@@ -20,7 +20,8 @@ enum class FilterBy(
 
     // Series
     ContinuingOnly(MR.strings.continuing_only),
-    EndedOnly(MR.strings.ended_only);
+    EndedOnly(MR.strings.ended_only),
+    ;
 
     companion object {
         fun typeEntries(type: InstanceType) =

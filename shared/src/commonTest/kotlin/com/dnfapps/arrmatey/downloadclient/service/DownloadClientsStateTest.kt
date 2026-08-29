@@ -8,7 +8,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class DownloadClientsStateTest {
-
     @Test
     fun testInitialState() {
         val state = DownloadClientsState()
@@ -18,18 +17,20 @@ class DownloadClientsStateTest {
 
     @Test
     fun testStateWithClients() {
-        val client = DownloadClient(
-            id = 1,
-            label = "Test",
-            url = "http://test.com",
-            type = DownloadClientType.QBittorrent,
-            apiKey = EncryptedString(""),
-            selected = true
-        )
-        val state = DownloadClientsState(
-            downloadClients = listOf(client),
-            selectedDownloadClient = client
-        )
+        val client =
+            DownloadClient(
+                id = 1,
+                label = "Test",
+                url = "http://test.com",
+                type = DownloadClientType.QBittorrent,
+                apiKey = EncryptedString(""),
+                selected = true,
+            )
+        val state =
+            DownloadClientsState(
+                downloadClients = listOf(client),
+                selectedDownloadClient = client,
+            )
         assertEquals(1, state.downloadClients.size)
         assertEquals(client, state.selectedDownloadClient)
     }

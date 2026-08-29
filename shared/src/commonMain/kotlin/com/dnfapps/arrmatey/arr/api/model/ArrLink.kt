@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ArrLink(
     val url: String,
-    val name: String
+    val name: String,
 )

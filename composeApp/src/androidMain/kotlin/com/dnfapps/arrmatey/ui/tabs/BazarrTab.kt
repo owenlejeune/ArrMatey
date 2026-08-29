@@ -22,7 +22,7 @@ fun BazarrTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
     navigationManager: NavigationManager = koinInject(),
-    navigation: Navigator<BazarrScreen> = navigationManager.bazarr
+    navigation: Navigator<BazarrScreen> = navigationManager.bazarr,
 ) {
     NavDisplay(
         backStack = navigation.backStack,
@@ -30,20 +30,21 @@ fun BazarrTab(
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-        entryProvider = entryProvider {
-            entry<BazarrScreen.Library> {
-                BazarrScreen(
-                    wideRailIsVisible = wideRailIsVisible,
-                    onNavigateToDetails = { id, type -> navigation.openDetails(id, type) }
-                )
-            }
-            entry<BazarrScreen.Details> { details ->
-                BazarrDetailsScreen(
-                    id = details.id,
-                    type = details.type,
-                    onBack = { navigation.popBackStack() }
-                )
-            }
-        }
+        entryProvider =
+            entryProvider {
+                entry<BazarrScreen.Library> {
+                    BazarrScreen(
+                        wideRailIsVisible = wideRailIsVisible,
+                        onNavigateToDetails = { id, type -> navigation.openDetails(id, type) },
+                    )
+                }
+                entry<BazarrScreen.Details> { details ->
+                    BazarrDetailsScreen(
+                        id = details.id,
+                        type = details.type,
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+            },
     )
 }

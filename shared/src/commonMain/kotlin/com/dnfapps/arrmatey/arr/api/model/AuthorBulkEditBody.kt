@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class AuthorBulkEditBody(
     val authorIds: List<Long>,
     val monitored: Boolean? = null,
-    val monitorNewItems: AuthorMonitorType? = null
+    val monitorNewItems: AuthorMonitorType? = null,
 )

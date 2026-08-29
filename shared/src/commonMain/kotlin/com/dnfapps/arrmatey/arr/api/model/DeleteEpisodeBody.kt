@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DeleteEpisodeBody(
-    val episodeFileIds: List<Long>
+    val episodeFileIds: List<Long>,
 )

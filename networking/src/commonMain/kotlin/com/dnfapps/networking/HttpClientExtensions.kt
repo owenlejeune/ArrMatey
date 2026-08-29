@@ -18,9 +18,9 @@ import io.ktor.client.request.put
 suspend inline fun <reified T> HttpClient.safeGet(
     url: String,
     crossinline onProgress: (Float) -> Unit = {},
-    crossinline builder: HttpRequestBuilder.() -> Unit = {}
-): NetworkResult<T> {
-    return safeCall {
+    crossinline builder: HttpRequestBuilder.() -> Unit = {},
+): NetworkResult<T> =
+    safeCall {
         get(url) {
             builder()
             onDownload { bytesSentTotal, contentLength ->
@@ -30,48 +30,41 @@ suspend inline fun <reified T> HttpClient.safeGet(
             }
         }.body()
     }
-}
 
 suspend inline fun <reified T> HttpClient.safePost(
     url: String,
-    crossinline builder: HttpRequestBuilder.() -> Unit = {}
-): NetworkResult<T> {
-    return safeCall {
+    crossinline builder: HttpRequestBuilder.() -> Unit = {},
+): NetworkResult<T> =
+    safeCall {
         post(url, builder).body()
     }
-}
 
 suspend inline fun <reified T> HttpClient.safePut(
     url: String,
-    crossinline builder: HttpRequestBuilder.() -> Unit = {}
-): NetworkResult<T> {
-    return safeCall {
+    crossinline builder: HttpRequestBuilder.() -> Unit = {},
+): NetworkResult<T> =
+    safeCall {
         put(url, builder).body()
     }
-}
 
 suspend inline fun <reified T> HttpClient.safeDelete(
     url: String,
-    crossinline builder: HttpRequestBuilder.() -> Unit = {}
-): NetworkResult<T> {
-    return safeCall {
+    crossinline builder: HttpRequestBuilder.() -> Unit = {},
+): NetworkResult<T> =
+    safeCall {
         delete(url, builder).body()
     }
-}
 
 suspend inline fun <reified T> HttpClient.safePatch(
     url: String,
-    crossinline builder: HttpRequestBuilder.() -> Unit = {}
-): NetworkResult<T> {
-    return safeCall {
+    crossinline builder: HttpRequestBuilder.() -> Unit = {},
+): NetworkResult<T> =
+    safeCall {
         patch(url, builder).body()
     }
-}
 
-suspend inline fun <reified T> HttpClient.safeCall(
-    crossinline block: suspend HttpClient.() -> T
-): NetworkResult<T> {
-    return try {
+suspend inline fun <reified T> HttpClient.safeCall(crossinline block: suspend HttpClient.() -> T): NetworkResult<T> =
+    try {
         val data = block(this)
         NetworkResult.Success(data)
     } catch (e: ClientRequestException) {
@@ -99,7 +92,6 @@ suspend inline fun <reified T> HttpClient.safeCall(
             NetworkResult.Error(cause = e, errorType = ErrorType.Unexpected)
         }
     }
-}
 
 expect fun Throwable.isNoConnectionError(): Boolean
 

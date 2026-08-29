@@ -62,17 +62,17 @@ fun SeasonsArea(
     deleteSeasonFiles: (Int) -> Unit = {},
     seasonDeleteInProgress: Boolean = false,
     onNavigateToEpisodeDetails: (ArrEpisode) -> Unit = {},
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> }
+    onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> },
 ) {
     if (seasons.isEmpty()) return
 
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         Text(
             text = mokoString(MR.strings.seasons_header),
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge,
         )
 
         seasons.forEach { season ->
@@ -80,49 +80,51 @@ fun SeasonsArea(
             val iconRotation by animateFloatAsState(
                 targetValue = if (expanded) 180f else 0f,
                 animationSpec = tween(durationMillis = 200),
-                label = "iconRotation"
+                label = "iconRotation",
             )
 
             Column(
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
             ) {
                 ContainerCard(
-                    modifier = Modifier.clickable { expanded = !expanded }
+                    modifier = Modifier.clickable { expanded = !expanded },
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
-                                    text = if (season.seasonNumber == 0) {
-                                        mokoString(MR.strings.specials)
-                                    } else {
-                                        mokoString(MR.strings.season_label, season.seasonNumber)
-                                    },
-                                    style = MaterialTheme.typography.titleLarge
+                                    text =
+                                        if (season.seasonNumber == 0) {
+                                            mokoString(MR.strings.specials)
+                                        } else {
+                                            mokoString(MR.strings.season_label, season.seasonNumber)
+                                        },
+                                    style = MaterialTheme.typography.titleLarge,
                                 )
-                                val statsText = season.episodeFileCount?.let {
-                                    "$it/${season.totalEpisodeCount}"
-                                } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
+                                val statsText =
+                                    season.episodeFileCount?.let {
+                                        "$it/${season.totalEpisodeCount}"
+                                    } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
 
                                 AnimatedContent(
                                     targetState = statsText,
                                     transitionSpec = {
                                         (fadeIn() + slideInVertically { it }).togetherWith(fadeOut() + slideOutVertically { -it })
                                     },
-                                    label = "SeasonStatsTextAnimation"
+                                    label = "SeasonStatsTextAnimation",
                                 ) { text ->
                                     Text(
                                         text = text,
-                                        style = MaterialTheme.typography.bodyMedium
+                                        style = MaterialTheme.typography.bodyMedium,
                                     )
                                 }
                             }
@@ -131,7 +133,7 @@ fun SeasonsArea(
                                 Text(
                                     text = season.infoString,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
@@ -139,32 +141,34 @@ fun SeasonsArea(
                         AnimatedVisibility(
                             visible = season.monitored != null && seriesId != null && seriesId > 0,
                             enter = fadeIn() + expandHorizontally(),
-                            exit = fadeOut() + shrinkHorizontally()
+                            exit = fadeOut() + shrinkHorizontally(),
                         ) {
                             AnimatedContent(
                                 targetState = season.isMonitored,
                                 transitionSpec = {
                                     (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
                                 },
-                                label = "SeasonBookmarkIconAnimation"
+                                label = "SeasonBookmarkIconAnimation",
                             ) { isMonitored ->
                                 Icon(
                                     imageVector = if (isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                    contentDescription = if (isMonitored) {
-                                        mokoString(MR.strings.monitored)
-                                    } else {
-                                        mokoString(MR.strings.unmonitored)
-                                    },
-                                    modifier = Modifier.clickable {
-                                        onToggleSeasonMonitor(season.seasonNumber)
-                                    }
+                                    contentDescription =
+                                        if (isMonitored) {
+                                            mokoString(MR.strings.monitored)
+                                        } else {
+                                            mokoString(MR.strings.unmonitored)
+                                        },
+                                    modifier =
+                                        Modifier.clickable {
+                                            onToggleSeasonMonitor(season.seasonNumber)
+                                        },
                                 )
                             }
                         }
                         Icon(
                             imageVector = Icons.Default.ExpandCircleDown,
                             contentDescription = null,
-                            modifier = Modifier.rotate(iconRotation)
+                            modifier = Modifier.rotate(iconRotation),
                         )
                     }
                 }
@@ -172,7 +176,7 @@ fun SeasonsArea(
                 AnimatedVisibility(
                     visible = expanded,
                     enter = expandVertically(),
-                    exit = shrinkVertically()
+                    exit = shrinkVertically(),
                 ) {
                     Column {
                         if (seriesId != null && season.arrSeason != null) {
@@ -184,7 +188,7 @@ fun SeasonsArea(
                                 searchInProgress = { searchIds.contains(it.toLong()) },
                                 onDeleteSeason = { deleteSeasonFiles(season.seasonNumber) },
                                 deleteInProgress = seasonDeleteInProgress,
-                                onNavigateToSeriesRelease = onNavigateToSeriesRelease
+                                onNavigateToSeriesRelease = onNavigateToSeriesRelease,
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                         }
@@ -198,7 +202,7 @@ fun SeasonsArea(
                                 onAutomaticSearch = onEpisodeAutomaticSearch,
                                 onToggleMonitor = onToggleEpisodeMonitor,
                                 onNavigateToSeriesRelease = { onNavigateToSeriesRelease(seriesId, episode.episodeNumber) },
-                                searchInProgress = { searchIds.contains(it) }
+                                searchInProgress = { searchIds.contains(it) },
                             )
 
                             if (index < season.episodes.size - 1) {
@@ -225,19 +229,21 @@ fun SeasonsArea(
     seasonDeleteInProgress: Boolean,
     onNavigateToEpisodeDetails: (ArrSeries, ArrEpisode) -> Unit,
     onNavigateToSeriesRelease: (Long?, Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val arrEpMap = episodes.groupBy { it.seasonNumber }
-    val wrappedSeasons = series.seasons.sortedByDescending { it.seasonNumber }.map { season ->
-        val seasonEpisodes = (arrEpMap[season.seasonNumber] ?: emptyList())
-            .sortedByDescending { it.episodeNumber }
-            .map { EpisodeWrapper(arrEpisode = it) }
-        SeasonWrapper(
-            seasonNumber = season.seasonNumber,
-            arrSeason = season,
-            episodes = seasonEpisodes
-        )
-    }
+    val wrappedSeasons =
+        series.seasons.sortedByDescending { it.seasonNumber }.map { season ->
+            val seasonEpisodes =
+                (arrEpMap[season.seasonNumber] ?: emptyList())
+                    .sortedByDescending { it.episodeNumber }
+                    .map { EpisodeWrapper(arrEpisode = it) }
+            SeasonWrapper(
+                seasonNumber = season.seasonNumber,
+                arrSeason = season,
+                episodes = seasonEpisodes,
+            )
+        }
 
     SeasonsArea(
         seasons = wrappedSeasons,
@@ -251,6 +257,6 @@ fun SeasonsArea(
         seasonDeleteInProgress = seasonDeleteInProgress,
         onNavigateToEpisodeDetails = { onNavigateToEpisodeDetails(series, it) },
         onNavigateToSeriesRelease = onNavigateToSeriesRelease,
-        modifier = modifier
+        modifier = modifier,
     )
 }

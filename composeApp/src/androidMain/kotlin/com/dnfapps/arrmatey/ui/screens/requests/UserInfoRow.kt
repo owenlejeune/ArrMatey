@@ -23,27 +23,28 @@ import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 fun UserInfoRow(
     label: String,
     displayName: String,
-    avatar: String?
+    avatar: String?,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
-            text = buildAnnotatedString {
-                append(label)
-                append(" ")
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(displayName)
-                }
-            },
-            style = MaterialTheme.typography.bodyMedium
+            text =
+                buildAnnotatedString {
+                    append(label)
+                    append(" ")
+                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(displayName)
+                    }
+                },
+            style = MaterialTheme.typography.bodyMedium,
         )
         AsyncImage(
             model = rememberRemoteImageData(avatar),
             modifier = Modifier.size(18.dp).clip(CircleShape),
             contentDescription = null,
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
         )
     }
 }

@@ -41,8 +41,10 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class,
-    ExperimentalMaterial3ExpressiveApi::class
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    FlowPreview::class,
+    ExperimentalMaterial3ExpressiveApi::class,
 )
 @Composable
 fun ArrSearchScreen(
@@ -51,7 +53,7 @@ fun ArrSearchScreen(
     onBack: () -> Unit,
     onItemClick: (ArrMedia) -> Unit,
     instanceId: Long? = null,
-    viewModel: ArrSearchViewModel = koinInjectParams(type, instanceId)
+    viewModel: ArrSearchViewModel = koinInjectParams(type, instanceId),
 ) {
     val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()
     val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
@@ -96,25 +98,27 @@ fun ArrSearchScreen(
                         sortBy = sortBy,
                         onSortChanged = { viewModel.setSortBy(it) },
                         sortOrder = sortOrder,
-                        onOrderChanged = { viewModel.setSortOrder(it) }
+                        onOrderChanged = { viewModel.setSortOrder(it) },
                     )
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             when (val state = lookupState) {
                 is ArrLibrary.Initial -> {}
                 is ArrLibrary.Loading -> {
                     LoadingIndicator(
-                        modifier = Modifier
-                            .size(96.dp)
-                            .align(Alignment.Center)
+                        modifier =
+                            Modifier
+                                .size(96.dp)
+                                .align(Alignment.Center),
                     )
                 }
 
@@ -122,7 +126,7 @@ fun ArrSearchScreen(
                     if (state.items.isEmpty()) {
                         Text(
                             text = mokoString(MR.strings.empty_library),
-                            modifier = Modifier.align(Alignment.Center)
+                            modifier = Modifier.align(Alignment.Center),
                         )
                     } else {
                         MediaList(
@@ -131,7 +135,7 @@ fun ArrSearchScreen(
                             onItemClick = onItemClick,
                             itemIsActive = { item -> item.id in activeMediaIds },
                             includeOverview = true,
-                            showBannerBackground = showBanners
+                            showBannerBackground = showBanners,
                         )
                     }
                 }

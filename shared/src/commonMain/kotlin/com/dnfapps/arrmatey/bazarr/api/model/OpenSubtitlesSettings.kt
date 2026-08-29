@@ -10,5 +10,5 @@ data class OpenSubtitlesSettings(
     val timeout: Int,
     val use_tag_search: Boolean,
     val username: String,
-    val vip: Boolean
+    val vip: Boolean,
 )

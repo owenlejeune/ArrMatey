@@ -12,14 +12,13 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 
 class TimeExtensionsTest {
-
     private val timeZone = TimeZone.UTC
 
     @Test
     fun testLocalDateIsToday() {
         val today = Clock.System.todayIn(timeZone)
         assertTrue(today.isToday(timeZone))
-        
+
         assertFalse(LocalDate(1999, 12, 31).isToday(timeZone))
     }
 

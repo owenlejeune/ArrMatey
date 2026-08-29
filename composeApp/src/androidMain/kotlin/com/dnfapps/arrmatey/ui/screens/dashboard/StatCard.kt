@@ -22,16 +22,16 @@ fun StatCard(
     icon: ImageVector,
     label: String,
     value: String,
-    color: Color
+    color: Color,
 ) {
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = color),
-        shape = MaterialTheme.shapes.large
+        shape = MaterialTheme.shapes.large,
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp))
             Column {

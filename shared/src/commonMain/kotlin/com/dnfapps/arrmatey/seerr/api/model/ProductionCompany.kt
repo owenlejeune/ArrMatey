@@ -7,5 +7,5 @@ data class ProductionCompany(
     val id: Long,
     val logoPath: String? = null,
     val originCountry: String? = null,
-    val name: String
+    val name: String,
 )

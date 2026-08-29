@@ -20,7 +20,9 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedQueue
 
-actual class FileSink actual constructor(private val filename: String) : LogSink {
+actual class FileSink actual constructor(
+    private val filename: String,
+) : LogSink {
     private var file: File = File(LogFileManager.getLogFilePath(filename))
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
     private val logQueue = ConcurrentLinkedQueue<String>()
@@ -67,9 +69,7 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
         }
     }
 
-    private fun shouldRotate(): Boolean {
-        return file.exists() && file.length() >= maxFileSizeBytes
-    }
+    private fun shouldRotate(): Boolean = file.exists() && file.length() >= maxFileSizeBytes
 
     private fun rotateLogFile() {
         try {
@@ -128,8 +128,8 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
         }
     }
 
-    fun getAllLogFiles(): List<File> {
-        return buildList {
+    fun getAllLogFiles(): List<File> =
+        buildList {
             if (file.exists()) add(file)
             for (i in 1..maxBackupFiles) {
                 val backupFile = File(LogFileManager.getLogFilePath("$filename.$i"))
@@ -138,11 +138,8 @@ actual class FileSink actual constructor(private val filename: String) : LogSink
                 }
             }
         }
-    }
 
-    fun getTotalLogSize(): Long {
-        return getAllLogFiles().sumOf { it.length() }
-    }
+    fun getTotalLogSize(): Long = getAllLogFiles().sumOf { it.length() }
 
     fun shutdown() {
         flush()
@@ -157,22 +154,16 @@ actual object LogFileManager {
         appContext = context.applicationContext
     }
 
-    actual fun getLogDirectory(): String {
-        return File(appContext.filesDir, "logs").apply { mkdirs() }.absolutePath
-    }
+    actual fun getLogDirectory(): String = File(appContext.filesDir, "logs").apply { mkdirs() }.absolutePath
 
-    actual fun getLogFilePath(filename: String): String {
-        return File(getLogDirectory(), filename).absolutePath
-    }
+    actual fun getLogFilePath(filename: String): String = File(getLogDirectory(), filename).absolutePath
 
     fun getAllLogFiles(): List<File> {
         val logDir = File(getLogDirectory())
         return logDir.listFiles()?.toList() ?: emptyList()
     }
 
-    fun getTotalLogDirectorySize(): Long {
-        return getAllLogFiles().sumOf { it.length() }
-    }
+    fun getTotalLogDirectorySize(): Long = getAllLogFiles().sumOf { it.length() }
 
     fun clearAllLogs() {
         getAllLogFiles().forEach { it.delete() }

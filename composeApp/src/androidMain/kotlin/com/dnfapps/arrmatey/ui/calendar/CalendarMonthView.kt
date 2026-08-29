@@ -59,16 +59,22 @@ fun CalendarMonthView(
 
     LaunchedEffect(currentMonth, state.dates) {
         if (selectedDate.month != currentMonth.month || selectedDate.year != currentMonth.year) {
-             selectedDate = if (isCurrentMonth) today else LocalDate(
-                 currentMonth.year,
-                 currentMonth.month,
-                 1
-             )
+            selectedDate =
+                if (isCurrentMonth) {
+                    today
+                } else {
+                    LocalDate(
+                        currentMonth.year,
+                        currentMonth.month,
+                        1,
+                    )
+                }
         }
 
-        val lastDayOfMonth = LocalDate(currentMonth.year, currentMonth.month, 1)
-            .plus(1, DateTimeUnit.MONTH)
-            .minus(1, DateTimeUnit.DAY)
+        val lastDayOfMonth =
+            LocalDate(currentMonth.year, currentMonth.month, 1)
+                .plus(1, DateTimeUnit.MONTH)
+                .minus(1, DateTimeUnit.DAY)
 
         if (state.dates.isNotEmpty() && lastDayOfMonth > state.dates.last()) {
             onLoadMore()
@@ -81,14 +87,14 @@ fun CalendarMonthView(
             isCurrentMonth = isCurrentMonth,
             onPreviousMonth = { currentMonth = currentMonth.minus(1, DateTimeUnit.MONTH) },
             onNextMonth = { currentMonth = currentMonth.plus(1, DateTimeUnit.MONTH) },
-            onTitleClick = { if (!isCurrentMonth) currentMonth = today }
+            onTitleClick = { if (!isCurrentMonth) currentMonth = today },
         )
 
         CalendarMonthGrid(
             currentMonth = currentMonth,
             selectedDate = selectedDate,
             onDateSelected = { selectedDate = it },
-            state = state
+            state = state,
         )
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
@@ -96,14 +102,14 @@ fun CalendarMonthView(
         if (selectedDate.month == currentMonth.month && selectedDate.year == currentMonth.year) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp)
+                contentPadding = PaddingValues(16.dp),
             ) {
                 item {
                     CalendarDaySection(
                         date = selectedDate,
                         items = state.items[selectedDate] ?: emptyList(),
                         instances = instances,
-                        onItemClick = onItemClick
+                        onItemClick = onItemClick,
                     )
                 }
             }
@@ -117,14 +123,15 @@ private fun MonthHeader(
     isCurrentMonth: Boolean,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
-    onTitleClick: () -> Unit
+    onTitleClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onPreviousMonth) {
             Icon(Icons.Default.ChevronLeft, contentDescription = null)
@@ -134,7 +141,7 @@ private fun MonthHeader(
             text = "${currentMonth.month.name} ${currentMonth.year}",
             style = MaterialTheme.typography.titleLarge,
             color = if (isCurrentMonth) MaterialTheme.colorScheme.primary else Color.Unspecified,
-            modifier = Modifier.clickable { onTitleClick() }
+            modifier = Modifier.clickable { onTitleClick() },
         )
 
         IconButton(onClick = onNextMonth) {

@@ -32,14 +32,13 @@ data class SonarrQueueItem(
     override val outputPath: String? = null,
     override val downloadClientHasPostImportCategory: Boolean = false,
     override var taskGroupCount: Int? = null,
-
     val seriesId: Long? = null,
     val series: ArrSeries? = null,
     val episodeId: Long? = null,
     val episode: Episode? = null,
     val episodeHasFile: Boolean? = null,
-    val seasonNumber: Int? = null
-): QueueItem {
+    val seasonNumber: Int? = null,
+) : QueueItem {
     override val type = InstanceType.Sonarr
     val calcSeriesId: Long?
         get() = seriesId ?: series?.id

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class LookupParams(
     val query: String,
     val language: String? = null,
-    val region: String? = null
+    val region: String? = null,
 ) {
-    constructor(): this("")
+    constructor() : this("")
 }

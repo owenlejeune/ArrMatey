@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.RatingItem
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
@@ -44,44 +44,47 @@ fun UnifiedDetailsHeader(
     releasedBy: String?,
     seasonCount: String?,
     genres: List<String>,
-    bannerGradientHeight: Dp? = null
+    bannerGradientHeight: Dp? = null,
 ) {
     var detailHeight by remember { mutableIntStateOf(0) }
     Box(modifier = Modifier.fillMaxWidth()) {
         DetailHeaderBanner(
             bannerUrl = bannerUrl,
-            gradientHeight = bannerGradientHeight ?: detailHeight.times(2).dp
+            gradientHeight = bannerGradientHeight ?: detailHeight.times(2).dp,
         )
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = topPadding)
-                .padding(horizontal = 12.dp)
-                .align(Alignment.BottomCenter),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = topPadding)
+                    .padding(horizontal = 12.dp)
+                    .align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.Bottom,
         ) {
             BasePosterItem(
                 model = rememberRemoteImageData(posterUrl),
                 modifier = Modifier.width(150.dp),
-                aspectRatio = type?.aspectRatio ?: AspectRatio.Poster
+                aspectRatio = type?.aspectRatio ?: AspectRatio.Poster,
             )
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.onGloballyPositioned {
-                    detailHeight = it.size.height
-                }
+                modifier =
+                    Modifier.onGloballyPositioned {
+                        detailHeight = it.size.height
+                    },
             ) {
                 clearLogo?.let { clearLogo ->
                     Box(modifier = Modifier.wrapContentSize()) {
                         AsyncImage(
                             model = rememberRemoteImageData(clearLogo),
                             contentDescription = null,
-                            modifier = Modifier
-                                .align(Alignment.CenterStart)
-                                .height(120.dp)
-                                .padding(horizontal = 6.dp),
+                            modifier =
+                                Modifier
+                                    .align(Alignment.CenterStart)
+                                    .height(120.dp)
+                                    .padding(horizontal = 6.dp),
                             contentScale = ContentScale.Fit,
                         )
                     }
@@ -90,26 +93,29 @@ fun UnifiedDetailsHeader(
                 RatingsSection(ratings)
 
                 listOfNotNull(
-                    year, runtimeString, seasonCount, certification
-                ).joinToString(Bullet).takeUnless { it.isEmpty() }?.let { info ->
+                    year,
+                    runtimeString,
+                    seasonCount,
+                    certification,
+                ).joinToString(BULLET).takeUnless { it.isEmpty() }?.let { info ->
                     Text(
                         text = info,
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
                     )
                 }
                 releasedBy?.let { releasedBy ->
                     Text(
                         text = releasedBy,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
                 genres.takeUnless { it.isEmpty() }?.let { genres ->
                     Text(
-                        text = genres.joinToString(Bullet),
+                        text = genres.joinToString(BULLET),
                         color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }

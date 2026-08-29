@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class UnmappedFolder(
     val name: String,
     val path: String,
-    val relativePath: String
+    val relativePath: String,
 )

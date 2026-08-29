@@ -38,7 +38,6 @@ data class ArrMovie(
     override val ratings: MovieRatings? = null,
     override val statistics: MovieStatistics? = null,
     @Contextual override val added: Instant? = null,
-
     val imdbId: String? = null,
     val tmdbId: Long,
     val originalTitle: String? = null,
@@ -64,16 +63,15 @@ data class ArrMovie(
     val collection: MovieCollection? = null,
     val popularity: Double = 0.toDouble(),
     val lastSearchTime: String? = null,
-
     override val instanceId: Long? = null,
-    override val instanceIds: List<Long> = listOfNotNull(instanceId)
-): ArrMedia, CalendarItem, InstanceTypeIdentifiable {
-
+    override val instanceIds: List<Long> = listOfNotNull(instanceId),
+) : ArrMedia,
+    CalendarItem,
+    InstanceTypeIdentifiable {
     override val calendarId: Long
         get() = tmdbId
 
-    override fun getCalendarDates(): List<Instant> =
-        listOfNotNull(digitalRelease, physicalRelease, inCinemas)
+    override fun getCalendarDates(): List<Instant> = listOfNotNull(digitalRelease, physicalRelease, inCinemas)
 
     override val notificationScheduledTime: Instant?
         get() = closestFutureRelease?.second
@@ -88,20 +86,21 @@ data class ArrMovie(
         get() = id ?: tmdbId.plus(100_000)
 
     val isWaiting: Boolean
-        get() = when(status) {
-            MediaStatus.Tba, MediaStatus.Announced -> true
-            MediaStatus.InCinemas -> minimumAvailability == MediaStatus.Released
-            else -> false
-        }
+        get() =
+            when (status) {
+                MediaStatus.Tba, MediaStatus.Announced -> true
+                MediaStatus.InCinemas -> minimumAvailability == MediaStatus.Released
+                else -> false
+            }
 
     val grabbed: Instant?
         get() = movieFile?.dateAdded
 
     override fun ratingScore(): Double {
         val imdb = ratings?.imdb?.value
-        val rt = ratings?.rottenTomatoes?.value?.apply { this/10 }
+        val rt = ratings?.rottenTomatoes?.value?.apply { this / 10 }
         val tmdb = ratings?.tmdb?.value
-        val mtc = ratings?.metacritic?.value?.apply { this/10 }
+        val mtc = ratings?.metacritic?.value?.apply { this / 10 }
         val trakt = ratings?.trakt?.value
 
         val avail = listOfNotNull(imdb, rt, tmdb, mtc, trakt)
@@ -112,17 +111,18 @@ data class ArrMovie(
         get() = status.name
 
     override val statusProgress: Float
-        get() = if(movieFile == null) 0f else 1f
+        get() = if (movieFile == null) 0f else 1f
 
     override val statusColor: Color
-        get() = when {
-            status == MediaStatus.Tba || status == MediaStatus.Announced -> ArrBlue
-            movieFile != null && monitored -> ArrGreen
-            movieFile != null && !monitored -> ArrGrey
-            movieFile == null && monitored -> ArrRed
-            movieFile == null && !monitored -> ArrOrange
-            else -> Color.Unspecified
-        }
+        get() =
+            when {
+                status == MediaStatus.Tba || status == MediaStatus.Announced -> ArrBlue
+                movieFile != null && monitored -> ArrGreen
+                movieFile != null && !monitored -> ArrGrey
+                movieFile == null && monitored -> ArrRed
+                movieFile == null && !monitored -> ArrOrange
+                else -> Color.Unspecified
+            }
 
     override val fileSize: Long
         get() = movieFile?.size ?: super.fileSize
@@ -130,10 +130,7 @@ data class ArrMovie(
     override val releasedBy: String?
         get() = studio
 
-
-    override fun setMonitored(monitored: Boolean): ArrMovie {
-        return copy(monitored = monitored)
-    }
+    override fun setMonitored(monitored: Boolean): ArrMovie = copy(monitored = monitored)
 
     override val isMissing: Boolean
         get() = movieFile == null
@@ -150,9 +147,8 @@ data class ArrMovie(
             return listOfNotNull(
                 inCinemas?.let { MR.strings.in_cinemas to it },
                 digitalRelease?.let { MR.strings.digital_release to it },
-                physicalRelease?.let { MR.strings.physical_release to it }
-            )
-                .filter { it.second > now }
+                physicalRelease?.let { MR.strings.physical_release to it },
+            ).filter { it.second > now }
                 .minByOrNull { it.second }
         }
 
@@ -161,7 +157,7 @@ data class ArrMovie(
         minimumAvailability: MediaStatus,
         qualityProfileId: Int,
         rootFolderPath: String,
-        tags: List<Int>
+        tags: List<Int>,
     ) = copy(
         id = 0,
         alternateTitles = alternateTitles.filter { it.title != null },
@@ -169,7 +165,7 @@ data class ArrMovie(
         minimumAvailability = minimumAvailability,
         qualityProfileId = qualityProfileId,
         rootFolderPath = rootFolderPath,
-        tags = tags
+        tags = tags,
     )
 
     fun copyForUpdate(
@@ -177,16 +173,17 @@ data class ArrMovie(
         minimumAvailability: MediaStatus,
         qualityProfileId: Int,
         rootFolderPath: String,
-        tags: List<Int>
+        tags: List<Int>,
     ) = copy(
         monitored = monitored,
         minimumAvailability = minimumAvailability,
         qualityProfileId = qualityProfileId,
         rootFolderPath = rootFolderPath,
-        tags = tags
+        tags = tags,
     )
 
-    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
-        copy(rootFolderPath = rootFolderPath)
-
+    override fun withNewRoot(
+        rootFolderPath: String,
+        currentRootFolderPath: String?,
+    ): ArrMedia = copy(rootFolderPath = rootFolderPath)
 }

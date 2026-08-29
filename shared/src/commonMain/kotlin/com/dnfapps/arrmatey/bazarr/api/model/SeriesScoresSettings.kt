@@ -15,5 +15,5 @@ data class SeriesScoresSettings(
     val source: Int,
     val streaming_service: Int,
     val video_codec: Int,
-    val year: Int
+    val year: Int,
 )

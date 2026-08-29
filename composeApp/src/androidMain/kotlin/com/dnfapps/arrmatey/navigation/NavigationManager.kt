@@ -22,7 +22,7 @@ class NavigationManager(
     val bazarr: BazarrTabNavigator,
     private val appState: AppState,
     private val tabManager: TabManager,
-    private val instanceRepository: com.dnfapps.arrmatey.database.InstanceRepository
+    private val instanceRepository: com.dnfapps.arrmatey.database.InstanceRepository,
 ) {
     // Reactive UI state properties
     val drawerExpandedState: StateFlow<Boolean> = appState.drawerExpanded
@@ -31,7 +31,9 @@ class NavigationManager(
 
     // UI state actions
     fun openDrawer() = appState.setDrawerOpen(true)
+
     fun closeDrawer() = appState.setDrawerOpen(false)
+
     fun setDrawerOpen(isOpen: Boolean) = appState.setDrawerOpen(isOpen)
 
     fun setSelectedTab(tab: TabItem) = appState.setSelectedTab(tab)
@@ -47,17 +49,16 @@ class NavigationManager(
     }
 
     fun openOverlay(tab: TabItem?) = appState.openOverlay(tab)
+
     fun closeOverlay() = appState.closeOverlay()
 
     /**
      * Returns the [Navigator] for a specific [InstanceType].
      */
-    fun arr(type: InstanceType): Navigator<NavKey> {
-        return navigatorFor(tabFor(type))
-    }
+    fun arr(type: InstanceType): Navigator<NavKey> = navigatorFor(tabFor(type))
 
-    fun tabFor(type: InstanceType): TabItem.Standard {
-        return when (type) {
+    fun tabFor(type: InstanceType): TabItem.Standard =
+        when (type) {
             InstanceType.Sonarr -> TabItem.Standard.SHOWS
             InstanceType.Radarr -> TabItem.Standard.MOVIES
             InstanceType.Lidarr -> TabItem.Standard.MUSIC
@@ -65,16 +66,14 @@ class NavigationManager(
             InstanceType.Listenarr -> TabItem.Standard.AUDIOBOOKS
             else -> throw IllegalStateException("Invalid arr type $type")
         }
-    }
 
     /**
      * Generic accessor for feature navigators.
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : NavKey> navigatorFor(tab: TabItem): Navigator<T> {
-        return tabNavigators[tab] as? Navigator<T>
+    fun <T : NavKey> navigatorFor(tab: TabItem): Navigator<T> =
+        tabNavigators[tab] as? Navigator<T>
             ?: throw IllegalArgumentException("No navigator registered for tab: $tab")
-    }
 
     fun getNavigator(tab: TabItem?): Navigator<*>? = tab?.let { tabNavigators[it] }
 
@@ -136,45 +135,52 @@ class NavigationManager(
         navigateToTab(TabItem.Standard.CALENDAR)
     }
 
-    fun openSeerrDetails(tmdbId: Long, requestType: RequestType) {
+    fun openSeerrDetails(
+        tmdbId: Long,
+        requestType: RequestType,
+    ) {
         discover.toDetails(tmdbId = tmdbId, requestType = requestType)
     }
 
-    fun navigateToMediaDetails(tmdbId: Long, requestType: RequestType) {
+    fun navigateToMediaDetails(
+        tmdbId: Long,
+        requestType: RequestType,
+    ) {
         val tabConfig = tabManager.tabConfiguration.value
         val visibleTabs = tabConfig.visibleTabs
         val drawerTabs = tabConfig.drawerTabs
 
-        val selectedTab = when (requestType) {
-            RequestType.Movie -> {
-                when {
-                    visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
-                    visibleTabs.any { it == TabItem.Standard.MOVIES } -> TabItem.Standard.MOVIES
-                    visibleTabs.any { it == TabItem.Standard.DISCOVER } -> TabItem.Standard.DISCOVER
-                    drawerTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
-                    drawerTabs.any { it == TabItem.Standard.MOVIES } -> TabItem.Standard.MOVIES
-                    else -> TabItem.Standard.DISCOVER
+        val selectedTab =
+            when (requestType) {
+                RequestType.Movie -> {
+                    when {
+                        visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                        visibleTabs.any { it == TabItem.Standard.MOVIES } -> TabItem.Standard.MOVIES
+                        visibleTabs.any { it == TabItem.Standard.DISCOVER } -> TabItem.Standard.DISCOVER
+                        drawerTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                        drawerTabs.any { it == TabItem.Standard.MOVIES } -> TabItem.Standard.MOVIES
+                        else -> TabItem.Standard.DISCOVER
+                    }
+                }
+                RequestType.Tv -> {
+                    when {
+                        visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                        visibleTabs.any { it == TabItem.Standard.SHOWS } -> TabItem.Standard.SHOWS
+                        visibleTabs.any { it == TabItem.Standard.DISCOVER } -> TabItem.Standard.DISCOVER
+                        drawerTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                        drawerTabs.any { it == TabItem.Standard.SHOWS } -> TabItem.Standard.SHOWS
+                        else -> TabItem.Standard.DISCOVER
+                    }
+                }
+                else -> {
+                    when {
+                        visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                        visibleTabs.any { it == TabItem.Standard.DISCOVER } -> TabItem.Standard.DISCOVER
+                        drawerTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
+                        else -> TabItem.Standard.DISCOVER
+                    }
                 }
             }
-            RequestType.Tv -> {
-                when {
-                    visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
-                    visibleTabs.any { it == TabItem.Standard.SHOWS } -> TabItem.Standard.SHOWS
-                    visibleTabs.any { it == TabItem.Standard.DISCOVER } -> TabItem.Standard.DISCOVER
-                    drawerTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
-                    drawerTabs.any { it == TabItem.Standard.SHOWS } -> TabItem.Standard.SHOWS
-                    else -> TabItem.Standard.DISCOVER
-                }
-            }
-            else -> {
-                when {
-                    visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
-                    visibleTabs.any { it == TabItem.Standard.DISCOVER } -> TabItem.Standard.DISCOVER
-                    drawerTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
-                    else -> TabItem.Standard.DISCOVER
-                }
-            }
-        }
 
         navigateToTab(selectedTab)
         navigatorFor<NavKey>(selectedTab).toDetails(tmdbId = tmdbId, requestType = requestType)

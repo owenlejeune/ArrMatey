@@ -35,87 +35,96 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun TrackRow(
     track: LidarrTrack,
-    trackFile: LidarrTrackFile?
+    trackFile: LidarrTrackFile?,
 ) {
     val file = track.trackFile ?: trackFile
     val mediaInfo = file?.mediaInfo
 
-    val mediaInfoStatus = remember(mediaInfo) {
-        listOfNotNull(
-            mediaInfo?.audioCodec,
-            mediaInfo?.audioChannels?.toOneDecimal(),
-            mediaInfo?.audioBitrate,
-            mediaInfo?.audioSampleRate,
-            mediaInfo?.audioBits
-        ).joinToString(" - ")
-    }
-    val mediaInfoStatusCondensed = remember(mediaInfo) {
-        listOfNotNull(
-            mediaInfo?.audioCodec,
-            mediaInfo?.audioBits
-        ).joinToString(" ")
-            .takeUnless { it.isEmpty() }
-    }
+    val mediaInfoStatus =
+        remember(mediaInfo) {
+            listOfNotNull(
+                mediaInfo?.audioCodec,
+                mediaInfo?.audioChannels?.toOneDecimal(),
+                mediaInfo?.audioBitrate,
+                mediaInfo?.audioSampleRate,
+                mediaInfo?.audioBits,
+            ).joinToString(" - ")
+        }
+    val mediaInfoStatusCondensed =
+        remember(mediaInfo) {
+            listOfNotNull(
+                mediaInfo?.audioCodec,
+                mediaInfo?.audioBits,
+            ).joinToString(" ")
+                .takeUnless { it.isEmpty() }
+        }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) {
-            val titleString = buildAnnotatedString {
-                withStyle(SpanStyle(fontSize = 16.sp)) {
-                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("${track.absoluteTrackNumber}.")
-                    }
-                    withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                        append(track.title)
+            val titleString =
+                buildAnnotatedString {
+                    withStyle(SpanStyle(fontSize = 16.sp)) {
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                            append("${track.absoluteTrackNumber}.")
+                        }
+                        withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
+                            append(track.title)
+                        }
                     }
                 }
-            }
             Text(
                 text = titleString,
                 lineHeight = 16.sp,
                 overflow = TextOverflow.MiddleEllipsis,
-                maxLines = 1
+                maxLines = 1,
             )
 
-            val (statusText, statusColor) = when {
-                file == null -> mokoString(MR.strings.missing) to MaterialTheme.colorScheme.error
-                mediaInfo == null -> mokoString(MR.strings.no_media_info) to MaterialTheme.colorScheme.error
-                else -> mediaInfoStatus to MaterialTheme.colorScheme.tertiary
-            }
+            val (statusText, statusColor) =
+                when {
+                    file == null -> mokoString(MR.strings.missing) to MaterialTheme.colorScheme.error
+                    mediaInfo == null -> mokoString(MR.strings.no_media_info) to MaterialTheme.colorScheme.error
+                    else -> mediaInfoStatus to MaterialTheme.colorScheme.tertiary
+                }
 
-            val styledStatusText = buildAnnotatedString {
-                withStyle(SpanStyle(
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.secondary
-                )) {
-                    append(track.duration.formatAsDuration())
+            val styledStatusText =
+                buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.secondary,
+                        ),
+                    ) {
+                        append(track.duration.formatAsDuration())
+                    }
+                    bullet()
+                    withStyle(
+                        SpanStyle(
+                            fontSize = 14.sp,
+                            color = statusColor,
+                            fontStyle = FontStyle.Italic,
+                        ),
+                    ) {
+                        append(statusText)
+                    }
                 }
-                bullet()
-                withStyle(SpanStyle(
-                    fontSize = 14.sp,
-                    color = statusColor,
-                    fontStyle = FontStyle.Italic
-                )) {
-                    append(statusText)
-                }
-            }
             Text(styledStatusText)
         }
 
         mediaInfoStatusCondensed?.let { staus ->
             Surface(
                 color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(4.dp),
             ) {
                 Text(
                     text = staus,
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             }
         } ?: Icon(

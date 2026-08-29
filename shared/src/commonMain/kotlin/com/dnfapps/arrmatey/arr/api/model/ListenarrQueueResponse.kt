@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ListenarrQueueResponse(
-    val items: List<ListenarrQueueItem>
+    val items: List<ListenarrQueueItem>,
 )

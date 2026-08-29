@@ -34,48 +34,53 @@ fun ErrorView(
     message: String,
     onOpenSettings: () -> Unit,
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val icon = when (errorType) {
-        HttpErrorType.Timeout -> Icons.Default.Timer
-        HttpErrorType.Network -> Icons.Default.WifiOff
-        else -> Icons.Default.Warning
-    }
+    val icon =
+        when (errorType) {
+            HttpErrorType.Timeout -> Icons.Default.Timer
+            HttpErrorType.Network -> Icons.Default.WifiOff
+            else -> Icons.Default.Warning
+        }
 
-    val iconColor = when (errorType) {
-        HttpErrorType.Timeout, HttpErrorType.Network -> Color(0xFFFFA500)
-        else -> MaterialTheme.colorScheme.error
-    }
+    val iconColor =
+        when (errorType) {
+            HttpErrorType.Timeout, HttpErrorType.Network -> Color(0xFFFFA500)
+            else -> MaterialTheme.colorScheme.error
+        }
 
-    val title = when (errorType) {
-        HttpErrorType.Timeout -> MR.strings.error_timeout_title
-        HttpErrorType.Network -> MR.strings.error_network_title
-        else -> MR.strings.error_generic_title
-    }
+    val title =
+        when (errorType) {
+            HttpErrorType.Timeout -> MR.strings.error_timeout_title
+            HttpErrorType.Network -> MR.strings.error_network_title
+            else -> MR.strings.error_generic_title
+        }
 
-    val detailMessage = if (errorType == HttpErrorType.Timeout) {
-        mokoString(MR.strings.error_timeout_description)
-    } else {
-        message
-    }
+    val detailMessage =
+        if (errorType == HttpErrorType.Timeout) {
+            mokoString(MR.strings.error_timeout_description)
+        } else {
+            message
+        }
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = iconColor,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(48.dp),
         )
 
         Text(
             text = mokoString(title),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
         )
 
         Text(
@@ -83,20 +88,21 @@ fun ErrorView(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
         )
 
         Column(
-            modifier = Modifier
-                .padding(horizontal = 32.dp)
-                .padding(top = 8.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .padding(horizontal = 32.dp)
+                    .padding(top = 8.dp)
+                    .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (errorType == HttpErrorType.Timeout) {
                 Button(
                     onClick = onOpenSettings,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(Icons.Default.Settings, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
@@ -106,7 +112,7 @@ fun ErrorView(
 
             OutlinedButton(
                 onClick = onRetry,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(Icons.Default.Refresh, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -116,13 +122,14 @@ fun ErrorView(
 
         if (errorType == HttpErrorType.Timeout) {
             Text(
-                text = mokoString(MR.strings.error_timeout_tip,  mokoString(MR.strings.slow_instance)),
+                text = mokoString(MR.strings.error_timeout_tip, mokoString(MR.strings.slow_instance)),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp)
+                modifier =
+                    Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 8.dp),
             )
         }
     }

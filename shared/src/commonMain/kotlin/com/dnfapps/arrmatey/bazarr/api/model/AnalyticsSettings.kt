@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AnalyticsSettings(
-    val enabled: Boolean
+    val enabled: Boolean,
 )

@@ -7,5 +7,5 @@ data class Collection(
     val id: Long,
     val name: String,
     val posterPath: String? = null,
-    val backdropPath: String? = null
+    val backdropPath: String? = null,
 )

@@ -25,7 +25,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -58,7 +57,7 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun ProwlarrIndexersContent(
     modifier: Modifier = Modifier,
-    viewModel: ProwlarrIndexersViewModel
+    viewModel: ProwlarrIndexersViewModel,
 ) {
     val indexersState by viewModel.indexers.collectAsStateWithLifecycle()
     val indexersStatus by viewModel.indexerStatus.collectAsStateWithLifecycle()
@@ -66,15 +65,16 @@ fun ProwlarrIndexersContent(
     var showIndexerStatus by remember { mutableStateOf<IndexerStatus?>(null) }
 
     Column(
-        modifier = modifier.padding(horizontal = 12.dp)
+        modifier = modifier.padding(horizontal = 12.dp),
     ) {
         when (val state = indexersState) {
             is ProwlarrIndexersState.Initial,
-            is ProwlarrIndexersState.Loading -> {
+            is ProwlarrIndexersState.Loading,
+            -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
                 ) {
                     CircularProgressIndicator()
                 }
@@ -82,15 +82,16 @@ fun ProwlarrIndexersContent(
 
             is ProwlarrIndexersState.Error -> {
                 Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
                         text = state.message,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(16.dp),
                     )
                 }
             }
@@ -100,23 +101,23 @@ fun ProwlarrIndexersContent(
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
                     ) {
                         Text(
                             text = mokoString(MR.strings.no_indexers_configured),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 } else {
                     PullToRefreshBox(
                         isRefreshing = false,
                         onRefresh = { viewModel.refresh() },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     ) {
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
                         ) {
                             item { Spacer(modifier = Modifier.size(4.dp)) }
                             items(items = state.items, key = { it.id }) { indexer ->
@@ -125,7 +126,7 @@ fun ProwlarrIndexersContent(
                                 IndexerCard(
                                     indexer = indexer,
                                     hasIssues = indexerStatus?.hasFailure ?: false,
-                                    onShowIssues = { showIndexerStatus = indexerStatus }
+                                    onShowIssues = { showIndexerStatus = indexerStatus },
                                 )
                             }
                             item { Spacer(modifier = Modifier.size(4.dp)) }
@@ -138,23 +139,24 @@ fun ProwlarrIndexersContent(
 
     showIndexerStatus?.let { indexersStatus ->
         ModalBottomSheet(
-            onDismissRequest = { showIndexerStatus = null }
+            onDismissRequest = { showIndexerStatus = null },
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp)
+                modifier =
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 24.dp),
             ) {
                 indexersStatus.disabledTill?.let { disabledTill ->
                     ContainerCard(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = mokoString(MR.strings.disabled_until),
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            text = disabledTill.format ()
+                            text = disabledTill.format(),
                         )
                     }
                 }
@@ -162,10 +164,10 @@ fun ProwlarrIndexersContent(
                     ContainerCard(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = mokoString(MR.strings.most_recent_failure),
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            text = mostRecentFailure.format ()
+                            text = mostRecentFailure.format(),
                         )
                     }
                 }
@@ -173,10 +175,10 @@ fun ProwlarrIndexersContent(
                     ContainerCard(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = mokoString(MR.strings.initial_failure),
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            text = initialFailure.format()
+                            text = initialFailure.format(),
                         )
                     }
                 }
@@ -189,64 +191,68 @@ fun ProwlarrIndexersContent(
 private fun IndexerCard(
     indexer: ProwlarrIndexer,
     hasIssues: Boolean,
-    onShowIssues: () -> Unit
+    onShowIssues: () -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = onShowIssues
+        onClick = onShowIssues,
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = indexer.name ?: indexer.implementationName ?: mokoString(MR.strings.unknown),
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
                 val protocol = indexer.protocol?.name ?: mokoString(MR.strings.unknown).lowercase()
-                val protocolColor = when (indexer.protocol) {
-                    ReleaseProtocol.Torrent -> MaterialTheme.colorScheme.primary
-                    ReleaseProtocol.Usenet, ReleaseProtocol.Soulseek -> MaterialTheme.colorScheme.tertiary
-                    else -> MaterialTheme.colorScheme.outline
-                }
+                val protocolColor =
+                    when (indexer.protocol) {
+                        ReleaseProtocol.Torrent -> MaterialTheme.colorScheme.primary
+                        ReleaseProtocol.Usenet, ReleaseProtocol.Soulseek -> MaterialTheme.colorScheme.tertiary
+                        else -> MaterialTheme.colorScheme.outline
+                    }
                 Text(
                     text = protocol,
                     style = MaterialTheme.typography.labelMedium,
                     color = protocolColor,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 )
             }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                val dotColor = if (indexer.enable)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant
+                val dotColor =
+                    if (indexer.enable) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
                 Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(dotColor)
+                    modifier =
+                        Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(dotColor),
                 )
 
                 Text(
                     text = if (indexer.enable) mokoString(MR.strings.enabled) else mokoString(MR.strings.disabled),
                     style = MaterialTheme.typography.bodySmall,
-                    color = dotColor
+                    color = dotColor,
                 )
 
                 if (indexer.supportsRss) {
@@ -254,7 +260,7 @@ private fun IndexerCard(
                         imageVector = Icons.Default.RssFeed,
                         contentDescription = "RSS",
                         modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
 
@@ -263,7 +269,7 @@ private fun IndexerCard(
                         imageVector = Icons.Default.Search,
                         contentDescription = mokoString(MR.strings.search),
                         modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -272,7 +278,7 @@ private fun IndexerCard(
                         imageVector = Icons.Default.WarningAmber,
                         contentDescription = null,
                         tint = ArrOrange,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(18.dp),
                     )
                 }
             }
@@ -282,10 +288,11 @@ private fun IndexerCard(
                     Text(
                         text = msg,
                         style = MaterialTheme.typography.bodySmall,
-                        color = when (indexer.message?.type) {
-                            IndexerMessageType.Warning -> MaterialTheme.colorScheme.tertiary
-                            else -> MaterialTheme.colorScheme.error
-                        }
+                        color =
+                            when (indexer.message?.type) {
+                                IndexerMessageType.Warning -> MaterialTheme.colorScheme.tertiary
+                                else -> MaterialTheme.colorScheme.error
+                            },
                     )
                 }
             }

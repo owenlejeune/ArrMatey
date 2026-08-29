@@ -7,11 +7,13 @@ import dev.shivathapaa.logger.sink.DefaultLogSink
 
 fun initLogging() {
     try {
-        val config = LoggerConfig.Builder()
-            .minLevel(LogLevel.DEBUG)
-            .addSink(DefaultLogSink())
-            .addSink(FileSink("arrmatey.log"))
-            .build()
+        val config =
+            LoggerConfig
+                .Builder()
+                .minLevel(LogLevel.DEBUG)
+                .addSink(DefaultLogSink())
+                .addSink(FileSink("arrmatey.log"))
+                .build()
 
         LoggerFactory.install(config)
     } catch (e: Exception) {

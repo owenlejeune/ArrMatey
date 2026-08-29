@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 
 @Composable
-fun statusBarHeight(): Dp = WindowInsets.statusBars
-    .asPaddingValues()
-    .calculateTopPadding()
+fun statusBarHeight(): Dp =
+    WindowInsets.statusBars
+        .asPaddingValues()
+        .calculateTopPadding()

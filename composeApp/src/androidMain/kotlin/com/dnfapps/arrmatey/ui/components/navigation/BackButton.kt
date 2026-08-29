@@ -12,11 +12,11 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun BackButton(onClick: () -> Unit) {
     IconButton(
-        onClick = onClick
+        onClick = onClick,
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-            contentDescription = mokoString(MR.strings.back)
+            contentDescription = mokoString(MR.strings.back),
         )
     }
 }

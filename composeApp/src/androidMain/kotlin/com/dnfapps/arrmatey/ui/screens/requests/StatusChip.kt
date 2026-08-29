@@ -15,36 +15,38 @@ fun StatusChip(request: MediaRequest) {
     val mediaStatus = MediaStatus.fromValue(request.media.status)
     val requestStatus = RequestStatus.fromValue(request.status)
 
-    val (label, container, content) = when {
-        mediaStatus == MediaStatus.Deleted ->
-            Triple(mediaStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+    val (label, container, content) =
+        when {
+            mediaStatus == MediaStatus.Deleted ->
+                Triple(mediaStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
 
-        mediaStatus == MediaStatus.Available ->
-            Triple(mediaStatus.resource, MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
+            mediaStatus == MediaStatus.Available ->
+                Triple(mediaStatus.resource, MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
 
-        mediaStatus == MediaStatus.PartiallyAvailable ->
-            Triple(mediaStatus.resource, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+            mediaStatus == MediaStatus.PartiallyAvailable ->
+                Triple(mediaStatus.resource, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
 
-        mediaStatus == MediaStatus.Processing ->
-            Triple(mediaStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+            mediaStatus == MediaStatus.Processing ->
+                Triple(mediaStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
 
-        requestStatus == RequestStatus.Declined ->
-            Triple(requestStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+            requestStatus == RequestStatus.Declined ->
+                Triple(requestStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
 
-        requestStatus == RequestStatus.Approved ->
-            Triple(requestStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+            requestStatus == RequestStatus.Approved ->
+                Triple(requestStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
 
-        else -> // Default to Pending
-            Triple(requestStatus.resource, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
-    }
+            else -> // Default to Pending
+                Triple(requestStatus.resource, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+        }
 
     AssistChip(
         onClick = { },
         label = { Text(mokoString(label)) },
-        colors = AssistChipDefaults.assistChipColors(
-            containerColor = container,
-            labelColor = content
-        ),
-        border = null
+        colors =
+            AssistChipDefaults.assistChipColors(
+                containerColor = container,
+                labelColor = content,
+            ),
+        border = null,
     )
 }

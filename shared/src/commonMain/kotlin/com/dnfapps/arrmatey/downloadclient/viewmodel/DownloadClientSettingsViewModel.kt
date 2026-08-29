@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.downloadclient.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
@@ -15,6 +14,7 @@ import com.dnfapps.arrmatey.downloadclient.usecase.GetDownloadClientByIdUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientUseCase
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.utils.isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,9 +29,8 @@ class DownloadClientSettingsViewModel(
     private val createDownloadClientUseCase: CreateDownloadClientUseCase,
     private val updateDownloadClientUseCase: UpdateDownloadClientUseCase,
     private val getDownloadClientByIdUseCase: GetDownloadClientByIdUseCase,
-    private val downloadClientManager: DownloadClientManager
-): ViewModel() {
-
+    private val downloadClientManager: DownloadClientManager,
+) : ViewModel() {
     private val _uiState = MutableStateFlow(DownloadClientConfigurationUiState())
     val uiState: StateFlow<DownloadClientConfigurationUiState> = _uiState.asStateFlow()
 
@@ -64,7 +63,7 @@ class DownloadClientSettingsViewModel(
                             isEditing = true,
                             localNetworkEnabled = client.localNetworkEnabled,
                             localNetworkSsids = client.localNetworkSsids,
-                            localNetworkEndpoint = client.localNetworkEndpoint ?: ""
+                            localNetworkEndpoint = client.localNetworkEndpoint ?: "",
                         )
                     }
                 }
@@ -84,9 +83,13 @@ class DownloadClientSettingsViewModel(
         _uiState.update {
             it.copy(
                 url = url,
-                saveButtonEnabled = url.isNotEmpty() &&
-                        (it.noApiKeyRequired || it.apiKey.isNotEmpty()
-                                || (it.username.isNotEmpty() && it.password.isNotEmpty()))
+                saveButtonEnabled =
+                    url.isNotEmpty() &&
+                        (
+                            it.noApiKeyRequired ||
+                                it.apiKey.isNotEmpty() ||
+                                (it.username.isNotEmpty() && it.password.isNotEmpty())
+                        ),
             )
         }
     }
@@ -95,9 +98,13 @@ class DownloadClientSettingsViewModel(
         _uiState.update {
             it.copy(
                 username = username,
-                saveButtonEnabled = it.url.isNotEmpty() &&
-                        (it.noApiKeyRequired || it.apiKey.isNotEmpty()
-                                || (username.isNotEmpty() && it.password.isNotEmpty()))
+                saveButtonEnabled =
+                    it.url.isNotEmpty() &&
+                        (
+                            it.noApiKeyRequired ||
+                                it.apiKey.isNotEmpty() ||
+                                (username.isNotEmpty() && it.password.isNotEmpty())
+                        ),
             )
         }
     }
@@ -106,9 +113,13 @@ class DownloadClientSettingsViewModel(
         _uiState.update {
             it.copy(
                 password = password,
-                saveButtonEnabled = it.url.isNotEmpty() &&
-                        (it.noApiKeyRequired || it.apiKey.isNotEmpty()
-                                || (it.username.isNotEmpty() && password.isNotEmpty()))
+                saveButtonEnabled =
+                    it.url.isNotEmpty() &&
+                        (
+                            it.noApiKeyRequired ||
+                                it.apiKey.isNotEmpty() ||
+                                (it.username.isNotEmpty() && password.isNotEmpty())
+                        ),
             )
         }
     }
@@ -118,9 +129,13 @@ class DownloadClientSettingsViewModel(
             val newApiKey = if (it.noApiKeyRequired) "" else apiKey
             it.copy(
                 apiKey = newApiKey,
-                saveButtonEnabled = it.url.isNotEmpty() &&
-                        (it.noApiKeyRequired || newApiKey.isNotEmpty()
-                                || (!it.username.isNotEmpty() && !it.password.isNotEmpty()))
+                saveButtonEnabled =
+                    it.url.isNotEmpty() &&
+                        (
+                            it.noApiKeyRequired ||
+                                newApiKey.isNotEmpty() ||
+                                (!it.username.isNotEmpty() && !it.password.isNotEmpty())
+                        ),
             )
         }
     }
@@ -135,9 +150,13 @@ class DownloadClientSettingsViewModel(
                 apiKey = newApiKey,
                 username = newUsername,
                 password = newPassword,
-                saveButtonEnabled = it.url.isNotEmpty() &&
-                        (enabled || newApiKey.isNotEmpty()
-                                || (!newUsername.isNotEmpty() && !newPassword.isNotEmpty()))
+                saveButtonEnabled =
+                    it.url.isNotEmpty() &&
+                        (
+                            enabled ||
+                                newApiKey.isNotEmpty() ||
+                                (!newUsername.isNotEmpty() && !newPassword.isNotEmpty())
+                        ),
             )
         }
     }
@@ -168,7 +187,7 @@ class DownloadClientSettingsViewModel(
                     _uiState.update {
                         it.copy(
                             isTesting = false,
-                            testResult = status is OperationStatus.Success
+                            testResult = status is OperationStatus.Success,
                         )
                     }
                 }
@@ -183,17 +202,18 @@ class DownloadClientSettingsViewModel(
                 return@launch
             }
             _uiState.update { it.copy(localTesting = true, localTestResult = null) }
-            val client = buildDownloadClient().copy(
-                url = uiState.value.localNetworkEndpoint,
-                localNetworkEnabled = false // Force use current URL
-            )
+            val client =
+                buildDownloadClient().copy(
+                    url = uiState.value.localNetworkEndpoint,
+                    localNetworkEnabled = false, // Force use current URL
+                )
             val resultFlow = testDownloadClientConnectionUseCase(client)
             resultFlow.collect { status ->
                 if (status !is OperationStatus.InProgress) {
                     _uiState.update {
                         it.copy(
                             localTesting = false,
-                            localTestResult = status is OperationStatus.Success
+                            localTestResult = status is OperationStatus.Success,
                         )
                     }
                 }
@@ -201,12 +221,13 @@ class DownloadClientSettingsViewModel(
         }
     }
 
-    private fun buildDownloadClient(): DownloadClient {
-        return DownloadClient(
+    private fun buildDownloadClient(): DownloadClient =
+        DownloadClient(
             id = downloadClient.value?.id ?: 0,
             type = uiState.value.selectedType,
-            label = uiState.value.label.takeUnless { it.isEmpty() }
-                ?: uiState.value.selectedType.displayName,
+            label =
+                uiState.value.label.takeUnless { it.isEmpty() }
+                    ?: uiState.value.selectedType.displayName,
             url = uiState.value.url,
             username = EncryptedString(uiState.value.username),
             password = EncryptedString(uiState.value.password),
@@ -216,9 +237,8 @@ class DownloadClientSettingsViewModel(
             selected = downloadClient.value?.selected ?: false,
             localNetworkEnabled = uiState.value.localNetworkEnabled,
             localNetworkSsids = uiState.value.localNetworkSsids,
-            localNetworkEndpoint = uiState.value.localNetworkEndpoint
+            localNetworkEndpoint = uiState.value.localNetworkEndpoint,
         )
-    }
 
     fun deleteClient() {
         downloadClientId?.let { clientId ->
@@ -233,9 +253,10 @@ class DownloadClientSettingsViewModel(
                 }.onFailure { error ->
                     _uiState.update {
                         it.copy(
-                            mutationState = DownloadClientMutationState.Error(
-                                error.message ?: ""
-                            )
+                            mutationState =
+                                DownloadClientMutationState.Error(
+                                    error.message ?: "",
+                                ),
                         )
                     }
                 }
@@ -275,10 +296,11 @@ class DownloadClientSettingsViewModel(
                                     pendingClientId = null
                                     _uiState.update {
                                         it.copy(
-                                            mutationState = DownloadClientMutationState.Success(
-                                                createdId
-                                            ),
-                                            isTesting = false
+                                            mutationState =
+                                                DownloadClientMutationState.Success(
+                                                    createdId,
+                                                ),
+                                            isTesting = false,
                                         )
                                     }
                                 }
@@ -290,11 +312,12 @@ class DownloadClientSettingsViewModel(
 
                                     _uiState.update {
                                         it.copy(
-                                            mutationState = DownloadClientMutationState.ConnectionFailed(
-                                                testStatus.message ?: "Connection test failed"
-                                            ),
+                                            mutationState =
+                                                DownloadClientMutationState.ConnectionFailed(
+                                                    testStatus.message ?: "Connection test failed",
+                                                ),
                                             isTesting = false,
-                                            isEditing = false
+                                            isEditing = false,
                                         )
                                     }
                                 }
@@ -302,7 +325,6 @@ class DownloadClientSettingsViewModel(
                                 else -> {}
                             }
                         }
-
                 }
                 is DownloadClientMutationState.Conflict -> {
                     _uiState.update {
@@ -318,7 +340,7 @@ class DownloadClientSettingsViewModel(
                     _uiState.update {
                         it.copy(
                             mutationState = DownloadClientMutationState.Error("Unexpected error"),
-                            isTesting = false
+                            isTesting = false,
                         )
                     }
                 }
@@ -342,7 +364,7 @@ class DownloadClientSettingsViewModel(
                                     _uiState.update {
                                         it.copy(
                                             mutationState = DownloadClientMutationState.Success(updatedId),
-                                            isTesting = false
+                                            isTesting = false,
                                         )
                                     }
                                 }
@@ -353,16 +375,17 @@ class DownloadClientSettingsViewModel(
                                     }
                                     _uiState.update {
                                         it.copy(
-                                            mutationState = DownloadClientMutationState.ConnectionFailed(
-                                                testStatus.message ?: "Connection test failed"
-                                            ),
-                                            isTesting = false
+                                            mutationState =
+                                                DownloadClientMutationState.ConnectionFailed(
+                                                    testStatus.message ?: "Connection test failed",
+                                                ),
+                                            isTesting = false,
                                         )
                                     }
                                 }
                                 else -> {}
                             }
-                    }
+                        }
                 }
                 is DownloadClientMutationState.Conflict -> {
                     _uiState.update {
@@ -378,7 +401,7 @@ class DownloadClientSettingsViewModel(
                     _uiState.update {
                         it.copy(
                             mutationState = DownloadClientMutationState.Error("Unexpected error"),
-                            isTesting = false
+                            isTesting = false,
                         )
                     }
                 }

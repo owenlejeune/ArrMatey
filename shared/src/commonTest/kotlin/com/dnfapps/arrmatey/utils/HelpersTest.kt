@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class HelpersTest {
-
     @Test
     fun testThenGetTrueReturnsResult() {
         assertEquals("value", true thenGet "value")

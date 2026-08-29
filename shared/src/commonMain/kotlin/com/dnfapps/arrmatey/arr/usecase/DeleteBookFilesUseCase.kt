@@ -10,15 +10,16 @@ import kotlinx.coroutines.flow.flow
 class DeleteBookFilesUseCase {
     operator fun invoke(
         bookFileIds: List<Long>,
-        repository: ArrInstanceRepository
-    ): Flow<OperationStatus> = flow {
-        emit(OperationStatus.InProgress)
-        repository.deleteBookFiles(bookFileIds)
-            .onSuccess {
-                emit(OperationStatus.Success("Books deleted successfully"))
-            }
-            .onError { code, message, cause ->
-                emit(OperationStatus.Error(code, message, cause))
-            }
-    }
+        repository: ArrInstanceRepository,
+    ): Flow<OperationStatus> =
+        flow {
+            emit(OperationStatus.InProgress)
+            repository
+                .deleteBookFiles(bookFileIds)
+                .onSuccess {
+                    emit(OperationStatus.Success("Books deleted successfully"))
+                }.onError { code, message, cause ->
+                    emit(OperationStatus.Error(code, message, cause))
+                }
+        }
 }

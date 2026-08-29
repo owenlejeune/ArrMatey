@@ -10,5 +10,5 @@ enum class IndexerPrivacy {
     Private,
 
     @SerialName("semiPrivate")
-    SemiPrivate
+    SemiPrivate,
 }

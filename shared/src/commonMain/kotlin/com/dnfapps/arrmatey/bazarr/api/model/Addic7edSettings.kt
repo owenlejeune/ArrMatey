@@ -8,5 +8,5 @@ data class Addic7edSettings(
     val password: String,
     val user_agent: String,
     val username: String,
-    val vip: Boolean
+    val vip: Boolean,
 )

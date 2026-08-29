@@ -23,7 +23,6 @@ data class Author(
     override val runtime: Int? = null,
     override val certification: String? = null,
     override val alternateTitles: List<AlternateTitle> = emptyList(),
-
     override val qualityProfileId: Int,
     override val monitored: Boolean,
     override val images: List<ArrImage>,
@@ -38,7 +37,6 @@ data class Author(
     override val statistics: BookshelfStatistics? = null,
     @Contextual override val added: Instant? = null,
     override val status: MediaStatus,
-
     val sortNameLastFirst: String? = null,
     val monitorNewItems: AuthorMonitorType,
     val metadataProfileId: Int,
@@ -46,15 +44,15 @@ data class Author(
     val links: List<ArrLink> = emptyList(),
     val nextBook: Book? = null,
     val lastBook: Book? = null,
-    val addOptions: AuthorAddOptions? = null
-): ArrMedia, HasArrImages<Author>, InstanceTypeIdentifiable {
+    val addOptions: AuthorAddOptions? = null,
+) : ArrMedia,
+    HasArrImages<Author>,
+    InstanceTypeIdentifiable {
     companion object {
-        fun fromJson(value: String): Author {
-            return ArrMedia.json.decodeFromString(value)
-        }
+        fun fromJson(value: String): Author = ArrMedia.json.decodeFromString(value)
     }
 
-    override val guid: Long get() = id?: (Random.nextLong() + 200_000)
+    override val guid: Long get() = id ?: (Random.nextLong() + 200_000)
 
     override val isMissing: Boolean
         get() = statistics?.let { it.bookFileCount < it.totalBookCount } ?: false
@@ -62,19 +60,19 @@ data class Author(
     override fun ratingScore(): Double = ratings.value.toDouble()
 
     override val statusColor: Color
-        get() = when {
-            status == MediaStatus.Ended && statistics?.percentOfBooks == 100f -> ArrGreen
-            status == MediaStatus.Continuing && statistics?.percentOfBooks == 100f -> ArrBlue
-            statistics?.percentOfBooks != 100f && monitored -> ArrRed
-            statistics?.percentOfBooks != 100f && !monitored -> ArrOrange
-            else -> Color.Unspecified
-        }
+        get() =
+            when {
+                status == MediaStatus.Ended && statistics?.percentOfBooks == 100f -> ArrGreen
+                status == MediaStatus.Continuing && statistics?.percentOfBooks == 100f -> ArrBlue
+                statistics?.percentOfBooks != 100f && monitored -> ArrRed
+                statistics?.percentOfBooks != 100f && !monitored -> ArrOrange
+                else -> Color.Unspecified
+            }
 
     override val releasedBy: String? get() = null
     override val statusString: String get() = status.name
 
-    override fun setMonitored(monitored: Boolean): ArrMedia =
-        this.copy(monitored = monitored)
+    override fun setMonitored(monitored: Boolean): ArrMedia = this.copy(monitored = monitored)
 
     val bookFileCount: Int
         get() = statistics?.bookFileCount ?: 0
@@ -88,15 +86,14 @@ data class Author(
     override val statusProgress: Float
         get() = statistics?.percentOfBooks?.div(100f) ?: 0f
 
-    override fun withLocalImages(instanceUrl: String): Author =
-        copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
+    override fun withLocalImages(instanceUrl: String): Author = copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
 
     fun copyForCreation(
         monitor: AuthorMonitorType,
         monitorNew: AuthorMonitorType,
         qualityProfileId: Int,
         rootFolderPath: String?,
-        tags: List<Int>
+        tags: List<Int>,
     ) = copy(
 //        id = 0,
         addOptions = AuthorAddOptions(monitor = monitor),
@@ -104,9 +101,9 @@ data class Author(
         monitored = monitor != AuthorMonitorType.None,
         qualityProfileId = qualityProfileId,
         rootFolderPath = rootFolderPath,
-        path = "${rootFolderPath}/${folder}",
+        path = "$rootFolderPath/$folder",
         metadataProfileId = 1,
-        tags = tags
+        tags = tags,
     )
 
     fun copyForEdit(
@@ -114,16 +111,18 @@ data class Author(
         monitorNew: AuthorMonitorType,
         qualityProfileId: Int,
         rootFolderPath: String?,
-        tags: List<Int>
+        tags: List<Int>,
     ) = copy(
         monitored = monitored,
         monitorNewItems = monitorNew,
         qualityProfileId = qualityProfileId,
         rootFolderPath = rootFolderPath,
-        path = "${rootFolderPath}/${folder}",
-        tags = tags
+        path = "$rootFolderPath/$folder",
+        tags = tags,
     )
 
-    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
-        copy(rootFolderPath = rootFolderPath)
+    override fun withNewRoot(
+        rootFolderPath: String,
+        currentRootFolderPath: String?,
+    ): ArrMedia = copy(rootFolderPath = rootFolderPath)
 }

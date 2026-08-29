@@ -51,7 +51,7 @@ fun AddEditCustomWebpageScreen(
     webpageId: Long? = null,
     viewModel: CustomWebpageConfigurationViewModel = koinInjectParams(webpageId),
     moko: MokoStrings = koinInject(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -71,13 +71,14 @@ fun AddEditCustomWebpageScreen(
         }
     }
 
-    val titleText = remember(uiState.isEditing) {
-        if (uiState.isEditing) {
-            moko.getString(MR.strings.edit_webpage)
-        } else {
-            moko.getString(MR.strings.add_webpage)
+    val titleText =
+        remember(uiState.isEditing) {
+            if (uiState.isEditing) {
+                moko.getString(MR.strings.edit_webpage)
+            } else {
+                moko.getString(MR.strings.add_webpage)
+            }
         }
-    }
 
     Scaffold(
         topBar = {
@@ -92,15 +93,16 @@ fun AddEditCustomWebpageScreen(
                             onClick = {
                                 confirmDelete = true
                             },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            ),
-                            modifier = Modifier.padding(end = 4.dp)
+                            colors =
+                                IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                ),
+                            modifier = Modifier.padding(end = 4.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = null
+                                contentDescription = null,
                             )
                         }
                     }
@@ -109,21 +111,22 @@ fun AddEditCustomWebpageScreen(
                             viewModel.saveWebpage()
                         },
                         enabled = uiState.saveButtonEnabled,
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier.padding(end = 16.dp),
                     ) {
                         Text(text = mokoString(MR.strings.save))
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Spacer(Modifier.height(8.dp))
 
@@ -134,7 +137,7 @@ fun AddEditCustomWebpageScreen(
                 onValueChange = { viewModel.setName(it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = mokoString(MR.strings.custom_page_placeholder),
-                singleLine = true
+                singleLine = true,
             )
 
             AMOutlinedTextField(
@@ -147,16 +150,17 @@ fun AddEditCustomWebpageScreen(
                 description = mokoString(MR.strings.custom_page_description),
                 singleLine = true,
                 isError = uiState.endpointError,
-                errorMessage = when {
-                    uiState.endpointError -> mokoString(MR.strings.invalid_host)
-                    else -> null
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
+                errorMessage =
+                    when {
+                        uiState.endpointError -> mokoString(MR.strings.invalid_host)
+                        else -> null
+                    },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             )
 
             CustomHeaderSection(
                 headers = uiState.headers,
-                onHeadersChanged = { viewModel.setHeaders(it) }
+                onHeadersChanged = { viewModel.setHeaders(it) },
             )
 
             Spacer(Modifier.height(16.dp))
@@ -165,26 +169,25 @@ fun AddEditCustomWebpageScreen(
 
     if (confirmDelete) {
         AlertDialog(
-            onDismissRequest = { confirmDelete = false},
+            onDismissRequest = { confirmDelete = false },
             confirmButton = {
                 TextButton(
                     onClick = {
                         viewModel.deleteWebpage()
-                    }
+                    },
                 ) { Text(mokoString(MR.strings.yes)) }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
                         confirmDelete = false
-
-                    }
+                    },
                 ) { Text(mokoString(MR.strings.no)) }
             },
             title = { Text(mokoString(MR.strings.confirm)) },
             text = {
                 Text(mokoString(MR.strings.confirm_delete_custom_webpage))
-            }
+            },
         )
     }
 
@@ -197,7 +200,7 @@ fun AddEditCustomWebpageScreen(
                 TextButton(onClick = { viewModel.clearError() }) {
                     Text(mokoString(MR.strings.ok))
                 }
-            }
+            },
         )
     }
 }

@@ -9,7 +9,6 @@ data class SeriesStatistics(
     val episodeCount: Int,
     val totalEpisodeCount: Int,
     val percentOfEpisodes: Double,
-
     override val sizeOnDisk: Long,
-    override val releaseGroups: List<String> = emptyList()
-): ArrStatistics
+    override val releaseGroups: List<String> = emptyList(),
+) : ArrStatistics

@@ -44,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -79,7 +78,7 @@ fun PosterItem(
     aspectRatio: AspectRatio = AspectRatio.Poster,
     posterModel: Any? = null,
     additionalContent: @Composable BoxScope.() -> Unit = {},
-    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
 ) {
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
     val selectedItems by multiSelectState.selectedItems.collectAsStateWithLifecycle()
@@ -87,16 +86,17 @@ fun PosterItem(
 
     var imageLoadError by remember { mutableStateOf(value = false) }
 
-    val model = posterModel ?: rememberRemoteImageData(
-        url = item.getPoster()?.remoteUrl,
-        onError = { _, err ->
-            println(err.throwable.message)
-            imageLoadError = true
-        },
-        onSuccess = { _, _ ->
-            imageLoadError = false
-        }
-    )
+    val model =
+        posterModel ?: rememberRemoteImageData(
+            url = item.getPoster()?.remoteUrl,
+            onError = { _, err ->
+                println(err.throwable.message)
+                imageLoadError = true
+            },
+            onSuccess = { _, _ ->
+                imageLoadError = false
+            },
+        )
 
     BasePosterItem(
         model = model,
@@ -124,10 +124,11 @@ fun PosterItem(
             additionalContent()
             if (isInSelectionMode) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                    contentAlignment = Alignment.TopEnd
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                    contentAlignment = Alignment.TopEnd,
                 ) {
                     CircularCheckbox(checked = isSelected)
                 }
@@ -135,21 +136,21 @@ fun PosterItem(
         },
         errorContent = {
             if (imageLoadError) {
-                Column (
+                Column(
                     modifier = Modifier.align(Alignment.Center).padding(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Default.BrokenImage,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(48.dp),
                     )
                     Text(
                         text = item.title ?: mokoString(MR.strings.unknown),
                         style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
@@ -160,16 +161,16 @@ fun PosterItem(
                 text = item.title ?: mokoString(MR.strings.unknown),
                 style = MaterialTheme.typography.labelLarge,
                 minLines = 2,
-                maxLines = 2
+                maxLines = 2,
             )
             item.year?.let { year ->
                 Text(
                     text = year.toString(),
                     style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1
+                    maxLines = 1,
                 )
             }
-        }
+        },
     )
 }
 
@@ -186,27 +187,29 @@ fun PosterItem(
     aspectRatio: AspectRatio = AspectRatio.Poster,
     isSelected: Boolean = false,
     showOverlays: Boolean = true,
-    includeCredits: Boolean = false
+    includeCredits: Boolean = false,
 ) {
     if (item.mediaType == RequestType.Person) {
         CastCrewItem(
             profilePath = item.fullPosterPath,
             name = item.title ?: item.name ?: mokoString(MR.strings.unknown),
             credit = item.knownForDepartment ?: "",
-            modifier = modifier.clickable(enabled = onItemClick != null) {
-                onItemClick?.invoke(item)
-            }
+            modifier =
+                modifier.clickable(enabled = onItemClick != null) {
+                    onItemClick?.invoke(item)
+                },
         )
     } else {
         var imageLoadError by remember { mutableStateOf(false) }
 
-        val model = rememberRemoteImageData(
-            url = item.fullPosterPath,
-            onError = { _, err ->
-                println(err.throwable.message)
-                imageLoadError = true
-            }
-        )
+        val model =
+            rememberRemoteImageData(
+                url = item.fullPosterPath,
+                onError = { _, err ->
+                    println(err.throwable.message)
+                    imageLoadError = true
+                },
+            )
 
         BasePosterItem(
             model = model,
@@ -235,16 +238,17 @@ fun PosterItem(
                     style = MaterialTheme.typography.labelLarge,
                     minLines = 2,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
-                val subText = when (item.mediaType) {
-                    RequestType.Person -> item.knownForDepartment ?: ""
-                    else -> (item.releaseDate ?: item.firstAirDate)?.take(4) ?: ""
-                }
+                val subText =
+                    when (item.mediaType) {
+                        RequestType.Person -> item.knownForDepartment ?: ""
+                        else -> (item.releaseDate ?: item.firstAirDate)?.take(4) ?: ""
+                    }
                 Text(
                     text = subText,
                     style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1
+                    maxLines = 1,
                 )
 
                 if (includeCredits) {
@@ -253,7 +257,7 @@ fun PosterItem(
                         text = credit,
                         style = MaterialTheme.typography.labelMediumEmphasized,
                         maxLines = 2,
-                        minLines = 2
+                        minLines = 2,
                     )
                 }
             },
@@ -262,22 +266,22 @@ fun PosterItem(
                     Column(
                         modifier = Modifier.align(Alignment.Center).padding(4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Default.BrokenImage,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(48.dp),
                         )
                         Text(
                             text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
                             style = MaterialTheme.typography.titleSmall,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
-            }
+            },
         )
     }
 }
@@ -293,17 +297,18 @@ fun PosterItem(
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
     isSelected: Boolean = false,
-    showOverlays: Boolean = true
+    showOverlays: Boolean = true,
 ) {
     var imageLoadError by remember { mutableStateOf(false) }
 
-    val model = rememberRemoteImageData(
-        url = item.fullPosterPath,
-        onError = { _, err ->
-            println(err.throwable.message)
-            imageLoadError = true
-        }
-    )
+    val model =
+        rememberRemoteImageData(
+            url = item.fullPosterPath,
+            onError = { _, err ->
+                println(err.throwable.message)
+                imageLoadError = true
+            },
+        )
 
     BasePosterItem(
         model = model,
@@ -327,63 +332,67 @@ fun PosterItem(
         },
         errorContent = {
             if (imageLoadError) {
-                Column (
+                Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Default.BrokenImage,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(48.dp),
                     )
                     Text(
                         text = item.displayTitle,
                         style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
 private fun BoxScope.MediaTypeOverlay(type: RequestType) {
-    val text = when (type) {
-        RequestType.Movie -> mokoString(MR.strings.type_movie)
-        RequestType.Tv -> mokoString(MR.strings.type_series)
-        RequestType.Person -> mokoString(MR.strings.type_person)
-    }.replaceFirstChar { it.uppercase() }
+    val text =
+        when (type) {
+            RequestType.Movie -> mokoString(MR.strings.type_movie)
+            RequestType.Tv -> mokoString(MR.strings.type_series)
+            RequestType.Person -> mokoString(MR.strings.type_person)
+        }.replaceFirstChar { it.uppercase() }
 
     MediaRequestTypeChip(
         text = text,
         requestType = type,
-        modifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(8.dp)
+        modifier =
+            Modifier
+                .align(Alignment.TopStart)
+                .padding(8.dp),
     )
 }
 
 @Composable
 private fun BoxScope.StatusOverlay(status: MediaStatus) {
-    val (icon, color) = when (status) {
-        MediaStatus.Available -> Icons.Default.CheckCircle to Color(0xFF50d27d)
-        MediaStatus.PartiallyAvailable -> Icons.Default.RemoveCircle to Color(0xFFfbbf24)
-        MediaStatus.Pending, MediaStatus.Processing -> Icons.Default.Schedule to Color(0xFF3b82f6)
-        else -> return
-    }
+    val (icon, color) =
+        when (status) {
+            MediaStatus.Available -> Icons.Default.CheckCircle to Color(0xFF50d27d)
+            MediaStatus.PartiallyAvailable -> Icons.Default.RemoveCircle to Color(0xFFfbbf24)
+            MediaStatus.Pending, MediaStatus.Processing -> Icons.Default.Schedule to Color(0xFF3b82f6)
+            else -> return
+        }
 
     Icon(
         imageVector = icon,
         contentDescription = null,
         tint = color,
-        modifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(8.dp)
-            .size(20.dp)
-            .background(Color.White, CircleShape)
+        modifier =
+            Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+                .size(20.dp)
+                .background(Color.White, CircleShape),
     )
 }
 
@@ -403,67 +412,81 @@ fun BasePosterItem(
     errorContent: @Composable BoxScope.() -> Unit = {},
     additionalContent: @Composable BoxScope.() -> Unit = {},
     footerContent: @Composable ColumnScope.() -> Unit = {},
-    footerVisible: Boolean = false
+    footerVisible: Boolean = false,
 ) {
     Card(
         shape = RoundedCornerShape(radius.radius),
         elevation = CardDefaults.cardElevation(elevation.elevation),
-        modifier = modifier.then(
-            if (onClick != null || onLongClick != null) {
-                Modifier.combinedClickable(
-                    enabled = enabled,
-                    onClick = { onClick?.invoke() },
-                    onLongClick = onLongClick
-                )
-            } else Modifier
-        ),
-        border = if (isSelected) BorderStroke(4.dp, ArrLightPurple) else null
+        modifier =
+            modifier.then(
+                if (onClick != null || onLongClick != null) {
+                    Modifier.combinedClickable(
+                        enabled = enabled,
+                        onClick = { onClick?.invoke() },
+                        onLongClick = onLongClick,
+                    )
+                } else {
+                    Modifier
+                },
+            ),
+        border = if (isSelected) BorderStroke(4.dp, ArrLightPurple) else null,
     ) {
         val isFixedSize = posterHeight != null
         Column(modifier = if (isFixedSize) Modifier.width(IntrinsicSize.Min) else Modifier) {
             Box(
-                modifier = Modifier
-                    .then(if (isFixedSize) Modifier.height(posterHeight) else Modifier)
-                    .aspectRatio(aspectRatio.ratio, isFixedSize)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                modifier =
+                    Modifier
+                        .then(if (isFixedSize) Modifier.height(posterHeight) else Modifier)
+                        .aspectRatio(aspectRatio.ratio, isFixedSize)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
             ) {
                 when (model) {
-                    is Painter -> Image(
-                        painter = model,
-                        contentScale = ContentScale.Crop,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .cloudy(20)
-                            .align(Alignment.Center)
-                            .fillMaxSize()
-                    )
+                    is Painter ->
+                        Image(
+                            painter = model,
+                            contentScale = ContentScale.Crop,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .cloudy(20)
+                                    .align(Alignment.Center)
+                                    .fillMaxSize(),
+                        )
 
-                    else -> AsyncImage(
-                        model = model,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .cloudy(20)
-                            .align(Alignment.Center)
-                            .fillMaxSize()
-                    )
+                    else ->
+                        AsyncImage(
+                            model = model,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier =
+                                Modifier
+                                    .cloudy(20)
+                                    .align(Alignment.Center)
+                                    .fillMaxSize(),
+                        )
                 }
                 when (model) {
-                    is Painter -> Image(
-                        painter = model,
-                        contentDescription = null,
-                        contentScale = ContentScale.FillHeight,
-                        modifier = Modifier.align(Alignment.Center)
-                            .fillMaxSize()
-                    )
+                    is Painter ->
+                        Image(
+                            painter = model,
+                            contentDescription = null,
+                            contentScale = ContentScale.FillHeight,
+                            modifier =
+                                Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxSize(),
+                        )
 
-                    else -> AsyncImage(
-                        model = model,
-                        contentDescription = null,
-                        contentScale = ContentScale.FillHeight,
-                        modifier = Modifier.align(Alignment.Center)
-                            .fillMaxSize()
-                    )
+                    else ->
+                        AsyncImage(
+                            model = model,
+                            contentDescription = null,
+                            contentScale = ContentScale.FillHeight,
+                            modifier =
+                                Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxSize(),
+                        )
                 }
 
                 errorContent()
@@ -472,14 +495,15 @@ fun BasePosterItem(
             AnimatedVisibility(
                 visible = footerVisible,
                 enter = expandVertically(),
-                exit = shrinkVertically()
+                exit = shrinkVertically(),
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .padding(bottom = 8.dp)
-                        .padding(top = 16.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
+                            .padding(bottom = 8.dp)
+                            .padding(top = 16.dp),
                 ) {
                     footerContent()
                 }

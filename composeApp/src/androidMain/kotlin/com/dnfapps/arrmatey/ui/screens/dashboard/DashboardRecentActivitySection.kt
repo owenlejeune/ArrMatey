@@ -33,56 +33,63 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun DashboardActivityQueueSection(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean
+    isEditing: Boolean,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         val activity = state.activityQueue
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Default.History, null,
-                    modifier = Modifier.size(20.dp)
+                    Icons.Default.History,
+                    null,
+                    modifier = Modifier.size(20.dp),
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = mokoString(MR.strings.activity),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
             if (state.activityQueue.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.no_activity),
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 2.dp, bottom = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
 
             activity.take(5).forEach { item ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Box(
                         Modifier
                             .size(4.dp)
                             .clip(CircleShape)
                             .background(
-                                if (item.hasIssue) MaterialTheme.colorScheme.error
-                                else item.type.associatedColor
-                            )
+                                if (item.hasIssue) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    item.type.associatedColor
+                                },
+                            ),
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
@@ -90,20 +97,20 @@ fun DashboardActivityQueueSection(
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             item.instanceName?.let {
                                 Text(
                                     it,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
                                 )
                             }
                             Text(
                                 item.statusLabel,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (item.hasIssue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (item.hasIssue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -112,7 +119,7 @@ fun DashboardActivityQueueSection(
                         Text(
                             item.progressLabel,
                             style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 }
@@ -122,10 +129,10 @@ fun DashboardActivityQueueSection(
                 Text(
                     mokoString(
                         MR.strings.additional_items_count,
-                        activity.size - 5
+                        activity.size - 5,
                     ),
                     style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier.align(Alignment.End),
                 )
             }
         }

@@ -21,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.arr.api.model.AlbumRelease
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
@@ -34,12 +33,12 @@ fun EditAlbumSheet(
     album: ArrAlbum,
     editInProgress: Boolean,
     onEditAlbum: (ArrAlbum) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     var monitored by remember { mutableStateOf(album.monitored) }
     var anyReleaseOk by remember { mutableStateOf(album.anyReleaseOk) }
-    var selectedRelease by remember { 
-        mutableStateOf(album.releases.firstOrNull { it.monitored } ?: album.releases.firstOrNull()) 
+    var selectedRelease by remember {
+        mutableStateOf(album.releases.firstOrNull { it.monitored } ?: album.releases.firstOrNull())
     }
 
     ModalBottomSheet(
@@ -48,29 +47,31 @@ fun EditAlbumSheet(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !editInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !editInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,
-                onCheckedChange = { monitored = it }
+                onCheckedChange = { monitored = it },
             )
 
             LabelledSwitch(
                 label = mokoString(MR.strings.automatically_switch_release),
                 sublabel = mokoString(MR.strings.automatically_switch_releass_description),
                 checked = anyReleaseOk,
-                onCheckedChange = { anyReleaseOk = it }
+                onCheckedChange = { anyReleaseOk = it },
             )
 
             if (album.releases.isNotEmpty()) {
@@ -93,41 +94,44 @@ fun EditAlbumSheet(
                         }
                     },
                     label = { Text(mokoString(MR.strings.releases)) },
-                    singleLine = false
+                    singleLine = false,
                 )
             }
 
             Button(
                 onClick = {
-                    val updatedReleases = album.releases.map { release ->
-                        release.copy(monitored = release.id == selectedRelease?.id)
-                    }
-                    val updatedAlbum = album.copy(
-                        monitored = monitored,
-                        anyReleaseOk = anyReleaseOk,
-                        releases = updatedReleases,
-                        duration = selectedRelease?.duration ?: album.duration,
-                        profileId = album.profileId,
-                        statistics = album.statistics?.let { stats ->
-                            stats.copy(
-                                trackCount = selectedRelease?.trackCount ?: stats.trackCount,
-                                totalTrackCount = selectedRelease?.trackCount ?: stats.totalTrackCount
-                            )
+                    val updatedReleases =
+                        album.releases.map { release ->
+                            release.copy(monitored = release.id == selectedRelease?.id)
                         }
-                    )
+                    val updatedAlbum =
+                        album.copy(
+                            monitored = monitored,
+                            anyReleaseOk = anyReleaseOk,
+                            releases = updatedReleases,
+                            duration = selectedRelease?.duration ?: album.duration,
+                            profileId = album.profileId,
+                            statistics =
+                                album.statistics?.let { stats ->
+                                    stats.copy(
+                                        trackCount = selectedRelease?.trackCount ?: stats.trackCount,
+                                        totalTrackCount = selectedRelease?.trackCount ?: stats.totalTrackCount,
+                                    )
+                                },
+                        )
                     onEditAlbum(updatedAlbum)
                 },
-                enabled = !editInProgress && (selectedRelease != null || album.releases.isEmpty())
+                enabled = !editInProgress && (selectedRelease != null || album.releases.isEmpty()),
             ) {
                 if (editInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(
-                        text = mokoString(MR.strings.save)
+                        text = mokoString(MR.strings.save),
                     )
                 }
             }

@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PreviewPathBody(
     val destinationRoot: String,
-    val metadata: AudiobookMetadataBody
+    val metadata: AudiobookMetadataBody,
 )

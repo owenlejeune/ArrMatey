@@ -5,7 +5,7 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrMedia
 
 data class BazarrDetails(
     val details: BazarrMedia? = null,
-    val episodes: List<BazarrEpisode> = emptyList()
+    val episodes: List<BazarrEpisode> = emptyList(),
 ) {
-    constructor(): this(null)
+    constructor() : this(null)
 }

@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
@@ -10,6 +9,7 @@ import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionU
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,87 +26,97 @@ class MoreScreenViewModel(
     customWebpageRepository: CustomWebpageRepository,
     private val testInstanceConnectionUseCase: TestInstanceConnectionUseCase,
     private val testDownloadClientConnectionUseCase: TestDownloadClientConnectionUseCase,
-    private val preferencesStore: PreferencesStore
-): ViewModel() {
+    private val preferencesStore: PreferencesStore,
+) : ViewModel() {
+    val useServiceNavLogos =
+        preferencesStore.useServiceNavLogos
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
 
-    val useServiceNavLogos = preferencesStore.useServiceNavLogos
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+    val hideInstanceSwitcher =
+        preferencesStore.hideInstanceSwitcher
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
 
-    val hideInstanceSwitcher = preferencesStore.hideInstanceSwitcher
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+    val appTheme =
+        preferencesStore.appTheme
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = AppTheme.System,
+            )
 
-    val appTheme = preferencesStore.appTheme
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = AppTheme.System
-        )
+    val appColor =
+        preferencesStore.appColor
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = preferencesStore.defaultAppColor,
+            )
 
-    val appColor = preferencesStore.appColor
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = preferencesStore.defaultAppColor
-        )
+    val localNetworkPermissionInfoDismissed =
+        preferencesStore.localNetworkPermissionInfoDismissed
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
 
-    val localNetworkPermissionInfoDismissed = preferencesStore.localNetworkPermissionInfoDismissed
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+    val searchShowBanners =
+        preferencesStore.searchShowBanners
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
 
-    val searchShowBanners = preferencesStore.searchShowBanners
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true
-        )
-
-    val searchShowInstanceIndicatorShadow = preferencesStore.searchShowInstanceIndicatorShadow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true
-        )
+    val searchShowInstanceIndicatorShadow =
+        preferencesStore.searchShowInstanceIndicatorShadow
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
 
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
     val testingStatus: StateFlow<Map<Long, OperationStatus>> = _testingStatus.asStateFlow()
 
-    val instances = instanceRepository.observeAllInstances()
-        .map { instances ->
-            instances.sortedBy { it.type }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val instances =
+        instanceRepository
+            .observeAllInstances()
+            .map { instances ->
+                instances.sortedBy { it.type }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
-    val downloadClients = downloadClientRepository.observeAllDownloadClients()
-        .map { downloadClient ->
-            downloadClient.sortedBy { it.type }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val downloadClients =
+        downloadClientRepository
+            .observeAllDownloadClients()
+            .map { downloadClient ->
+                downloadClient.sortedBy { it.type }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
-    val customWebpages = customWebpageRepository.getAllWebpages()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val customWebpages =
+        customWebpageRepository
+            .getAllWebpages()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
     init {
         observeInstances()
@@ -136,9 +146,10 @@ class MoreScreenViewModel(
     private fun testInstance(id: Long) {
         viewModelScope.launch {
             testInstanceConnectionUseCase(id).collect { status ->
-                _testingStatus.value = _testingStatus.value.toMutableMap().apply {
-                    put(id, status)
-                }
+                _testingStatus.value =
+                    _testingStatus.value.toMutableMap().apply {
+                        put(id, status)
+                    }
             }
         }
     }
@@ -192,5 +203,4 @@ class MoreScreenViewModel(
     fun toggleSearchShowInstanceIndicatorShadow() {
         preferencesStore.toggleSearchShowInstanceIndicatorShadow()
     }
-
 }

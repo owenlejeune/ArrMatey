@@ -2,12 +2,12 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.state.InstancesState
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.SetInstanceActiveUseCase
-import com.dnfapps.arrmatey.instances.state.InstancesState
-import com.dnfapps.arrmatey.instances.model.Instance
-import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,8 +19,7 @@ class InstancesViewModel(
     private val observeAllInstancesByTypeUseCase: ObserveAllInstancesByTypeUseCase,
     private val observeSelectedInstanceUseCase: ObserveSelectedInstanceUseCase,
     private val setInstanceActiveUseCase: SetInstanceActiveUseCase,
-): ViewModel() {
-
+) : ViewModel() {
     private val _instancesState = MutableStateFlow(InstancesState(type))
     val instancesState: StateFlow<InstancesState> = _instancesState.asStateFlow()
 

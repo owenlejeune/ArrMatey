@@ -10,5 +10,5 @@ data class RequestSeason(
     val seasonNumber: Int,
     val status: Int,
     @Contextual val createdAt: Instant,
-    @Contextual val updatedAt: Instant
+    @Contextual val updatedAt: Instant,
 )

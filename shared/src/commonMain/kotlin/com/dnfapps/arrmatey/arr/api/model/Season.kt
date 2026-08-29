@@ -7,5 +7,5 @@ data class Season(
     val seasonNumber: Int,
     val monitored: Boolean,
     val statistics: SeasonStatistics? = null,
-    val images: List<ArrImage> = emptyList()
+    val images: List<ArrImage> = emptyList(),
 )

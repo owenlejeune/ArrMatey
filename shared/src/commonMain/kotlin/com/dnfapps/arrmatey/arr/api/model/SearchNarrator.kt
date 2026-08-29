@@ -8,5 +8,5 @@ import kotlin.time.Instant
 data class SearchNarrator(
     val name: String,
     @Serializable(with = ListenarrInstantSerializer::class)
-    val updatedAt: Instant? = null
+    val updatedAt: Instant? = null,
 )

@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.dnfapps.arrmatey.utils
 
 import kotlinx.cinterop.*
@@ -11,38 +13,49 @@ class AESEncryptionManager : EncryptionManager {
     private val keyAccount = "com.dnfapps.arrmatey.encryption.key"
 
     @OptIn(BetaInteropApi::class)
-    private fun getOrGenerateKey(): NSData? = memScoped {
-        val query = NSDictionary.dictionaryWithObjectsAndKeys(
-            kSecClassGenericPassword.toAny(), kSecClass.toAny(),
-            (keyAccount as Any as NSString), kSecAttrAccount.toAny(),
-            kCFBooleanTrue.toAny(), kSecReturnData.toAny(),
-            kSecMatchLimitOne.toAny(), kSecMatchLimit.toAny(),
-            null
-        )
+    private fun getOrGenerateKey(): NSData? =
+        memScoped {
+            val query =
+                NSDictionary.dictionaryWithObjectsAndKeys(
+                    kSecClassGenericPassword.toAny(),
+                    kSecClass.toAny(),
+                    (keyAccount as Any as NSString),
+                    kSecAttrAccount.toAny(),
+                    kCFBooleanTrue.toAny(),
+                    kSecReturnData.toAny(),
+                    kSecMatchLimitOne.toAny(),
+                    kSecMatchLimit.toAny(),
+                    null,
+                )
 
-        val result = alloc<CFTypeRefVar>()
-        val status = SecItemCopyMatching(query as Any? as CFDictionaryRef?, result.ptr)
+            val result = alloc<CFTypeRefVar>()
+            val status = SecItemCopyMatching(query as Any? as CFDictionaryRef?, result.ptr)
 
-        if (status == errSecSuccess) {
-            return CFBridgingRelease(result.value) as? NSData
+            if (status == errSecSuccess) {
+                return CFBridgingRelease(result.value) as? NSData
+            }
+
+            // Generate new key if not found
+            val newKey = NSMutableData.create(length = 32u) ?: return null
+            val statusRandom = SecRandomCopyBytes(kSecRandomDefault, 32u, newKey.mutableBytes)
+            if (statusRandom != errSecSuccess) return null
+
+            val addQuery =
+                NSDictionary.dictionaryWithObjectsAndKeys(
+                    kSecClassGenericPassword.toAny(),
+                    kSecClass.toAny(),
+                    (keyAccount as Any as NSString),
+                    kSecAttrAccount.toAny(),
+                    newKey,
+                    kSecValueData.toAny(),
+                    kSecAttrAccessibleAfterFirstUnlock.toAny(),
+                    kSecAttrAccessible.toAny(),
+                    null,
+                )
+
+            SecItemAdd(addQuery as Any? as CFDictionaryRef?, null)
+            return newKey
         }
-
-        // Generate new key if not found
-        val newKey = NSMutableData.create(length = 32u) ?: return null
-        val statusRandom = SecRandomCopyBytes(kSecRandomDefault, 32u, newKey.mutableBytes)
-        if (statusRandom != errSecSuccess) return null
-
-        val addQuery = NSDictionary.dictionaryWithObjectsAndKeys(
-            kSecClassGenericPassword.toAny(), kSecClass.toAny(),
-            (keyAccount as Any as NSString), kSecAttrAccount.toAny(),
-            newKey, kSecValueData.toAny(),
-            kSecAttrAccessibleAfterFirstUnlock.toAny(), kSecAttrAccessible.toAny(),
-            null
-        )
-
-        SecItemAdd(addQuery as Any? as CFDictionaryRef?, null)
-        return newKey
-    }
 
     @OptIn(BetaInteropApi::class)
     override fun encrypt(plainText: String): String {
@@ -71,33 +84,38 @@ class AESEncryptionManager : EncryptionManager {
     }
 
     @OptIn(BetaInteropApi::class, ExperimentalForeignApi::class)
-    private fun crypt(op: CCOperation, data: NSData): NSData? = memScoped {
-        val keyData = getOrGenerateKey() ?: return null
-        
-        val dataOut = NSMutableData.create(length = (data.length + kCCBlockSizeAES128.toULong())) ?: return null
-        val movedBytes = alloc<ULongVar>()
-        
-        val status = CCCrypt(
-            op,
-            kCCAlgorithmAES,
-            kCCOptionPKCS7Padding,
-            keyData.bytes,
-            kCCKeySizeAES256.toULong(),
-            null,
-            data.bytes,
-            data.length,
-            dataOut.mutableBytes,
-            dataOut.length,
-            movedBytes.ptr
-        )
-        
-        return if (status == kCCSuccess) {
-            dataOut.setLength(movedBytes.value)
-            dataOut
-        } else {
-            null
+    private fun crypt(
+        op: CCOperation,
+        data: NSData,
+    ): NSData? =
+        memScoped {
+            val keyData = getOrGenerateKey() ?: return null
+
+            val dataOut = NSMutableData.create(length = (data.length + kCCBlockSizeAES128.toULong())) ?: return null
+            val movedBytes = alloc<ULongVar>()
+
+            val status =
+                CCCrypt(
+                    op,
+                    kCCAlgorithmAES,
+                    kCCOptionPKCS7Padding,
+                    keyData.bytes,
+                    kCCKeySizeAES256.toULong(),
+                    null,
+                    data.bytes,
+                    data.length,
+                    dataOut.mutableBytes,
+                    dataOut.length,
+                    movedBytes.ptr,
+                )
+
+            return if (status == kCCSuccess) {
+                dataOut.setLength(movedBytes.value)
+                dataOut
+            } else {
+                null
+            }
         }
-    }
 
     @OptIn(BetaInteropApi::class)
     private fun CPointer<*>?.toAny(): Any = this?.let { interpretObjCPointer(it.rawValue) } ?: NSNull()

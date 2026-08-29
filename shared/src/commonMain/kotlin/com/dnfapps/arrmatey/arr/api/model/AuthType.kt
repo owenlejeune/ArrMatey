@@ -5,8 +5,15 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class AuthType {
-    @SerialName("none") NONE,
-    @SerialName("basic") BASIC,
-    @SerialName("forms") FORMS,
-    @SerialName("external") EXTERNAL
+    @SerialName("none")
+    NONE,
+
+    @SerialName("basic")
+    BASIC,
+
+    @SerialName("forms")
+    FORMS,
+
+    @SerialName("external")
+    EXTERNAL,
 }

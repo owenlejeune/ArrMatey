@@ -27,5 +27,5 @@ enum class DelugeTorrentState {
     @SerialName("Moving")
     Moving,
 
-    Unknown
+    Unknown,
 }

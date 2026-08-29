@@ -96,7 +96,7 @@ fun ArrConfigurationScreen(
     onLocalNetworkUrlChanged: (String) -> Unit,
     onLocalNetworkSsidChanged: (List<String>) -> Unit,
     onTestLocalConnection: () -> Unit,
-    onToggleNotificationsEnabled: () -> Unit
+    onToggleNotificationsEnabled: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -114,25 +114,28 @@ fun ArrConfigurationScreen(
 
     val createResult = uiState.createResult
 
-    val hasLabelConflict = remember(createResult) {
-        (createResult as? InsertResult.Conflict)
-            ?.fields
-            ?.contains(ConflictField.InstanceLabel) == true
-    }
+    val hasLabelConflict =
+        remember(createResult) {
+            (createResult as? InsertResult.Conflict)
+                ?.fields
+                ?.contains(ConflictField.InstanceLabel) == true
+        }
 
-    val hasUrlConflict = remember(createResult) {
-        (createResult as? InsertResult.Conflict)
-            ?.fields
-            ?.contains(ConflictField.InstanceUrl) == true
-    }
+    val hasUrlConflict =
+        remember(createResult) {
+            (createResult as? InsertResult.Conflict)
+                ?.fields
+                ?.contains(ConflictField.InstanceUrl) == true
+        }
 
-    val notificationPermissionHandler = rememberNotificationPermissionHandler(
-        onGranted = { onToggleNotificationsEnabled() }
-    )
+    val notificationPermissionHandler =
+        rememberNotificationPermissionHandler(
+            onGranted = { onToggleNotificationsEnabled() },
+        )
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         AMOutlinedTextField(
             label = mokoString(MR.strings.label),
@@ -142,7 +145,7 @@ fun ArrConfigurationScreen(
             placeholder = instanceType.toString(),
             singleLine = true,
             isError = hasLabelConflict,
-            errorMessage = hasLabelConflict thenGet mokoString(MR.strings.instance_label_exists)
+            errorMessage = hasLabelConflict thenGet mokoString(MR.strings.instance_label_exists),
         )
 
         AMOutlinedTextField(
@@ -155,18 +158,19 @@ fun ArrConfigurationScreen(
             description = mokoString(MR.strings.host_description, instanceType.name),
             singleLine = true,
             isError = endpointError || hasUrlConflict,
-            errorMessage = when {
-                endpointError -> mokoString(MR.strings.invalid_host)
-                hasUrlConflict -> mokoString(MR.strings.instance_url_exists)
-                else -> null
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
+            errorMessage =
+                when {
+                    endpointError -> mokoString(MR.strings.invalid_host)
+                    hasUrlConflict -> mokoString(MR.strings.instance_url_exists)
+                    else -> null
+                },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
         )
 
         LabelledCheckbox(
             label = mokoString(MR.strings.no_api_key),
             checked = uiState.noApiKeyRequired,
-            onCheckedChange = onNoApiKeyRequiredChanged
+            onCheckedChange = onNoApiKeyRequiredChanged,
         )
 
         AMOutlinedTextField(
@@ -177,7 +181,7 @@ fun ArrConfigurationScreen(
             modifier = Modifier.fillMaxWidth(),
             placeholder = mokoString(MR.strings.api_key_placeholder),
             singleLine = true,
-            enabled = !uiState.noApiKeyRequired
+            enabled = !uiState.noApiKeyRequired,
         )
 
         instanceType.getApiKeyEndpoint?.let { getApiKey ->
@@ -186,24 +190,25 @@ fun ArrConfigurationScreen(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.clickable(
-                    enabled = enabled
-                ) {
-                    val fullUrl = "${uiState.apiEndpoint}/$getApiKey"
-                    context.openLink(fullUrl)
-                }
+                modifier =
+                    Modifier.clickable(
+                        enabled = enabled,
+                    ) {
+                        val fullUrl = "${uiState.apiEndpoint}/$getApiKey"
+                        context.openLink(fullUrl)
+                    },
             ) {
                 Text(
                     text = mokoString(MR.strings.api_key_in_browser),
                     textDecoration = TextDecoration.Underline,
                     style = MaterialTheme.typography.bodySmall,
-                    color = color
+                    color = color,
                 )
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
-                    tint = color
+                    tint = color,
                 )
             }
         }
@@ -220,7 +225,7 @@ fun ArrConfigurationScreen(
                         } else {
                             onToggleNotificationsEnabled()
                         }
-                    }
+                    },
                 )
             }
         }
@@ -233,7 +238,7 @@ fun ArrConfigurationScreen(
             onLocalNetworkSsidChanged = { ssids ->
                 onLocalNetworkSsidChanged(ssids)
             },
-            onTestLocalConnection
+            onTestLocalConnection,
         )
 
         CustomTimeoutArea(isSlowInstance, customTimeout, onIsSlowInstanceChanged, onCustomTimeoutChanged)
@@ -242,15 +247,17 @@ fun ArrConfigurationScreen(
             localNetworkSsids = uiState.localNetworkSsids,
             localNetworkConfigured = uiState.localNetworkConfigured,
             headers = headers,
-            onHeadersChanged = onHeadersChanged
+            onHeadersChanged = onHeadersChanged,
         )
 
         TestConnectionSection(
             isTesting = isTesting,
-            testButtonEnabled = !isTesting && apiEndpoint.isNotBlank() &&
+            testButtonEnabled =
+                !isTesting &&
+                    apiEndpoint.isNotBlank() &&
                     (uiState.noApiKeyRequired || apiKey.isNotBlank()),
             testResult = testResult,
-            onTestConnection = onTestConnection
+            onTestConnection = onTestConnection,
         )
     }
 }
@@ -261,13 +268,13 @@ private fun HeadersEditor(
     localNetworkSsids: List<String>,
     headers: List<InstanceHeader>,
     onHeadersChanged: (List<InstanceHeader>) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var headersList by remember { mutableStateOf(headers) }
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         headersList.forEachIndexed { index, header ->
             HeaderItem(
@@ -275,19 +282,21 @@ private fun HeadersEditor(
                 localNetworkConfigured = localNetworkConfigured,
                 header = header,
                 onHeaderChanged = { newHeader ->
-                    val updated = headersList.toMutableList().apply {
-                        set(index, newHeader)
-                    }
+                    val updated =
+                        headersList.toMutableList().apply {
+                            set(index, newHeader)
+                        }
                     headersList = updated
                     onHeadersChanged(updated)
                 },
                 onDelete = {
-                    val updated = headersList.toMutableList().apply {
-                        removeAt(index)
-                    }
+                    val updated =
+                        headersList.toMutableList().apply {
+                            removeAt(index)
+                        }
                     headersList = updated
                     onHeadersChanged(updated)
-                }
+                },
             )
             HorizontalDivider()
         }
@@ -298,7 +307,7 @@ private fun HeadersEditor(
                 headersList = updated
                 onHeadersChanged(updated)
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
@@ -314,16 +323,16 @@ private fun HeaderItem(
     localNetworkSsids: List<String>,
     header: InstanceHeader,
     onHeaderChanged: (InstanceHeader) -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             AMOutlinedTextField(
                 value = header.key,
@@ -331,7 +340,7 @@ private fun HeaderItem(
                 label = mokoString(MR.strings.header_name),
                 modifier = Modifier.weight(1f),
                 placeholder = "X-Custom-Header",
-                singleLine = true
+                singleLine = true,
             )
 
             AMOutlinedTextField(
@@ -340,17 +349,17 @@ private fun HeaderItem(
                 label = mokoString(MR.strings.header_value),
                 modifier = Modifier.weight(1f),
                 placeholder = "value",
-                singleLine = true
+                singleLine = true,
             )
 
             IconButton(
                 onClick = onDelete,
-                modifier = Modifier.padding(top = 18.dp)
+                modifier = Modifier.padding(top = 18.dp),
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = mokoString(MR.strings.delete),
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.error,
                 )
             }
         }
@@ -360,46 +369,51 @@ private fun HeaderItem(
             val iconRotation by animateFloatAsState(
                 targetValue = if (expanded) 180f else 0f,
                 animationSpec = tween(durationMillis = 200),
-                label = "iconRotation"
+                label = "iconRotation",
             )
 
             Box {
                 OutlinedButton(
                     onClick = { expanded = true },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.large
+                    shape = MaterialTheme.shapes.large,
                 ) {
                     Text(
-                        text = when (header.restrictionType) {
-                            HeaderRestrictionType.Always -> "Always"
-                            HeaderRestrictionType.RemoteOnly -> "Remote Only"
-                            HeaderRestrictionType.SpecificSsids -> {
-                                if (header.restrictedSsids.isEmpty()) "Select SSIDs"
-                                else header.restrictedSsids.joinToString(", ")
-                            }
-                        }
+                        text =
+                            when (header.restrictionType) {
+                                HeaderRestrictionType.Always -> "Always"
+                                HeaderRestrictionType.RemoteOnly -> "Remote Only"
+                                HeaderRestrictionType.SpecificSsids -> {
+                                    if (header.restrictedSsids.isEmpty()) {
+                                        "Select SSIDs"
+                                    } else {
+                                        header.restrictedSsids.joinToString(", ")
+                                    }
+                                }
+                            },
                     )
                     Spacer(Modifier.weight(1f))
                     Icon(
                         imageVector = Icons.Default.ExpandCircleDown,
                         contentDescription = null,
-                        modifier = Modifier.rotate(iconRotation)
+                        modifier = Modifier.rotate(iconRotation),
                     )
                 }
 
                 DropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    onDismissRequest = { expanded = false },
                 ) {
                     HeaderRestrictionType.entries.forEach { type ->
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = when (type) {
-                                        HeaderRestrictionType.Always -> "Always"
-                                        HeaderRestrictionType.RemoteOnly -> "Remote Only"
-                                        HeaderRestrictionType.SpecificSsids -> "Specific SSIDs"
-                                    }
+                                    text =
+                                        when (type) {
+                                            HeaderRestrictionType.Always -> "Always"
+                                            HeaderRestrictionType.RemoteOnly -> "Remote Only"
+                                            HeaderRestrictionType.SpecificSsids -> "Specific SSIDs"
+                                        },
                                 )
                             },
                             onClick = {
@@ -407,7 +421,7 @@ private fun HeaderItem(
                                 if (type != HeaderRestrictionType.SpecificSsids) {
                                     expanded = false
                                 }
-                            }
+                            },
                         )
                     }
                 }
@@ -416,7 +430,7 @@ private fun HeaderItem(
             if (header.restrictionType == HeaderRestrictionType.SpecificSsids) {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     localNetworkSsids.forEach { ssid ->
                         val selected = header.restrictedSsids.contains(ssid) || localNetworkSsids.size == 1
@@ -424,26 +438,28 @@ private fun HeaderItem(
                             selected = selected,
                             onClick = {
                                 if (localNetworkSsids.size > 1) {
-                                    val newList = if (selected) {
-                                        header.restrictedSsids - ssid
-                                    } else {
-                                        header.restrictedSsids + ssid
-                                    }
+                                    val newList =
+                                        if (selected) {
+                                            header.restrictedSsids - ssid
+                                        } else {
+                                            header.restrictedSsids + ssid
+                                        }
                                     onHeaderChanged(header.copy(restrictedSsids = newList))
                                 }
                             },
                             label = { Text(ssid) },
-                            leadingIcon = if (selected) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Filled.Done,
-                                        contentDescription = "Done icon",
-                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
-                                    )
-                                }
-                            } else {
-                                null
-                            },
+                            leadingIcon =
+                                if (selected) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Filled.Done,
+                                            contentDescription = "Done icon",
+                                            modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                        )
+                                    }
+                                } else {
+                                    null
+                                },
                         )
                     }
                 }
@@ -457,30 +473,32 @@ fun TestConnectionSection(
     isTesting: Boolean,
     testButtonEnabled: Boolean,
     testResult: Boolean?,
-    onTestConnection: () -> Unit
+    onTestConnection: () -> Unit,
 ) {
     Card(
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-        ),
-        modifier = Modifier.fillMaxWidth()
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            ),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
         ) {
             Button(
                 onClick = onTestConnection,
-                enabled = testButtonEnabled
+                enabled = testButtonEnabled,
             ) {
                 if (isTesting) {
                     CircularProgressIndicator(
                         modifier = Modifier.padding(end = 8.dp).size(24.dp),
-                        strokeWidth = 2.dp
+                        strokeWidth = 2.dp,
                     )
                 }
                 Text(text = mokoString(MR.strings.test))
@@ -489,29 +507,29 @@ fun TestConnectionSection(
             testResult?.let { result ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (result) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                         Text(
                             text = mokoString(MR.strings.success),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     } else {
                         Icon(
                             painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
+                            tint = MaterialTheme.colorScheme.error,
                         )
                         Text(
                             text = mokoString(MR.strings.failure),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error
+                            color = MaterialTheme.colorScheme.error,
                         )
                     }
                 }
@@ -525,13 +543,13 @@ fun CustomTimeoutArea(
     isSlowInstance: Boolean,
     customTimeout: Long?,
     onIsSlowInstanceChanged: (Boolean) -> Unit,
-    onCustomTimeoutChanged: (Long?) -> Unit
+    onCustomTimeoutChanged: (Long?) -> Unit,
 ) {
     Section {
         LabelledSwitch(
             label = mokoString(MR.strings.slow_instance),
             checked = isSlowInstance,
-            onCheckedChange = onIsSlowInstanceChanged
+            onCheckedChange = onIsSlowInstanceChanged,
         )
 
         AMOutlinedTextField(
@@ -541,7 +559,7 @@ fun CustomTimeoutArea(
             label = mokoString(MR.strings.custom_timeout_seconds),
             enabled = isSlowInstance,
             placeholder = DEFAULT_SLOW_TIMEOUT.toString(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
     }
 }
@@ -555,24 +573,25 @@ fun CustomHeaderSection(
 ) {
     Card(
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-        ),
-        modifier = Modifier.fillMaxWidth()
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            ),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
                 text = mokoString(MR.strings.custom_headers),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
             )
 
             Text(
                 text = mokoString(MR.strings.custom_headers_description),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             if (headers.isNotEmpty()) {
@@ -583,7 +602,7 @@ fun CustomHeaderSection(
                 localNetworkSsids = localNetworkSsids,
                 localNetworkConfigured = localNetworkConfigured,
                 headers = headers,
-                onHeadersChanged = onHeadersChanged
+                onHeadersChanged = onHeadersChanged,
             )
         }
     }
@@ -597,25 +616,27 @@ fun LocalNetworkArea(
     onLocalNetworkUrlChanged: (String) -> Unit,
     onLocalNetworkSsidChanged: (List<String>) -> Unit,
     onTestLocalConnection: () -> Unit,
-    moko: MokoStrings = koinInject()
+    moko: MokoStrings = koinInject(),
 ) {
     val context = LocalContext.current
-    val locationPermissionHandler = rememberLocationPermissionHandler(
-        onDenied = {
-            Toast.makeText(context, moko.getString(MR.strings.location_denied), Toast.LENGTH_SHORT).show()
-        }
-    )
+    val locationPermissionHandler =
+        rememberLocationPermissionHandler(
+            onDenied = {
+                Toast.makeText(context, moko.getString(MR.strings.location_denied), Toast.LENGTH_SHORT).show()
+            },
+        )
 
     Card(
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-        ),
-        modifier = Modifier.fillMaxWidth()
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            ),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.local_network_switching),
@@ -626,7 +647,7 @@ fun LocalNetworkArea(
                     if (it) {
                         locationPermissionHandler.checkAndPerformAction()
                     }
-                }
+                },
             )
 
             AnimatedVisibility(visible = uiState.localNetworkEnabled && !locationPermissionHandler.isGranted()) {
@@ -636,7 +657,7 @@ fun LocalNetworkArea(
                         onClick = {
                             context.openAppSettings()
                             onLocalNetworkEnabledChanged(false)
-                        }
+                        },
                     ) {
                         Text(mokoString(MR.strings.open_location_permissions))
                     }
@@ -650,7 +671,7 @@ fun LocalNetworkArea(
                             Text(
                                 text = mokoString(MR.strings.current_network, ssid),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -660,13 +681,16 @@ fun LocalNetworkArea(
                         onValueChange = onLocalNetworkUrlChanged,
                         modifier = Modifier.fillMaxWidth(),
                         label = mokoString(MR.strings.local_network_url),
-                        placeholder = "http://192.168.1.100:${defaultPort}",
+                        placeholder = "http://192.168.1.100:$defaultPort",
                         enabled = uiState.localNetworkEnabled,
                         singleLine = true,
                         isError = uiState.localNetworkUrlError,
-                        errorMessage = if (uiState.localNetworkUrlError) {
-                            mokoString(MR.strings.invalid_url)
-                        } else null
+                        errorMessage =
+                            if (uiState.localNetworkUrlError) {
+                                mokoString(MR.strings.invalid_url)
+                            } else {
+                                null
+                            },
                     )
 
                     AMOutlinedTextField(
@@ -679,7 +703,7 @@ fun LocalNetworkArea(
                         placeholder = "MyHomeWiFi, MyHomeWiFi_5G",
                         description = mokoString(MR.strings.wifi_ssid_description),
                         enabled = uiState.localNetworkEnabled,
-                        singleLine = true
+                        singleLine = true,
                     )
 
                     OutlinedButton(
@@ -696,7 +720,7 @@ fun LocalNetworkArea(
                                 }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Icon(Icons.Default.WifiFind, null)
                         Text(mokoString(MR.strings.use_current_network), modifier = Modifier.padding(start = 6.dp))
@@ -707,20 +731,22 @@ fun LocalNetworkArea(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Button(
                             onClick = onTestLocalConnection,
-                            enabled = !uiState.localTesting &&
+                            enabled =
+                                !uiState.localTesting &&
                                     uiState.localNetworkUrl.isNotBlank() &&
                                     (uiState.noApiKeyRequired || uiState.apiKey.isNotBlank()),
                         ) {
                             if (uiState.localTesting) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .padding(end = 8.dp)
-                                        .size(16.dp),
-                                    strokeWidth = 2.dp
+                                    modifier =
+                                        Modifier
+                                            .padding(end = 8.dp)
+                                            .size(16.dp),
+                                    strokeWidth = 2.dp,
                                 )
                             }
                             Text(text = mokoString(MR.strings.test_local_connection))
@@ -728,31 +754,31 @@ fun LocalNetworkArea(
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             when (uiState.localTestResult) {
                                 true -> {
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = MaterialTheme.colorScheme.primary,
                                     )
                                     Text(
                                         text = mokoString(MR.strings.success),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
                                 false -> {
                                     Icon(
                                         painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error
+                                        tint = MaterialTheme.colorScheme.error,
                                     )
                                     Text(
                                         text = mokoString(MR.strings.failure),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.error
+                                        color = MaterialTheme.colorScheme.error,
                                     )
                                 }
                                 else -> {}
@@ -766,20 +792,19 @@ fun LocalNetworkArea(
 }
 
 @Composable
-fun Section(
-    content: @Composable ColumnScope.() -> Unit
-) {
+fun Section(content: @Composable ColumnScope.() -> Unit) {
     Card(
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-        ),
-        modifier = Modifier.fillMaxWidth()
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            ),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            content = content
+            content = content,
         )
     }
 }

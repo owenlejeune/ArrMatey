@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MonitoredResponse(
     val id: Long,
-    val monitored: Boolean
+    val monitored: Boolean,
 )

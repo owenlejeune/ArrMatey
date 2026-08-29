@@ -1,15 +1,16 @@
 package com.dnfapps.arrmatey.utils
 
 import android.Manifest
-import androidx.annotation.RequiresPermission
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 import android.os.Build
+import androidx.annotation.RequiresPermission
 
-class AndroidNetworkUtils(private val context: Context) : NetworkUtils {
-
+class AndroidNetworkUtils(
+    private val context: Context,
+) : NetworkUtils {
     private val connectivityManager: ConnectivityManager? by lazy {
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
     }
@@ -84,7 +85,6 @@ fun initializeNetworkUtils(context: Context) {
     networkUtilsInstance = AndroidNetworkUtils(context.applicationContext)
 }
 
-actual fun getNetworkUtils(): NetworkUtils {
-    return networkUtilsInstance
+actual fun getNetworkUtils(): NetworkUtils =
+    networkUtilsInstance
         ?: throw IllegalStateException("NetworkUtils not initialized. Call initializeNetworkUtils(context) first.")
-}

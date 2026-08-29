@@ -11,7 +11,7 @@ sealed interface DownloadReleasePayload {
     data class Movie(
         override val guid: String,
         override val indexerId: Int,
-        val movieId: Int?
+        val movieId: Int?,
     ) : DownloadReleasePayload
 
     @Serializable
@@ -20,7 +20,7 @@ sealed interface DownloadReleasePayload {
         override val indexerId: Int,
         val seriesId: Int? = null,
         val seasonNumber: Int? = null,
-        val episodeId: Long? = null
+        val episodeId: Long? = null,
     ) : DownloadReleasePayload
 
     @Serializable
@@ -28,13 +28,13 @@ sealed interface DownloadReleasePayload {
         override val guid: String,
         override val indexerId: Int,
         val albumId: Long? = null,
-    ): DownloadReleasePayload
+    ) : DownloadReleasePayload
 
     @Serializable
     data class Book(
         override val guid: String,
-        override val indexerId: Int
-    ): DownloadReleasePayload
+        override val indexerId: Int,
+    ) : DownloadReleasePayload
 
     @Serializable
     data class AudioBook(
@@ -42,5 +42,5 @@ sealed interface DownloadReleasePayload {
         val searchResult: ListenarrRelease,
         override val guid: String = searchResult.torrentUrl ?: "",
         override val indexerId: Int = -1,
-    ): DownloadReleasePayload
+    ) : DownloadReleasePayload
 }

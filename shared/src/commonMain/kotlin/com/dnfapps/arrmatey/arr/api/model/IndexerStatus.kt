@@ -9,7 +9,7 @@ data class IndexerStatus(
     val indexerId: Long,
     @Contextual val disabledTill: Instant? = null,
     @Contextual val mostRecentFailure: Instant? = null,
-    @Contextual val initialFailure: Instant? = null
+    @Contextual val initialFailure: Instant? = null,
 ) {
     val hasFailure: Boolean
         get() = disabledTill != null || mostRecentFailure != null || initialFailure != null

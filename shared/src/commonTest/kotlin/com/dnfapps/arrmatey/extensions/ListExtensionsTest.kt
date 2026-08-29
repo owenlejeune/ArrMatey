@@ -5,14 +5,17 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ListExtensionsTest {
-
-    private data class Item(val name: String, val value: Int?)
-
-    private val items = listOf(
-        Item("b", 2),
-        Item("a", 3),
-        Item("c", 1)
+    private data class Item(
+        val name: String,
+        val value: Int?,
     )
+
+    private val items =
+        listOf(
+            Item("b", 2),
+            Item("a", 3),
+            Item("c", 1),
+        )
 
     @Test
     fun testOrderedSortedByAsc() {

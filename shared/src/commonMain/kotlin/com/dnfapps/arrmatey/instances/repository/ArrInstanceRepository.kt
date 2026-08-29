@@ -68,8 +68,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class ArrInstanceRepository(
     override val instance: Instance,
     private val httpClient: HttpClient,
-    private val logger: Logger
-): InstanceScopedRepository {
+    private val logger: Logger,
+) : InstanceScopedRepository {
     val client: ArrClient = createClient()
 
     val sonarrClient: SonarrClient
@@ -87,14 +87,15 @@ class ArrInstanceRepository(
     val listenarrClient: ListenarrClient
         get() = client as? ListenarrClient ?: throw IllegalStateException("Client is not a ListenarrClient instance")
 
-    private fun createClient(): ArrClient = when (instance.type) {
-        InstanceType.Sonarr -> SonarrClient(instance, httpClient)
-        InstanceType.Radarr -> RadarrClient(instance, httpClient)
-        InstanceType.Lidarr -> LidarrClient(instance, httpClient)
-        InstanceType.Booksehelf -> BookshelfClient(instance, httpClient)
-        InstanceType.Listenarr -> ListenarrClient(instance, httpClient)
-        else -> TODO()
-    }
+    private fun createClient(): ArrClient =
+        when (instance.type) {
+            InstanceType.Sonarr -> SonarrClient(instance, httpClient)
+            InstanceType.Radarr -> RadarrClient(instance, httpClient)
+            InstanceType.Lidarr -> LidarrClient(instance, httpClient)
+            InstanceType.Booksehelf -> BookshelfClient(instance, httpClient)
+            InstanceType.Listenarr -> ListenarrClient(instance, httpClient)
+            else -> TODO()
+        }
 
     private val _library = MutableStateFlow<NetworkResult<List<ArrMedia>>?>(null)
     val library: StateFlow<NetworkResult<List<ArrMedia>>?> = _library.asStateFlow()
@@ -136,7 +137,6 @@ class ArrInstanceRepository(
 
     private val _activityTasks = MutableStateFlow<List<QueueItem>>(emptyList())
     val activityTasks: StateFlow<List<QueueItem>> = _activityTasks.asStateFlow()
-
 
     private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val addItemStatus: StateFlow<OperationStatus> = _addItemStatus.asStateFlow()
@@ -184,12 +184,13 @@ class ArrInstanceRepository(
     private val _booksLibrary = MutableStateFlow<List<Book>>(emptyList())
     val booksLibrary: StateFlow<List<Book>> = _booksLibrary.asStateFlow()
 
-    val authorBooks: Flow<Map<Long, List<Book>>> = booksLibrary
-        .map { books ->
-            books
-                .filter { it.authorId != null }
-                .groupBy { it.authorId!! }
-        }
+    val authorBooks: Flow<Map<Long, List<Book>>> =
+        booksLibrary
+            .map { books ->
+                books
+                    .filter { it.authorId != null }
+                    .groupBy { it.authorId!! }
+            }
 
     // Listenarr-specific
     private val _audiobookFiles = MutableStateFlow<Map<Long, List<AudiobookFile>>>(emptyMap())
@@ -198,47 +199,48 @@ class ArrInstanceRepository(
     private val _listenarrConfiguration = MutableStateFlow(ListenarrConfiguration())
     val listenarrConfiguration: StateFlow<ListenarrConfiguration> = _listenarrConfiguration.asStateFlow()
 
-    override suspend fun testConnection(): NetworkResult<Unit> {
-        return client.testConnection()
-    }
+    override suspend fun testConnection(): NetworkResult<Unit> = client.testConnection()
 
     suspend fun refreshLibrary() {
         _library.value = NetworkResult.Loading
         _library.value = client.getLibrary()
         safePerformReadarr { client ->
-            client.getBooks()
+            client
+                .getBooks()
                 .onSuccess {
                     _booksLibrary.value = it
                 }
         }
         safePerformListenarr { client ->
-            client.getConfigurationSettings()
+            client
+                .getConfigurationSettings()
                 .onSuccess {
                     _listenarrConfiguration.value = it
                 }
         }
     }
 
-    suspend fun getMediaDetails(id: Long): NetworkResult<ArrMedia> {
-        return client.getDetail(id)
+    suspend fun getMediaDetails(id: Long): NetworkResult<ArrMedia> =
+        client
+            .getDetail(id)
             .onSuccess { media ->
                 logger.info { "Media details for $id: $media" }
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
                 currentCache[id] = media
                 _mediaDetailsCache.value = currentCache
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 logger.error(cause) { "Error getting media details for $id: $message" }
             }
-    }
 
     suspend fun refreshQualityProfiles() {
-        client.getQualityProfiles()
+        client
+            .getQualityProfiles()
             .onSuccess { _qualityProfiles.value = it }
     }
 
     suspend fun refreshRootFolders() {
-        client.getRootFolders()
+        client
+            .getRootFolders()
             .onSuccess { _rootFolders.value = it }
             .onError { code, message, cause ->
                 logger.error(cause) { "Error refreshing root folders: $message (code=$code)" }
@@ -246,12 +248,14 @@ class ArrInstanceRepository(
     }
 
     suspend fun refreshTags() {
-        client.getTags()
+        client
+            .getTags()
             .onSuccess { _tags.value = it }
     }
 
     suspend fun refreshCustomFilters() {
-        client.getCustomFilters()
+        client
+            .getCustomFilters()
             .onSuccess { _customFilters.value = it }
             .onError { code, message, cause ->
                 logger.error(cause) { "Error refreshing custom filters: $message (code=$code)" }
@@ -259,17 +263,20 @@ class ArrInstanceRepository(
     }
 
     suspend fun refreshStatus() {
-        client.getStatus()
+        client
+            .getStatus()
             .onSuccess { _softwareStatus.value = it }
     }
 
     suspend fun refreshDiskSpace() {
-        client.getDiskSpace()
+        client
+            .getDiskSpace()
             .onSuccess { _diskSpace.value = it }
     }
 
     suspend fun refreshHealth() {
-        client.getHealth()
+        client
+            .getHealth()
             .onSuccess { _health.value = it }
     }
 
@@ -290,8 +297,12 @@ class ArrInstanceRepository(
         }
     }
 
-    suspend fun refreshActivityTasks(page: Int = 1, pageSize: Int = 100) {
-        client.fetchActivityTasks(page, pageSize)
+    suspend fun refreshActivityTasks(
+        page: Int = 1,
+        pageSize: Int = 100,
+    ) {
+        client
+            .fetchActivityTasks(page, pageSize)
             .onSuccess { queue ->
                 _activityTasks.value = queue.records
             }
@@ -308,13 +319,13 @@ class ArrInstanceRepository(
         val language = _listenarrConfiguration.value.defaultSearchLanguage
         val region = _listenarrConfiguration.value.defaultSearchRegion
         val queryParams = LookupParams(query, language, region)
-        client.lookup(queryParams)
+        client
+            .lookup(queryParams)
             .onSuccess { results ->
                 logger.info { "Lookup results: $results" }
                 val libraryItems = library.value?.asSuccess()?.data ?: emptyList()
                 _lookupResults.value = NetworkResult.Success(results.mergeWithLibrary(libraryItems))
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 logger.error(cause) { "Error performing lookup: $message" }
                 _lookupResults.value = NetworkResult.Error(code, message, cause)
             }
@@ -338,7 +349,10 @@ class ArrInstanceRepository(
         }
     }
 
-    suspend fun addItem(item: ArrMedia, searchOnAdd: Boolean) {
+    suspend fun addItem(
+        item: ArrMedia,
+        searchOnAdd: Boolean,
+    ) {
         _addItemStatus.value = OperationStatus.InProgress
         delay(100.milliseconds)
 
@@ -346,7 +360,10 @@ class ArrInstanceRepository(
         processAddResult(result, searchOnAdd)
     }
 
-    private suspend fun processAddResult(result: NetworkResult<ArrMedia>, searchOnAdd: Boolean) {
+    private suspend fun processAddResult(
+        result: NetworkResult<ArrMedia>,
+        searchOnAdd: Boolean,
+    ) {
         result
             .onSuccess { addedItem ->
                 _addItemStatus.value = OperationStatus.Success("Item added successfully")
@@ -364,8 +381,7 @@ class ArrInstanceRepository(
                 delay(1500.milliseconds)
                 _addItemStatus.value = OperationStatus.Idle
                 _lastAddedItemId.value = null
-            }
-            .onError { code, error, cause ->
+            }.onError { code, error, cause ->
                 _addItemStatus.value = OperationStatus.Error(code, error, cause)
                 delay(1500.milliseconds)
                 _addItemStatus.value = OperationStatus.Idle
@@ -376,29 +392,27 @@ class ArrInstanceRepository(
     suspend fun getReleases(params: ReleaseParams) {
         _releases.value = NetworkResult.Loading
 
-        client.getReleases(params)
+        client
+            .getReleases(params)
             .mapValues { it.apply { mediaId = params.mediaId } }
             .onSuccess { releases ->
                 logger.info { "Got releases: $releases" }
                 _releases.value = NetworkResult.Success(releases)
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 logger.error(cause) { "Error getting releases: $message" }
                 _releases.value = NetworkResult.Error(code, message, cause)
             }
     }
 
-    suspend fun downloadRelease(
-        payload: DownloadReleasePayload
-    ): NetworkResult<Any> {
+    suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> {
         _downloadStatus.value = DownloadState.Loading(payload.guid)
 
-        return client.downloadRelease(payload)
+        return client
+            .downloadRelease(payload)
             .onSuccess {
                 logger.info { "Download release success: $it" }
                 _downloadStatus.value = DownloadState.Success
-            }
-            .onError { code, error, cause ->
+            }.onError { code, error, cause ->
                 logger.error(cause) { "Download release error: $error" }
                 _downloadStatus.value = DownloadState.Error
             }
@@ -412,58 +426,56 @@ class ArrInstanceRepository(
         releaseId: Int,
         removeFromClient: Boolean,
         addToBlocklist: Boolean,
-        skipRedownload: Boolean
-    ): NetworkResult<Unit> {
-        return client.deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
-    }
+        skipRedownload: Boolean,
+    ): NetworkResult<Unit> = client.deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
 
     suspend fun executeAutomaticSearch(itemId: Long) {
         _searchStatus.value = OperationStatus.InProgress
 
-        client.performAutomaticSearch(itemId)
+        client
+            .performAutomaticSearch(itemId)
             .onSuccess {
                 logger.info { "Search initiated: $it" }
                 _searchStatus.value = OperationStatus.Success("Search initiated")
-            }
-            .onError { code, error, cause ->
+            }.onError { code, error, cause ->
                 logger.error(cause) { "Search error: $error" }
                 _searchStatus.value = OperationStatus.Error(code, error, cause)
-            }
-            .also {
+            }.also {
                 _searchStatus.value = OperationStatus.Idle
             }
     }
 
-    suspend fun executeCommand(payload: CommandPayload): NetworkResult<Any> {
-        return client.command(payload)
-    }
+    suspend fun executeCommand(payload: CommandPayload): NetworkResult<Any> = client.command(payload)
 
     suspend fun getItemHistory(
         itemId: Long,
         altIt: Long? = null,
         page: Int = 1,
-        pageSize: Int = 100
+        pageSize: Int = 100,
     ): NetworkResult<List<HistoryItem>> {
         _historyStatus.value = OperationStatus.InProgress
 
-        return client.getItemHistory(itemId, page, pageSize, altIt)
+        return client
+            .getItemHistory(itemId, page, pageSize, altIt)
             .onSuccess { history ->
                 val currentCache = _historyCache.value.toMutableMap()
                 currentCache[itemId] = history
                 _historyCache.value = currentCache
                 _historyStatus.value = OperationStatus.Success()
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 _historyStatus.value = OperationStatus.Error(code, message, cause)
-            }
-            .also {
+            }.also {
                 _historyStatus.value = OperationStatus.Idle
             }
     }
 
-    suspend fun editMediaItem(item: ArrMedia, moveFiles: Boolean): NetworkResult<Unit> {
+    suspend fun editMediaItem(
+        item: ArrMedia,
+        moveFiles: Boolean,
+    ): NetworkResult<Unit> {
         _editItemStatus.value = OperationStatus.InProgress
-        return client.edit(item, moveFiles)
+        return client
+            .edit(item, moveFiles)
             .onSuccess {
                 val id = item.id ?: return@onSuccess
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
@@ -472,8 +484,7 @@ class ArrInstanceRepository(
 
                 updateItemInLibraryCache(item)
                 _editItemStatus.value = OperationStatus.Success("Item edited successfully")
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 _editItemStatus.value = OperationStatus.Error(code, message, cause)
             }
     }
@@ -481,7 +492,8 @@ class ArrInstanceRepository(
     suspend fun updateMediaItem(item: ArrMedia): NetworkResult<ArrMedia> {
         _monitorStatus.value = OperationStatus.InProgress
 
-        return client.update(item)
+        return client
+            .update(item)
             .onSuccess { updateItem ->
                 _monitorStatus.value = OperationStatus.Success("Item updated successfully")
 
@@ -491,8 +503,7 @@ class ArrInstanceRepository(
                 _mediaDetailsCache.value = currentCache
 
                 updateItemInLibraryCache(updateItem)
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 _monitorStatus.value = OperationStatus.Error(code, message, cause)
             }.also {
                 _monitorStatus.value = OperationStatus.Idle
@@ -502,9 +513,10 @@ class ArrInstanceRepository(
     suspend fun delete(
         id: Long,
         deleteFiles: Boolean,
-        addImportExclusion: Boolean
+        addImportExclusion: Boolean,
     ): NetworkResult<Unit> =
-        client.delete(id, deleteFiles, addImportExclusion)
+        client
+            .delete(id, deleteFiles, addImportExclusion)
             .onSuccess {
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
                 currentCache.remove(id)
@@ -516,39 +528,48 @@ class ArrInstanceRepository(
     private fun removeItemFromLibraryCache(id: Long) {
         val currentLibrary = _library.value
         if (currentLibrary is NetworkResult.Success) {
-            _library.value = NetworkResult.Success(
-                currentLibrary.data.filterNot { it.id == id }
-            )
+            _library.value =
+                NetworkResult.Success(
+                    currentLibrary.data.filterNot { it.id == id },
+                )
         }
     }
 
     private fun updateItemInLibraryCache(updatedItem: ArrMedia) {
         val currentLibrary = _library.value
         if (currentLibrary is NetworkResult.Success) {
-            val updatedItems = currentLibrary.data.map { item ->
-                if (item.id == updatedItem.id) updatedItem else item
-            }
-            _library.value = NetworkResult.Success(
-                updatedItems
-            )
+            val updatedItems =
+                currentLibrary.data.map { item ->
+                    if (item.id == updatedItem.id) updatedItem else item
+                }
+            _library.value =
+                NetworkResult.Success(
+                    updatedItems,
+                )
         }
     }
 
-    suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> {
+    suspend fun updateMonitoring(
+        ids: List<Long>,
+        monitor: Any,
+    ): NetworkResult<Unit> {
         _monitorStatus.value = OperationStatus.InProgress
 
-        return client.updateMonitoring(ids, monitor)
+        return client
+            .updateMonitoring(ids, monitor)
             .onSuccess {
                 _monitorStatus.value = OperationStatus.Success("Monitoring updated successfully")
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 _monitorStatus.value = OperationStatus.Error(code, message, cause)
             }.also {
                 _monitorStatus.value = OperationStatus.Idle
             }
     }
 
-    suspend fun toggleSeasonMonitor(id: Long, seasonNumber: Int): NetworkResult<ArrMedia> {
+    suspend fun toggleSeasonMonitor(
+        id: Long,
+        seasonNumber: Int,
+    ): NetworkResult<ArrMedia> {
         _monitorStatus.value = OperationStatus.InProgress
 
         val currentSeries = _mediaDetailsCache.value[id] as? ArrSeries
@@ -557,17 +578,19 @@ class ArrInstanceRepository(
             return NetworkResult.Error(message = "Series not found in cache")
         }
 
-        val updatedSeason = currentSeries.seasons.map { season ->
-            if (season.seasonNumber == seasonNumber) {
-                season.copy(monitored = !season.monitored)
-            } else {
-                season
+        val updatedSeason =
+            currentSeries.seasons.map { season ->
+                if (season.seasonNumber == seasonNumber) {
+                    season.copy(monitored = !season.monitored)
+                } else {
+                    season
+                }
             }
-        }
 
         val updatedSeries = currentSeries.copy(seasons = updatedSeason)
 
-        return client.update(updatedSeries)
+        return client
+            .update(updatedSeries)
             .onSuccess { resultSeries ->
                 _monitorStatus.value = OperationStatus.Success("Season monitor toggled")
 
@@ -591,20 +614,22 @@ class ArrInstanceRepository(
             return NetworkResult.Error(message = "Not a Sonarr instance")
         }
 
-        return (client as SonarrClient).updateEpisode(updatedEpisode)
+        return (client as SonarrClient)
+            .updateEpisode(updatedEpisode)
             .onSuccess { resultEpisode ->
-                _monitorStatus.value = OperationStatus.Success(
-                    if (resultEpisode.monitored) "Episode monitored" else "Episode unmonitored"
+                _monitorStatus.value =
+                    OperationStatus.Success(
+                        if (resultEpisode.monitored) "Episode monitored" else "Episode unmonitored",
+                    )
+                updateEpisodeInCache(
+                    resultEpisode.copy(
+                        images = episode.images,
+                        episodeFile = episode.episodeFile,
+                    ),
                 )
-                updateEpisodeInCache(resultEpisode.copy(
-                    images = episode.images,
-                    episodeFile = episode.episodeFile
-                ))
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 _monitorStatus.value = OperationStatus.Error(code, message, cause)
-            }
-            .also {
+            }.also {
                 _monitorStatus.value = OperationStatus.Idle
             }
     }
@@ -612,12 +637,14 @@ class ArrInstanceRepository(
     private fun updateSeriesInLibraryCache(series: ArrMedia) {
         val currentLibrary = _library.value
         if (currentLibrary is NetworkResult.Success) {
-            val updatedItems = currentLibrary.data.map { item ->
-                if (item.id == series.id) series else item
-            }
-            _library.value = NetworkResult.Success(
-                updatedItems
-            )
+            val updatedItems =
+                currentLibrary.data.map { item ->
+                    if (item.id == series.id) series else item
+                }
+            _library.value =
+                NetworkResult.Success(
+                    updatedItems,
+                )
         }
     }
 
@@ -642,15 +669,16 @@ class ArrInstanceRepository(
             return NetworkResult.Error(message = "Not a Lidarr instance")
         }
 
-        return (client as LidarrClient).toggleMonitored(album)
+        return (client as LidarrClient)
+            .toggleMonitored(album)
             .onSuccess { resultAlbum ->
-                _monitorStatus.value = OperationStatus.Success(
-                    if (resultAlbum.monitored) "Album monitored" else "Album unmonitored"
-                )
+                _monitorStatus.value =
+                    OperationStatus.Success(
+                        if (resultAlbum.monitored) "Album monitored" else "Album unmonitored",
+                    )
                 updateAlbumInCache(resultAlbum.copy(images = album.images))
                 _monitorStatus.value = OperationStatus.Idle
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 _monitorStatus.value = OperationStatus.Error(code, message, cause)
                 _monitorStatus.value = OperationStatus.Idle
             }
@@ -664,12 +692,12 @@ class ArrInstanceRepository(
             return NetworkResult.Error(message = "Not a Lidarr instance")
         }
 
-        return (client as LidarrClient).updateAlbum(album)
+        return (client as LidarrClient)
+            .updateAlbum(album)
             .onSuccess { resultAlbum ->
                 _editItemStatus.value = OperationStatus.Success("Album updated successfully")
                 updateAlbumInCache(resultAlbum.copy(images = album.images))
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 _editItemStatus.value = OperationStatus.Error(code, message, cause)
             }
     }
@@ -693,40 +721,46 @@ class ArrInstanceRepository(
         }
     }
 
-    private fun updateMonitoredInCache(id: Long, status: Boolean) {
+    private fun updateMonitoredInCache(
+        id: Long,
+        status: Boolean,
+    ) {
         val libraryState = _library.value
         if (libraryState is NetworkResult.Success) {
-            val updatedItems = libraryState.data.map { item ->
-                if (item.id == id) {
-                    when (item) {
-                        is ArrSeries -> item.copy(monitored = status)
-                        is ArrMovie -> item.copy(monitored = status)
-                        is Arrtist -> item.copy(monitored = status)
-                        is Author -> item.copy(monitored = status)
-                        is Audiobook -> item.copy(monitored = status)
-                        is SearchAudiobook -> item
-                        is MockMedia -> item
+            val updatedItems =
+                libraryState.data.map { item ->
+                    if (item.id == id) {
+                        when (item) {
+                            is ArrSeries -> item.copy(monitored = status)
+                            is ArrMovie -> item.copy(monitored = status)
+                            is Arrtist -> item.copy(monitored = status)
+                            is Author -> item.copy(monitored = status)
+                            is Audiobook -> item.copy(monitored = status)
+                            is SearchAudiobook -> item
+                            is MockMedia -> item
+                        }
+                    } else {
+                        item
                     }
-                } else {
-                    item
                 }
-            }
-            _library.value = NetworkResult.Success(
-                updatedItems
-            )
+            _library.value =
+                NetworkResult.Success(
+                    updatedItems,
+                )
         }
 
         val currentDetailsCache = _mediaDetailsCache.value
         currentDetailsCache[id]?.let { item ->
-            val updatedMedia = when (item) {
-                is ArrSeries -> item.copy(monitored = status)
-                is ArrMovie -> item.copy(monitored = status)
-                is Arrtist -> item.copy(monitored = status)
-                is Author -> item.copy(monitored = status)
-                is Audiobook -> item.copy(monitored = status)
-                is SearchAudiobook -> item
-                is MockMedia -> item
-            }
+            val updatedMedia =
+                when (item) {
+                    is ArrSeries -> item.copy(monitored = status)
+                    is ArrMovie -> item.copy(monitored = status)
+                    is Arrtist -> item.copy(monitored = status)
+                    is Author -> item.copy(monitored = status)
+                    is Audiobook -> item.copy(monitored = status)
+                    is SearchAudiobook -> item
+                    is MockMedia -> item
+                }
             val updatedCache = currentDetailsCache.toMutableMap()
             updatedCache[id] = updatedMedia
             _mediaDetailsCache.value = updatedCache
@@ -742,35 +776,34 @@ class ArrInstanceRepository(
             it[id]
         }
 
-    fun getCacheMediaDetails(id: Long): ArrMedia? =
-        _mediaDetailsCache.value[id]
+    fun getCacheMediaDetails(id: Long): ArrMedia? = _mediaDetailsCache.value[id]
 
-    fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> = flow {
-        emit(NetworkResult.Loading)
+    fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> =
+        flow {
+            emit(NetworkResult.Loading)
 
-        val result = client.getDetail(id)
-        when (result) {
-            is NetworkResult.Success -> {
-                val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache[id] = result.data
-                _mediaDetailsCache.value = currentCache
+            val result = client.getDetail(id)
+            when (result) {
+                is NetworkResult.Success -> {
+                    val currentCache = _mediaDetailsCache.value.toMutableMap()
+                    currentCache[id] = result.data
+                    _mediaDetailsCache.value = currentCache
+                }
+
+                is NetworkResult.Error -> {
+                    emit(result)
+                    return@flow
+                }
+
+                is NetworkResult.Loading -> {}
             }
 
-            is NetworkResult.Error -> {
-                emit(result)
-                return@flow
-            }
-
-            is NetworkResult.Loading -> {}
+            _mediaDetailsCache
+                .map { cache ->
+                    cache[id]?.let { NetworkResult.Success(it) }
+                        ?: NetworkResult.Error(message = "Media not found in cache")
+                }.collect { emit(it) }
         }
-
-        _mediaDetailsCache
-            .map { cache ->
-                cache[id]?.let { NetworkResult.Success(it) }
-                    ?: NetworkResult.Error(message = "Media not found in cache")
-            }
-            .collect { emit(it) }
-    }
 
     suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> {
         _monitorStatus.value = OperationStatus.InProgress
@@ -786,19 +819,19 @@ class ArrInstanceRepository(
             .map { it as Audiobook }
     }
 
-    fun observeItemHistory(itemId: Long): Flow<List<HistoryItem>> {
-        return historyCache.map { cache ->
+    fun observeItemHistory(itemId: Long): Flow<List<HistoryItem>> =
+        historyCache.map { cache ->
             cache[itemId] ?: emptyList()
         }
-    }
 
     // Sonarr-specific
     suspend fun getEpisodes(
         seriesId: Long,
-        seasonNumber: Int? = null
+        seasonNumber: Int? = null,
     ): NetworkResult<List<Episode>> =
         safePerformSonarr { client ->
-            client.getEpisodes(seriesId, seasonNumber)
+            client
+                .getEpisodes(seriesId, seasonNumber)
                 .onSuccess { episodes ->
                     val currentMap = _episodes.value.toMutableMap()
                     currentMap[seriesId] = episodes
@@ -808,7 +841,7 @@ class ArrInstanceRepository(
 
     suspend fun deleteSeasonFiles(
         seriesId: Long,
-        seasonNumber: Int
+        seasonNumber: Int,
     ): NetworkResult<Unit> =
         safePerformSonarr {
             var episodes = _episodes.value[seriesId]?.filter { it.seasonNumber == seasonNumber } ?: emptyList()
@@ -818,9 +851,10 @@ class ArrInstanceRepository(
                     episodes = fetchResult.data.filter { it.seasonNumber == seasonNumber }
                 }
             }
-            val fileIds = episodes
-                .filter { it.hasFile || it.episodeFile != null || (it.episodeFileId != null && it.episodeFileId != 0L) }
-                .mapNotNull { it.episodeFileId?.takeIf { id -> id != 0L } ?: it.episodeFile?.id }
+            val fileIds =
+                episodes
+                    .filter { it.hasFile || it.episodeFile != null || (it.episodeFileId != null && it.episodeFileId != 0L) }
+                    .mapNotNull { it.episodeFileId?.takeIf { id -> id != 0L } ?: it.episodeFile?.id }
             if (fileIds.isEmpty()) {
                 return@safePerformSonarr NetworkResult.Success(Unit)
             }
@@ -833,16 +867,18 @@ class ArrInstanceRepository(
 
     suspend fun deleteEpisodes(
         seriesId: Long,
-        episodes: List<Episode>
+        episodes: List<Episode>,
     ): NetworkResult<Unit> =
         safePerformSonarr { client ->
-            val fileIds = episodes
-                .filter { it.hasFile || it.episodeFile != null || (it.episodeFileId != null && it.episodeFileId != 0L) }
-                .mapNotNull { it.episodeFileId?.takeIf { id -> id != 0L } ?: it.episodeFile?.id }
+            val fileIds =
+                episodes
+                    .filter { it.hasFile || it.episodeFile != null || (it.episodeFileId != null && it.episodeFileId != 0L) }
+                    .mapNotNull { it.episodeFileId?.takeIf { id -> id != 0L } ?: it.episodeFile?.id }
             if (fileIds.isEmpty()) {
                 return@safePerformSonarr NetworkResult.Success(Unit)
             }
-            client.deleteEpisodes(fileIds)
+            client
+                .deleteEpisodes(fileIds)
                 .onSuccess {
                     getEpisodes(seriesId)
                 }
@@ -850,10 +886,11 @@ class ArrInstanceRepository(
 
     suspend fun deleteEpisodeFile(
         seriesId: Long,
-        fileId: Long
+        fileId: Long,
     ): NetworkResult<Unit> =
         safePerformSonarr { client ->
-            client.deleteEpisode(fileId)
+            client
+                .deleteEpisode(fileId)
                 .onSuccess {
                     getEpisodes(seriesId)
                 }
@@ -862,7 +899,8 @@ class ArrInstanceRepository(
     // Radarr-specific
     suspend fun getMovieExtraFiles(movieId: Long): NetworkResult<List<ExtraFile>> =
         safePerformRadarr { client ->
-            client.getMovieExtraFile(movieId)
+            client
+                .getMovieExtraFile(movieId)
                 .onSuccess { files ->
                     val currentMap = _movieExtraFiles.value.toMutableMap()
                     currentMap[movieId] = files
@@ -878,7 +916,8 @@ class ArrInstanceRepository(
     // Lidarr-specific
     suspend fun getArtistAlbums(artistId: Long): NetworkResult<List<ArrAlbum>> =
         safePerformLidarr { client ->
-            client.getAlbums(artistId)
+            client
+                .getAlbums(artistId)
                 .onSuccess { albums ->
                     val currentMap = _artistAlbums.value.toMutableMap()
                     currentMap[artistId] = albums.sortedByDescending { it.releaseDate }
@@ -888,7 +927,8 @@ class ArrInstanceRepository(
 
     suspend fun getArtistTracks(artistId: Long): NetworkResult<List<LidarrTrack>> =
         safePerformLidarr { client ->
-            client.getTracks(artistId = artistId)
+            client
+                .getTracks(artistId = artistId)
                 .onSuccess { tracks ->
                     val currentMap = _artistTracks.value.toMutableMap()
                     currentMap[artistId] = tracks.groupBy { it.albumId }
@@ -898,7 +938,8 @@ class ArrInstanceRepository(
 
     suspend fun getArtistTrackFiles(artistId: Long): NetworkResult<List<LidarrTrackFile>> =
         safePerformLidarr { client ->
-            client.getTrackFiles(artistId = artistId)
+            client
+                .getTrackFiles(artistId = artistId)
                 .onSuccess { trackFiles ->
                     val currentMap = _artistTrackFiles.value.toMutableMap()
                     currentMap[artistId] = trackFiles.groupBy { it.albumId }
@@ -908,7 +949,7 @@ class ArrInstanceRepository(
 
     suspend fun deleteAlbumFiles(
         artistId: Long,
-        albumId: Long
+        albumId: Long,
     ): NetworkResult<Unit> =
         safePerformLidarr { client ->
             val files = (_artistTrackFiles.value[artistId] ?: emptyMap())[albumId] ?: emptyList()
@@ -918,21 +959,22 @@ class ArrInstanceRepository(
                 }
         }
 
-    suspend fun deleteTrackFiles(
-        tracks: List<LidarrTrackFile>
-    ): NetworkResult<Unit> =
+    suspend fun deleteTrackFiles(tracks: List<LidarrTrackFile>): NetworkResult<Unit> =
         safePerformLidarr { client ->
             val fileIds = tracks.map { it.id }
-            client.deleteTracks(fileIds)
+            client
+                .deleteTracks(fileIds)
                 .onSuccess {
                     _artistTrackFiles.update { currentMap ->
-                        currentMap.mapValues { (_, albumMap) ->
-                            albumMap.mapValues { (_, tracks) ->
-                                tracks.filterNot { trackFile ->
-                                    fileIds.contains(trackFile.id)
-                                }
+                        currentMap
+                            .mapValues { (_, albumMap) ->
+                                albumMap
+                                    .mapValues { (_, tracks) ->
+                                        tracks.filterNot { trackFile ->
+                                            fileIds.contains(trackFile.id)
+                                        }
+                                    }.filterValues { it.isNotEmpty() }
                             }.filterValues { it.isNotEmpty() }
-                        }.filterValues { it.isNotEmpty() }
                     }
                 }
         }
@@ -940,7 +982,8 @@ class ArrInstanceRepository(
     // Readarr-specific
     suspend fun getAuthorSeries(authorId: Long): NetworkResult<List<BookSeries>> =
         safePerformReadarr { client ->
-            client.getAuthorSeries(authorId)
+            client
+                .getAuthorSeries(authorId)
                 .onSuccess { result ->
                     val currentMap = _authorSeries.value.toMutableMap()
                     currentMap[authorId] = result
@@ -950,7 +993,8 @@ class ArrInstanceRepository(
 
     suspend fun getAuthorBookFiles(authorId: Long): NetworkResult<List<BookFile>> =
         safePerformReadarr { client ->
-            client.getAuthorBookFiles(authorId)
+            client
+                .getAuthorBookFiles(authorId)
                 .onSuccess { result ->
                     val currentMap = _authorBookFiles.value.toMutableMap()
                     currentMap[authorId] = result
@@ -960,9 +1004,9 @@ class ArrInstanceRepository(
 
     suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
         safePerformReadarr { client ->
-            client.deleteBookFiles(bookFilesIds)
+            client
+                .deleteBookFiles(bookFilesIds)
                 .onSuccess { result ->
-
                 }
         }
 
@@ -977,24 +1021,23 @@ class ArrInstanceRepository(
         val bookId = book.id
         val updatedMonitored = !book.monitored
 
-        return (client as BookshelfClient).setBookMonitorStatus(listOf(bookId), updatedMonitored)
+        return (client as BookshelfClient)
+            .setBookMonitorStatus(listOf(bookId), updatedMonitored)
             .onSuccess { responses ->
                 val response = responses.firstOrNull()
                 val isMonitored = response?.monitored ?: updatedMonitored
-                _monitorStatus.value = OperationStatus.Success(
-                    if (isMonitored) "Book monitored" else "Book unmonitored"
-                )
+                _monitorStatus.value =
+                    OperationStatus.Success(
+                        if (isMonitored) "Book monitored" else "Book unmonitored",
+                    )
                 val updatedBook = book.copy(monitored = isMonitored)
                 updateBookInCache(updatedBook)
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 _monitorStatus.value = OperationStatus.Error(code, message, cause)
-            }
-            .map { responses ->
+            }.map { responses ->
                 val response = responses.firstOrNull()
                 book.copy(monitored = response?.monitored ?: updatedMonitored)
-            }
-            .also {
+            }.also {
                 _monitorStatus.value = OperationStatus.Idle
             }
     }
@@ -1014,7 +1057,8 @@ class ArrInstanceRepository(
 
     suspend fun getAudiobookFiles(audiobookId: Long): NetworkResult<List<AudiobookFile>> =
         safePerformListenarr { client ->
-            client.getDetail(audiobookId)
+            client
+                .getDetail(audiobookId)
                 .onSuccess { result ->
                     val currentMap = _audiobookFiles.value.toMutableMap()
                     currentMap[audiobookId] = result.files
@@ -1022,72 +1066,77 @@ class ArrInstanceRepository(
                 }
         }.map { it.files }
 
-    suspend fun getMetadata(asin: String, region: String) =
-        safePerformListenarr { client ->
-            client.getMetadata(asin, region)
-        }
+    suspend fun getMetadata(
+        asin: String,
+        region: String,
+    ) = safePerformListenarr { client ->
+        client.getMetadata(asin, region)
+    }
 
-    suspend fun getPreviewPath(rootPath: String, body: AudiobookMetadataBody) =
-        safePerformListenarr { client ->
-            client.getPreviewPath(rootPath, body)
-        }
+    suspend fun getPreviewPath(
+        rootPath: String,
+        body: AudiobookMetadataBody,
+    ) = safePerformListenarr { client ->
+        client.getPreviewPath(rootPath, body)
+    }
 
-    suspend fun addNewAudiobook(item: SearchAudiobook, metadata: AudiobookMetadataBody, searchOnAdd: Boolean) {
+    suspend fun addNewAudiobook(
+        item: SearchAudiobook,
+        metadata: AudiobookMetadataBody,
+        searchOnAdd: Boolean,
+    ) {
         _addItemStatus.value = OperationStatus.InProgress
         delay(100)
 
-        val result = safePerformListenarr { client ->
-            val path = item.rootFolderPath?.trimEnd('/')?.plus("/")?.plus(item.path?.trimStart('/')) ?: ""
-            val body = AddAudiobookBody(
-                autoSearch = searchOnAdd,
-                destinationPath = path,
-                monitored = item.monitored,
-                metadata = metadata
-            )
-            client.addNewAudiobook(body)
-                .map { it.audiobook }
-        }
+        val result =
+            safePerformListenarr { client ->
+                val path =
+                    item.rootFolderPath
+                        ?.trimEnd('/')
+                        ?.plus("/")
+                        ?.plus(item.path?.trimStart('/')) ?: ""
+                val body =
+                    AddAudiobookBody(
+                        autoSearch = searchOnAdd,
+                        destinationPath = path,
+                        monitored = item.monitored,
+                        metadata = metadata,
+                    )
+                client
+                    .addNewAudiobook(body)
+                    .map { it.audiobook }
+            }
         processAddResult(result, false)
     }
 
     suspend fun moveAudiobookFiles(item: Audiobook) {
-
     }
 
     // Helpers
-    private suspend inline fun <reified T> safePerformSonarr(
-        operation: suspend (SonarrClient) -> NetworkResult<T>
-    ): NetworkResult<T> {
+    private suspend inline fun <reified T> safePerformSonarr(operation: suspend (SonarrClient) -> NetworkResult<T>): NetworkResult<T> {
         val client = client as? SonarrClient ?: return NetworkResult.Error(message = "Not a Sonarr instance")
         return operation(client)
     }
 
-    private suspend inline fun <reified T> safePerformRadarr(
-        operation: suspend (RadarrClient) -> NetworkResult<T>
-    ): NetworkResult<T> {
+    private suspend inline fun <reified T> safePerformRadarr(operation: suspend (RadarrClient) -> NetworkResult<T>): NetworkResult<T> {
         val client = client as? RadarrClient ?: return NetworkResult.Error(message = "Not a Radarr instance")
         return operation(client)
     }
 
-    private suspend inline fun <reified T> safePerformLidarr(
-        operation: suspend (LidarrClient) -> NetworkResult<T>
-    ): NetworkResult<T> {
+    private suspend inline fun <reified T> safePerformLidarr(operation: suspend (LidarrClient) -> NetworkResult<T>): NetworkResult<T> {
         val client = client as? LidarrClient ?: return NetworkResult.Error(message = "Not a Lidarr instance")
         return operation(client)
     }
 
-    private suspend inline fun <reified T> safePerformReadarr(
-        operation: suspend (BookshelfClient) -> NetworkResult<T>
-    ): NetworkResult<T> {
+    private suspend inline fun <reified T> safePerformReadarr(operation: suspend (BookshelfClient) -> NetworkResult<T>): NetworkResult<T> {
         val client = client as? BookshelfClient ?: return NetworkResult.Error(message = "Not a Readarr instance")
         return operation(client)
     }
 
     private suspend inline fun <reified T> safePerformListenarr(
-        operation: suspend (ListenarrClient) -> NetworkResult<T>
+        operation: suspend (ListenarrClient) -> NetworkResult<T>,
     ): NetworkResult<T> {
         val client = client as? ListenarrClient ?: return NetworkResult.Error(message = "Not a Listenarr instance")
         return operation(client)
     }
-
 }

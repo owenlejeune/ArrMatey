@@ -7,5 +7,5 @@ data class AddAudiobookBody(
     val autoSearch: Boolean,
     val destinationPath: String,
     val monitored: Boolean,
-    val metadata: AudiobookMetadataBody
+    val metadata: AudiobookMetadataBody,
 )

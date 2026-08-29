@@ -7,5 +7,5 @@ data class Creator(
     val id: Long,
     val name: String,
     val gender: Int,
-    val profilePath: String? = null
+    val profilePath: String? = null,
 )

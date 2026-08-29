@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,27 +22,28 @@ fun <T> RadioGroup(
     entries: Collection<T>,
     onItemSelected: (T) -> Unit,
     isItemSelected: (T) -> Boolean,
-    itemLabel: @Composable (T) -> String
+    itemLabel: @Composable (T) -> String,
 ) {
     Box {
         Column(
-            modifier = Modifier.selectableGroup(),//.padding(6.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.selectableGroup(), // .padding(6.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             entries.forEach { entry ->
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = isItemSelected(entry),
-                            onClick = { onItemSelected(entry) },
-                            role = Role.RadioButton
-                        ),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = isItemSelected(entry),
+                                onClick = { onItemSelected(entry) },
+                                role = Role.RadioButton,
+                            ),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RadioButton(
                         selected = isItemSelected(entry),
-                        onClick = null
+                        onClick = null,
                     )
                     Text(
                         text = itemLabel(entry),

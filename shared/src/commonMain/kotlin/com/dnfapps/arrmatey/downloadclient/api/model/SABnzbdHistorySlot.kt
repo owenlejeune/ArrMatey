@@ -10,5 +10,5 @@ data class SABnzbdHistorySlot(
     @SerialName("bytes") val bytes: Long = 0,
     @SerialName("status") val status: String = "",
     @SerialName("category") val category: String = "",
-    @SerialName("completed") val completed: Long = 0
+    @SerialName("completed") val completed: Long = 0,
 )

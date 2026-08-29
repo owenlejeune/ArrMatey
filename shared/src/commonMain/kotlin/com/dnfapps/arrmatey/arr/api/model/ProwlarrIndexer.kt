@@ -25,5 +25,5 @@ data class ProwlarrIndexer(
     val priority: Int,
     val downloadClientId: Int? = null,
     val privacy: IndexerPrivacy? = null,
-    @Contextual val added: Instant? = null
+    @Contextual val added: Instant? = null,
 )

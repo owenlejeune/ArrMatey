@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.arr.state
 
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 
@@ -9,23 +8,24 @@ data class CalendarFilterState(
     val contentFilter: ContentFilter = ContentFilter.All,
     val showMonitoredOnly: Boolean = false,
     val showPremiersOnly: Boolean = false,
-    val showFinalesOnly: Boolean = false
+    val showFinalesOnly: Boolean = false,
 ) {
-    constructor(): this(CalendarViewMode.List, ContentFilter.All, false, false, false)
+    constructor() : this(CalendarViewMode.List, ContentFilter.All, false, false, false)
 }
 
 enum class CalendarViewMode {
-    List, Month
+    List,
+    Month,
 }
 
 enum class ContentFilter(
     val resource: StringResource,
-    val systemImage: String
+    val systemImage: String,
 ) {
     All(MR.strings.all, "play.square.stack"),
     MoviesOnly(MR.strings.movies, "movieclapper"),
     EpisodesOnly(MR.strings.episodes, "tv"),
     AlbumsOnly(MR.strings.albums_header, "music.note"),
     BooksOnly(MR.strings.books, "book"),
-    AudiobooksOnly(MR.strings.audiobooks, "headphones")
+    AudiobooksOnly(MR.strings.audiobooks, "headphones"),
 }

@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BookMonitorBody(
     val bookIds: List<Long>,
-    val monitored: Boolean
+    val monitored: Boolean,
 )

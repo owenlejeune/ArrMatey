@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class QueueStatusMessage(
     val title: String? = null,
-    val messages: List<String> = emptyList()
+    val messages: List<String> = emptyList(),
 )

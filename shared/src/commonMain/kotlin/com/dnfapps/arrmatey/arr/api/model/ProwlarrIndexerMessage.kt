@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProwlarrIndexerMessage(
     val message: String? = null,
-    val type: IndexerMessageType? = null
+    val type: IndexerMessageType? = null,
 )

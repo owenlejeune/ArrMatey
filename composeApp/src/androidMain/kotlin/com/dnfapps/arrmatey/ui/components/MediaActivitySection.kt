@@ -16,21 +16,21 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun MediaActivitySection(
     queueItems: List<QueueItem>,
     onQueueItemClicked: (QueueItem) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         Text(
             text = mokoString(MR.strings.activity),
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge,
         )
 
         queueItems.forEach { item ->
             ActivityItem(
                 item = item,
-                onClick = { onQueueItemClicked(item) }
+                onClick = { onQueueItemClicked(item) },
             )
         }
     }

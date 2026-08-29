@@ -30,5 +30,5 @@ data class PlexSettings(
     val update_movie_library: Boolean,
     val update_series_library: Boolean,
     val user_id: String,
-    val username: String
+    val username: String,
 )

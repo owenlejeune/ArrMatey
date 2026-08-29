@@ -5,8 +5,7 @@ import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import kotlinx.coroutines.flow.Flow
 
 class ObserveSelectedDownloadClientsUseCase(
-    private val downloadClientRepository: DownloadClientRepository
+    private val downloadClientRepository: DownloadClientRepository,
 ) {
-    operator fun invoke(): Flow<DownloadClient?> =
-        downloadClientRepository.observeSelectedDownloadClient()
+    operator fun invoke(): Flow<DownloadClient?> = downloadClientRepository.observeSelectedDownloadClient()
 }

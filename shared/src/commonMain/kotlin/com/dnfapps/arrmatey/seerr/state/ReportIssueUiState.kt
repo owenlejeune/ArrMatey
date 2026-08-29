@@ -14,7 +14,7 @@ data class ReportIssueUiState(
     val saveButtonEnabled: Boolean = false,
     val saveInProgress: Boolean = false,
     val saveError: String? = null,
-    val saveSuccess: Boolean = false
+    val saveSuccess: Boolean = false,
 ) {
-    constructor(): this(IssueType.Video) // empty constructor for ios
+    constructor() : this(IssueType.Video) // empty constructor for ios
 }

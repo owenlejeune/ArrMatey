@@ -11,8 +11,8 @@ import com.dnfapps.arrmatey.utils.getNetworkUtils
     tableName = "download_clients",
     indices = [
         Index(value = ["url"], unique = true),
-        Index(value = ["label"], unique = true)
-    ]
+        Index(value = ["label"], unique = true),
+    ],
 )
 data class DownloadClient(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -25,12 +25,10 @@ data class DownloadClient(
     val noApiKeyRequired: Boolean = false,
     val selected: Boolean = false,
     val headers: List<InstanceHeader> = emptyList(),
-
     val localNetworkEnabled: Boolean = false,
     val localNetworkSsids: List<String> = emptyList(),
-    val localNetworkEndpoint: String? = null
+    val localNetworkEndpoint: String? = null,
 ) {
-
     fun getEffectiveBaseUrl(): String {
         if (!localNetworkEnabled ||
             localNetworkSsids.isEmpty() ||
@@ -50,15 +48,14 @@ data class DownloadClient(
         }
     }
 
-    fun isUsingLocalNetwork(): Boolean {
-        return try {
+    fun isUsingLocalNetwork(): Boolean =
+        try {
             val currentSsid = getNetworkUtils().getCurrentWifiSsid()
             localNetworkEnabled &&
-                    !localNetworkEndpoint.isNullOrBlank() &&
-                    currentSsid != null &&
-                    localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
+                !localNetworkEndpoint.isNullOrBlank() &&
+                currentSsid != null &&
+                localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
         } catch (e: Exception) {
             false
         }
-    }
 }

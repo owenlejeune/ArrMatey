@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class KtuvitSettings(
     val email: String,
-    val hashed_password: String
+    val hashed_password: String,
 )

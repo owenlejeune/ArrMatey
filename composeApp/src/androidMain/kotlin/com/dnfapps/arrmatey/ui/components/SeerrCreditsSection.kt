@@ -38,28 +38,28 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun SeerrCreditsSection(
     credits: Credits,
     modifier: Modifier = Modifier,
-    onPersonClick: (Long) -> Unit = {}
+    onPersonClick: (Long) -> Unit = {},
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         if (credits.cast.isNotEmpty()) {
             Text(
                 text = mokoString(MR.strings.cast),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 24.dp)
+                modifier = Modifier.padding(horizontal = 24.dp),
             )
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 24.dp)
+                contentPadding = PaddingValues(horizontal = 24.dp),
             ) {
                 items(credits.cast) { castMember ->
                     CastCrewItem(
                         profilePath = castMember.fullProfilePath,
                         name = castMember.name,
                         credit = castMember.character,
-                        modifier = Modifier.clickable { onPersonClick(castMember.id) }
+                        modifier = Modifier.clickable { onPersonClick(castMember.id) },
                     )
                 }
             }
@@ -73,18 +73,18 @@ fun SeerrCreditsSection(
             Text(
                 text = mokoString(MR.strings.crew),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 24.dp)
+                modifier = Modifier.padding(horizontal = 24.dp),
             )
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 24.dp)
+                contentPadding = PaddingValues(horizontal = 24.dp),
             ) {
                 items(credits.crew) { crewMember ->
                     CastCrewItem(
                         profilePath = crewMember.fullProfilePath,
                         name = crewMember.name,
                         credit = crewMember.job,
-                        modifier = Modifier.clickable { onPersonClick(crewMember.id) }
+                        modifier = Modifier.clickable { onPersonClick(crewMember.id) },
                     )
                 }
             }
@@ -97,42 +97,43 @@ fun CastCrewItem(
     profilePath: String?,
     name: String,
     credit: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     ContainerCard(
-        modifier = modifier
-            .width(120.dp),
+        modifier =
+            modifier
+                .width(120.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         PersonProfileImage(profilePath)
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
                 text = name,
                 style = MaterialTheme.typography.titleSmall,
                 minLines = 2,
-                maxLines = 2
+                maxLines = 2,
             )
             Box(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.BottomStart
+                contentAlignment = Alignment.BottomStart,
             ) {
                 Text(
                     text = "",
                     style = MaterialTheme.typography.labelMedium,
                     minLines = 3,
-                    maxLines = 3
+                    maxLines = 3,
                 )
                 Text(
                     text = credit,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -142,20 +143,22 @@ fun CastCrewItem(
 @Composable
 fun PersonProfileImage(profilePath: String?) {
     Box(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .size(88.dp),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .size(88.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Icon(Icons.Default.Person, contentDescription = null)
         AsyncImage(
             model = rememberRemoteImageData(profilePath),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(88.dp)
-                .clip(CircleShape)
+            modifier =
+                Modifier
+                    .size(88.dp)
+                    .clip(CircleShape),
         )
     }
 }

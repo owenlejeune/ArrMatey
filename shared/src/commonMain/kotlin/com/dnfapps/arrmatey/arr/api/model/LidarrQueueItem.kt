@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
 @Serializable
-data class LidarrQueueItem (
+data class LidarrQueueItem(
     override val id: Int,
     override var instanceId: Long? = null,
     override var instanceName: String? = null,
@@ -32,13 +32,11 @@ data class LidarrQueueItem (
     override val outputPath: String? = null,
     override val downloadClientHasPostImportCategory: Boolean = false,
     override var taskGroupCount: Int? = null,
-
     val albumId: Long? = null,
     val album: ArrAlbum? = null,
     val artistId: Long? = null,
-    val artist: Arrtist? = null
-): QueueItem {
-
+    val artist: Arrtist? = null,
+) : QueueItem {
     override val type = InstanceType.Lidarr
 
     override val taskGroup: String

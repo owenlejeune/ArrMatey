@@ -12,7 +12,6 @@ import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
-import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -27,6 +26,7 @@ import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateAllPreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.Blur
 import com.dnfapps.arrmatey.utils.GridDensity
@@ -34,7 +34,7 @@ import com.dnfapps.arrmatey.utils.GridSpacing
 import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
-import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,73 +65,77 @@ class UnifiedLibraryViewModel(
     private val deleteMediaUseCase: DeleteMediaUseCase,
     private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
     private val executeArrCommandUseCase: ExecuteArrCommandUseCase,
-    getActivityTasksUseCase: GetActivityTasksUseCase
+    getActivityTasksUseCase: GetActivityTasksUseCase,
 ) : ViewModel() {
+    val activeMediaIdsByInstance: StateFlow<Map<Long, Set<Long>>> =
+        getActivityTasksUseCase()
+            .map { tasks ->
+                tasks
+                    .groupBy { it.instanceId }
+                    .mapNotNull { (instanceId, instanceTasks) ->
+                        instanceId?.let { id ->
+                            id to instanceTasks.mapNotNull { it.mediaId }.toSet()
+                        }
+                    }.toMap()
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyMap(),
+            )
 
-    val activeMediaIdsByInstance: StateFlow<Map<Long, Set<Long>>> = getActivityTasksUseCase()
-        .map { tasks ->
-            tasks.groupBy { it.instanceId }
-                .mapNotNull { (instanceId, instanceTasks) ->
-                    instanceId?.let { id ->
-                        id to instanceTasks.mapNotNull { it.mediaId }.toSet()
-                    }
-                }.toMap()
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyMap()
-        )
-
-    fun isItemActive(instanceId: Long, mediaId: Long): Boolean =
-        activeMediaIdsByInstance.value[instanceId]?.contains(mediaId) == true
+    fun isItemActive(
+        instanceId: Long,
+        mediaId: Long,
+    ): Boolean = activeMediaIdsByInstance.value[instanceId]?.contains(mediaId) == true
 
     private val arrOrder = InstanceType.arrs()
 
-    val arrInstances: StateFlow<List<Instance>> = observeAllInstancesUseCase()
-        .map { all ->
-            all.filter { it.type in arrOrder }
-                .sortedWith(compareBy<Instance> { arrOrder.indexOf(it.type) }.thenBy { it.label })
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = emptyList()
-        )
+    val arrInstances: StateFlow<List<Instance>> =
+        observeAllInstancesUseCase()
+            .map { all ->
+                all
+                    .filter { it.type in arrOrder }
+                    .sortedWith(compareBy<Instance> { arrOrder.indexOf(it.type) }.thenBy { it.label })
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = emptyList(),
+            )
 
     private val _selectedInstance = MutableStateFlow<Instance?>(null)
     val selectedInstance: StateFlow<Instance?> = _selectedInstance.asStateFlow()
 
-    val libraries: StateFlow<Map<Long, ArrLibrary>> = arrInstances
-        .flatMapLatest { instances ->
-            if (instances.isEmpty()) {
-                flowOf(emptyMap())
-            } else {
-                val libraryFlows = instances.map { instance ->
-                    getLibraryUseCase(instance.id).map { libraryState ->
-                        instance.id to libraryState
+    val libraries: StateFlow<Map<Long, ArrLibrary>> =
+        arrInstances
+            .flatMapLatest { instances ->
+                if (instances.isEmpty()) {
+                    flowOf(emptyMap())
+                } else {
+                    val libraryFlows =
+                        instances.map { instance ->
+                            getLibraryUseCase(instance.id).map { libraryState ->
+                                instance.id to libraryState
+                            }
+                        }
+                    combine(libraryFlows) { results ->
+                        results.toMap()
                     }
                 }
-                combine(libraryFlows) { results ->
-                    results.toMap()
-                }
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = emptyMap()
-        )
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = emptyMap(),
+            )
 
-    val offlineInstanceIds: StateFlow<Set<Long>> = libraries
-        .map { map ->
-            map.filterValues { it is ArrLibrary.Error }.keys
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = emptySet()
-        )
+    val offlineInstanceIds: StateFlow<Set<Long>> =
+        libraries
+            .map { map ->
+                map.filterValues { it is ArrLibrary.Error }.keys
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = emptySet(),
+            )
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -150,95 +154,101 @@ class UnifiedLibraryViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    val hasBazarr: StateFlow<Boolean> = getBazarrInstanceRepositoryUseCase
-        .observeSelected()
-        .map { it != null }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = false
-        )
+    val hasBazarr: StateFlow<Boolean> =
+        getBazarrInstanceRepositoryUseCase
+            .observeSelected()
+            .map { it != null }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 
-    val selectedRepository: StateFlow<ArrInstanceRepository?> = _selectedInstance
-        .map { instance ->
-            instance?.let { instanceManager.getArrRepository(it.id) }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
+    val selectedRepository: StateFlow<ArrInstanceRepository?> =
+        _selectedInstance
+            .map { instance ->
+                instance?.let { instanceManager.getArrRepository(it.id) }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = null,
+            )
 
-    val preferences: StateFlow<InstancePreferences> = _selectedInstance
-        .filterNotNull()
-        .flatMapLatest { instance ->
-            instancePreferenceStoreRepository.getInstancePreferences(instance.id).observePreferences()
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = InstancePreferences()
-        )
+    val preferences: StateFlow<InstancePreferences> =
+        _selectedInstance
+            .filterNotNull()
+            .flatMapLatest { instance ->
+                instancePreferenceStoreRepository.getInstancePreferences(instance.id).observePreferences()
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = InstancePreferences(),
+            )
 
-    val instanceData: StateFlow<InstanceData?> = selectedRepository
-        .flatMapLatest { repo ->
-            if (repo == null) flowOf(null)
-            else combine(
-                repo.qualityProfiles,
-                repo.rootFolders,
-                repo.tags,
-                repo.customFilters
-            ) { qp, rf, tags, filters ->
-                InstanceData(
-                    qualityProfiles = qp,
-                    rootFolders = rf,
-                    tags = tags,
-                    customFilters = filters
-                )
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
+    val instanceData: StateFlow<InstanceData?> =
+        selectedRepository
+            .flatMapLatest { repo ->
+                if (repo == null) {
+                    flowOf(null)
+                } else {
+                    combine(
+                        repo.qualityProfiles,
+                        repo.rootFolders,
+                        repo.tags,
+                        repo.customFilters,
+                    ) { qp, rf, tags, filters ->
+                        InstanceData(
+                            qualityProfiles = qp,
+                            rootFolders = rf,
+                            tags = tags,
+                            customFilters = filters,
+                        )
+                    }
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = null,
+            )
 
-    val currentLibraryState: StateFlow<ArrLibrary> = combine(
-        _selectedInstance,
-        libraries,
-        _searchQuery
-    ) { instance, libMap, query ->
-        if (instance == null) {
-            ArrLibrary.Initial
-        } else {
-            val state = libMap[instance.id] ?: ArrLibrary.Initial
-            if (state is ArrLibrary.Success && query.isNotEmpty()) {
-                state.copy(items = state.items.filter { it.title?.contains(query, ignoreCase = true) == true })
+    val currentLibraryState: StateFlow<ArrLibrary> =
+        combine(
+            _selectedInstance,
+            libraries,
+            _searchQuery,
+        ) { instance, libMap, query ->
+            if (instance == null) {
+                ArrLibrary.Initial
             } else {
-                state
+                val state = libMap[instance.id] ?: ArrLibrary.Initial
+                if (state is ArrLibrary.Success && query.isNotEmpty()) {
+                    state.copy(items = state.items.filter { it.title?.contains(query, ignoreCase = true) == true })
+                } else {
+                    state
+                }
             }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = ArrLibrary.Initial
-    )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = ArrLibrary.Initial,
+        )
 
-    val selectedItem: StateFlow<ArrMedia?> = combine(
-        selectionState.selectedItems,
-        currentLibraryState
-    ) { selectedIds, state ->
-        if (selectedIds.size == 1) {
-            val id = selectedIds.first()
-            (state as? ArrLibrary.Success)?.items?.find { it.id == id }
-        } else {
-            null
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = null
-    )
+    val selectedItem: StateFlow<ArrMedia?> =
+        combine(
+            selectionState.selectedItems,
+            currentLibraryState,
+        ) { selectedIds, state ->
+            if (selectedIds.size == 1) {
+                val id = selectedIds.first()
+                (state as? ArrLibrary.Success)?.items?.find { it.id == id }
+            } else {
+                null
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null,
+        )
 
     init {
         viewModelScope.launch {
@@ -307,10 +317,11 @@ class UnifiedLibraryViewModel(
     fun updateCustomFilter(customFilterId: Long?) {
         viewModelScope.launch {
             val instance = _selectedInstance.value ?: return@launch
-            val updatedPreferences = preferences.value.copy(
-                customFilterId = customFilterId,
-                filterBy = if (customFilterId != null) FilterBy.All else preferences.value.filterBy
-            )
+            val updatedPreferences =
+                preferences.value.copy(
+                    customFilterId = customFilterId,
+                    filterBy = if (customFilterId != null) FilterBy.All else preferences.value.filterBy,
+                )
             updateInstancePreferencesUseCase(instance.id, updatedPreferences)
         }
     }
@@ -397,7 +408,11 @@ class UnifiedLibraryViewModel(
         }
     }
 
-    fun deleteMedia(item: ArrMedia, deleteFiles: Boolean, addImportExclusion: Boolean) {
+    fun deleteMedia(
+        item: ArrMedia,
+        deleteFiles: Boolean,
+        addImportExclusion: Boolean,
+    ) {
         val mediaId = item.id ?: return
         viewModelScope.launch {
             val instance = _selectedInstance.value ?: return@launch
@@ -413,7 +428,10 @@ class UnifiedLibraryViewModel(
         }
     }
 
-    fun editItem(item: ArrMedia, moveFiles: Boolean = false) {
+    fun editItem(
+        item: ArrMedia,
+        moveFiles: Boolean = false,
+    ) {
         viewModelScope.launch {
             val instance = _selectedInstance.value ?: return@launch
             val repository = instanceManager.getArrRepository(instance.id) ?: return@launch
@@ -501,7 +519,10 @@ class UnifiedLibraryViewModel(
         }
     }
 
-    fun deleteSelected(deleteFiles: Boolean, addExclusion: Boolean) {
+    fun deleteSelected(
+        deleteFiles: Boolean,
+        addExclusion: Boolean,
+    ) {
         viewModelScope.launch {
             val instance = _selectedInstance.value ?: return@launch
             val repository = instanceManager.getArrRepository(instance.id) ?: return@launch

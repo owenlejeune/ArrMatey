@@ -18,9 +18,8 @@ class BackupViewModel(
     private val exportDataUseCase: ExportDataUseCase,
     private val importDataUseCase: ImportDataUseCase,
     private val instanceDao: InstanceDao,
-    private val downloadClientDao: DownloadClientDao
-): ViewModel() {
-
+    private val downloadClientDao: DownloadClientDao,
+) : ViewModel() {
     private val _exportUiState = MutableStateFlow(ExportUiState())
     val exportUiState: StateFlow<ExportUiState> = _exportUiState.asStateFlow()
 
@@ -35,12 +34,14 @@ class BackupViewModel(
         viewModelScope.launch {
             val instances = instanceDao.getAllInstances()
             val downloadClients = downloadClientDao.getAllDownloadClients()
-            _exportUiState.update { it.copy(
-                instances = instances,
-                downloadClients = downloadClients,
-                selectedInstanceIds = instances.map { i -> i.id }.toSet(),
-                selectedDownloadClientIds = downloadClients.map { c -> c.id }.toSet()
-            ) }
+            _exportUiState.update {
+                it.copy(
+                    instances = instances,
+                    downloadClients = downloadClients,
+                    selectedInstanceIds = instances.map { i -> i.id }.toSet(),
+                    selectedDownloadClientIds = downloadClients.map { c -> c.id }.toSet(),
+                )
+            }
         }
     }
 
@@ -79,17 +80,18 @@ class BackupViewModel(
     fun exportData(onExportReady: (String) -> Unit) {
         val state = _exportUiState.value
         if (state.password.isBlank()) return
-        
+
         viewModelScope.launch {
             _exportUiState.update { it.copy(isExporting = true) }
-            val encryptedData = exportDataUseCase(
-                password = state.password,
-                selectedInstanceIds = state.selectedInstanceIds,
-                selectedDownloadClientIds = state.selectedDownloadClientIds,
-                includeInstancePreferences = state.includeInstancePreferences,
-                includeTabPreferences = state.includeTabPreferences,
-                includeUiPreferences = state.includeUiPreferences
-            )
+            val encryptedData =
+                exportDataUseCase(
+                    password = state.password,
+                    selectedInstanceIds = state.selectedInstanceIds,
+                    selectedDownloadClientIds = state.selectedDownloadClientIds,
+                    includeInstancePreferences = state.includeInstancePreferences,
+                    includeTabPreferences = state.includeTabPreferences,
+                    includeUiPreferences = state.includeUiPreferences,
+                )
             _exportUiState.update { it.copy(isExporting = false) }
             onExportReady(encryptedData)
         }
@@ -107,12 +109,14 @@ class BackupViewModel(
         viewModelScope.launch {
             try {
                 val backup = importDataUseCase.decryptBackup(encryptedData, password)
-                _importUiState.update { it.copy(
-                    decryptedBackup = backup,
-                    selectedInstanceIndices = backup.instances.indices.toSet(),
-                    selectedDownloadClientIndices = backup.downloadClients.indices.toSet(),
-                    error = null
-                ) }
+                _importUiState.update {
+                    it.copy(
+                        decryptedBackup = backup,
+                        selectedInstanceIndices = backup.instances.indices.toSet(),
+                        selectedDownloadClientIndices = backup.downloadClients.indices.toSet(),
+                        error = null,
+                    )
+                }
             } catch (e: Exception) {
                 _importUiState.update { it.copy(error = "Invalid password or corrupted backup file\n${e.message}") }
             }
@@ -154,7 +158,7 @@ class BackupViewModel(
                 selectedInstanceIndices = state.selectedInstanceIndices,
                 selectedDownloadClientIndices = state.selectedDownloadClientIndices,
                 importTabPreferences = state.importTabPreferences,
-                importUiPreferences = state.importUiPreferences
+                importUiPreferences = state.importUiPreferences,
             )
             _importUiState.update { it.copy(isImporting = false) }
             onComplete()

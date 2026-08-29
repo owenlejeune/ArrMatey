@@ -20,5 +20,5 @@ data class Field(
     val hidden: String,
     val privacy: String,
     val placeholder: String,
-    val isFloat: Boolean
+    val isFloat: Boolean,
 )

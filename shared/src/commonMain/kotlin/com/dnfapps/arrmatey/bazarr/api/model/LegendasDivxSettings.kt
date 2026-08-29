@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class LegendasDivxSettings(
     val password: String,
     val skip_wrong_fps: Boolean,
-    val username: String
+    val username: String,
 )

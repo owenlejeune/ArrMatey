@@ -43,19 +43,24 @@ data class Episode(
     val endTime: String? = null,
     val grabDate: String? = null,
     val images: List<ArrImage> = emptyList(),
-
     val series: ArrSeries? = null,
     override val instanceId: Long? = null,
-    override val instanceIds: List<Long> = listOfNotNull(instanceId)
-): CalendarItem, InstanceTypeIdentifiable {
-    override val calendarId: Long 
+    override val instanceIds: List<Long> = listOfNotNull(instanceId),
+) : CalendarItem,
+    InstanceTypeIdentifiable {
+    override val calendarId: Long
         get() = tvdbId ?: id
-    override fun getCalendarDates(): List<Instant> = 
-        listOfNotNull(airDateUtc)
-    override val notificationScheduledTime: Instant? 
+
+    override fun getCalendarDates(): List<Instant> = listOfNotNull(airDateUtc)
+
+    override val notificationScheduledTime: Instant?
         get() = airDateUtc
-    override val notificationMessage: String 
-        get() = "${series?.title ?: "Unknown Series"} - S${seasonNumber}E${episodeNumber}${airDateUtc?.let { " - ${it.format("HH:mm")}" } ?: ""}"
+    override val notificationMessage: String
+        get() = "${series?.title ?: "Unknown Series"} - S${seasonNumber}E${episodeNumber}${airDateUtc?.let {
+            " - ${it.format(
+                "HH:mm",
+            )}"
+        } ?: ""}"
 
     val displayTitle: String
         get() = title ?: "Unknown"
@@ -74,7 +79,7 @@ data class Episode(
 
     fun formatAirDateUtc(
         friendlyTodayFormat: Boolean = true,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): String? {
         if (airDateUtc == null) return null
         val localDateTime = airDateUtc.toLocalDateTime(timeZone)
@@ -94,23 +99,23 @@ data class Episode(
     val episodeLabel: String
         get() = "s${seasonNumber.padStart(2, '0')}e${episodeNumber.padStart(2, '0')}"
 
-    fun getPoster(): ArrImage?  {
-        return images.firstOrNull { it.coverType == CoverType.Poster }
+    fun getPoster(): ArrImage? =
+        images.firstOrNull { it.coverType == CoverType.Poster }
             ?: images.firstOrNull { it.coverType == CoverType.Screenshot }
-    }
-    fun getBanner(): ArrImage? {
-        return images.firstOrNull { it.coverType == CoverType.FanArt }
+
+    fun getBanner(): ArrImage? =
+        images.firstOrNull { it.coverType == CoverType.FanArt }
             ?: images.firstOrNull { it.coverType == CoverType.Banner }
             ?: images.firstOrNull { it.coverType == CoverType.Poster }
             ?: images.firstOrNull { it.coverType == CoverType.Screenshot }
-    }
 
     val statusLabel: String
-        get() = when {
-            hasFile -> "Downloaded"
-            airDate?.isBeforeToday() == true -> "Unaired"
-            else -> "Missing"
-        }
+        get() =
+            when {
+                hasFile -> "Downloaded"
+                airDate?.isBeforeToday() == true -> "Unaired"
+                else -> "Missing"
+            }
 
     fun toJson(): String = ArrMedia.json.encodeToString(this)
 
@@ -119,7 +124,9 @@ data class Episode(
     }
 }
 
-enum class FinaleType(val resource: StringResource) {
+enum class FinaleType(
+    val resource: StringResource,
+) {
     @SerialName("series")
     Series(MR.strings.series_finale),
 
@@ -127,5 +134,5 @@ enum class FinaleType(val resource: StringResource) {
     Season(MR.strings.season_finale),
 
     @SerialName("midseason")
-    Midseason(MR.strings.midseason_finale)
+    Midseason(MR.strings.midseason_finale),
 }

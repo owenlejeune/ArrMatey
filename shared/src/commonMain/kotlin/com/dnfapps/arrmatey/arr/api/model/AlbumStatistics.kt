@@ -8,5 +8,5 @@ data class AlbumStatistics(
     val trackCount: Int,
     val totalTrackCount: Int,
     val sizeOnDisk: Long,
-    val percentOfTracks: Double
+    val percentOfTracks: Double,
 )

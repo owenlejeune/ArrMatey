@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.utils.MokoStrings
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Serializable
 
@@ -38,24 +37,26 @@ data class ArrSoftwareStatus(
     val packageUpdateMechanism: UpdateMechanism? = null,
     val packageUpdateMechanismMessage: String? = null,
     val databaseVersion: String? = null,
-    val databaseType: DatabaseType? = null
+    val databaseType: DatabaseType? = null,
 ) {
     val hostPlatform: StringResource
-        get() = when {
-            isDocker -> MR.strings.docker
-            isLinux -> MR.strings.linux
-            isOsx -> MR.strings.macos
-            isWindows -> MR.strings.windows
-            else -> MR.strings.unknown
-        }
+        get() =
+            when {
+                isDocker -> MR.strings.docker
+                isLinux -> MR.strings.linux
+                isOsx -> MR.strings.macos
+                isWindows -> MR.strings.windows
+                else -> MR.strings.unknown
+            }
 
     val hostOs: String?
-        get() = buildString {
-            osName?.let { os ->
-                append(os)
-                osVersion?.let { v ->
-                    append(" ($v)")
+        get() =
+            buildString {
+                osName?.let { os ->
+                    append(os)
+                    osVersion?.let { v ->
+                        append(" ($v)")
+                    }
                 }
-            }
-        }.takeUnless { it.isEmpty() }
+            }.takeUnless { it.isEmpty() }
 }

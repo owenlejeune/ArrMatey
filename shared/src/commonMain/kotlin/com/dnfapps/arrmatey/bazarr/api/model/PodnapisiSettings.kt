@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PodnapisiSettings(
-    val verify_ssl: Boolean
+    val verify_ssl: Boolean,
 )

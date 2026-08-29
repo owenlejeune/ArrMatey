@@ -1,6 +1,8 @@
 package com.dnfapps.arrmatey.seerr.api.model
 
-enum class UserPermission(val bit: Int) {
+enum class UserPermission(
+    val bit: Int,
+) {
     ADMIN(2),
     MANAGE_SETTINGS(4),
     MANAGE_USERS(8),
@@ -18,5 +20,5 @@ enum class UserPermission(val bit: Int) {
     ADVANCED_DETAILS(32768),
     VIEW_REQUESTS(65536),
     MANAGE_ISSUES(131072),
-    VIEW_ISSUES(262144);
+    VIEW_ISSUES(262144),
 }

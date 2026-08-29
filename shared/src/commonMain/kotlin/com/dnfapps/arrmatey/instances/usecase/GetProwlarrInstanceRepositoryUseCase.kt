@@ -5,11 +5,9 @@ import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetProwlarrInstanceRepositoryUseCase(
-    private val instanceManager: InstanceManager
+    private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(instanceId: Long): ProwlarrInstanceRepository? =
-        instanceManager.getProwlarrRepository(instanceId)
+    operator fun invoke(instanceId: Long): ProwlarrInstanceRepository? = instanceManager.getProwlarrRepository(instanceId)
 
-    fun observeSelected(): Flow<ProwlarrInstanceRepository?> =
-        instanceManager.getSelectedProwlarrRepository()
+    fun observeSelected(): Flow<ProwlarrInstanceRepository?> = instanceManager.getSelectedProwlarrRepository()
 }

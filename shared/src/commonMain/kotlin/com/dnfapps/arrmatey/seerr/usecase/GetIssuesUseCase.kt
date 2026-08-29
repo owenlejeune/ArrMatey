@@ -8,13 +8,12 @@ import kotlinx.coroutines.CoroutineScope
 class GetIssuesUseCase {
     fun createPagingController(
         repository: SeerrInstanceRepository,
-        scope: CoroutineScope
-    ): PagingController<MediaIssuePackage> {
-        return PagingController(
+        scope: CoroutineScope,
+    ): PagingController<MediaIssuePackage> =
+        PagingController(
             scope = scope,
-            keySelector = { it.issue.id }
+            keySelector = { it.issue.id },
         ) {
             repository.getIssuesPaging()
         }
-    }
 }

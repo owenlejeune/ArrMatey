@@ -27,9 +27,8 @@ import kotlin.time.Instant
 sealed interface ArrMedia {
     companion object Companion : KoinComponent {
         val json: Json by inject()
-        fun fromJson(value: String): ArrMedia {
-            return json.decodeFromString(AnyArrMediaSerializer, value)
-        }
+
+        fun fromJson(value: String): ArrMedia = json.decodeFromString(AnyArrMediaSerializer, value)
     }
 
     /**
@@ -56,6 +55,7 @@ sealed interface ArrMedia {
     val alternateTitles: List<AlternateTitle>
     val ratings: ArrRatings?
     val statistics: ArrStatistics?
+
     @Contextual val added: Instant?
     val status: MediaStatus
 
@@ -63,7 +63,9 @@ sealed interface ArrMedia {
      * Computed properties + helpers
      */
     val guid: Long
+
     fun ratingScore(): Double
+
     val statusProgress: Float
     val statusColor: Color
     val releasedBy: String?
@@ -73,33 +75,35 @@ sealed interface ArrMedia {
     val runtimeString: String
         get() = runtime?.formatMinutesAsRuntime() ?: ""
 
-    fun getPoster(): ArrImage?  {
-        return images.firstOrNull { it.coverType == CoverType.Poster }
-    }
-    fun getBanner(): ArrImage? {
-        return images.firstOrNull { it.coverType == CoverType.FanArt }
+    fun getPoster(): ArrImage? = images.firstOrNull { it.coverType == CoverType.Poster }
+
+    fun getBanner(): ArrImage? =
+        images.firstOrNull { it.coverType == CoverType.FanArt }
             ?: images.firstOrNull { it.coverType == CoverType.Banner }
             ?: images.firstOrNull { it.coverType == CoverType.Poster }
             ?: images.firstOrNull { it.coverType == CoverType.Cover }
-    }
 
-    fun getClearLogo(): ArrImage? {
-        return images.firstOrNull { it.coverType == CoverType.ClearLogo }
-    }
+    fun getClearLogo(): ArrImage? = images.firstOrNull { it.coverType == CoverType.ClearLogo }
+
     fun setMonitored(monitored: Boolean): ArrMedia
 
-    fun formatTags(availableTags: List<Tag>): String? = when {
-        availableTags.isEmpty() || tags.isEmpty() -> null
-        else -> {
-            tags.mapNotNull { t -> availableTags.firstOrNull { it.id == t }?.label }
-                .joinToString(", ")
-                .takeUnless { it.isEmpty() }
+    fun formatTags(availableTags: List<Tag>): String? =
+        when {
+            availableTags.isEmpty() || tags.isEmpty() -> null
+            else -> {
+                tags
+                    .mapNotNull { t -> availableTags.firstOrNull { it.id == t }?.label }
+                    .joinToString(", ")
+                    .takeUnless { it.isEmpty() }
+            }
         }
-    }
-    fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String? = null): ArrMedia
 
-    fun findCurrentRoot(rootFolders: List<RootFolder>): RootFolder? =
-        rootFolders.firstOrNull { it.path == rootFolderPath }
+    fun withNewRoot(
+        rootFolderPath: String,
+        currentRootFolderPath: String? = null,
+    ): ArrMedia
+
+    fun findCurrentRoot(rootFolders: List<RootFolder>): RootFolder? = rootFolders.firstOrNull { it.path == rootFolderPath }
 
     /**
      * Filtering props
@@ -116,15 +120,16 @@ sealed interface ArrMedia {
 }
 
 fun ArrMedia.toJson(): String {
-    val element: JsonElement = when (this) {
-        is ArrSeries -> ArrMedia.json.encodeToJsonElement(ArrSeriesSerializer, this)
-        is ArrMovie  -> ArrMedia.json.encodeToJsonElement(ArrMovieSerializer, this)
-        is Arrtist -> ArrMedia.json.encodeToJsonElement(ArrtistSerializer, this)
-        is Author -> ArrMedia.json.encodeToJsonElement(AuthorSerializer, this)
-        is Audiobook -> ArrMedia.json.encodeToJsonElement(AudiobookSerializer, this)
-        is SearchAudiobook -> ArrMedia.json.encodeToJsonElement(SearchAudiobookSerializer, this)
-        is MockMedia -> ArrMedia.json.encodeToJsonElement(MockMedia.serializer(), this)
-    }
+    val element: JsonElement =
+        when (this) {
+            is ArrSeries -> ArrMedia.json.encodeToJsonElement(ArrSeriesSerializer, this)
+            is ArrMovie -> ArrMedia.json.encodeToJsonElement(ArrMovieSerializer, this)
+            is Arrtist -> ArrMedia.json.encodeToJsonElement(ArrtistSerializer, this)
+            is Author -> ArrMedia.json.encodeToJsonElement(AuthorSerializer, this)
+            is Audiobook -> ArrMedia.json.encodeToJsonElement(AudiobookSerializer, this)
+            is SearchAudiobook -> ArrMedia.json.encodeToJsonElement(SearchAudiobookSerializer, this)
+            is MockMedia -> ArrMedia.json.encodeToJsonElement(MockMedia.serializer(), this)
+        }
 
     return ArrMedia.json.encodeToString(element)
 }
@@ -151,7 +156,7 @@ object ArrMovieSerializer :
     }
 }
 
-object ArrtistSerializer:
+object ArrtistSerializer :
     JsonTransformingSerializer<Arrtist>(Arrtist.serializer()) {
     override fun transformSerialize(element: JsonElement): JsonElement {
         val obj = element.jsonObject
@@ -162,7 +167,7 @@ object ArrtistSerializer:
     }
 }
 
-object AuthorSerializer:
+object AuthorSerializer :
     JsonTransformingSerializer<Author>(Author.serializer()) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
         val obj = element.jsonObject
@@ -173,7 +178,7 @@ object AuthorSerializer:
     }
 }
 
-object AudiobookSerializer:
+object AudiobookSerializer :
     JsonTransformingSerializer<Audiobook>(Audiobook.serializer()) {
     override fun transformSerialize(element: JsonElement): JsonElement {
         val obj = element.jsonObject
@@ -184,7 +189,7 @@ object AudiobookSerializer:
     }
 }
 
-object SearchAudiobookSerializer:
+object SearchAudiobookSerializer :
     JsonTransformingSerializer<SearchAudiobook>(SearchAudiobook.serializer()) {
     override fun transformSerialize(element: JsonElement): JsonElement {
         val obj = element.jsonObject
@@ -195,8 +200,7 @@ object SearchAudiobookSerializer:
     }
 }
 
-
-object AnyArrMediaSerializer: KSerializer<ArrMedia> {
+object AnyArrMediaSerializer : KSerializer<ArrMedia> {
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("AnyArrmedia")
 
@@ -218,18 +222,22 @@ object AnyArrMediaSerializer: KSerializer<ArrMedia> {
         }
     }
 
-    override fun serialize(encoder: Encoder, value: ArrMedia) {
+    override fun serialize(
+        encoder: Encoder,
+        value: ArrMedia,
+    ) {
         require(encoder is JsonEncoder)
         val json = encoder.json
-        val element: JsonElement = when (value) {
-            is ArrSeries -> json.encodeToJsonElement(ArrSeriesSerializer, value)
-            is ArrMovie  -> json.encodeToJsonElement(ArrMovieSerializer, value)
-            is Arrtist -> json.encodeToJsonElement(ArrtistSerializer, value)
-            is Author -> json.encodeToJsonElement(AuthorSerializer, value)
-            is Audiobook -> json.encodeToJsonElement(AudiobookSerializer, value)
-            is SearchAudiobook -> json.encodeToJsonElement(SearchAudiobookSerializer, value)
-            is MockMedia -> json.encodeToJsonElement(MockMedia.serializer(), value)
-        }
+        val element: JsonElement =
+            when (value) {
+                is ArrSeries -> json.encodeToJsonElement(ArrSeriesSerializer, value)
+                is ArrMovie -> json.encodeToJsonElement(ArrMovieSerializer, value)
+                is Arrtist -> json.encodeToJsonElement(ArrtistSerializer, value)
+                is Author -> json.encodeToJsonElement(AuthorSerializer, value)
+                is Audiobook -> json.encodeToJsonElement(AudiobookSerializer, value)
+                is SearchAudiobook -> json.encodeToJsonElement(SearchAudiobookSerializer, value)
+                is MockMedia -> json.encodeToJsonElement(MockMedia.serializer(), value)
+            }
         encoder.encodeJsonElement(element)
     }
 }

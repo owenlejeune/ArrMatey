@@ -21,23 +21,22 @@ class MovieFilesViewModel(
     private val movieId: Long,
     private val getMovieFilesUseCase: GetMovieFilesUseCase,
     getActivityTasksUseCase: GetActivityTasksUseCase,
-    private val deleteQueueItemUseCase: DeleteQueueItemUseCase
-): ViewModel() {
-
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
+) : ViewModel() {
     private val _uiState = MutableStateFlow(MovieFilesState())
     val uiState: StateFlow<MovieFilesState> = _uiState.asStateFlow()
 
-    val queueItems: StateFlow<List<QueueItem>> = getActivityTasksUseCase()
-        .map { tasks ->
-            tasks.filterIsInstance<RadarrQueueItem>().filter { task ->
-                task.movieId == movieId || task.mediaId == movieId
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val queueItems: StateFlow<List<QueueItem>> =
+        getActivityTasksUseCase()
+            .map { tasks ->
+                tasks.filterIsInstance<RadarrQueueItem>().filter { task ->
+                    task.movieId == movieId || task.mediaId == movieId
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
     private val _removeQueueItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val removeQueueItemStatus: StateFlow<OperationStatus> = _removeQueueItemStatus.asStateFlow()
@@ -66,14 +65,14 @@ class MovieFilesViewModel(
         queueItem: QueueItem,
         removeFromClient: Boolean,
         addToBlocklist: Boolean,
-        skipRedownload: Boolean
+        skipRedownload: Boolean,
     ) {
         viewModelScope.launch {
             deleteQueueItemUseCase(
                 queueItem = queueItem,
                 removeFromClient = removeFromClient,
                 addToBlocklist = addToBlocklist,
-                skipRedownload = skipRedownload
+                skipRedownload = skipRedownload,
             ).collect { status ->
                 _removeQueueItemStatus.value = status
             }

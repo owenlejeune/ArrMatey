@@ -89,7 +89,7 @@ import org.koin.compose.koinInject
 fun AddEditDownloadClientScreen(
     clientId: Long? = null,
     viewModel: DownloadClientSettingsViewModel = koinInjectParams(clientId),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -119,7 +119,7 @@ fun AddEditDownloadClientScreen(
             is DownloadClientMutationState.ConnectionFailed -> {
                 snackbarHostState.showSnackbar(
                     message = "Connection test failed: ${state.message}",
-                    duration = SnackbarDuration.Long
+                    duration = SnackbarDuration.Long,
                 )
             }
             else -> {
@@ -128,11 +128,12 @@ fun AddEditDownloadClientScreen(
         }
     }
 
-    val titleText = if (uiState.isEditing) {
-        mokoString(MR.strings.edit_download_client)
-    } else {
-        mokoString(MR.strings.add_download_client)
-    }
+    val titleText =
+        if (uiState.isEditing) {
+            mokoString(MR.strings.edit_download_client)
+        } else {
+            mokoString(MR.strings.add_download_client)
+        }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -148,15 +149,16 @@ fun AddEditDownloadClientScreen(
                             onClick = {
                                 confirmDelete = true
                             },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            ),
-                            modifier = Modifier.padding(end = 4.dp)
+                            colors =
+                                IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                ),
+                            modifier = Modifier.padding(end = 4.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = null
+                                contentDescription = null,
                             )
                         }
                     }
@@ -167,16 +169,16 @@ fun AddEditDownloadClientScreen(
                             }
                         },
                         enabled = uiState.saveButtonEnabled && !uiState.isTesting,
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier.padding(end = 16.dp),
                     ) {
                         AnimatedContent(
                             targetState = uiState.isTesting,
-                            label = "save_button"
+                            label = "save_button",
                         ) { isTesting ->
                             if (isTesting) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(16.dp),
-                                    strokeWidth = 2.dp
+                                    strokeWidth = 2.dp,
                                 )
                             } else {
                                 Text(text = mokoString(MR.strings.save))
@@ -184,51 +186,53 @@ fun AddEditDownloadClientScreen(
                         }
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-                .padding(bottom = navigationBarBottomInset() + 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = navigationBarBottomInset() + 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AnimatedVisibility(
-                visible = uiState.mutationState is DownloadClientMutationState.ConnectionFailed
+                visible = uiState.mutationState is DownloadClientMutationState.ConnectionFailed,
             ) {
                 Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                        ),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = Icons.Default.ErrorOutline,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onErrorContainer
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
                         )
                         Column {
                             Text(
                                 text = "Connection Failed",
                                 style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer
+                                color = MaterialTheme.colorScheme.onErrorContainer,
                             )
                             (uiState.mutationState as? DownloadClientMutationState.ConnectionFailed)?.let { state ->
                                 Text(
                                     text = state.message,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
                                 )
                             }
                         }
@@ -242,12 +246,12 @@ fun AddEditDownloadClientScreen(
                 onOptionSelected = { viewModel.updateSelectedType(it) },
                 getOptionLabel = { it.displayName },
                 label = { Text(mokoString(MR.strings.client_type)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
 
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 val hasLabelConflict = conflictFields.contains(DownloadClientConflictField.DownloadClientLabel)
                 AMOutlinedTextField(
@@ -258,7 +262,7 @@ fun AddEditDownloadClientScreen(
                     isError = hasLabelConflict,
                     errorMessage = hasLabelConflict thenGet mokoString(MR.strings.field_conflict, mokoString(MR.strings.client_label)),
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 val hasUrlConflict = conflictFields.contains(DownloadClientConflictField.DownloadClientUrl)
@@ -272,40 +276,42 @@ fun AddEditDownloadClientScreen(
                     description = mokoString(MR.strings.host_description, uiState.selectedType.displayName),
                     singleLine = true,
                     isError = uiState.endpointError || hasUrlConflict,
-                    errorMessage = when {
-                        uiState.endpointError -> mokoString(MR.strings.invalid_host)
-                        hasUrlConflict -> mokoString(MR.strings.field_conflict, mokoString(MR.strings.client_url))
-                        else -> null
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
+                    errorMessage =
+                        when {
+                            uiState.endpointError -> mokoString(MR.strings.invalid_host)
+                            hasUrlConflict -> mokoString(MR.strings.field_conflict, mokoString(MR.strings.client_url))
+                            else -> null
+                        },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 )
 
                 Card(
                     shape = MaterialTheme.shapes.large,
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        ),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(
                             text = mokoString(MR.strings.authentication),
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
 
                         Text(
                             text = mokoString(MR.strings.download_client_authentication),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
 
                         LabelledCheckbox(
                             label = mokoString(MR.strings.no_auth_required),
                             checked = uiState.noApiKeyRequired,
-                            onCheckedChange = { viewModel.updateNoApiKeyRequired(it) }
+                            onCheckedChange = { viewModel.updateNoApiKeyRequired(it) },
                         )
 
                         AMOutlinedTextField(
@@ -314,7 +320,7 @@ fun AddEditDownloadClientScreen(
                             label = mokoString(MR.strings.client_username),
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            enabled = !uiState.noApiKeyRequired
+                            enabled = !uiState.noApiKeyRequired,
                         )
 
                         var showPassword by remember { mutableStateOf(false) }
@@ -322,17 +328,18 @@ fun AddEditDownloadClientScreen(
                             value = uiState.password,
                             onValueChange = { viewModel.updatePassword(it) },
                             label = mokoString(MR.strings.client_password),
-                            visualTransformation = if (showPassword) {
-                                VisualTransformation.None
-                            } else {
-                                PasswordVisualTransformation()
-                            },
+                            visualTransformation =
+                                if (showPassword) {
+                                    VisualTransformation.None
+                                } else {
+                                    PasswordVisualTransformation()
+                                },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             trailingIcon = {
                                 AnimatedContent(
                                     targetState = showPassword,
-                                    modifier = Modifier.clickable { showPassword = !showPassword }
+                                    modifier = Modifier.clickable { showPassword = !showPassword },
                                 ) { visible ->
                                     if (visible) {
                                         Icon(Icons.Default.Visibility, null)
@@ -341,18 +348,18 @@ fun AddEditDownloadClientScreen(
                                     }
                                 }
                             },
-                            enabled = !uiState.noApiKeyRequired
+                            enabled = !uiState.noApiKeyRequired,
                         )
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                         ) {
                             HorizontalDivider(Modifier.weight(1f))
                             Text(
                                 mokoString(MR.strings.or),
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
                             )
                             HorizontalDivider(Modifier.weight(1f))
                         }
@@ -364,7 +371,7 @@ fun AddEditDownloadClientScreen(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             placeholder = mokoString(MR.strings.api_key_placeholder),
-                            enabled = !uiState.noApiKeyRequired
+                            enabled = !uiState.noApiKeyRequired,
                         )
                     }
                 }
@@ -373,7 +380,7 @@ fun AddEditDownloadClientScreen(
                     localNetworkSsids = uiState.localNetworkSsids,
                     localNetworkConfigured = uiState.localNetworkConfigured,
                     headers = uiState.headers,
-                    onHeadersChanged = { viewModel.updateHeaders(it) }
+                    onHeadersChanged = { viewModel.updateHeaders(it) },
                 )
 
                 LocalNetworkArea(
@@ -382,42 +389,41 @@ fun AddEditDownloadClientScreen(
                     onLocalNetworkEnabledChanged = { viewModel.updateLocalNetworkEnabled(it) },
                     onLocalNetworkUrlChanged = { viewModel.updateLocalNetworkUrl(it) },
                     onLocalNetworkSsidChanged = { viewModel.updateLocalNetworkSsid(it) },
-                    onTestLocalConnection = { viewModel.testLocalConnection() }
+                    onTestLocalConnection = { viewModel.testLocalConnection() },
                 )
 
                 TestConnectionSection(
                     isTesting = uiState.isTesting,
                     testButtonEnabled = !uiState.isTesting && uiState.url.isNotBlank(),
                     testResult = uiState.testResult,
-                    onTestConnection = { viewModel.testConnection() }
+                    onTestConnection = { viewModel.testConnection() },
                 )
             }
         }
 
         if (confirmDelete) {
             AlertDialog(
-                onDismissRequest = { confirmDelete = false},
+                onDismissRequest = { confirmDelete = false },
                 confirmButton = {
                     TextButton(
                         onClick = {
                             scope.launch {
                                 viewModel.deleteClient()
                             }
-                        }
+                        },
                     ) { Text(mokoString(MR.strings.yes)) }
                 },
                 dismissButton = {
                     TextButton(
                         onClick = {
                             confirmDelete = false
-
-                        }
+                        },
                     ) { Text(mokoString(MR.strings.no)) }
                 },
                 title = { Text(mokoString(MR.strings.confirm)) },
                 text = {
                     Text(mokoString(MR.strings.confirm_delete_download_client))
-                }
+                },
             )
         }
     }
@@ -431,25 +437,27 @@ fun LocalNetworkArea(
     onLocalNetworkUrlChanged: (String) -> Unit,
     onLocalNetworkSsidChanged: (List<String>) -> Unit,
     onTestLocalConnection: () -> Unit,
-    moko: MokoStrings = koinInject()
+    moko: MokoStrings = koinInject(),
 ) {
     val context = LocalContext.current
-    val locationPermissionHandler = rememberLocationPermissionHandler(
-        onDenied = {
-            Toast.makeText(context, moko.getString(MR.strings.location_denied), Toast.LENGTH_SHORT).show()
-        }
-    )
+    val locationPermissionHandler =
+        rememberLocationPermissionHandler(
+            onDenied = {
+                Toast.makeText(context, moko.getString(MR.strings.location_denied), Toast.LENGTH_SHORT).show()
+            },
+        )
 
     Card(
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-        ),
-        modifier = Modifier.fillMaxWidth()
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            ),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.local_network_switching),
@@ -460,7 +468,7 @@ fun LocalNetworkArea(
                     if (it) {
                         locationPermissionHandler.checkAndPerformAction()
                     }
-                }
+                },
             )
 
             AnimatedVisibility(visible = uiState.localNetworkEnabled && !locationPermissionHandler.isGranted()) {
@@ -470,7 +478,7 @@ fun LocalNetworkArea(
                         onClick = {
                             context.openAppSettings()
                             onLocalNetworkEnabledChanged(false)
-                        }
+                        },
                     ) {
                         Text(mokoString(MR.strings.open_location_permissions))
                     }
@@ -484,7 +492,7 @@ fun LocalNetworkArea(
                             Text(
                                 text = mokoString(MR.strings.current_network, ssid),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -494,13 +502,16 @@ fun LocalNetworkArea(
                         onValueChange = onLocalNetworkUrlChanged,
                         modifier = Modifier.fillMaxWidth(),
                         label = mokoString(MR.strings.local_network_url),
-                        placeholder = "http://192.168.1.100:${defaultPort}",
+                        placeholder = "http://192.168.1.100:$defaultPort",
                         enabled = uiState.localNetworkEnabled,
                         singleLine = true,
                         isError = uiState.localNetworkEndpointError,
-                        errorMessage = if (uiState.localNetworkEndpointError) {
-                            mokoString(MR.strings.invalid_url)
-                        } else null
+                        errorMessage =
+                            if (uiState.localNetworkEndpointError) {
+                                mokoString(MR.strings.invalid_url)
+                            } else {
+                                null
+                            },
                     )
 
                     AMOutlinedTextField(
@@ -513,7 +524,7 @@ fun LocalNetworkArea(
                         placeholder = "MyHomeWiFi, MyHomeWiFi_5G",
                         description = mokoString(MR.strings.wifi_ssid_description),
                         enabled = uiState.localNetworkEnabled,
-                        singleLine = true
+                        singleLine = true,
                     )
 
                     OutlinedButton(
@@ -530,7 +541,7 @@ fun LocalNetworkArea(
                                 }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Icon(Icons.Default.WifiFind, null)
                         Text(mokoString(MR.strings.use_current_network), modifier = Modifier.padding(start = 6.dp))
@@ -541,19 +552,21 @@ fun LocalNetworkArea(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Button(
                             onClick = onTestLocalConnection,
-                            enabled = !uiState.localTesting &&
+                            enabled =
+                                !uiState.localTesting &&
                                     uiState.localNetworkEndpoint.isNotBlank(),
                         ) {
                             if (uiState.localTesting) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .padding(end = 8.dp)
-                                        .size(16.dp),
-                                    strokeWidth = 2.dp
+                                    modifier =
+                                        Modifier
+                                            .padding(end = 8.dp)
+                                            .size(16.dp),
+                                    strokeWidth = 2.dp,
                                 )
                             }
                             Text(text = mokoString(MR.strings.test_local_connection))
@@ -561,31 +574,31 @@ fun LocalNetworkArea(
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             when (uiState.localTestResult) {
                                 true -> {
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = MaterialTheme.colorScheme.primary,
                                     )
                                     Text(
                                         text = mokoString(MR.strings.success),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
                                 false -> {
                                     Icon(
                                         painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error
+                                        tint = MaterialTheme.colorScheme.error,
                                     )
                                     Text(
                                         text = mokoString(MR.strings.failure),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.error
+                                        color = MaterialTheme.colorScheme.error,
                                     )
                                 }
                                 else -> {}

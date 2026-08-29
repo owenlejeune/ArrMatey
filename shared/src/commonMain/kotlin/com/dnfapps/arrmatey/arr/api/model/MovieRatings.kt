@@ -8,5 +8,5 @@ data class MovieRatings(
     val tmdb: MovieRating? = null,
     val metacritic: MovieRating? = null,
     val rottenTomatoes: MovieRating? = null,
-    val trakt: MovieRating? = null
-): ArrRatings
+    val trakt: MovieRating? = null,
+) : ArrRatings

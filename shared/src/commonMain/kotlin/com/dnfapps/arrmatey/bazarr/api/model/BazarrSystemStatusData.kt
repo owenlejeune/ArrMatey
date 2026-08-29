@@ -16,5 +16,5 @@ data class BazarrSystemStatusData(
     val bazarr_config_directory: String,
     val start_time: Double,
     val timezone: String,
-    val cpu_cores: Int
+    val cpu_cores: Int,
 )

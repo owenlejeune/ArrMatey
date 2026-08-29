@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 
 class DownloadClientManager(
     private val downloadClientRepository: DownloadClientRepository,
-    private val httpClientFactory: HttpClientFactory
+    private val httpClientFactory: HttpClientFactory,
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -36,7 +36,8 @@ class DownloadClientManager(
 
     private fun observeDownloadClients() {
         scope.launch {
-            downloadClientRepository.observeAllDownloadClients()
+            downloadClientRepository
+                .observeAllDownloadClients()
                 .collect { downloadClients ->
                     updateClientApis(downloadClients)
                 }
@@ -63,27 +64,21 @@ class DownloadClientManager(
         _downloadClientApis.value = currentApis
     }
 
-    fun observeAllDownloadClients(): Flow<List<DownloadClient>> =
-        downloadClientRepository.observeAllDownloadClients()
+    fun observeAllDownloadClients(): Flow<List<DownloadClient>> = downloadClientRepository.observeAllDownloadClients()
 
-    fun observeSelectedDownloadClient(): Flow<DownloadClient?> =
-        downloadClientRepository.observeSelectedDownloadClient()
+    fun observeSelectedDownloadClient(): Flow<DownloadClient?> = downloadClientRepository.observeSelectedDownloadClient()
 
-    fun getSelectedDownloadClientApi(): Flow<DownloadClientApi?> {
-        return observeSelectedDownloadClient()
+    fun getSelectedDownloadClientApi(): Flow<DownloadClientApi?> =
+        observeSelectedDownloadClient()
             .map { selectedClient ->
                 selectedClient?.let { _downloadClientApis.value[it.id] }
             }
-    }
 
-    fun observeSelectedApiClient(): Flow<DownloadClientApi?> =
-        getSelectedDownloadClientApi()
+    fun observeSelectedApiClient(): Flow<DownloadClientApi?> = getSelectedDownloadClientApi()
 
-    fun getDownloadClientApi(id: Long): DownloadClientApi? =
-        _downloadClientApis.value[id]
+    fun getDownloadClientApi(id: Long): DownloadClientApi? = _downloadClientApis.value[id]
 
-    fun getApiClient(id: Long): DownloadClientApi? =
-        getDownloadClientApi(id)
+    fun getApiClient(id: Long): DownloadClientApi? = getDownloadClientApi(id)
 
     suspend fun getOrCreateApi(id: Long): DownloadClientApi? {
         _downloadClientApis.value[id]?.let { return it }
@@ -115,9 +110,7 @@ class DownloadClientManager(
         cachedClients.remove(id)
     }
 
-    fun createApiFromClient(client: DownloadClient): DownloadClientApi {
-        return createApi(client)
-    }
+    fun createApiFromClient(client: DownloadClient): DownloadClientApi = createApi(client)
 
     suspend fun getSelectedDownloadClientApiSnapshot(): DownloadClientApi? {
         val selectedClient = downloadClientRepository.getSelectedDownloadClient()
@@ -126,11 +119,9 @@ class DownloadClientManager(
         }
     }
 
-    suspend fun getAllDownloadClientApis(): List<DownloadClientApi> =
-        _downloadClientApis.value.values.toList()
+    suspend fun getAllDownloadClientApis(): List<DownloadClientApi> = _downloadClientApis.value.values.toList()
 
-    suspend fun getDownloadClientById(id: Long): DownloadClient? =
-        downloadClientRepository.getDownloadClientById(id)
+    suspend fun getDownloadClientById(id: Long): DownloadClient? = downloadClientRepository.getDownloadClientById(id)
 
     suspend fun setSelectedClient(downloadClient: DownloadClient) {
         downloadClientRepository.setDownloadClientActive(downloadClient)

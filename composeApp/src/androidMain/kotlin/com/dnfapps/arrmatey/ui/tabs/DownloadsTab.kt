@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package com.dnfapps.arrmatey.ui.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -89,9 +91,9 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientCommandState
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
-import com.dnfapps.arrmatey.entensions.ArrowDown
-import com.dnfapps.arrmatey.entensions.ArrowUp
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.ARROW_DOWN
+import com.dnfapps.arrmatey.entensions.ARROW_UP
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.showErrorImmediately
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
@@ -118,7 +120,7 @@ fun DownloadsTab(
     wideRailIsVisible: Boolean,
     viewModel: DownloadQueueViewModel = koinInject(),
     clientsViewModel: DownloadClientsViewModel = koinInject(),
-    navigationManager: NavigationManager = koinInject()
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val queueState by viewModel.downloadQueueState.collectAsStateWithLifecycle()
     val filterState by viewModel.filterState.collectAsStateWithLifecycle()
@@ -142,9 +144,13 @@ fun DownloadsTab(
 
     val textFieldState = rememberTextFieldState()
 
-    val availableTags = remember(queueState.queueItems) {
-        queueState.queueItems.flatMap { it.tags }.distinct().sorted()
-    }
+    val availableTags =
+        remember(queueState.queueItems) {
+            queueState.queueItems
+                .flatMap { it.tags }
+                .distinct()
+                .sorted()
+        }
 
     LaunchedEffect(textFieldState.text) {
         viewModel.updateSearchQuery(textFieldState.text.toString())
@@ -161,7 +167,7 @@ fun DownloadsTab(
                 deleteTarget = null
                 bulkDeleteTarget = false
                 snackbarHostState.showErrorImmediately(
-                    message = state.message ?: genericErrorMessage
+                    message = state.message ?: genericErrorMessage,
                 )
                 viewModel.resetCommandState()
             }
@@ -186,7 +192,7 @@ fun DownloadsTab(
                             viewModel.selectAllItems()
                         }
                     },
-                    isAllSelected = viewModel.areAllItemsSelected()
+                    isAllSelected = viewModel.areAllItemsSelected(),
                 )
             } else {
                 val count = queueState.queueItems.size
@@ -214,68 +220,73 @@ fun DownloadsTab(
                             onUpdateCompletedOnly = viewModel::updateCompletedOnly,
                             onUpdateExcludeStatuses = viewModel::updateExcludeStatuses,
                             onUpdateExcludeTags = viewModel::updateExcludeTags,
-                            onClearFilters = viewModel::clearFilters
+                            onClearFilters = viewModel::clearFilters,
                         )
-                    }
+                    },
                 )
             }
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+            contentAlignment = Alignment.Center,
         ) {
             if (downloadClientState.downloadClients.isEmpty()) {
                 NoDownloadClientsView(
                     onAddDownloadClientClick = {
                         navigationManager.openNewDownloadClientScreen()
-                    }
+                    },
                 )
             } else if (!hasLoaded || (queueState.queueItems.isEmpty() && isRefreshing)) {
                 LoadingIndicator(
-                    modifier = Modifier.size(96.dp)
+                    modifier = Modifier.size(96.dp),
                 )
             } else {
                 PullToRefreshBox(
                     modifier = Modifier.fillMaxSize(),
                     isRefreshing = isRefreshing,
                     onRefresh = { viewModel.refresh() },
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Column {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp)
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp)
+                                    .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             Spacer(Modifier.width(18.dp))
                             downloadClientState.downloadClients.forEach { client ->
                                 val info =
                                     queueState.transferInfo.firstOrNull { it.client.id == client.id }
                                 FilterChip(
-                                    selected = downloadClientState.downloadClients.size > 1
-                                            && filterState.clientIds.contains(client.id),
+                                    selected =
+                                        downloadClientState.downloadClients.size > 1 &&
+                                            filterState.clientIds.contains(client.id),
                                     onClick = { viewModel.toggleClientIdFilter(client.id) },
                                     leadingIcon = {
                                         Image(
                                             painter = painterResource(client.type.icon),
                                             contentDescription = null,
-                                            modifier = Modifier.size(18.dp)
+                                            modifier = Modifier.size(18.dp),
                                         )
                                     },
                                     label = {
                                         Text(
-                                            text = "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  ↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
+                                            text =
+                                                "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  " +
+                                                    "↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(vertical = 2.dp)
+                                            modifier = Modifier.padding(vertical = 2.dp),
                                         )
-                                    }
+                                    },
                                 )
                             }
                             Spacer(Modifier.width(18.dp))
@@ -284,14 +295,14 @@ fun DownloadsTab(
                             Column(
                                 modifier = Modifier.fillMaxSize(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                                verticalArrangement = Arrangement.Center,
                             ) {
                                 if (errorMessage != null) {
                                     Icon(
                                         imageVector = Icons.Default.ErrorOutline,
                                         contentDescription = null,
                                         modifier = Modifier.size(64.dp),
-                                        tint = ArrRed
+                                        tint = ArrRed,
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
@@ -299,11 +310,11 @@ fun DownloadsTab(
                                         style = MaterialTheme.typography.bodyLarge,
                                         color = ArrRed,
                                         textAlign = TextAlign.Center,
-                                        modifier = Modifier.padding(horizontal = 32.dp)
+                                        modifier = Modifier.padding(horizontal = 32.dp),
                                     )
                                 } else if (isRefreshing) {
                                     LoadingIndicator(
-                                        modifier = Modifier.size(64.dp)
+                                        modifier = Modifier.size(64.dp),
                                     )
                                 } else {
                                     Text(text = mokoString(MR.strings.no_activity))
@@ -314,11 +325,11 @@ fun DownloadsTab(
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = PaddingValues(16.dp),
-                                state = listState
+                                state = listState,
                             ) {
                                 items(
                                     items = queueState.queueItems,
-                                    key = { "${it.client.id}:${it.id}" }
+                                    key = { "${it.client.id}:${it.id}" },
                                 ) { item ->
                                     val isSelected = selectedItems.contains(item.id)
                                     TorrentActionsCard(
@@ -337,7 +348,7 @@ fun DownloadsTab(
                                             if (isInSelectionMode) {
                                                 viewModel.toggleItemSelection(item.id)
                                             }
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -350,21 +361,23 @@ fun DownloadsTab(
         if (isInSelectionMode) {
             FlexibleBottomSheet(
                 onDismissRequest = { viewModel.exitSelectionMode() },
-                sheetState = rememberFlexibleBottomSheetState(
-                    isModal = false,
-                    initialValue = FlexibleSheetValue.IntermediatelyExpanded,
-                    flexibleSheetSize = FlexibleSheetSize(
-                        fullyExpanded = FlexibleSheetSize.WrapContent,
-                        intermediatelyExpanded = 0.15f,
-                        slightlyExpanded = 0.15f
-                    )
-                ),
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                sheetState =
+                    rememberFlexibleBottomSheetState(
+                        isModal = false,
+                        initialValue = FlexibleSheetValue.IntermediatelyExpanded,
+                        flexibleSheetSize =
+                            FlexibleSheetSize(
+                                fullyExpanded = FlexibleSheetSize.WrapContent,
+                                intermediatelyExpanded = 0.15f,
+                                slightlyExpanded = 0.15f,
+                            ),
+                    ),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
                 DownloadSelectionBottomBar(
                     onPause = { viewModel.pauseSelected() },
                     onResume = { viewModel.resumeSelected() },
-                    onDelete = { bulkDeleteTarget = true }
+                    onDelete = { bulkDeleteTarget = true },
                 )
             }
         }
@@ -377,7 +390,7 @@ fun DownloadsTab(
                 },
                 onConfirm = { deleteFiles ->
                     viewModel.deleteDownload(item.id, deleteFiles)
-                }
+                },
             )
         }
 
@@ -387,7 +400,7 @@ fun DownloadsTab(
                 onDismiss = { bulkDeleteTarget = false },
                 onConfirm = { deleteFiles ->
                     viewModel.deleteSelected(deleteFiles)
-                }
+                },
             )
         }
     }
@@ -399,12 +412,12 @@ private fun SelectionTopBar(
     count: Int,
     onClose: () -> Unit,
     onSelectAll: () -> Unit,
-    isAllSelected: Boolean
+    isAllSelected: Boolean,
 ) {
     TopAppBar(
         title = {
             Text(
-                text = mokoString(MR.strings.selected_count, count)
+                text = mokoString(MR.strings.selected_count, count),
             )
         },
         navigationIcon = {
@@ -416,10 +429,10 @@ private fun SelectionTopBar(
             IconButton(onClick = onSelectAll) {
                 Icon(
                     imageVector = if (isAllSelected) Icons.Default.Deselect else Icons.Default.SelectAll,
-                    contentDescription = null
+                    contentDescription = null,
                 )
             }
-        }
+        },
     )
 }
 
@@ -427,31 +440,32 @@ private fun SelectionTopBar(
 private fun DownloadSelectionBottomBar(
     onPause: () -> Unit,
     onResume: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     FlowRow(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 24.dp)
-            .fillMaxWidth(),
+        modifier =
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp)
+                .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
         DownloadSelectionActionItem(
             icon = Icons.Default.Pause,
             label = mokoString(MR.strings.pause),
-            onClick = onPause
+            onClick = onPause,
         )
         DownloadSelectionActionItem(
             icon = Icons.Default.PlayArrow,
             label = mokoString(MR.strings.resume),
-            onClick = onResume
+            onClick = onResume,
         )
         DownloadSelectionActionItem(
             icon = Icons.Default.Delete,
             label = mokoString(MR.strings.delete),
             onClick = onDelete,
-            isError = true
+            isError = true,
         )
     }
 }
@@ -462,23 +476,28 @@ private fun DownloadSelectionActionItem(
     label: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
-    isError: Boolean = false
+    isError: Boolean = false,
 ) {
     Button(
         onClick = onClick,
-        colors = if (isError) ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError
-        ) else ButtonDefaults.buttonColors(),
-        enabled = enabled
+        colors =
+            if (isError) {
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                )
+            } else {
+                ButtonDefaults.buttonColors()
+            },
+        enabled = enabled,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            modifier = Modifier.padding(end = 4.dp)
+            modifier = Modifier.padding(end = 4.dp),
         )
         Text(
-            text = label.breakable()
+            text = label.breakable(),
         )
     }
 }
@@ -491,113 +510,125 @@ private fun DownloadQueueItem(
     isInSelectionMode: Boolean,
     isSelected: Boolean,
     onLongClick: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
-    val statusColor = remember(item.status) { when(item.status) {
-        DownloadItemStatus.Downloading,
-            DownloadItemStatus.DownloadingForced,
-            DownloadItemStatus.DownloadingMetadataForced,
-            DownloadItemStatus.Checking,
-            DownloadItemStatus.CheckingResumeData,
-            DownloadItemStatus.Moving,
-            DownloadItemStatus.DownloadingStalled -> ArrGreen
-        DownloadItemStatus.Uploading,
-            DownloadItemStatus.UploadingForced -> ArrBlue
-        DownloadItemStatus.DownloadingPaused,
-            DownloadItemStatus.UploadingPaused -> ArrPurple
-        DownloadItemStatus.Queued,
-             DownloadItemStatus.Allocating,
-             DownloadItemStatus.Propagating,
-             DownloadItemStatus.Fetching -> ArrGrey
-        DownloadItemStatus.Error,
-            DownloadItemStatus.MissingFiles,
-            DownloadItemStatus.Unknown -> ArrRed
-    } }
+    val statusColor =
+        remember(item.status) {
+            when (item.status) {
+                DownloadItemStatus.Downloading,
+                DownloadItemStatus.DownloadingForced,
+                DownloadItemStatus.DownloadingMetadataForced,
+                DownloadItemStatus.Checking,
+                DownloadItemStatus.CheckingResumeData,
+                DownloadItemStatus.Moving,
+                DownloadItemStatus.DownloadingStalled,
+                -> ArrGreen
+                DownloadItemStatus.Uploading,
+                DownloadItemStatus.UploadingForced,
+                -> ArrBlue
+                DownloadItemStatus.DownloadingPaused,
+                DownloadItemStatus.UploadingPaused,
+                -> ArrPurple
+                DownloadItemStatus.Queued,
+                DownloadItemStatus.Allocating,
+                DownloadItemStatus.Propagating,
+                DownloadItemStatus.Fetching,
+                -> ArrGrey
+                DownloadItemStatus.Error,
+                DownloadItemStatus.MissingFiles,
+                DownloadItemStatus.Unknown,
+                -> ArrRed
+            }
+        }
 
-    ContainerCard (
-        modifier = Modifier.combinedClickable(
-            onLongClick = onLongClick,
-            onClick = onClick
-        ),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow
-        ),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ContainerCard(
+        modifier =
+            Modifier.combinedClickable(
+                onLongClick = onLongClick,
+                onClick = onClick,
+            ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
+            ),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (isInSelectionMode) {
                 Checkbox(
                     checked = isSelected,
-                    onCheckedChange = { onClick() }
+                    onCheckedChange = { onClick() },
                 )
             }
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
                     text = item.name.breakable(),
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
 
-                val statusLabel = buildAnnotatedString {
-                    withStyle(SpanStyle(color = statusColor)) {
-                        append(mokoString(item.status.resource))
+                val statusLabel =
+                    buildAnnotatedString {
+                        withStyle(SpanStyle(color = statusColor)) {
+                            append(mokoString(item.status.resource))
+                        }
+                        if (item.downloadSpeed > 0L) {
+                            append(BULLET)
+                            append(ARROW_DOWN)
+                            append(item.downloadSpeed.bytesAsFileSizeString())
+                            append("/s")
+                        }
+                        if (item.uploadSpeed > 0L) {
+                            append(BULLET)
+                            append(ARROW_UP)
+                            append(item.uploadSpeed.bytesAsFileSizeString())
+                            append("/s")
+                        }
                     }
-                    if (item.downloadSpeed > 0L) {
-                        append(Bullet)
-                        append(ArrowDown)
-                        append(item.downloadSpeed.bytesAsFileSizeString())
-                        append("/s")
-                    }
-                    if (item.uploadSpeed > 0L) {
-                        append(Bullet)
-                        append(ArrowUp)
-                        append(item.uploadSpeed.bytesAsFileSizeString())
-                        append("/s")
-                    }
-                }
                 Text(
                     text = statusLabel,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                val progressLabel = buildString {
-                    append(item.downloaded.bytesAsFileSizeString())
-                    append(" / ")
-                    append(item.size.bytesAsFileSizeString())
-                    append(Bullet)
-                    append("${(item.progress * 100).toInt()}%")
-                }
+                val progressLabel =
+                    buildString {
+                        append(item.downloaded.bytesAsFileSizeString())
+                        append(" / ")
+                        append(item.size.bytesAsFileSizeString())
+                        append(BULLET)
+                        append("${(item.progress * 100).toInt()}%")
+                    }
                 Text(
                     text = progressLabel,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 LinearProgressIndicator(
                     progress = { item.progress.toFloat() },
                     modifier = Modifier.fillMaxWidth(),
                     trackColor = statusColor.copy(alpha = 0.3f),
-                    color = statusColor
+                    color = statusColor,
                 )
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 4.dp),
                 ) {
                     if (item.etaString.isNotBlank()) {
                         Text(
                             text = "ETA: ${item.etaString}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
 
@@ -606,17 +637,17 @@ private fun DownloadQueueItem(
                     if (showClientInfo) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             Image(
                                 painter = painterResource(item.client.type.icon),
                                 contentDescription = null,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
                             )
                             Text(
                                 text = item.client.label,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -624,17 +655,18 @@ private fun DownloadQueueItem(
 
                 if (item.category.isNotEmpty() || item.tags.isNotEmpty()) {
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         item.category.takeUnless { it.isEmpty() }?.let { category ->
                             AssistChip(
                                 onClick = { },
                                 label = { Text(category) },
                                 border = null,
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    labelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
+                                colors =
+                                    AssistChipDefaults.assistChipColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    ),
                             )
                         }
                         item.tags.forEach { tag ->
@@ -643,10 +675,11 @@ private fun DownloadQueueItem(
                                 label = { Text(tag) },
                                 border = null,
                                 shape = CircleShape,
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                    labelColor = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
+                                colors =
+                                    AssistChipDefaults.assistChipColors(
+                                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                        labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    ),
                             )
                         }
                     }
@@ -660,7 +693,7 @@ private fun DownloadQueueItem(
 private fun DeleteDownloadDialog(
     commandState: DownloadClientCommandState,
     onDismiss: () -> Unit,
-    onConfirm: (Boolean) -> Unit
+    onConfirm: (Boolean) -> Unit,
 ) {
     var deleteFiles by remember { mutableStateOf(false) }
 
@@ -671,7 +704,7 @@ private fun DeleteDownloadDialog(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Remove this download?")
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Checkbox(checked = deleteFiles, onCheckedChange = { deleteFiles = it })
                     Text(mokoString(MR.strings.delete_files))
@@ -681,7 +714,7 @@ private fun DeleteDownloadDialog(
         confirmButton = {
             TextButton(
                 onClick = { onConfirm(deleteFiles) },
-                enabled = commandState !is DownloadClientCommandState.Loading
+                enabled = commandState !is DownloadClientCommandState.Loading,
             ) {
                 Text(mokoString(MR.strings.yes))
             }
@@ -690,49 +723,50 @@ private fun DeleteDownloadDialog(
             TextButton(onClick = onDismiss) {
                 Text(mokoString(MR.strings.no))
             }
-        }
+        },
     )
 }
 
 @Composable
 private fun NoDownloadClientsView(
     modifier: Modifier = Modifier,
-    onAddDownloadClientClick: () -> Unit = {}
+    onAddDownloadClientClick: () -> Unit = {},
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        modifier = modifier,
     ) {
         Icon(
             imageVector = Icons.Default.CloudQueue,
             contentDescription = null,
-            modifier = Modifier.size(128.dp)
+            modifier = Modifier.size(128.dp),
         )
         Text(
             text = mokoString(MR.strings.no_download_clients),
             fontSize = 20.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
         Button(
             onClick = onAddDownloadClientClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
         ) {
             Icon(
                 imageVector = Icons.Default.AddCircle,
-                contentDescription = null
+                contentDescription = null,
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = mokoString(MR.strings.add_instance),
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
         }
     }
@@ -748,7 +782,7 @@ fun TorrentActionsCard(
     onResume: () -> Unit,
     onDelete: () -> Unit,
     onLongClick: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val state = rememberSwipeToDismissBoxState()
 
@@ -772,44 +806,48 @@ fun TorrentActionsCard(
         enableDismissFromStartToEnd = !isInSelectionMode,
         enableDismissFromEndToStart = !isInSelectionMode,
         backgroundContent = {
-            val color = when (state.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
-                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                else -> Color.Unspecified
-            }
-            val icon = when (state.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd ->
-                    if (item.status.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause
-                else -> Icons.Default.Delete
-            }
-            val alignment = when (state.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                else -> Alignment.CenterEnd
-            }
+            val color =
+                when (state.dismissDirection) {
+                    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
+                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+                    else -> Color.Unspecified
+                }
+            val icon =
+                when (state.dismissDirection) {
+                    SwipeToDismissBoxValue.StartToEnd ->
+                        if (item.status.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause
+                    else -> Icons.Default.Delete
+                }
+            val alignment =
+                when (state.dismissDirection) {
+                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                    else -> Alignment.CenterEnd
+                }
 
             when (state.dismissDirection) {
                 SwipeToDismissBoxValue.StartToEnd,
-                SwipeToDismissBoxValue.EndToStart -> {
+                SwipeToDismissBoxValue.EndToStart,
+                -> {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .drawBehind {
-                                drawRoundRect(
-                                    color = color,
-                                    cornerRadius = CornerRadius(10.dp.toPx())
-                                )
-                            }
-                            .wrapContentSize(alignment)
-                            .padding(12.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .drawBehind {
+                                    drawRoundRect(
+                                        color = color,
+                                        cornerRadius = CornerRadius(10.dp.toPx()),
+                                    )
+                                }.wrapContentSize(alignment)
+                                .padding(12.dp),
                     )
                 }
                 else -> {}
             }
         },
-        onDismiss = {}
+        onDismiss = {},
     ) {
         DownloadQueueItem(
             item = item,
@@ -817,7 +855,7 @@ fun TorrentActionsCard(
             isInSelectionMode = isInSelectionMode,
             isSelected = isSelected,
             onLongClick = onLongClick,
-            onClick = onClick
+            onClick = onClick,
         )
     }
 }

@@ -9,18 +9,21 @@ import com.dnfapps.arrmatey.utils.EncryptionManager
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-val iosDbModule = module {
-    single<RoomDatabase.Builder<ArrMateyDatabase>> {
-        getDatabaseBuilder()
+val iosDbModule =
+    module {
+        single<RoomDatabase.Builder<ArrMateyDatabase>> {
+            getDatabaseBuilder()
+        }
     }
-}
 
-val iosSecurityModule = module {
-    single<EncryptionManager> { AESEncryptionManager() }
-}
+val iosSecurityModule =
+    module {
+        single<EncryptionManager> { AESEncryptionManager() }
+    }
 
-val iosNotificationModule = module {
-    single { NotificationManager(get()) }
-}
+val iosNotificationModule =
+    module {
+        single { NotificationManager(get()) }
+    }
 
 actual fun platformModules(): List<Module> = listOf(iosDbModule, iosSecurityModule, iosNotificationModule)

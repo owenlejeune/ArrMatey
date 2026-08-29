@@ -39,7 +39,7 @@ fun EditAudiobookSheet(
     rootFolders: List<RootFolder>,
     editInProgress: Boolean,
     onEditItem: (Audiobook) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     var monitored by remember { mutableStateOf(item.monitored) }
     var selectedQualityProfileId by remember { mutableIntStateOf(item.qualityProfileId) }
@@ -52,22 +52,24 @@ fun EditAudiobookSheet(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !editInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !editInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,
                 onCheckedChange = { monitored = it },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             DropdownPicker(
@@ -77,7 +79,7 @@ fun EditAudiobookSheet(
                 onOptionSelected = { selectedQualityProfileId = it.id },
                 getOptionLabel = { it.name ?: "" },
                 label = { Text(mokoString(MR.strings.quality_profile)) },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             if (rootFolders.isNotEmpty()) {
@@ -88,7 +90,7 @@ fun EditAudiobookSheet(
                     onOptionSelected = { selectedRootFolder = it },
                     getOptionLabel = { it.path },
                     label = { Text(mokoString(MR.strings.root_folder)) },
-                    enabled = !editInProgress
+                    enabled = !editInProgress,
                 )
             }
 
@@ -97,7 +99,7 @@ fun EditAudiobookSheet(
                 onValueChange = { relativePath = it },
                 modifier = Modifier.fillMaxWidth(),
                 label = mokoString(MR.strings.relative_path),
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             Button(
@@ -107,19 +109,19 @@ fun EditAudiobookSheet(
                             monitored = monitored,
                             qualityProfileId = selectedQualityProfileId,
                             rootFolderPath = selectedRootFolder.path,
-                            relativePath = relativePath
-                        )
+                            relativePath = relativePath,
+                        ),
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !editInProgress
+                enabled = !editInProgress,
             ) {
                 if (editInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(mokoString(MR.strings.save))
                 }

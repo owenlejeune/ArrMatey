@@ -18,7 +18,6 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
@@ -65,7 +64,7 @@ fun DiscoverTab(
     wideRailIsVisible: Boolean,
     viewModel: DiscoverViewModel = koinInject(),
     navigationManager: NavigationManager = koinInject(),
-    navigation: Navigator<NavKey> = navigationManager.discover
+    navigation: Navigator<NavKey> = navigationManager.discover,
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     NavDisplay(
@@ -74,28 +73,29 @@ fun DiscoverTab(
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-        entryProvider = entryProvider {
-            entry<DiscoverScreen.Home> {
-                DiscoverHomeScreen(
-                    viewModel = viewModel,
-                    wideRailIsVisible = wideRailIsVisible,
-                    onItemClick = { result ->
-                        when (result) {
-                            is SearchResult.ArrMediaResult -> {
-                                navigation.toArrDetailsOrPreview(result.media, result.instanceType)
+        entryProvider =
+            entryProvider {
+                entry<DiscoverScreen.Home> {
+                    DiscoverHomeScreen(
+                        viewModel = viewModel,
+                        wideRailIsVisible = wideRailIsVisible,
+                        onItemClick = { result ->
+                            when (result) {
+                                is SearchResult.ArrMediaResult -> {
+                                    navigation.toArrDetailsOrPreview(result.media, result.instanceType)
+                                }
+                                is SearchResult.SeerrMediaResult -> {
+                                    navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
+                                }
+                                is SearchResult.SeerrPersonResult -> {
+                                    navigation.toPersonDetails(result.result.id)
+                                }
                             }
-                            is SearchResult.SeerrMediaResult -> {
-                                navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
-                            }
-                            is SearchResult.SeerrPersonResult -> {
-                                navigation.toPersonDetails(result.result.id)
-                            }
-                        }
-                    }
-                )
-            }
-            mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
-        }
+                        },
+                    )
+                }
+                mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
+            },
     )
 }
 
@@ -104,7 +104,7 @@ fun DiscoverTab(
 private fun DiscoverHomeScreen(
     viewModel: DiscoverViewModel,
     wideRailIsVisible: Boolean,
-    onItemClick: (SearchResult) -> Unit
+    onItemClick: (SearchResult) -> Unit,
 ) {
     val trendingState by viewModel.trendingState.collectAsStateWithLifecycle()
     val moviesState by viewModel.moviesState.collectAsStateWithLifecycle()
@@ -135,41 +135,45 @@ private fun DiscoverHomeScreen(
                     if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
-        Box(modifier = Modifier
-            .padding(paddingValues)
-            .fillMaxSize()) {
+        Box(
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+        ) {
             if (searchBarState.isExpanded()) {
                 DiscoverSearchOverlay(
                     items = searchState,
                     isLoading = isSearching,
                     onItemClick = onItemClick,
                     showBanners = searchShowBanners,
-                    showInstanceIndicatorShadow = searchShowInstanceIndicatorShadow
+                    showInstanceIndicatorShadow = searchShowInstanceIndicatorShadow,
                 )
             } else {
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
                     onRefresh = { viewModel.refresh() },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(vertical = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
                         DiscoverSection(
                             title = MR.strings.trending,
                             icon = Icons.AutoMirrored.Filled.TrendingUp,
                             data = trendingState,
                             onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextTrendingPage() }
+                            onLoadMore = { viewModel.loadNextTrendingPage() },
                         )
 
                         DiscoverSection(
@@ -177,7 +181,7 @@ private fun DiscoverHomeScreen(
                             icon = Icons.Default.Movie,
                             data = moviesState,
                             onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextMoviesPage() }
+                            onLoadMore = { viewModel.loadNextMoviesPage() },
                         )
 
                         DiscoverSection(
@@ -185,7 +189,7 @@ private fun DiscoverHomeScreen(
                             icon = Icons.Default.Event,
                             data = upcomingMoviesState,
                             onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextUpcomingMoviesPage() }
+                            onLoadMore = { viewModel.loadNextUpcomingMoviesPage() },
                         )
 
                         DiscoverSection(
@@ -193,7 +197,7 @@ private fun DiscoverHomeScreen(
                             icon = Icons.Default.Tv,
                             data = tvState,
                             onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextTvPage() }
+                            onLoadMore = { viewModel.loadNextTvPage() },
                         )
 
                         DiscoverSection(
@@ -201,7 +205,7 @@ private fun DiscoverHomeScreen(
                             icon = Icons.Default.Event,
                             data = upcomingTvState,
                             onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextUpcomingTvPage() }
+                            onLoadMore = { viewModel.loadNextUpcomingTvPage() },
                         )
 
                         Spacer(modifier = Modifier.height(0.dp))
@@ -219,7 +223,7 @@ private fun DiscoverSearchOverlay(
     isLoading: Boolean,
     onItemClick: (SearchResult) -> Unit,
     showBanners: Boolean,
-    showInstanceIndicatorShadow: Boolean
+    showInstanceIndicatorShadow: Boolean,
 ) {
     if (isLoading && items.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -231,7 +235,7 @@ private fun DiscoverSearchOverlay(
             onItemClick = onItemClick,
             includeOverview = true,
             showBanners = showBanners,
-            showInstanceIndicatorShadow = showInstanceIndicatorShadow
+            showInstanceIndicatorShadow = showInstanceIndicatorShadow,
         )
     }
 }

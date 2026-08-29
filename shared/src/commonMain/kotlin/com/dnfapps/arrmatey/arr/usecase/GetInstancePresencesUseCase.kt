@@ -14,31 +14,33 @@ class GetInstancePresencesUseCase {
         query: String?,
         resolvedTvdbLookupId: Long?,
         resolvedLookupId: Long?,
-        existingPresences: Map<Long, ArrMedia?>
+        existingPresences: Map<Long, ArrMedia?>,
     ): Map<Long, ArrMedia?> {
         if (repositories.isEmpty() || query.isNullOrBlank()) return existingPresences
 
-        val missingRepos = repositories.filter { repo ->
-            !existingPresences.containsKey(repo.instance.id)
-        }
+        val missingRepos =
+            repositories.filter { repo ->
+                !existingPresences.containsKey(repo.instance.id)
+            }
         if (missingRepos.isEmpty()) return existingPresences
 
         val updatedMap = existingPresences.toMutableMap()
         missingRepos.forEach { repo ->
             val lookupRes = repo.directLookup(query)
             val list = (lookupRes as? NetworkResult.Success)?.data ?: emptyList()
-            val match = list.firstOrNull { media ->
-                when (media) {
-                    is ArrSeries -> {
-                        (resolvedTvdbLookupId != null && resolvedTvdbLookupId > 0 && media.tvdbId == resolvedTvdbLookupId) ||
-                        (resolvedLookupId != null && resolvedLookupId > 0 && media.tmdbId == resolvedLookupId)
+            val match =
+                list.firstOrNull { media ->
+                    when (media) {
+                        is ArrSeries -> {
+                            (resolvedTvdbLookupId != null && resolvedTvdbLookupId > 0 && media.tvdbId == resolvedTvdbLookupId) ||
+                                (resolvedLookupId != null && resolvedLookupId > 0 && media.tmdbId == resolvedLookupId)
+                        }
+                        is ArrMovie -> {
+                            resolvedLookupId != null && resolvedLookupId > 0 && media.tmdbId == resolvedLookupId
+                        }
+                        else -> false
                     }
-                    is ArrMovie -> {
-                        resolvedLookupId != null && resolvedLookupId > 0 && media.tmdbId == resolvedLookupId
-                    }
-                    else -> false
-                }
-            } ?: if (resolvedTvdbLookupId == null && resolvedLookupId == null) list.firstOrNull() else null
+                } ?: if (resolvedTvdbLookupId == null && resolvedLookupId == null) list.firstOrNull() else null
             updatedMap[repo.instance.id] = match
         }
         return updatedMap
@@ -48,32 +50,32 @@ class GetInstancePresencesUseCase {
         repositories: List<ArrInstanceRepository>,
         activeRepoId: Long?,
         activeArrMedia: ArrMedia?,
-        presencesMap: Map<Long, ArrMedia?>
-    ): List<InstanceMediaPresence> {
-        return buildPresencesListFromInstances(
+        presencesMap: Map<Long, ArrMedia?>,
+    ): List<InstanceMediaPresence> =
+        buildPresencesListFromInstances(
             instances = repositories.map { it.instance },
             activeRepoId = activeRepoId,
             activeArrMedia = activeArrMedia,
-            presencesMap = presencesMap
+            presencesMap = presencesMap,
         )
-    }
 
     fun buildPresencesListFromInstances(
         instances: List<Instance>,
         activeRepoId: Long?,
         activeArrMedia: ArrMedia?,
-        presencesMap: Map<Long, ArrMedia?>
+        presencesMap: Map<Long, ArrMedia?>,
     ): List<InstanceMediaPresence> {
         val hasActiveArrId = activeArrMedia?.let { it.id != null && it.id != 0L } ?: false
         return instances.map { instance ->
-            val media = if (instance.id == activeRepoId && hasActiveArrId) {
-                activeArrMedia
-            } else {
-                presencesMap[instance.id]
-            }
+            val media =
+                if (instance.id == activeRepoId && hasActiveArrId) {
+                    activeArrMedia
+                } else {
+                    presencesMap[instance.id]
+                }
             InstanceMediaPresence(
                 instance = instance,
-                arrMedia = media
+                arrMedia = media,
             )
         }
     }

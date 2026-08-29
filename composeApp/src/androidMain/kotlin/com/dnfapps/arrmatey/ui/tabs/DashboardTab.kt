@@ -19,7 +19,7 @@ import org.koin.compose.koinInject
 fun DashboardTab(
     windowSizeClass: WindowSizeClass,
     navigationManager: NavigationManager = koinInject(),
-    navigation: DashboardTabNavigator = navigationManager.dashboard
+    navigation: DashboardTabNavigator = navigationManager.dashboard,
 ) {
     NavDisplay(
         backStack = navigation.backStack,
@@ -27,23 +27,24 @@ fun DashboardTab(
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-        entryProvider = entryProvider { 
-            entry<DashboardScreen.Main> { 
-                CombinedDashboard(
-                    windowSizeClass = windowSizeClass,
-                    onNavigateToArrDashboard = { id -> navigation.openArrDashboard(id) }
-                ) 
-            }
-            entry<DashboardScreen.ArrDashboard> { 
-                ArrInstanceDashboard(
-                    id = it.id,
-                    windowSizeClass = windowSizeClass,
-                    onBack = { navigation.popBackStack() },
-                    onNavigateToEditInstance = { instanceId ->
-                        navigationManager.openEditInstanceScreen(instanceId)
-                    }
-                ) 
-            }
-        }
+        entryProvider =
+            entryProvider {
+                entry<DashboardScreen.Main> {
+                    CombinedDashboard(
+                        windowSizeClass = windowSizeClass,
+                        onNavigateToArrDashboard = { id -> navigation.openArrDashboard(id) },
+                    )
+                }
+                entry<DashboardScreen.ArrDashboard> {
+                    ArrInstanceDashboard(
+                        id = it.id,
+                        windowSizeClass = windowSizeClass,
+                        onBack = { navigation.popBackStack() },
+                        onNavigateToEditInstance = { instanceId ->
+                            navigationManager.openEditInstanceScreen(instanceId)
+                        },
+                    )
+                }
+            },
     )
 }

@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class HDBitsSettings(
     val passkey: String,
-    val username: String
+    val username: String,
 )

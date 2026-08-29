@@ -24,13 +24,10 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
-import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
-import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
@@ -49,7 +46,7 @@ fun EditAuthorSheet(
     tags: List<Tag>,
     editInProgress: Boolean,
     onEditItem: (ArrMedia) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     var monitor by remember { mutableStateOf(item.monitored) }
     var monitorNewBooks by remember { mutableStateOf(item.monitorNewItems) }
@@ -63,37 +60,40 @@ fun EditAuthorSheet(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !editInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !editInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitor,
                 onCheckedChange = { monitor = it },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             DropdownPicker(
-                options = listOf(
-                    AuthorMonitorType.All,
-                    AuthorMonitorType.None,
-                    AuthorMonitorType.Future
-                ),
+                options =
+                    listOf(
+                        AuthorMonitorType.All,
+                        AuthorMonitorType.None,
+                        AuthorMonitorType.Future,
+                    ),
                 modifier = Modifier.fillMaxWidth(),
                 selectedOption = monitorNewBooks,
                 onOptionSelected = { monitorNewBooks = it },
                 getOptionLabel = { mokoString(it.resource) },
                 label = { Text(mokoString(MR.strings.monitor_new_books)) },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             qualityProfiles
@@ -106,7 +106,7 @@ fun EditAuthorSheet(
                         onOptionSelected = { qualityProfileId = it.id },
                         getOptionLabel = { it.name ?: "" },
                         label = { Text(mokoString(MR.strings.quality_profile)) },
-                        enabled = !editInProgress
+                        enabled = !editInProgress,
                     )
                 }
 
@@ -127,7 +127,7 @@ fun EditAuthorSheet(
                             ?: mokoString(MR.strings.unknown)
                     },
                     label = { Text(mokoString(MR.strings.tags)) },
-                    enabled = !editInProgress
+                    enabled = !editInProgress,
                 )
             }
 
@@ -142,33 +142,34 @@ fun EditAuthorSheet(
                             onOptionSelected = { rootFolder = it.path },
                             label = { Text(mokoString(MR.strings.root_folder)) },
                             getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
-                            enabled = !editInProgress
+                            enabled = !editInProgress,
                         )
                     }
             }
 
             Button(
                 onClick = {
-                    val newItem = item.copyForEdit(
-                        monitored = monitor,
-                        monitorNew = monitorNewBooks,
-                        qualityProfileId = qualityProfileId,
-                        rootFolderPath = rootFolder,
-                        tags = selectedTags
-                    )
+                    val newItem =
+                        item.copyForEdit(
+                            monitored = monitor,
+                            monitorNew = monitorNewBooks,
+                            qualityProfileId = qualityProfileId,
+                            rootFolderPath = rootFolder,
+                            tags = selectedTags,
+                        )
                     onEditItem(newItem)
                 },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             ) {
                 if (editInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(
-                        text = mokoString(MR.strings.save)
+                        text = mokoString(MR.strings.save),
                     )
                 }
             }

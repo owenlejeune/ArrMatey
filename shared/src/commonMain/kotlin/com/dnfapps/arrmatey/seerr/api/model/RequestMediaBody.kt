@@ -12,5 +12,5 @@ data class RequestMediaBody(
     val rootFolder: String? = null,
     val languageProfileId: Long? = null,
     val seasons: List<Int>? = null,
-    val userId: Long? = null
+    val userId: Long? = null,
 )

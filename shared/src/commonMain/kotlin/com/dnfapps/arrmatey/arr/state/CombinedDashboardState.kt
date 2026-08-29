@@ -36,7 +36,9 @@ import kotlin.time.Clock
 
 sealed interface CombinedDashboardState {
     data object Initial : CombinedDashboardState
+
     data object Loading : CombinedDashboardState
+
     data class Success(
         val instances: List<ArrInstanceDashboardState>,
         val seerrInstances: List<SeerrDashboardState> = emptyList(),
@@ -50,130 +52,145 @@ sealed interface CombinedDashboardState {
         val prowlarrStats: List<ProwlarrDashboardState> = emptyList(),
         val bazarrStats: List<BazarrDashboardState> = emptyList(),
         val networkStatus: NetworkStatusState? = null,
-        val isRefreshing: Boolean = false
+        val isRefreshing: Boolean = false,
     ) : CombinedDashboardState
 
     companion object {
         val Mock: Success by lazy {
-            val instances = InstanceType.entries.mapIndexed { index, type ->
-                Instance(
-                    id = index.toLong(),
-                    type = type,
-                    label = type.name,
-                    url = "http://localhost:${type.defaultPort}",
-                    apiKey = EncryptedString("mock")
-                )
-            }
+            val instances =
+                InstanceType.entries.mapIndexed { index, type ->
+                    Instance(
+                        id = index.toLong(),
+                        type = type,
+                        label = type.name,
+                        url = "http://localhost:${type.defaultPort}",
+                        apiKey = EncryptedString("mock"),
+                    )
+                }
 
-            val arrInstances = instances.filter { it.type in InstanceType.arrs() }.map {
-                ArrInstanceDashboardState(
-                    instance = it,
-                    softwareStatus = ArrSoftwareStatus(version = "1.0.0", appName = it.label),
-                    disks = listOf(
-                        ArrDiskSpace(
-                            freeSpace = 500_000_000_000L,
-                            totalSpace = 1_000_000_000_000L,
-                            label = "Root",
-                            path = "/"
-                        )
+            val arrInstances =
+                instances.filter { it.type in InstanceType.arrs() }.map {
+                    ArrInstanceDashboardState(
+                        instance = it,
+                        softwareStatus = ArrSoftwareStatus(version = "1.0.0", appName = it.label),
+                        disks =
+                            listOf(
+                                ArrDiskSpace(
+                                    freeSpace = 500_000_000_000L,
+                                    totalSpace = 1_000_000_000_000L,
+                                    label = "Root",
+                                    path = "/",
+                                ),
+                            ),
+                        healthItems = emptyList(),
+                        totalItems = 100,
+                        sizeOnDisk = 250_000_000_000L,
+                    )
+                }
+
+            val seerrInstances =
+                instances.filter { it.type == InstanceType.Seerr }.map {
+                    SeerrDashboardState(
+                        instance = it,
+                        pendingRequestsCount = 5,
+                        openIssuesCount = 2,
+                    )
+                }
+
+            val prowlarrStats =
+                instances.filter { it.type == InstanceType.Prowlarr }.map {
+                    ProwlarrDashboardState(
+                        instance = it,
+                        softwareStatus = ArrSoftwareStatus(version = "1.0.0", appName = it.label),
+                        totalIndexers = 10,
+                        healthyIndexers = 8,
+                        failingIndexers = 2,
+                    )
+                }
+
+            val bazarrStats =
+                instances.filter { it.type == InstanceType.Bazarr }.map {
+                    BazarrDashboardState(
+                        instance = it,
+                        wantedEpisodesCount = 12,
+                        wantedMoviesCount = 3,
+                    )
+                }
+
+            val downloadClients =
+                listOf(
+                    DownloadClientDashboardState(
+                        client =
+                            DownloadClient(
+                                id = 1,
+                                type = DownloadClientType.QBittorrent,
+                                label = "qBittorrent",
+                                url = "http://localhost:8080",
+                            ),
+                        isOnline = true,
+                        activeDownloadsCount = 2,
                     ),
-                    healthItems = emptyList(),
-                    totalItems = 100,
-                    sizeOnDisk = 250_000_000_000L
                 )
-            }
 
-            val seerrInstances = instances.filter { it.type == InstanceType.Seerr }.map {
-                SeerrDashboardState(
-                    instance = it,
-                    pendingRequestsCount = 5,
-                    openIssuesCount = 2
+            val recentlyAdded =
+                listOf(
+                    MockMedia.Sonarr,
+                    MockMedia.Radarr,
+                    MockMedia.Lidarr,
+                    MockMedia.Readarr,
                 )
-            }
-
-            val prowlarrStats = instances.filter { it.type == InstanceType.Prowlarr }.map {
-                ProwlarrDashboardState(
-                    instance = it,
-                    softwareStatus = ArrSoftwareStatus(version = "1.0.0", appName = it.label),
-                    totalIndexers = 10,
-                    healthyIndexers = 8,
-                    failingIndexers = 2
-                )
-            }
-
-            val bazarrStats = instances.filter { it.type == InstanceType.Bazarr }.map {
-                BazarrDashboardState(
-                    instance = it,
-                    wantedEpisodesCount = 12,
-                    wantedMoviesCount = 3
-                )
-            }
-
-            val downloadClients = listOf(
-                DownloadClientDashboardState(
-                    client = DownloadClient(
-                        id = 1,
-                        type = DownloadClientType.QBittorrent,
-                        label = "qBittorrent",
-                        url = "http://localhost:8080"
-                    ),
-                    isOnline = true,
-                    activeDownloadsCount = 2
-                )
-            )
-
-            val recentlyAdded = listOf(
-                MockMedia.Sonarr, MockMedia.Radarr, MockMedia.Lidarr, MockMedia.Readarr
-            )
 
             val now = Clock.System.now()
             val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
 
-            val mockEpisode = Episode(
-                id = 1,
-                seriesId = 1,
-                tvdbId = 1,
-                episodeFileId = null,
-                seasonNumber = 1,
-                episodeNumber = 1,
-                title = "Mock Episode",
-                airDate = today,
-                hasFile = false,
-                monitored = true,
-                unverifiedSceneNumbering = false,
-                runtime = 30,
-                instanceId = 1,
-                series = ArrSeries(
-                    title = "A Totally Awesome Series",
-                    originalLanguage = Language(0),
-                    year = 2026,
-                    qualityProfileId = 1,
+            val mockEpisode =
+                Episode(
+                    id = 1,
+                    seriesId = 1,
+                    tvdbId = 1,
+                    episodeFileId = null,
+                    seasonNumber = 1,
+                    episodeNumber = 1,
+                    title = "Mock Episode",
+                    airDate = today,
+                    hasFile = false,
                     monitored = true,
-                    runtime = 22,
-                    status = MediaStatus.Continuing,
-                    ended = false,
-                    seasonFolder = true,
-                    monitorNewItems = MonitorNewItems.All,
-                    useSceneNumbering = false,
-                    tvdbId = 0,
-                    seriesType = SeriesType.Standard
+                    unverifiedSceneNumbering = false,
+                    runtime = 30,
+                    instanceId = 1,
+                    series =
+                        ArrSeries(
+                            title = "A Totally Awesome Series",
+                            originalLanguage = Language(0),
+                            year = 2026,
+                            qualityProfileId = 1,
+                            monitored = true,
+                            runtime = 22,
+                            status = MediaStatus.Continuing,
+                            ended = false,
+                            seasonFolder = true,
+                            monitorNewItems = MonitorNewItems.All,
+                            useSceneNumbering = false,
+                            tvdbId = 0,
+                            seriesType = SeriesType.Standard,
+                        ),
                 )
-            )
 
-            val mockQueueItem = SonarrQueueItem(
-                id = 1,
-                instanceId = 1,
-                instanceName = "Sonarr",
-                title = "Mock Show S01E01",
-                protocol = ReleaseProtocol.Usenet,
-                size = 1000f,
-                sizeleft = 500f,
-                quality = QualityInfo(Quality(1, "HDTV-720p"), Revision(1, 0, false)),
-                trackedDownloadStatus = QueueDownloadStatus.Ok,
-                trackedDownloadState = QueueDownloadState.Downloading,
-                seriesId = 1,
-                episodeId = 1
-            )
+            val mockQueueItem =
+                SonarrQueueItem(
+                    id = 1,
+                    instanceId = 1,
+                    instanceName = "Sonarr",
+                    title = "Mock Show S01E01",
+                    protocol = ReleaseProtocol.Usenet,
+                    size = 1000f,
+                    sizeleft = 500f,
+                    quality = QualityInfo(Quality(1, "HDTV-720p"), Revision(1, 0, false)),
+                    trackedDownloadStatus = QueueDownloadStatus.Ok,
+                    trackedDownloadState = QueueDownloadState.Downloading,
+                    seriesId = 1,
+                    episodeId = 1,
+                )
 
             Success(
                 instances = arrInstances,
@@ -183,45 +200,49 @@ sealed interface CombinedDashboardState {
                 downloadClients = downloadClients,
                 activityQueue = listOf(mockQueueItem),
                 recentlyAdded = recentlyAdded,
-                downloadTransfers = listOf(
-                    DownloadTransferInfo(
-                        client = downloadClients.first().client,
-                        downloadSpeed = 10_000_000,
-                        uploadSpeed = 1_000_000
-                    )
-                ),
-                activeDownloads = listOf(
-                    DownloadItem(
-                        client = downloadClients.first().client,
-                        id = "1",
-                        name = "Mock Download",
-                        size = 1_000_000_000,
-                        downloaded = 500_000_000,
-                        progress = 0.5,
-                        downloadSpeed = 5_000_000,
-                        uploadSpeed = 500_000,
-                        status = DownloadItemStatus.Downloading,
-                        category = "tv-sonarr",
-                        addedOn = now.toEpochMilliseconds(),
-                        eta = 100
-                    )
-                ),
+                downloadTransfers =
+                    listOf(
+                        DownloadTransferInfo(
+                            client = downloadClients.first().client,
+                            downloadSpeed = 10_000_000,
+                            uploadSpeed = 1_000_000,
+                        ),
+                    ),
+                activeDownloads =
+                    listOf(
+                        DownloadItem(
+                            client = downloadClients.first().client,
+                            id = "1",
+                            name = "Mock Download",
+                            size = 1_000_000_000,
+                            downloaded = 500_000_000,
+                            progress = 0.5,
+                            downloadSpeed = 5_000_000,
+                            uploadSpeed = 500_000,
+                            status = DownloadItemStatus.Downloading,
+                            category = "tv-sonarr",
+                            addedOn = now.toEpochMilliseconds(),
+                            eta = 100,
+                        ),
+                    ),
                 calendarItems = listOf(DashboardCalendarItem(mockEpisode, today)),
                 upcomingCalendarItems = listOf(DashboardCalendarItem(mockEpisode, today)),
-                networkStatus = NetworkStatusState(
-                    ssid = "Mock-WiFi",
-                    isWifi = true,
-                    instanceStatuses = instances.map {
-                        InstanceNetworkStatus(
-                            instanceName = it.label,
-                            isLocal = true,
-                            currentEndpoint = it.url,
-                            icon = it.type.icon,
-                            isOnline = true,
-                            isLocalSwitchingEnabled = true
-                        )
-                    }
-                )
+                networkStatus =
+                    NetworkStatusState(
+                        ssid = "Mock-WiFi",
+                        isWifi = true,
+                        instanceStatuses =
+                            instances.map {
+                                InstanceNetworkStatus(
+                                    instanceName = it.label,
+                                    isLocal = true,
+                                    currentEndpoint = it.url,
+                                    icon = it.type.icon,
+                                    isOnline = true,
+                                    isLocalSwitchingEnabled = true,
+                                )
+                            },
+                    ),
             )
         }
     }
@@ -230,7 +251,7 @@ sealed interface CombinedDashboardState {
 data class NetworkStatusState(
     val ssid: String? = null,
     val isWifi: Boolean,
-    val instanceStatuses: List<InstanceNetworkStatus>
+    val instanceStatuses: List<InstanceNetworkStatus>,
 )
 
 data class InstanceNetworkStatus(
@@ -239,7 +260,7 @@ data class InstanceNetworkStatus(
     val currentEndpoint: String,
     val icon: ImageResource,
     val isOnline: Boolean,
-    val isLocalSwitchingEnabled: Boolean
+    val isLocalSwitchingEnabled: Boolean,
 )
 
 data class ArrInstanceDashboardState(
@@ -251,20 +272,20 @@ data class ArrInstanceDashboardState(
     val activityTasks: List<QueueItem> = emptyList(),
     val activeCount: Int = 0,
     val totalItems: Int = 0,
-    val sizeOnDisk: Long = 0
+    val sizeOnDisk: Long = 0,
 )
 
 data class SeerrDashboardState(
     val instance: Instance,
     val pendingRequestsCount: Int = 0,
-    val openIssuesCount: Int = 0
+    val openIssuesCount: Int = 0,
 )
 
 data class DownloadClientDashboardState(
     val client: DownloadClient,
     val transferInfo: DownloadTransferInfo? = null,
     val isOnline: Boolean = true,
-    val activeDownloadsCount: Int = 0
+    val activeDownloadsCount: Int = 0,
 )
 
 data class ProwlarrDashboardState(
@@ -272,19 +293,19 @@ data class ProwlarrDashboardState(
     val softwareStatus: ArrSoftwareStatus? = null,
     val totalIndexers: Int,
     val healthyIndexers: Int,
-    val failingIndexers: Int
+    val failingIndexers: Int,
 )
 
 data class BazarrDashboardState(
     val instance: Instance,
     val wantedEpisodesCount: Int,
-    val wantedMoviesCount: Int
+    val wantedMoviesCount: Int,
 )
 
 data class DashboardCalendarItem(
     val item: CalendarItem,
-    val date: LocalDate
+    val date: LocalDate,
 ) {
     val uniqueId: String
-        get() = "${item.calendarId}_${date}"
+        get() = "${item.calendarId}_$date"
 }

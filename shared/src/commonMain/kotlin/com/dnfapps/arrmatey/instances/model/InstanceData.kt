@@ -9,5 +9,5 @@ data class InstanceData(
     val qualityProfiles: List<QualityProfile>,
     val rootFolders: List<RootFolder>,
     val tags: List<Tag>,
-    val customFilters: List<CustomFilter>
+    val customFilters: List<CustomFilter>,
 )

@@ -16,30 +16,32 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class DeleteMediaUseCaseTest {
-
-    private val fakeInstance = Instance(
-        id = 1,
-        label = "Test Sonarr",
-        url = "http://localhost:8989",
-        apiKey = EncryptedString("test-api-key"),
-        type = InstanceType.Sonarr,
-        enabled = true
-    )
+    private val fakeInstance =
+        Instance(
+            id = 1,
+            label = "Test Sonarr",
+            url = "http://localhost:8989",
+            apiKey = EncryptedString("test-api-key"),
+            type = InstanceType.Sonarr,
+            enabled = true,
+        )
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testDeleteMediaSuccess() = runTest {
-        val mockEngine = MockEngine { _ ->
-            respond("", HttpStatusCode.OK)
-        }
-        val httpClient = HttpClient(mockEngine)
-        val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger)
-        val useCase = DeleteMediaUseCase()
+    fun testDeleteMediaSuccess() =
+        runTest {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond("", HttpStatusCode.OK)
+                }
+            val httpClient = HttpClient(mockEngine)
+            val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger)
+            val useCase = DeleteMediaUseCase()
 
-        useCase(123, true, false, repository).test {
-            assertTrue(awaitItem() is OperationStatus.InProgress)
-            assertTrue(awaitItem() is OperationStatus.Success)
-            awaitComplete()
+            useCase(123, true, false, repository).test {
+                assertTrue(awaitItem() is OperationStatus.InProgress)
+                assertTrue(awaitItem() is OperationStatus.Success)
+                awaitComplete()
+            }
         }
-    }
 }

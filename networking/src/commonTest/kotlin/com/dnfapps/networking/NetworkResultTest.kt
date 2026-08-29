@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class NetworkResultTest {
-
     @Test
     fun testMapSuccess() {
         val result = NetworkResult.Success(10)

@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
-import kotlin.math.expm1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,54 +45,57 @@ fun <T> DropdownPicker(
     allDivider: (@Composable () -> Unit)? = { HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp)) },
     unknownValueLabel: String = mokoString(MR.strings.unknown),
     singleLine: Boolean = true,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     var isDropDownExpanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isDropDownExpanded && enabled,
-        onExpandedChange = { if (enabled) isDropDownExpanded = it }
+        onExpandedChange = { if (enabled) isDropDownExpanded = it },
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             label()
             OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                 readOnly = true,
-                value = when {
-                    selectedOption != null -> getOptionLabel(selectedOption)
-                    includeAllOption -> allLabel
-                    else -> unknownValueLabel
-                },
+                value =
+                    when {
+                        selectedOption != null -> getOptionLabel(selectedOption)
+                        includeAllOption -> allLabel
+                        else -> unknownValueLabel
+                    },
                 onValueChange = {},
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant
-                ),
+                colors =
+                    OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    ),
                 shape = MaterialTheme.shapes.large,
                 singleLine = singleLine,
-                enabled = enabled
+                enabled = enabled,
             )
         }
         ExposedDropdownMenu(
             expanded = isDropDownExpanded && enabled,
             onDismissRequest = { isDropDownExpanded = false },
             shape = MaterialTheme.shapes.extraLarge,
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             if (includeAllOption) {
                 DropdownMenuItem(
                     text = {
                         Text(
                             allLabel,
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge,
                         )
                     },
                     onClick = {
@@ -101,9 +103,10 @@ fun <T> DropdownPicker(
                         onAllSelected()
                     },
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    colors = MenuDefaults.itemColors(
-                        textColor = MaterialTheme.colorScheme.onSurface
-                    )
+                    colors =
+                        MenuDefaults.itemColors(
+                            textColor = MaterialTheme.colorScheme.onSurface,
+                        ),
                 )
                 allDivider?.invoke()
             }
@@ -113,25 +116,27 @@ fun <T> DropdownPicker(
                     text = {
                         Text(
                             text = getOptionLabel(t),
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge,
                         )
                     },
-                    leadingIcon = when {
-                        selectedOption == t -> {
-                            { Icon(Icons.Default.Check, null) }
-                        }
-                        getOptionIcon != null -> {
-                            { Icon(getOptionIcon(t), null) }
-                        }
-                        else -> null
-                    },
+                    leadingIcon =
+                        when {
+                            selectedOption == t -> {
+                                { Icon(Icons.Default.Check, null) }
+                            }
+                            getOptionIcon != null -> {
+                                { Icon(getOptionIcon(t), null) }
+                            }
+                            else -> null
+                        },
                     onClick = {
                         isDropDownExpanded = false
                         onOptionSelected(t)
                     },
-                    colors = MenuDefaults.itemColors(
-                        textColor = MaterialTheme.colorScheme.onSurface
-                    )
+                    colors =
+                        MenuDefaults.itemColors(
+                            textColor = MaterialTheme.colorScheme.onSurface,
+                        ),
                 )
             }
         }
@@ -148,43 +153,45 @@ fun <T> MultiSelectDropdownPicker(
     modifier: Modifier = Modifier,
     label: @Composable () -> Unit = {},
     getOptionLabel: @Composable (T) -> String = { it.toString() },
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
-    var isDropDownExpanded  by remember { mutableStateOf(false) }
+    var isDropDownExpanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = isDropDownExpanded && enabled,
-        onExpandedChange = { if (enabled) isDropDownExpanded = it }
+        onExpandedChange = { if (enabled) isDropDownExpanded = it },
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             label()
             OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                 readOnly = true,
                 value = valueLabel,
                 onValueChange = {},
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant
-                ),
+                colors =
+                    OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    ),
                 shape = MaterialTheme.shapes.large,
                 singleLine = true,
-                enabled = enabled
+                enabled = enabled,
             )
         }
         ExposedDropdownMenu(
             expanded = isDropDownExpanded && enabled,
             onDismissRequest = { isDropDownExpanded = false },
             shape = MaterialTheme.shapes.extraLarge,
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             options.forEach { option ->
                 val isSelected = selectedOptions.contains(option)
@@ -193,7 +200,7 @@ fun <T> MultiSelectDropdownPicker(
                     text = {
                         Text(
                             text = getOptionLabel(option),
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge,
                         )
                     },
                     leadingIcon = {
@@ -204,9 +211,10 @@ fun <T> MultiSelectDropdownPicker(
                     onClick = {
                         onOptionSelected(option, !isSelected)
                     },
-                    colors = MenuDefaults.itemColors(
-                        textColor = MaterialTheme.colorScheme.onSurface
-                    )
+                    colors =
+                        MenuDefaults.itemColors(
+                            textColor = MaterialTheme.colorScheme.onSurface,
+                        ),
                 )
             }
         }

@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ServiceErrors(
     val radarr: List<String> = emptyList(),
-    val sonarr: List<String> = emptyList()
+    val sonarr: List<String> = emptyList(),
 )

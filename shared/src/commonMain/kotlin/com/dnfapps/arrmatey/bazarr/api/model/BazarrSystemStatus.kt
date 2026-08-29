@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BazarrSystemStatus(
-    val data: BazarrSystemStatusData
+    val data: BazarrSystemStatusData,
 )

@@ -4,7 +4,9 @@ import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 
-enum class SeriesMonitorType(val resource: StringResource) {
+enum class SeriesMonitorType(
+    val resource: StringResource,
+) {
     @SerialName("unknown")
     Unknown(MR.strings.unknown),
 
@@ -45,5 +47,5 @@ enum class SeriesMonitorType(val resource: StringResource) {
     None(MR.strings.none),
 
     @SerialName("skip")
-    Skip(MR.strings.skip)
+    Skip(MR.strings.skip),
 }

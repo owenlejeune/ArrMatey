@@ -11,84 +11,91 @@ import com.dnfapps.arrmatey.arr.api.model.MovieEditorBody
 import com.dnfapps.arrmatey.arr.api.model.MovieRelease
 import com.dnfapps.arrmatey.arr.api.model.RadarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onSuccess
-import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 
 class RadarrClient(
     override val instance: Instance,
-    httpClient: HttpClient
-): BaseArrClient(httpClient), ArrClient {
-
+    httpClient: HttpClient,
+) : BaseArrClient(httpClient),
+    ArrClient {
     override suspend fun getLibrary(): NetworkResult<List<ArrMovie>> =
         get<List<ArrMovie>>("movie")
             .onSuccess { movies ->
                 movies.map { movie ->
                     movie.copy(
-                        images = movie.images.map { image ->
-                            if (image.remoteUrl?.startsWith("/") == true) {
-                                image.copy(remoteUrl = "$baseUrl${image.remoteUrl}")
-                            } else {
-                                image
-                            }
-                        }
+                        images =
+                            movie.images.map { image ->
+                                if (image.remoteUrl?.startsWith("/") == true) {
+                                    image.copy(remoteUrl = "$baseUrl${image.remoteUrl}")
+                                } else {
+                                    image
+                                }
+                            },
                     )
                 }
             }
 
-    override suspend fun getDetail(id: Long): NetworkResult<ArrMovie> =
-        get("movie/$id")
+    override suspend fun getDetail(id: Long): NetworkResult<ArrMovie> = get("movie/$id")
 
-    override suspend fun update(item: ArrMedia): NetworkResult<ArrMovie> =
-        put("movie/${item.id}", item)
+    override suspend fun update(item: ArrMedia): NetworkResult<ArrMovie> = put("movie/${item.id}", item)
 
-    override suspend fun edit(item: ArrMedia, moveFiles: Boolean): NetworkResult<Unit> {
-        val movie = item as? ArrMovie
-            ?: return NetworkResult.Error(message = "Item must be an ArrMovie")
-        val id = item.id
-            ?: return NetworkResult.Error(message = "Id must not be null")
-        val body = MovieEditorBody(
-            movieIds = listOf(id),
-            monitored = movie.monitored,
-            qualityProfileId = movie.qualityProfileId,
-            minimumAvailability = movie.minimumAvailability,
-            rootFolderPath = movie.rootFolderPath,
-            tags = movie.tags,
-            applyTags = ApplyTags.Replace,
-            moveFiles = moveFiles,
-        )
+    override suspend fun edit(
+        item: ArrMedia,
+        moveFiles: Boolean,
+    ): NetworkResult<Unit> {
+        val movie =
+            item as? ArrMovie
+                ?: return NetworkResult.Error(message = "Item must be an ArrMovie")
+        val id =
+            item.id
+                ?: return NetworkResult.Error(message = "Id must not be null")
+        val body =
+            MovieEditorBody(
+                movieIds = listOf(id),
+                monitored = movie.monitored,
+                qualityProfileId = movie.qualityProfileId,
+                minimumAvailability = movie.minimumAvailability,
+                rootFolderPath = movie.rootFolderPath,
+                tags = movie.tags,
+                applyTags = ApplyTags.Replace,
+                moveFiles = moveFiles,
+            )
         return put("movie/editor", body = body)
     }
 
     override suspend fun delete(
         id: Long,
         deleteFiles: Boolean,
-        addImportExclusion: Boolean
+        addImportExclusion: Boolean,
     ): NetworkResult<Unit> =
         delete(
             endpoint = "movie/$id",
-            params = mapOf(
-                "deleteFiles" to deleteFiles,
-                "addImportExclusion" to addImportExclusion
-            )
+            params =
+                mapOf(
+                    "deleteFiles" to deleteFiles,
+                    "addImportExclusion" to addImportExclusion,
+                ),
         )
 
     override suspend fun setMonitorStatus(
         id: Long,
-        monitorStatus: Boolean
+        monitorStatus: Boolean,
     ): NetworkResult<List<MonitoredResponse>> =
-        put("movie/editor", mapOf(
-            "monitored" to monitorStatus,
-            "movieIds" to listOf(id)
-        ))
+        put(
+            "movie/editor",
+            mapOf(
+                "monitored" to monitorStatus,
+                "movieIds" to listOf(id),
+            ),
+        )
 
-    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrMovie>> =
-        get("movie/lookup", mapOf("term" to params.query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrMovie>> = get("movie/lookup", mapOf("term" to params.query))
 
-    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrMovie> =
-        post("movie", item)
+    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrMovie> = post("movie", item)
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<MovieRelease>> {
         if (params !is ReleaseParams.Movie) {
@@ -101,32 +108,35 @@ class RadarrClient(
         id: Long,
         page: Int,
         pageSize: Int,
-        altId: Long?
+        altId: Long?,
     ): NetworkResult<List<RadarrHistoryItem>> =
-        get("history/movie", mapOf(
-            "page" to page,
-            "pageSize" to pageSize,
-            "movieId" to id
-        ))
+        get(
+            "history/movie",
+            mapOf(
+                "page" to page,
+                "pageSize" to pageSize,
+                "movieId" to id,
+            ),
+        )
 
     override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
         post("command", CommandPayload.Movie(listOf(id)))
 
     override suspend fun getCalendar(
         start: LocalDate,
-        end: LocalDate
+        end: LocalDate,
     ): NetworkResult<List<ArrMovie>> =
-        get<List<ArrMovie>>("calendar", mapOf(
-            "start" to start.toString(),
-            "end" to end.toString(),
-            "unmonitored" to true,
-            "includeMoveiFile" to true
-        )).map { it.map { movie -> movie.copy(instanceId = instance.id) } }
+        get<List<ArrMovie>>(
+            "calendar",
+            mapOf(
+                "start" to start.toString(),
+                "end" to end.toString(),
+                "unmonitored" to true,
+                "includeMoveiFile" to true,
+            ),
+        ).map { it.map { movie -> movie.copy(instanceId = instance.id) } }
 
-    suspend fun getMovieExtraFile(id: Long): NetworkResult<List<ExtraFile>> =
-        get("extrafile", mapOf("movieId" to id))
+    suspend fun getMovieExtraFile(id: Long): NetworkResult<List<ExtraFile>> = get("extrafile", mapOf("movieId" to id))
 
-    suspend fun deleteMovieFile(id: Long): NetworkResult<Unit> =
-        delete("movieFile/$id")
-
+    suspend fun deleteMovieFile(id: Long): NetworkResult<Unit> = delete("movieFile/$id")
 }

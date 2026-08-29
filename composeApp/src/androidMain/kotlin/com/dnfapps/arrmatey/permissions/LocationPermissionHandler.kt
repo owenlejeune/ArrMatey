@@ -21,35 +21,39 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun rememberLocationPermissionHandler(
     onGranted: () -> Unit = {},
     onDenied: () -> Unit = {},
-    onCancelled: () -> Unit = {}
+    onCancelled: () -> Unit = {},
 ): LocationPermissionHandler {
     val context = LocalContext.current
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) onGranted()
-        else onDenied()
-    }
+    val permissionLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            if (isGranted) {
+                onGranted()
+            } else {
+                onDenied()
+            }
+        }
 
     var showRationale by remember { mutableStateOf(false) }
 
-    val locationPermissionHandler = remember {
-        object : LocationPermissionHandler {
-            override fun checkAndPerformAction() {
-                val checkPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                when (checkPermission) {
-                    PackageManager.PERMISSION_GRANTED -> onGranted()
-                    PackageManager.PERMISSION_DENIED -> onDenied()
-                    else -> showRationale = true
+    val locationPermissionHandler =
+        remember {
+            object : LocationPermissionHandler {
+                override fun checkAndPerformAction() {
+                    val checkPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                    when (checkPermission) {
+                        PackageManager.PERMISSION_GRANTED -> onGranted()
+                        PackageManager.PERMISSION_DENIED -> onDenied()
+                        else -> showRationale = true
+                    }
                 }
-            }
 
-            override fun isGranted(): Boolean {
-                return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                override fun isGranted(): Boolean =
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
                         PackageManager.PERMISSION_GRANTED
             }
         }
-    }
 
     if (showRationale) {
         AlertDialog(
@@ -73,7 +77,7 @@ fun rememberLocationPermissionHandler(
                 }) {
                     Text(mokoString(MR.strings.cancel))
                 }
-            }
+            },
         )
     }
 
@@ -82,5 +86,6 @@ fun rememberLocationPermissionHandler(
 
 interface LocationPermissionHandler {
     fun checkAndPerformAction()
+
     fun isGranted(): Boolean
 }

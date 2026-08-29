@@ -32,20 +32,20 @@ fun MovieFileView(
     onDeleteFile: () -> Unit,
     onNavigateToMovieFiles: (ArrMovie) -> Unit,
     onNavigateToMovieReleases: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = mokoString(MR.strings.files),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
 //            Image(
 //                painter = painterResource(MR.images.radarr),
@@ -59,9 +59,10 @@ fun MovieFileView(
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable {
-                        onNavigateToMovieFiles(movie)
-                    }
+                    modifier =
+                        Modifier.clickable {
+                            onNavigateToMovieFiles(movie)
+                        },
                 )
             }
         }
@@ -72,9 +73,10 @@ fun MovieFileView(
             onAutomaticClicked = onAutomaticSearch,
             automaticSearchEnabled = movie.monitored,
             automaticSearchInProgress = searchIds.contains(movie.id),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
         )
         movie.movieFile?.let { file ->
             FileCard(file, onDelete = onDeleteFile)
@@ -86,11 +88,12 @@ fun MovieFileView(
         if (movie.movieFile == null && movieExtraFiles.isEmpty()) {
             Text(
                 text = mokoString(MR.strings.no_files),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         }
     }

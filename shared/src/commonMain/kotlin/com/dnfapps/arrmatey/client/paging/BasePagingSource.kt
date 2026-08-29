@@ -5,11 +5,10 @@ import com.dnfapps.networking.NetworkResult
 
 class BasePagingSource<T : Any, R : Any>(
     private val fetcher: suspend (page: Int) -> NetworkResult<R>,
-    private val processor: suspend (R) -> PageResult<T>
+    private val processor: suspend (R) -> PageResult<T>,
 ) : PagingSource<T>() {
-
-    override suspend fun load(page: Int): LoadResult<T> {
-        return when (val result = fetcher(page)) {
+    override suspend fun load(page: Int): LoadResult<T> =
+        when (val result = fetcher(page)) {
             is NetworkResult.Loading -> {
                 LoadResult.Error(Exception("Unexpected loading state"))
             }
@@ -20,7 +19,7 @@ class BasePagingSource<T : Any, R : Any>(
                         data = pageResult.items,
                         currentPage = page,
                         hasNextPage = pageResult.hasNextPage,
-                        totalItemCount = pageResult.totalItemCount
+                        totalItemCount = pageResult.totalItemCount,
                     )
                 } catch (e: Exception) {
                     LoadResult.Error(e)
@@ -32,10 +31,9 @@ class BasePagingSource<T : Any, R : Any>(
                         code = result.code,
                         message = result.message,
                         cause = result.cause,
-                        errorType = result.errorType
-                    )
+                        errorType = result.errorType,
+                    ),
                 )
             }
         }
-    }
 }

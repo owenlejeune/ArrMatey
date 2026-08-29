@@ -42,10 +42,8 @@ data class BookshelfRelease(
     override val shouldOverride: Boolean = false,
     override val languages: List<Language> = emptyList(),
     override val magnetUrl: String? = null,
-
     override var mediaId: Long? = null,
-
     val authorName: String? = null,
     val bookTitle: String? = null,
-    val discography: Boolean = false
-): ArrRelease
+    val discography: Boolean = false,
+) : ArrRelease

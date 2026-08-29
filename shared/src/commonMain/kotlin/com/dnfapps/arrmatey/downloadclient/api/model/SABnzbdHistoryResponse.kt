@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SABnzbdHistoryResponse(
-    @SerialName("history") val history: SABnzbdHistoryData = SABnzbdHistoryData()
+    @SerialName("history") val history: SABnzbdHistoryData = SABnzbdHistoryData(),
 )

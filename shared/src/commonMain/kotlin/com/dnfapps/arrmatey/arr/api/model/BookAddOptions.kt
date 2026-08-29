@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BookAddOptions(
 //    val addType: AddType,
-    val searchForNewBook: Boolean = false
+    val searchForNewBook: Boolean = false,
 )

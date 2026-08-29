@@ -56,10 +56,10 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 fun ShortcutsCustomizationScreen(
     preferenceStore: AndroidPreferencesStore = koinInject(),
     shortcutManager: AppShortcutManager = koinInject(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
-    
+
     var shortcutItems by remember { mutableStateOf<List<AppShortcutManager.ShortcutItem>>(emptyList()) }
     val savedOrder by preferenceStore.shortcutsOrder.collectAsState(initial = emptyList())
     val disabledShortcuts by preferenceStore.disabledShortcuts.collectAsState(initial = emptySet())
@@ -67,14 +67,15 @@ fun ShortcutsCustomizationScreen(
     LaunchedEffect(Unit) {
         val available = shortcutManager.getAllAvailableShortcuts()
         val shortcutMap = available.associateBy { it.id }
-        
-        val ordered = if (savedOrder.isEmpty()) {
-            available
-        } else {
-            val existingOrder = savedOrder.mapNotNull { shortcutMap[it] }
-            val newOnes = available.filter { it.id !in savedOrder }
-            existingOrder + newOnes
-        }
+
+        val ordered =
+            if (savedOrder.isEmpty()) {
+                available
+            } else {
+                val existingOrder = savedOrder.mapNotNull { shortcutMap[it] }
+                val newOnes = available.filter { it.id !in savedOrder }
+                existingOrder + newOnes
+            }
 
         shortcutItems = ordered.sortedBy { it.id in disabledShortcuts }
     }
@@ -83,14 +84,15 @@ fun ShortcutsCustomizationScreen(
         topBar = {
             TopAppBar(
                 title = { Text(mokoString(MR.strings.customize_shortcuts)) },
-                navigationIcon = { BackButton(onClick = onBack) }
+                navigationIcon = { BackButton(onClick = onBack) },
             )
-        }
+        },
     ) { padding ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding),
         ) {
             ShortcutsList(
                 items = shortcutItems,
@@ -99,17 +101,17 @@ fun ShortcutsCustomizationScreen(
                     val newList = shortcutItems.toMutableList()
                     val movedItem = newList.removeAt(fromIndex)
                     newList.add(toIndex, movedItem)
-                    
+
                     val firstDisabledIndex = shortcutItems.indexOfFirst { it.id in disabledShortcuts }
                     val n = if (firstDisabledIndex == -1) shortcutItems.size else firstDisabledIndex
-                    
+
                     var nextDisabled = disabledShortcuts
                     if (n in (toIndex + 1)..fromIndex) {
                         nextDisabled = nextDisabled - movedItem.id
                     } else if (n in (fromIndex + 1)..toIndex) {
                         nextDisabled = nextDisabled + movedItem.id
                     }
-                    
+
                     shortcutItems = newList
                     scope.launch {
                         preferenceStore.saveDisabledShortcuts(nextDisabled)
@@ -122,7 +124,7 @@ fun ShortcutsCustomizationScreen(
                         val currentDisabled = preferenceStore.disabledShortcuts.first()
                         val nextDisabled = if (enabled) currentDisabled - id else currentDisabled + id
                         preferenceStore.saveDisabledShortcuts(nextDisabled)
-                        
+
                         // Re-sort items: enabled ones at top, disabled at bottom, maintaining relative order
                         val newList = shortcutItems.toMutableList()
                         val itemIndex = newList.indexOfFirst { it.id == id }
@@ -145,7 +147,7 @@ fun ShortcutsCustomizationScreen(
                         preferenceStore.saveShortcutsOrder(newList.map { it.id })
                         shortcutManager.updateShortcuts()
                     }
-                }
+                },
             )
         }
     }
@@ -156,38 +158,40 @@ fun ShortcutsList(
     items: List<AppShortcutManager.ShortcutItem>,
     disabledIds: Set<String>,
     onMove: (Int, Int) -> Unit,
-    onToggle: (String, Boolean) -> Unit
+    onToggle: (String, Boolean) -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
     val lazyListState = rememberLazyListState()
 
-    val reorderableLazyColumnState = rememberReorderableLazyListState(
-        lazyListState = lazyListState,
-        onMove = { from, to ->
-            val fromIndex = items.indexOfFirst { it.id == from.key }
-            val toIndex = items.indexOfFirst { it.id == to.key }
+    val reorderableLazyColumnState =
+        rememberReorderableLazyListState(
+            lazyListState = lazyListState,
+            onMove = { from, to ->
+                val fromIndex = items.indexOfFirst { it.id == from.key }
+                val toIndex = items.indexOfFirst { it.id == to.key }
 
-            if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
-                onMove(fromIndex, toIndex)
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            }
-        }
-    )
+                if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                    onMove(fromIndex, toIndex)
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }
+            },
+        )
 
     LazyColumn(
         state = lazyListState,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
             ContainerCard(
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
             ) {
                 Text(
                     text = mokoString(MR.strings.customize_shortcuts_description),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
@@ -200,43 +204,46 @@ fun ShortcutsList(
                 val alpha by animateFloatAsState(if (isEnabled) 1f else 0.6f)
 
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .graphicsLayer { this.alpha = alpha },
-                    elevation = CardDefaults.cardElevation(defaultElevation = elevation)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .graphicsLayer { this.alpha = alpha },
+                    elevation = CardDefaults.cardElevation(defaultElevation = elevation),
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Default.DragHandle,
                             contentDescription = null,
-                            modifier = Modifier.draggableHandle(
-                                enabled = true,
-                                interactionSource = interactionSource
-                            )
+                            modifier =
+                                Modifier.draggableHandle(
+                                    enabled = true,
+                                    interactionSource = interactionSource,
+                                ),
                         )
 
                         Icon(
                             painter = painterResource(item.iconRes),
                             contentDescription = null,
-                            modifier = Modifier.padding(start = 8.dp).size(24.dp)
+                            modifier = Modifier.padding(start = 8.dp).size(24.dp),
                         )
 
                         Text(
                             text = item.label,
                             modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge,
                         )
 
                         Switch(
                             checked = isEnabled,
-                            onCheckedChange = { onToggle(item.id, it) }
+                            onCheckedChange = { onToggle(item.id, it) },
                         )
                     }
                 }

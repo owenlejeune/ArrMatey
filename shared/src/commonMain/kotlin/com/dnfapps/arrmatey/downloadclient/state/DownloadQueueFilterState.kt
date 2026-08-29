@@ -10,7 +10,7 @@ data class DownloadQueueFilterState(
     val activeOnly: Boolean = false,
     val completedOnly: Boolean = false,
     val excludeTags: Boolean = false,
-    val excludeStatuses: Boolean = false
+    val excludeStatuses: Boolean = false,
 ) {
-    constructor(): this("") // empty ios constructor
+    constructor() : this("") // empty ios constructor
 }

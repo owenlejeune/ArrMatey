@@ -27,29 +27,30 @@ fun AudiobookFileView(
     onAutomaticSearch: () -> Unit,
     onNavigateToAudiobookFiles: (Audiobook) -> Unit,
     onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = mokoString(MR.strings.files),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
             Text(
                 text = mokoString(MR.strings.history),
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.clickable {
-                    onNavigateToAudiobookFiles(audiobook)
-                }
+                modifier =
+                    Modifier.clickable {
+                        onNavigateToAudiobookFiles(audiobook)
+                    },
             )
         }
 
@@ -60,9 +61,10 @@ fun AudiobookFileView(
             onAutomaticClicked = onAutomaticSearch,
             automaticSearchEnabled = audiobook.monitored,
             automaticSearchInProgress = searchIds.contains(audiobook.id),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
         )
 
         audiobook.files.forEach { file ->
@@ -72,11 +74,12 @@ fun AudiobookFileView(
         if (audiobook.files.isEmpty()) {
             Text(
                 text = mokoString(MR.strings.no_files),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         }
     }

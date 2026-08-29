@@ -14,7 +14,7 @@ fun SeasonHeader(
     searchInProgress: (Int) -> Boolean = { false },
     onDeleteSeason: () -> Unit = {},
     deleteInProgress: Boolean = false,
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> }
+    onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> },
 ) {
     if (seriesId != null && season.arrSeason != null) {
         ReleaseDownloadButtons(

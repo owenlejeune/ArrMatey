@@ -5,12 +5,12 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class NetworkUtilsTest {
-
     private class FakeNetworkUtils(
         private val currentSsid: String?,
-        private val wifiConnected: Boolean = true
+        private val wifiConnected: Boolean = true,
     ) : NetworkUtils {
         override fun getCurrentWifiSsid(): String? = currentSsid
+
         override fun isConnectedToWifi(): Boolean = wifiConnected
     }
 

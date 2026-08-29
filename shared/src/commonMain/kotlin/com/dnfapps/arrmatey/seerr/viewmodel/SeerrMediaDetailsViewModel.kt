@@ -2,22 +2,21 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.model.OperationStatus
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
-import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
+import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
-import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
@@ -26,12 +25,13 @@ import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.state.toButtonState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetPersonCreditsUseCase
-import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -55,9 +55,8 @@ class SeerrMediaDetailsViewModel(
     private val getSeerrMovieRatingsUseCase: GetSeerrMovieRatingsUseCase,
     private val submitIssueUseCase: SubmitIssueUseCase,
     private val submitRequestUseCase: SubmitRequestUseCase,
-    private val getPersonCreditsUseCase: GetPersonCreditsUseCase
-): ViewModel() {
-
+    private val getPersonCreditsUseCase: GetPersonCreditsUseCase,
+) : ViewModel() {
     private val _combinedRatings = MutableStateFlow<CombinedRatings?>(null)
     private val _rtRatings = MutableStateFlow<RottenTomatoesRating?>(null)
 
@@ -65,23 +64,24 @@ class SeerrMediaDetailsViewModel(
     val personCredits: StateFlow<PersonCredits?> = _personCredits.asStateFlow()
 
     private val _uiState = MutableStateFlow<SeerrDetailsState>(SeerrDetailsState.Initial)
-    val uiState: StateFlow<SeerrDetailsState> = combine(
-        _uiState,
-        _rtRatings,
-        _combinedRatings
-    ) { state, rtRatings, combinedRatings ->
-        when (state) {
-            is SeerrDetailsState.Success -> state.copy(
-                rtRatings = combinedRatings?.rt ?: rtRatings,
-                imdbRatings = combinedRatings?.imdb
-            )
-            else -> state
-        }
-    }
-        .stateIn(
+    val uiState: StateFlow<SeerrDetailsState> =
+        combine(
+            _uiState,
+            _rtRatings,
+            _combinedRatings,
+        ) { state, rtRatings, combinedRatings ->
+            when (state) {
+                is SeerrDetailsState.Success ->
+                    state.copy(
+                        rtRatings = combinedRatings?.rt ?: rtRatings,
+                        imdbRatings = combinedRatings?.imdb,
+                    )
+                else -> state
+            }
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = SeerrDetailsState.Initial
+            initialValue = SeerrDetailsState.Initial,
         )
 
     private val _isReportIssueSheetVisible = MutableStateFlow(false)
@@ -99,28 +99,28 @@ class SeerrMediaDetailsViewModel(
     private var seerrMediaId: Long? = null
 
     private val _reportIssueState = MutableStateFlow(ReportIssueUiState())
-    val reportIssueState: StateFlow<ReportIssueUiState> = _reportIssueState
-        .combine(_uiState) { issueState, uiState ->
-            if (uiState is SeerrDetailsState.Success) {
-                seerrMediaId = uiState.item.mediaInfo?.id
-                if (issueState.saveSuccess) {
-                    _isReportIssueSheetVisible.value = false
+    val reportIssueState: StateFlow<ReportIssueUiState> =
+        _reportIssueState
+            .combine(_uiState) { issueState, uiState ->
+                if (uiState is SeerrDetailsState.Success) {
+                    seerrMediaId = uiState.item.mediaInfo?.id
+                    if (issueState.saveSuccess) {
+                        _isReportIssueSheetVisible.value = false
+                    }
+                    issueState.copy(
+                        includeSeriesOptions = uiState.item.requestType == RequestType.Tv,
+                        mediaTitle = uiState.item.displayTitle,
+                        availableSeasons = (uiState.item as? TvDetails)?.seasons ?: emptyList(),
+                        saveButtonEnabled = issueState.message.isNotEmpty() && !issueState.saveInProgress,
+                    )
+                } else {
+                    issueState
                 }
-                issueState.copy(
-                    includeSeriesOptions = uiState.item.requestType == RequestType.Tv,
-                    mediaTitle = uiState.item.displayTitle,
-                    availableSeasons = (uiState.item as? TvDetails)?.seasons ?: emptyList(),
-                    saveButtonEnabled = issueState.message.isNotEmpty() && !issueState.saveInProgress
-                )
-            } else {
-                issueState
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ReportIssueUiState()
-        )
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = ReportIssueUiState(),
+            )
 
     private val _currentUser = MutableStateFlow<SeerrUser?>(null)
     val currentUser: StateFlow<SeerrUser?> = _currentUser.asStateFlow()
@@ -137,23 +137,23 @@ class SeerrMediaDetailsViewModel(
     private val _serviceDetails = MutableStateFlow<ServiceDetails?>(null)
     val serviceDetails: StateFlow<ServiceDetails?> = _serviceDetails.asStateFlow()
 
-    val buttonState: StateFlow<MediaButtonState> = combine(
-        _uiState,
-        _currentUser,
-    ) { state, user ->
-        when (state) {
-            is SeerrDetailsState.Success -> {
-                val isAdmin = user?.hasPermission(UserPermission.ADMIN) == true
-                val totalSeasonCount = (state.item as? TvDetails)?.numberOfSeasons ?: 0
-                state.item.mediaInfo.toButtonState(state.item.relatedVideos, totalSeasonCount, user?.id, isAdmin)
+    val buttonState: StateFlow<MediaButtonState> =
+        combine(
+            _uiState,
+            _currentUser,
+        ) { state, user ->
+            when (state) {
+                is SeerrDetailsState.Success -> {
+                    val isAdmin = user?.hasPermission(UserPermission.ADMIN) == true
+                    val totalSeasonCount = (state.item as? TvDetails)?.numberOfSeasons ?: 0
+                    state.item.mediaInfo.toButtonState(state.item.relatedVideos, totalSeasonCount, user?.id, isAdmin)
+                }
+                else -> MediaButtonState()
             }
-            else -> MediaButtonState()
-        }
-    }
-        .stateIn(
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = MediaButtonState()
+            initialValue = MediaButtonState(),
         )
 
     private val _selectedInstance = MutableStateFlow<Instance?>(null)
@@ -166,7 +166,8 @@ class SeerrMediaDetailsViewModel(
 
     private fun observeSelectedInstance() {
         viewModelScope.launch {
-            getSeerrInstanceRepositoryUseCase.observeSelected()
+            getSeerrInstanceRepositoryUseCase
+                .observeSelected()
                 .filterNotNull()
                 .collectLatest { repository ->
                     currentRepository = repository
@@ -209,23 +210,29 @@ class SeerrMediaDetailsViewModel(
         viewModelScope.launch {
             combine(_uiState, _radarrServices, _sonarrServices) { state, radarr, sonarr ->
                 if (state is SeerrDetailsState.Success) {
-                    val request = state.item.mediaInfo?.requests?.firstOrNull { it.status == 1 }
-                    val serverId = request?.serverId ?: when (state.item.requestType) {
-                        RequestType.Movie -> radarr.find { it.isDefault }?.id
-                        RequestType.Tv -> sonarr.find { it.isDefault }?.id
-                        RequestType.Person -> null
-                    }
+                    val request =
+                        state.item.mediaInfo
+                            ?.requests
+                            ?.firstOrNull { it.status == 1 }
+                    val serverId =
+                        request?.serverId ?: when (state.item.requestType) {
+                            RequestType.Movie -> radarr.find { it.isDefault }?.id
+                            RequestType.Tv -> sonarr.find { it.isDefault }?.id
+                            RequestType.Person -> null
+                        }
                     if (serverId != null) serverId to state.item.requestType else null
-                } else null
-            }
-                .filterNotNull()
+                } else {
+                    null
+                }
+            }.filterNotNull()
                 .distinctUntilChanged()
                 .collectLatest { (serverId, type) ->
-                    val result = when (type) {
-                        RequestType.Movie -> repository.getRadarrDetails(serverId)
-                        RequestType.Tv -> repository.getSonarrDetails(serverId)
-                        RequestType.Person -> return@collectLatest
-                    }
+                    val result =
+                        when (type) {
+                            RequestType.Movie -> repository.getRadarrDetails(serverId)
+                            RequestType.Tv -> repository.getSonarrDetails(serverId)
+                            RequestType.Person -> return@collectLatest
+                        }
                     result.onSuccess { details ->
                         _serviceDetails.value = details
                     }
@@ -258,7 +265,7 @@ class SeerrMediaDetailsViewModel(
         profileId: Long? = null,
         rootFolder: String? = null,
         languageProfileId: Long? = null,
-        seasons: List<Int>? = null
+        seasons: List<Int>? = null,
     ) {
         val repository = currentRepository ?: return
         viewModelScope.launch {
@@ -269,7 +276,7 @@ class SeerrMediaDetailsViewModel(
                 profileId = profileId,
                 rootFolder = rootFolder,
                 languageProfileId = languageProfileId,
-                seasons = seasons
+                seasons = seasons,
             ).onSuccess { refreshDetails() }
         }
     }
@@ -313,21 +320,22 @@ class SeerrMediaDetailsViewModel(
         languageProfileId: Long? = null,
         seasons: List<Int>? = null,
         is4k: Boolean = false,
-        userId: Long? = null
+        userId: Long? = null,
     ) {
         val repository = currentRepository ?: return
         viewModelScope.launch {
-            val body = RequestMediaBody(
-                mediaType = mediaType,
-                mediaId = tmdbId,
-                is4k = is4k,
-                serverId = null, // serverId will be determined by Seerr based on profile/rootFolder
-                profileId = profileId,
-                rootFolder = rootFolder,
-                languageProfileId = languageProfileId,
-                seasons = seasons,
-                userId = userId
-            )
+            val body =
+                RequestMediaBody(
+                    mediaType = mediaType,
+                    mediaId = tmdbId,
+                    is4k = is4k,
+                    serverId = null, // serverId will be determined by Seerr based on profile/rootFolder
+                    profileId = profileId,
+                    rootFolder = rootFolder,
+                    languageProfileId = languageProfileId,
+                    seasons = seasons,
+                    userId = userId,
+                )
             submitRequestUseCase(body, repository).onSuccess {
                 hideRequestSheet()
                 refreshDetails()
@@ -374,13 +382,14 @@ class SeerrMediaDetailsViewModel(
     fun submitIssue() {
         val seerrId = seerrMediaId ?: return
         val state = _reportIssueState.value
-        val issue = IssueBody(
-            issueType = state.issueType.value,
-            message = state.message,
-            mediaId = seerrId,
-            problemSeason = state.problemSeason ?: 0,
-            problemEpisode = state.problemSeason?.let { state.problemEpisode } ?: 0
-        )
+        val issue =
+            IssueBody(
+                issueType = state.issueType.value,
+                message = state.message,
+                mediaId = seerrId,
+                problemSeason = state.problemSeason ?: 0,
+                problemEpisode = state.problemSeason?.let { state.problemEpisode } ?: 0,
+            )
         viewModelScope.launch {
             submitIssueUseCase(issue)
                 .collect { issueStatus ->
@@ -388,11 +397,10 @@ class SeerrMediaDetailsViewModel(
                         it.copy(
                             saveInProgress = issueStatus == OperationStatus.InProgress,
                             saveError = (issueStatus as? OperationStatus.Error)?.message,
-                            saveSuccess = issueStatus is OperationStatus.Success
+                            saveSuccess = issueStatus is OperationStatus.Success,
                         )
                     }
                 }
         }
     }
-
 }

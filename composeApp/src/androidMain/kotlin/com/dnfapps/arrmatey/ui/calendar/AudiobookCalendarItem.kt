@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BasePosterItem
@@ -37,61 +37,66 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun AudiobookCalendarItem(
     audiobook: Audiobook,
     instances: List<Instance>,
-    onNavigate: (Long?) -> Unit
+    onNavigate: (Long?) -> Unit,
 ) {
     SlidableCalendarItem(
         instanceIds = audiobook.instanceIds,
         instances = instances,
-        onInstanceSelected = onNavigate
+        onInstanceSelected = onNavigate,
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = ArrLightPurple,
-                contentColor = surfaceDark
-            )
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = ArrLightPurple,
+                    contentColor = surfaceDark,
+                ),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 BasePosterItem(
                     model = rememberRemoteImageData(audiobook.getPoster()?.remoteUrl),
                     aspectRatio = AspectRatio.Cover,
-                    modifier = Modifier.width(50.dp)
+                    modifier = Modifier.width(50.dp),
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = audiobook.title ?: mokoString(MR.strings.unknown),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                     Text(
-                        text = listOfNotNull(
-                            audiobook.authors.joinToString(", "),
-                            audiobook.series?.takeUnless { it.isEmpty() }
-                        ).joinToString(separator = Bullet),
-                        style = MaterialTheme.typography.bodyMedium
+                        text =
+                            listOfNotNull(
+                                audiobook.authors.joinToString(", "),
+                                audiobook.series?.takeUnless { it.isEmpty() },
+                            ).joinToString(separator = BULLET),
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
 
-                val statusIcon = when {
-                    audiobook.isDownloaded -> Icons.Default.FileDownloadDone
-                    !audiobook.monitored -> Icons.Default.BookmarkBorder
-                    audiobook.monitored -> Icons.Default.Bookmark
-                    else -> null
-                }
+                val statusIcon =
+                    when {
+                        audiobook.isDownloaded -> Icons.Default.FileDownloadDone
+                        !audiobook.monitored -> Icons.Default.BookmarkBorder
+                        audiobook.monitored -> Icons.Default.Bookmark
+                        else -> null
+                    }
                 statusIcon?.let { icon ->
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = surfaceContainerLowDark,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(18.dp),
                     )
                 }
             }

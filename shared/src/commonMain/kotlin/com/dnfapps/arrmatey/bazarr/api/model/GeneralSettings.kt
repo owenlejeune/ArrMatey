@@ -74,5 +74,5 @@ data class GeneralSettings(
     val use_sonarr: Boolean,
     val utf8_encode: Boolean,
     val wanted_search_frequency: Int,
-    val wanted_search_frequency_movie: Int
+    val wanted_search_frequency_movie: Int,
 )

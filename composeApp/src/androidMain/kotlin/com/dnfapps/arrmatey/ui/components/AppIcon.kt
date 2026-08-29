@@ -10,9 +10,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 @Composable
 fun AppIcon(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val drawable = remember {
-        context.packageManager.getApplicationIcon(context.packageName)
-    }
+    val drawable =
+        remember {
+            context.packageManager.getApplicationIcon(context.packageName)
+        }
 
     AndroidView(
         factory = { ctx ->
@@ -20,6 +21,6 @@ fun AppIcon(modifier: Modifier = Modifier) {
                 setImageDrawable(drawable)
             }
         },
-        modifier = modifier
+        modifier = modifier,
     )
 }

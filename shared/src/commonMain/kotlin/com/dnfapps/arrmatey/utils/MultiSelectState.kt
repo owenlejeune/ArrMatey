@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 
 class MultiSelectState<T>(
     private val initialItems: Collection<T> = emptyList(),
-    selectionModeAvailable: Boolean = true
+    selectionModeAvailable: Boolean = true,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -23,13 +23,14 @@ class MultiSelectState<T>(
     private val _isInSelectionMode = MutableStateFlow(false)
     val isInSelectionMode: StateFlow<Boolean> = _isInSelectionMode.asStateFlow()
 
-    val selectionCount: StateFlow<Int> = _selectedItems
-        .map { it.size }
-        .stateIn(
-            scope = scope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = 0
-        )
+    val selectionCount: StateFlow<Int> =
+        _selectedItems
+            .map { it.size }
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 0,
+            )
 
     private val _isSelectionModeAvailable = MutableStateFlow(selectionModeAvailable)
     val isSelectionModeAvailable: StateFlow<Boolean> = _isSelectionModeAvailable.asStateFlow()
@@ -107,8 +108,5 @@ class MultiSelectState<T>(
         _selectedItems.value = emptySet()
     }
 
-    fun areAllSelected(items: Collection<T>): Boolean {
-        return _selectedItems.value.containsAll(items)
-    }
-
+    fun areAllSelected(items: Collection<T>): Boolean = _selectedItems.value.containsAll(items)
 }

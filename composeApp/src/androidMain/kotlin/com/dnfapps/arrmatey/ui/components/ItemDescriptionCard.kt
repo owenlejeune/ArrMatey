@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.ui.components
 
-import android.text.Html
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -21,20 +20,24 @@ import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.entensions.rememberHtml
 
 @Composable
-fun ItemDescriptionCard(overview: String, modifier: Modifier = Modifier) {
+fun ItemDescriptionCard(
+    overview: String,
+    modifier: Modifier = Modifier,
+) {
     var expanded by remember { mutableStateOf(false) }
     val parsed = overview.rememberHtml()
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .animateContentSize()
-            .clickable {
-                expanded = !expanded
-            },
-        shape = RoundedCornerShape(12.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .clickable {
+                    expanded = !expanded
+                },
+        shape = RoundedCornerShape(12.dp),
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 12.dp, horizontal = 18.dp)
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 18.dp),
         ) {
             Text(
                 text = parsed,
@@ -45,7 +48,7 @@ fun ItemDescriptionCard(overview: String, modifier: Modifier = Modifier) {
                     if (!result.didOverflowHeight) {
                         expanded = true
                     }
-                }
+                },
             )
         }
     }

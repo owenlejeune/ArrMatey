@@ -7,5 +7,5 @@ enum class ApprovalStatus {
     Approve,
 
     @SerialName("decline")
-    Decline
+    Decline,
 }

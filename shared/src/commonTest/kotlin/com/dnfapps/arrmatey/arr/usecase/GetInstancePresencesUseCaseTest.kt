@@ -1,15 +1,13 @@
 package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
+import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.database.EncryptedString
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class GetInstancePresencesUseCaseTest {
-
     private val useCase = GetInstancePresencesUseCase()
 
     private val instance1 = Instance(id = 1, label = "Inst 1", type = InstanceType.Sonarr, url = "", apiKey = EncryptedString(""))
@@ -21,12 +19,13 @@ class GetInstancePresencesUseCaseTest {
         val activeMedia = MockMedia.Sonarr
         val presencesMap = mapOf(2L to MockMedia.Default)
 
-        val result = useCase.buildPresencesListFromInstances(
-            instances = instances,
-            activeRepoId = 1L,
-            activeArrMedia = activeMedia,
-            presencesMap = presencesMap
-        )
+        val result =
+            useCase.buildPresencesListFromInstances(
+                instances = instances,
+                activeRepoId = 1L,
+                activeArrMedia = activeMedia,
+                presencesMap = presencesMap,
+            )
 
         assertEquals(2, result.size)
         assertEquals(instance1.id, result[0].instance.id)
@@ -40,12 +39,13 @@ class GetInstancePresencesUseCaseTest {
         val instances = listOf(instance1)
         val presencesMap = mapOf(1L to MockMedia.Default)
 
-        val result = useCase.buildPresencesListFromInstances(
-            instances = instances,
-            activeRepoId = 1L,
-            activeArrMedia = null,
-            presencesMap = presencesMap
-        )
+        val result =
+            useCase.buildPresencesListFromInstances(
+                instances = instances,
+                activeRepoId = 1L,
+                activeArrMedia = null,
+                presencesMap = presencesMap,
+            )
 
         assertEquals(1, result.size)
         assertEquals(MockMedia.Default, result[0].arrMedia)

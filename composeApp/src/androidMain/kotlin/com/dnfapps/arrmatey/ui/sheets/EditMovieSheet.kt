@@ -44,7 +44,7 @@ fun EditMovieSheet(
     tags: List<Tag>,
     editInProgress: Boolean,
     onEditItem: (ArrMovie) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     var monitored by remember { mutableStateOf(item.monitored) }
     var minimumAvailability by remember { mutableStateOf(item.minimumAvailability) }
@@ -58,21 +58,24 @@ fun EditMovieSheet(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !editInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !editInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,
                 onCheckedChange = { monitored = it },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             qualityProfiles
@@ -85,22 +88,23 @@ fun EditMovieSheet(
                         onOptionSelected = { qualityProfileId = it.id },
                         getOptionLabel = { it.name ?: "" },
                         label = { Text(mokoString(MR.strings.quality_profile)) },
-                        enabled = !editInProgress
+                        enabled = !editInProgress,
                     )
                 }
 
             DropdownPicker(
-                options = listOf(
-                    MediaStatus.Announced,
-                    MediaStatus.InCinemas,
-                    MediaStatus.Released
-                ),
+                options =
+                    listOf(
+                        MediaStatus.Announced,
+                        MediaStatus.InCinemas,
+                        MediaStatus.Released,
+                    ),
                 modifier = Modifier.fillMaxWidth(),
                 selectedOption = minimumAvailability,
                 onOptionSelected = { minimumAvailability = it },
                 getOptionLabel = { mokoString(it.resource) },
                 label = { Text(mokoString(MR.strings.minimum_availability)) },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             if (tags.isNotEmpty()) {
@@ -120,7 +124,7 @@ fun EditMovieSheet(
                             ?: mokoString(MR.strings.unknown)
                     },
                     label = { Text(mokoString(MR.strings.tags)) },
-                    enabled = !editInProgress
+                    enabled = !editInProgress,
                 )
             }
 
@@ -135,35 +139,35 @@ fun EditMovieSheet(
                             onOptionSelected = { rootFolder = it.path },
                             label = { Text(mokoString(MR.strings.root_folder)) },
                             getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
-                            enabled = !editInProgress
+                            enabled = !editInProgress,
                         )
                     }
             }
 
             Button(
                 onClick = {
-                    val updatedItem = item.copyForUpdate(
-                        monitored = monitored,
-                        minimumAvailability = minimumAvailability,
-                        qualityProfileId = qualityProfileId,
-                        rootFolderPath = rootFolder,
-                        tags = selectedTags
-                    )
+                    val updatedItem =
+                        item.copyForUpdate(
+                            monitored = monitored,
+                            minimumAvailability = minimumAvailability,
+                            qualityProfileId = qualityProfileId,
+                            rootFolderPath = rootFolder,
+                            tags = selectedTags,
+                        )
                     onEditItem(updatedItem)
                 },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             ) {
                 if (editInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(mokoString(MR.strings.save))
                 }
             }
         }
     }
-
 }

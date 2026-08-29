@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class AutoSearchBody(
     val seriesid: Long? = null,
     val radarrid: Long? = null,
-    val action: String = "search-missing"
+    val action: String = "search-missing",
 )

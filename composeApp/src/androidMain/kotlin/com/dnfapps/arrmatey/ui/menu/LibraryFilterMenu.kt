@@ -45,7 +45,7 @@ fun LibraryFilterMenu(
     onSortByChanged: (SortBy) -> Unit,
     sortOrder: SortOrder,
     onSortOrderChanged: (SortOrder) -> Unit,
-    onOpenViewCustomization: () -> Unit
+    onOpenViewCustomization: () -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val groupInteractionSource = remember { MutableInteractionSource() }
@@ -56,11 +56,11 @@ fun LibraryFilterMenu(
         }
         DropdownMenuPopup(
             expanded = showMenu,
-            onDismissRequest = { showMenu = false }
+            onDismissRequest = { showMenu = false },
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 3),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 DropdownMenuItem(
                     text = { Text(mokoString(MR.strings.view_customization)) },
@@ -70,14 +70,14 @@ fun LibraryFilterMenu(
                         showMenu = false
                     },
                     shapes = MenuDefaults.itemShape(0, 1),
-                    leadingIcon = { Icon(Icons.Default.Palette, null) }
+                    leadingIcon = { Icon(Icons.Default.Palette, null) },
                 )
             }
             Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
 
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(1, 3),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 val filterOptions = FilterBy.typeEntries(type)
                 filterOptions.forEachIndexed { index, filter ->
@@ -91,21 +91,22 @@ fun LibraryFilterMenu(
                         shapes = MenuDefaults.itemShape(index, filterOptions.size),
                         selectedLeadingIcon = {
                             Icon(Icons.Default.Check, null)
-                        }
+                        },
                     )
                 }
             }
 
             if (customFilters.isNotEmpty()) {
-                val libraryFilters = customFilters.filter {
-                    it.type == "series" || it.type == "movies" || it.type == "artist" || it.type == "books"
-                }
+                val libraryFilters =
+                    customFilters.filter {
+                        it.type == "series" || it.type == "movies" || it.type == "artist" || it.type == "books"
+                    }
                 if (libraryFilters.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
 
                     DropdownMenuGroup(
                         shapes = MenuDefaults.groupShape(2, 4),
-                        interactionSource = groupInteractionSource
+                        interactionSource = groupInteractionSource,
                     ) {
                         libraryFilters.forEachIndexed { index, filter ->
                             DropdownMenuItem(
@@ -118,7 +119,7 @@ fun LibraryFilterMenu(
                                 shapes = MenuDefaults.itemShape(index, libraryFilters.size),
                                 selectedLeadingIcon = {
                                     Icon(Icons.Default.Check, null)
-                                }
+                                },
                             )
                         }
                     }
@@ -128,7 +129,7 @@ fun LibraryFilterMenu(
 
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(if (customFilters.isNotEmpty()) 3 else 2, if (customFilters.isNotEmpty()) 4 else 3),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 val sortOptions = SortBy.typeEntries(type)
                 sortOptions.forEachIndexed { index, sort ->
@@ -140,17 +141,21 @@ fun LibraryFilterMenu(
                                 onSortOrderChanged(
                                     if (sortOrder == SortOrder.Asc) {
                                         SortOrder.Desc
-                                    } else SortOrder.Asc
+                                    } else {
+                                        SortOrder.Asc
+                                    },
                                 )
                             } else {
                                 onSortByChanged(sort)
                             }
                         },
                         shapes = MenuDefaults.itemShape(index, sortOptions.size),
-                        selectedLeadingIcon = { when(sortOrder) {
-                            SortOrder.Asc -> Icon(Icons.Default.ArrowDropUp, null)
-                            SortOrder.Desc -> Icon(Icons.Default.ArrowDropDown, null)
-                        } }
+                        selectedLeadingIcon = {
+                            when (sortOrder) {
+                                SortOrder.Asc -> Icon(Icons.Default.ArrowDropUp, null)
+                                SortOrder.Desc -> Icon(Icons.Default.ArrowDropDown, null)
+                            }
+                        },
                     )
                 }
             }

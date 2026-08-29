@@ -11,5 +11,5 @@ data class BazarrSubtitleLanguage(
     val code2: String? = null,
     val code3: String? = null,
     val forced: Boolean = false,
-    val hi: Boolean = false
+    val hi: Boolean = false,
 )

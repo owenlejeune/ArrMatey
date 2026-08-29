@@ -19,63 +19,86 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ProwlarrInstanceRepositoryTest {
-
-    private val fakeInstance = Instance(
-        id = 1,
-        label = "Test Prowlarr",
-        url = "http://localhost:9696",
-        apiKey = EncryptedString("test-api-key"),
-        type = InstanceType.Prowlarr,
-        enabled = true
-    )
-
-    @Test
-    fun testRefreshStatus() = runTest {
-        val mockEngine = MockEngine { _ ->
-            respond(
-                content = """{"version": "1.2.0"}""",
-                status = HttpStatusCode.OK,
-                headers = headersOf("Content-Type", "application/json")
-            )
-        }
-        val httpClient = HttpClient(mockEngine) {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
-        val repository = ProwlarrInstanceRepository(fakeInstance, httpClient)
-
-        repository.refreshStatus()
-
-        assertNotNull(repository.softwareStatus.value)
-        assertEquals("1.2.0", repository.softwareStatus.value?.version)
-    }
+    private val fakeInstance =
+        Instance(
+            id = 1,
+            label = "Test Prowlarr",
+            url = "http://localhost:9696",
+            apiKey = EncryptedString("test-api-key"),
+            type = InstanceType.Prowlarr,
+            enabled = true,
+        )
 
     @Test
-    fun testGetIndexers() = runTest {
-        val mockEngine = MockEngine { _ ->
-            respond(
-                content = """[{"id": 1, "name": "Indexer 1", "enable": true, "supportsRss": true, "supportsSearch": true, "supportsRedirect": true, "priority": 1}]""",
-                status = HttpStatusCode.OK,
-                headers = headersOf("Content-Type", "application/json")
-            )
-        }
-        val httpClient = HttpClient(mockEngine) {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
-        val repository = ProwlarrInstanceRepository(fakeInstance, httpClient)
+    fun testRefreshStatus() =
+        runTest {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = """{"version": "1.2.0"}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                }
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json(
+                            Json {
+                                ignoreUnknownKeys = true
+                            },
+                        )
+                    }
+                }
+            val repository = ProwlarrInstanceRepository(fakeInstance, httpClient)
 
-        val result = repository.getIndexers()
+            repository.refreshStatus()
 
-        assertTrue(result is NetworkResult.Success)
-        assertEquals(1, result.data.size)
-        assertEquals("Indexer 1", result.data[0].name)
-        assertEquals(1, repository.indexers.value.size)
-    }
+            assertNotNull(repository.softwareStatus.value)
+            assertEquals("1.2.0", repository.softwareStatus.value?.version)
+        }
+
+    @Test
+    fun testGetIndexers() =
+        runTest {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content =
+                            """
+                            [
+                              {
+                                "id": 1,
+                                "name": "Indexer 1",
+                                "enable": true,
+                                "supportsRss": true,
+                                "supportsSearch": true,
+                                "supportsRedirect": true,
+                                "priority": 1
+                              }
+                            ]
+                            """.trimIndent(),
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                }
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json(
+                            Json {
+                                ignoreUnknownKeys = true
+                            },
+                        )
+                    }
+                }
+            val repository = ProwlarrInstanceRepository(fakeInstance, httpClient)
+
+            val result = repository.getIndexers()
+
+            assertTrue(result is NetworkResult.Success)
+            assertEquals(1, result.data.size)
+            assertEquals("Indexer 1", result.data[0].name)
+            assertEquals(1, repository.indexers.value.size)
+        }
 }

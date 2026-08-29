@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ListenarrConfiguration(
     val defaultSearchLanguage: String,
-    val defaultSearchRegion: String
+    val defaultSearchRegion: String,
 ) {
-    constructor(): this("english", "us")
+    constructor() : this("english", "us")
 }

@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface InstanceDao {
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(instance: Instance): Long
 
@@ -51,7 +50,10 @@ interface InstanceDao {
     suspend fun selectInstance(id: Long)
 
     @Transaction
-    suspend fun setInstanceAsSelected(id: Long, type: InstanceType) {
+    suspend fun setInstanceAsSelected(
+        id: Long,
+        type: InstanceType,
+    ) {
         unselectAllOf(type)
         selectInstance(id)
     }
@@ -63,12 +65,19 @@ interface InstanceDao {
     suspend fun findByLabel(label: String): Long?
 
     @Query("SELECT id FROM instances WHERE url = :url AND id != :currentId LIMIT 1")
-    suspend fun findOtherByUrl(url: String, currentId: Long): Long?
+    suspend fun findOtherByUrl(
+        url: String,
+        currentId: Long,
+    ): Long?
 
     @Query("SELECT id FROM instances WHERE label = :label AND id != :currentId LIMIT 1")
-    suspend fun findOtherByLabel(label: String, currentId: Long): Long?
+    suspend fun findOtherByLabel(
+        label: String,
+        currentId: Long,
+    ): Long?
 
-    @Query("""
+    @Query(
+        """
         UPDATE instances
         SET selected = true
         WHERE id = (
@@ -84,7 +93,8 @@ interface InstanceDao {
             ORDER BY i.id
             LIMIT 1
         )
-    """)
+    """,
+    )
     suspend fun ensureFirstSelectedIfNone(type: InstanceType)
 
     @Transaction

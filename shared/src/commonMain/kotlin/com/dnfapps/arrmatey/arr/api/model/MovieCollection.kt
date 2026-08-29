@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MovieCollection(
     val title: String? = null,
-    val tmdbId: Int? = null
+    val tmdbId: Int? = null,
 )

@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.compose.utils.breakable
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.extensions.isEqual
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
@@ -42,83 +42,88 @@ fun MovieCalendarItem(
     date: LocalDate,
     movie: ArrMovie,
     instances: List<Instance>,
-    onNavigate: (Long?) -> Unit
+    onNavigate: (Long?) -> Unit,
 ) {
     SlidableCalendarItem(
         instanceIds = movie.instanceIds,
         instances = instances,
-        onInstanceSelected = onNavigate
+        onInstanceSelected = onNavigate,
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = ArrOrange,
-                contentColor = surfaceDark
-            )
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = ArrOrange,
+                    contentColor = surfaceDark,
+                ),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 PosterItem(movie, Modifier.width(50.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = movie.title?.breakable() ?: mokoString(MR.strings.unknown),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
 
                     Row(
                         modifier = Modifier.padding(vertical = 2.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (movie.inCinemas?.isEqual(date) == true) {
                             Text(
                                 text = mokoString(MR.strings.in_cinemas),
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                         if (movie.digitalRelease?.isEqual(date) == true) {
                             Text(
                                 text = mokoString(MR.strings.digital_release),
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                         if (movie.physicalRelease?.isEqual(date) == true) {
                             Text(
                                 text = mokoString(MR.strings.physical_release),
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     }
 
                     Text(
-                        text = listOfNotNull(movie.certification, movie.studio)
-                            .joinToString(Bullet),
+                        text =
+                            listOfNotNull(movie.certification, movie.studio)
+                                .joinToString(BULLET),
                         style = MaterialTheme.typography.bodySmall,
-                        color = surfaceContainerLowDark
+                        color = surfaceContainerLowDark,
                     )
                 }
 
-                val statusIcon = when {
-                    movie.isDownloaded -> Icons.Default.FileDownloadDone
-                    !movie.monitored -> Icons.Default.BookmarkBorder
-                    movie.isWaiting -> Icons.Default.AccessTimeFilled
-                    movie.monitored -> Icons.Default.Bookmark
-                    else -> null
-                }
+                val statusIcon =
+                    when {
+                        movie.isDownloaded -> Icons.Default.FileDownloadDone
+                        !movie.monitored -> Icons.Default.BookmarkBorder
+                        movie.isWaiting -> Icons.Default.AccessTimeFilled
+                        movie.monitored -> Icons.Default.Bookmark
+                        else -> null
+                    }
                 statusIcon?.let { icon ->
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = surfaceContainerLowDark,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }

@@ -25,7 +25,7 @@ data class BazarrRelease(
     val scoreWithoutHash: Int,
     val subtitle: String,
     val uploader: String,
-    val url: String
+    val url: String,
 ) {
     val forced: Boolean
         get() = forcedString == "True"
@@ -35,5 +35,4 @@ data class BazarrRelease(
 
     val originalFormat: Boolean
         get() = originalFormatString == "True"
-
 }

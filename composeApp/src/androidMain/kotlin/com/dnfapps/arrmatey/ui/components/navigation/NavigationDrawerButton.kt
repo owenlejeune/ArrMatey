@@ -12,7 +12,7 @@ fun NavigationDrawerButton() {
     val navManager = navigationManager
     IconButton(onClick = {
         navManager.openDrawer()
-    } ) {
+    }) {
         Icon(Icons.Default.Menu, null)
     }
 }

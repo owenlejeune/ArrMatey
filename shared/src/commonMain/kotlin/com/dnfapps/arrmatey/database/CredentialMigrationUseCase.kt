@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.first
 class CredentialMigrationUseCase(
     private val instanceDao: InstanceDao,
     private val downloadClientDao: DownloadClientDao,
-    private val preferencesStore: PreferencesStore
+    private val preferencesStore: PreferencesStore,
 ) {
     suspend operator fun invoke() {
         val migrated = preferencesStore.credentialsMigrated.first()

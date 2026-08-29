@@ -17,7 +17,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,9 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
-import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
@@ -48,7 +47,7 @@ fun EditSeriesSheet(
     tags: List<Tag>,
     editInProgress: Boolean,
     onEditItem: (ArrMedia) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     var monitor by remember { mutableStateOf(item.monitored) }
     var monitorNewSeasons by remember { mutableStateOf(item.monitorNewItems == MonitorNewItems.All) }
@@ -64,23 +63,25 @@ fun EditSeriesSheet(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !editInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !editInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitor,
                 onCheckedChange = { monitor = it },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             LabelledSwitch(
@@ -89,14 +90,14 @@ fun EditSeriesSheet(
                 onCheckedChange = {
                     monitorNewSeasons = it
                 },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             LabelledSwitch(
                 label = mokoString(MR.strings.season_folders),
                 checked = seasonFolders,
                 onCheckedChange = { seasonFolders = it },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             DropdownPicker(
@@ -106,7 +107,7 @@ fun EditSeriesSheet(
                 onOptionSelected = { seriesType = it },
                 getOptionLabel = { mokoString(it.resource) },
                 label = { Text(mokoString(MR.strings.series_type)) },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             )
 
             qualityProfiles
@@ -119,7 +120,7 @@ fun EditSeriesSheet(
                         onOptionSelected = { qualityProfileId = it.id },
                         getOptionLabel = { it.name ?: "" },
                         label = { Text(mokoString(MR.strings.quality_profile)) },
-                        enabled = !editInProgress
+                        enabled = !editInProgress,
                     )
                 }
 
@@ -140,7 +141,7 @@ fun EditSeriesSheet(
                             ?: mokoString(MR.strings.unknown)
                     },
                     label = { Text(mokoString(MR.strings.tags)) },
-                    enabled = !editInProgress
+                    enabled = !editInProgress,
                 )
             }
 
@@ -155,39 +156,41 @@ fun EditSeriesSheet(
                             onOptionSelected = { rootFolder = it.path },
                             label = { Text(mokoString(MR.strings.root_folder)) },
                             getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
-                            enabled = !editInProgress
+                            enabled = !editInProgress,
                         )
                     }
             }
 
             Button(
                 onClick = {
-                    val newItem = item.copyForEdit(
-                        monitored = monitor,
-                        monitorNewSeasons = if (monitorNewSeasons) {
-                            MonitorNewItems.All
-                        } else {
-                            MonitorNewItems.None
-                        },
-                        qualityProfileId = qualityProfileId,
-                        seriesType = seriesType,
-                        seasonFolder = seasonFolders,
-                        rootFolderPath = rootFolder,
-                        tags = selectedTags
-                    )
+                    val newItem =
+                        item.copyForEdit(
+                            monitored = monitor,
+                            monitorNewSeasons =
+                                if (monitorNewSeasons) {
+                                    MonitorNewItems.All
+                                } else {
+                                    MonitorNewItems.None
+                                },
+                            qualityProfileId = qualityProfileId,
+                            seriesType = seriesType,
+                            seasonFolder = seasonFolders,
+                            rootFolderPath = rootFolder,
+                            tags = selectedTags,
+                        )
                     onEditItem(newItem)
                 },
-                enabled = !editInProgress
+                enabled = !editInProgress,
             ) {
                 if (editInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(
-                        text = mokoString(MR.strings.save)
+                        text = mokoString(MR.strings.save),
                     )
                 }
             }

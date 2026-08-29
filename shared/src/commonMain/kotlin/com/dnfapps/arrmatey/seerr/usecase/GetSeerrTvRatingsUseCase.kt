@@ -9,17 +9,21 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 
 class GetSeerrTvRatingsUseCase(
-    private val instanceManager: InstanceManager
+    private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(tmdbId: Long): Flow<RottenTomatoesRating?> = flow {
-        val repository = instanceManager.getSelectedSeerrRepository()
-            .firstOrNull()
-        if (repository != null) {
-            repository.getTvRatings(tmdbId)
-                .onSuccess { emit(it) }
-                .onError { _, _, _ -> emit(null) }
-        } else {
-            emit(null)
+    operator fun invoke(tmdbId: Long): Flow<RottenTomatoesRating?> =
+        flow {
+            val repository =
+                instanceManager
+                    .getSelectedSeerrRepository()
+                    .firstOrNull()
+            if (repository != null) {
+                repository
+                    .getTvRatings(tmdbId)
+                    .onSuccess { emit(it) }
+                    .onError { _, _, _ -> emit(null) }
+            } else {
+                emit(null)
+            }
         }
-    }
 }

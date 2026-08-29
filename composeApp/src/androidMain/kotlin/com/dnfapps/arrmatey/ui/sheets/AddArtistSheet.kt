@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
@@ -35,12 +35,12 @@ import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.datastore.InstancePreferences
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
 import com.dnfapps.arrmatey.utils.mokoPlural
-import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,20 +57,20 @@ fun AddArtistSheet(
     onDismiss: () -> Unit,
     instances: List<Instance> = emptyList(),
     selectedInstance: Instance? = null,
-    onInstanceSelected: (Instance) -> Unit = {}
+    onInstanceSelected: (Instance) -> Unit = {},
 ) {
     var monitor by remember(preferences.addArtistMonitor, selectedInstance?.id) { mutableStateOf(preferences.addArtistMonitor) }
     var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId, selectedInstance?.id) {
         mutableStateOf(
             qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
-                ?: qualityProfiles.firstOrNull()
+                ?: qualityProfiles.firstOrNull(),
         )
     }
     var monitorNew by remember(preferences.addArtistMonitorNew, selectedInstance?.id) { mutableStateOf(preferences.addArtistMonitorNew) }
     var rootFolder by remember(rootFolders, preferences.addRootFolderPath, selectedInstance?.id) {
         mutableStateOf(
             rootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
-                ?: rootFolders.firstOrNull()
+                ?: rootFolders.firstOrNull(),
         )
     }
     val selectedTags = remember(selectedInstance?.id) { mutableStateListOf<Int>() }
@@ -82,32 +82,34 @@ fun AddArtistSheet(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !addInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !addInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column {
                 Text(
                     text = mokoString(MR.strings.type_artist).uppercase(),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = item.title ?: "",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             if (instances.size > 1 && selectedInstance != null) {
@@ -118,7 +120,7 @@ fun AddArtistSheet(
                     onOptionSelected = onInstanceSelected,
                     getOptionLabel = { it.label },
                     label = { Text(mokoString(MR.strings.instances)) },
-                    enabled = !addInProgress
+                    enabled = !addInProgress,
                 )
             }
             DropdownPicker(
@@ -128,21 +130,22 @@ fun AddArtistSheet(
                 onOptionSelected = { monitor = it },
                 getOptionLabel = { mokoString(it.resource) },
                 label = { Text(mokoString(MR.strings.monitor)) },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             DropdownPicker(
-                options = listOf(
-                    ArtistMonitorType.All,
-                    ArtistMonitorType.None,
-                    ArtistMonitorType.Future
-                ),
+                options =
+                    listOf(
+                        ArtistMonitorType.All,
+                        ArtistMonitorType.None,
+                        ArtistMonitorType.Future,
+                    ),
                 modifier = Modifier.fillMaxWidth(),
                 selectedOption = monitorNew,
                 onOptionSelected = { monitorNew = it },
                 getOptionLabel = { mokoString(it.resource) },
                 label = { Text(mokoString(MR.strings.monitor_new_albums)) },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             DropdownPicker(
@@ -152,7 +155,7 @@ fun AddArtistSheet(
                 onOptionSelected = { qualityProfile = it },
                 getOptionLabel = { it.name ?: "" },
                 label = { Text(mokoString(MR.strings.quality_profile)) },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             if (tags.isNotEmpty()) {
@@ -172,7 +175,7 @@ fun AddArtistSheet(
                             ?: mokoString(MR.strings.unknown)
                     },
                     label = { Text(mokoString(MR.strings.tags)) },
-                    enabled = !addInProgress
+                    enabled = !addInProgress,
                 )
             }
 
@@ -184,7 +187,7 @@ fun AddArtistSheet(
                     onOptionSelected = { rootFolder = it },
                     label = { Text(mokoString(MR.strings.root_folder)) },
                     getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
-                    enabled = !addInProgress
+                    enabled = !addInProgress,
                 )
             }
 
@@ -192,7 +195,7 @@ fun AddArtistSheet(
                 label = mokoString(MR.strings.search_on_add_label),
                 checked = searchOnAdd,
                 onCheckedChange = { searchOnAdd = it },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             Button(
@@ -206,30 +209,31 @@ fun AddArtistSheet(
                                 addArtistMonitorNew = monitorNew,
                                 addQualityProfileId = qp.id,
                                 addRootFolderPath = rf.path,
-                                addSearchOnAdd = searchOnAdd
+                                addSearchOnAdd = searchOnAdd,
+                            ),
+                        )
+                        val newItem =
+                            item.copyForCreation(
+                                monitor = monitor,
+                                monitorNew = monitorNew,
+                                qualityProfileId = qp.id,
+                                rootFolderPath = rf.path,
+                                tags = selectedTags,
                             )
-                        )
-                        val newItem = item.copyForCreation(
-                            monitor = monitor,
-                            monitorNew = monitorNew,
-                            qualityProfileId = qp.id,
-                            rootFolderPath = rf.path,
-                            tags = selectedTags
-                        )
                         onAddItem(newItem, searchOnAdd)
                     }
                 },
-                enabled = !addInProgress && qualityProfile != null && rootFolder != null
+                enabled = !addInProgress && qualityProfile != null && rootFolder != null,
             ) {
                 if (addInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(
-                        text = mokoString(MR.strings.save)
+                        text = mokoString(MR.strings.save),
                     )
                 }
             }

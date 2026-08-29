@@ -52,7 +52,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.InteractiveSearchViewModel
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.compose.utils.singleLanguageLabel
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.extensions.formatAgeMinutes
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -77,7 +77,7 @@ fun InteractiveSearchScreen(
     onBack: () -> Unit = {},
     viewModel: InteractiveSearchViewModel = koinInjectParams(instanceType, defaultFilter),
     instanceViewModel: InstancesViewModel = koinInjectParams(instanceType),
-    navigationManager: NavigationManager = koinInject()
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val context = LocalContext.current
     val releaseUiState by viewModel.releaseUiState.collectAsStateWithLifecycle()
@@ -87,7 +87,7 @@ fun InteractiveSearchScreen(
     val customFilters by viewModel.customFilters.collectAsStateWithLifecycle()
 
     val textFieldState = rememberTextFieldState()
-    var confirmRelease by remember { mutableStateOf<ArrRelease?>( null) }
+    var confirmRelease by remember { mutableStateOf<ArrRelease?>(null) }
 
     val downloadQueueSuccessMessage = mokoString(MR.strings.download_queue_success)
     val downloadQueueErrorMessage = mokoString(MR.strings.download_queue_error)
@@ -124,7 +124,7 @@ fun InteractiveSearchScreen(
         topBar = {
             ArrAppBarWithSearch(
                 textFieldState = textFieldState,
-                navigationIcon =  { BackButton(onClick = onBack) },
+                navigationIcon = { BackButton(onClick = onBack) },
                 actions = {
                     InteractiveSearchMenu(
                         type = instanceType,
@@ -147,30 +147,31 @@ fun InteractiveSearchScreen(
                         onProtocolChange = { viewModel.setFilterProtocol(it) },
                         customFilters = customFilters,
                         selectedCustomFilterId = filterState.customFilterId,
-                        onCustomFilterChange = { viewModel.setCustomFilter(it) }
+                        onCustomFilterChange = { viewModel.setCustomFilter(it) },
                     )
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+            contentAlignment = Alignment.Center,
         ) {
             when (val state = releaseUiState) {
                 is ReleaseLibrary.Loading -> {
                     LoadingIndicator(
-                        modifier = Modifier.size(96.dp)
+                        modifier = Modifier.size(96.dp),
                     )
                 }
                 is ReleaseLibrary.Success -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize().padding(horizontal = 18.dp),
                         verticalArrangement = Arrangement.spacedBy(18.dp),
-                        contentPadding = PaddingValues(vertical = 12.dp)
+                        contentPadding = PaddingValues(vertical = 12.dp),
                     ) {
                         items(state.items) { item ->
                             val shouldAnimate =
@@ -184,17 +185,17 @@ fun InteractiveSearchScreen(
                                         confirmRelease = item
                                     }
                                 },
-                                animate = shouldAnimate
+                                animate = shouldAnimate,
                             )
                         }
                         if (state.items.isEmpty()) {
                             item {
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
+                                    contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
-                                        text = mokoString(MR.strings.no_results_found)
+                                        text = mokoString(MR.strings.no_results_found),
                                     )
                                 }
                             }
@@ -213,7 +214,7 @@ fun InteractiveSearchScreen(
                                 navigationManager.openEditInstanceScreen(it.id)
                             }
                         },
-                        onRetry = { viewModel.getRelease(releaseParams) }
+                        onRetry = { viewModel.getRelease(releaseParams) },
                     )
                 }
                 else -> {}
@@ -229,7 +230,7 @@ fun InteractiveSearchScreen(
                     },
                     text = {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Text(mokoString(MR.strings.grab_release_message))
                             ReleaseItem(release)
@@ -240,20 +241,20 @@ fun InteractiveSearchScreen(
                             onClick = {
                                 viewModel.downloadRelease(release, force = true)
                                 confirmRelease = null
-                            }
+                            },
                         ) {
                             Text(mokoString(MR.strings.grab))
                         }
                     },
                     dismissButton = {
                         TextButton(
-                            onClick =  {
+                            onClick = {
                                 confirmRelease = null
-                            }
+                            },
                         ) {
                             Text(mokoString(MR.strings.cancel))
                         }
-                    }
+                    },
                 )
             }
         }
@@ -261,58 +262,62 @@ fun InteractiveSearchScreen(
 }
 
 @Composable
-fun <T: ArrRelease> ReleaseItem(
+fun <T : ArrRelease> ReleaseItem(
     item: T,
     onItemClick: ((T) -> Unit)? = null,
-    animate: Boolean = false
+    animate: Boolean = false,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(
-                onClick = { onItemClick?.invoke(item) },
-                enabled = onItemClick != null
-            ),
-        shape = RoundedCornerShape(10.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(
+                    onClick = { onItemClick?.invoke(item) },
+                    enabled = onItemClick != null,
+                ),
+        shape = RoundedCornerShape(10.dp),
     ) {
         ProgressBox(
-            animate = animate
+            animate = animate,
         ) {
             Column(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth()
+                modifier =
+                    Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth(),
             ) {
                 Text(
                     text = item.title,
                     fontWeight = FontWeight.Bold,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
 
-                val secondLine = buildAnnotatedString {
-                    withStyle(SpanStyle(color = item.peerColor)) {
-                        append(item.typeLabel)
-                    }
-                    bullet()
-                    item.quality?.qualityLabel?.let { qualityLabel ->
-                        append(qualityLabel)
+                val secondLine =
+                    buildAnnotatedString {
+                        withStyle(SpanStyle(color = item.peerColor)) {
+                            append(item.typeLabel)
+                        }
                         bullet()
+                        item.quality?.qualityLabel?.let { qualityLabel ->
+                            append(qualityLabel)
+                            bullet()
+                        }
+                        append(item.size.bytesAsFileSizeString())
                     }
-                    append(item.size.bytesAsFileSizeString())
-                }
                 Text(
                     text = secondLine,
-                    maxLines = 2
+                    maxLines = 2,
                 )
 
-                val thirdLine = listOf(
-                    item.languages.singleLanguageLabel(),
-                    item.indexerLabel,
-                    item.ageMinutes.formatAgeMinutes()
-                ).joinToString(Bullet)
+                val thirdLine =
+                    listOf(
+                        item.languages.singleLanguageLabel(),
+                        item.indexerLabel,
+                        item.ageMinutes.formatAgeMinutes(),
+                    ).joinToString(BULLET)
                 Text(
                     text = thirdLine,
-                    maxLines = 2
+                    maxLines = 2,
                 )
             }
         }

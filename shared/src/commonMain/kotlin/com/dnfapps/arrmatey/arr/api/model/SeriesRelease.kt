@@ -42,9 +42,7 @@ data class SeriesRelease(
     override val shouldOverride: Boolean = false,
     override val languages: List<Language> = emptyList(),
     override val magnetUrl: String? = null,
-
     override var mediaId: Long? = null,
-
     val tmdbId: Int? = null,
     val imdbId: String? = null,
     val indexerFlags: Int? = null,
@@ -70,5 +68,5 @@ data class SeriesRelease(
     val special: Boolean = false,
     val seriesId: Int? = null,
     val episodeId: Long? = null,
-    val episodeIds: List<Long> = emptyList()
-): ArrRelease
+    val episodeIds: List<Long> = emptyList(),
+) : ArrRelease

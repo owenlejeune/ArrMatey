@@ -25,7 +25,7 @@ fun TwoPaneMasterDetailNavDisplay(
     isExpanded: Boolean,
     entryProvider: (NavKey) -> NavEntry<NavKey>,
     modifier: Modifier = Modifier,
-    isMasterScreen: (NavKey) -> Boolean = { it is ArrScreen.Library || it is MediaScreen.Search }
+    isMasterScreen: (NavKey) -> Boolean = { it is ArrScreen.Library || it is MediaScreen.Search },
 ) {
     val baseIndex = navigation.backStack.indexOfLast(isMasterScreen).coerceAtLeast(0)
     val baseScreen = navigation.backStack[baseIndex]
@@ -35,7 +35,7 @@ fun TwoPaneMasterDetailNavDisplay(
 
     val detailsWeight by animateFloatAsState(
         targetValue = if (showDetails) 1.2f else 0.001f,
-        label = "DetailsWeight"
+        label = "DetailsWeight",
     )
 
     Row(modifier = modifier.fillMaxSize()) {
@@ -46,7 +46,7 @@ fun TwoPaneMasterDetailNavDisplay(
                 transitionSpec = { forwardSlideTransform() },
                 popTransitionSpec = { popSlideTransform() },
                 predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-                entryProvider = entryProvider
+                entryProvider = entryProvider,
             )
         }
 
@@ -59,7 +59,7 @@ fun TwoPaneMasterDetailNavDisplay(
             visible = showDetails,
             enter = slideInHorizontally { it },
             exit = slideOutHorizontally { it },
-            modifier = Modifier.weight(detailsWeight)
+            modifier = Modifier.weight(detailsWeight),
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 if (lastValidDetailBackStack.value.isNotEmpty()) {
@@ -69,7 +69,7 @@ fun TwoPaneMasterDetailNavDisplay(
                         transitionSpec = { forwardSlideTransform() },
                         popTransitionSpec = { popSlideTransform() },
                         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-                        entryProvider = entryProvider
+                        entryProvider = entryProvider,
                     )
                 }
             }

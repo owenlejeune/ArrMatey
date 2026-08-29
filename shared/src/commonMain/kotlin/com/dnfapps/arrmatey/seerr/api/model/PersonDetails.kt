@@ -20,7 +20,6 @@ data class PersonDetails(
     val adult: Boolean = false,
     val imdbId: String? = null,
     override val homepage: String? = null,
-
     // RequestMediaDetails implementation
     override val backdropPath: String? = null,
     override val posterPath: String? = profilePath,
@@ -40,7 +39,8 @@ data class PersonDetails(
     override val mediaInfo: MediaInfo? = null,
     override val watchProviders: List<WatchProvider> = emptyList(),
     override val relatedVideos: List<Video> = emptyList(),
-    override val requestType: RequestType = RequestType.Movie // Using Movie as a fallback/not strictly applicable
+    // Using Movie as a fallback/not strictly applicable
+    override val requestType: RequestType = RequestType.Movie,
 ) : RequestMediaDetails {
     override fun getCertification(localeCode: String): String? = null
 }

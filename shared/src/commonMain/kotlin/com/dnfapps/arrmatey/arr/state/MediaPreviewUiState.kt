@@ -16,7 +16,7 @@ data class MediaPreviewUiState(
     val relativePath: String = "",
     val preferences: InstancePreferences = InstancePreferences(),
     val instances: List<Instance> = emptyList(),
-    val selectedInstance: Instance? = null
+    val selectedInstance: Instance? = null,
 ) {
-    constructor(): this(emptyList())
+    constructor() : this(emptyList())
 }

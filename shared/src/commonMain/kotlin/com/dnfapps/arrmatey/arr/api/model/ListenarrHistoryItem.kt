@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -27,12 +26,11 @@ data class ListenarrHistoryItem(
     override val customFormatScore: Int? = 0,
     @Serializable(with = ListenarrHistoryDataSerializer::class)
     override val data: Map<String, String?> = emptyMap(),
-
     val audiobookId: Long,
     val audiobookTitle: String,
     val message: String,
-    val source: String
-): HistoryItem {
+    val source: String,
+) : HistoryItem {
     override val languages: List<Language>
         get() = emptyList()
 
@@ -43,8 +41,7 @@ data class ListenarrHistoryItem(
         get() = null
 }
 
-
-object ListenarrHistoryDataSerializer: KSerializer<Map<String, String?>> {
+object ListenarrHistoryDataSerializer : KSerializer<Map<String, String?>> {
     override val descriptor = PrimitiveSerialDescriptor("ListenarrHistoryData", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): Map<String, String?> {
@@ -55,7 +52,10 @@ object ListenarrHistoryDataSerializer: KSerializer<Map<String, String?>> {
         }
     }
 
-    override fun serialize(encoder: Encoder, value: Map<String, String?>) {
+    override fun serialize(
+        encoder: Encoder,
+        value: Map<String, String?>,
+    ) {
         encoder.encodeString(Json.encodeToString(value))
     }
 }

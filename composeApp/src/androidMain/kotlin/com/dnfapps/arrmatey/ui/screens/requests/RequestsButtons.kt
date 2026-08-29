@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.dnfapps.arrmatey.ui.screens.requests
 
 import androidx.compose.foundation.layout.*
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.isDebug
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
@@ -20,7 +23,6 @@ import com.dnfapps.arrmatey.ui.components.ConfirmableButton
 import com.dnfapps.arrmatey.ui.theme.onPrimaryDark
 import com.dnfapps.arrmatey.ui.theme.primaryDark
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.model.OperationStatus
 import kotlinx.coroutines.delay
 
 @Composable
@@ -32,7 +34,7 @@ fun RequestButtons(
     onDeclineClicked: () -> Unit,
     onEditClicked: () -> Unit,
     onDeleteClicked: () -> Unit,
-    onRemoveFromServiceClicked: () -> Unit
+    onRemoveFromServiceClicked: () -> Unit,
 ) {
     var showDeclineConfirm by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -63,7 +65,8 @@ fun RequestButtons(
     val mediaStatusValue = request.media.status
 
     val isPendingApproval = requestStatusValue == 1
-    val isApproved = requestStatusValue == 2 ||
+    val isApproved =
+        requestStatusValue == 2 ||
             requestStatusValue == 5 ||
             mediaStatusValue >= 4
     val isDeclined = requestStatusValue == 3
@@ -84,7 +87,7 @@ fun RequestButtons(
                         showDeclineConfirm = true
                     }
                 },
-                onEdit = onEditClicked
+                onEdit = onEditClicked,
             )
         }
 
@@ -110,7 +113,7 @@ fun RequestButtons(
                     } else {
                         showRemoveConfirm = true
                     }
-                }
+                },
             )
         }
     }
@@ -124,20 +127,23 @@ private fun PendingApprovalButtons(
     showDeclineConfirm: Boolean,
     onApprove: () -> Unit,
     onDecline: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
 ) {
-    val approveColors = ButtonDefaults.buttonColors(
-        containerColor = primaryDark,
-        contentColor = onPrimaryDark
-    )
-    val declineColors = ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.error,
-        contentColor = MaterialTheme.colorScheme.onError
-    )
-    val editColors = ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.tertiary,
-        contentColor = MaterialTheme.colorScheme.onTertiary
-    )
+    val approveColors =
+        ButtonDefaults.buttonColors(
+            containerColor = primaryDark,
+            contentColor = onPrimaryDark,
+        )
+    val declineColors =
+        ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError,
+        )
+    val editColors =
+        ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+        )
 
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         if (isAdmin) {
@@ -145,7 +151,7 @@ private fun PendingApprovalButtons(
                 onClick = onApprove,
                 modifier = Modifier.weight(1f),
                 colors = approveColors,
-                enabled = operationsState.approvalStates[request.id] != OperationStatus.InProgress
+                enabled = operationsState.approvalStates[request.id] != OperationStatus.InProgress,
             ) {
                 if (operationsState.approvalStates[request.id] is OperationStatus.InProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
@@ -167,17 +173,20 @@ private fun PendingApprovalButtons(
                 if (operationsState.cancelStates[request.id] is OperationStatus.InProgress) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onError
+                        color = MaterialTheme.colorScheme.onError,
                     )
                 } else {
                     Icon(Icons.Default.Close, null)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        if (isAdmin) mokoString(MR.strings.decline)
-                        else mokoString(MR.strings.cancel_request)
+                        if (isAdmin) {
+                            mokoString(MR.strings.decline)
+                        } else {
+                            mokoString(MR.strings.cancel_request)
+                        },
                     )
                 }
-            }
+            },
         )
     }
 
@@ -186,7 +195,7 @@ private fun PendingApprovalButtons(
             Button(
                 onClick = onEdit,
                 modifier = Modifier.fillMaxWidth(),
-                colors = editColors
+                colors = editColors,
             ) {
                 Icon(Icons.Default.Edit, null)
                 Spacer(Modifier.width(4.dp))
@@ -204,12 +213,13 @@ private fun AdminActionButtons(
     showDeleteConfirm: Boolean,
     showRemoveConfirm: Boolean,
     onDelete: () -> Unit,
-    onRemoveFromService: () -> Unit
+    onRemoveFromService: () -> Unit,
 ) {
-    val declineColors = ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.error,
-        contentColor = MaterialTheme.colorScheme.onError
-    )
+    val declineColors =
+        ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError,
+        )
 
     ConfirmableButton(
         isConfirming = showDeleteConfirm,
@@ -220,15 +230,16 @@ private fun AdminActionButtons(
             Icon(Icons.Default.Delete, null)
             Spacer(Modifier.width(4.dp))
             Text(mokoString(MR.strings.delete_request))
-        }
+        },
     )
 
     if (isApproved && mediaStatusValue != 6) {
-        val serviceName = when (request.type) {
-            RequestType.Movie -> InstanceType.Radarr.name
-            RequestType.Tv -> InstanceType.Sonarr.name
-            else -> ""
-        }
+        val serviceName =
+            when (request.type) {
+                RequestType.Movie -> InstanceType.Radarr.name
+                RequestType.Tv -> InstanceType.Sonarr.name
+                else -> ""
+            }
 
         ConfirmableButton(
             isConfirming = showRemoveConfirm,
@@ -239,7 +250,7 @@ private fun AdminActionButtons(
                 Icon(Icons.Default.Delete, null)
                 Spacer(Modifier.width(4.dp))
                 Text(mokoString(MR.strings.remove_from_service, serviceName))
-            }
+            },
         )
     }
 }

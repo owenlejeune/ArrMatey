@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.downloadclient.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.service.DownloadClientsState
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientMutationState
@@ -11,6 +10,7 @@ import com.dnfapps.arrmatey.downloadclient.usecase.ObserveDownloadClientsUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.ObserveSelectedDownloadClientsUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.SetDownloadClientActiveUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,19 +24,18 @@ class DownloadClientsViewModel(
     observeSelectedDownloadClientsUseCase: ObserveSelectedDownloadClientsUseCase,
     private val testDownloadClientConnectionUseCase: TestDownloadClientConnectionUseCase,
     private val deleteDownloadClientUseCase: DeleteDownloadClientUseCase,
-    private val setDownloadClientActiveUseCase: SetDownloadClientActiveUseCase
-): ViewModel() {
-
-    val downloadClientsState: StateFlow<DownloadClientsState> = combine(
-        observeDownloadClientsUseCase(),
-        observeSelectedDownloadClientsUseCase()
-    ) { clients, selected ->
-        DownloadClientsState(clients, selected)
-    }
-        .stateIn(
+    private val setDownloadClientActiveUseCase: SetDownloadClientActiveUseCase,
+) : ViewModel() {
+    val downloadClientsState: StateFlow<DownloadClientsState> =
+        combine(
+            observeDownloadClientsUseCase(),
+            observeSelectedDownloadClientsUseCase(),
+        ) { clients, selected ->
+            DownloadClientsState(clients, selected)
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = DownloadClientsState()
+            initialValue = DownloadClientsState(),
         )
 
     private val _connectionStates = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
@@ -48,9 +47,10 @@ class DownloadClientsViewModel(
     fun testConnection(id: Long) {
         viewModelScope.launch {
             testDownloadClientConnectionUseCase(id).collect { state ->
-                _connectionStates.value = _connectionStates.value.toMutableMap().apply {
-                    put(id, state)
-                }
+                _connectionStates.value =
+                    _connectionStates.value.toMutableMap().apply {
+                        put(id, state)
+                    }
             }
         }
     }
@@ -62,9 +62,10 @@ class DownloadClientsViewModel(
             }.onSuccess {
                 _mutationState.value = DownloadClientMutationState.Success(downloadClient.id)
             }.onFailure { error ->
-                _mutationState.value = DownloadClientMutationState.Error(
-                    error.message ?: ""
-                )
+                _mutationState.value =
+                    DownloadClientMutationState.Error(
+                        error.message ?: "",
+                    )
             }
         }
     }

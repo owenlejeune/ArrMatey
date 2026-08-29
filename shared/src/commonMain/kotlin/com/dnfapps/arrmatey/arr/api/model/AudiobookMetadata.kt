@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.ZoneOffset
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -30,7 +29,7 @@ data class AudiobookMetadata(
     val bookFormat: String? = null,
     val contentType: String? = null,
     val contentDeliveryType: String? = null,
-    val sku: String? = null
+    val sku: String? = null,
 ) {
     fun toBody(source: String): AudiobookMetadataBody {
         val primarySeries = series.firstOrNull()
@@ -46,24 +45,26 @@ data class AudiobookMetadata(
             isbn = listOfNotNull(isbn),
             language = language.orEmpty(),
             narrators = narrators.map { it.name },
-            publishYear = publishDate?.toLocalDateTime(TimeZone.UTC)?.year?.toString()
-                ?: releaseDate?.take(4).orEmpty(),
+            publishYear =
+                publishDate?.toLocalDateTime(TimeZone.UTC)?.year?.toString()
+                    ?: releaseDate?.take(4).orEmpty(),
             publishDate = releaseDate.orEmpty(),
             publisher = publisher.orEmpty(),
             runtime = lengthMinutes ?: 0,
             series = primarySeries?.name.orEmpty(),
-            seriesMemberships = series.mapIndexed { index, s ->
-                SeriesMembership(
-                    seriesName = s.name,
-                    seriesNumber = s.position.orEmpty(),
-                    isPrimary = index == 0,
-                    sortOrder = index
-                )
-            },
+            seriesMemberships =
+                series.mapIndexed { index, s ->
+                    SeriesMembership(
+                        seriesName = s.name,
+                        seriesNumber = s.position.orEmpty(),
+                        isPrimary = index == 0,
+                        sortOrder = index,
+                    )
+                },
             seriesNumber = primarySeries?.position.orEmpty(),
             source = source,
             tags = emptyList(),
-            title = title
+            title = title,
         )
     }
 }

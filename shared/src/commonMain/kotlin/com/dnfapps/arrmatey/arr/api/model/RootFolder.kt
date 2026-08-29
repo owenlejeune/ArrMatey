@@ -10,7 +10,7 @@ data class RootFolder(
     val accessible: Boolean = true,
     val freeSpace: Long = 0L,
     val isDefault: Boolean = false,
-    val unmappedFolders: List<UnmappedFolder> = emptyList()
+    val unmappedFolders: List<UnmappedFolder> = emptyList(),
 ) {
     val freeSpaceString: String
         get() = freeSpace.bytesAsFileSizeString()

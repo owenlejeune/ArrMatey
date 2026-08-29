@@ -8,5 +8,5 @@ data class EmbeddedSubtitlesSettings(
     val hi_fallback: Boolean,
     val included_codecs: List<String>,
     val timeout: Int,
-    val unknown_as_fallback: Boolean
+    val unknown_as_fallback: Boolean,
 )

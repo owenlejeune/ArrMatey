@@ -17,5 +17,5 @@ data class AlbumRelease(
     val country: List<String> = emptyList(),
     val label: List<String> = emptyList(),
     val format: String? = null,
-    val monitored: Boolean = false
+    val monitored: Boolean = false,
 )

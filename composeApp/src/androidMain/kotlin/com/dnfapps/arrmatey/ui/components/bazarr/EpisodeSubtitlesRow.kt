@@ -27,11 +27,12 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
 @Composable
 fun EpisodeSubtitlesRow(
     bazarrEpisode: BazarrEpisode,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val existingSubs = bazarrEpisode.subtitles
-        .filter { !it.isEmbedded }
-        .distinctBy { it.code2.orEmpty().lowercase() to it.hi to it.forced }
+    val existingSubs =
+        bazarrEpisode.subtitles
+            .filter { !it.isEmbedded }
+            .distinctBy { it.code2.orEmpty().lowercase() to it.hi to it.forced }
     val missingSubs = bazarrEpisode.missingSubtitles.distinctBy { it.code2.orEmpty().lowercase() to it.hi to it.forced }
 
     if (existingSubs.isEmpty() && missingSubs.isEmpty()) return
@@ -40,34 +41,40 @@ fun EpisodeSubtitlesRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        itemVerticalAlignment = Alignment.CenterVertically
+        itemVerticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = Icons.Default.Subtitles,
             contentDescription = null,
             modifier = Modifier.size(18.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
         )
 
         existingSubs.forEach { sub ->
-            val label = buildString {
-                append(sub.code2.orEmpty().uppercase().ifBlank { sub.name })
-                if (sub.hi) append(" · HI")
-                if (sub.forced) append(" · Forced")
-            }
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = RoundedCornerShape(4.dp)
+            val label =
+                buildString {
+                    append(
+                        sub.code2
+                            .orEmpty()
+                            .uppercase()
+                            .ifBlank { sub.name },
                     )
-                    .padding(horizontal = 4.dp, vertical = 1.dp)
+                    if (sub.hi) append(" · HI")
+                    if (sub.forced) append(" · Forced")
+                }
+            Box(
+                modifier =
+                    Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(4.dp),
+                        ).padding(horizontal = 4.dp, vertical = 1.dp),
             ) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
                 )
             }
         }
@@ -75,28 +82,28 @@ fun EpisodeSubtitlesRow(
         missingSubs.forEach { missing ->
             val label = missing.chipLabel()
             Box(
-                modifier = Modifier
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                    .padding(horizontal = 4.dp, vertical = 1.dp)
+                modifier =
+                    Modifier
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
+                            shape = RoundedCornerShape(4.dp),
+                        ).padding(horizontal = 4.dp, vertical = 1.dp),
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         imageVector = Icons.Default.PriorityHigh,
                         modifier = Modifier.height(12.dp),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error
+                        tint = MaterialTheme.colorScheme.error,
                     )
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
             }

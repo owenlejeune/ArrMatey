@@ -17,27 +17,30 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 fun MediaRequestTypeChip(
     text: String,
     requestType: RequestType,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val (container, content) = when (requestType) {
-        RequestType.Tv -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
-        RequestType.Movie -> MaterialTheme.colorScheme.tertiary to MaterialTheme.colorScheme.onTertiary
-        RequestType.Person -> MaterialTheme.colorScheme.secondary to MaterialTheme.colorScheme.onSecondary
-    }
+    val (container, content) =
+        when (requestType) {
+            RequestType.Tv -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+            RequestType.Movie -> MaterialTheme.colorScheme.tertiary to MaterialTheme.colorScheme.onTertiary
+            RequestType.Person -> MaterialTheme.colorScheme.secondary to MaterialTheme.colorScheme.onSecondary
+        }
 
     Box(
-        modifier = modifier
-            .clip(CircleShape)
-            .background(container)
-            .padding(horizontal = 8.dp, vertical = 2.dp)
+        modifier =
+            modifier
+                .clip(CircleShape)
+                .background(container)
+                .padding(horizontal = 8.dp, vertical = 2.dp),
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 12.sp,
-                lineHeight = 14.sp
-            ),
-            color = content
+            style =
+                MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                ),
+            color = content,
         )
     }
 }

@@ -18,57 +18,59 @@ import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.RequestsTabNavigator
 import com.dnfapps.arrmatey.navigation.SeriesTabNavigator
 import com.dnfapps.arrmatey.navigation.SettingsTabNavigator
+import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import com.dnfapps.arrmatey.ui.helpers.ArrImageLoader
 import com.dnfapps.arrmatey.utils.AndroidCrashManager
 import com.dnfapps.arrmatey.utils.CrashManager
-import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import org.koin.dsl.module
 
-val androidModule = module {
-    single { AppState() }
+val androidModule =
+    module {
+        single { AppState() }
 
-    single { AndroidPreferencesStore(get()) }
+        single { AndroidPreferencesStore(get()) }
 
-    // Shortcuts
-    single { AppShortcutManager(get(), get(), get(), get(), get()) }
+        // Shortcuts
+        single { AppShortcutManager(get(), get(), get(), get(), get()) }
 
-    // Navigators
-    single { SettingsTabNavigator() }
-    single { LibraryTabNavigator() }
-    single { SeriesTabNavigator() }
-    single { MoviesTabNavigator() }
-    single { MusicTabNavigator() }
-    single { RequestsTabNavigator() }
-    single { DiscoverTabNavigator() }
-    single { CalendarTabNavigator() }
-    single { BooksTabNavigator() }
-    single { AudiobooksTabNavigator() }
-    single { DashboardTabNavigator() }
-    single { BazarrTabNavigator() }
+        // Navigators
+        single { SettingsTabNavigator() }
+        single { LibraryTabNavigator() }
+        single { SeriesTabNavigator() }
+        single { MoviesTabNavigator() }
+        single { MusicTabNavigator() }
+        single { RequestsTabNavigator() }
+        single { DiscoverTabNavigator() }
+        single { CalendarTabNavigator() }
+        single { BooksTabNavigator() }
+        single { AudiobooksTabNavigator() }
+        single { DashboardTabNavigator() }
+        single { BazarrTabNavigator() }
 
-    // Navigation Manager
-    single {
-        val registry: Map<TabItem, Navigator<*>> = mapOf(
-            TabItem.Standard.LIBRARY to get<LibraryTabNavigator>(),
-            TabItem.Standard.SHOWS to get<SeriesTabNavigator>(),
-            TabItem.Standard.MOVIES to get<MoviesTabNavigator>(),
-            TabItem.Standard.MUSIC to get<MusicTabNavigator>(),
-            TabItem.Standard.REQUESTS to get<RequestsTabNavigator>(),
-            TabItem.Standard.DISCOVER to get<DiscoverTabNavigator>(),
-            TabItem.Standard.CALENDAR to get<CalendarTabNavigator>(),
-            TabItem.Standard.BOOKS to get<BooksTabNavigator>(),
-            TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>(),
-        )
-        NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get(), get())
+        // Navigation Manager
+        single {
+            val registry: Map<TabItem, Navigator<*>> =
+                mapOf(
+                    TabItem.Standard.LIBRARY to get<LibraryTabNavigator>(),
+                    TabItem.Standard.SHOWS to get<SeriesTabNavigator>(),
+                    TabItem.Standard.MOVIES to get<MoviesTabNavigator>(),
+                    TabItem.Standard.MUSIC to get<MusicTabNavigator>(),
+                    TabItem.Standard.REQUESTS to get<RequestsTabNavigator>(),
+                    TabItem.Standard.DISCOVER to get<DiscoverTabNavigator>(),
+                    TabItem.Standard.CALENDAR to get<CalendarTabNavigator>(),
+                    TabItem.Standard.BOOKS to get<BooksTabNavigator>(),
+                    TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>(),
+                )
+            NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get(), get())
+        }
+
+        // Others
+        single<ImageLoader> {
+            ArrImageLoader(get(), get())
+                .imageLoader
+        }
+
+        single<CrashManager> {
+            AndroidCrashManager()
+        }
     }
-
-    // Others
-    single<ImageLoader> {
-        ArrImageLoader(get(), get())
-            .imageLoader
-    }
-
-    single<CrashManager> {
-        AndroidCrashManager()
-    }
-}

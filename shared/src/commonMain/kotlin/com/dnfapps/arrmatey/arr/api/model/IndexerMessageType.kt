@@ -10,5 +10,5 @@ enum class IndexerMessageType {
     Warning,
 
     @SerialName("error")
-    Error
+    Error,
 }

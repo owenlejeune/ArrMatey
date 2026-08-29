@@ -15,5 +15,5 @@ data class TransmissionTorrent(
     @SerialName("status") val status: Int = 0,
     @SerialName("downloadDir") val downloadDir: String = "",
     @SerialName("addedDate") val addedDate: Long = 0,
-    @SerialName("hashString") val hashString: String = ""
+    @SerialName("hashString") val hashString: String = "",
 )

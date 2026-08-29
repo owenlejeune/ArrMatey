@@ -9,7 +9,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 
 class GetCalendarUseCase(
-    private val calendarService: CalendarService
+    private val calendarService: CalendarService,
 ) {
     operator fun invoke(): Flow<CalendarState> =
         combine(
@@ -19,10 +19,10 @@ class GetCalendarUseCase(
                 calendarService.isLoading,
                 calendarService.isLoadingFuture,
                 calendarService.hasLoaded,
-                calendarService.error
+                calendarService.error,
             ) { isLoading, isLoadingFuture, hasLoaded, error ->
                 LoadingStatus(isLoading, isLoadingFuture, hasLoaded, error)
-            }
+            },
         ) { dates, items, status ->
             CalendarState(
                 items = items,
@@ -31,7 +31,11 @@ class GetCalendarUseCase(
                 isLoadingFuture = status.isLoadingFuture,
                 hasLoaded = status.hasLoaded,
                 error = status.error,
-                today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+                today =
+                    Clock.System
+                        .now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .date,
             )
         }
 
@@ -39,7 +43,7 @@ class GetCalendarUseCase(
         val isLoading: Boolean,
         val isLoadingFuture: Boolean,
         val hasLoaded: Boolean,
-        val error: String?
+        val error: String?,
     )
 
     suspend fun load() {

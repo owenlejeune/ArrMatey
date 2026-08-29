@@ -7,5 +7,5 @@ data class BookshelfHistoryResponse(
     val page: Int,
     val pageSize: Int,
     val totalRecords: Int,
-    val records: List<BookshelfHistoryItem>
+    val records: List<BookshelfHistoryItem>,
 )

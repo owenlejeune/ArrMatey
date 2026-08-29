@@ -27,4 +27,3 @@ fun popSlideTransform(): ContentTransform =
 
 // Predictive-back pop: same shape as popSlideTransform, driven by gesture progress
 fun predictivePopSlideTransform(): ContentTransform = popSlideTransform()
-

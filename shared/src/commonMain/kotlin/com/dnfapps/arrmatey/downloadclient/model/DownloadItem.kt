@@ -16,5 +16,5 @@ data class DownloadItem(
     val addedOn: Long,
     val eta: Long,
     val etaString: String = eta.toFormattedDuration(),
-    val tags: List<String> = emptyList()
+    val tags: List<String> = emptyList(),
 )

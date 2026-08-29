@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.downloadclient.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
@@ -19,6 +18,7 @@ import com.dnfapps.arrmatey.downloadclient.usecase.ResumeDownloadUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientPreferencesUseCase
 import com.dnfapps.arrmatey.extensions.orderedSortedWith
 import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.utils.MultiSelectState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -40,73 +40,76 @@ class DownloadQueueViewModel(
     private val resumeDownloadUseCase: ResumeDownloadUseCase,
     private val deleteDownloadUseCase: DeleteDownloadUseCase,
     private val updateDownloadClientPreferencesUseCase: UpdateDownloadClientPreferencesUseCase,
-    observeDownloadClientPreferencesUseCase: ObserveDownloadClientPreferencesUseCase
-): ViewModel() {
-
+    observeDownloadClientPreferencesUseCase: ObserveDownloadClientPreferencesUseCase,
+) : ViewModel() {
     private val _filterState = MutableStateFlow(DownloadQueueFilterState())
     val filterState: StateFlow<DownloadQueueFilterState> = _filterState.asStateFlow()
 
-    val sortState: StateFlow<DownloadQueueSortState> = observeDownloadClientPreferencesUseCase()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = DownloadQueueSortState()
-        )
+    val sortState: StateFlow<DownloadQueueSortState> =
+        observeDownloadClientPreferencesUseCase()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = DownloadQueueSortState(),
+            )
 
     val downloadQueueState: StateFlow<DownloadQueueBundle> =
         combine(
             downloadQueueService.allTransfers,
             _filterState,
-            sortState
+            sortState,
         ) { queueState, filters, sorting ->
-            val filtered = queueState.queueItems.filter { item ->
-                val matchesQuery = filters.query.isBlank() || item.name.contains(filters.query, ignoreCase = true)
-                val matchesClient = filters.clientIds.contains(item.client.id)
+            val filtered =
+                queueState.queueItems.filter { item ->
+                    val matchesQuery = filters.query.isBlank() || item.name.contains(filters.query, ignoreCase = true)
+                    val matchesClient = filters.clientIds.contains(item.client.id)
 
-                val matchesStatus = if (filters.selectedStatuses.isEmpty()) {
-                    true
-                } else {
-                    val contains = filters.selectedStatuses.contains(item.status)
-                    if (filters.excludeStatuses) !contains else contains
+                    val matchesStatus =
+                        if (filters.selectedStatuses.isEmpty()) {
+                            true
+                        } else {
+                            val contains = filters.selectedStatuses.contains(item.status)
+                            if (filters.excludeStatuses) !contains else contains
+                        }
+
+                    val matchesTags =
+                        if (filters.selectedTags.isEmpty()) {
+                            true
+                        } else {
+                            val contains = item.tags.any { filters.selectedTags.contains(it) }
+                            if (filters.excludeTags) !contains else contains
+                        }
+
+                    val matchesActive = !filters.activeOnly || (item.downloadSpeed > 0 || item.uploadSpeed > 0)
+                    val matchesCompleted = !filters.completedOnly || item.progress >= 1.0
+
+                    matchesQuery && matchesClient && matchesStatus && matchesTags && matchesActive && matchesCompleted
                 }
-
-                val matchesTags = if (filters.selectedTags.isEmpty()) {
-                    true
-                } else {
-                    val contains = item.tags.any { filters.selectedTags.contains(it) }
-                    if (filters.excludeTags) !contains else contains
-                }
-
-                val matchesActive = !filters.activeOnly || (item.downloadSpeed > 0 || item.uploadSpeed > 0)
-                val matchesCompleted = !filters.completedOnly || item.progress >= 1.0
-
-                matchesQuery && matchesClient && matchesStatus && matchesTags && matchesActive && matchesCompleted
-            }
             val sorted = applySorting(sorting, filtered)
             queueState.copy(queueItems = sorted)
-        }
-        .stateIn(
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = DownloadQueueBundle()
+            initialValue = DownloadQueueBundle(),
         )
 
     val selectionState = MultiSelectState<String>()
 
-    val selectedItem: StateFlow<DownloadItem?> = combine(
-        selectionState.selectedItems,
-        downloadQueueState
-    ) { selectedIds, state ->
-        if (selectedIds.size == 1) {
-            state.queueItems.find { it.id == selectedIds.first() }
-        } else {
-            null
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
-    )
+    val selectedItem: StateFlow<DownloadItem?> =
+        combine(
+            selectionState.selectedItems,
+            downloadQueueState,
+        ) { selectedIds, state ->
+            if (selectedIds.size == 1) {
+                state.queueItems.find { it.id == selectedIds.first() }
+            } else {
+                null
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null,
+        )
 
     private val _commandState = MutableStateFlow<DownloadClientCommandState>(DownloadClientCommandState.Initial)
     val commandState: StateFlow<DownloadClientCommandState> = _commandState.asStateFlow()
@@ -117,26 +120,27 @@ class DownloadQueueViewModel(
     val isPolling: StateFlow<Boolean> = downloadQueueService.isPolling
     val hasLoaded: StateFlow<Boolean> = downloadQueueService.hasLoaded
 
-    val errorMessage: StateFlow<String?> = combine(
-        downloadQueueService.allTransfers,
-        _filterState,
-        downloadQueueRepository.observeAllDownloadClients()
-    ) { bundle, filters, allClients ->
-        if (bundle.clientErrors.isEmpty()) return@combine null
+    val errorMessage: StateFlow<String?> =
+        combine(
+            downloadQueueService.allTransfers,
+            _filterState,
+            downloadQueueRepository.observeAllDownloadClients(),
+        ) { bundle, filters, allClients ->
+            if (bundle.clientErrors.isEmpty()) return@combine null
 
-        val selectedClientIds = filters.clientIds
-        val errorsInSelected = bundle.clientErrors.filterKeys { it in selectedClientIds }
+            val selectedClientIds = filters.clientIds
+            val errorsInSelected = bundle.clientErrors.filterKeys { it in selectedClientIds }
 
-        when {
-            allClients.size == 1 -> bundle.clientErrors.values.firstOrNull()
-            selectedClientIds.size == 1 && errorsInSelected.isNotEmpty() -> errorsInSelected.values.first()
-            else -> null
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
-    )
+            when {
+                allClients.size == 1 -> bundle.clientErrors.values.firstOrNull()
+                selectedClientIds.size == 1 && errorsInSelected.isNotEmpty() -> errorsInSelected.values.first()
+                else -> null
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null,
+        )
 
     init {
         viewModelScope.launch {
@@ -169,7 +173,10 @@ class DownloadQueueViewModel(
         }
     }
 
-    fun deleteDownload(id: String, deleteFiles: Boolean) {
+    fun deleteDownload(
+        id: String,
+        deleteFiles: Boolean,
+    ) {
         runSingleItemOp(id) { clientId ->
             deleteDownloadUseCase(clientId, listOf(id), deleteFiles)
         }
@@ -177,14 +184,19 @@ class DownloadQueueViewModel(
 
     private fun runSingleItemOp(
         id: String,
-        op: (clientId: Long) -> Flow<OperationStatus>
+        op: (clientId: Long) -> Flow<OperationStatus>,
     ) {
         viewModelScope.launch {
-            val clientId = downloadQueueState.value.queueItems.firstOrNull { it.id == id }?.client?.id
+            val clientId =
+                downloadQueueState.value.queueItems
+                    .firstOrNull { it.id == id }
+                    ?.client
+                    ?.id
             if (clientId == null) {
-                _commandState.value = DownloadClientCommandState.Error(
-                    message = "Download item no longer available"
-                )
+                _commandState.value =
+                    DownloadClientCommandState.Error(
+                        message = "Download item no longer available",
+                    )
                 return@launch
             }
             op(clientId).collect { state ->
@@ -237,48 +249,56 @@ class DownloadQueueViewModel(
         runBulkOp { clientId, ids -> deleteDownloadUseCase(clientId, ids, deleteFiles) }
     }
 
-    private fun runBulkOp(
-        op: (clientId: Long, ids: List<String>) -> Flow<OperationStatus>
-    ) {
+    private fun runBulkOp(op: (clientId: Long, ids: List<String>) -> Flow<OperationStatus>) {
         viewModelScope.launch {
             val selectedIds = selectionState.selectedItems.value
             if (selectedIds.isEmpty()) return@launch
 
             val itemsById = downloadQueueState.value.queueItems.associateBy { it.id }
-            val idsByClient = selectedIds
-                .mapNotNull { id -> itemsById[id]?.let { it.client.id to id } }
-                .groupBy({ it.first }, { it.second })
+            val idsByClient =
+                selectedIds
+                    .mapNotNull { id -> itemsById[id]?.let { it.client.id to id } }
+                    .groupBy({ it.first }, { it.second })
 
             if (idsByClient.isEmpty()) {
-                _commandState.value = DownloadClientCommandState.Error(
-                    message = "No items available for this action"
-                )
+                _commandState.value =
+                    DownloadClientCommandState.Error(
+                        message = "No items available for this action",
+                    )
                 exitSelectionMode()
                 return@launch
             }
 
             _commandState.value = DownloadClientCommandState.Loading
 
-            val results = idsByClient.entries
-                .map { (clientId, ids) -> async { op(clientId, ids).last() } }
-                .awaitAll()
+            val results =
+                idsByClient.entries
+                    .map { (clientId, ids) -> async { op(clientId, ids).last() } }
+                    .awaitAll()
 
             val errors = results.filterIsInstance<OperationStatus.Error>()
             val anySuccess = results.any { it is OperationStatus.Success }
 
-            _commandState.value = when {
-                errors.isEmpty() -> DownloadClientCommandState.Success
-                anySuccess -> DownloadClientCommandState.Error(
-                    message = "Partial failure on ${errors.size} of ${results.size} clients: " +
-                            errors.mapNotNull { it.message }.joinToString("; ")
-                )
-                else -> DownloadClientCommandState.Error(
-                    code = errors.first().code,
-                    message = errors.mapNotNull { it.message }.joinToString("; ")
-                        .ifBlank { "Operation failed" },
-                    cause = errors.first().cause
-                )
-            }
+            _commandState.value =
+                when {
+                    errors.isEmpty() -> DownloadClientCommandState.Success
+                    anySuccess ->
+                        DownloadClientCommandState.Error(
+                            message =
+                                "Partial failure on ${errors.size} of ${results.size} clients: " +
+                                    errors.mapNotNull { it.message }.joinToString("; "),
+                        )
+                    else ->
+                        DownloadClientCommandState.Error(
+                            code = errors.first().code,
+                            message =
+                                errors
+                                    .mapNotNull { it.message }
+                                    .joinToString("; ")
+                                    .ifBlank { "Operation failed" },
+                            cause = errors.first().cause,
+                        )
+                }
 
             if (anySuccess) downloadQueueService.manualRefresh()
             exitSelectionMode()
@@ -360,32 +380,36 @@ class DownloadQueueViewModel(
         }
     }
 
-    private fun applySorting(sortState: DownloadQueueSortState, items: List<DownloadItem>): List<DownloadItem> {
-        val comparator: Comparator<DownloadItem> = when(sortState.sortBy) {
-            SortBy.Title -> compareBy { it.name }
-            SortBy.Added -> compareBy { it.addedOn }
-            SortBy.Size -> compareBy { it.size }
-            SortBy.Progress -> compareBy { it.progress }
-            SortBy.DownloadSpeed -> compareBy { it.downloadSpeed }
-            SortBy.UploadSpeed -> compareBy { it.uploadSpeed }
-            SortBy.Eta -> compareBy { it.eta }
-            else -> throw IllegalStateException("Unsupport download queue item sort by option: ${sortState.sortBy}")
-        }
+    private fun applySorting(
+        sortState: DownloadQueueSortState,
+        items: List<DownloadItem>,
+    ): List<DownloadItem> {
+        val comparator: Comparator<DownloadItem> =
+            when (sortState.sortBy) {
+                SortBy.Title -> compareBy { it.name }
+                SortBy.Added -> compareBy { it.addedOn }
+                SortBy.Size -> compareBy { it.size }
+                SortBy.Progress -> compareBy { it.progress }
+                SortBy.DownloadSpeed -> compareBy { it.downloadSpeed }
+                SortBy.UploadSpeed -> compareBy { it.uploadSpeed }
+                SortBy.Eta -> compareBy { it.eta }
+                else -> throw IllegalStateException("Unsupport download queue item sort by option: ${sortState.sortBy}")
+            }
         return items.orderedSortedWith(sortState.sortOrder, comparator)
     }
 
-
-
-    private fun OperationStatus.toCommandState(): DownloadClientCommandState = when (this) {
-        is OperationStatus.Idle -> DownloadClientCommandState.Initial
-        is OperationStatus.InProgress -> DownloadClientCommandState.Loading
-        is OperationStatus.Success -> DownloadClientCommandState.Success
-        is OperationStatus.Error -> DownloadClientCommandState.Error(
-            code = code,
-            message = message,
-            cause = cause
-        )
-    }
+    private fun OperationStatus.toCommandState(): DownloadClientCommandState =
+        when (this) {
+            is OperationStatus.Idle -> DownloadClientCommandState.Initial
+            is OperationStatus.InProgress -> DownloadClientCommandState.Loading
+            is OperationStatus.Success -> DownloadClientCommandState.Success
+            is OperationStatus.Error ->
+                DownloadClientCommandState.Error(
+                    code = code,
+                    message = message,
+                    cause = cause,
+                )
+        }
 
     private fun safeSavePreference(transform: (DownloadQueueSortState) -> DownloadQueueSortState) {
         viewModelScope.launch {

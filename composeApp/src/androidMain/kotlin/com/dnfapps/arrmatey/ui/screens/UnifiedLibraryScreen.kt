@@ -60,6 +60,7 @@ import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
@@ -71,7 +72,6 @@ import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
 import com.skydoves.flexible.core.FlexibleSheetSize
 import com.skydoves.flexible.core.FlexibleSheetValue
@@ -87,7 +87,7 @@ fun UnifiedLibraryScreen(
     wideRailIsVisible: Boolean = false,
     onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
     onNavigateToDetails: (ArrMedia, InstanceType, Long?) -> Unit,
-    unifiedLibraryViewModel: UnifiedLibraryViewModel = koinInject()
+    unifiedLibraryViewModel: UnifiedLibraryViewModel = koinInject(),
 ) {
     val context = LocalContext.current
     val navigationManager = navigationManager
@@ -171,16 +171,17 @@ fun UnifiedLibraryScreen(
                         if (!wideRailIsVisible) {
                             NavigationDrawerButton()
                         }
-                    }
+                    },
                 )
             },
-            contentWindowInsets = WindowInsets.statusBars
+            contentWindowInsets = WindowInsets.statusBars,
         ) { paddingValues ->
             Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+                contentAlignment = Alignment.Center,
             ) {
                 NoInstanceView(InstanceType.Sonarr)
             }
@@ -195,10 +196,10 @@ fun UnifiedLibraryScreen(
                 AnimatedVisibility(
                     visible = !isExpanded && !isInSelectionMode,
                     enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
-                    exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200))
+                    exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
                 ) {
                     FloatingActionButton(
-                        onClick = { onNavigateToSearch("", currentType, currentInstance.id) }
+                        onClick = { onNavigateToSearch("", currentType, currentInstance.id) },
                     ) {
                         Icon(Icons.Default.Add, null)
                     }
@@ -208,14 +209,15 @@ fun UnifiedLibraryScreen(
                 AnimatedContent(
                     targetState = isInSelectionMode,
                     transitionSpec = {
-                        (fadeIn(animationSpec = tween(200, delayMillis = 50)) +
-                            slideInVertically(animationSpec = tween(200, delayMillis = 50)) { -it / 2 })
-                            .togetherWith(
-                                fadeOut(animationSpec = tween(150)) +
-                                    slideOutVertically(animationSpec = tween(150)) { -it / 2 }
-                            )
+                        (
+                            fadeIn(animationSpec = tween(200, delayMillis = 50)) +
+                                slideInVertically(animationSpec = tween(200, delayMillis = 50)) { -it / 2 }
+                        ).togetherWith(
+                            fadeOut(animationSpec = tween(150)) +
+                                slideOutVertically(animationSpec = tween(150)) { -it / 2 },
+                        )
                     },
-                    label = "SelectionTopBarAnimation"
+                    label = "SelectionTopBarAnimation",
                 ) { inSelection ->
                     if (inSelection) {
                         SelectionTopBar(
@@ -228,16 +230,17 @@ fun UnifiedLibraryScreen(
                                     unifiedLibraryViewModel.selectAllItems()
                                 }
                             },
-                            isAllSelected = unifiedLibraryViewModel.areAllItemsSelected()
+                            isAllSelected = unifiedLibraryViewModel.areAllItemsSelected(),
                         )
                     } else {
                         ArrAppBarWithSearch(
                             textFieldState = textFieldState,
                             textFieldEnabled = true,
-                            searchPlaceholder = mokoString(
-                                MR.strings.search_placeholder,
-                                currentInstance.label
-                            ),
+                            searchPlaceholder =
+                                mokoString(
+                                    MR.strings.search_placeholder,
+                                    currentInstance.label,
+                                ),
                             trailingIcon = {
                                 InstanceOptionsMenu(
                                     onViewWebGui = {
@@ -252,10 +255,10 @@ fun UnifiedLibraryScreen(
                                             Image(
                                                 painter = painterResource(currentType.icon),
                                                 contentDescription = mokoString(currentType.resource),
-                                                modifier = Modifier.size(24.dp)
+                                                modifier = Modifier.size(24.dp),
                                             )
                                         }
-                                    }
+                                    },
                                 )
                             },
                             navigationIcon = {
@@ -275,24 +278,25 @@ fun UnifiedLibraryScreen(
                                     onSortByChanged = { unifiedLibraryViewModel.updateSortBy(it) },
                                     sortOrder = preferences.sortOrder,
                                     onSortOrderChanged = { unifiedLibraryViewModel.updateSortOrder(it) },
-                                    onOpenViewCustomization = { showViewCustomizationSheet = true }
+                                    onOpenViewCustomization = { showViewCustomizationSheet = true },
                                 )
-                            }
+                            },
                         )
                     }
                 }
             },
-            contentWindowInsets = WindowInsets.statusBars
+            contentWindowInsets = WindowInsets.statusBars,
         ) { paddingValues ->
             Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
+                modifier =
+                    Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
             ) {
                 AnimatedVisibility(
                     visible = arrInstances.size > 1 && !isInSelectionMode,
                     enter = expandVertically(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
-                    exit = shrinkVertically(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200))
+                    exit = shrinkVertically(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
                 ) {
                     val selectedIndex = arrInstances.indexOfFirst { it.id == currentInstance.id }.coerceAtLeast(0)
                     SecondaryScrollableTabRow(
@@ -300,7 +304,7 @@ fun UnifiedLibraryScreen(
                         edgePadding = 16.dp,
                         containerColor = MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.onSurface,
-                        divider = {}
+                        divider = {},
                     ) {
                         arrInstances.forEach { tabInstance ->
                             val isOffline = tabInstance.id in offlineInstanceIds
@@ -310,41 +314,42 @@ fun UnifiedLibraryScreen(
                                 text = {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                                     ) {
                                         tabInstance.type.tabIcon?.let { icon ->
                                             Icon(
                                                 painter = painterResource(icon),
                                                 contentDescription = null,
                                                 modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.onBackground
+                                                tint = MaterialTheme.colorScheme.onBackground,
                                             )
                                         }
                                         Text(
                                             text = tabInstance.label,
                                             maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
+                                            overflow = TextOverflow.Ellipsis,
                                         )
                                         if (isOffline) {
                                             Icon(
                                                 imageVector = Icons.Default.WifiOff,
                                                 contentDescription = mokoString(MR.strings.offline),
                                                 tint = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(16.dp)
+                                                modifier = Modifier.size(16.dp),
                                             )
                                         }
                                     }
-                                }
+                                },
                             )
                         }
                     }
                 }
 
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
                 ) {
                     when (val state = uiState) {
                         is ArrLibrary.Initial -> {
@@ -353,7 +358,7 @@ fun UnifiedLibraryScreen(
 
                         is ArrLibrary.Loading -> {
                             LoadingIndicator(
-                                modifier = Modifier.size(96.dp)
+                                modifier = Modifier.size(96.dp),
                             )
                         }
 
@@ -366,7 +371,7 @@ fun UnifiedLibraryScreen(
                                 },
                                 onRetry = {
                                     unifiedLibraryViewModel.refreshSelected()
-                                }
+                                },
                             )
                         }
 
@@ -376,7 +381,7 @@ fun UnifiedLibraryScreen(
                                 onRefresh = {
                                     unifiedLibraryViewModel.refreshSelected()
                                 },
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
                             ) {
                                 val items = state.items
                                 if (items.isEmpty() && textFieldState.text.isEmpty()) {
@@ -392,7 +397,7 @@ fun UnifiedLibraryScreen(
                                         itemIsActive = { item ->
                                             activeMediaIdsByInstance[currentInstance.id]?.contains(item.id) == true
                                         },
-                                        multiSelectState = unifiedLibraryViewModel.selectionState
+                                        multiSelectState = unifiedLibraryViewModel.selectionState,
                                     )
                                 } else {
                                     EmptySearchResultsView(currentType, textFieldState.text.toString()) {
@@ -420,23 +425,25 @@ fun UnifiedLibraryScreen(
                     onGridSpacingChanged = { unifiedLibraryViewModel.updateGridSpacing(it) },
                     onPosterElevationChanged = { unifiedLibraryViewModel.updatePosterElevation(it) },
                     onPosterRadiusChanged = { unifiedLibraryViewModel.updatePosterRadius(it) },
-                    onApplyGloballyChanged = { unifiedLibraryViewModel.updateApplyGlobally(it) }
+                    onApplyGloballyChanged = { unifiedLibraryViewModel.updateApplyGlobally(it) },
                 )
             }
 
             if (isInSelectionMode) {
                 FlexibleBottomSheet(
                     onDismissRequest = { unifiedLibraryViewModel.exitSelectionMode() },
-                    sheetState = rememberFlexibleBottomSheetState(
-                        isModal = false,
-                        initialValue = FlexibleSheetValue.IntermediatelyExpanded,
-                        flexibleSheetSize = FlexibleSheetSize(
-                            fullyExpanded = FlexibleSheetSize.WrapContent,
-                            intermediatelyExpanded = 0.15f,
-                            slightlyExpanded = 0.15f
-                        )
-                    ),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                    sheetState =
+                        rememberFlexibleBottomSheetState(
+                            isModal = false,
+                            initialValue = FlexibleSheetValue.IntermediatelyExpanded,
+                            flexibleSheetSize =
+                                FlexibleSheetSize(
+                                    fullyExpanded = FlexibleSheetSize.WrapContent,
+                                    intermediatelyExpanded = 0.15f,
+                                    slightlyExpanded = 0.15f,
+                                ),
+                        ),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 ) {
                     SelectionBottomBar(
                         count = selectionCount,
@@ -451,7 +458,7 @@ fun UnifiedLibraryScreen(
                         onSearchMonitored = { unifiedLibraryViewModel.performAutomaticLookupSelected() },
                         onSearchSubtitles = { unifiedLibraryViewModel.performSubtitleSearchSelected() },
                         onUpdateMonitoring = { showMonitorOptionsSheet = true },
-                        onDelete = { confirmBulkDelete = true }
+                        onDelete = { confirmBulkDelete = true },
                     )
                 }
             }
@@ -464,7 +471,7 @@ fun UnifiedLibraryScreen(
                     onDismiss = { confirmDelete = null },
                     onDelete = { deleteFiles, addExclusion ->
                         unifiedLibraryViewModel.deleteMedia(item, deleteFiles, addExclusion)
-                    }
+                    },
                 )
             }
 
@@ -483,7 +490,7 @@ fun UnifiedLibraryScreen(
                             unifiedLibraryViewModel.editItem(it)
                         }
                     },
-                    onDismiss = { showEditSheet = null }
+                    onDismiss = { showEditSheet = null },
                 )
             }
 
@@ -498,7 +505,7 @@ fun UnifiedLibraryScreen(
                             onClick = {
                                 unifiedLibraryViewModel.editItem(item, moveFiles = true)
                                 moveFilesItem = null
-                            }
+                            },
                         ) {
                             Text(mokoString(MR.strings.yes))
                         }
@@ -508,11 +515,11 @@ fun UnifiedLibraryScreen(
                             onClick = {
                                 unifiedLibraryViewModel.editItem(item)
                                 moveFilesItem = null
-                            }
+                            },
                         ) {
                             Text(mokoString(MR.strings.no))
                         }
-                    }
+                    },
                 )
             }
 
@@ -525,7 +532,7 @@ fun UnifiedLibraryScreen(
                     onDelete = { deleteFiles, addExclusion ->
                         unifiedLibraryViewModel.deleteSelected(deleteFiles, addExclusion)
                         confirmBulkDelete = false
-                    }
+                    },
                 )
             }
 
@@ -536,7 +543,7 @@ fun UnifiedLibraryScreen(
                     onOptionSelected = {
                         // Monitor option selected
                         showMonitorOptionsSheet = false
-                    }
+                    },
                 )
             }
         }

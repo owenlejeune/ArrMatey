@@ -9,6 +9,6 @@ fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<ArrMateyDatabase>
     val dbFile = appContext.getDatabasePath("arrmatey_room.db")
     return Room.databaseBuilder<ArrMateyDatabase>(
         context = appContext,
-        name = dbFile.absolutePath
+        name = dbFile.absolutePath,
     )
 }

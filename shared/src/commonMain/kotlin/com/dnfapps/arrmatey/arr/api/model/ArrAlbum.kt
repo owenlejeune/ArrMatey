@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.arr.api.model
 
-import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -24,16 +23,14 @@ data class ArrAlbum(
     val duration: Long,
     val ratings: LidarrRatings? = null,
     val releases: List<AlbumRelease> = emptyList(),
-
     override val instanceId: Long? = null,
-    override val instanceIds: List<Long> = listOfNotNull(instanceId)
-): CalendarItem, InstanceTypeIdentifiable {
-
+    override val instanceIds: List<Long> = listOfNotNull(instanceId),
+) : CalendarItem,
+    InstanceTypeIdentifiable {
     override val calendarId: Long
         get() = id
 
-    override fun getCalendarDates(): List<Instant> =
-        listOfNotNull(releaseDate)
+    override fun getCalendarDates(): List<Instant> = listOfNotNull(releaseDate)
 
     override val notificationScheduledTime: Instant?
         get() = releaseDate
@@ -41,9 +38,10 @@ data class ArrAlbum(
     override val notificationMessage: String
         get() = "${artist?.title ?: "Unknown Artist"} - ${title ?: "Unknown Album"}"
 
-    fun getCover() = images.firstOrNull {
-        it.coverType == CoverType.Cover
-    }
+    fun getCover() =
+        images.firstOrNull {
+            it.coverType == CoverType.Cover
+        }
 
     val downloadedTrackCount: Int
         get() = statistics?.trackFileCount ?: 0

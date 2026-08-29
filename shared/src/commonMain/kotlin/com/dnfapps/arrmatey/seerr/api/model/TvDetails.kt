@@ -28,7 +28,6 @@ data class TvDetails(
     override val watchProviders: List<WatchProvider> = emptyList(),
     override val relatedVideos: List<Video> = emptyList(),
     override val requestType: RequestType = RequestType.Tv,
-
     val contentRatings: ContentRatings? = null,
     val createdBy: List<Creator> = emptyList(),
     val episodeRunTime: List<Int> = emptyList(),
@@ -45,11 +44,12 @@ data class TvDetails(
     val originCountry: List<String> = emptyList(),
     val originalName: String,
     val seasons: List<Season> = emptyList(),
-    val type: String
-): RequestMediaDetails {
-
+    val type: String,
+) : RequestMediaDetails {
     override fun getCertification(localeCode: String): String? =
-        contentRatings?.results?.firstOrNull {
-            it.iso_3166_1 == localeCode
-        }?.rating
+        contentRatings
+            ?.results
+            ?.firstOrNull {
+                it.iso_3166_1 == localeCode
+            }?.rating
 }

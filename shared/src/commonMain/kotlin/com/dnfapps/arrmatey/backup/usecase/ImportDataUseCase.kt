@@ -18,9 +18,12 @@ class ImportDataUseCase(
     private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository,
     private val preferencesStore: PreferencesStore,
     private val transportEncryptor: TransportEncryptor,
-    private val json: Json
+    private val json: Json,
 ) {
-    fun decryptBackup(encryptedData: String, password: String): BackupExport {
+    fun decryptBackup(
+        encryptedData: String,
+        password: String,
+    ): BackupExport {
         val jsonString = transportEncryptor.decrypt(encryptedData, password)
         return json.decodeFromString(jsonString)
     }
@@ -30,51 +33,54 @@ class ImportDataUseCase(
         selectedInstanceIndices: Set<Int>,
         selectedDownloadClientIndices: Set<Int>,
         importTabPreferences: Boolean,
-        importUiPreferences: Boolean
+        importUiPreferences: Boolean,
     ) {
         backup.instances.forEachIndexed { index, export ->
             if (index in selectedInstanceIndices) {
-                val instance = Instance(
-                    type = export.type,
-                    label = export.label,
-                    url = export.url,
-                    apiKey = EncryptedString(export.apiKey),
-                    noApiKeyRequired = export.noApiKeyRequired,
-                    enabled = export.enabled,
-                    slowInstance = export.slowInstance,
-                    customTimeout = export.customTimeout,
-                    notificationsEnabled = export.notificationsEnabled,
-                    headers = export.headers,
-                    localNetworkEnabled = export.localNetworkEnabled,
-                    localNetworkSsids = export.localNetworkSsids,
-                    localNetworkEndpoint = export.localNetworkEndpoint
-                )
-                
+                val instance =
+                    Instance(
+                        type = export.type,
+                        label = export.label,
+                        url = export.url,
+                        apiKey = EncryptedString(export.apiKey),
+                        noApiKeyRequired = export.noApiKeyRequired,
+                        enabled = export.enabled,
+                        slowInstance = export.slowInstance,
+                        customTimeout = export.customTimeout,
+                        notificationsEnabled = export.notificationsEnabled,
+                        headers = export.headers,
+                        localNetworkEnabled = export.localNetworkEnabled,
+                        localNetworkSsids = export.localNetworkSsids,
+                        localNetworkEndpoint = export.localNetworkEndpoint,
+                    )
+
                 val existingByUrl = instanceDao.findByUrl(instance.url)
                 val existingByLabel = instanceDao.findByLabel(instance.label)
-                
-                val finalInstance = when {
-                    existingByUrl != null -> {
-                        var uniqueLabel = instance.label
-                        if (existingByLabel != null && existingByLabel != existingByUrl) {
-                            uniqueLabel = "${instance.label} (Imported)"
-                        }
-                        instance.copy(id = existingByUrl, label = uniqueLabel)
-                    }
-                    existingByLabel != null -> {
-                        instance.copy(id = existingByLabel)
-                    }
-                    else -> {
-                        instance
-                    }
-                }
 
-                val id = if (finalInstance.id != 0L) {
-                    instanceDao.update(finalInstance)
-                    finalInstance.id
-                } else {
-                    instanceDao.insert(finalInstance)
-                }
+                val finalInstance =
+                    when {
+                        existingByUrl != null -> {
+                            var uniqueLabel = instance.label
+                            if (existingByLabel != null && existingByLabel != existingByUrl) {
+                                uniqueLabel = "${instance.label} (Imported)"
+                            }
+                            instance.copy(id = existingByUrl, label = uniqueLabel)
+                        }
+                        existingByLabel != null -> {
+                            instance.copy(id = existingByLabel)
+                        }
+                        else -> {
+                            instance
+                        }
+                    }
+
+                val id =
+                    if (finalInstance.id != 0L) {
+                        instanceDao.update(finalInstance)
+                        finalInstance.id
+                    } else {
+                        instanceDao.insert(finalInstance)
+                    }
 
                 if (id > 0 && export.preferences != null) {
                     val prefStore = instancePreferenceStoreRepository.getInstancePreferences(id)
@@ -89,38 +95,40 @@ class ImportDataUseCase(
 
         backup.downloadClients.forEachIndexed { index, export ->
             if (index in selectedDownloadClientIndices) {
-                val client = DownloadClient(
-                    type = export.type,
-                    label = export.label,
-                    url = export.url,
-                    username = EncryptedString(export.username),
-                    password = EncryptedString(export.password),
-                    apiKey = EncryptedString(export.apiKey),
-                    noApiKeyRequired = export.noApiKeyRequired,
-                    headers = export.headers,
-                    localNetworkEnabled = export.localNetworkEnabled,
-                    localNetworkSsids = export.localNetworkSsids,
-                    localNetworkEndpoint = export.localNetworkEndpoint
-                )
+                val client =
+                    DownloadClient(
+                        type = export.type,
+                        label = export.label,
+                        url = export.url,
+                        username = EncryptedString(export.username),
+                        password = EncryptedString(export.password),
+                        apiKey = EncryptedString(export.apiKey),
+                        noApiKeyRequired = export.noApiKeyRequired,
+                        headers = export.headers,
+                        localNetworkEnabled = export.localNetworkEnabled,
+                        localNetworkSsids = export.localNetworkSsids,
+                        localNetworkEndpoint = export.localNetworkEndpoint,
+                    )
 
                 val existingByUrl = downloadClientDao.findByUrl(client.url)
                 val existingByLabel = downloadClientDao.findByLabel(client.label)
 
-                val finalClient = when {
-                    existingByUrl != null -> {
-                        var uniqueLabel = client.label
-                        if (existingByLabel != null && existingByLabel != existingByUrl) {
-                            uniqueLabel = "${client.label} (Imported)"
+                val finalClient =
+                    when {
+                        existingByUrl != null -> {
+                            var uniqueLabel = client.label
+                            if (existingByLabel != null && existingByLabel != existingByUrl) {
+                                uniqueLabel = "${client.label} (Imported)"
+                            }
+                            client.copy(id = existingByUrl, label = uniqueLabel)
                         }
-                        client.copy(id = existingByUrl, label = uniqueLabel)
+                        existingByLabel != null -> {
+                            client.copy(id = existingByLabel)
+                        }
+                        else -> {
+                            client
+                        }
                     }
-                    existingByLabel != null -> {
-                        client.copy(id = existingByLabel)
-                    }
-                    else -> {
-                        client
-                    }
-                }
 
                 if (finalClient.id != 0L) {
                     downloadClientDao.update(finalClient)

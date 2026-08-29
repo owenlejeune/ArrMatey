@@ -49,26 +49,26 @@ fun ToolbarAddButton(
     onRequestClicked: () -> Unit,
     showRequest4kButton: Boolean = false,
     onRequest4kClicked: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (canAddDirectly && isSeerrConfigured) {
         var showToolbarAddMenu by remember { mutableStateOf(false) }
         Box(modifier = modifier) {
             IconButton(
                 onClick = { showToolbarAddMenu = true },
-                colors = IconButtonDefaults.headerBarColors()
+                colors = IconButtonDefaults.headerBarColors(),
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = mokoString(MR.strings.add)
+                    contentDescription = mokoString(MR.strings.add),
                 )
             }
             DropdownMenuPopup(
                 expanded = showToolbarAddMenu,
-                onDismissRequest = { showToolbarAddMenu = false }
+                onDismissRequest = { showToolbarAddMenu = false },
             ) {
                 DropdownMenuGroup(
-                    shapes = MenuDefaults.groupShape(0, 1)
+                    shapes = MenuDefaults.groupShape(0, 1),
                 ) {
                     DropdownMenuItem(
                         selected = false,
@@ -78,7 +78,7 @@ fun ToolbarAddButton(
                             onAddDirectlyClicked()
                         },
                         leadingIcon = { Icon(Icons.Default.Add, null) },
-                        shapes = MenuDefaults.itemShape(1, 2)
+                        shapes = MenuDefaults.itemShape(1, 2),
                     )
                     if (pendingRequestId != null) {
                         DropdownMenuItem(
@@ -89,7 +89,7 @@ fun ToolbarAddButton(
                                 onViewRequestClicked()
                             },
                             leadingIcon = { Icon(Icons.Default.Schedule, null) },
-                            shapes = MenuDefaults.itemShape(0, 2)
+                            shapes = MenuDefaults.itemShape(0, 2),
                         )
                     } else {
                         DropdownMenuItem(
@@ -100,7 +100,7 @@ fun ToolbarAddButton(
                                 onRequestClicked()
                             },
                             leadingIcon = { Icon(Icons.AutoMirrored.Default.Send, null) },
-                            shapes = MenuDefaults.itemShape(1, 2)
+                            shapes = MenuDefaults.itemShape(1, 2),
                         )
                     }
                 }
@@ -110,11 +110,11 @@ fun ToolbarAddButton(
         IconButton(
             onClick = onAddDirectlyClicked,
             colors = IconButtonDefaults.headerBarColors(),
-            modifier = modifier
+            modifier = modifier,
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = mokoString(MR.strings.add)
+                contentDescription = mokoString(MR.strings.add),
             )
         }
     } else if (isSeerrConfigured) {
@@ -122,11 +122,11 @@ fun ToolbarAddButton(
             IconButton(
                 onClick = onViewRequestClicked,
                 colors = IconButtonDefaults.headerBarColors(),
-                modifier = modifier
+                modifier = modifier,
             ) {
                 Icon(
                     imageVector = Icons.Default.Schedule,
-                    contentDescription = mokoString(MR.strings.view_request)
+                    contentDescription = mokoString(MR.strings.view_request),
                 )
             }
         } else if (showRequest4kButton) {
@@ -136,15 +136,16 @@ fun ToolbarAddButton(
                 leadingButton = {
                     SplitButtonDefaults.LeadingButton(
                         onClick = onRequestClicked,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                            contentColor = MaterialTheme.colorScheme.onBackground
-                        )
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                                contentColor = MaterialTheme.colorScheme.onBackground,
+                            ),
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = mokoString(MR.strings.request)
+                                contentDescription = mokoString(MR.strings.request),
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(mokoString(MR.strings.request))
@@ -155,19 +156,20 @@ fun ToolbarAddButton(
                     Box {
                         SplitButtonDefaults.TrailingButton(
                             onClick = { showRequestMenu = true },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                                contentColor = MaterialTheme.colorScheme.onBackground
-                            )
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                                    contentColor = MaterialTheme.colorScheme.onBackground,
+                                ),
                         ) {
                             Icon(Icons.Default.ArrowDropDown, null)
                         }
                         DropdownMenuPopup(
                             expanded = showRequestMenu,
-                            onDismissRequest = { showRequestMenu = false }
+                            onDismissRequest = { showRequestMenu = false },
                         ) {
                             DropdownMenuGroup(
-                                shapes = MenuDefaults.groupShape(0, 1)
+                                shapes = MenuDefaults.groupShape(0, 1),
                             ) {
                                 DropdownMenuItem(
                                     selected = false,
@@ -179,25 +181,25 @@ fun ToolbarAddButton(
                                     leadingIcon = {
                                         Icon(
                                             imageVector = Icons.Default.HighQuality,
-                                            contentDescription = null
+                                            contentDescription = null,
                                         )
                                     },
-                                    shapes = MenuDefaults.itemShape(0, 1)
+                                    shapes = MenuDefaults.itemShape(0, 1),
                                 )
                             }
                         }
                     }
-                }
+                },
             )
         } else {
             IconButton(
                 onClick = onRequestClicked,
                 colors = IconButtonDefaults.headerBarColors(),
-                modifier = modifier
+                modifier = modifier,
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = mokoString(MR.strings.add)
+                    contentDescription = mokoString(MR.strings.add),
                 )
             }
         }

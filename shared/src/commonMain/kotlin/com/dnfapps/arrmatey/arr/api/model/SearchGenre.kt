@@ -10,5 +10,5 @@ data class SearchGenre(
     val name: String,
     val type: String? = null,
     @Serializable(with = ListenarrInstantSerializer::class)
-    val updatedAt: Instant? = null
+    val updatedAt: Instant? = null,
 )

@@ -21,8 +21,7 @@ data class EpisodeFile(
     override val mediaInfo: MediaInfo? = null,
     override val qualityCutoffNotMet: Boolean,
     override val originalFilePath: String? = null,
-
     val seriesId: Long,
     val seasonNumber: Int,
     val releaseType: String? = null,
-): MediaFile
+) : MediaFile

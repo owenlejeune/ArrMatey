@@ -26,20 +26,20 @@ fun CountStatItem(
     count: Int,
     containerColor: Color,
     modifier: Modifier = Modifier,
-    contentColor: Color = contentColorFor(containerColor)
+    contentColor: Color = contentColorFor(containerColor),
 ) {
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor),
-        shape = MaterialTheme.shapes.large
+        shape = MaterialTheme.shapes.large,
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(icon, null, modifier = Modifier.size(24.dp))
                 Text(count.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

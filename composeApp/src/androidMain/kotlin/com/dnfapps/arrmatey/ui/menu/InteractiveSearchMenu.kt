@@ -67,15 +67,18 @@ fun InteractiveSearchMenu(
     onProtocolChange: (ReleaseProtocol?) -> Unit,
     customFilters: List<CustomFilter>,
     selectedCustomFilterId: Long?,
-    onCustomFilterChange: (Long?) -> Unit
+    onCustomFilterChange: (Long?) -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     val groupInteractionSource = remember { MutableInteractionSource() }
 
-    val indexes = if (type == InstanceType.Sonarr) {
-        listOf(0, 1, 2)
-    } else { listOf(0, null, 1) }
+    val indexes =
+        if (type == InstanceType.Sonarr) {
+            listOf(0, 1, 2)
+        } else {
+            listOf(0, null, 1)
+        }
     val indexCount = indexes.count { it != null }
 
     Box {
@@ -86,11 +89,11 @@ fun InteractiveSearchMenu(
         }
         DropdownMenuPopup(
             expanded = menuExpanded,
-            onDismissRequest = { menuExpanded = false }
+            onDismissRequest = { menuExpanded = false },
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, indexCount),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 libraryState?.let { state ->
                     QualitiesMenu(state.filterQualities, filterQualityInfo) {
@@ -120,7 +123,7 @@ fun InteractiveSearchMenu(
             if (type == InstanceType.Sonarr) {
                 DropdownMenuGroup(
                     shapes = MenuDefaults.groupShape(1, indexCount),
-                    interactionSource = groupInteractionSource
+                    interactionSource = groupInteractionSource,
                 ) {
                     ReleaseFilterBy.entries.forEachIndexed { index, filter ->
                         DropdownMenuItem(
@@ -131,7 +134,7 @@ fun InteractiveSearchMenu(
                                 menuExpanded = false
                             },
                             shapes = MenuDefaults.itemShape(index, ReleaseFilterBy.entries.size),
-                            selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                            selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                         )
                     }
                 }
@@ -142,7 +145,7 @@ fun InteractiveSearchMenu(
             if (releaseFilters.isNotEmpty()) {
                 DropdownMenuGroup(
                     shapes = MenuDefaults.groupShape(indexCount, indexCount + 1),
-                    interactionSource = groupInteractionSource
+                    interactionSource = groupInteractionSource,
                 ) {
                     releaseFilters.forEachIndexed { index, filter ->
                         DropdownMenuItem(
@@ -153,7 +156,7 @@ fun InteractiveSearchMenu(
                                 menuExpanded = false
                             },
                             shapes = MenuDefaults.itemShape(index, releaseFilters.size),
-                            selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                            selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                         )
                     }
                 }
@@ -162,7 +165,7 @@ fun InteractiveSearchMenu(
 
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(indexes[2]!!, indexCount + (if (releaseFilters.isNotEmpty()) 1 else 0)),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 ReleaseSortBy.entries.forEachIndexed { index, sort ->
                     DropdownMenuItem(
@@ -170,20 +173,24 @@ fun InteractiveSearchMenu(
                         selected = sort == selectedSortBy,
                         onClick = {
                             if (sort == selectedSortBy) {
-                                onSortOrderChanged(when (selectedSortOrder) {
-                                    SortOrder.Asc -> SortOrder.Desc
-                                    SortOrder.Desc -> SortOrder.Asc
-                                })
+                                onSortOrderChanged(
+                                    when (selectedSortOrder) {
+                                        SortOrder.Asc -> SortOrder.Desc
+                                        SortOrder.Desc -> SortOrder.Asc
+                                    },
+                                )
                             } else {
                                 onSortByChanged(sort)
                             }
                             menuExpanded = false
                         },
                         shapes = MenuDefaults.itemShape(index, ReleaseSortBy.entries.size),
-                        selectedLeadingIcon = { when (selectedSortOrder) {
-                            SortOrder.Asc -> Icon(Icons.Default.ArrowDropUp, null)
-                            SortOrder.Desc -> Icon(Icons.Default.ArrowDropDown, null)
-                        } }
+                        selectedLeadingIcon = {
+                            when (selectedSortOrder) {
+                                SortOrder.Asc -> Icon(Icons.Default.ArrowDropUp, null)
+                                SortOrder.Desc -> Icon(Icons.Default.ArrowDropDown, null)
+                            }
+                        },
                     )
                 }
             }
@@ -196,7 +203,7 @@ fun InteractiveSearchMenu(
 private fun QualitiesMenu(
     qualities: Set<QualityInfo>,
     selected: QualityInfo?,
-    onChange: (QualityInfo?) -> Unit
+    onChange: (QualityInfo?) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -205,17 +212,17 @@ private fun QualitiesMenu(
             text = { Text(selected?.qualityLabel ?: mokoString(MR.strings.quality_profile)) },
             onClick = { expanded = true },
             trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-            leadingIcon = { Icon(Icons.Default.HighQuality, null) }
+            leadingIcon = { Icon(Icons.Default.HighQuality, null) },
         )
         DropdownMenuPopup(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            offset = DpOffset(x = 350.dp, y = 0.dp)
+            offset = DpOffset(x = 350.dp, y = 0.dp),
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 1),
                 interactionSource = interactionSource,
-                containerColor = MenuDefaults.groupVibrantContainerColor
+                containerColor = MenuDefaults.groupVibrantContainerColor,
             ) {
                 DropdownMenuItem(
                     text = { Text(mokoString(MR.strings.any)) },
@@ -224,9 +231,9 @@ private fun QualitiesMenu(
                         onChange(null)
                         expanded = false
                     },
-                    shapes = MenuDefaults.itemShape(0, qualities.size+1),
+                    shapes = MenuDefaults.itemShape(0, qualities.size + 1),
                     colors = MenuDefaults.selectableItemVibrantColors(),
-                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                 )
                 qualities.forEachIndexed { index, info ->
                     DropdownMenuItem(
@@ -236,9 +243,9 @@ private fun QualitiesMenu(
                             expanded = false
                         },
                         selected = info == selected,
-                        shapes = MenuDefaults.itemShape(index+1, qualities.size+1),
+                        shapes = MenuDefaults.itemShape(index + 1, qualities.size + 1),
                         colors = MenuDefaults.selectableItemVibrantColors(),
-                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                     )
                 }
             }
@@ -251,7 +258,7 @@ private fun QualitiesMenu(
 private fun LanguageMenu(
     languages: Set<Language>,
     selected: Language?,
-    onChange: (Language?) -> Unit
+    onChange: (Language?) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -260,17 +267,17 @@ private fun LanguageMenu(
             text = { Text(selected?.name ?: mokoString(MR.strings.language)) },
             onClick = { expanded = true },
             trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-            leadingIcon = { Icon(Icons.Default.Language, null) }
+            leadingIcon = { Icon(Icons.Default.Language, null) },
         )
         DropdownMenuPopup(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            offset = DpOffset(x = 350.dp, y = 0.dp)
+            offset = DpOffset(x = 350.dp, y = 0.dp),
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 1),
                 interactionSource = interactionSource,
-                containerColor = MenuDefaults.groupVibrantContainerColor
+                containerColor = MenuDefaults.groupVibrantContainerColor,
             ) {
                 DropdownMenuItem(
                     text = { Text(mokoString(MR.strings.any)) },
@@ -279,9 +286,9 @@ private fun LanguageMenu(
                         onChange(null)
                         expanded = false
                     },
-                    shapes = MenuDefaults.itemShape(0, languages.size+1),
+                    shapes = MenuDefaults.itemShape(0, languages.size + 1),
                     colors = MenuDefaults.selectableItemVibrantColors(),
-                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                 )
                 languages.forEachIndexed { index, language ->
                     DropdownMenuItem(
@@ -291,9 +298,9 @@ private fun LanguageMenu(
                             expanded = false
                         },
                         selected = language == selected,
-                        shapes = MenuDefaults.itemShape(index+1, languages.size+1),
+                        shapes = MenuDefaults.itemShape(index + 1, languages.size + 1),
                         colors = MenuDefaults.selectableItemVibrantColors(),
-                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                     )
                 }
             }
@@ -306,7 +313,7 @@ private fun LanguageMenu(
 private fun IndexersMenu(
     indexers: Set<String>,
     selected: String?,
-    onChange: (String?) -> Unit
+    onChange: (String?) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -315,17 +322,17 @@ private fun IndexersMenu(
             text = { Text(selected ?: mokoString(MR.strings.indexer)) },
             onClick = { expanded = true },
             trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-            leadingIcon = { Icon(Icons.Default.House, null) }
+            leadingIcon = { Icon(Icons.Default.House, null) },
         )
         DropdownMenuPopup(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            offset = DpOffset(x = 350.dp, y = 0.dp)
+            offset = DpOffset(x = 350.dp, y = 0.dp),
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 1),
                 interactionSource = interactionSource,
-                containerColor = MenuDefaults.groupVibrantContainerColor
+                containerColor = MenuDefaults.groupVibrantContainerColor,
             ) {
                 DropdownMenuItem(
                     text = { Text(mokoString(MR.strings.any)) },
@@ -334,9 +341,9 @@ private fun IndexersMenu(
                         onChange(null)
                         expanded = false
                     },
-                    shapes = MenuDefaults.itemShape(0, indexers.size+1),
+                    shapes = MenuDefaults.itemShape(0, indexers.size + 1),
                     colors = MenuDefaults.selectableItemVibrantColors(),
-                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                 )
                 indexers.forEachIndexed { index, indexer ->
                     DropdownMenuItem(
@@ -346,9 +353,9 @@ private fun IndexersMenu(
                             expanded = false
                         },
                         selected = indexer == selected,
-                        shapes = MenuDefaults.itemShape(index+1, indexers.size+1),
+                        shapes = MenuDefaults.itemShape(index + 1, indexers.size + 1),
                         colors = MenuDefaults.selectableItemVibrantColors(),
-                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                     )
                 }
             }
@@ -361,7 +368,7 @@ private fun IndexersMenu(
 private fun ProtocolMenu(
     protocols: Set<ReleaseProtocol>,
     selected: ReleaseProtocol?,
-    onChange: (ReleaseProtocol?) -> Unit
+    onChange: (ReleaseProtocol?) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -370,17 +377,17 @@ private fun ProtocolMenu(
             text = { Text(selected?.name ?: mokoString(MR.strings.protocol)) },
             onClick = { expanded = true },
             trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-            leadingIcon = { Icon(Icons.Default.Download, null) }
+            leadingIcon = { Icon(Icons.Default.Download, null) },
         )
         DropdownMenuPopup(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            offset = DpOffset(x = 350.dp, y = 0.dp)
+            offset = DpOffset(x = 350.dp, y = 0.dp),
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 1),
                 interactionSource = interactionSource,
-                containerColor = MenuDefaults.groupVibrantContainerColor
+                containerColor = MenuDefaults.groupVibrantContainerColor,
             ) {
                 DropdownMenuItem(
                     text = { Text(mokoString(MR.strings.any)) },
@@ -389,9 +396,9 @@ private fun ProtocolMenu(
                         onChange(null)
                         expanded = false
                     },
-                    shapes = MenuDefaults.itemShape(0, protocols.size+1),
+                    shapes = MenuDefaults.itemShape(0, protocols.size + 1),
                     colors = MenuDefaults.selectableItemVibrantColors(),
-                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                 )
                 protocols.forEachIndexed { index, protocol ->
                     DropdownMenuItem(
@@ -401,9 +408,9 @@ private fun ProtocolMenu(
                             expanded = false
                         },
                         selected = protocol == selected,
-                        shapes = MenuDefaults.itemShape(index+1, protocols.size+1),
+                        shapes = MenuDefaults.itemShape(index + 1, protocols.size + 1),
                         colors = MenuDefaults.selectableItemVibrantColors(),
-                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                     )
                 }
             }
@@ -416,7 +423,7 @@ private fun ProtocolMenu(
 private fun CustomFormatMenu(
     customFormats: Set<CustomFormat>,
     selected: CustomFormat?,
-    onChange: (CustomFormat?) -> Unit
+    onChange: (CustomFormat?) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -425,17 +432,17 @@ private fun CustomFormatMenu(
             text = { Text(selected?.name ?: mokoString(MR.strings.custom_format)) },
             onClick = { expanded = true },
             trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-            leadingIcon = { Icon(Icons.Default.Tag, null) }
+            leadingIcon = { Icon(Icons.Default.Tag, null) },
         )
         DropdownMenuPopup(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            offset = DpOffset(x = 350.dp, y = 0.dp)
+            offset = DpOffset(x = 350.dp, y = 0.dp),
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 1),
                 interactionSource = interactionSource,
-                containerColor = MenuDefaults.groupVibrantContainerColor
+                containerColor = MenuDefaults.groupVibrantContainerColor,
             ) {
                 DropdownMenuItem(
                     text = { Text(mokoString(MR.strings.any)) },
@@ -444,9 +451,9 @@ private fun CustomFormatMenu(
                         onChange(null)
                         expanded = false
                     },
-                    shapes = MenuDefaults.itemShape(0, customFormats.size+1),
+                    shapes = MenuDefaults.itemShape(0, customFormats.size + 1),
                     colors = MenuDefaults.selectableItemVibrantColors(),
-                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                 )
                 customFormats.forEachIndexed { index, format ->
                     DropdownMenuItem(
@@ -456,9 +463,9 @@ private fun CustomFormatMenu(
                             expanded = false
                         },
                         selected = format == selected,
-                        shapes = MenuDefaults.itemShape(index+1, customFormats.size+1),
+                        shapes = MenuDefaults.itemShape(index + 1, customFormats.size + 1),
                         colors = MenuDefaults.selectableItemVibrantColors(),
-                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                     )
                 }
             }

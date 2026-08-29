@@ -68,9 +68,10 @@ fun CalendarListView(
 
     LaunchedEffect(state.dates.isEmpty()) {
         if (state.dates.isNotEmpty()) {
-            val targetIndex = state.dates
-                .indexOfFirst { it >= state.today }
-                .coerceAtLeast(0)
+            val targetIndex =
+                state.dates
+                    .indexOfFirst { it >= state.today }
+                    .coerceAtLeast(0)
             listState.scrollToItem(targetIndex)
         }
     }
@@ -90,23 +91,24 @@ fun CalendarListView(
         ) {
             items(
                 items = state.dates,
-                key = { it.toString() }
+                key = { it.toString() },
             ) { date ->
                 CalendarDaySection(
                     date = date,
                     items = state.items[date] ?: emptyList(),
                     instances = instances,
-                    onItemClick = onItemClick
+                    onItemClick = onItemClick,
                 )
             }
 
             if (state.isLoadingFuture) {
                 item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                        contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(32.dp))
                     }
@@ -118,7 +120,7 @@ fun CalendarListView(
             visible = !isTodayVisible,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-            modifier = Modifier.align(Alignment.BottomEnd)
+            modifier = Modifier.align(Alignment.BottomEnd),
         ) {
             FloatingActionButton(
                 onClick = {
@@ -128,11 +130,11 @@ fun CalendarListView(
                 },
                 modifier = Modifier.padding(12.dp),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ) {
                 Icon(
                     imageVector = Icons.Default.Today,
-                    contentDescription = mokoString(MR.strings.today)
+                    contentDescription = mokoString(MR.strings.today),
                 )
             }
         }

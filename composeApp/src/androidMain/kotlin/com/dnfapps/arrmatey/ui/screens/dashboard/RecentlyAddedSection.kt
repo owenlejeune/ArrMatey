@@ -37,57 +37,64 @@ import dev.icerock.moko.resources.compose.painterResource
 fun RecentlyAddedSection(
     state: CombinedDashboardState.Success,
     onOpenItem: (Long, InstanceType) -> Unit,
-    enabled: Boolean
+    enabled: Boolean,
 ) {
     val items = state.recentlyAdded
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             ) {
                 Icon(
-                    Icons.Default.History, null,
-                    modifier = Modifier.size(20.dp)
+                    Icons.Default.History,
+                    null,
+                    modifier = Modifier.size(20.dp),
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = mokoString(MR.strings.recently_added),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
             if (items.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.nothing_recently_added),
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 2.dp, bottom = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
 
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                userScrollEnabled = enabled
+                userScrollEnabled = enabled,
             ) {
                 items(items) { item ->
                     val type = (item as InstanceTypeIdentifiable).instanceType
-                    val posterModel = if (item is MockMedia) {
-                        type.mockCover?.let { painterResource(it) }
-                    } else null
+                    val posterModel =
+                        if (item is MockMedia) {
+                            type.mockCover?.let { painterResource(it) }
+                        } else {
+                            null
+                        }
                     PosterItem(
                         item = item,
                         modifier = Modifier.width(120.dp),
@@ -95,7 +102,7 @@ fun RecentlyAddedSection(
                         onItemClick = {
                             onOpenItem(item.id ?: 0, type)
                         },
-                        showFooter = true
+                        showFooter = true,
                     )
                 }
             }

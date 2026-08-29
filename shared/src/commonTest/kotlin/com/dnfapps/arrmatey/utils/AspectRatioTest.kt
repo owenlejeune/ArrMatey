@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AspectRatioTest {
-
     @Test
     fun testPosterRatio() {
         assertEquals(0.675f, AspectRatio.Poster.ratio)

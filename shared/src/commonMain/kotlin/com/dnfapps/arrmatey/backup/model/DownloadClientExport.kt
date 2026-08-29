@@ -16,5 +16,5 @@ data class DownloadClientExport(
     val headers: List<InstanceHeader>,
     val localNetworkEnabled: Boolean,
     val localNetworkSsids: List<String>,
-    val localNetworkEndpoint: String?
+    val localNetworkEndpoint: String?,
 )

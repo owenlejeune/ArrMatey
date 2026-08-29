@@ -5,11 +5,9 @@ import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import kotlinx.coroutines.flow.Flow
 
 class GetActivityTasksUseCase(
-    private val activityQueueService: ActivityQueueService
+    private val activityQueueService: ActivityQueueService,
 ) {
-    operator fun invoke(): Flow<List<QueueItem>> =
-        activityQueueService.allActivityTasks
+    operator fun invoke(): Flow<List<QueueItem>> = activityQueueService.allActivityTasks
 
-    fun getTasksWithIssues(): Flow<Int> =
-        activityQueueService.tasksWithIssues
+    fun getTasksWithIssues(): Flow<Int> = activityQueueService.tasksWithIssues
 }

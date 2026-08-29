@@ -4,7 +4,9 @@ import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 
-enum class ArtistMonitorType(val resource: StringResource) {
+enum class ArtistMonitorType(
+    val resource: StringResource,
+) {
     @SerialName("unknown")
     Unknown(MR.strings.unknown),
 
@@ -30,5 +32,5 @@ enum class ArtistMonitorType(val resource: StringResource) {
     New(MR.strings.new_albums),
 
     @SerialName("none")
-    None(MR.strings.none)
+    None(MR.strings.none),
 }

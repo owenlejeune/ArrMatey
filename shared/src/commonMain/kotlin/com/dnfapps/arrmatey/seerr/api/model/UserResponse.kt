@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserResponse(
     val pageInfo: PageInfo,
-    val results: List<SeerrUser> = emptyList()
+    val results: List<SeerrUser> = emptyList(),
 )

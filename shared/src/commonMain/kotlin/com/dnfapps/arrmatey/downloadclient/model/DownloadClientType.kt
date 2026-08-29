@@ -13,7 +13,7 @@ enum class DownloadClientType(
     val icon: ImageResource,
     val tabIcon: ImageResource,
     val github: String,
-    val website: String
+    val website: String,
 ) {
     QBittorrent(
         displayName = "qBittorrent",
@@ -22,7 +22,7 @@ enum class DownloadClientType(
         icon = MR.images.qbittorrent,
         tabIcon = MR.images.qbittorrent_tab,
         github = "https://github.com/qbittorrent/qBittorrent",
-        website = "https://www.qbittorrent.org/"
+        website = "https://www.qbittorrent.org/",
     ),
     SABnzbd(
         displayName = "SABnzbd",
@@ -31,7 +31,7 @@ enum class DownloadClientType(
         icon = MR.images.sabnzbd,
         tabIcon = MR.images.sabnzbd_tab,
         github = "https://github.com/sabnzbd/sabnzbd",
-        website = "https://sabnzbd.org/"
+        website = "https://sabnzbd.org/",
     ),
     Deluge(
         displayName = "Deluge",
@@ -40,7 +40,7 @@ enum class DownloadClientType(
         icon = MR.images.deluge,
         tabIcon = MR.images.deluge_tab,
         github = "https://github.com/deluge-torrent/deluge",
-        website = "https://www.deluge-torrent.org/"
+        website = "https://www.deluge-torrent.org/",
     ),
     Transmission(
         displayName = "Transmission",
@@ -49,6 +49,6 @@ enum class DownloadClientType(
         icon = MR.images.transmission,
         tabIcon = MR.images.transmission_tab,
         github = "https://github.com/transmission/transmission",
-        website = "https://transmissionbt.com/"
-    )
+        website = "https://transmissionbt.com/",
+    ),
 }

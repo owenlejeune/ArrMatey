@@ -18,5 +18,5 @@ enum class SABnzbdQueueSlotStatus {
     @SerialName("Fetching")
     Fetching,
 
-    Unknown
+    Unknown,
 }

@@ -51,25 +51,22 @@ data class Audiobook(
     @SerialName("status") val statusStr: String? = null,
     val files: List<AudiobookFile> = emptyList(),
     @SerialName("description") override val overview: String? = null,
-
-    @Serializable(with =  ListenarrNullableInstantSerializer::class)
+    @Serializable(with = ListenarrNullableInstantSerializer::class)
     val publishedDate: Instant? = null,
-
     override val instanceId: Long? = null,
-    override val instanceIds: List<Long> = listOfNotNull(instanceId)
-) : ArrMedia, HasArrImages<Audiobook>, CalendarItem, InstanceTypeIdentifiable {
-
+    override val instanceIds: List<Long> = listOfNotNull(instanceId),
+) : ArrMedia,
+    HasArrImages<Audiobook>,
+    CalendarItem,
+    InstanceTypeIdentifiable {
     companion object {
-        fun fromJson(value: String): Audiobook {
-            return ArrMedia.json.decodeFromString(value)
-        }
+        fun fromJson(value: String): Audiobook = ArrMedia.json.decodeFromString(value)
     }
 
     override val calendarId: Long
         get() = id ?: (asin?.hashCode()?.toLong() ?: 0L)
 
-    override fun getCalendarDates(): List<Instant> =
-        listOfNotNull(publishedDate)
+    override fun getCalendarDates(): List<Instant> = listOfNotNull(publishedDate)
 
     override val notificationScheduledTime: Instant?
         get() = publishedDate
@@ -78,12 +75,13 @@ data class Audiobook(
         get() = "$title - ${authors.joinToString(", ")}"
 
     override fun withLocalImages(instanceUrl: String): Audiobook {
-        val localImages = imageUrl?.let { path ->
-            listOf(
-                ArrImage(CoverType.Cover, path, path)
-                    .rebuildWithLocalUrls(instanceUrl)
-            )
-        } ?: emptyList()
+        val localImages =
+            imageUrl?.let { path ->
+                listOf(
+                    ArrImage(CoverType.Cover, path, path)
+                        .rebuildWithLocalUrls(instanceUrl),
+                )
+            } ?: emptyList()
 
         return copy(images = localImages)
     }
@@ -127,11 +125,12 @@ data class Audiobook(
     override val added: Instant?
         get() = publishedDate
 
-    override val status: MediaStatus get() = when(statusStr) {
-        "quality-match" -> MediaStatus.Released
-        "no-file" -> MediaStatus.Announced
-        else -> MediaStatus.Deleted
-    }
+    override val status: MediaStatus get() =
+        when (statusStr) {
+            "quality-match" -> MediaStatus.Released
+            "no-file" -> MediaStatus.Announced
+            else -> MediaStatus.Deleted
+        }
 
     override val guid: Long
         get() = id ?: (asin?.hashCode()?.toLong() ?: 0L)
@@ -142,11 +141,12 @@ data class Audiobook(
         get() = if (fileSize > 0 || fileCount > 0) 1.0f else 0.0f
 
     override val statusColor: Color
-        get() = when {
-            statusStr == "quality-match" -> ArrGreen
-            monitored -> ArrRed
-            else -> ArrGrey
-        }
+        get() =
+            when {
+                statusStr == "quality-match" -> ArrGreen
+                monitored -> ArrRed
+                else -> ArrGrey
+            }
 
     override val releasedBy: String?
         get() = publisher
@@ -162,60 +162,64 @@ data class Audiobook(
         get() = wanted
 
     override val runtimeString: String
-        get() = when {
-            runtime == null -> ""
-            runtime > 20_000 -> runtime.formatSecondsAsRuntime()
-            else -> runtime.formatMinutesAsRuntime()
-        }
+        get() =
+            when {
+                runtime == null -> ""
+                runtime > 20_000 -> runtime.formatSecondsAsRuntime()
+                else -> runtime.formatMinutesAsRuntime()
+            }
 
     override val fileSize: Long
         get() = remoteFileSize ?: files.sumOf { it.size ?: 0 }
 
-    override fun getPoster(): ArrImage? =
-        images.firstOrNull()
+    override fun getPoster(): ArrImage? = images.firstOrNull()
 
     fun copyForCreation(
         monitored: Boolean,
         qualityProfileId: Int,
         rootFolderPath: String,
-        tags: List<Int>
+        tags: List<Int>,
     ) = copy(
         id = 0,
         monitored = monitored,
         qualityProfileId = qualityProfileId,
         basePath = rootFolderPath,
-        tags = tags
+        tags = tags,
     )
 
     fun copyForEdit(
         monitored: Boolean,
         qualityProfileId: Int,
         rootFolderPath: String,
-        relativePath: String
+        relativePath: String,
     ) = copy(
         monitored = monitored,
         qualityProfileId = qualityProfileId,
-        basePath = "${rootFolderPath}/${relativePath.trimStart('/')}"
+        basePath = "$rootFolderPath/${relativePath.trimStart('/')}",
     )
 
-    override fun findCurrentRoot(rootFolders: List<RootFolder>): RootFolder? =
-        rootFolders.firstOrNull { path?.startsWith(it.path) == true }
+    override fun findCurrentRoot(rootFolders: List<RootFolder>): RootFolder? = rootFolders.firstOrNull { path?.startsWith(it.path) == true }
 
-    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia {
+    override fun withNewRoot(
+        rootFolderPath: String,
+        currentRootFolderPath: String?,
+    ): ArrMedia {
         val currentPath = basePath ?: ""
         val currentRoot = currentRootFolderPath ?: ""
-        val relativePath = if (currentRoot.isNotEmpty() && currentPath.startsWith(currentRoot)) {
-            currentPath.removePrefix(currentRoot).trimStart('/', '\\')
-        } else {
-            currentPath
-        }
+        val relativePath =
+            if (currentRoot.isNotEmpty() && currentPath.startsWith(currentRoot)) {
+                currentPath.removePrefix(currentRoot).trimStart('/', '\\')
+            } else {
+                currentPath
+            }
 
         val separator = if (rootFolderPath.contains('\\')) "\\" else "/"
-        val newPath = if (rootFolderPath.endsWith(separator) || relativePath.startsWith(separator)) {
-            rootFolderPath + relativePath
-        } else {
-            rootFolderPath + separator + relativePath
-        }
+        val newPath =
+            if (rootFolderPath.endsWith(separator) || relativePath.startsWith(separator)) {
+                rootFolderPath + relativePath
+            } else {
+                rootFolderPath + separator + relativePath
+            }
         return copy(basePath = newPath)
     }
 
@@ -223,27 +227,28 @@ data class Audiobook(
         get() = "$title $${authors.joinToString(" ")}"
 }
 
-fun Audiobook.toEditBody(): JsonElement = buildJsonObject {
-    put("monitored", monitored)
-    put("title", title)
-    put("subtitle", subtitle)
-    put("authors", authors.toJsonArray())
-    put("narrators", narrators.toJsonArray())
-    put("description", overview)
-    put("publisher", publisher)
-    put("language", language)
-    put("publishedDate", publishedDate?.toString() ?: "")
-    put("publishYear", publishYear)
-    put("edition", edition ?: "")
-    put("series", series)
-    put("seriesNumber", seriesNumber)
-    put("seriesMemberships", JsonArray(seriesMemberships.map { Json.encodeToJsonElement(SeriesMembership.serializer(), it) }))
-    put("genres", genres.toJsonArray())
-    put("imageUrl", imageUrl)
-    put("tags", JsonArray(tags.map { JsonPrimitive(it) }))
-    put("abridged", abridged)
-    put("explicit", explicit)
-    put("runtime", runtime)
-    put("basePath", basePath)
-    put("qualityProfileId", if (qualityProfileId > 0) qualityProfileId else -1)
-}
+fun Audiobook.toEditBody(): JsonElement =
+    buildJsonObject {
+        put("monitored", monitored)
+        put("title", title)
+        put("subtitle", subtitle)
+        put("authors", authors.toJsonArray())
+        put("narrators", narrators.toJsonArray())
+        put("description", overview)
+        put("publisher", publisher)
+        put("language", language)
+        put("publishedDate", publishedDate?.toString() ?: "")
+        put("publishYear", publishYear)
+        put("edition", edition ?: "")
+        put("series", series)
+        put("seriesNumber", seriesNumber)
+        put("seriesMemberships", JsonArray(seriesMemberships.map { Json.encodeToJsonElement(SeriesMembership.serializer(), it) }))
+        put("genres", genres.toJsonArray())
+        put("imageUrl", imageUrl)
+        put("tags", JsonArray(tags.map { JsonPrimitive(it) }))
+        put("abridged", abridged)
+        put("explicit", explicit)
+        put("runtime", runtime)
+        put("basePath", basePath)
+        put("qualityProfileId", if (qualityProfileId > 0) qualityProfileId else -1)
+    }

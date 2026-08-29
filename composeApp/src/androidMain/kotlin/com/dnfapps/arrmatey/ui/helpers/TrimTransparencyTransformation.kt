@@ -1,14 +1,17 @@
 package com.dnfapps.arrmatey.ui.helpers
 
 import android.graphics.Bitmap
+import androidx.core.graphics.get
 import coil3.size.Size
 import coil3.transform.Transformation
-import androidx.core.graphics.get
 
 class TrimTransparencyTransformation : Transformation() { // Remove the ()
     override val cacheKey: String = "trim_transparency_v1"
 
-    override suspend fun transform(input: Bitmap, size: Size): Bitmap {
+    override suspend fun transform(
+        input: Bitmap,
+        size: Size,
+    ): Bitmap {
         // Ensure we have a readable bitmap
         val config = input.config ?: Bitmap.Config.ARGB_8888
         val softwareBitmap = if (input.isMutable) input else input.copy(config, true)

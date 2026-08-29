@@ -20,5 +20,5 @@ data class InstanceExport(
     val localNetworkEnabled: Boolean,
     val localNetworkSsids: List<String>,
     val localNetworkEndpoint: String?,
-    val preferences: InstancePreferences? = null
+    val preferences: InstancePreferences? = null,
 )

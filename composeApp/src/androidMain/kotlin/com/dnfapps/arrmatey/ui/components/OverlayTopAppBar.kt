@@ -24,14 +24,14 @@ fun OverlayTopAppBar(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     title: @Composable () -> Unit = {},
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     OverlayTopAppBar(
         scrollValueProvider = { scrollState.value },
         modifier = modifier,
         navigationIcon = navigationIcon,
         title = title,
-        actions = actions
+        actions = actions,
     )
 }
 
@@ -42,7 +42,7 @@ fun OverlayTopAppBar(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     title: @Composable () -> Unit = {},
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     OverlayTopAppBar(
         scrollValueProvider = {
@@ -51,7 +51,7 @@ fun OverlayTopAppBar(
         modifier = modifier,
         navigationIcon = navigationIcon,
         title = title,
-        actions = actions
+        actions = actions,
     )
 }
 
@@ -62,7 +62,7 @@ fun OverlayTopAppBar(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     title: @Composable () -> Unit = {},
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     OverlayTopAppBar(
         scrollValueProvider = {
@@ -71,7 +71,7 @@ fun OverlayTopAppBar(
         modifier = modifier,
         navigationIcon = navigationIcon,
         title = title,
-        actions = actions
+        actions = actions,
     )
 }
 
@@ -82,7 +82,7 @@ private fun OverlayTopAppBar(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     title: @Composable () -> Unit = {},
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     val headerBackgroundAlpha by remember {
         derivedStateOf {
@@ -97,7 +97,7 @@ private fun OverlayTopAppBar(
             AnimatedVisibility(
                 visible = headerBackgroundAlpha > 0.9f,
                 enter = fadeIn(),
-                exit = fadeOut()
+                exit = fadeOut(),
             ) {
                 title()
             }
@@ -105,10 +105,12 @@ private fun OverlayTopAppBar(
         navigationIcon = navigationIcon,
         actions = actions,
         modifier = modifier,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(
-                alpha = headerBackgroundAlpha
-            )
-        )
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor =
+                    MaterialTheme.colorScheme.surface.copy(
+                        alpha = headerBackgroundAlpha,
+                    ),
+            ),
     )
 }

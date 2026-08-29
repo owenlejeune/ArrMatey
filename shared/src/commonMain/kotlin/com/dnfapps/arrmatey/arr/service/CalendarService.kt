@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.arr.service
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -13,8 +12,6 @@ import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
 import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
-import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +36,7 @@ import kotlin.time.Instant
 class CalendarService(
     private val instanceManager: InstanceManager,
     private val notificationCleanupUseCase: NotificationCleanupUseCase,
-    private val scheduleNotificationUseCase: ScheduleNotificationUseCase
+    private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -69,7 +66,11 @@ class CalendarService(
         _isLoading.value = true
         _error.value = null
 
-        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val now =
+            Clock.System
+                .now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
         val start = now.minus(daysRange, DateTimeUnit.DAY)
         val end = now.plus(daysRange, DateTimeUnit.DAY)
 
@@ -84,10 +85,11 @@ class CalendarService(
     suspend fun loadMoreDates() {
         if (_isLoadingFuture.value || _isLoading.value) return
 
-        val lastDate = _dates.value.lastOrNull() ?: run {
-            load()
-            return
-        }
+        val lastDate =
+            _dates.value.lastOrNull() ?: run {
+                load()
+                return
+            }
 
         _isLoadingFuture.value = true
 
@@ -101,17 +103,20 @@ class CalendarService(
         _isLoadingFuture.value = false
     }
 
-    private suspend fun fetch(start: LocalDate, end: LocalDate) {
+    private suspend fun fetch(
+        start: LocalDate,
+        end: LocalDate,
+    ) {
         val repositories = instanceManager.getAllArrRepositories()
 
         coroutineScope {
             repositories.forEach { repository ->
                 launch {
-                    repository.client.getCalendar(start, end)
+                    repository.client
+                        .getCalendar(start, end)
                         .onSuccess { items ->
                             handleCalendarItems(repository, items)
-                        }
-                        .onError { _, message, _ ->
+                        }.onError { _, message, _ ->
                             _error.value = message
                         }
                 }
@@ -121,22 +126,23 @@ class CalendarService(
 
     private fun handleCalendarItems(
         repository: ArrInstanceRepository,
-        items: List<CalendarItem>
+        items: List<CalendarItem>,
     ) {
         val type = repository.instance.type
         val instance = repository.instance
         val instanceId = instance.id
 
-        val itemsWithId = items.map { item ->
-            when (item) {
-                is ArrMovie -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
-                is Episode -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
-                is ArrAlbum -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
-                is Book -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
-                is Audiobook -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
-                else -> item
+        val itemsWithId =
+            items.map { item ->
+                when (item) {
+                    is ArrMovie -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                    is Episode -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                    is ArrAlbum -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                    is Book -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                    is Audiobook -> item.copy(instanceId = instanceId, instanceIds = listOf(instanceId))
+                    else -> item
+                }
             }
-        }
 
         // State updates immediately as this repository succeeds
         _items.update { current ->
@@ -156,16 +162,17 @@ class CalendarService(
         scope.launch {
             val fetchedIds = itemsWithId.map { it.calendarId.toInt() }.toSet()
 
-            val snapshot: List<CalendarItem> = _items.value.values.flatten().filter {
-                isItemOfInstanceType(it, type)
-            }
+            val snapshot: List<CalendarItem> =
+                _items.value.values.flatten().filter {
+                    isItemOfInstanceType(it, type)
+                }
 
             notificationCleanupUseCase.cleanup(
                 instanceId = instance.id,
                 currentItems = snapshot,
                 fetchedIds = fetchedIds,
                 getId = { it.calendarId.toInt() },
-                getInstanceId = { it.instanceId }
+                getInstanceId = { it.instanceId },
             )
 
             itemsWithId.forEach { item ->
@@ -175,15 +182,18 @@ class CalendarService(
                         message = item.notificationMessage,
                         scheduledTime = scheduledTime,
                         notificationId = item.calendarId.toInt(),
-                        releaseType = item.notificationReleaseType
+                        releaseType = item.notificationReleaseType,
                     )
                 }
             }
         }
     }
 
-    private fun isItemOfInstanceType(item: CalendarItem, type: InstanceType): Boolean {
-        return when (type) {
+    private fun isItemOfInstanceType(
+        item: CalendarItem,
+        type: InstanceType,
+    ): Boolean =
+        when (type) {
             InstanceType.Radarr -> item is ArrMovie
             InstanceType.Sonarr -> item is Episode || item is EpisodeGroup
             InstanceType.Lidarr -> item is ArrAlbum
@@ -191,18 +201,18 @@ class CalendarService(
             InstanceType.Listenarr -> item is Audiobook
             else -> false
         }
-    }
 
     private fun upsertItem(
         map: MutableMap<LocalDate, List<CalendarItem>>,
         item: CalendarItem,
-        date: LocalDate
+        date: LocalDate,
     ) {
         val currentList = map[date]?.toMutableList() ?: mutableListOf()
 
-        val existingIndex = currentList.indexOfFirst { existing ->
-            isSameItem(existing, item)
-        }
+        val existingIndex =
+            currentList.indexOfFirst { existing ->
+                isSameItem(existing, item)
+            }
         if (existingIndex >= 0) {
             val existing = currentList[existingIndex]
             val combinedIds = (existing.instanceIds + item.instanceIds).distinct()
@@ -214,7 +224,11 @@ class CalendarService(
         map[date] = currentList
     }
 
-    private fun mergeItems(existing: CalendarItem, newItem: CalendarItem, instanceIds: List<Long>): CalendarItem {
+    private fun mergeItems(
+        existing: CalendarItem,
+        newItem: CalendarItem,
+        instanceIds: List<Long>,
+    ): CalendarItem {
         return when (newItem) {
             is ArrMovie -> newItem.copy(instanceIds = instanceIds)
             is Episode -> newItem.copy(instanceIds = instanceIds)
@@ -222,26 +236,29 @@ class CalendarService(
             is Book -> newItem.copy(instanceIds = instanceIds)
             is Audiobook -> newItem.copy(instanceIds = instanceIds)
             is EpisodeGroup -> {
-                val existingEpisodes = if (existing is EpisodeGroup) {
-                    listOf(existing.first) + existing.additional
-                } else if (existing is Episode) {
-                    listOf(existing)
-                } else {
-                    emptyList()
-                }
+                val existingEpisodes =
+                    if (existing is EpisodeGroup) {
+                        listOf(existing.first) + existing.additional
+                    } else if (existing is Episode) {
+                        listOf(existing)
+                    } else {
+                        emptyList()
+                    }
 
                 val newEpisodes = listOf(newItem.first) + newItem.additional
-                
-                val allEpisodes = (existingEpisodes + newEpisodes).groupBy { 
-                    it.tvdbId ?: it.id 
-                }.map { (_, eps) ->
-                    val first = eps.first()
-                    val ids = eps.flatMap { it.instanceIds }.distinct()
-                    first.copy(instanceIds = ids)
-                }.sortedWith(
-                    compareBy<Episode> { it.seasonNumber }
-                        .thenBy { it.episodeNumber }
-                )
+
+                val allEpisodes =
+                    (existingEpisodes + newEpisodes)
+                        .groupBy {
+                            it.tvdbId ?: it.id
+                        }.map { (_, eps) ->
+                            val first = eps.first()
+                            val ids = eps.flatMap { it.instanceIds }.distinct()
+                            first.copy(instanceIds = ids)
+                        }.sortedWith(
+                            compareBy<Episode> { it.seasonNumber }
+                                .thenBy { it.episodeNumber },
+                        )
 
                 if (allEpisodes.isEmpty()) return newItem
 
@@ -249,7 +266,7 @@ class CalendarService(
                     EpisodeGroup(
                         first = allEpisodes.first(),
                         additional = allEpisodes.drop(1),
-                        totalCount = allEpisodes.size
+                        totalCount = allEpisodes.size,
                     )
                 } else {
                     allEpisodes.first()
@@ -258,24 +275,30 @@ class CalendarService(
         }
     }
 
-    private fun isSameItem(a: CalendarItem, b: CalendarItem): Boolean {
+    private fun isSameItem(
+        a: CalendarItem,
+        b: CalendarItem,
+    ): Boolean {
         if (a is EpisodeGroup && b is EpisodeGroup) {
             return a.first.seriesId == b.first.seriesId && a.first.getCalendarDates() == b.first.getCalendarDates()
         }
         if (a::class != b::class) return false
         return when (a) {
             is ArrMovie -> if (b is ArrMovie) a.tmdbId == b.tmdbId else false
-            is Episode -> if (b is Episode) {
-                when {
-                    a.tvdbId != null && b.tvdbId != null -> a.tvdbId == b.tvdbId
-                    a.series?.tvdbId != null && b.series?.tvdbId != null ->
-                        a.series.tvdbId == b.series.tvdbId &&
+            is Episode ->
+                if (b is Episode) {
+                    when {
+                        a.tvdbId != null && b.tvdbId != null -> a.tvdbId == b.tvdbId
+                        a.series?.tvdbId != null && b.series?.tvdbId != null ->
+                            a.series.tvdbId == b.series.tvdbId &&
                                 a.seasonNumber == b.seasonNumber &&
                                 a.episodeNumber == b.episodeNumber
 
-                    else -> a.id == b.id && a.instanceId == b.instanceId
+                        else -> a.id == b.id && a.instanceId == b.instanceId
+                    }
+                } else {
+                    false
                 }
-            } else false
 
             is ArrAlbum -> if (b is ArrAlbum) a.foreignAlbumId == b.foreignAlbumId else false
             is Book -> if (b is Book) a.foreignBookId == b.foreignBookId else false
@@ -287,48 +310,54 @@ class CalendarService(
     private fun applyGrouping(map: MutableMap<LocalDate, List<CalendarItem>>) {
         map.keys.forEach { date ->
             val items = map[date] ?: return@forEach
-            
-            val allEpisodes = items.flatMap { item ->
-                when (item) {
-                    is Episode -> listOf(item)
-                    is EpisodeGroup -> listOf(item.first) + item.additional
-                    else -> emptyList()
-                }
-            }.groupBy { it.tvdbId ?: it.id }
-                .map { (_, eps) ->
-                    val first = eps.first()
-                    val ids = eps.flatMap { it.instanceIds }.distinct()
-                    first.copy(instanceIds = ids)
-                }
+
+            val allEpisodes =
+                items
+                    .flatMap { item ->
+                        when (item) {
+                            is Episode -> listOf(item)
+                            is EpisodeGroup -> listOf(item.first) + item.additional
+                            else -> emptyList()
+                        }
+                    }.groupBy { it.tvdbId ?: it.id }
+                    .map { (_, eps) ->
+                        val first = eps.first()
+                        val ids = eps.flatMap { it.instanceIds }.distinct()
+                        first.copy(instanceIds = ids)
+                    }
 
             if (allEpisodes.isEmpty()) return@forEach
 
             val nonEpisodeItems = items.filter { it !is Episode && it !is EpisodeGroup }
 
-            val grouped = allEpisodes
-                .groupBy { it.series?.tvdbId ?: it.series?.id }
-                .map { (_, episodeList) ->
-                    if (episodeList.size > 1) {
-                        val sorted = episodeList.sortedWith(
-                            compareBy<Episode> { it.seasonNumber }
-                                .thenBy { it.episodeNumber }
-                        )
-                        EpisodeGroup(
-                            first = sorted.first(),
-                            additional = sorted.drop(1),
-                            totalCount = sorted.size
-                        )
-                    } else {
-                        episodeList.first()
+            val grouped =
+                allEpisodes
+                    .groupBy { it.series?.tvdbId ?: it.series?.id }
+                    .map { (_, episodeList) ->
+                        if (episodeList.size > 1) {
+                            val sorted =
+                                episodeList.sortedWith(
+                                    compareBy<Episode> { it.seasonNumber }
+                                        .thenBy { it.episodeNumber },
+                                )
+                            EpisodeGroup(
+                                first = sorted.first(),
+                                additional = sorted.drop(1),
+                                totalCount = sorted.size,
+                            )
+                        } else {
+                            episodeList.first()
+                        }
                     }
-                }
 
             map[date] = nonEpisodeItems + grouped
         }
     }
 
-
-    private fun insertDates(start: LocalDate, end: LocalDate) {
+    private fun insertDates(
+        start: LocalDate,
+        end: LocalDate,
+    ) {
         val currentDates = _dates.value.toMutableList()
         var current = start
 
@@ -342,9 +371,7 @@ class CalendarService(
         _dates.value = currentDates.sorted()
     }
 
-    private fun Instant.toLocalDate(): LocalDate {
-        return this.toLocalDateTime(TimeZone.currentSystemDefault()).date
-    }
+    private fun Instant.toLocalDate(): LocalDate = this.toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     fun reset() {
         _items.value = emptyMap()

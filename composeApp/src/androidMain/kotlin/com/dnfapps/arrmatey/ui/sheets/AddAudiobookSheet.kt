@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
@@ -31,8 +31,8 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.datastore.InstancePreferences
-import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
@@ -52,20 +52,20 @@ fun AddAudiobookSheet(
     onDismiss: () -> Unit,
     instances: List<Instance> = emptyList(),
     selectedInstance: Instance? = null,
-    onInstanceSelected: (Instance) -> Unit = {}
+    onInstanceSelected: (Instance) -> Unit = {},
 ) {
     var monitored by remember(preferences.addAudiobookMonitored, selectedInstance?.id) { mutableStateOf(preferences.addAudiobookMonitored) }
     var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId, selectedInstance?.id) {
         mutableStateOf(
             qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
-                ?: qualityProfiles.firstOrNull()
+                ?: qualityProfiles.firstOrNull(),
         )
     }
     var rootFolder by remember(rootFolders, preferences.addRootFolderPath, selectedInstance?.id) {
         mutableStateOf(
             rootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
                 ?: rootFolders.firstOrNull { it.isDefault }
-                ?: rootFolders.firstOrNull()
+                ?: rootFolders.firstOrNull(),
         )
     }
     var relativePath by remember(selectedInstance?.id) { mutableStateOf(relativePath) }
@@ -77,31 +77,34 @@ fun AddAudiobookSheet(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !addInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !addInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column {
                 Text(
                     text = mokoString(MR.strings.type_audiobook).uppercase(),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             if (instances.size > 1 && selectedInstance != null) {
@@ -112,14 +115,14 @@ fun AddAudiobookSheet(
                     onOptionSelected = onInstanceSelected,
                     getOptionLabel = { it.label },
                     label = { Text(mokoString(MR.strings.instances)) },
-                    enabled = !addInProgress
+                    enabled = !addInProgress,
                 )
             }
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,
                 onCheckedChange = { monitored = it },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             DropdownPicker(
@@ -130,7 +133,7 @@ fun AddAudiobookSheet(
                 getOptionLabel = { it.name ?: "" },
                 label = { Text(mokoString(MR.strings.quality_profile)) },
                 unknownValueLabel = mokoString(MR.strings.default_label),
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             DropdownPicker(
@@ -147,7 +150,7 @@ fun AddAudiobookSheet(
                         }
                     }
                 },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             AMOutlinedTextField(
@@ -155,14 +158,14 @@ fun AddAudiobookSheet(
                 onValueChange = { relativePath = it },
                 modifier = Modifier.fillMaxWidth(),
                 label = mokoString(MR.strings.relative_path),
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             LabelledSwitch(
                 label = mokoString(MR.strings.search_on_add_label),
                 checked = searchOnAdd,
                 onCheckedChange = { searchOnAdd = it },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             Button(
@@ -174,29 +177,30 @@ fun AddAudiobookSheet(
                                 addAudiobookMonitored = monitored,
                                 addQualityProfileId = qualityProfile?.id,
                                 addRootFolderPath = rf.path,
-                                addSearchOnAdd = searchOnAdd
+                                addSearchOnAdd = searchOnAdd,
+                            ),
+                        )
+                        val newItem =
+                            item.copyForCreation(
+                                monitored = monitored,
+                                qualityProfileId = qualityProfile?.id ?: 0,
+                                rootFolderPath = rf.path,
+                                relativePath = relativePath,
                             )
-                        )
-                        val newItem = item.copyForCreation(
-                            monitored = monitored,
-                            qualityProfileId = qualityProfile?.id ?: 0,
-                            rootFolderPath = rf.path,
-                            relativePath = relativePath
-                        )
                         onAddItem(newItem, searchOnAdd)
                     }
                 },
-                enabled = !addInProgress && rootFolder != null
+                enabled = !addInProgress && rootFolder != null,
             ) {
                 if (addInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(
-                        text = mokoString(MR.strings.save)
+                        text = mokoString(MR.strings.save),
                     )
                 }
             }

@@ -63,7 +63,7 @@ fun WebViewScreen(
     bannerMessage: String? = null,
     onBannerClick: (() -> Unit)? = null,
     wideRailIsVisible: Boolean,
-    onBack: (() -> Unit)? = null
+    onBack: (() -> Unit)? = null,
 ) {
     var webView by remember { mutableStateOf<WebView?>(null) }
     var canGoBack by remember { mutableStateOf(false) }
@@ -78,23 +78,24 @@ fun WebViewScreen(
     val lifecyclerOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecyclerOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_PAUSE -> webView?.onPause()
-                Lifecycle.Event.ON_RESUME -> webView?.onResume()
-                Lifecycle.Event.ON_DESTROY -> {
-                    webView?.apply {
-                        stopLoading()
-                        loadUrl("about:blank")
-                        clearHistory()
-                        clearCache(true)
-                        destroy()
+        val observer =
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_PAUSE -> webView?.onPause()
+                    Lifecycle.Event.ON_RESUME -> webView?.onResume()
+                    Lifecycle.Event.ON_DESTROY -> {
+                        webView?.apply {
+                            stopLoading()
+                            loadUrl("about:blank")
+                            clearHistory()
+                            clearCache(true)
+                            destroy()
+                        }
+                        webView = null
                     }
-                    webView = null
+                    else -> {}
                 }
-                else -> {}
             }
-        }
         lifecyclerOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecyclerOwner.lifecycle.removeObserver(observer)
@@ -125,7 +126,7 @@ fun WebViewScreen(
                             text = currentTitle.ifEmpty { title ?: "" },
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                         if (currentUrl.isNotEmpty()) {
                             Text(
@@ -133,7 +134,7 @@ fun WebViewScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -150,13 +151,13 @@ fun WebViewScreen(
                 actions = {
                     IconButton(
                         onClick = { webView?.goBack() },
-                        enabled = canGoBack
+                        enabled = canGoBack,
                     ) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, null)
                     }
                     IconButton(
                         onClick = { webView?.goForward() },
-                        enabled = canGoForward
+                        enabled = canGoForward,
                     ) {
                         Icon(Icons.AutoMirrored.Default.ArrowForward, null)
                     }
@@ -166,10 +167,10 @@ fun WebViewScreen(
                         }
                         DropdownMenuPopup(
                             expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false }
+                            onDismissRequest = { menuExpanded = false },
                         ) {
                             DropdownMenuGroup(
-                                shapes = MenuDefaults.groupShape(0, 1)
+                                shapes = MenuDefaults.groupShape(0, 1),
                             ) {
                                 DropdownMenuItem(
                                     text = { Text(mokoString(MR.strings.refresh)) },
@@ -179,38 +180,40 @@ fun WebViewScreen(
                                     onClick = {
                                         menuExpanded = false
                                         webView?.reload()
-                                    }
+                                    },
                                 )
                             }
                         }
                     }
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
         ) {
             AnimatedVisibility(
                 visible = showBanner && bannerMessage != null,
                 enter = expandVertically(),
-                exit = shrinkVertically()
+                exit = shrinkVertically(),
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .clickable(enabled = onBannerClick != null) { onBannerClick?.invoke() }
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .clickable(enabled = onBannerClick != null) { onBannerClick?.invoke() }
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = bannerMessage ?: "",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = { showBanner = false }) {
                         Icon(Icons.Default.Close, null)
@@ -221,56 +224,66 @@ fun WebViewScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 AndroidView(
                     factory = { context ->
-                        WebView(context).apply {
-                            webViewClient = object : WebViewClient() {
-                                override fun doUpdateVisitedHistory(
-                                    view: WebView?,
-                                    url: String?,
-                                    isReload: Boolean
-                                ) {
-                                    super.doUpdateVisitedHistory(view, url, isReload)
-                                    canGoBack = view?.canGoBack() == true
-                                    canGoForward = view?.canGoForward() == true
-                                    currentUrl = url ?: ""
+                        WebView(context)
+                            .apply {
+                                webViewClient =
+                                    object : WebViewClient() {
+                                        override fun doUpdateVisitedHistory(
+                                            view: WebView?,
+                                            url: String?,
+                                            isReload: Boolean,
+                                        ) {
+                                            super.doUpdateVisitedHistory(view, url, isReload)
+                                            canGoBack = view?.canGoBack() == true
+                                            canGoForward = view?.canGoForward() == true
+                                            currentUrl = url ?: ""
+                                        }
+                                    }
+
+                                webChromeClient =
+                                    object : WebChromeClient() {
+                                        override fun onProgressChanged(
+                                            view: WebView?,
+                                            newProgress: Int,
+                                        ) {
+                                            progress = newProgress / 100f
+                                        }
+
+                                        override fun onReceivedTitle(
+                                            view: WebView?,
+                                            title: String?,
+                                        ) {
+                                            currentTitle = title ?: ""
+                                        }
+                                    }
+
+                                settings.apply {
+                                    javaScriptEnabled = true
+                                    domStorageEnabled = true
+                                    loadWithOverviewMode = true
+                                    useWideViewPort = true
+                                    setSupportZoom(true)
+                                    builtInZoomControls = true
+                                    displayZoomControls = false
                                 }
-                            }
 
-                            webChromeClient = object : WebChromeClient() {
-                                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                                    progress = newProgress / 100f
-                                }
-
-                                override fun onReceivedTitle(view: WebView?, title: String?) {
-                                    currentTitle = title ?: ""
-                                }
-                            }
-
-                            settings.apply {
-                                javaScriptEnabled = true
-                                domStorageEnabled = true
-                                loadWithOverviewMode = true
-                                useWideViewPort = true
-                                setSupportZoom(true)
-                                builtInZoomControls = true
-                                displayZoomControls = false
-                            }
-
-                            loadUrl(url)
-                        }.also { webView = it }
+                                loadUrl(url)
+                            }.also { webView = it }
                     },
                     update = { view ->
                         canGoBack = view.canGoBack()
                         canGoForward = view.canGoForward()
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 )
 
                 if (progress > 0f && progress < 1f) {
                     LinearProgressIndicator(
                         progress = { progress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopCenter)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.TopCenter),
                     )
                 }
             }

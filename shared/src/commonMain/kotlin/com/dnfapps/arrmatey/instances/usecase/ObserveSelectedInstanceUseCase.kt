@@ -6,8 +6,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.Flow
 
 class ObserveSelectedInstanceUseCase(
-    private val instanceRepository: InstanceRepository
+    private val instanceRepository: InstanceRepository,
 ) {
-    operator fun invoke(type: InstanceType): Flow<Instance?> =
-        instanceRepository.observeSelectedInstance(type)
+    operator fun invoke(type: InstanceType): Flow<Instance?> = instanceRepository.observeSelectedInstance(type)
 }

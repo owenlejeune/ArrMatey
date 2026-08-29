@@ -48,7 +48,7 @@ fun ArrAppBarWithSearch(
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     leadingIcon: @Composable () -> Unit = { Icon(Icons.Default.Search, null) },
-    trailingIcon: @Composable () -> Unit = {}
+    trailingIcon: @Composable () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val inputField =
@@ -65,7 +65,7 @@ fun ArrAppBarWithSearch(
                         modifier = Modifier.clearAndSetSemantics {},
                         text = searchPlaceholder,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 },
                 leadingIcon = {
@@ -79,7 +79,7 @@ fun ArrAppBarWithSearch(
                 },
                 trailingIcon = {
                     AnimatedContent(
-                        targetState = textFieldState.text.isNotEmpty()
+                        targetState = textFieldState.text.isNotEmpty(),
                     ) { isNotEmpty ->
                         if (isNotEmpty) {
                             IconButton(onClick = { textFieldState.clearText() }) {
@@ -89,7 +89,7 @@ fun ArrAppBarWithSearch(
                             trailingIcon()
                         }
                     }
-                }
+                },
             )
         }
 
@@ -104,17 +104,17 @@ fun ArrAppBarWithSearch(
                 visible = searchBarState.isCollapsed(),
                 enter = expandIn(),
                 exit = shrinkOut(),
-                content = { navigationIcon() }
+                content = { navigationIcon() },
             )
         },
         actions = {
             AnimatedVisibility(
                 visible = searchBarState.isCollapsed(),
                 enter = expandIn(),
-                exit = shrinkOut()
+                exit = shrinkOut(),
             ) {
-              Row { actions() }
+                Row { actions() }
             }
-        }
+        },
     )
 }

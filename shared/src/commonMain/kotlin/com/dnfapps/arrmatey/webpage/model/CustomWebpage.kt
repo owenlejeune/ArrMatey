@@ -10,5 +10,5 @@ data class CustomWebpage(
     val id: Long = 0,
     val name: String,
     val url: String,
-    val headers: List<InstanceHeader> = emptyList()
+    val headers: List<InstanceHeader> = emptyList(),
 )

@@ -10,5 +10,5 @@ data class ReleaseDate(
     val iso_639_1: String? = null,
     val note: String? = null,
     @Contextual val release_date: Instant,
-    val type: Int
+    val type: Int,
 )

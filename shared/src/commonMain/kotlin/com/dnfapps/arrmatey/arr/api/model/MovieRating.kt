@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class MovieRating(
     val votes: Int,
     val value: Double,
-    val type: String
+    val type: String,
 )

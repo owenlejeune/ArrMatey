@@ -39,12 +39,13 @@ fun EditPathSheet(
     onEditItem: (ArrMedia, moveFiles: Boolean) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val initialRootFolder = remember(item, rootFolders) {
-        item.findCurrentRoot(rootFolders) ?: rootFolders.firstOrNull()
-    }
-    
+    val initialRootFolder =
+        remember(item, rootFolders) {
+            item.findCurrentRoot(rootFolders) ?: rootFolders.firstOrNull()
+        }
+
     var selectedRootFolder by remember { mutableStateOf(initialRootFolder) }
-    
+
     val isPathChanged = selectedRootFolder?.path != initialRootFolder?.path
     var moveFiles by remember { mutableStateOf(value = false) }
 
@@ -54,20 +55,23 @@ fun EditPathSheet(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !editInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !editInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
                 text = mokoString(MR.strings.edit_path),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
 
             selectedRootFolder?.let { folder ->
@@ -78,7 +82,7 @@ fun EditPathSheet(
                     onOptionSelected = { selectedRootFolder = it },
                     label = { Text(mokoString(MR.strings.root_folder)) },
                     getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
-                    enabled = !editInProgress
+                    enabled = !editInProgress,
                 )
             }
 
@@ -86,7 +90,7 @@ fun EditPathSheet(
                 label = mokoString(MR.strings.move_files),
                 checked = moveFiles,
                 onCheckedChange = { moveFiles = it },
-                enabled = !editInProgress && isPathChanged
+                enabled = !editInProgress && isPathChanged,
             )
 
             Button(
@@ -96,14 +100,14 @@ fun EditPathSheet(
                     onEditItem(updatedItem, moveFiles)
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !editInProgress && isPathChanged
+                enabled = !editInProgress && isPathChanged,
             ) {
                 if (editInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(mokoString(MR.strings.save))
                 }

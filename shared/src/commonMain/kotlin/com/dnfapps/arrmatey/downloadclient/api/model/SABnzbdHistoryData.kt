@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SABnzbdHistoryData(
-    @SerialName("slots") val slots: List<SABnzbdHistorySlot> = emptyList()
+    @SerialName("slots") val slots: List<SABnzbdHistorySlot> = emptyList(),
 )

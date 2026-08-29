@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.utils
 
-//@OptIn(ExperimentalForeignApi::class)
-//class IOSNetworkUtils : NetworkUtils {
+// @OptIn(ExperimentalForeignApi::class)
+// class IOSNetworkUtils : NetworkUtils {
 //
 //    override fun getCurrentWifiSsid(): String? {
 //        // Get supported interfaces
@@ -56,10 +56,10 @@ package com.dnfapps.arrmatey.utils
 //        // Simple check: if we can get SSID, we're connected
 //        return getCurrentWifiSsid() != null
 //    }
-//}
+// }
 
-//@OptIn(ExperimentalForeignApi::class)
-//class IOSNetworkUtils : NetworkUtils {
+// @OptIn(ExperimentalForeignApi::class)
+// class IOSNetworkUtils : NetworkUtils {
 //
 //    override fun getCurrentWifiSsid(): String? {
 //        return memScoped {
@@ -99,11 +99,10 @@ package com.dnfapps.arrmatey.utils
 //    override fun isConnectedToWifi(): Boolean {
 //        return getCurrentWifiSsid() != null
 //    }
-//}
+// }
 
-
-//@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-//class IOSNetworkUtils : NetworkUtils {
+// @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+// class IOSNetworkUtils : NetworkUtils {
 //
 //    override fun getCurrentWifiSsid(): String? {
 //        // Get supported interfaces
@@ -138,8 +137,7 @@ package com.dnfapps.arrmatey.utils
 //    override fun isConnectedToWifi(): Boolean {
 //        return getCurrentWifiSsid() != null
 //    }
-//}
-
+// }
 
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -154,7 +152,6 @@ import platform.SystemConfiguration.kCNNetworkInfoKeySSID
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 class IOSNetworkUtils : NetworkUtils {
-
     override fun getCurrentWifiSsid(): String? {
         // Get supported interfaces
         val interfacesPtr = CNCopySupportedInterfaces() ?: return null
@@ -185,11 +182,8 @@ class IOSNetworkUtils : NetworkUtils {
         return null
     }
 
-    override fun isConnectedToWifi(): Boolean {
-        return getCurrentWifiSsid() != null
-    }
+    override fun isConnectedToWifi(): Boolean = getCurrentWifiSsid() != null
 }
-
 
 private var networkUtilsInstance: NetworkUtils? = null
 
@@ -197,7 +191,4 @@ fun initializeNetworkUtils() {
     networkUtilsInstance = IOSNetworkUtils()
 }
 
-actual fun getNetworkUtils(): NetworkUtils {
-    return networkUtilsInstance ?: IOSNetworkUtils().also { networkUtilsInstance = it }
-}
-
+actual fun getNetworkUtils(): NetworkUtils = networkUtilsInstance ?: IOSNetworkUtils().also { networkUtilsInstance = it }

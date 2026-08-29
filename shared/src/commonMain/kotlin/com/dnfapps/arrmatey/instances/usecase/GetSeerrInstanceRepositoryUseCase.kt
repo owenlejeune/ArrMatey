@@ -5,11 +5,9 @@ import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetSeerrInstanceRepositoryUseCase(
-    private val instanceManager: InstanceManager
+    private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(instanceId: Long): SeerrInstanceRepository? =
-        instanceManager.getSeerrRepository(instanceId)
+    operator fun invoke(instanceId: Long): SeerrInstanceRepository? = instanceManager.getSeerrRepository(instanceId)
 
-    fun observeSelected(): Flow<SeerrInstanceRepository?> =
-        instanceManager.getSelectedSeerrRepository()
+    fun observeSelected(): Flow<SeerrInstanceRepository?> = instanceManager.getSelectedSeerrRepository()
 }

@@ -17,11 +17,12 @@ data class InteractiveSearchUiState(
     val protocol: ReleaseProtocol? = null,
     val quality: QualityInfo? = null,
     val customFormat: CustomFormat? = null,
-    val customFilterId: Long? = null
+    val customFilterId: Long? = null,
 ) {
     companion object {
-        fun empty(filterBy: ReleaseFilterBy) = InteractiveSearchUiState(
-            filterBy = filterBy
-        )
+        fun empty(filterBy: ReleaseFilterBy) =
+            InteractiveSearchUiState(
+                filterBy = filterBy,
+            )
     }
 }

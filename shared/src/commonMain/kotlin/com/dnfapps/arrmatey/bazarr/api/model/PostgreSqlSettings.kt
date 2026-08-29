@@ -10,5 +10,5 @@ data class PostgreSqlSettings(
     val password: String,
     val port: Int,
     val url: String,
-    val username: String
+    val username: String,
 )

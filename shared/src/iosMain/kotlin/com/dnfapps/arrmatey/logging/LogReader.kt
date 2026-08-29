@@ -1,12 +1,14 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.dnfapps.arrmatey.logging
 
-import platform.Foundation.*
 import kotlinx.cinterop.*
+import platform.Foundation.*
 
 actual object LogReader {
     @OptIn(BetaInteropApi::class)
-    actual fun readLogs(): String {
-        return autoreleasepool {
+    actual fun readLogs(): String =
+        autoreleasepool {
             try {
                 val logPath = LogFileManager.getLogFilePath("arrmatey.log")
                 val fileManager = NSFileManager.defaultManager
@@ -25,7 +27,6 @@ actual object LogReader {
                 "Error reading logs: ${e.message}"
             }
         }
-    }
 
     @OptIn(BetaInteropApi::class)
     actual fun clearLogs() {
@@ -44,7 +45,5 @@ actual object LogReader {
         }
     }
 
-    actual fun getLogFilePath(): String {
-        return LogFileManager.getLogFilePath("arrmatey.log")
-    }
+    actual fun getLogFilePath(): String = LogFileManager.getLogFilePath("arrmatey.log")
 }

@@ -11,4 +11,4 @@ data class BookshelfStatistics(
     val totalBookCount: Int,
     val percentOfBooks: Float,
     val availableBookCount: Int = 0,
-): ArrStatistics
+) : ArrStatistics

@@ -6,17 +6,18 @@ enum class HttpErrorType {
     Http,
     Network,
     Timeout,
-    Unexpected;
+    Unexpected,
+    ;
 
     companion object {
-        internal fun fromErrorType(type: ErrorType) = when (type) {
-            ErrorType.Http -> Http
-            ErrorType.Network -> Network
-            ErrorType.Timeout -> Timeout
-            ErrorType.Unexpected -> Unexpected
-        }
+        internal fun fromErrorType(type: ErrorType) =
+            when (type) {
+                ErrorType.Http -> Http
+                ErrorType.Network -> Network
+                ErrorType.Timeout -> Timeout
+                ErrorType.Unexpected -> Unexpected
+            }
     }
 }
 
-internal fun ErrorType.toHttpError(): HttpErrorType =
-    HttpErrorType.fromErrorType(this)
+internal fun ErrorType.toHttpError(): HttpErrorType = HttpErrorType.fromErrorType(this)

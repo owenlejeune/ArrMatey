@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class MediaExtensionsTest {
-
     @Test
     fun testFormatAirTime_24h() {
         assertEquals("14:30", formatAirTime_logic("14:30", is24Hour = true))
@@ -29,7 +28,10 @@ class MediaExtensionsTest {
     }
 
     // Helper to test logic since I didn't want to change the production signature yet
-    private fun formatAirTime_logic(airTime: String?, is24Hour: Boolean): String? {
+    private fun formatAirTime_logic(
+        airTime: String?,
+        is24Hour: Boolean,
+    ): String? {
         if (airTime.isNullOrBlank()) return null
         val parts = airTime.split(":")
         if (parts.size < 2) return null
@@ -42,11 +44,12 @@ class MediaExtensionsTest {
             "$padHour:$padMinute"
         } else {
             val amPm = if (hour >= 12) "PM" else "AM"
-            val displayHour = when {
-                hour == 0 -> 12
-                hour > 12 -> hour - 12
-                else -> hour
-            }
+            val displayHour =
+                when {
+                    hour == 0 -> 12
+                    hour > 12 -> hour - 12
+                    else -> hour
+                }
             val padMinute = minute.toString().padStart(2, '0')
             "$displayHour:$padMinute $amPm"
         }

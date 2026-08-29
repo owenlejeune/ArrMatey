@@ -5,10 +5,10 @@ sealed class LoadResult<T : Any> {
         val data: List<T>,
         val totalItemCount: Int,
         val currentPage: Int,
-        val hasNextPage: Boolean
+        val hasNextPage: Boolean,
     ) : LoadResult<T>()
 
     data class Error<T : Any>(
-        val throwable: Throwable
+        val throwable: Throwable,
     ) : LoadResult<T>()
 }

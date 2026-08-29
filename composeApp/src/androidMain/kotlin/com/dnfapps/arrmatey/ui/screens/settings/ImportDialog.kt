@@ -34,7 +34,7 @@ fun ImportDialog(
     onToggleInstanceSelection: (Int) -> Unit,
     onToggleDownloadClientSelection: (Int) -> Unit,
     onToggleImportTabPreferences: () -> Unit,
-    onToggleImportUiPreferences: () -> Unit
+    onToggleImportUiPreferences: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -42,7 +42,7 @@ fun ImportDialog(
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.verticalScroll(rememberScrollState())
+                modifier = Modifier.verticalScroll(rememberScrollState()),
             ) {
                 if (importState.decryptedBackup == null) {
                     Text(mokoString(MR.strings.import_password_prompt))
@@ -53,37 +53,37 @@ fun ImportDialog(
                         label = { Text(mokoString(MR.strings.password)) },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
                     )
 
                     if (importState.error != null) {
                         Text(
                             text = importState.error!!,
                             color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                 } else {
                     Text(
                         text = mokoString(MR.strings.select_items_to_import),
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
 
                     if (importState.decryptedBackup?.instances?.isNotEmpty() == true) {
                         Text(
                             text = mokoString(MR.strings.instances),
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                         importState.decryptedBackup?.instances?.forEachIndexed { index, instance ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Checkbox(
                                     checked = importState.selectedInstanceIndices.contains(index),
-                                    onCheckedChange = { onToggleInstanceSelection(index) }
+                                    onCheckedChange = { onToggleInstanceSelection(index) },
                                 )
                                 Text(text = instance.label)
                             }
@@ -97,52 +97,53 @@ fun ImportDialog(
                         Text(
                             text = mokoString(MR.strings.download_clients),
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                         importState.decryptedBackup?.downloadClients?.forEachIndexed { index, client ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Checkbox(
                                     checked = importState.selectedDownloadClientIndices.contains(index),
-                                    onCheckedChange = { onToggleDownloadClientSelection(index) }
+                                    onCheckedChange = { onToggleDownloadClientSelection(index) },
                                 )
                                 Text(text = client.label)
                             }
                         }
                     }
-                    
+
                     if (importState.decryptedBackup?.globalPreferences != null) {
                         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                         Text(
                             text = mokoString(MR.strings.backup_restore),
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
-                        
+
                         if (importState.decryptedBackup?.globalPreferences?.tabPreferences != null) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Checkbox(
                                     checked = importState.importTabPreferences,
-                                    onCheckedChange = { onToggleImportTabPreferences() }
+                                    onCheckedChange = { onToggleImportTabPreferences() },
                                 )
                                 Text(text = mokoString(MR.strings.navigation_bar_configuration))
                             }
                         }
 
-                        if (importState.decryptedBackup?.globalPreferences?.useServiceNavLogos != null || 
-                            importState.decryptedBackup?.globalPreferences?.hideInstanceSwitcher != null) {
+                        if (importState.decryptedBackup?.globalPreferences?.useServiceNavLogos != null ||
+                            importState.decryptedBackup?.globalPreferences?.hideInstanceSwitcher != null
+                        ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Checkbox(
                                     checked = importState.importUiPreferences,
-                                    onCheckedChange = { onToggleImportUiPreferences() }
+                                    onCheckedChange = { onToggleImportUiPreferences() },
                                 )
                                 Text(text = mokoString(MR.strings.user_interface))
                             }
@@ -155,15 +156,16 @@ fun ImportDialog(
             if (importState.decryptedBackup == null) {
                 TextButton(
                     enabled = importState.password.isNotBlank(),
-                    onClick = onConfirmDecrypt
+                    onClick = onConfirmDecrypt,
                 ) {
                     Text(mokoString(MR.strings.ok))
                 }
             } else {
                 TextButton(
-                    enabled = importState.selectedInstanceIndices.isNotEmpty() ||
+                    enabled =
+                        importState.selectedInstanceIndices.isNotEmpty() ||
                             importState.selectedDownloadClientIndices.isNotEmpty(),
-                    onClick = onConfirmImport
+                    onClick = onConfirmImport,
                 ) {
                     Text(mokoString(MR.strings.import_data))
                 }
@@ -173,6 +175,6 @@ fun ImportDialog(
             TextButton(onClick = onDismiss) {
                 Text(mokoString(MR.strings.cancel))
             }
-        }
+        },
     )
 }

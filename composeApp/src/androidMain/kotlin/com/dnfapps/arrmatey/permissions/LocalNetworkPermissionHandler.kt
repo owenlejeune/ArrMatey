@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -23,54 +22,60 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun rememberLocalNetworkPermissionHandler(
     onGranted: () -> Unit = {},
     onDenied: () -> Unit = {},
-    onCancelled: () -> Unit = {}
+    onCancelled: () -> Unit = {},
 ): LocalNetworkPermissionHandler {
     val context = LocalContext.current
 
-    val localNetworkPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
-        Manifest.permission.ACCESS_LOCAL_NETWORK
-    } else {
-        ""
-    }
+    val localNetworkPermission =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+            Manifest.permission.ACCESS_LOCAL_NETWORK
+        } else {
+            ""
+        }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) onGranted()
-        else onDenied()
-    }
+    val permissionLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            if (isGranted) {
+                onGranted()
+            } else {
+                onDenied()
+            }
+        }
 
     var showRationale by remember { mutableStateOf(false) }
 
-    val localNetworkPermissionHandler = remember {
-        object : LocalNetworkPermissionHandler {
-            override fun checkAndPerformAction() {
-                if (Build.VERSION.SDK_INT < 37) {
-                    onGranted()
-                    return
+    val localNetworkPermissionHandler =
+        remember {
+            object : LocalNetworkPermissionHandler {
+                override fun checkAndPerformAction() {
+                    if (Build.VERSION.SDK_INT < 37) {
+                        onGranted()
+                        return
+                    }
+
+                    val checkPermission = ContextCompat.checkSelfPermission(context, localNetworkPermission)
+                    when (checkPermission) {
+                        PackageManager.PERMISSION_GRANTED -> onGranted()
+                        PackageManager.PERMISSION_DENIED -> onDenied()
+                        else -> showRationale = true
+                    }
                 }
 
-                val checkPermission = ContextCompat.checkSelfPermission(context, localNetworkPermission)
-                when (checkPermission) {
-                    PackageManager.PERMISSION_GRANTED -> onGranted()
-                    PackageManager.PERMISSION_DENIED -> onDenied()
-                    else -> showRationale = true
-                }
-            }
-
-            override fun isGranted(): Boolean {
-                if (Build.VERSION.SDK_INT < 37) return true
-                return ContextCompat.checkSelfPermission(context, localNetworkPermission) ==
+                override fun isGranted(): Boolean {
+                    if (Build.VERSION.SDK_INT < 37) return true
+                    return ContextCompat.checkSelfPermission(context, localNetworkPermission) ==
                         PackageManager.PERMISSION_GRANTED
-            }
-            
-            override fun requestPermission() {
-                if (Build.VERSION.SDK_INT >= 37) {
-                    permissionLauncher.launch(localNetworkPermission)
+                }
+
+                override fun requestPermission() {
+                    if (Build.VERSION.SDK_INT >= 37) {
+                        permissionLauncher.launch(localNetworkPermission)
+                    }
                 }
             }
         }
-    }
 
     if (showRationale) {
         AlertDialog(
@@ -94,7 +99,7 @@ fun rememberLocalNetworkPermissionHandler(
                 }) {
                     Text(mokoString(MR.strings.cancel))
                 }
-            }
+            },
         )
     }
 
@@ -103,6 +108,8 @@ fun rememberLocalNetworkPermissionHandler(
 
 interface LocalNetworkPermissionHandler {
     fun checkAndPerformAction()
+
     fun isGranted(): Boolean
+
     fun requestPermission()
 }

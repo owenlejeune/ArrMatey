@@ -43,20 +43,21 @@ data class SearchAudiobook(
     @Serializable(with = ListenarrInstantSerializer::class)
     val updatedAt: Instant? = null,
     override val images: List<ArrImage> = emptyList(),
-
     override val monitored: Boolean = false,
     override val qualityProfileId: Int = 0,
     override val rootFolderPath: String? = null,
-    val relativePath: String? = null
-) : ArrMedia, HasArrImages<SearchAudiobook>, InstanceTypeIdentifiable {
-
+    val relativePath: String? = null,
+) : ArrMedia,
+    HasArrImages<SearchAudiobook>,
+    InstanceTypeIdentifiable {
     override fun withLocalImages(instanceUrl: String): SearchAudiobook {
-        val localImages = imageUrl?.let { path ->
-            listOf(
-                ArrImage(CoverType.Poster, path, path)
-                    .rebuildWithLocalUrls(instanceUrl)
-            )
-        } ?: emptyList()
+        val localImages =
+            imageUrl?.let { path ->
+                listOf(
+                    ArrImage(CoverType.Poster, path, path)
+                        .rebuildWithLocalUrls(instanceUrl),
+                )
+            } ?: emptyList()
         return copy(images = localImages)
     }
 
@@ -99,7 +100,9 @@ data class SearchAudiobook(
 
     override val guid: Long
         get() = asin.hashCode().toLong()
+
     override fun ratingScore(): Double = 0.0
+
     override val statusProgress: Float
         get() = 0f
     override val statusColor: Color
@@ -110,8 +113,12 @@ data class SearchAudiobook(
         get() = "Search Result"
 
     override fun setMonitored(monitored: Boolean): ArrMedia = this
-    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
-        copy(rootFolderPath = rootFolderPath)
+
+    override fun withNewRoot(
+        rootFolderPath: String,
+        currentRootFolderPath: String?,
+    ): ArrMedia = copy(rootFolderPath = rootFolderPath)
+
     override val isMissing: Boolean
         get() = true
 
@@ -119,20 +126,19 @@ data class SearchAudiobook(
         monitored: Boolean,
         qualityProfileId: Int,
         rootFolderPath: String,
-        relativePath: String
+        relativePath: String,
     ) = copy(
         monitored = monitored,
         qualityProfileId = qualityProfileId,
         rootFolderPath = rootFolderPath,
-        relativePath = relativePath
+        relativePath = relativePath,
     )
 }
 
-fun createSearchAudiobook(audiobook: Audiobook): SearchAudiobook {
-    return SearchAudiobook(
+fun createSearchAudiobook(audiobook: Audiobook): SearchAudiobook =
+    SearchAudiobook(
         asin = audiobook.asin ?: "",
         title = audiobook.title ?: "",
         summary = audiobook.overview,
-        authors = audiobook.authors.map { SearchAuthor(name = it) }
+        authors = audiobook.authors.map { SearchAuthor(name = it) },
     )
-}

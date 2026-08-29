@@ -23,30 +23,33 @@ actual fun Instant.format(pattern: String): String {
 }
 
 actual fun LocalDate.format(pattern: String): String {
-    val sdf = SimpleDateFormat(pattern, Locale.getDefault()).apply {
-        timeZone = JavaTimeZone.getTimeZone("UTC")
-    }
+    val sdf =
+        SimpleDateFormat(pattern, Locale.getDefault()).apply {
+            timeZone = JavaTimeZone.getTimeZone("UTC")
+        }
     return sdf.format(Date(toEpochDays() * 86_400_000))
 }
 
 actual fun formatLocalDateTime(
     localDateTime: LocalDateTime,
     pattern: String,
-    timeZone: TimeZone
+    timeZone: TimeZone,
 ): String {
-    val cal = Calendar.getInstance(JavaTimeZone.getTimeZone(timeZone.id), Locale.getDefault()).apply {
-        set(Calendar.YEAR, localDateTime.year)
-        set(Calendar.MONTH, localDateTime.month.number - 1) // Calendar months are 0-based
-        set(Calendar.DAY_OF_MONTH, localDateTime.day)
-        set(Calendar.HOUR_OF_DAY, localDateTime.hour)
-        set(Calendar.MINUTE, localDateTime.minute)
-        set(Calendar.SECOND, localDateTime.second)
-        set(Calendar.MILLISECOND, localDateTime.nanosecond / 1_000_000)
-    }
+    val cal =
+        Calendar.getInstance(JavaTimeZone.getTimeZone(timeZone.id), Locale.getDefault()).apply {
+            set(Calendar.YEAR, localDateTime.year)
+            set(Calendar.MONTH, localDateTime.month.number - 1) // Calendar months are 0-based
+            set(Calendar.DAY_OF_MONTH, localDateTime.day)
+            set(Calendar.HOUR_OF_DAY, localDateTime.hour)
+            set(Calendar.MINUTE, localDateTime.minute)
+            set(Calendar.SECOND, localDateTime.second)
+            set(Calendar.MILLISECOND, localDateTime.nanosecond / 1_000_000)
+        }
 
-    val sdf = SimpleDateFormat(pattern, Locale.getDefault()).apply {
-        this.timeZone = cal.timeZone
-    }
+    val sdf =
+        SimpleDateFormat(pattern, Locale.getDefault()).apply {
+            this.timeZone = cal.timeZone
+        }
 
     return sdf.format(cal.time)
 }

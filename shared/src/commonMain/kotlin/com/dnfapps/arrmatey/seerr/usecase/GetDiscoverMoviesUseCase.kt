@@ -8,13 +8,12 @@ import kotlinx.coroutines.CoroutineScope
 class GetDiscoverMoviesUseCase {
     fun createPagingController(
         repository: SeerrInstanceRepository,
-        scope: CoroutineScope
-    ): PagingController<DiscoverResult> {
-        return PagingController(
+        scope: CoroutineScope,
+    ): PagingController<DiscoverResult> =
+        PagingController(
             scope = scope,
-            keySelector = { "${it.mediaType.name}_${it.id}" }
+            keySelector = { "${it.mediaType.name}_${it.id}" },
         ) {
             repository.getDiscoverMoviesPaging()
         }
-    }
 }

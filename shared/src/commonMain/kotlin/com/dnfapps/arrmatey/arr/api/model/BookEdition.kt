@@ -24,9 +24,5 @@ data class BookEdition(
     val ratings: BookEditionRatings? = null,
     val monitored: Boolean,
     val manualAdd: Boolean,
-    val grabbed: Boolean
+    val grabbed: Boolean,
 )
-
-
-
-

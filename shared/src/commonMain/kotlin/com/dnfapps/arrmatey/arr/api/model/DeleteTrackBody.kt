@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DeleteTrackBody(
-    val trackFileIds: List<Long>
+    val trackFileIds: List<Long>,
 )

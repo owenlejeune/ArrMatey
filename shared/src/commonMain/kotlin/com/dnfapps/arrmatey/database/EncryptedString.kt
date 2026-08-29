@@ -5,4 +5,6 @@ import kotlin.jvm.JvmInline
 
 @Serializable
 @JvmInline
-value class EncryptedString(val value: String)
+value class EncryptedString(
+    val value: String,
+)

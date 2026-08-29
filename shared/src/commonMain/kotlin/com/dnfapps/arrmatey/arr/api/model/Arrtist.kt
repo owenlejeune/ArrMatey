@@ -22,7 +22,6 @@ data class Arrtist(
     override val runtime: Int? = null,
     override val certification: String? = null,
     override val alternateTitles: List<AlternateTitle> = emptyList(),
-
     override val qualityProfileId: Int,
     override val monitored: Boolean,
     override val images: List<ArrImage>,
@@ -37,7 +36,6 @@ data class Arrtist(
     override val statistics: LidarrStatistics? = null,
     @Contextual override val added: Instant? = null,
     override val status: MediaStatus,
-
     val monitorNewItems: ArtistMonitorType,
     val metadataProfileId: Int,
     val foreignArtistId: String? = null,
@@ -49,8 +47,10 @@ data class Arrtist(
     val nextAlbum: ArrAlbum? = null,
     val lastAlbum: ArrAlbum? = null,
     val members: List<ArtistMember> = emptyList(),
-    val addOptions: ArtistAddOptions? = null
-): ArrMedia, HasArrImages<Arrtist>, InstanceTypeIdentifiable {
+    val addOptions: ArtistAddOptions? = null,
+) : ArrMedia,
+    HasArrImages<Arrtist>,
+    InstanceTypeIdentifiable {
     override val guid: Long get() = id ?: (tadbId + 100_000)
 
     override val isMissing: Boolean
@@ -59,13 +59,14 @@ data class Arrtist(
     override fun ratingScore(): Double = ratings.value.toDouble()
 
     override val statusColor: Color
-        get() = when {
-            status == MediaStatus.Ended && statistics?.percentOfTracks == 100f -> ArrGreen
-            status == MediaStatus.Continuing && statistics?.percentOfTracks == 100f -> ArrBlue
-            statistics?.percentOfTracks != 100f && monitored -> ArrRed
-            statistics?.percentOfTracks != 100f && !monitored -> ArrOrange
-            else -> Color.Unspecified
-        }
+        get() =
+            when {
+                status == MediaStatus.Ended && statistics?.percentOfTracks == 100f -> ArrGreen
+                status == MediaStatus.Continuing && statistics?.percentOfTracks == 100f -> ArrBlue
+                statistics?.percentOfTracks != 100f && monitored -> ArrRed
+                statistics?.percentOfTracks != 100f && !monitored -> ArrOrange
+                else -> Color.Unspecified
+            }
 
     override val releasedBy: String? get() = null
     override val statusString: String get() = status.name
@@ -89,7 +90,7 @@ data class Arrtist(
         monitorNew: ArtistMonitorType,
         qualityProfileId: Int,
         rootFolderPath: String?,
-        tags: List<Int>
+        tags: List<Int>,
     ) = copy(
         id = 0,
         addOptions = ArtistAddOptions(monitor = monitor),
@@ -97,7 +98,7 @@ data class Arrtist(
         qualityProfileId = qualityProfileId,
         rootFolderPath = rootFolderPath,
         metadataProfileId = 1,
-        tags = tags
+        tags = tags,
     )
 
     fun copyForEdit(
@@ -105,19 +106,19 @@ data class Arrtist(
         monitorNew: ArtistMonitorType,
         qualityProfileId: Int,
         rootFolderPath: String?,
-        tags: List<Int>
+        tags: List<Int>,
     ) = copy(
         monitored = monitored,
         monitorNewItems = monitorNew,
         qualityProfileId = qualityProfileId,
         rootFolderPath = rootFolderPath,
-        tags = tags
+        tags = tags,
     )
 
-    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
-        copy(rootFolderPath = rootFolderPath)
+    override fun withNewRoot(
+        rootFolderPath: String,
+        currentRootFolderPath: String?,
+    ): ArrMedia = copy(rootFolderPath = rootFolderPath)
 
-    override fun withLocalImages(instanceUrl: String): Arrtist  =
-        copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
-
+    override fun withLocalImages(instanceUrl: String): Arrtist = copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
 }

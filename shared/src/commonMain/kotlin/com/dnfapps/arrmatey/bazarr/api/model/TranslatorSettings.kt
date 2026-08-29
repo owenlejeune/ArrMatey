@@ -10,5 +10,5 @@ data class TranslatorSettings(
     val lingarr_token: String,
     val lingarr_url: String,
     val translator_info: Boolean,
-    val translator_type: String
+    val translator_type: String,
 )

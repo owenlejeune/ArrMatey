@@ -11,23 +11,25 @@ import com.dnfapps.arrmatey.ui.theme.ViewType
 @Composable
 fun ViewTypeMenuButton(
     viewType: ViewType,
-    onViewTypeChanged: (ViewType) -> Unit
+    onViewTypeChanged: (ViewType) -> Unit,
 ) {
-    val newType = when (viewType) {
-        ViewType.Grid -> ViewType.List
-        ViewType.List -> ViewType.Grid
-    }
+    val newType =
+        when (viewType) {
+            ViewType.Grid -> ViewType.List
+            ViewType.List -> ViewType.Grid
+        }
     IconButton(
         onClick = {
             onViewTypeChanged(newType)
-        }
+        },
     ) {
         Icon(
-            imageVector = when (viewType) {
-                ViewType.Grid -> Icons.AutoMirrored.Default.List
-                ViewType.List -> Icons.Default.GridView
-            },
-            contentDescription = "Switch to ${newType.name} view"
+            imageVector =
+                when (viewType) {
+                    ViewType.Grid -> Icons.AutoMirrored.Default.List
+                    ViewType.List -> Icons.Default.GridView
+                },
+            contentDescription = "Switch to ${newType.name} view",
         )
     }
 }

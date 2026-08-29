@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BetaSeriesSettings(
-    val token: String
+    val token: String,
 )

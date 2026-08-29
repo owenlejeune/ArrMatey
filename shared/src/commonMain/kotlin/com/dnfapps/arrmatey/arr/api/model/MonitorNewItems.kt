@@ -7,5 +7,5 @@ enum class MonitorNewItems {
     All,
 
     @SerialName("none")
-    None
+    None,
 }

@@ -19,4 +19,28 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.aboutLibraries) apply false
+    alias(libs.plugins.spotless)
+}
+
+val ktlintVersion = libs.versions.ktlint.get()
+
+allprojects {
+    apply(
+        plugin =
+            rootProject.libs.plugins.spotless
+                .get()
+                .pluginId,
+    )
+
+    configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+        kotlin {
+            target("src/**/*.kt")
+            targetExclude("**/build/**", "**/generated/**")
+            ktlint(ktlintVersion)
+        }
+        kotlinGradle {
+            target("*.gradle.kts")
+            ktlint(ktlintVersion)
+        }
+    }
 }

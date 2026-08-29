@@ -1,14 +1,14 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
-import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.safeCall
-import com.dnfapps.networking.safeGet
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTorrent
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTransferInfoResponse
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeCall
+import com.dnfapps.networking.safeGet
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
@@ -18,9 +18,8 @@ import io.ktor.http.Parameters
 
 class QBittorrentClient(
     private val downloadClient: DownloadClient,
-    private val httpClient: HttpClient
-): DownloadClientApi {
-
+    private val httpClient: HttpClient,
+) : DownloadClientApi {
     private var authenticated: Boolean = false
 
     override suspend fun testConnection(): NetworkResult<Unit> {
@@ -39,7 +38,8 @@ class QBittorrentClient(
 
     override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> =
         authenticatedCall {
-            httpClient.safeGet<List<QBittorrentTorrent>>("api/v2/torrents/info")
+            httpClient
+                .safeGet<List<QBittorrentTorrent>>("api/v2/torrents/info")
                 .map { torrents -> torrents.map { it.toDownloadItem() } }
         }
 
@@ -49,7 +49,10 @@ class QBittorrentClient(
     override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> =
         authenticatedCall { postTorrentAction("api/v2/torrents/start", ids) }
 
-    override suspend fun deleteDownload(ids: List<String>, deleteFiles: Boolean): NetworkResult<Unit> =
+    override suspend fun deleteDownload(
+        ids: List<String>,
+        deleteFiles: Boolean,
+    ): NetworkResult<Unit> =
         authenticatedCall {
             httpClient.safeCall {
                 post("api/v2/torrents/delete") {
@@ -58,8 +61,8 @@ class QBittorrentClient(
                             Parameters.build {
                                 append("hashes", ids.joinToString("|"))
                                 append("deleteFiles", deleteFiles.toString())
-                            }
-                        )
+                            },
+                        ),
                     )
                 }
                 Unit
@@ -68,20 +71,19 @@ class QBittorrentClient(
 
     override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> =
         authenticatedCall {
-            httpClient.safeGet<QBittorrentTransferInfoResponse>("api/v2/transfer/info")
+            httpClient
+                .safeGet<QBittorrentTransferInfoResponse>("api/v2/transfer/info")
                 .map { info ->
                     DownloadTransferInfo(
                         client = downloadClient,
                         downloadSpeed = info.downloadSpeed,
-                        uploadSpeed = info.uploadSpeed
+                        uploadSpeed = info.uploadSpeed,
                     )
                 }
         }
 
     // Re-login and retry once on 401/403 so an expired session cookie recovers automatically.
-    private suspend fun <T> authenticatedCall(
-        block: suspend () -> NetworkResult<T>
-    ): NetworkResult<T> {
+    private suspend fun <T> authenticatedCall(block: suspend () -> NetworkResult<T>): NetworkResult<T> {
         when (val auth = ensureAuthenticated()) {
             is NetworkResult.Error -> return auth
             is NetworkResult.Loading -> return NetworkResult.Loading
@@ -114,19 +116,20 @@ class QBittorrentClient(
             return NetworkResult.Success(Unit)
         }
 
-        val loginResult = httpClient.safeCall {
-            post("api/v2/auth/login") {
-                setBody(
-                    FormDataContent(
-                        Parameters.build {
-                            append("username", downloadClient.username.value)
-                            append("password", downloadClient.password.value)
-                        }
+        val loginResult =
+            httpClient.safeCall {
+                post("api/v2/auth/login") {
+                    setBody(
+                        FormDataContent(
+                            Parameters.build {
+                                append("username", downloadClient.username.value)
+                                append("password", downloadClient.password.value)
+                            },
+                        ),
                     )
-                )
+                }
+                Unit
             }
-            Unit
-        }
 
         return when (loginResult) {
             is NetworkResult.Success -> {
@@ -141,23 +144,25 @@ class QBittorrentClient(
         }
     }
 
-    private suspend fun postTorrentAction(endpoint: String, hashes: List<String>): NetworkResult<Unit> {
-        return httpClient.safeCall {
+    private suspend fun postTorrentAction(
+        endpoint: String,
+        hashes: List<String>,
+    ): NetworkResult<Unit> =
+        httpClient.safeCall {
             post(endpoint) {
                 setBody(
                     FormDataContent(
                         Parameters.build {
                             append("hashes", hashes.joinToString("|"))
-                        }
-                    )
+                        },
+                    ),
                 )
             }
             Unit
         }
-    }
 
-    private fun QBittorrentTorrent.toDownloadItem(): DownloadItem {
-        return DownloadItem(
+    private fun QBittorrentTorrent.toDownloadItem(): DownloadItem =
+        DownloadItem(
             client = downloadClient,
             id = hash,
             name = name,
@@ -170,7 +175,6 @@ class QBittorrentClient(
             status = DownloadItemStatus.from(state),
             category = category,
             addedOn = addedOn,
-            tags = tags.split(",").map { it.trim() }.filter { it.isNotBlank() }
+            tags = tags.split(",").map { it.trim() }.filter { it.isNotBlank() },
         )
-    }
 }

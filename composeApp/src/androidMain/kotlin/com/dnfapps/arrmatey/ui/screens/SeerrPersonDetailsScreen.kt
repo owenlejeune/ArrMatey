@@ -70,7 +70,7 @@ fun SeerrPersonDetailsScreen(
     personId: Long,
     onBack: () -> Unit,
     onMediaClick: (Long, RequestType) -> Unit = { _, _ -> },
-    viewModel: SeerrMediaDetailsViewModel = koinInjectParams(personId, RequestType.Person)
+    viewModel: SeerrMediaDetailsViewModel = koinInjectParams(personId, RequestType.Person),
 ) {
     val navManager = navigationManager
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -78,20 +78,23 @@ fun SeerrPersonDetailsScreen(
     val gridState = rememberLazyGridState()
 
     Scaffold(
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
+                    .fillMaxSize(),
         ) {
             when (val state = uiState) {
                 is SeerrDetailsState.Initial,
-                is SeerrDetailsState.Loading -> {
+                is SeerrDetailsState.Loading,
+                -> {
                     LoadingIndicator(
-                        modifier = Modifier
-                            .size(96.dp)
-                            .align(Alignment.Center)
+                        modifier =
+                            Modifier
+                                .size(96.dp)
+                                .align(Alignment.Center),
                     )
                 }
                 is SeerrDetailsState.Error -> {
@@ -106,7 +109,7 @@ fun SeerrPersonDetailsScreen(
                         onRetry = {
                             viewModel.refreshDetails()
                         },
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier.align(Alignment.Center),
                     )
                 }
                 is SeerrDetailsState.Success -> {
@@ -114,7 +117,7 @@ fun SeerrPersonDetailsScreen(
                     val credits by viewModel.personCredits.collectAsStateWithLifecycle()
                     PullToRefreshBox(
                         isRefreshing = false,
-                        onRefresh = { viewModel.refreshDetails() }
+                        onRefresh = { viewModel.refreshDetails() },
                     ) {
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = GridDensity.Normal.minSize),
@@ -122,49 +125,50 @@ fun SeerrPersonDetailsScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(bottom = 24.dp, start = 24.dp, end = 24.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 PersonDetailsHeader(
                                     item = item,
                                     credits = credits,
-                                    modifier = Modifier.breakPadding(24.dp)
+                                    modifier = Modifier.breakPadding(24.dp),
                                 )
                             }
 
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 Column(
                                     modifier = Modifier.padding(top = 12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                                    verticalArrangement = Arrangement.spacedBy(24.dp),
                                 ) {
                                     Column {
                                         Text(
                                             text = item.displayTitle,
-                                            style = MaterialTheme.typography.headlineMedium
+                                            style = MaterialTheme.typography.headlineMedium,
                                         )
                                         val birthday = item.birthday?.format("MMMM d, yyyy") ?: mokoString(MR.strings.unknown)
                                         val birthplace = item.placeOfBirth?.takeUnlessEmpty() ?: mokoString(MR.strings.unknown)
                                         Text(
                                             text = mokoString(MR.strings.born_on, birthday, birthplace),
-                                            style = MaterialTheme.typography.bodyMedium
+                                            style = MaterialTheme.typography.bodyMedium,
                                         )
 
                                         if (item.alsoKnownAs.isNotEmpty()) {
                                             Text(
                                                 modifier = Modifier.padding(top = 8.dp),
-                                                text = buildAnnotatedString {
-                                                    withStyle(
-                                                        style = MaterialTheme.typography.titleMediumEmphasized.toSpanStyle()
-                                                    ) {
-                                                        append(mokoString(MR.strings.also_known_as))
-                                                    }
-                                                    withStyle(
-                                                        style = MaterialTheme.typography.bodyMedium.toSpanStyle()
-                                                    ) {
-                                                        append(" ")
-                                                        append(item.alsoKnownAs.joinToString(", "))
-                                                    }
-                                                }
+                                                text =
+                                                    buildAnnotatedString {
+                                                        withStyle(
+                                                            style = MaterialTheme.typography.titleMediumEmphasized.toSpanStyle(),
+                                                        ) {
+                                                            append(mokoString(MR.strings.also_known_as))
+                                                        }
+                                                        withStyle(
+                                                            style = MaterialTheme.typography.bodyMedium.toSpanStyle(),
+                                                        ) {
+                                                            append(" ")
+                                                            append(item.alsoKnownAs.joinToString(", "))
+                                                        }
+                                                    },
                                             )
                                         }
                                     }
@@ -183,7 +187,7 @@ fun SeerrPersonDetailsScreen(
                                         items = personCredits.cast,
                                         onItemClick = { result ->
                                             onMediaClick(result.id, result.mediaType)
-                                        }
+                                        },
                                     )
                                 }
                                 if (personCredits.crew.isNotEmpty()) {
@@ -193,7 +197,7 @@ fun SeerrPersonDetailsScreen(
                                         items = personCredits.crew,
                                         onItemClick = { result ->
                                             onMediaClick(result.id, result.mediaType)
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -208,14 +212,14 @@ fun SeerrPersonDetailsScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = { onBack() },
-                        colors = IconButtonDefaults.headerBarColors()
+                        colors = IconButtonDefaults.headerBarColors(),
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(MR.strings.back)
+                            contentDescription = mokoString(MR.strings.back),
                         )
                     }
-                }
+                },
             )
         }
     }
@@ -225,19 +229,19 @@ private fun LazyGridScope.seerrCreditsGrid(
     title: StringResource,
     icon: ImageVector,
     items: List<DiscoverResult>,
-    onItemClick: (DiscoverResult) -> Unit
+    onItemClick: (DiscoverResult) -> Unit,
 ) {
     item(span = { GridItemSpan(maxLineSpan) }) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 12.dp)
+            modifier = Modifier.padding(top = 12.dp),
         ) {
             Icon(icon, null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
             Text(
                 text = mokoString(title),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         }
     }
@@ -246,7 +250,7 @@ private fun LazyGridScope.seerrCreditsGrid(
         PosterItem(
             item = item,
             onItemClick = { onItemClick(item) },
-            includeCredits = true
+            includeCredits = true,
         )
     }
 }

@@ -13,7 +13,7 @@ data class SeasonWrapper(
     val seasonNumber: Int,
     val arrSeason: ArrSeason? = null,
     val seerrSeason: SeerrSeason? = null,
-    val episodes: List<EpisodeWrapper> = emptyList()
+    val episodes: List<EpisodeWrapper> = emptyList(),
 ) {
     val totalEpisodeCount: Int
         get() = arrSeason?.statistics?.totalEpisodeCount ?: seerrSeason?.episodeCount ?: episodes.size
@@ -35,8 +35,14 @@ data class SeasonWrapper(
 
     val year: String
         get() {
-            val minUtcYear = episodes.mapNotNull { it.airDateUtc }.minOrNull()
-                ?.toLocalDateTime(TimeZone.UTC)?.date?.year?.toString()
+            val minUtcYear =
+                episodes
+                    .mapNotNull { it.airDateUtc }
+                    .minOrNull()
+                    ?.toLocalDateTime(TimeZone.UTC)
+                    ?.date
+                    ?.year
+                    ?.toString()
             val minDateYear = episodes.mapNotNull { it.airDate?.year }.minOrNull()?.toString()
             return minUtcYear ?: minDateYear ?: MokoStrings().getString(MR.strings.tba)
         }
@@ -44,8 +50,11 @@ data class SeasonWrapper(
     val runtime: String?
         get() {
             val items = episodes.mapNotNull { it.arrEpisode?.runtime?.takeIf { r -> r > 0 } }
-            return if (items.isEmpty()) null
-            else items.sorted()[items.size / 2].formatMinutesAsRuntime()
+            return if (items.isEmpty()) {
+                null
+            } else {
+                items.sorted()[items.size / 2].formatMinutesAsRuntime()
+            }
         }
 
     val sizeOnDisk: String?

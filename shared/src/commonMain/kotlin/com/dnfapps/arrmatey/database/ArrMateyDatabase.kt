@@ -19,13 +19,15 @@ import kotlinx.coroutines.IO
 @Database(
     entities = [Instance::class, DownloadClient::class, CustomWebpage::class],
     version = 11,
-    exportSchema = true
+    exportSchema = true,
 )
 @TypeConverters(Converters::class)
 @ConstructedBy(ArrMateyDatabaseConstructor::class)
 abstract class ArrMateyDatabase : RoomDatabase() {
     abstract fun getInstanceDao(): InstanceDao
+
     abstract fun getDownloadClientDao(): DownloadClientDao
+
     abstract fun getCustomWebpageDao(): CustomWebpageDao
 }
 
@@ -34,12 +36,9 @@ expect object ArrMateyDatabaseConstructor : RoomDatabaseConstructor<ArrMateyData
     override fun initialize(): ArrMateyDatabase
 }
 
-fun getRoomDatabase(
-    builder: RoomDatabase.Builder<ArrMateyDatabase>
-): ArrMateyDatabase {
-    return builder
+fun getRoomDatabase(builder: RoomDatabase.Builder<ArrMateyDatabase>): ArrMateyDatabase =
+    builder
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
         .addMigrations(*migrations)
         .build()
-}

@@ -58,53 +58,54 @@ fun AlbumsArea(
     deleteAlbumFiles: (Long) -> Unit,
     albumDeleteInProgress: Boolean,
     onNavigateToAlbumRelease: (Long, Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         Text(
             text = mokoString(MR.strings.albums_header),
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge,
         )
         albums.forEach { album ->
             var expanded by rememberSaveable { mutableStateOf(false) }
             val iconRotation by animateFloatAsState(
                 targetValue = if (expanded) 180f else 0f,
                 animationSpec = tween(durationMillis = 200),
-                label = "iconRotation"
+                label = "iconRotation",
             )
             Column(
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
             ) {
                 ContainerCard(
-                    modifier = Modifier.clickable { expanded = !expanded }
+                    modifier = Modifier.clickable { expanded = !expanded },
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         AlbumCover(item = album, modifier = Modifier.size(60.dp))
                         Column(
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             Text(
-                                text = buildString {
-                                    append(album.title)
-                                    album.releaseDate?.format("YYYY")?.let { year ->
-                                        append(" ($year)")
-                                    }
-                                },
+                                text =
+                                    buildString {
+                                        append(album.title)
+                                        album.releaseDate?.format("YYYY")?.let { year ->
+                                            append(" ($year)")
+                                        }
+                                    },
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 16.sp,
                                 maxLines = 2,
-                                overflow = TextOverflow.MiddleEllipsis
+                                overflow = TextOverflow.MiddleEllipsis,
                             )
                             album.statistics?.let { statistics ->
                                 Text(
                                     text = "${statistics.trackFileCount}/${statistics.totalTrackCount}",
-                                    fontSize = 14.sp
+                                    fontSize = 14.sp,
                                 )
                             }
                         }
@@ -112,37 +113,45 @@ fun AlbumsArea(
                         Icon(
                             imageVector = Icons.Default.ExpandCircleDown,
                             contentDescription = null,
-                            modifier = Modifier.rotate(iconRotation)
+                            modifier = Modifier.rotate(iconRotation),
                         )
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = mokoString(MR.strings.edit),
-                            modifier = Modifier.clickable {
-                                onEditAlbum(album)
-                            }
+                            modifier =
+                                Modifier.clickable {
+                                    onEditAlbum(album)
+                                },
                         )
                         Icon(
-                            imageVector = if (album.monitored) Icons.Default.Bookmark
-                                          else Icons.Default.BookmarkBorder,
-                            contentDescription = if (album.monitored) {
-                                mokoString(MR.strings.monitored)
-                            } else {
-                                mokoString(MR.strings.unmonitored)
-                            },
-                            modifier = Modifier.clickable {
-                                onToggleAlbumMonitor(album)
-                            }
+                            imageVector =
+                                if (album.monitored) {
+                                    Icons.Default.Bookmark
+                                } else {
+                                    Icons.Default.BookmarkBorder
+                                },
+                            contentDescription =
+                                if (album.monitored) {
+                                    mokoString(MR.strings.monitored)
+                                } else {
+                                    mokoString(MR.strings.unmonitored)
+                                },
+                            modifier =
+                                Modifier.clickable {
+                                    onToggleAlbumMonitor(album)
+                                },
                         )
                     }
                 }
                 AnimatedVisibility(
                     visible = expanded,
                     enter = expandVertically(),
-                    exit = shrinkVertically()
+                    exit = shrinkVertically(),
                 ) {
                     Column {
-                        val albumTracks = (tracks[album.id] ?: emptyList())
-                            .sortedBy { it.absoluteTrackNumber }
+                        val albumTracks =
+                            (tracks[album.id] ?: emptyList())
+                                .sortedBy { it.absoluteTrackNumber }
                         val albumTrackFiles = (trackFiles[album.id] ?: emptyList())
 
                         Spacer(modifier = Modifier.height(6.dp))
@@ -156,21 +165,22 @@ fun AlbumsArea(
                                 deleteAlbumFiles(album.id)
                             },
                             deleteInProgress = albumDeleteInProgress,
-                            onNavigateToAlbumRelease = onNavigateToAlbumRelease
+                            onNavigateToAlbumRelease = onNavigateToAlbumRelease,
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         albumTracks.forEachIndexed { index, track ->
                             TrackRow(
                                 track = track,
-                                trackFile = if (track.hasFile) {
-                                    albumTrackFiles.firstOrNull { file ->
-                                        track.trackFileId?.let { it == file.id } ?: false
-                                    }
-                                } else {
-                                    null
-                                }
+                                trackFile =
+                                    if (track.hasFile) {
+                                        albumTrackFiles.firstOrNull { file ->
+                                            track.trackFileId?.let { it == file.id } ?: false
+                                        }
+                                    } else {
+                                        null
+                                    },
                             )
-                            if (index < albumTracks.size-1) {
+                            if (index < albumTracks.size - 1) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                             }
                         }

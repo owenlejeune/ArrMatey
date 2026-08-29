@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AudiobookStatistics(
     override val sizeOnDisk: Long,
-    override val releaseGroups: List<String> = emptyList()
+    override val releaseGroups: List<String> = emptyList(),
 ) : ArrStatistics

@@ -8,5 +8,5 @@ data class SelectOption(
     val name: String,
     val order: Int,
     val hint: String,
-    val dividerAfter: Boolean
+    val dividerAfter: Boolean,
 )

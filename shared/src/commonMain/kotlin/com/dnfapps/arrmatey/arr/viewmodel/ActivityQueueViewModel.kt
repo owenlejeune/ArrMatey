@@ -28,41 +28,45 @@ class ActivityQueueViewModel(
     private val activityQueueService: ActivityQueueService,
     getActivityTasksUseCase: GetActivityTasksUseCase,
     instanceRepository: InstanceRepository,
-    private val deleteQueueItemUseCase: DeleteQueueItemUseCase
-): ViewModel() {
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
+) : ViewModel() {
+    val activityTasks =
+        getActivityTasksUseCase()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
-    val activityTasks = getActivityTasksUseCase()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val tasksWithIssues =
+        getActivityTasksUseCase
+            .getTasksWithIssues()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 0,
+            )
 
-    val tasksWithIssues = getActivityTasksUseCase.getTasksWithIssues()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = 0
-        )
-
-    val isPolling = activityQueueService.isPolling
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+    val isPolling =
+        activityQueueService.isPolling
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
 
     val hasLoaded: StateFlow<Boolean> = activityQueueService.hasLoaded
 
-    val instances = instanceRepository.observeAllInstances()
-        .map { all ->
-            all.filter { it.type.supportsActivityQueue }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val instances =
+        instanceRepository
+            .observeAllInstances()
+            .map { all ->
+                all.filter { it.type.supportsActivityQueue }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
     private val _activityQueueUiState = MutableStateFlow(ActivityQueueUiState())
     val activityQueueUiState: StateFlow<ActivityQueueUiState> = _activityQueueUiState.asStateFlow()
@@ -70,18 +74,19 @@ class ActivityQueueViewModel(
     private val _removeItemState = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val removeItemState: StateFlow<OperationStatus> = _removeItemState.asStateFlow()
 
-    val queueItems: StateFlow<List<QueueItem>> = combine(
-        activityTasks,
-        _activityQueueUiState
-    ) { tasks, (instanceId, sortBy, sortOrder) ->
-        val grouped = tasks.groupByTask()
-        val filtered = filterByInstance(grouped, instanceId)
-        applySorting(filtered, sortBy, sortOrder)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    val queueItems: StateFlow<List<QueueItem>> =
+        combine(
+            activityTasks,
+            _activityQueueUiState,
+        ) { tasks, (instanceId, sortBy, sortOrder) ->
+            val grouped = tasks.groupByTask()
+            val filtered = filterByInstance(grouped, instanceId)
+            applySorting(filtered, sortBy, sortOrder)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
 
     init {
         startPolling()
@@ -127,7 +132,7 @@ class ActivityQueueViewModel(
         item: QueueItem,
         removeFromClient: Boolean,
         addToBlocklist: Boolean,
-        skipRedownload: Boolean
+        skipRedownload: Boolean,
     ) {
         viewModelScope.launch {
             deleteQueueItemUseCase(item, removeFromClient, addToBlocklist, skipRedownload)
@@ -148,10 +153,16 @@ class ActivityQueueViewModel(
         activityQueueService.stopPolling()
     }
 
-    private fun filterByInstance(items: List<QueueItem>, instanceId: Long?): List<QueueItem> =
-        instanceId?.let { items.filter { it.instanceId == instanceId } } ?: items
+    private fun filterByInstance(
+        items: List<QueueItem>,
+        instanceId: Long?,
+    ): List<QueueItem> = instanceId?.let { items.filter { it.instanceId == instanceId } } ?: items
 
-    private fun applySorting(items: List<QueueItem>, sortBy: QueueSortBy, sortOrder: SortOrder) = when(sortBy) {
+    private fun applySorting(
+        items: List<QueueItem>,
+        sortBy: QueueSortBy,
+        sortOrder: SortOrder,
+    ) = when (sortBy) {
         QueueSortBy.Title -> items.orderedSortedBy(sortOrder) { it.titleLabel }
         QueueSortBy.Added -> items.orderedSortedBy(sortOrder) { it.added }
     }

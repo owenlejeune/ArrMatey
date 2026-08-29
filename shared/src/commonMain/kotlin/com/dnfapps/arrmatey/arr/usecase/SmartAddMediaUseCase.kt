@@ -7,11 +7,10 @@ import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
-import com.dnfapps.networking.onSuccess
 
 class SmartAddMediaUseCase(
     private val addMediaItemUseCase: AddMediaItemUseCase,
-    private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase
+    private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase,
 ) {
     suspend operator fun invoke(
         instanceType: InstanceType,
@@ -20,14 +19,14 @@ class SmartAddMediaUseCase(
         searchOnAdd: Boolean = false,
         seerrMediaDetails: RequestMediaDetails? = null,
         seerrRepository: SeerrInstanceRepository? = null,
-        targetInstanceId: Long? = null
+        targetInstanceId: Long? = null,
     ) {
         addMediaItemUseCase(
             instanceType = instanceType,
             item = item,
             metadata = metadata,
             searchOnAdd = searchOnAdd,
-            targetInstanceId = targetInstanceId
+            targetInstanceId = targetInstanceId,
         )
 
         if (seerrMediaDetails != null && seerrRepository != null) {
@@ -36,7 +35,7 @@ class SmartAddMediaUseCase(
                 setRequestApprovalStatusUseCase(
                     requestId = pendingRequest.id,
                     approvalStatus = ApprovalStatus.Approve,
-                    repository = seerrRepository
+                    repository = seerrRepository,
                 )
             }
         }

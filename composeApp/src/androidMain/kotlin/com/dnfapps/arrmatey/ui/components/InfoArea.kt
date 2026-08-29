@@ -32,29 +32,29 @@ import dev.icerock.moko.resources.compose.painterResource
 data class InfoCardData(
     val items: List<InfoItem>,
     val header: (@Composable () -> Unit)? = null,
-    val footer: (@Composable () -> Unit)? = null
+    val footer: (@Composable () -> Unit)? = null,
 )
 
 @Composable
 fun InfoCardInstanceFooter(
     instance: Instance,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Image(
             painter = painterResource(instance.type.icon),
             contentDescription = null,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(18.dp),
         )
         Text(
             text = instance.label,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -68,10 +68,10 @@ fun InfoAreaCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp)
+        shape = RoundedCornerShape(10.dp),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
         ) {
             header?.invoke()
             if (header != null) {
@@ -82,14 +82,16 @@ fun InfoAreaCard(
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .then(
-                            if (item.onClick != null) {
-                                Modifier.clickable { item.onClick.invoke() }
-                            } else Modifier
-                        )
-                        .padding(vertical = 4.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .then(
+                                if (item.onClick != null) {
+                                    Modifier.clickable { item.onClick.invoke() }
+                                } else {
+                                    Modifier
+                                },
+                            ).padding(vertical = 4.dp),
                 ) {
                     Text(text = key, fontSize = 14.sp)
                     Text(
@@ -98,7 +100,7 @@ fun InfoAreaCard(
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.End,
                         fontSize = 14.sp,
-                        modifier = Modifier.widthIn(max = 200.dp)
+                        modifier = Modifier.widthIn(max = 200.dp),
                     )
                 }
                 if (index < infoItems.size - 1 || footer != null) {
@@ -121,18 +123,18 @@ fun InfoArea(
     if (infoItems.isEmpty()) return
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (title != null) {
             Text(
                 text = mokoString(title),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
         }
         InfoAreaCard(
             infoItems = infoItems,
             header = header,
-            footer = footer
+            footer = footer,
         )
     }
 }
@@ -147,19 +149,19 @@ fun InfoArea(
     if (validCards.isEmpty()) return
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (title != null) {
             Text(
                 text = mokoString(title),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
         }
         validCards.forEach { card ->
             InfoAreaCard(
                 infoItems = card.items,
                 header = card.header,
-                footer = card.footer
+                footer = card.footer,
             )
         }
     }
@@ -175,12 +177,12 @@ fun InfoArea(
     if (arrCards.isEmpty() && seerrCards.isEmpty()) return
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (title != null) {
             Text(
                 text = mokoString(title),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
             )
         }
         arrCards.takeUnless { it.isEmpty() }?.let { cardItems ->

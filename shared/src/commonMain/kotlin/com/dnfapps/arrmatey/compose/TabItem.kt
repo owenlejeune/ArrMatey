@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
+
 sealed interface TabItem {
     val iosIcon: String
     val resource: StringResource
@@ -12,7 +13,7 @@ sealed interface TabItem {
 
     val key: String
 
-    data object Settings: TabItem {
+    data object Settings : TabItem {
         override val iosIcon: String
             get() = "gear"
         override val resource: StringResource
@@ -29,7 +30,7 @@ sealed interface TabItem {
         override val iosIcon: String,
         override val resource: StringResource,
         override val isDisabled: Boolean = false,
-        override val associatedType: InstanceType? = null
+        override val associatedType: InstanceType? = null,
     ) : TabItem {
         LIBRARY("books.vertical", MR.strings.library),
         SHOWS("tv", MR.strings.series, associatedType = InstanceType.Sonarr),
@@ -44,19 +45,21 @@ sealed interface TabItem {
         DISCOVER("sparkles", MR.strings.discover),
         PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr),
         BAZARR("captions.bubble", MR.strings.bazarr, associatedType = InstanceType.Bazarr),
-        DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard);
+        DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard),
+        ;
 
-        override val key: String get() = "standard_${name}"
+        override val key: String get() = "standard_$name"
     }
 
     data class CustomWebpage(
         val id: Long,
         val name: String,
         val url: String,
-        val headers: List<InstanceHeader> = emptyList()
+        val headers: List<InstanceHeader> = emptyList(),
     ) : TabItem {
         override val iosIcon: String = "globe"
         override val resource: StringResource = MR.strings.custom_webpage // Will use name instead
+
 //        override val drawerOnly: Boolean = false
         override val isDisabled: Boolean = false
         override val associatedType: InstanceType? = null
@@ -66,16 +69,16 @@ sealed interface TabItem {
     companion object {
         fun standardEntries(): List<Standard> = Standard.entries.filter { !it.isDisabled }
 
-        fun defaultStandardEntries(): List<Standard> = listOf(
-            Standard.SHOWS,
-            Standard.MOVIES,
-            Standard.MUSIC,
-            Standard.ACTIVITY,
-            Standard.CALENDAR
-        )
+        fun defaultStandardEntries(): List<Standard> =
+            listOf(
+                Standard.SHOWS,
+                Standard.MOVIES,
+                Standard.MUSIC,
+                Standard.ACTIVITY,
+                Standard.CALENDAR,
+            )
 
-        fun defaultHiddenStandard(): List<Standard> =
-            standardEntries().filter { !defaultStandardEntries().contains(it) }
+        fun defaultHiddenStandard(): List<Standard> = standardEntries().filter { !defaultStandardEntries().contains(it) }
 
         fun defaultStandardKeys(): List<String> = defaultStandardEntries().map { it.key }
 

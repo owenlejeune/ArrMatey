@@ -20,7 +20,7 @@ fun Float.formatAgeMinutes(): String {
         }
         in 2_880..<129_600 -> {
             // less than 90 days
-            "${days} days"
+            "$days days"
         }
         in 129_600..<525_600 -> {
             // less than 365 days

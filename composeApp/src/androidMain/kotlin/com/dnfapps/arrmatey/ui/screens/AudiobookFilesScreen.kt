@@ -35,7 +35,8 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.BULLET
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
@@ -45,14 +46,13 @@ import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.model.OperationStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudiobookFilesScreen(
     audiobook: Audiobook,
     onBack: () -> Unit = {},
-    viewModel: AudiobookFilesViewModel = koinInjectParams(audiobook.id ?: 0L)
+    viewModel: AudiobookFilesViewModel = koinInjectParams(audiobook.id ?: 0L),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
@@ -67,34 +67,35 @@ fun AudiobookFilesScreen(
                 title = {},
                 navigationIcon = {
                     IconButton(
-                        onClick = onBack
+                        onClick = onBack,
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refreshHistory() },
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 if (queueItems.isNotEmpty()) {
                     item {
                         MediaActivitySection(
                             queueItems = queueItems,
-                            onQueueItemClicked = { selectedQueueItem = it }
+                            onQueueItemClicked = { selectedQueueItem = it },
                         )
                     }
                 }
@@ -102,7 +103,7 @@ fun AudiobookFilesScreen(
                     Text(
                         text = mokoString(MR.strings.files),
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
                 items(uiState.files) { file ->
@@ -112,7 +113,7 @@ fun AudiobookFilesScreen(
                     Text(
                         text = mokoString(MR.strings.history),
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
                 items(uiState.history) { historyItem ->
@@ -133,7 +134,7 @@ fun AudiobookFilesScreen(
             QueueItemInfoSheet(
                 item = item,
                 onDismiss = { selectedQueueItem = null },
-                onRemove = { showConfirmRemoveQueueItem = true }
+                onRemove = { showConfirmRemoveQueueItem = true },
             )
         }
 
@@ -146,11 +147,11 @@ fun AudiobookFilesScreen(
                         queueItem = selectedQueueItem!!,
                         removeFromClient = clientRemove,
                         addToBlocklist = blocklist,
-                        skipRedownload = skipRedownload
+                        skipRedownload = skipRedownload,
                     )
                     showConfirmRemoveQueueItem = false
                     selectedQueueItem = null
-                }
+                },
             )
         }
     }
@@ -160,21 +161,26 @@ fun AudiobookFilesScreen(
 fun AudiobookFileCard(file: AudiobookFile) {
     ContainerCard(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = file.path?.split("/")?.lastOrNull()?.breakable()
-                ?: mokoString(MR.strings.unknown),
-            fontWeight = FontWeight.SemiBold
+            text =
+                file.path
+                    ?.split("/")
+                    ?.lastOrNull()
+                    ?.breakable()
+                    ?: mokoString(MR.strings.unknown),
+            fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = listOfNotNull(
-                file.format,
-                file.size?.bytesAsFileSizeString()
-            ).joinToString(Bullet),
-            fontSize = 12.sp
+            text =
+                listOfNotNull(
+                    file.format,
+                    file.size?.bytesAsFileSizeString(),
+                ).joinToString(BULLET),
+            fontSize = 12.sp,
         )
         file.createdAt?.format("MMM d, yyyy")?.let { formattedDate ->
             Text(
                 text = mokoString(MR.strings.added_on, formattedDate),
-                fontSize = 12.sp
+                fontSize = 12.sp,
             )
         }
     }

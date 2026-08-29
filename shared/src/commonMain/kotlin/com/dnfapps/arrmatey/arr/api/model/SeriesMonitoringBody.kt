@@ -5,24 +5,26 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SeriesMonitoringBody(
     val series: List<IdWrapper>,
-    val monitoringOptions: SeriesMonitorOption
+    val monitoringOptions: SeriesMonitorOption,
 )
 
 @Serializable
 data class SeriesMonitorOption(
-    val monitor: SeriesMonitorType
+    val monitor: SeriesMonitorType,
 )
 
 @Serializable
 data class ArtistMonitoringBody(
     val artist: List<IdWrapper>,
-    val monitoringOptions: ArtistMonitoringOption
+    val monitoringOptions: ArtistMonitoringOption,
 )
 
 @Serializable
 data class ArtistMonitoringOption(
-    val monitoringBody: ArtistMonitorType
+    val monitoringBody: ArtistMonitorType,
 )
 
 @Serializable
-data class IdWrapper(val id: Long)
+data class IdWrapper(
+    val id: Long,
+)

@@ -51,7 +51,10 @@ fun Int.formatAsDuration(): String {
     return "${pad(hours)}:${pad(minutes)}:${pad(seconds)}"
 }
 
-fun Int.padStart(length: Int, char: Char): String = toString().padStart(length, char)
+fun Int.padStart(
+    length: Int,
+    char: Char,
+): String = toString().padStart(length, char)
 
 fun Double.toOneDecimal(): String {
     val rounded = (this * 10.0).let { kotlin.math.round(it) / 10.0 }

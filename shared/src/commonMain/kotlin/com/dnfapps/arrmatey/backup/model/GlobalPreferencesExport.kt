@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class GlobalPreferencesExport(
     val tabPreferences: TabPreferences? = null,
     val useServiceNavLogos: Boolean? = null,
-    val hideInstanceSwitcher: Boolean? = null
+    val hideInstanceSwitcher: Boolean? = null,
 )

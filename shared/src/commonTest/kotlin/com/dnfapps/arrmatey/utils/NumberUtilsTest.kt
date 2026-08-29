@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class NumberUtilsTest {
-
     @Test
     fun testFormatToOneDecimalAppendsZeroForIntegers() {
         assertEquals("5.0", 5f.formatToOneDecimal())

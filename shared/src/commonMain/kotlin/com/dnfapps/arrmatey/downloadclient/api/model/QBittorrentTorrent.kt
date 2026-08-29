@@ -16,5 +16,5 @@ data class QBittorrentTorrent(
     @SerialName("category") val category: String = "",
     @SerialName("added_on") val addedOn: Long = 0,
     @SerialName("downloaded") val downloaded: Long = 0,
-    @SerialName("tags") val tags: String = ""
+    @SerialName("tags") val tags: String = "",
 )

@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class AudiobookPreviewPaths(
     val fullPath: String,
     val relativePath: String,
-    val root: String
+    val root: String,
 )

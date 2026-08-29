@@ -9,5 +9,5 @@ data class ProxySettings(
     val port: String,
     val type: String?,
     val url: String,
-    val username: String
+    val username: String,
 )

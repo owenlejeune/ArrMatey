@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.arr.api.model
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -25,11 +24,11 @@ data class ProwlarrSearchResult(
     val categories: List<ProwlarrCategory> = emptyList(),
     val downloadAllowed: Boolean = false,
     val fullSeason: Boolean = false,
-    val releaseGroup: String? = null
+    val releaseGroup: String? = null,
 )
 
 @Serializable
 data class ProwlarrCategory(
     val id: Int,
-    val name: String? = null
+    val name: String? = null,
 )

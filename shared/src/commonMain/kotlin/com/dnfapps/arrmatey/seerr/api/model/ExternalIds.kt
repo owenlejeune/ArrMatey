@@ -11,5 +11,5 @@ data class ExternalIds(
     val instagramId: String? = null,
     val tvdbId: Long? = null,
     val tvrageId: Long? = null,
-    val twitterId: String? = null
+    val twitterId: String? = null,
 )

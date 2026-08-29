@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.ui.components.MediaActivitySection
@@ -38,14 +39,13 @@ import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.model.OperationStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthorFilesScreen(
     author: Author,
     onBack: () -> Unit = {},
-    viewModel: AuthorFilesViewModel = koinInjectParams(author.id ?: 0L)
+    viewModel: AuthorFilesViewModel = koinInjectParams(author.id ?: 0L),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
@@ -60,34 +60,35 @@ fun AuthorFilesScreen(
                 title = {},
                 navigationIcon = {
                     IconButton(
-                        onClick = onBack
+                        onClick = onBack,
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refreshHistory() },
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 if (queueItems.isNotEmpty()) {
                     item {
                         MediaActivitySection(
                             queueItems = queueItems,
-                            onQueueItemClicked = { selectedQueueItem = it }
+                            onQueueItemClicked = { selectedQueueItem = it },
                         )
                     }
                 }
@@ -95,7 +96,7 @@ fun AuthorFilesScreen(
                     Text(
                         text = mokoString(MR.strings.files),
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
                 items(uiState.files) { file ->
@@ -105,7 +106,7 @@ fun AuthorFilesScreen(
                     Text(
                         text = mokoString(MR.strings.history),
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
                 items(uiState.history) { historyItem ->
@@ -126,7 +127,7 @@ fun AuthorFilesScreen(
             QueueItemInfoSheet(
                 item = item,
                 onDismiss = { selectedQueueItem = null },
-                onRemove = { showConfirmRemoveQueueItem = true }
+                onRemove = { showConfirmRemoveQueueItem = true },
             )
         }
 
@@ -139,11 +140,11 @@ fun AuthorFilesScreen(
                         queueItem = selectedQueueItem!!,
                         removeFromClient = clientRemove,
                         addToBlocklist = blocklist,
-                        skipRedownload = skipRedownload
+                        skipRedownload = skipRedownload,
                     )
                     showConfirmRemoveQueueItem = false
                     selectedQueueItem = null
-                }
+                },
             )
         }
     }

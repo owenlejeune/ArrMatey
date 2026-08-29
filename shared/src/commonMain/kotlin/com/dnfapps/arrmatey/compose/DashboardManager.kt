@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.compose
 
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.utils.StringResolver
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,11 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class DashboardManager(
-    private val preferencesStore: PreferencesStore
+    private val preferencesStore: PreferencesStore,
 ) {
     private val _cardsOrder = MutableStateFlow<List<DashboardCards>>(emptyList())
     val cardsOrder: StateFlow<List<DashboardCards>> = _cardsOrder.asStateFlow()
@@ -41,18 +39,20 @@ class DashboardManager(
     }
 
     fun removeCard(card: DashboardCards) {
-        val newCards = _cardsOrder.value.toMutableList().apply {
-            remove(card)
-        }
+        val newCards =
+            _cardsOrder.value.toMutableList().apply {
+                remove(card)
+            }
         saveCardOrder(newCards)
     }
 
     fun addCard(card: DashboardCards) {
-        val newCards = _cardsOrder.value.toMutableList().apply {
-            if (card !in this) {
-                add(card)
+        val newCards =
+            _cardsOrder.value.toMutableList().apply {
+                if (card !in this) {
+                    add(card)
+                }
             }
-        }
         saveCardOrder(newCards)
     }
 
@@ -61,7 +61,9 @@ class DashboardManager(
     }
 }
 
-enum class DashboardCards(val title: StringResource) {
+enum class DashboardCards(
+    val title: StringResource,
+) {
     ArrOverview(MR.strings.dashboard_arr_overview),
     SeerrOverview(MR.strings.dashboard_seerr_overview),
     ProwlarrOverview(MR.strings.dashboard_prowlarr_overview),
@@ -72,13 +74,23 @@ enum class DashboardCards(val title: StringResource) {
     OnToday(MR.strings.dashboard_todays_releases),
     UpcomingReleases(MR.strings.dashboard_upcoming_releases),
     InstanceDashboard(MR.strings.dashboard_instance_dashboards),
-    BazarrOverview(MR.strings.dashboard_bazarr_overview);
+    BazarrOverview(MR.strings.dashboard_bazarr_overview),
+    ;
 
     companion object {
         val defaultEntries: List<DashboardCards>
-            get() = listOf(
-                ArrOverview, SeerrOverview, ProwlarrOverview, BazarrOverview, ActivityQueue,
-                RecentlyAdded, OnToday, UpcomingReleases, Network, InstanceDashboard
-            )
+            get() =
+                listOf(
+                    ArrOverview,
+                    SeerrOverview,
+                    ProwlarrOverview,
+                    BazarrOverview,
+                    ActivityQueue,
+                    RecentlyAdded,
+                    OnToday,
+                    UpcomingReleases,
+                    Network,
+                    InstanceDashboard,
+                )
     }
 }

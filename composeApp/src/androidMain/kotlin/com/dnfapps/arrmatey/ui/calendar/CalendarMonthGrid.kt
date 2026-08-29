@@ -20,24 +20,29 @@ fun CalendarMonthGrid(
     currentMonth: LocalDate,
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate) -> Unit,
-    state: CalendarState
+    state: CalendarState,
 ) {
     val firstDayOfMonth = LocalDate(currentMonth.year, currentMonth.month, 1)
     val daysInMonth = currentMonth.daysInMonth()
-    val firstDayOfWeek = firstDayOfMonth.dayOfWeek.ordinal+1
+    val firstDayOfWeek = firstDayOfMonth.dayOfWeek.ordinal + 1
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth()) {
             listOf(
-                MR.strings.sun, MR.strings.mon, MR.strings.tues, MR.strings.wed,
-                MR.strings.thu, MR.strings.fri, MR.strings.sat
+                MR.strings.sun,
+                MR.strings.mon,
+                MR.strings.tues,
+                MR.strings.wed,
+                MR.strings.thu,
+                MR.strings.fri,
+                MR.strings.sat,
             ).forEach { day ->
                 Text(
                     text = mokoString(day),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -56,7 +61,7 @@ fun CalendarMonthGrid(
                             isSelected = date == selectedDate,
                             items = state.items[date] ?: emptyList(),
                             modifier = Modifier.weight(1f),
-                            onClick = { onDateSelected(date) }
+                            onClick = { onDateSelected(date) },
                         )
                     } else {
                         Spacer(modifier = Modifier.weight(1f))

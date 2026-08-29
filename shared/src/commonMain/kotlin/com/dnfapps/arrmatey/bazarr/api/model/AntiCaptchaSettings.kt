@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AntiCaptchaSettings(
-    val anti_captcha_key: String
+    val anti_captcha_key: String,
 )

@@ -11,11 +11,11 @@ import com.dnfapps.arrmatey.arr.usecase.GetBookEditionUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetBookHistoryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
-import com.dnfapps.arrmatey.model.OperationStatus
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,9 +32,8 @@ class BookDetailsViewModel(
     private val performAutomaticSearchUseCase: PerformAutomaticSearchUseCase,
     private val getBookHistoryUseCase: GetBookHistoryUseCase,
     private val deleteBookFilesUseCase: DeleteBookFilesUseCase,
-    private val getBookEditionUseCase: GetBookEditionUseCase
-): ViewModel() {
-
+    private val getBookEditionUseCase: GetBookEditionUseCase,
+) : ViewModel() {
     private val _book = MutableStateFlow(book)
     val book: StateFlow<Book> = _book.asStateFlow()
 
@@ -70,7 +69,8 @@ class BookDetailsViewModel(
 
     private fun observeSelectedInstance() {
         viewModelScope.launch {
-            getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Booksehelf)
+            getArrInstanceRepositoryUseCase
+                .observeSelected(InstanceType.Booksehelf)
                 .filterNotNull()
                 .collectLatest { repository ->
                     currentRepository = repository
@@ -85,8 +85,7 @@ class BookDetailsViewModel(
             repository.authorBooks
                 .map { booksMap ->
                     booksMap[authorId]?.firstOrNull { it.id == _book.value.id }
-                }
-                .collect { book ->
+                }.collect { book ->
                     book?.let { _book.value = it }
                 }
         }
@@ -94,8 +93,7 @@ class BookDetailsViewModel(
             repository.authorBookFiles
                 .map { booksFilesMap ->
                     booksFilesMap[authorId]?.filter { it.bookId == _book.value.id }
-                }
-                .collect { bookFiles ->
+                }.collect { bookFiles ->
                     _bookFiles.value = bookFiles ?: emptyList()
                 }
         }
@@ -129,7 +127,7 @@ class BookDetailsViewModel(
                     mediaId = authorId,
                     type = InstanceType.Booksehelf,
                     repository = it,
-                    bookId = _book.value.id
+                    bookId = _book.value.id,
                 )
             }
         }

@@ -38,14 +38,17 @@ fun DiscoverSection(
     icon: ImageVector,
     data: PagedData<DiscoverResult>,
     onItemClick: (DiscoverResult) -> Unit,
-    onLoadMore: () -> Unit
+    onLoadMore: () -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
 
     val shouldLoadMore by remember {
         derivedStateOf {
             val totalItemsCount = lazyListState.layoutInfo.totalItemsCount
-            val lastVisibleItemIndex = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val lastVisibleItemIndex =
+                lazyListState.layoutInfo.visibleItemsInfo
+                    .lastOrNull()
+                    ?.index ?: 0
             lastVisibleItemIndex >= totalItemsCount - 5 && totalItemsCount > 0
         }
     }
@@ -59,14 +62,14 @@ fun DiscoverSection(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(icon, null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
             Text(
                 text = mokoString(title),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         }
 
@@ -81,13 +84,13 @@ fun DiscoverSection(
                 state = lazyListState,
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 items(items) { item ->
                     PosterItem(
                         item = item,
                         modifier = Modifier.width(120.dp),
-                        onItemClick = { onItemClick(item) }
+                        onItemClick = { onItemClick(item) },
                     )
                 }
 
@@ -101,7 +104,7 @@ fun DiscoverSection(
             Text(
                 text = data.error ?: "",
                 modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
             )
         }
     }

@@ -27,7 +27,7 @@ import org.koin.compose.koinInject
 @Composable
 fun App(
     windowSizeClass: WindowSizeClass,
-    preferences: PreferencesStore = koinInject()
+    preferences: PreferencesStore = koinInject(),
 ) {
     val showReleaseNotesSheet by preferences.shouldShowReleaseNotes.collectAsStateWithLifecycle(false)
 
@@ -36,7 +36,7 @@ fun App(
 
     LaunchedEffect(Unit) {
         preferences.markFirstLaunchComplete()
-        
+
         val seen = preferences.localNetworkNoticeSeen.first()
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN &&
@@ -58,7 +58,7 @@ fun App(
 
         if (showLocalNetworkNotice) {
             AlertDialog(
-                onDismissRequest = { 
+                onDismissRequest = {
                     showLocalNetworkNotice = false
                     preferences.markLocalNetworkNoticeAsSeen()
                 },
@@ -72,7 +72,7 @@ fun App(
                     }) {
                         Text(mokoString(MR.strings.ok))
                     }
-                }
+                },
             )
         }
     }

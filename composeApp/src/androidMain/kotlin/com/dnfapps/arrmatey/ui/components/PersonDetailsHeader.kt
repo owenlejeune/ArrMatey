@@ -5,7 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -14,20 +13,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun PersonDetailsHeader(
     item: PersonDetails,
     credits: PersonCredits?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val backdrops = credits?.backdrops ?: emptyList()
     var currentIndex by remember { mutableIntStateOf(0) }
@@ -46,26 +43,27 @@ fun PersonDetailsHeader(
             targetState = backdrops.getOrNull(currentIndex),
             animationSpec = tween(1500),
             label = "BackdropSlideshow",
-            modifier = Modifier.matchParentSize()
+            modifier = Modifier.matchParentSize(),
         ) { url ->
             Box(modifier = Modifier.fillMaxSize()) {
                 DetailHeaderBanner(
                     bannerUrl = url,
-                    gradientHeight = 150.dp
+                    gradientHeight = 150.dp,
                 )
             }
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 170.dp)
-                .padding(horizontal = 12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 170.dp)
+                    .padding(horizontal = 12.dp),
         ) {
             PosterItem(
                 item = item,
                 modifier = Modifier.width(150.dp),
-                showOverlays = false
+                showOverlays = false,
             )
         }
     }

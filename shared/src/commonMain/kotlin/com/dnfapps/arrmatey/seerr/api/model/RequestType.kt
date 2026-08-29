@@ -11,12 +11,15 @@ enum class RequestType {
     Tv,
 
     @SerialName("person")
-    Person;
+    Person,
+
+    ;
 
     val associatedInstanceType: InstanceType?
-        get() = when(this) {
-            Movie -> InstanceType.Radarr
-            Tv -> InstanceType.Sonarr
-            Person -> null
-        }
+        get() =
+            when (this) {
+                Movie -> InstanceType.Radarr
+                Tv -> InstanceType.Sonarr
+                Person -> null
+            }
 }

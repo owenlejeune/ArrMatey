@@ -25,6 +25,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Run Spotless Check (ktlint)
+        run: ./gradlew spotlessCheck
+
       - name: Run Lint
         run: ./gradlew lintDebug
 

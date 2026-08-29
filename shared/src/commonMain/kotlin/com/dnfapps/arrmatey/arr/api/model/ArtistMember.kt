@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class ArtistMember(
     val name: String? = null,
     val instrument: String? = null,
-    val images: List<ArrImage> = emptyList()
+    val images: List<ArrImage> = emptyList(),
 )

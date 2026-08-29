@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SABnzbdQueueData(
     @SerialName("slots") val slots: List<SABnzbdQueueSlot> = emptyList(),
-    @SerialName("kbpersec") val kbPerSec: String = "0"
+    @SerialName("kbpersec") val kbPerSec: String = "0",
 )

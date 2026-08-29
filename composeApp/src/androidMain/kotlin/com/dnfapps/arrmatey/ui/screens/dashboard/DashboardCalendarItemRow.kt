@@ -30,42 +30,46 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun DashboardCalendarItemRow(
     dashboardItem: DashboardCalendarItem,
-    showDate: Boolean = false
+    showDate: Boolean = false,
 ) {
     val item = dashboardItem.item
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        val title = when (item) {
-            is Episode -> item.series?.title ?: ""
-            is EpisodeGroup -> item.first.series?.title ?: ""
-            is ArrAlbum -> item.artist?.title ?: ""
-            is ArrMovie -> item.title ?: ""
-            is Audiobook -> item.title ?: ""
-            is Book -> item.title
-        }
-        val sub = when (item) {
-            is Episode -> "${item.seasonEpLabel}: ${item.title ?: ""}"
-            is EpisodeGroup -> {
-                val episodes = listOf(item.first) + item.additional
-                episodes.joinToString(", ") { "${it.seasonEpLabel}: ${it.title ?: ""}" }
+        val title =
+            when (item) {
+                is Episode -> item.series?.title ?: ""
+                is EpisodeGroup -> item.first.series?.title ?: ""
+                is ArrAlbum -> item.artist?.title ?: ""
+                is ArrMovie -> item.title ?: ""
+                is Audiobook -> item.title ?: ""
+                is Book -> item.title
             }
-            is ArrAlbum -> item.title ?: ""
-            is ArrMovie -> {
-                val label = when {
-                    item.physicalRelease?.isEqual(dashboardItem.date) == true -> mokoString(MR.strings.physical_release)
-                    item.digitalRelease?.isEqual(dashboardItem.date) == true -> mokoString(MR.strings.digital_release)
-                    item.inCinemas?.isEqual(dashboardItem.date) == true -> mokoString(MR.strings.in_cinemas)
-                    else -> mokoString(MR.strings.release_date)
+        val sub =
+            when (item) {
+                is Episode -> "${item.seasonEpLabel}: ${item.title ?: ""}"
+                is EpisodeGroup -> {
+                    val episodes = listOf(item.first) + item.additional
+                    episodes.joinToString(", ") { "${it.seasonEpLabel}: ${it.title ?: ""}" }
                 }
-                label
+                is ArrAlbum -> item.title ?: ""
+                is ArrMovie -> {
+                    val label =
+                        when {
+                            item.physicalRelease?.isEqual(dashboardItem.date) == true -> mokoString(MR.strings.physical_release)
+                            item.digitalRelease?.isEqual(dashboardItem.date) == true -> mokoString(MR.strings.digital_release)
+                            item.inCinemas?.isEqual(dashboardItem.date) == true -> mokoString(MR.strings.in_cinemas)
+                            else -> mokoString(MR.strings.release_date)
+                        }
+                    label
+                }
+                else -> ""
             }
-            else -> ""
-        }
 
-        val color = item.associatedType?.associatedColor
-            ?: MaterialTheme.colorScheme.primary
+        val color =
+            item.associatedType?.associatedColor
+                ?: MaterialTheme.colorScheme.primary
 
         Box(Modifier.size(4.dp).clip(CircleShape).background(color))
         Column {
@@ -77,7 +81,7 @@ fun DashboardCalendarItemRow(
                 Text(
                     text = dashboardItem.date.format("EEE, MMM d"),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
         }

@@ -32,13 +32,11 @@ data class ReadarrQueueItem(
     override val outputPath: String? = null,
     override val downloadClientHasPostImportCategory: Boolean = false,
     override var taskGroupCount: Int? = null,
-
     val authorId: Long? = null,
     val author: Author? = null,
     val bookId: Long? = null,
-    val book: Book? = null
-): QueueItem {
-
+    val book: Book? = null,
+) : QueueItem {
     override val type = InstanceType.Booksehelf
 
     override val taskGroup: String

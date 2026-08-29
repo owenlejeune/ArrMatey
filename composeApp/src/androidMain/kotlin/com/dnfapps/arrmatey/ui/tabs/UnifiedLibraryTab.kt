@@ -22,24 +22,28 @@ fun UnifiedLibraryTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
     navigationManager: NavigationManager = koinInject(),
-    navigation: Navigator<NavKey> = navigationManager.navigatorFor(TabItem.Standard.LIBRARY)
+    navigation: Navigator<NavKey> = navigationManager.navigatorFor(TabItem.Standard.LIBRARY),
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
     TwoPaneMasterDetailNavDisplay(
         navigation = navigation,
         isExpanded = isExpanded,
-        entryProvider = unifiedLibraryEntryProvider(isExpanded, wideRailIsVisible, navigation)
+        entryProvider = unifiedLibraryEntryProvider(isExpanded, wideRailIsVisible, navigation),
     )
 }
 
-private fun unifiedLibraryEntryProvider(isExpanded: Boolean, wideRailIsVisible: Boolean, navigation: Navigator<*>) = entryProvider {
+private fun unifiedLibraryEntryProvider(
+    isExpanded: Boolean,
+    wideRailIsVisible: Boolean,
+    navigation: Navigator<*>,
+) = entryProvider {
     entry<ArrScreen.Library> {
         UnifiedLibraryScreen(
             isExpanded = isExpanded,
             wideRailIsVisible = wideRailIsVisible,
             onNavigateToSearch = { query, type, instanceId -> navigation.toSearch(query, type, instanceId) },
-            onNavigateToDetails = { media, type, instanceId -> navigation.toMediaDetails(media, type, instanceId) }
+            onNavigateToDetails = { media, type, instanceId -> navigation.toMediaDetails(media, type, instanceId) },
         )
     }
     mediaNavEntries(navigation = navigation, isExpanded = isExpanded, defaultInstanceType = InstanceType.Sonarr)

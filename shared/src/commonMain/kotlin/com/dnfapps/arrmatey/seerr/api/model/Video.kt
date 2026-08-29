@@ -9,5 +9,5 @@ data class Video(
     val name: String,
     val size: Int,
     val type: String,
-    val site: String
+    val site: String,
 )

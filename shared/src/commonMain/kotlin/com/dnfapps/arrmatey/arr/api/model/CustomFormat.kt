@@ -7,5 +7,5 @@ data class CustomFormat(
     val id: Int,
     val name: String,
     val includeCustomFormatWhenRenaming: Boolean = false,
-    val specifications: List<Specification> = emptyList()
+    val specifications: List<Specification> = emptyList(),
 )

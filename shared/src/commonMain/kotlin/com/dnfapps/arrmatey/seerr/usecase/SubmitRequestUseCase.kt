@@ -8,8 +8,6 @@ import com.dnfapps.networking.NetworkResult
 class SubmitRequestUseCase {
     suspend operator fun invoke(
         request: RequestMediaBody,
-        repository: SeerrInstanceRepository
-    ): NetworkResult<MediaRequest> {
-        return repository.createRequest(request)
-    }
+        repository: SeerrInstanceRepository,
+    ): NetworkResult<MediaRequest> = repository.createRequest(request)
 }

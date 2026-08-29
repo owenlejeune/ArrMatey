@@ -15,6 +15,5 @@ data class RadarrHistoryItem(
     override val customFormats: List<CustomFormat> = emptyList(),
     override val customFormatScore: Int? = null,
     override val data: Map<String, String?> = emptyMap(),
-
-    val movieId: Long
-): HistoryItem
+    val movieId: Long,
+) : HistoryItem

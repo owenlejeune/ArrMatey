@@ -13,8 +13,7 @@ data class Service(
     val is4k: Boolean = false,
 )
 
-
-//{
+// {
 //    "id": 0,
 //    "name": "Radarr",
 //    "is4k": false,
@@ -22,4 +21,4 @@ data class Service(
 //    "activeDirectory": "/movies",
 //    "activeProfileId": 8,
 //    "activeTags": []
-//}
+// }

@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TransmissionRpcResponse<T>(
     @SerialName("result") val result: String = "",
-    @SerialName("arguments") val arguments: T? = null
+    @SerialName("arguments") val arguments: T? = null,
 )

@@ -20,5 +20,5 @@ data class MediaInfo(
     val resolution: String? = null,
     val runTime: String? = null,
     val scanType: String? = null,
-    val subtitles: String? = null
+    val subtitles: String? = null,
 )

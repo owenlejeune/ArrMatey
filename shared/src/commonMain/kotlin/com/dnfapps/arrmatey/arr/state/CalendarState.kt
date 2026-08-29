@@ -1,12 +1,6 @@
 package com.dnfapps.arrmatey.arr.state
 
-import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
-import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.extensions.localToday
 import kotlinx.datetime.LocalDate
 import kotlin.time.Clock
@@ -19,7 +13,7 @@ data class CalendarState(
     val isLoadingFuture: Boolean = false,
     val hasLoaded: Boolean = false,
     val error: String? = null,
-    val today: LocalDate = Clock.localToday()
+    val today: LocalDate = Clock.localToday(),
 ) {
-    constructor(): this(CalendarFilterState())
+    constructor() : this(CalendarFilterState())
 }

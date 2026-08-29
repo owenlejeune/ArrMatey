@@ -41,7 +41,7 @@ import dev.icerock.moko.resources.compose.painterResource
 @Composable
 fun DashboardDownloadClientsSection(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean
+    isEditing: Boolean,
 ) {
     val clients = state.downloadClients
     val totalDownloadSpeed = state.downloadTransfers.sumOf { it.downloadSpeed }
@@ -49,50 +49,52 @@ fun DashboardDownloadClientsSection(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             clients.forEach { state ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Image(
                         painter = painterResource(state.client.type.icon),
                         contentDescription = null,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = state.client.label,
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             Text(
                                 text = "${state.activeDownloadsCount} ${mokoString(MR.strings.downloads)}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             if (!state.isOnline) {
                                 Box(
-                                    modifier = Modifier
-                                        .size(4.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.error)
+                                    modifier =
+                                        Modifier
+                                            .size(4.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.error),
                                 )
                                 Text(
                                     text = mokoString(MR.strings.offline),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.error
+                                    color = MaterialTheme.colorScheme.error,
                                 )
                             }
                         }
@@ -103,30 +105,34 @@ fun DashboardDownloadClientsSection(
                         Column(horizontalAlignment = Alignment.End) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
                                 Icon(
-                                    Icons.Default.ExpandMore, null,
-                                    tint = ArrGreen, modifier = Modifier.size(16.dp)
+                                    Icons.Default.ExpandMore,
+                                    null,
+                                    tint = ArrGreen,
+                                    modifier = Modifier.size(16.dp),
                                 )
                                 Text(
                                     text = "${transferInfo.downloadSpeed.bytesAsFileSizeString()}/s",
                                     style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
                                 )
                             }
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
                                 Icon(
-                                    Icons.Default.ExpandLess, null,
-                                    tint = ArrBlue, modifier = Modifier.size(16.dp)
+                                    Icons.Default.ExpandLess,
+                                    null,
+                                    tint = ArrBlue,
+                                    modifier = Modifier.size(16.dp),
                                 )
                                 Text(
                                     text = "${transferInfo.uploadSpeed.bytesAsFileSizeString()}/s",
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
@@ -137,21 +143,22 @@ fun DashboardDownloadClientsSection(
             if (state.activeDownloads.isNotEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.Download, null,
-                        modifier = Modifier.size(20.dp)
+                        Icons.Default.Download,
+                        null,
+                        modifier = Modifier.size(20.dp),
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         mokoString(MR.strings.downloads),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                     Spacer(Modifier.weight(1f))
                     if (totalDownloadSpeed > 0) {
                         Text(
                             "${totalDownloadSpeed.bytesAsFileSizeString()}/s",
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -164,30 +171,30 @@ fun DashboardDownloadClientsSection(
                                 style = MaterialTheme.typography.bodyMedium,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             )
                             Text(
                                 "${(download.progress * 100).toInt()}%",
                                 style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
                             )
                         }
 
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
                                 text = "${download.downloaded.bytesAsFileSizeString()} / ${download.size.bytesAsFileSizeString()}",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Spacer(Modifier.weight(1f))
                             if (download.downloadSpeed > 0) {
                                 Text(
                                     text = "${download.downloadSpeed.bytesAsFileSizeString()}/s",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = ArrGreen
+                                    color = ArrGreen,
                                 )
                             }
                         }
@@ -203,10 +210,10 @@ fun DashboardDownloadClientsSection(
                     Text(
                         mokoString(
                             MR.strings.additional_items_count,
-                            state.activeDownloads.size - 5
+                            state.activeDownloads.size - 5,
                         ),
                         style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.align(Alignment.End)
+                        modifier = Modifier.align(Alignment.End),
                     )
                 }
             }

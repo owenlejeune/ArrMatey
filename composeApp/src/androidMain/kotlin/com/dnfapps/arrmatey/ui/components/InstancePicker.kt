@@ -39,7 +39,7 @@ fun InstancePicker(
     typeInstances: List<Instance>,
     onInstanceSelected: (Instance) -> Unit,
     modifier: Modifier = Modifier,
-    buttonColors: IconButtonColors = IconButtonDefaults.iconButtonColors()
+    buttonColors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
 ) {
     val navManager = navigationManager
     var isExpanded by remember { mutableStateOf(false) }
@@ -48,7 +48,7 @@ fun InstancePicker(
     Box(modifier = modifier) {
         IconButton(
             onClick = { isExpanded = true },
-            colors = buttonColors
+            colors = buttonColors,
         ) {
             Icon(Hard_drive, null)
         }
@@ -60,32 +60,32 @@ fun InstancePicker(
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 1),
                 interactionSource = interactionSource,
-                containerColor = MenuDefaults.groupVibrantContainerColor
+                containerColor = MenuDefaults.groupVibrantContainerColor,
             ) {
                 typeInstances.forEachIndexed { index, inst ->
                     DropdownMenuItem(
                         text = { Text(inst.label) },
                         selected = inst.id == currentInstance?.id,
-                        shapes = MenuDefaults.itemShape(index, typeInstances.size+1),
+                        shapes = MenuDefaults.itemShape(index, typeInstances.size + 1),
                         colors = MenuDefaults.selectableItemVibrantColors(),
                         onClick = {
                             isExpanded = false
                             onInstanceSelected(inst)
                         },
-                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) }
+                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                     )
                 }
                 HorizontalDivider(Modifier.padding(MenuDefaults.HorizontalDividerPadding))
                 DropdownMenuItem(
                     text = { Text(mokoString(MR.strings.add_instance)) },
                     selected = false,
-                    shapes = MenuDefaults.itemShape(typeInstances.size, typeInstances.size+1),
+                    shapes = MenuDefaults.itemShape(typeInstances.size, typeInstances.size + 1),
                     colors = MenuDefaults.selectableItemVibrantColors(),
                     leadingIcon = { Icon(Icons.Default.Add, null) },
                     onClick = {
                         isExpanded = false
                         navManager.openNewInstanceScreen(type)
-                    }
+                    },
                 )
             }
         }

@@ -26,7 +26,7 @@ class AppShortcutManager(
     private val moko: MokoStrings,
     private val instanceRepository: InstanceRepository,
     private val downloadClientRepository: DownloadClientRepository,
-    private val preferenceStore: AndroidPreferencesStore
+    private val preferenceStore: AndroidPreferencesStore,
 ) {
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -48,7 +48,7 @@ class AppShortcutManager(
         val label: String,
         val action: String,
         val iconRes: Int,
-        val extras: Map<String, String> = emptyMap()
+        val extras: Map<String, String> = emptyMap(),
     )
 
     init {
@@ -56,7 +56,7 @@ class AppShortcutManager(
             instanceRepository.observeAllInstances(),
             downloadClientRepository.observeAllDownloadClients(),
             preferenceStore.shortcutsOrder,
-            preferenceStore.disabledShortcuts
+            preferenceStore.disabledShortcuts,
         ) { _, _, _, _ -> }
             .onEach { updateShortcuts() }
             .launchIn(scope)
@@ -68,63 +68,77 @@ class AppShortcutManager(
 
         InstanceType.arrs().forEach { type ->
             if (allInstances.any { it.type == type }) {
-                shortcuts.add(ShortcutItem(
-                    id = "search_${type.name.lowercase()}",
-                    label = moko.getString(MR.strings.arr_search_shortcut, listOf(type.name)),
-                    action = ACTION_OPEN_SEARCH,
-                    iconRes = R.drawable.baseline_search_24,
-                    extras = mapOf(EXTRA_INSTANCE_TYPE to type.name)
-                ))
+                shortcuts.add(
+                    ShortcutItem(
+                        id = "search_${type.name.lowercase()}",
+                        label = moko.getString(MR.strings.arr_search_shortcut, listOf(type.name)),
+                        action = ACTION_OPEN_SEARCH,
+                        iconRes = R.drawable.baseline_search_24,
+                        extras = mapOf(EXTRA_INSTANCE_TYPE to type.name),
+                    ),
+                )
 
-                shortcuts.add(ShortcutItem(
-                    id = "library_${type.name.lowercase()}",
-                    label = moko.getString(MR.strings.arr_library_shortcut, listOf(type.name)),
-                    action = ACTION_OPEN_LIBRARY,
-                    iconRes = type.tabIcon?.drawableResId ?: R.drawable.outline_browse_24,
-                    extras = mapOf(EXTRA_INSTANCE_TYPE to type.name)
-                ))
+                shortcuts.add(
+                    ShortcutItem(
+                        id = "library_${type.name.lowercase()}",
+                        label = moko.getString(MR.strings.arr_library_shortcut, listOf(type.name)),
+                        action = ACTION_OPEN_LIBRARY,
+                        iconRes = type.tabIcon?.drawableResId ?: R.drawable.outline_browse_24,
+                        extras = mapOf(EXTRA_INSTANCE_TYPE to type.name),
+                    ),
+                )
             }
         }
 
         val allDownloadClients = downloadClientRepository.observeAllDownloadClients().first()
         if (allDownloadClients.isNotEmpty()) {
-            shortcuts.add(ShortcutItem(
-                id = "downloads",
-                label = moko.getString(MR.strings.downloads),
-                action = ACTION_OPEN_DOWNLOADS,
-                iconRes = R.drawable.outline_cloud_download_24
-            ))
+            shortcuts.add(
+                ShortcutItem(
+                    id = "downloads",
+                    label = moko.getString(MR.strings.downloads),
+                    action = ACTION_OPEN_DOWNLOADS,
+                    iconRes = R.drawable.outline_cloud_download_24,
+                ),
+            )
         }
 
         if (allInstances.any { it.type == InstanceType.Seerr }) {
-            shortcuts.add(ShortcutItem(
-                id = "requests",
-                label = moko.getString(MR.strings.requests),
-                action = ACTION_OPEN_REQUESTS,
-                iconRes = R.drawable.outline_inbox_24
-            ))
+            shortcuts.add(
+                ShortcutItem(
+                    id = "requests",
+                    label = moko.getString(MR.strings.requests),
+                    action = ACTION_OPEN_REQUESTS,
+                    iconRes = R.drawable.outline_inbox_24,
+                ),
+            )
         }
 
-        shortcuts.add(ShortcutItem(
-            id = "calendar",
-            label = moko.getString(MR.strings.schedule),
-            action = ACTION_OPEN_SCHEDULE,
-            iconRes = R.drawable.outline_calendar_today_24
-        ))
+        shortcuts.add(
+            ShortcutItem(
+                id = "calendar",
+                label = moko.getString(MR.strings.schedule),
+                action = ACTION_OPEN_SCHEDULE,
+                iconRes = R.drawable.outline_calendar_today_24,
+            ),
+        )
 
-        shortcuts.add(ShortcutItem(
-            id = "activity",
-            label = moko.getString(MR.strings.activity),
-            action = ACTION_OPEN_ACTIVITY,
-            iconRes = R.drawable.outline_download_24
-        ))
+        shortcuts.add(
+            ShortcutItem(
+                id = "activity",
+                label = moko.getString(MR.strings.activity),
+                action = ACTION_OPEN_ACTIVITY,
+                iconRes = R.drawable.outline_download_24,
+            ),
+        )
 
-        shortcuts.add(ShortcutItem(
-            id = "dashboard",
-            label = moko.getString(MR.strings.dashboard),
-            action = ACTION_OPEN_DASHBOARD,
-            iconRes = R.drawable.baseline_dashboard_24
-        ))
+        shortcuts.add(
+            ShortcutItem(
+                id = "dashboard",
+                label = moko.getString(MR.strings.dashboard),
+                action = ACTION_OPEN_DASHBOARD,
+                iconRes = R.drawable.baseline_dashboard_24,
+            ),
+        )
 
         return shortcuts
     }
@@ -135,23 +149,24 @@ class AppShortcutManager(
         val disabled = preferenceStore.disabledShortcuts.first()
 
         val shortcutMap = availableShortcuts.associateBy { it.id }
-        
+
         val newShortcuts = availableShortcuts.filter { it.id !in order }
-        
-        val orderedShortcuts = if (order.isEmpty()) {
-            availableShortcuts
-        } else {
-            val existingOrder = order.mapNotNull { shortcutMap[it] }
-            // Find the index of the first disabled shortcut to insert new enabled ones before it
-            val firstDisabledIndex = existingOrder.indexOfFirst { it.id in disabled }
-            if (firstDisabledIndex == -1) {
-                existingOrder + newShortcuts
+
+        val orderedShortcuts =
+            if (order.isEmpty()) {
+                availableShortcuts
             } else {
-                val list = existingOrder.toMutableList()
-                list.addAll(firstDisabledIndex, newShortcuts)
-                list
+                val existingOrder = order.mapNotNull { shortcutMap[it] }
+                // Find the index of the first disabled shortcut to insert new enabled ones before it
+                val firstDisabledIndex = existingOrder.indexOfFirst { it.id in disabled }
+                if (firstDisabledIndex == -1) {
+                    existingOrder + newShortcuts
+                } else {
+                    val list = existingOrder.toMutableList()
+                    list.addAll(firstDisabledIndex, newShortcuts)
+                    list
+                }
             }
-        }
 
         // If there are new shortcuts or some were removed from order, save the updated order
         val currentOrderIds = orderedShortcuts.map { it.id }
@@ -161,15 +176,16 @@ class AppShortcutManager(
 
         val shortcutsToDisplay = orderedShortcuts.filter { it.id !in disabled }
 
-        val shortcutInfos = shortcutsToDisplay.map { item ->
-            createShortcut(
-                id = item.id,
-                label = item.label,
-                action = item.action,
-                iconRes = item.iconRes,
-                extras = item.extras
-            )
-        }
+        val shortcutInfos =
+            shortcutsToDisplay.map { item ->
+                createShortcut(
+                    id = item.id,
+                    label = item.label,
+                    action = item.action,
+                    iconRes = item.iconRes,
+                    extras = item.extras,
+                )
+            }
 
         ShortcutManagerCompat.setDynamicShortcuts(context, shortcutInfos)
     }
@@ -179,15 +195,17 @@ class AppShortcutManager(
         label: String,
         action: String,
         iconRes: Int,
-        extras: Map<String, String> = emptyMap()
+        extras: Map<String, String> = emptyMap(),
     ): ShortcutInfoCompat {
-        val intent = Intent(context, MainActivity::class.java).apply {
-            this.action = action
-            extras.forEach { (key, value) -> putExtra(key, value) }
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
+        val intent =
+            Intent(context, MainActivity::class.java).apply {
+                this.action = action
+                extras.forEach { (key, value) -> putExtra(key, value) }
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
 
-        return ShortcutInfoCompat.Builder(context, id)
+        return ShortcutInfoCompat
+            .Builder(context, id)
             .setShortLabel(label)
             .setLongLabel(label)
             .setIcon(IconCompat.createWithResource(context, iconRes))

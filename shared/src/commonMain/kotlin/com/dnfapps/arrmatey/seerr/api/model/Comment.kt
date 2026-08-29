@@ -10,5 +10,5 @@ data class Comment(
     val message: String,
     @Contextual val createdAt: Instant? = null,
     @Contextual val updatedAt: Instant? = null,
-    val user: RequestUser? = null
+    val user: RequestUser? = null,
 )

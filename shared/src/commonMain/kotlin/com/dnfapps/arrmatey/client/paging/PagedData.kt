@@ -7,7 +7,7 @@ data class PagedData<T>(
     val hasMore: Boolean = false,
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
 ) {
     val isEmpty: Boolean
         get() = items.isEmpty() && !isLoading && error == null
@@ -15,5 +15,5 @@ data class PagedData<T>(
     val canLoadMore: Boolean
         get() = hasMore && !isLoadingMore && !isLoading
 
-    constructor(): this(emptyList()) // empty ios constructor
+    constructor() : this(emptyList()) // empty ios constructor
 }

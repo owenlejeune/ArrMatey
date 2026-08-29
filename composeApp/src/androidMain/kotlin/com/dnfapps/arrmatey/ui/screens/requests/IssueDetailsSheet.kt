@@ -54,7 +54,7 @@ fun IssueDetailsSheet(
     ip: MediaIssuePackage,
     onDismiss: () -> Unit,
     onIssueClosed: () -> Unit = onDismiss,
-    viewModel: IssueDetailsViewModel = koinInjectParams(ip)
+    viewModel: IssueDetailsViewModel = koinInjectParams(ip),
 ) {
     val context = LocalContext.current
 
@@ -95,42 +95,45 @@ fun IssueDetailsSheet(
     val commentsList = uiState.issuePackage.issue.comments
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
+            modifier =
+                Modifier
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-                    .weight(1f, fill = false),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 commentsList.minByOrNull { it.id }?.let { description ->
                     item {
                         Text(
                             text = mokoString(MR.strings.description),
-                            style = MaterialTheme.typography.headlineSmall
+                            style = MaterialTheme.typography.headlineSmall,
                         )
                     }
                     item {
                         Text(
                             text = description.message,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
                     }
                     item {
                         UserInfoRow(
                             label = mokoString(MR.strings.opened_by),
                             avatar = description.user?.avatar,
-                            displayName = description.user?.displayName ?: mokoString(MR.strings.unknown)
+                            displayName = description.user?.displayName ?: mokoString(MR.strings.unknown),
                         )
                         description.createdAt?.format()?.let { createdAt ->
                             Text(
                                 text = createdAt,
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     }
@@ -139,7 +142,7 @@ fun IssueDetailsSheet(
                     item {
                         Text(
                             text = mokoString(MR.strings.comments),
-                            style = MaterialTheme.typography.headlineSmall
+                            style = MaterialTheme.typography.headlineSmall,
                         )
                     }
                     val subList = commentsList.subList(fromIndex = 1, toIndex = commentsList.size)
@@ -152,17 +155,17 @@ fun IssueDetailsSheet(
                                 model = rememberRemoteImageData(comment.user?.avatar),
                                 modifier = Modifier.size(36.dp).clip(CircleShape),
                                 contentDescription = null,
-                                contentScale = ContentScale.Fit
+                                contentScale = ContentScale.Fit,
                             )
                             Column {
                                 Text(
                                     text = comment.message,
-                                    style = MaterialTheme.typography.bodyLarge
+                                    style = MaterialTheme.typography.bodyLarge,
                                 )
                                 comment.createdAt?.format()?.let { createdAt ->
                                     Text(
                                         text = createdAt,
-                                        style = MaterialTheme.typography.bodySmall
+                                        style = MaterialTheme.typography.bodySmall,
                                     )
                                 }
                             }
@@ -174,15 +177,16 @@ fun IssueDetailsSheet(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton (
+                IconButton(
                     onClick = { confirmCloseIssue = true },
                     modifier = Modifier.size(50.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    )
+                    colors =
+                        IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
                 ) {
                     Icon(Icons.Default.CheckCircleOutline, null)
                 }
@@ -197,7 +201,7 @@ fun IssueDetailsSheet(
                             onClick = {
                                 viewModel.submitIssueComment(newComment)
                             },
-                            enabled = uiState.commentSubmissionStatus != OperationStatus.InProgress && newComment.isNotEmpty()
+                            enabled = uiState.commentSubmissionStatus != OperationStatus.InProgress && newComment.isNotEmpty(),
                         ) {
                             if (uiState.commentSubmissionStatus is OperationStatus.InProgress) {
                                 CircularProgressIndicator(Modifier.size(24.dp))
@@ -206,7 +210,7 @@ fun IssueDetailsSheet(
                             }
                         }
                     },
-                    enabled = uiState.commentSubmissionStatus != OperationStatus.InProgress
+                    enabled = uiState.commentSubmissionStatus != OperationStatus.InProgress,
                 )
             }
         }
@@ -227,7 +231,7 @@ fun IssueDetailsSheet(
                 TextButton(onClick = { confirmCloseIssue = false }) {
                     Text(mokoString(MR.strings.no))
                 }
-            }
+            },
         )
     }
 }

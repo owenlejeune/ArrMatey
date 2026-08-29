@@ -45,14 +45,15 @@ fun FullScreenSearchAppBar(
     searchBarState: SearchBarState = rememberSearchBarState(),
     searchPlaceholder: String = mokoString(MR.strings.search),
     scrollBehavior: SearchBarScrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior(),
-    colors: AppBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
-        searchBarColors = SearchBarDefaults.containedColors(state = searchBarState)
-    ),
+    colors: AppBarWithSearchColors =
+        SearchBarDefaults.appBarWithSearchColors(
+            searchBarColors = SearchBarDefaults.containedColors(state = searchBarState),
+        ),
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     leadingIcon: @Composable () -> Unit = { Icon(Icons.Default.Search, null) },
     trailingIcon: @Composable () -> Unit = {},
-    expandedContent: @Composable ColumnScope.() -> Unit
+    expandedContent: @Composable ColumnScope.() -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val inputField =
@@ -67,7 +68,7 @@ fun FullScreenSearchAppBar(
                         modifier = Modifier.clearAndSetSemantics {},
                         text = searchPlaceholder,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 },
                 leadingIcon = {
@@ -81,7 +82,7 @@ fun FullScreenSearchAppBar(
                 },
                 trailingIcon = {
                     AnimatedContent(
-                        targetState = textFieldState.text.isNotEmpty()
+                        targetState = textFieldState.text.isNotEmpty(),
                     ) { isNotEmpty ->
                         if (isNotEmpty) {
                             IconButton(onClick = { textFieldState.clearText() }) {
@@ -91,7 +92,7 @@ fun FullScreenSearchAppBar(
                             trailingIcon()
                         }
                     }
-                }
+                },
             )
         }
 
@@ -106,18 +107,18 @@ fun FullScreenSearchAppBar(
                 visible = searchBarState.isCollapsed(),
                 enter = expandIn(),
                 exit = shrinkOut(),
-                content = { navigationIcon() }
+                content = { navigationIcon() },
             )
         },
         actions = {
             AnimatedVisibility(
                 visible = searchBarState.isCollapsed(),
                 enter = expandIn(),
-                exit = shrinkOut()
+                exit = shrinkOut(),
             ) {
                 Row { actions() }
             }
-        }
+        },
     )
     ExpandedFullScreenContainedSearchBar(
         state = searchBarState,

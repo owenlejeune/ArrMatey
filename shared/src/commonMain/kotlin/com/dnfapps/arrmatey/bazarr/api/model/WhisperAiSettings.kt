@@ -8,5 +8,5 @@ data class WhisperAiSettings(
     val loglevel: String,
     val pass_video_name: Boolean,
     val response: Int,
-    val timeout: Int
+    val timeout: Int,
 )

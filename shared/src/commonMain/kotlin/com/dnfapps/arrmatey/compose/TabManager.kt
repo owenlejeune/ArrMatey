@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 
 class TabManager(
     private val preferencesStore: PreferencesStore,
-    customWebpageRepository: CustomWebpageRepository
+    customWebpageRepository: CustomWebpageRepository,
 ) {
     private val tabPreferencesFlow = preferencesStore.tabPreferences
     private val customWebpagesFlow = customWebpageRepository.getAllWebpages()
@@ -26,37 +26,38 @@ class TabManager(
         val visibleTabs: List<TabItem> = TabItem.defaultStandardEntries(),
         val drawerTabs: List<TabItem> = TabItem.defaultHiddenStandard(),
         val hiddenTabs: List<TabItem> = emptyList(),
-        val isInitialValue: Boolean = false
+        val isInitialValue: Boolean = false,
     ) {
-        constructor(): this(TabItem.defaultStandardEntries()) // empty ios constructor
+        constructor() : this(TabItem.defaultStandardEntries()) // empty ios constructor
     }
 
-    val tabConfiguration: StateFlow<TabConfiguration> = combine(
-        tabPreferencesFlow,
-        customWebpagesFlow
-    ) { prefs, webpages ->
-        TabConfiguration(
-            visibleTabs = buildVisibleTabs(prefs, webpages),
-            drawerTabs = buildDrawerTabs(prefs, webpages),
-            hiddenTabs = buildHiddenTabs(prefs, webpages),
-            isInitialValue = false
-        )
-    }
-        .stateIn(
+    val tabConfiguration: StateFlow<TabConfiguration> =
+        combine(
+            tabPreferencesFlow,
+            customWebpagesFlow,
+        ) { prefs, webpages ->
+            TabConfiguration(
+                visibleTabs = buildVisibleTabs(prefs, webpages),
+                drawerTabs = buildDrawerTabs(prefs, webpages),
+                hiddenTabs = buildHiddenTabs(prefs, webpages),
+                isInitialValue = false,
+            )
+        }.stateIn(
             scope = CoroutineScope(Dispatchers.IO),
             started = SharingStarted.Eagerly,
-            initialValue = TabConfiguration(isInitialValue = true)
+            initialValue = TabConfiguration(isInitialValue = true),
         )
 
     fun hideTab(item: TabItem) {
         CoroutineScope(Dispatchers.IO).launch {
             val currentPrefs = tabPreferencesFlow.first()
             if (item.key !in currentPrefs.orderedRemovedKeys) {
-                val newPrefs = currentPrefs.copy(
-                    orderedVisibleKeys = currentPrefs.orderedVisibleKeys - item.key,
-                    orderedHiddenKeys = currentPrefs.orderedHiddenKeys - item.key,
-                    orderedRemovedKeys = currentPrefs.orderedRemovedKeys + item.key
-                )
+                val newPrefs =
+                    currentPrefs.copy(
+                        orderedVisibleKeys = currentPrefs.orderedVisibleKeys - item.key,
+                        orderedHiddenKeys = currentPrefs.orderedHiddenKeys - item.key,
+                        orderedRemovedKeys = currentPrefs.orderedRemovedKeys + item.key,
+                    )
                 preferencesStore.updateTabPreferences(newPrefs)
             }
         }
@@ -66,37 +67,35 @@ class TabManager(
         CoroutineScope(Dispatchers.IO).launch {
             val currentPrefs = tabPreferencesFlow.first()
             if (item.key in currentPrefs.orderedRemovedKeys) {
-                val newPrefs = currentPrefs.copy(
-                    orderedVisibleKeys = currentPrefs.orderedVisibleKeys,
-                    orderedHiddenKeys = currentPrefs.orderedHiddenKeys + item.key,
-                    orderedRemovedKeys = currentPrefs.orderedRemovedKeys - item.key
-                )
+                val newPrefs =
+                    currentPrefs.copy(
+                        orderedVisibleKeys = currentPrefs.orderedVisibleKeys,
+                        orderedHiddenKeys = currentPrefs.orderedHiddenKeys + item.key,
+                        orderedRemovedKeys = currentPrefs.orderedRemovedKeys - item.key,
+                    )
                 preferencesStore.updateTabPreferences(newPrefs)
             }
         }
     }
 
-    fun getVisibleTabs(): Flow<List<TabItem>> {
-        return combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
+    fun getVisibleTabs(): Flow<List<TabItem>> =
+        combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
             buildVisibleTabs(prefs, webpages)
         }
-    }
 
-    fun getHiddenTabs(): Flow<List<TabItem>> {
-        return combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
+    fun getHiddenTabs(): Flow<List<TabItem>> =
+        combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
             buildDrawerTabs(prefs, webpages)
         }
-    }
 
-    fun getAllTabs(): Flow<List<TabItem>> {
-        return combine(getVisibleTabs(), getHiddenTabs()) { visible, hidden ->
+    fun getAllTabs(): Flow<List<TabItem>> =
+        combine(getVisibleTabs(), getHiddenTabs()) { visible, hidden ->
             visible + hidden
         }
-    }
 
     private fun buildVisibleTabs(
         prefs: TabPreferences,
-        webpages: List<CustomWebpage>
+        webpages: List<CustomWebpage>,
     ): List<TabItem> {
         val standardItems = TabItem.Standard.entries.associateBy { it.key }
         val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }
@@ -107,7 +106,7 @@ class TabManager(
 
     private fun buildDrawerTabs(
         prefs: TabPreferences,
-        webpages: List<CustomWebpage>
+        webpages: List<CustomWebpage>,
     ): List<TabItem> {
         val standardItems = TabItem.Standard.entries.associateBy { it.key }
         val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }
@@ -131,7 +130,7 @@ class TabManager(
 
     private fun buildHiddenTabs(
         prefs: TabPreferences,
-        webpages: List<CustomWebpage>
+        webpages: List<CustomWebpage>,
     ): List<TabItem> {
         val standardItems = TabItem.Standard.entries.associateBy { it.key }
         val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }

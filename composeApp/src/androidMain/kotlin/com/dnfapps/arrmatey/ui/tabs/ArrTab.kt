@@ -22,14 +22,14 @@ fun ArrTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
     navigationManager: NavigationManager = koinInject(),
-    navigation: Navigator<NavKey> = navigationManager.arr(type)
+    navigation: Navigator<NavKey> = navigationManager.arr(type),
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
     TwoPaneMasterDetailNavDisplay(
         navigation = navigation,
         isExpanded = isExpanded,
-        entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation)
+        entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation),
     )
 }
 
@@ -37,7 +37,7 @@ private fun arrEntryProvider(
     type: InstanceType,
     isExpanded: Boolean,
     wideRailIsVisible: Boolean,
-    navigation: Navigator<*>
+    navigation: Navigator<*>,
 ) = entryProvider {
     entry<ArrScreen.Library> {
         ArrLibraryScreen(
@@ -45,7 +45,7 @@ private fun arrEntryProvider(
             isExpanded = isExpanded,
             wideRailIsVisible = wideRailIsVisible,
             onNavigateToSearch = { query, resolvedType, instanceId -> navigation.toSearch(query, resolvedType, instanceId) },
-            onNavigateToDetails = { media, instanceId -> navigation.toMediaDetails(media, type, instanceId) }
+            onNavigateToDetails = { media, instanceId -> navigation.toMediaDetails(media, type, instanceId) },
         )
     }
     mediaNavEntries(navigation = navigation, isExpanded = isExpanded, defaultInstanceType = type)

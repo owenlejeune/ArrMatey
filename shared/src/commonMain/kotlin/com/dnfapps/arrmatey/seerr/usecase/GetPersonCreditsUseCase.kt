@@ -7,8 +7,6 @@ import com.dnfapps.networking.NetworkResult
 class GetPersonCreditsUseCase {
     suspend operator fun invoke(
         personId: Long,
-        repository: SeerrInstanceRepository
-    ): NetworkResult<PersonCredits> {
-        return repository.getPersonCredits(personId)
-    }
+        repository: SeerrInstanceRepository,
+    ): NetworkResult<PersonCredits> = repository.getPersonCredits(personId)
 }

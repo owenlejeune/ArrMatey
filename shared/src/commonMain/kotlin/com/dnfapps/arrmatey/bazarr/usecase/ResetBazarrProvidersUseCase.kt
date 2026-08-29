@@ -1,10 +1,8 @@
 package com.dnfapps.arrmatey.bazarr.usecase
 
-import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
+import com.dnfapps.networking.NetworkResult
 
 class ResetBazarrProvidersUseCase {
-    suspend operator fun invoke(repository: BazarrInstanceRepository): NetworkResult<Unit> {
-        return repository.resetProviders()
-    }
+    suspend operator fun invoke(repository: BazarrInstanceRepository): NetworkResult<Unit> = repository.resetProviders()
 }

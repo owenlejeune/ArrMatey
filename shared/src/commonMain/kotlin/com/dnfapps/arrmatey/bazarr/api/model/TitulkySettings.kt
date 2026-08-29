@@ -7,5 +7,5 @@ data class TitulkySettings(
     val approved_only: Boolean,
     val password: String,
     val skip_wrong_fps: Boolean,
-    val username: String
+    val username: String,
 )

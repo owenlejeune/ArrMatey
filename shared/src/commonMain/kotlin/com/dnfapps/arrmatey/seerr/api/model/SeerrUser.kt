@@ -31,7 +31,5 @@ data class SeerrUser(
         return (this.permissions and permission.bit) != 0
     }
 
-    fun hasAnyPermission(vararg permissions: UserPermission): Boolean {
-        return permissions.any { hasPermission(it) }
-    }
+    fun hasAnyPermission(vararg permissions: UserPermission): Boolean = permissions.any { hasPermission(it) }
 }

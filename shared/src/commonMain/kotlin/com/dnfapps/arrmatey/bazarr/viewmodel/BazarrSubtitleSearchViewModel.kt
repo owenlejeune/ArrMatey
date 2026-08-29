@@ -5,11 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.bazarr.api.model.ProviderSubtitle
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.SubtitleSearchState
+import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
+import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
-import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
-import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,9 +24,8 @@ import kotlinx.coroutines.launch
  */
 class BazarrSubtitleSearchViewModel(
     private val target: BazarrMediaTarget,
-    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase
+    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
 ) : ViewModel() {
-
     private val _searchState = MutableStateFlow<SubtitleSearchState>(SubtitleSearchState.Idle)
     val searchState: StateFlow<SubtitleSearchState> = _searchState.asStateFlow()
 
@@ -37,8 +36,7 @@ class BazarrSubtitleSearchViewModel(
         search()
     }
 
-    private suspend fun repo(): BazarrInstanceRepository? =
-        getBazarrInstanceRepositoryUseCase.observeSelected().firstOrNull()
+    private suspend fun repo(): BazarrInstanceRepository? = getBazarrInstanceRepositoryUseCase.observeSelected().firstOrNull()
 
     fun search() {
         viewModelScope.launch {
@@ -48,10 +46,11 @@ class BazarrSubtitleSearchViewModel(
                 _searchState.value = SubtitleSearchState.Error("No Bazarr instance configured")
                 return@launch
             }
-            val result = when (target) {
-                is BazarrMediaTarget.Episode -> repo.searchEpisodeSubtitles(target.episodeId)
-                is BazarrMediaTarget.Movie -> repo.searchMovieSubtitles(target.radarrId)
-            }
+            val result =
+                when (target) {
+                    is BazarrMediaTarget.Episode -> repo.searchEpisodeSubtitles(target.episodeId)
+                    is BazarrMediaTarget.Movie -> repo.searchMovieSubtitles(target.radarrId)
+                }
             result
                 .onSuccess { _searchState.value = SubtitleSearchState.Success(it) }
                 .onError { _, message, _ ->
@@ -65,12 +64,13 @@ class BazarrSubtitleSearchViewModel(
             val repo = repo() ?: return@launch
             val key = result.key()
             _downloadStates.update { it + (key to OperationStatus.InProgress) }
-            val op = when (target) {
-                is BazarrMediaTarget.Episode ->
-                    repo.downloadEpisodeSubtitle(target.seriesId, target.episodeId, result)
-                is BazarrMediaTarget.Movie ->
-                    repo.downloadMovieSubtitle(target.radarrId, result)
-            }
+            val op =
+                when (target) {
+                    is BazarrMediaTarget.Episode ->
+                        repo.downloadEpisodeSubtitle(target.seriesId, target.episodeId, result)
+                    is BazarrMediaTarget.Movie ->
+                        repo.downloadMovieSubtitle(target.radarrId, result)
+                }
             op
                 .onSuccess { _downloadStates.update { m -> m + (key to OperationStatus.Success()) } }
                 .onError { code, message, cause ->

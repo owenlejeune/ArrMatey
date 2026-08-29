@@ -9,10 +9,10 @@ import com.dnfapps.arrmatey.bazarr.usecase.DownloadBazarrSubtitleToDeviceUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrEpisodesUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrMediaDetailsUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.PerformBazarrAutomaticSearchUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
-import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,21 +29,20 @@ class BazarrDetailsViewModel(
     private val getBazarrEpisodesUseCase: GetBazarrEpisodesUseCase,
     private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
     private val performBazarrAutomaticSearchUseCase: PerformBazarrAutomaticSearchUseCase,
-    private val downloadBazarrSubtitleToDeviceUseCase: DownloadBazarrSubtitleToDeviceUseCase
+    private val downloadBazarrSubtitleToDeviceUseCase: DownloadBazarrSubtitleToDeviceUseCase,
 ) : ViewModel() {
-
     private val _operationState = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val operationState: StateFlow<OperationStatus> = _operationState.asStateFlow()
 
-    val uiState: StateFlow<BazarrDetails> = getBazarrMediaDetailsUseCase(id, mediaType)
-        .combine(getBazarrEpisodesUseCase(id)) { details, episodes ->
-            BazarrDetails(details, episodes)
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = BazarrDetails()
-        )
+    val uiState: StateFlow<BazarrDetails> =
+        getBazarrMediaDetailsUseCase(id, mediaType)
+            .combine(getBazarrEpisodesUseCase(id)) { details, episodes ->
+                BazarrDetails(details, episodes)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = BazarrDetails(),
+            )
 
     fun performSearch() {
         viewModelScope.launch {
@@ -52,8 +51,7 @@ class BazarrDetailsViewModel(
             performBazarrAutomaticSearchUseCase(id, mediaType, repo)
                 .onSuccess {
                     _operationState.value = OperationStatus.Success()
-                }
-                .onError { code, message, cause ->
+                }.onError { code, message, cause ->
                     _operationState.value = OperationStatus.Error(code, message, cause)
                 }
         }
@@ -63,7 +61,10 @@ class BazarrDetailsViewModel(
         _operationState.value = OperationStatus.Idle
     }
 
-    fun downloadToDevice(subtitle: BazarrSubtitle, onResult: (ByteArray?) -> Unit) {
+    fun downloadToDevice(
+        subtitle: BazarrSubtitle,
+        onResult: (ByteArray?) -> Unit,
+    ) {
         viewModelScope.launch {
             downloadBazarrSubtitleToDeviceUseCase(subtitle, onResult)
         }

@@ -12,6 +12,4 @@ inline fun <R> String.unlessEmpty(block: (String) -> R): R? {
     return if (this.isEmpty()) null else block(this)
 }
 
-fun String.takeUnlessEmpty(): String? {
-    return this.takeUnless { it.isEmpty() }
-}
+fun String.takeUnlessEmpty(): String? = this.takeUnless { it.isEmpty() }

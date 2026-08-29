@@ -32,7 +32,7 @@ fun ConfirmDeleteAlert(
     initialAddExclusion: Boolean = false,
     initialDeleteFiles: Boolean = false,
     onDismiss: () -> Unit,
-    onDelete: (Boolean, Boolean) -> Unit
+    onDelete: (Boolean, Boolean) -> Unit,
 ) {
     var addExclusion by remember { mutableStateOf(initialAddExclusion) }
     var deleteFiles by remember { mutableStateOf(initialDeleteFiles) }
@@ -42,45 +42,48 @@ fun ConfirmDeleteAlert(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !deleteInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !deleteInProgress },
+            ),
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
+            modifier =
+                Modifier
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.add_exclusion),
                 sublabel = mokoString(MR.strings.add_exclusion_description),
                 checked = addExclusion,
-                onCheckedChange = { addExclusion = !addExclusion }
+                onCheckedChange = { addExclusion = !addExclusion },
             )
             LabelledSwitch(
                 label = mokoString(MR.strings.delete_files),
                 sublabel = mokoString(MR.strings.delete_files_description),
                 checked = deleteFiles,
-                onCheckedChange = { deleteFiles = !deleteFiles }
+                onCheckedChange = { deleteFiles = !deleteFiles },
             )
             Button(
                 onClick = { onDelete(deleteFiles, addExclusion) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
-                enabled = !deleteInProgress
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
+                enabled = !deleteInProgress,
             ) {
                 if (deleteInProgress) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(text = mokoString(MR.strings.delete))
                 }

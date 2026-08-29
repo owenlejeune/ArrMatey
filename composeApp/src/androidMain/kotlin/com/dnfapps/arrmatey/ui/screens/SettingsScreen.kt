@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
@@ -73,11 +72,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.ReleaseNotesSheet
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.extensions.nowTimestamp
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -85,6 +84,7 @@ import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.model.IconSource
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.permissions.rememberLocalNetworkPermissionHandler
@@ -106,7 +106,6 @@ import com.mikepenz.aboutlibraries.util.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
-import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -122,7 +121,7 @@ fun SettingsScreen(
     onNavigateToAddCustomWebpage: () -> Unit = {},
     onNavigateToTabPreferences: () -> Unit = {},
     onNavigateToShortcutsPreferences: () -> Unit = {},
-    onNavigateToDev: () -> Unit = {}
+    onNavigateToDev: () -> Unit = {},
 ) {
     val navManager = navigationManager
     val context = LocalContext.current
@@ -142,34 +141,37 @@ fun SettingsScreen(
 
     var showChangelogSheet by remember { mutableStateOf(false) }
 
-    val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json"),
-        onResult = { uri ->
-            uri?.let {
-                backupViewModel.exportData { encryptedData ->
-                    context.contentResolver.openOutputStream(it)?.use { outputStream ->
-                        outputStream.write(encryptedData.toByteArray())
+    val exportLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/json"),
+            onResult = { uri ->
+                uri?.let {
+                    backupViewModel.exportData { encryptedData ->
+                        context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                            outputStream.write(encryptedData.toByteArray())
+                        }
+                        Toast.makeText(context, moko.getString(MR.strings.export_ready), Toast.LENGTH_SHORT).show()
                     }
-                    Toast.makeText(context, moko.getString(MR.strings.export_ready), Toast.LENGTH_SHORT).show()
                 }
-            }
-        }
-    )
+            },
+        )
 
-    val importLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-        onResult = { uri ->
-            uri?.let {
-                val encryptedData = context.contentResolver.openInputStream(it)?.use { inputStream ->
-                    inputStream.readBytes().decodeToString()
+    val importLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+            onResult = { uri ->
+                uri?.let {
+                    val encryptedData =
+                        context.contentResolver.openInputStream(it)?.use { inputStream ->
+                            inputStream.readBytes().decodeToString()
+                        }
+                    if (encryptedData != null) {
+                        pendingImportData = encryptedData
+                        showImportDialog = true
+                    }
                 }
-                if (encryptedData != null) {
-                    pendingImportData = encryptedData
-                    showImportDialog = true
-                }
-            }
-        }
-    )
+            },
+        )
 
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
@@ -201,19 +203,20 @@ fun SettingsScreen(
                 navigationIcon = {
                     NavigationDrawerButton()
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
-                .padding(bottom = navigationBarBottomInset() + 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = navigationBarBottomInset() + 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN &&
@@ -223,48 +226,51 @@ fun SettingsScreen(
                 Card(
                     shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    )
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             Icon(Icons.Default.WifiOff, null)
                             Text(
                                 text = mokoString(MR.strings.local_network_denied_title),
                                 style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             )
                             IconButton(
                                 onClick = { viewModel.dismissLocalNetworkPermissionInfo() },
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(24.dp),
                             ) {
                                 Icon(Icons.Default.Close, null)
                             }
                         }
                         Text(
                             text = mokoString(MR.strings.local_network_denied_description),
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                         Button(
                             onClick = {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = Uri.fromParts("package", context.packageName, null)
-                                }
+                                val intent =
+                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = Uri.fromParts("package", context.packageName, null)
+                                    }
                                 context.startActivity(intent)
                             },
                             modifier = Modifier.align(Alignment.End),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            )
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                    contentColor = MaterialTheme.colorScheme.onError,
+                                ),
                         ) {
                             Text(mokoString(MR.strings.open_settings))
                         }
@@ -274,318 +280,341 @@ fun SettingsScreen(
 
             SettingsGroup(
                 title = mokoString(MR.strings.instances),
-                items = allInstances.map { instance ->
-                    SettingItem(
-                        icon = IconSource.Resource(instance.type.icon),
-                        title = instance.label,
-                        subtitle = instance.url,
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.Default.ChevronRight,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        },
-                        onClick = {
-                            onNavigateToInstance(instance.id, instance.type)
-                        },
-                        titleExtraContent = {
-                            Box(
-                                modifier = Modifier.size(18.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                when (instanceConnectionStatues[instance.id]) {
-                                    is OperationStatus.InProgress -> CircularProgressIndicator()
-                                    is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                    is OperationStatus.Error -> Icon(Icons.Default.WifiOff,  null, tint = Color.Red)
-                                    else -> {}
+                items =
+                    allInstances.map { instance ->
+                        SettingItem(
+                            icon = IconSource.Resource(instance.type.icon),
+                            title = instance.label,
+                            subtitle = instance.url,
+                            trailingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            },
+                            onClick = {
+                                onNavigateToInstance(instance.id, instance.type)
+                            },
+                            titleExtraContent = {
+                                Box(
+                                    modifier = Modifier.size(18.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    when (instanceConnectionStatues[instance.id]) {
+                                        is OperationStatus.InProgress -> CircularProgressIndicator()
+                                        is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
+                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = Color.Red)
+                                        else -> {}
+                                    }
                                 }
-                            }
-                        }
-                    )
-                } + SettingItem(
-                    title = mokoString(MR.strings.add_instance),
-                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                    icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                    onClick = {
-                        onNavigateToAddInstance()
-                    }
-                )
+                            },
+                        )
+                    } +
+                        SettingItem(
+                            title = mokoString(MR.strings.add_instance),
+                            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                            icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                            onClick = {
+                                onNavigateToAddInstance()
+                            },
+                        ),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.download_clients),
-                items = allDownloadClients.map { downloadClient ->
-                    SettingItem(
-                        icon = IconSource.Resource(downloadClient.type.icon),
-                        title = downloadClient.label,
-                        subtitle = downloadClient.url,
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.Default.ChevronRight,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        },
-                        onClick = {
-                            onNavigateToEditDownloadClient(downloadClient.id)
-                        },
-                        titleExtraContent = {
-                            Box(
-                                modifier = Modifier.size(18.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                when (instanceConnectionStatues[downloadClient.id + 100_000]) {
-                                    is OperationStatus.InProgress -> CircularProgressIndicator()
-                                    is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                    is OperationStatus.Error -> Icon(Icons.Default.WifiOff,  null, tint = Color.Red)
-                                    else -> {}
+                items =
+                    allDownloadClients.map { downloadClient ->
+                        SettingItem(
+                            icon = IconSource.Resource(downloadClient.type.icon),
+                            title = downloadClient.label,
+                            subtitle = downloadClient.url,
+                            trailingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            },
+                            onClick = {
+                                onNavigateToEditDownloadClient(downloadClient.id)
+                            },
+                            titleExtraContent = {
+                                Box(
+                                    modifier = Modifier.size(18.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    when (instanceConnectionStatues[downloadClient.id + 100_000]) {
+                                        is OperationStatus.InProgress -> CircularProgressIndicator()
+                                        is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
+                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = Color.Red)
+                                        else -> {}
+                                    }
                                 }
-                            }
-                        }
-                    )
-                } + SettingItem(
-                    title = mokoString(MR.strings.add_download_client),
-                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                    icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                    onClick = {
-                        onNavigateToAddDownloadClient()
-                    }
-                )
+                            },
+                        )
+                    } +
+                        SettingItem(
+                            title = mokoString(MR.strings.add_download_client),
+                            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                            icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                            onClick = {
+                                onNavigateToAddDownloadClient()
+                            },
+                        ),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.custom_webpages),
-                items = allCustomWebPages.map { webpage ->
-                    SettingItem(
-                        title = webpage.name,
-                        subtitle = webpage.url,
-                        icon = IconSource.Vector(Icons.Default.Language),
-                        onClick = {
-                            onNavigateToEditCustomWebpage(webpage.id)
-                        },
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.Default.ChevronRight,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        },
-                    )
-                } + SettingItem(
-                    title = mokoString(MR.strings.add_custom_webpage),
-                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                    icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                    onClick = {
-                        onNavigateToAddCustomWebpage()
-                    }
-                )
+                items =
+                    allCustomWebPages.map { webpage ->
+                        SettingItem(
+                            title = webpage.name,
+                            subtitle = webpage.url,
+                            icon = IconSource.Vector(Icons.Default.Language),
+                            onClick = {
+                                onNavigateToEditCustomWebpage(webpage.id)
+                            },
+                            trailingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            },
+                        )
+                    } +
+                        SettingItem(
+                            title = mokoString(MR.strings.add_custom_webpage),
+                            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                            icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                            onClick = {
+                                onNavigateToAddCustomWebpage()
+                            },
+                        ),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.user_interface),
-                items = listOf(
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Contrast),
-                        title = mokoString(MR.strings.theme),
-                        subtitle = mokoString(appTheme.resource),
-                        onClick = { showThemeDropdown = true },
-                        trailingContent = {
-                            Box {
-                                DropdownMenu(
-                                    expanded = showThemeDropdown,
-                                    onDismissRequest = { showThemeDropdown = false }
-                                ) {
-                                    AppTheme.entries.forEach { theme ->
-                                        DropdownMenuItem(
-                                            text = { Text(mokoString(theme.resource)) },
-                                            onClick = {
-                                                viewModel.setAppTheme(theme)
-                                                showThemeDropdown = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Palette),
-                        title = mokoString(MR.strings.color),
-                        subtitle = mokoString(appColor.resource),
-                        onClick = { showColorDropdown = true },
-                        trailingContent = {
-                            Box {
-                                DropdownMenu(
-                                    expanded = showColorDropdown,
-                                    onDismissRequest = { showColorDropdown = false }
-                                ) {
-                                    AppColor.entries
-                                        .filter { it != AppColor.Dynamic || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S }
-                                        .forEach { color ->
+                items =
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Contrast),
+                            title = mokoString(MR.strings.theme),
+                            subtitle = mokoString(appTheme.resource),
+                            onClick = { showThemeDropdown = true },
+                            trailingContent = {
+                                Box {
+                                    DropdownMenu(
+                                        expanded = showThemeDropdown,
+                                        onDismissRequest = { showThemeDropdown = false },
+                                    ) {
+                                        AppTheme.entries.forEach { theme ->
                                             DropdownMenuItem(
-                                                text = { Text(mokoString(color.resource)) },
+                                                text = { Text(mokoString(theme.resource)) },
                                                 onClick = {
-                                                    viewModel.setAppColor(color)
-                                                    showColorDropdown = false
-                                                }
+                                                    viewModel.setAppTheme(theme)
+                                                    showThemeDropdown = false
+                                                },
                                             )
                                         }
+                                    }
                                 }
-                            }
-                        }
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Palette),
+                            title = mokoString(MR.strings.color),
+                            subtitle = mokoString(appColor.resource),
+                            onClick = { showColorDropdown = true },
+                            trailingContent = {
+                                Box {
+                                    DropdownMenu(
+                                        expanded = showColorDropdown,
+                                        onDismissRequest = { showColorDropdown = false },
+                                    ) {
+                                        AppColor.entries
+                                            .filter { it != AppColor.Dynamic || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S }
+                                            .forEach { color ->
+                                                DropdownMenuItem(
+                                                    text = { Text(mokoString(color.resource)) },
+                                                    onClick = {
+                                                        viewModel.setAppColor(color)
+                                                        showColorDropdown = false
+                                                    },
+                                                )
+                                            }
+                                    }
+                                }
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Navigation),
+                            title = mokoString(MR.strings.navigation_bar_configuration),
+                            onClick = {
+                                onNavigateToTabPreferences()
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.AutoMirrored.Default.Shortcut),
+                            title = mokoString(MR.strings.shortcuts_configuration),
+                            onClick = {
+                                onNavigateToShortcutsPreferences()
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.MiscellaneousServices),
+                            title = mokoString(MR.strings.service_icons_title),
+                            subtitle = mokoString(MR.strings.service_icons_description),
+                            trailingContent = {
+                                Switch(
+                                    checked = useServiceNavLogos,
+                                    onCheckedChange = { viewModel.toggleUseServiceNavLogos() },
+                                )
+                            },
+                            onClick = { viewModel.toggleUseServiceNavLogos() },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Hard_drive),
+                            title = mokoString(MR.strings.instance_switcher_toggle_title),
+                            subtitle = mokoString(MR.strings.instance_switcher_toggle_description),
+                            trailingContent = {
+                                Switch(
+                                    checked = hideInstanceSwitcher,
+                                    onCheckedChange = { viewModel.toggleInstanceSwitcher() },
+                                )
+                            },
+                            onClick = { viewModel.toggleInstanceSwitcher() },
+                        ),
                     ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Navigation),
-                        title = mokoString(MR.strings.navigation_bar_configuration),
-                        onClick = {
-                            onNavigateToTabPreferences()
-                        }
-                    ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.AutoMirrored.Default.Shortcut),
-                        title = mokoString(MR.strings.shortcuts_configuration),
-                        onClick = {
-                            onNavigateToShortcutsPreferences()
-                        }
-                    ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.MiscellaneousServices),
-                        title = mokoString(MR.strings.service_icons_title),
-                        subtitle = mokoString(MR.strings.service_icons_description),
-                        trailingContent = {
-                            Switch(
-                                checked = useServiceNavLogos,
-                                onCheckedChange = { viewModel.toggleUseServiceNavLogos() }
-                            )
-                        },
-                        onClick = { viewModel.toggleUseServiceNavLogos() }
-                    ),
-                    SettingItem(
-                        icon = IconSource.Vector(Hard_drive),
-                        title = mokoString(MR.strings.instance_switcher_toggle_title),
-                        subtitle = mokoString(MR.strings.instance_switcher_toggle_description),
-                        trailingContent = {
-                            Switch(
-                                checked = hideInstanceSwitcher,
-                                onCheckedChange = { viewModel.toggleInstanceSwitcher() }
-                            )
-                        },
-                        onClick = { viewModel.toggleInstanceSwitcher() }
-                    )
-                )
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.search_results),
-                items = listOf(
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Image),
-                        title = mokoString(MR.strings.search_show_banners),
-                        trailingContent = {
-                            Switch(
-                                checked = searchShowBanners,
-                                onCheckedChange = { viewModel.toggleSearchShowBanners() }
-                            )
-                        },
-                        onClick = { viewModel.toggleSearchShowBanners() }
+                items =
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Image),
+                            title = mokoString(MR.strings.search_show_banners),
+                            trailingContent = {
+                                Switch(
+                                    checked = searchShowBanners,
+                                    onCheckedChange = { viewModel.toggleSearchShowBanners() },
+                                )
+                            },
+                            onClick = { viewModel.toggleSearchShowBanners() },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.BrightnessLow),
+                            title = mokoString(MR.strings.search_show_instance_indicator_shadow),
+                            trailingContent = {
+                                Switch(
+                                    checked = searchShowInstanceIndicatorShadow,
+                                    onCheckedChange = { viewModel.toggleSearchShowInstanceIndicatorShadow() },
+                                )
+                            },
+                            onClick = { viewModel.toggleSearchShowInstanceIndicatorShadow() },
+                        ),
                     ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.BrightnessLow),
-                        title = mokoString(MR.strings.search_show_instance_indicator_shadow),
-                        trailingContent = {
-                            Switch(
-                                checked = searchShowInstanceIndicatorShadow,
-                                onCheckedChange = { viewModel.toggleSearchShowInstanceIndicatorShadow() }
-                            )
-                        },
-                        onClick = { viewModel.toggleSearchShowInstanceIndicatorShadow() }
-                    )
-                )
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.deep_links_title),
-                items = listOf(
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Link),
-                        title = mokoString(MR.strings.tmdb_links),
-                        subtitle = mokoString(MR.strings.tmdb_links_description),
-                        onClick = {
-                            val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                Intent(
-                                    Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
-                                    "package:${context.packageName}".toUri()
-                                )
-                            } else {
-                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = Uri.fromParts("package", context.packageName, null)
-                                }
-                            }
-                            context.startActivity(intent)
-                        },
-                        trailingContent = {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                val isVerified = remember(context) {
-                                    val manager = context.getSystemService(DomainVerificationManager::class.java)
-                                    val userState = manager.getDomainVerificationUserState(context.packageName)
-                                    userState?.hostToStateMap?.entries?.any { (host, state) ->
-                                        host.contains("themoviedb.org") && (state == DomainVerificationUserState.DOMAIN_STATE_VERIFIED || state == DomainVerificationUserState.DOMAIN_STATE_SELECTED)
-                                    } == true
-                                }
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(
-                                        text = if (isVerified) mokoString(MR.strings.links_verified) else mokoString(MR.strings.links_not_verified),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = if (isVerified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                                    )
-                                    if (isVerified) {
-                                        Icon(
-                                            imageVector = Icons.Default.CheckCircle,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.primary
+                items =
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Link),
+                            title = mokoString(MR.strings.tmdb_links),
+                            subtitle = mokoString(MR.strings.tmdb_links_description),
+                            onClick = {
+                                val intent =
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        Intent(
+                                            Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                                            "package:${context.packageName}".toUri(),
                                         )
                                     } else {
-                                        Icon(
-                                            imageVector = Icons.Default.ChevronRight,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(24.dp)
-                                        )
+                                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                            data = Uri.fromParts("package", context.packageName, null)
+                                        }
                                     }
+                                context.startActivity(intent)
+                            },
+                            trailingContent = {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    val isVerified =
+                                        remember(context) {
+                                            val manager = context.getSystemService(DomainVerificationManager::class.java)
+                                            val userState = manager.getDomainVerificationUserState(context.packageName)
+                                            userState?.hostToStateMap?.entries?.any { (host, state) ->
+                                                host.contains("themoviedb.org") &&
+                                                    (
+                                                        state == DomainVerificationUserState.DOMAIN_STATE_VERIFIED ||
+                                                            state == DomainVerificationUserState.DOMAIN_STATE_SELECTED
+                                                    )
+                                            } == true
+                                        }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    ) {
+                                        Text(
+                                            text =
+                                                if (isVerified) {
+                                                    mokoString(
+                                                        MR.strings.links_verified,
+                                                    )
+                                                } else {
+                                                    mokoString(MR.strings.links_not_verified)
+                                                },
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = if (isVerified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                        )
+                                        if (isVerified) {
+                                            Icon(
+                                                imageVector = Icons.Default.CheckCircle,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp),
+                                                tint = MaterialTheme.colorScheme.primary,
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Default.ChevronRight,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(24.dp),
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.ChevronRight,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                    )
                                 }
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
-                    )
-                )
+                            },
+                        ),
+                    ),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.backup_restore),
-                items = listOf(
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Upload),
-                        title = mokoString(MR.strings.backup),
-                        subtitle = mokoString(MR.strings.backup_description),
-                        onClick = { showExportDialog = true }
+                items =
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Upload),
+                            title = mokoString(MR.strings.backup),
+                            subtitle = mokoString(MR.strings.backup_description),
+                            onClick = { showExportDialog = true },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Download),
+                            title = mokoString(MR.strings.restore),
+                            subtitle = mokoString(MR.strings.restore_description),
+                            onClick = { importLauncher.launch(arrayOf("application/json")) },
+                        ),
                     ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Download),
-                        title = mokoString(MR.strings.restore),
-                        subtitle = mokoString(MR.strings.restore_description),
-                        onClick = { importLauncher.launch(arrayOf("application/json")) }
-                    )
-                )
             )
 
             AboutCard(
@@ -605,7 +634,7 @@ fun SettingsScreen(
                     context.openLink(moko.getString(MR.strings.bmac_link))
                 },
                 onLibrariesClick = { showLibrariesSheet = true },
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
             )
 
             if (isDebug()) {
@@ -621,15 +650,16 @@ fun SettingsScreen(
                     onClick = {
                         onNavigateToDev()
                     },
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 ) {
                     Text(
                         text = "Development Settings",
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(20.dp)
+                        modifier = Modifier.padding(20.dp),
                     )
                 }
             }
@@ -638,29 +668,34 @@ fun SettingsScreen(
         if (showLibrariesSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showLibrariesSheet = false },
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
             ) {
                 val libraries by produceState<Libs?>(null) {
-                    value = withContext(Dispatchers.IO) {
-                        Libs.Builder().withContext(context).build()
-                    }
+                    value =
+                        withContext(Dispatchers.IO) {
+                            Libs.Builder().withContext(context).build()
+                        }
                 }
                 LibrariesContainer(
                     libraries = libraries,
                     modifier = Modifier.fillMaxSize(),
-                    colors = LibraryDefaults.libraryColors(
-                        libraryBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow
-                    ),
-                    padding = LibraryDefaults.libraryPadding(
-                        licenseDialogContentPadding = 16.dp
-                    ),
-                    header = { item {
-                        Text(
-                            text = mokoString(MR.strings.libraries),
-                            style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                        )
-                    } }
+                    colors =
+                        LibraryDefaults.libraryColors(
+                            libraryBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        ),
+                    padding =
+                        LibraryDefaults.libraryPadding(
+                            licenseDialogContentPadding = 16.dp,
+                        ),
+                    header = {
+                        item {
+                            Text(
+                                text = mokoString(MR.strings.libraries),
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                            )
+                        }
+                    },
                 )
             }
         }
@@ -675,7 +710,7 @@ fun SettingsScreen(
                         onClick = {
                             shareLogs(context)
                             confirmShareLastLog = false
-                        }
+                        },
                     ) { Text(mokoString(MR.strings.yes)) }
                 },
                 dismissButton = {
@@ -683,13 +718,13 @@ fun SettingsScreen(
                         onClick = {
                             confirmShareLastLog = false
                             context.openLink(moko.getString(MR.strings.bug_report_link))
-                        }
+                        },
                     ) { Text(mokoString(MR.strings.no)) }
                 },
                 title = { Text(mokoString(MR.strings.share_crash_log)) },
                 text = {
                     Text(mokoString(MR.strings.share_crash_log_message))
-                }
+                },
             )
         }
 
@@ -708,7 +743,7 @@ fun SettingsScreen(
                 onToggleIncludeTabPreferences = { backupViewModel.toggleIncludeTabPreferences() },
                 onToggleIncludeUiPreferences = { backupViewModel.toggleIncludeUiPreferences() },
                 onToggleInstanceSelection = { backupViewModel.toggleInstanceSelection(it) },
-                onToggleDownloadClientSelection = { backupViewModel.toggleDownloadClientSelection(it) }
+                onToggleDownloadClientSelection = { backupViewModel.toggleDownloadClientSelection(it) },
             )
         }
 
@@ -737,7 +772,7 @@ fun SettingsScreen(
                         pendingImportData = null
                         Toast.makeText(context, moko.getString(MR.strings.import_complete), Toast.LENGTH_SHORT).show()
                     }
-                }
+                },
             )
         }
 

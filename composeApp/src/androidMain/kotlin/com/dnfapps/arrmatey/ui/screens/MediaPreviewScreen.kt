@@ -40,8 +40,9 @@ import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
-import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
@@ -53,7 +54,6 @@ import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.model.OperationStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +63,7 @@ fun MediaPreviewScreen(
     onBack: () -> Unit,
     onItemAdded: (Long) -> Unit,
     isExpanded: Boolean = false,
-    viewModel: MediaPreviewViewModel = koinInjectParams(item, type)
+    viewModel: MediaPreviewViewModel = koinInjectParams(item, type),
 ) {
     val context = LocalContext.current
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -102,44 +102,47 @@ fun MediaPreviewScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = { onBack() },
-                        colors = IconButtonDefaults.headerBarColors()
+                        colors = IconButtonDefaults.headerBarColors(),
                     ) {
                         Icon(
                             imageVector = if (isExpanded) Icons.Default.Close else Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(if (isExpanded) MR.strings.close else MR.strings.back)
+                            contentDescription = mokoString(if (isExpanded) MR.strings.close else MR.strings.back),
                         )
                     }
                 },
                 actions = {
                     IconButton(
                         onClick = { showBottomSheet = true },
-                        colors = IconButtonDefaults.headerBarColors()
+                        colors = IconButtonDefaults.headerBarColors(),
                     ) {
                         Icon(
                             imageVector = Icons.Default.AddCircle,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
-        Box(modifier = Modifier
-            .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
-            .fillMaxSize()
+        Box(
+            modifier =
+                Modifier
+                    .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
+                    .fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier.verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 DetailsHeader(item, type, topPadding = paddingValues.calculateTopPadding())
 
                 Column(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 24.dp)
-                        .padding(top = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = 24.dp)
+                            .padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
 //                    UpcomingDateView(item)
 
@@ -158,7 +161,7 @@ fun MediaPreviewScreen(
                     },
                     onUpdatePreferences = viewModel::updatePreferences,
                     onInstanceSelected = { viewModel.selectInstance(it) },
-                    onDismiss = { showBottomSheet = false }
+                    onDismiss = { showBottomSheet = false },
                 )
             }
         }
@@ -173,80 +176,86 @@ private fun AddMediaSheet(
     onAddItem: (ArrMedia, Boolean) -> Unit,
     onUpdatePreferences: (InstancePreferences) -> Unit,
     onInstanceSelected: (Instance) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     when (item) {
-        is ArrSeries -> AddSeriesSheet(
-            item,
-            uiState.qualityProfiles,
-            uiState.rootFolders,
-            uiState.tags,
-            uiState.addItemStatus == OperationStatus.InProgress,
-            uiState.preferences,
-            onUpdatePreferences,
-            onAddItem,
-            onDismiss,
-            instances = uiState.instances,
-            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
-            onInstanceSelected = onInstanceSelected
-        )
-        is ArrMovie -> AddMovieSheet(
-            item,
-            uiState.qualityProfiles,
-            uiState.rootFolders,
-            uiState.tags,
-            uiState.addItemStatus == OperationStatus.InProgress,
-            uiState.preferences,
-            onUpdatePreferences,
-            onAddItem,
-            onDismiss,
-            instances = uiState.instances,
-            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
-            onInstanceSelected = onInstanceSelected
-        )
-        is Arrtist -> AddArtistSheet(
-            item,
-            uiState.qualityProfiles,
-            uiState.rootFolders,
-            uiState.tags,
-            uiState.addItemStatus == OperationStatus.InProgress,
-            uiState.preferences,
-            onUpdatePreferences,
-            onAddItem,
-            onDismiss,
-            instances = uiState.instances,
-            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
-            onInstanceSelected = onInstanceSelected
-        )
-        is Author -> AddAuthorSheet(
-            item,
-            uiState.qualityProfiles,
-            uiState.rootFolders,
-            uiState.tags,
-            uiState.addItemStatus == OperationStatus.InProgress,
-            uiState.preferences,
-            onUpdatePreferences,
-            onAddItem,
-            onDismiss,
-            instances = uiState.instances,
-            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
-            onInstanceSelected = onInstanceSelected
-        )
-        is SearchAudiobook -> AddAudiobookSheet(
-            item,
-            uiState.qualityProfiles,
-            uiState.rootFolders,
-            uiState.relativePath,
-            uiState.addItemStatus == OperationStatus.InProgress,
-            uiState.preferences,
-            onUpdatePreferences,
-            onAddItem,
-            onDismiss,
-            instances = uiState.instances,
-            selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
-            onInstanceSelected = onInstanceSelected
-        )
+        is ArrSeries ->
+            AddSeriesSheet(
+                item,
+                uiState.qualityProfiles,
+                uiState.rootFolders,
+                uiState.tags,
+                uiState.addItemStatus == OperationStatus.InProgress,
+                uiState.preferences,
+                onUpdatePreferences,
+                onAddItem,
+                onDismiss,
+                instances = uiState.instances,
+                selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+                onInstanceSelected = onInstanceSelected,
+            )
+        is ArrMovie ->
+            AddMovieSheet(
+                item,
+                uiState.qualityProfiles,
+                uiState.rootFolders,
+                uiState.tags,
+                uiState.addItemStatus == OperationStatus.InProgress,
+                uiState.preferences,
+                onUpdatePreferences,
+                onAddItem,
+                onDismiss,
+                instances = uiState.instances,
+                selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+                onInstanceSelected = onInstanceSelected,
+            )
+        is Arrtist ->
+            AddArtistSheet(
+                item,
+                uiState.qualityProfiles,
+                uiState.rootFolders,
+                uiState.tags,
+                uiState.addItemStatus == OperationStatus.InProgress,
+                uiState.preferences,
+                onUpdatePreferences,
+                onAddItem,
+                onDismiss,
+                instances = uiState.instances,
+                selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+                onInstanceSelected = onInstanceSelected,
+            )
+        is Author ->
+            AddAuthorSheet(
+                item,
+                uiState.qualityProfiles,
+                uiState.rootFolders,
+                uiState.tags,
+                uiState.addItemStatus == OperationStatus.InProgress,
+                uiState.preferences,
+                onUpdatePreferences,
+                onAddItem,
+                onDismiss,
+                instances = uiState.instances,
+                selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+                onInstanceSelected = onInstanceSelected,
+            )
+        is SearchAudiobook ->
+            AddAudiobookSheet(
+                item,
+                uiState.qualityProfiles,
+                uiState.rootFolders,
+                uiState.relativePath,
+                uiState.addItemStatus == OperationStatus.InProgress,
+                uiState.preferences,
+                onUpdatePreferences,
+                onAddItem,
+                onDismiss,
+                instances = uiState.instances,
+                selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+                onInstanceSelected = onInstanceSelected,
+            )
         is Audiobook,
-        is MockMedia -> {}
+        is MockMedia,
+        -> {}
     }
 }

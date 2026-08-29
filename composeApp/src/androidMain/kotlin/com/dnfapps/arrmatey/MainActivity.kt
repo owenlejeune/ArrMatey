@@ -23,7 +23,6 @@ import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
-
     private val shortcutManager: AppShortcutManager by inject()
     private val navigationManager: NavigationManager by inject()
     private val tabManager: TabManager by inject()
@@ -73,7 +72,7 @@ class MainActivity : ComponentActivity() {
                 AppShortcutManager.ACTION_OPEN_LIBRARY -> {
                     val typeName = intent.getStringExtra(AppShortcutManager.EXTRA_INSTANCE_TYPE)
                     val type = InstanceType.entries.find { it.name == typeName }
-                    type?.let { 
+                    type?.let {
                         navigationManager.arr(it).popToRoot()
                         navigationManager.navigateToTab(navigationManager.tabFor(it))
                     }
@@ -81,7 +80,7 @@ class MainActivity : ComponentActivity() {
                 AppShortcutManager.ACTION_OPEN_SEARCH -> {
                     val typeName = intent.getStringExtra(AppShortcutManager.EXTRA_INSTANCE_TYPE)
                     val type = InstanceType.entries.find { it.name == typeName }
-                    type?.let { 
+                    type?.let {
                         val navigator = navigationManager.arr(it)
                         navigator.popToRoot()
                         navigator.toSearch()
@@ -99,11 +98,12 @@ class MainActivity : ComponentActivity() {
                         if (type == "person") {
                             tmdbId?.let { navigationManager.navigateToPersonDetails(it) }
                         } else {
-                            val requestType = when (type) {
-                                "movie" -> RequestType.Movie
-                                "tv" -> RequestType.Tv
-                                else -> null
-                            }
+                            val requestType =
+                                when (type) {
+                                    "movie" -> RequestType.Movie
+                                    "tv" -> RequestType.Tv
+                                    else -> null
+                                }
                             if (tmdbId != null && requestType != null) {
                                 navigationManager.navigateToMediaDetails(tmdbId, requestType)
                             }

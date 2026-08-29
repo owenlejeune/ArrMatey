@@ -58,7 +58,7 @@ fun DownloadQueueFilterMenu(
     onUpdateCompletedOnly: (Boolean) -> Unit,
     onUpdateExcludeStatuses: (Boolean) -> Unit,
     onUpdateExcludeTags: (Boolean) -> Unit,
-    onClearFilters: () -> Unit
+    onClearFilters: () -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var showStatusSubMenu by remember { mutableStateOf(false) }
@@ -68,14 +68,15 @@ fun DownloadQueueFilterMenu(
     val statusScrollState = rememberScrollState()
     val tagsScrollState = rememberScrollState()
 
-    val activeFiltersCount = remember(filterState) {
-        var count = 0
-        if (filterState.activeOnly) count++
-        if (filterState.completedOnly) count++
-        count += filterState.selectedStatuses.size
-        count += filterState.selectedTags.size
-        count
-    }
+    val activeFiltersCount =
+        remember(filterState) {
+            var count = 0
+            if (filterState.activeOnly) count++
+            if (filterState.completedOnly) count++
+            count += filterState.selectedStatuses.size
+            count += filterState.selectedTags.size
+            count
+        }
 
     Box {
         IconButton(onClick = { showMenu = true }) {
@@ -84,35 +85,35 @@ fun DownloadQueueFilterMenu(
                     if (activeFiltersCount > 0) {
                         Badge { Text(activeFiltersCount.toString()) }
                     }
-                }
+                },
             ) {
                 Icon(
                     imageVector = Icons.Default.FilterList,
-                    contentDescription = mokoString(MR.strings.filter)
+                    contentDescription = mokoString(MR.strings.filter),
                 )
             }
         }
         DropdownMenuPopup(
             expanded = showMenu,
-            onDismissRequest = { showMenu = false }
+            onDismissRequest = { showMenu = false },
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 3),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 DropdownMenuItem(
                     selected = filterState.activeOnly,
                     onClick = { onUpdateActiveOnly(!filterState.activeOnly) },
                     text = { Text(mokoString(MR.strings.active_only)) },
                     selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
-                    shapes = MenuDefaults.itemShape(0, 2)
+                    shapes = MenuDefaults.itemShape(0, 2),
                 )
                 DropdownMenuItem(
                     selected = filterState.completedOnly,
                     onClick = { onUpdateCompletedOnly(!filterState.completedOnly) },
                     text = { Text(mokoString(MR.strings.completed_only)) },
                     selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
-                    shapes = MenuDefaults.itemShape(1, 2)
+                    shapes = MenuDefaults.itemShape(1, 2),
                 )
             }
 
@@ -120,7 +121,7 @@ fun DownloadQueueFilterMenu(
 
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(1, 3),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 Box {
                     DropdownMenuItem(
@@ -135,20 +136,21 @@ fun DownloadQueueFilterMenu(
                                 Icon(Icons.Default.ChevronRight, null)
                             }
                         },
-                        shapes = MenuDefaults.itemShape(0, if (availableTags.isEmpty()) 1 else 2)
+                        shapes = MenuDefaults.itemShape(0, if (availableTags.isEmpty()) 1 else 2),
                     )
                     DropdownMenuPopup(
                         expanded = showStatusSubMenu,
                         onDismissRequest = { showStatusSubMenu = false },
-                        offset = DpOffset(x = 350.dp, y = 0.dp)
+                        offset = DpOffset(x = 350.dp, y = 0.dp),
                     ) {
                         DropdownMenuGroup(
-                            modifier = Modifier
-                                .heightIn(max = 600.dp)
-                                .verticalScroll(statusScrollState),
+                            modifier =
+                                Modifier
+                                    .heightIn(max = 600.dp)
+                                    .verticalScroll(statusScrollState),
                             shapes = MenuDefaults.groupShape(0, 1),
                             interactionSource = groupInteractionSource,
-                            containerColor = MenuDefaults.groupVibrantContainerColor
+                            containerColor = MenuDefaults.groupVibrantContainerColor,
                         ) {
                             DropdownMenuItem(
                                 selected = filterState.excludeStatuses,
@@ -156,7 +158,7 @@ fun DownloadQueueFilterMenu(
                                 text = { Text(mokoString(MR.strings.exclude)) },
                                 selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                                 shapes = MenuDefaults.itemShape(0, DownloadItemStatus.entries.size + 1),
-                                colors = MenuDefaults.selectableItemVibrantColors()
+                                colors = MenuDefaults.selectableItemVibrantColors(),
                             )
                             HorizontalDivider(Modifier.padding(MenuDefaults.HorizontalDividerPadding))
                             DownloadItemStatus.entries.forEachIndexed { index, status ->
@@ -166,7 +168,7 @@ fun DownloadQueueFilterMenu(
                                     text = { Text(mokoString(status.resource)) },
                                     selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                                     shapes = MenuDefaults.itemShape(index + 1, DownloadItemStatus.entries.size + 1),
-                                    colors = MenuDefaults.selectableItemVibrantColors()
+                                    colors = MenuDefaults.selectableItemVibrantColors(),
                                 )
                             }
                         }
@@ -188,20 +190,21 @@ fun DownloadQueueFilterMenu(
                                 }
                             },
                             leadingIcon = { Icon(Icons.Default.Sell, null) },
-                            shapes = MenuDefaults.itemShape(1, 2)
+                            shapes = MenuDefaults.itemShape(1, 2),
                         )
                         DropdownMenuPopup(
                             expanded = showTagsSubMenu,
                             onDismissRequest = { showTagsSubMenu = false },
-                            offset = DpOffset(x = 350.dp, y = 0.dp)
+                            offset = DpOffset(x = 350.dp, y = 0.dp),
                         ) {
                             DropdownMenuGroup(
-                                modifier = Modifier
-                                    .heightIn(max = 400.dp)
-                                    .verticalScroll(tagsScrollState),
+                                modifier =
+                                    Modifier
+                                        .heightIn(max = 400.dp)
+                                        .verticalScroll(tagsScrollState),
                                 shapes = MenuDefaults.groupShape(0, 1),
                                 interactionSource = groupInteractionSource,
-                                containerColor = MenuDefaults.groupVibrantContainerColor
+                                containerColor = MenuDefaults.groupVibrantContainerColor,
                             ) {
                                 DropdownMenuItem(
                                     selected = filterState.excludeTags,
@@ -209,7 +212,7 @@ fun DownloadQueueFilterMenu(
                                     text = { Text(mokoString(MR.strings.exclude)) },
                                     selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                                     shapes = MenuDefaults.itemShape(0, availableTags.size + 1),
-                                    colors = MenuDefaults.selectableItemVibrantColors()
+                                    colors = MenuDefaults.selectableItemVibrantColors(),
                                 )
                                 HorizontalDivider(Modifier.padding(MenuDefaults.HorizontalDividerPadding))
                                 availableTags.forEachIndexed { index, tag ->
@@ -219,7 +222,7 @@ fun DownloadQueueFilterMenu(
                                         text = { Text(tag) },
                                         selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                                         shapes = MenuDefaults.itemShape(index + 1, availableTags.size + 1),
-                                        colors = MenuDefaults.selectableItemVibrantColors()
+                                        colors = MenuDefaults.selectableItemVibrantColors(),
                                     )
                                 }
                             }
@@ -232,7 +235,7 @@ fun DownloadQueueFilterMenu(
 
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(2, 3),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 val sortOptions = SortBy.downloadClientEntries()
                 sortOptions.forEachIndexed { index, sort ->
@@ -243,7 +246,9 @@ fun DownloadQueueFilterMenu(
                                 onSortOrderChanged(
                                     if (sortOrder == SortOrder.Asc) {
                                         SortOrder.Desc
-                                    } else SortOrder.Asc
+                                    } else {
+                                        SortOrder.Asc
+                                    },
                                 )
                             } else {
                                 onSortByChanged(sort)
@@ -256,7 +261,7 @@ fun DownloadQueueFilterMenu(
                                 SortOrder.Asc -> Icon(Icons.Default.ArrowDropUp, null)
                                 SortOrder.Desc -> Icon(Icons.Default.ArrowDropDown, null)
                             }
-                        }
+                        },
                     )
                 }
             }
@@ -265,7 +270,7 @@ fun DownloadQueueFilterMenu(
                 Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
                 DropdownMenuGroup(
                     shapes = MenuDefaults.groupShape(3, 4),
-                    interactionSource = groupInteractionSource
+                    interactionSource = groupInteractionSource,
                 ) {
                     DropdownMenuItem(
                         selected = false,
@@ -274,7 +279,7 @@ fun DownloadQueueFilterMenu(
                             showMenu = false
                         },
                         text = { Text(mokoString(MR.strings.clear_all)) },
-                        shapes = MenuDefaults.itemShape(0, 1)
+                        shapes = MenuDefaults.itemShape(0, 1),
                     )
                 }
             }

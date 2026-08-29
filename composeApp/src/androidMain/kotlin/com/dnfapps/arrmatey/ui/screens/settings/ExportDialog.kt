@@ -34,7 +34,7 @@ fun ExportDialog(
     onToggleIncludeTabPreferences: () -> Unit,
     onToggleIncludeUiPreferences: () -> Unit,
     onToggleInstanceSelection: (Long) -> Unit,
-    onToggleDownloadClientSelection: (Long) -> Unit
+    onToggleDownloadClientSelection: (Long) -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -42,7 +42,7 @@ fun ExportDialog(
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.verticalScroll(rememberScrollState())
+                modifier = Modifier.verticalScroll(rememberScrollState()),
             ) {
                 Text(mokoString(MR.strings.export_password_prompt))
 
@@ -52,38 +52,38 @@ fun ExportDialog(
                     label = { Text(mokoString(MR.strings.password)) },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Checkbox(
                         checked = exportState.includeInstancePreferences,
-                        onCheckedChange = { onToggleIncludeInstancePreferences() }
+                        onCheckedChange = { onToggleIncludeInstancePreferences() },
                     )
                     Text(mokoString(MR.strings.include_preferences))
                 }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Checkbox(
                         checked = exportState.includeTabPreferences,
-                        onCheckedChange = { onToggleIncludeTabPreferences() }
+                        onCheckedChange = { onToggleIncludeTabPreferences() },
                     )
                     Text(mokoString(MR.strings.navigation_bar_configuration))
                 }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Checkbox(
                         checked = exportState.includeUiPreferences,
-                        onCheckedChange = { onToggleIncludeUiPreferences() }
+                        onCheckedChange = { onToggleIncludeUiPreferences() },
                     )
                     Text(mokoString(MR.strings.user_interface))
                 }
@@ -93,23 +93,23 @@ fun ExportDialog(
                 Text(
                     text = mokoString(MR.strings.select_items_to_export),
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
 
                 if (exportState.instances.isNotEmpty()) {
                     Text(
                         text = mokoString(MR.strings.instances),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                     exportState.instances.forEach { instance ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
                             Checkbox(
                                 checked = exportState.selectedInstanceIds.contains(instance.id),
-                                onCheckedChange = { onToggleInstanceSelection(instance.id) }
+                                onCheckedChange = { onToggleInstanceSelection(instance.id) },
                             )
                             Text(text = instance.label)
                         }
@@ -120,16 +120,16 @@ fun ExportDialog(
                     Text(
                         text = mokoString(MR.strings.download_clients),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                     exportState.downloadClients.forEach { client ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
                             Checkbox(
                                 checked = exportState.selectedDownloadClientIds.contains(client.id),
-                                onCheckedChange = { onToggleDownloadClientSelection(client.id) }
+                                onCheckedChange = { onToggleDownloadClientSelection(client.id) },
                             )
                             Text(text = client.label)
                         }
@@ -139,9 +139,10 @@ fun ExportDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = exportState.password.isNotBlank() && 
+                enabled =
+                    exportState.password.isNotBlank() &&
                         (exportState.selectedInstanceIds.isNotEmpty() || exportState.selectedDownloadClientIds.isNotEmpty()),
-                onClick = onConfirm
+                onClick = onConfirm,
             ) {
                 Text(mokoString(MR.strings.save))
             }
@@ -150,6 +151,6 @@ fun ExportDialog(
             TextButton(onClick = onDismiss) {
                 Text(mokoString(MR.strings.cancel))
             }
-        }
+        },
     )
 }

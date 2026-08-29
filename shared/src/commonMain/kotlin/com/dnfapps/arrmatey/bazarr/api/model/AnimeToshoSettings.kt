@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class AnimeToshoSettings(
     val anidb_api_client: String,
     val anidb_api_client_ver: Int,
-    val search_threshold: Int
+    val search_threshold: Int,
 )

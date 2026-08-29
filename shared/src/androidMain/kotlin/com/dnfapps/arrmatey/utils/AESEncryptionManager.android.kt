@@ -22,13 +22,13 @@ class AESEncryptionManager : EncryptionManager {
 
         val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
         keyGenerator.init(
-            KeyGenParameterSpec.Builder(
-                keyStoreAlias,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-            )
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            KeyGenParameterSpec
+                .Builder(
+                    keyStoreAlias,
+                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+                ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .build()
+                .build(),
         )
         return keyGenerator.generateKey()
     }
@@ -40,11 +40,11 @@ class AESEncryptionManager : EncryptionManager {
             cipher.init(Cipher.ENCRYPT_MODE, getSecretKey())
             val iv = cipher.iv
             val cipherText = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
-            
+
             val combined = ByteArray(iv.size + cipherText.size)
             System.arraycopy(iv, 0, combined, 0, iv.size)
             System.arraycopy(cipherText, 0, combined, iv.size, cipherText.size)
-            
+
             Base64.encodeToString(combined, Base64.NO_WRAP)
         } catch (e: Exception) {
             plainText
@@ -59,11 +59,11 @@ class AESEncryptionManager : EncryptionManager {
 
             val iv = combined.sliceArray(0 until ivLength)
             val cipherText = combined.sliceArray(ivLength until combined.size)
-            
+
             val cipher = Cipher.getInstance(algorithm)
             val gcmParameterSpec = GCMParameterSpec(tagLength, iv)
             cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), gcmParameterSpec)
-            
+
             String(cipher.doFinal(cipherText), Charsets.UTF_8)
         } catch (e: Exception) {
             // Return original if decryption fails (e.g. if it was plain text)

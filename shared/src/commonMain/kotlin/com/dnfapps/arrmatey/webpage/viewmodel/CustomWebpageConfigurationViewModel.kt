@@ -18,22 +18,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 
 class CustomWebpageConfigurationViewModel(
     webpageId: Long?,
     private val repository: CustomWebpageRepository,
     private val addWebpageUseCase: AddCustomWebpageUseCase,
     private val updateWebpageUseCase: UpdateCustomWebpageUseCase,
-    private val deleteCustomWebpageUseCase: DeleteCustomWebpageUseCase
+    private val deleteCustomWebpageUseCase: DeleteCustomWebpageUseCase,
 ) : ViewModel() {
-
-    val webpages: StateFlow<List<CustomWebpage>> = repository.getAllWebpages()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val webpages: StateFlow<List<CustomWebpage>> =
+        repository
+            .getAllWebpages()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
     private val _uiState = MutableStateFlow(CustomWebpageUiState())
     val uiState: StateFlow<CustomWebpageUiState> = _uiState.asStateFlow()
@@ -45,17 +45,19 @@ class CustomWebpageConfigurationViewModel(
     }
 
     fun setName(name: String) {
-        _uiState.value = _uiState.value.copy(
-            name = name,
-            saveButtonEnabled = name.isNotBlank() && _uiState.value.url.isNotBlank()
-        )
+        _uiState.value =
+            _uiState.value.copy(
+                name = name,
+                saveButtonEnabled = name.isNotBlank() && _uiState.value.url.isNotBlank(),
+            )
     }
 
     fun setUrl(url: String) {
-        _uiState.value = _uiState.value.copy(
-            url = url,
-            saveButtonEnabled = url.isNotBlank() && _uiState.value.name.isNotBlank()
-        )
+        _uiState.value =
+            _uiState.value.copy(
+                url = url,
+                saveButtonEnabled = url.isNotBlank() && _uiState.value.name.isNotBlank(),
+            )
     }
 
     fun setHeaders(headers: List<InstanceHeader>) {
@@ -66,13 +68,14 @@ class CustomWebpageConfigurationViewModel(
         viewModelScope.launch {
             val webpage = repository.getWebpageById(id)
             if (webpage != null) {
-                _uiState.value = CustomWebpageUiState(
-                    id = webpage.id,
-                    name = webpage.name,
-                    url = webpage.url,
-                    headers = webpage.headers,
-                    isEditing = true
-                )
+                _uiState.value =
+                    CustomWebpageUiState(
+                        id = webpage.id,
+                        name = webpage.name,
+                        url = webpage.url,
+                        headers = webpage.headers,
+                        isEditing = true,
+                    )
             }
         }
     }
@@ -84,18 +87,20 @@ class CustomWebpageConfigurationViewModel(
                 return@launch
             }
 
-            val newWebpage = CustomWebpage(
-                id = _uiState.value.id,
-                name = _uiState.value.name,
-                url = _uiState.value.url,
-                headers = _uiState.value.headers
-            )
+            val newWebpage =
+                CustomWebpage(
+                    id = _uiState.value.id,
+                    name = _uiState.value.name,
+                    url = _uiState.value.url,
+                    headers = _uiState.value.headers,
+                )
 
-            val result = if (_uiState.value.isEditing) {
-                updateWebpageUseCase(newWebpage)
-            } else {
-                addWebpageUseCase(newWebpage)
-            }
+            val result =
+                if (_uiState.value.isEditing) {
+                    updateWebpageUseCase(newWebpage)
+                } else {
+                    addWebpageUseCase(newWebpage)
+                }
             _uiState.update { it.copy(saveResult = result) }
         }
     }

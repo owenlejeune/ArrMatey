@@ -29,9 +29,10 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun DiskSpaceSection(diskSpaces: List<ArrDiskSpace>) {
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             diskSpaces.forEachIndexed { index, disk ->
@@ -48,23 +49,24 @@ fun DiskSpaceSection(diskSpaces: List<ArrDiskSpace>) {
 @Composable
 fun DiskSpaceItem(disk: ArrDiskSpace) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = disk.path ?: mokoString(MR.strings.unknown),
-                style = MaterialTheme.typography.titleMediumEmphasized
+                style = MaterialTheme.typography.titleMediumEmphasized,
             )
             Text(
                 text = "${disk.freeSpace.bytesAsFileSizeString()} ${mokoString(MR.strings.free_space_lowercase)}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
@@ -74,29 +76,30 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
 
         LinearProgressIndicator(
             progress = { disk.usedPercentage },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp)),
             color = progressColor,
-            trackColor = progressColor.copy(alpha = 0.2f)
+            trackColor = progressColor.copy(alpha = 0.2f),
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             val usedSpace = disk.totalSpace - disk.freeSpace
             Text(
                 text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()}",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = "${(disk.usedPercentage * 100).toInt()}%",
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelMedium,
             )
         }
     }

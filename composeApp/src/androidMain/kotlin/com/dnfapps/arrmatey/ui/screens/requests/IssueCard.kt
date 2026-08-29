@@ -48,7 +48,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun IssueCard(
     issuePackage: MediaIssuePackage,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val issue = issuePackage.issue
     val details = issuePackage.details
@@ -57,72 +57,80 @@ fun IssueCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = inverseSurfaceLight,
-            contentColor = inverseOnSurfaceLight
-        ),
-        onClick = onClick
+        colors =
+            CardDefaults.cardColors(
+                containerColor = inverseSurfaceLight,
+                contentColor = inverseOnSurfaceLight,
+            ),
+        onClick = onClick,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BannerView(
-                bannerModel = details?.fullPosterPath?.let {
-                    rememberRemoteImageData(it)
-                },
-                modifier = Modifier.matchParentSize()
+                bannerModel =
+                    details?.fullPosterPath?.let {
+                        rememberRemoteImageData(it)
+                    },
+                modifier = Modifier.matchParentSize(),
             )
             Box(modifier = Modifier.matchParentSize().background(TranslucentBlack))
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(18.dp).fillMaxWidth()
+                modifier = Modifier.padding(18.dp).fillMaxWidth(),
             ) {
                 IssueCardHeader(
                     posterUrl = details?.fullPosterPath,
                     year = details?.displayDate?.year?.toString() ?: "",
                     requestType = issue.media?.mediaType,
                     title = details?.displayTitle ?: "",
-                    issue = issue
+                    issue = issue,
                 )
 
                 if (issue.media?.mediaType == RequestType.Tv) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(
                             text = mokoString(MR.strings.season),
-                            style = MaterialTheme.typography.labelMedium
+                            style = MaterialTheme.typography.labelMedium,
                         )
                         Box(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                            modifier =
+                                Modifier
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .padding(horizontal = 8.dp, vertical = 2.dp),
                         ) {
                             Text(
-                                text = issue.problemSeason
-                                    .takeUnless { it == 0 }?.toString()
-                                    ?: mokoString(MR.strings.all),
+                                text =
+                                    issue.problemSeason
+                                        .takeUnless { it == 0 }
+                                        ?.toString()
+                                        ?: mokoString(MR.strings.all),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = MaterialTheme.colorScheme.onPrimary,
                             )
                         }
                         Text(
                             text = mokoString(MR.strings.episode),
-                            style = MaterialTheme.typography.labelMedium
+                            style = MaterialTheme.typography.labelMedium,
                         )
                         Box(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                            modifier =
+                                Modifier
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .padding(horizontal = 8.dp, vertical = 2.dp),
                         ) {
                             Text(
-                                text = issue.problemEpisode
-                                    .takeUnless { it == 0 }?.toString()
-                                    ?: mokoString(MR.strings.all),
+                                text =
+                                    issue.problemEpisode
+                                        .takeUnless { it == 0 }
+                                        ?.toString()
+                                        ?: mokoString(MR.strings.all),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = MaterialTheme.colorScheme.onPrimary,
                             )
                         }
                     }
@@ -131,7 +139,7 @@ fun IssueCard(
                 issue.comments.minByOrNull { it.id }?.let { comment ->
                     Text(
                         text = comment.message,
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
                     )
                 }
             }
@@ -146,40 +154,41 @@ private fun IssueCardHeader(
     year: String,
     requestType: RequestType?,
     title: String,
-    issue: Issue
+    issue: Issue,
 ) {
     val issueType = IssueType.fromValue(issue.issueType)
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
     ) {
         AsyncImage(
             model = rememberRemoteImageData(posterUrl),
             contentDescription = null,
-            modifier = Modifier
-                .height(100.dp)
-                .aspectRatio(AspectRatio.Poster.ratio, true)
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Fit
+            modifier =
+                Modifier
+                    .height(100.dp)
+                    .aspectRatio(AspectRatio.Poster.ratio, true)
+                    .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Fit,
         )
 
         Column(
             modifier = Modifier.defaultMinSize(minHeight = 100.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top,
             ) {
                 Column {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(
                             text = year,
-                            style = MaterialTheme.typography.labelMedium
+                            style = MaterialTheme.typography.labelMedium,
                         )
                         requestType?.let { requestType ->
                             MediaRequestTypeChip(text = requestType.name, requestType)
@@ -188,33 +197,34 @@ private fun IssueCardHeader(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleLargeEmphasized,
-                        modifier = Modifier.padding(top = 2.dp)
+                        modifier = Modifier.padding(top = 2.dp),
                     )
                 }
                 Spacer(Modifier.weight(1f))
                 IssueStatusChip(issue)
             }
             Text(
-                text = buildAnnotatedString {
-                    withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                        append(mokoString(MR.strings.type))
-                    }
-                    append(" ")
-                    append(mokoString(issueType.label))
-                },
-                style = MaterialTheme.typography.bodyMedium
+                text =
+                    buildAnnotatedString {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
+                            append(mokoString(MR.strings.type))
+                        }
+                        append(" ")
+                        append(mokoString(issueType.label))
+                    },
+                style = MaterialTheme.typography.bodyMedium,
             )
             issue.createdBy?.let { createdBy ->
                 Column {
                     UserInfoRow(
                         label = mokoString(MR.strings.opened_by),
                         displayName = createdBy.displayName,
-                        avatar = createdBy.avatar
+                        avatar = createdBy.avatar,
                     )
                     issue.createdAt?.let { createdAt ->
                         Text(
                             text = createdAt.format("HH:mm, MMM d, yyyy"),
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                 }

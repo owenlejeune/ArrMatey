@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.ui.menu
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.FilterList
@@ -31,7 +30,7 @@ fun SearchSortMenu(
     sortBy: SortBy,
     onSortChanged: (SortBy) -> Unit,
     sortOrder: SortOrder,
-    onOrderChanged: (SortOrder) -> Unit
+    onOrderChanged: (SortOrder) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val options = remember { SortBy.lookupEntries() }
@@ -39,20 +38,20 @@ fun SearchSortMenu(
 
     Box {
         IconButton(
-            onClick = { expanded = !expanded }
+            onClick = { expanded = !expanded },
         ) {
             Icon(
                 imageVector = Icons.Default.FilterList,
-                contentDescription = mokoString(MR.strings.sort)
+                contentDescription = mokoString(MR.strings.sort),
             )
         }
         DropdownMenuPopup(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 1),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 options.forEachIndexed { index, option ->
                     DropdownMenuItem(
@@ -63,7 +62,7 @@ fun SearchSortMenu(
                                     when (sortOrder) {
                                         SortOrder.Asc -> SortOrder.Desc
                                         SortOrder.Desc -> SortOrder.Asc
-                                    }
+                                    },
                                 )
                             } else {
                                 onSortChanged(option)
@@ -76,7 +75,7 @@ fun SearchSortMenu(
                                 SortOrder.Desc -> Icon(Icons.Default.ArrowDropDown, null)
                             }
                         },
-                        shapes = MenuDefaults.itemShape(index, options.size)
+                        shapes = MenuDefaults.itemShape(index, options.size),
                     )
                 }
             }

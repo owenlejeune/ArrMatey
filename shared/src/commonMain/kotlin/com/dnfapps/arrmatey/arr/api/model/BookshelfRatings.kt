@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class BookshelfRatings(
     val votes: Int,
     val value: Float,
-    val popularity: Float
-): ArrRatings
+    val popularity: Float,
+) : ArrRatings

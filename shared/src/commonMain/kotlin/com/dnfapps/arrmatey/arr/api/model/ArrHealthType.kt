@@ -13,5 +13,5 @@ enum class ArrHealthType {
     Warning,
 
     @SerialName("error")
-    Error
+    Error,
 }

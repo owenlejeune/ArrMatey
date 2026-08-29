@@ -53,7 +53,7 @@ fun SeerrViewRequestSheet(
     requestInProgress: Boolean,
     onDismissRequest: () -> Unit,
     onApproveRequest: (Long, Long?, String?, Long?, List<Int>?) -> Unit,
-    onDeclineRequest: (Long) -> Unit
+    onDeclineRequest: (Long) -> Unit,
 ) {
     val request = details.mediaInfo?.requests?.firstOrNull { it.status == 1 } ?: return
 
@@ -71,9 +71,10 @@ fun SeerrViewRequestSheet(
         }
     }
 
-    val initialSeasons = remember(request.seasons) {
-        request.seasons.map { it.seasonNumber }.toSet()
-    }
+    val initialSeasons =
+        remember(request.seasons) {
+            request.seasons.map { it.seasonNumber }.toSet()
+        }
     var selectedSeasons by remember { mutableStateOf(initialSeasons) }
 
     ModalBottomSheet(
@@ -82,30 +83,33 @@ fun SeerrViewRequestSheet(
                 onDismissRequest()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !requestInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !requestInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column {
                 Text(
                     text = mokoString(MR.strings.pending_request).uppercase(),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = details.displayTitle,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
@@ -114,7 +118,7 @@ fun SeerrViewRequestSheet(
                     details = details,
                     selectedSeasons = selectedSeasons,
                     onSeasonsChanged = { selectedSeasons = it },
-                    enabled = !requestInProgress
+                    enabled = !requestInProgress,
                 )
             }
 
@@ -134,10 +138,10 @@ fun SeerrViewRequestSheet(
                         selectedProfileId,
                         selectedRootFolder,
                         request.languageProfileId,
-                        seasons
+                        seasons,
                     )
                 },
-                onDeclineRequest = { onDeclineRequest(request.id) }
+                onDeclineRequest = { onDeclineRequest(request.id) },
             )
         }
     }
@@ -148,11 +152,11 @@ private fun SeasonTable(
     details: TvDetails,
     selectedSeasons: Set<Int>,
     onSeasonsChanged: (Set<Int>) -> Unit,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     ContainerCard(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         val allSeasonsSelected = details.seasons.all { it.seasonNumber in selectedSeasons }
 
@@ -166,7 +170,7 @@ private fun SeasonTable(
                     onSeasonsChanged(emptySet())
                 }
             },
-            enabled = enabled
+            enabled = enabled,
         )
         HorizontalDivider()
 
@@ -175,26 +179,33 @@ private fun SeasonTable(
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Badge(
-                    containerColor = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else MaterialTheme.colorScheme.surfaceContainerLow
+                    containerColor =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerLow
+                        },
                 ) {
                     Text(
-                        text = if (isSelected) {
-                            mokoString(MR.strings.pending)
-                        } else mokoString(MR.strings.not_requested),
-                        modifier = Modifier.padding(2.dp)
+                        text =
+                            if (isSelected) {
+                                mokoString(MR.strings.pending)
+                            } else {
+                                mokoString(MR.strings.not_requested)
+                            },
+                        modifier = Modifier.padding(2.dp),
                     )
                 }
                 LabelledSwitch(
-                    label = if (season.seasonNumber == 0) {
-                        mokoString(MR.strings.specials)
-                    } else {
-                        mokoString(MR.strings.season_label, season.seasonNumber)
-                    },
+                    label =
+                        if (season.seasonNumber == 0) {
+                            mokoString(MR.strings.specials)
+                        } else {
+                            mokoString(MR.strings.season_label, season.seasonNumber)
+                        },
                     sublabel = mokoPlural(MR.plurals.episodes, season.episodeCount),
                     checked = isSelected,
                     onCheckedChange = { checked ->
@@ -204,7 +215,7 @@ private fun SeasonTable(
                             onSeasonsChanged(selectedSeasons - season.seasonNumber)
                         }
                     },
-                    enabled = enabled
+                    enabled = enabled,
                 )
             }
         }
@@ -220,7 +231,7 @@ private fun AdvancedSection(
     onRootFolderSelected: (String?) -> Unit,
     requestInProgress: Boolean,
     onApproveRequest: () -> Unit,
-    onDeclineRequest: () -> Unit
+    onDeclineRequest: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         val profiles = serviceDetails?.profiles ?: emptyList()
@@ -234,7 +245,7 @@ private fun AdvancedSection(
             getOptionLabel = { profileId ->
                 profiles.find { it.id == profileId }?.name ?: profileId.toString()
             },
-            enabled = !requestInProgress
+            enabled = !requestInProgress,
         )
 
         DropdownPicker(
@@ -243,17 +254,18 @@ private fun AdvancedSection(
             selectedOption = selectedRootFolder,
             onOptionSelected = { onRootFolderSelected(it) },
             getOptionLabel = { it },
-            enabled = !requestInProgress
+            enabled = !requestInProgress,
         )
 
         Button(
             onClick = onApproveRequest,
             modifier = Modifier.fillMaxWidth(),
             enabled = !requestInProgress,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4CAF50),
-                contentColor = Color.White
-            )
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50),
+                    contentColor = Color.White,
+                ),
         ) {
             if (requestInProgress) {
                 androidx.compose.material3.CircularProgressIndicator(Modifier.size(24.dp))
@@ -266,9 +278,10 @@ private fun AdvancedSection(
             onClick = onDeclineRequest,
             modifier = Modifier.fillMaxWidth(),
             enabled = !requestInProgress,
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.error
-            )
+            colors =
+                ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                ),
         ) {
             Text(mokoString(MR.strings.decline_request))
         }
@@ -281,36 +294,35 @@ private fun RequestedBySection(request: MediaRequest) {
         Text(
             text = mokoString(MR.strings.requested_by).uppercase(),
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
         ContainerCard(modifier = Modifier.fillMaxWidth()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 AsyncImage(
                     model = request.requestedBy.avatar,
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .clip(CircleShape),
+                    contentScale = ContentScale.Crop,
                 )
                 Column {
                     Text(
                         text = request.requestedBy.displayName,
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                     Text(
                         text = request.requestedBy.email,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
         }
     }
 }
-
-

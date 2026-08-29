@@ -21,7 +21,6 @@ import com.dnfapps.arrmatey.navigation.toEpisodeDetails
 import com.dnfapps.arrmatey.navigation.toMovieFiles
 import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.navigation.toPersonDetails
-import com.dnfapps.arrmatey.navigation.toPreview
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.ArrSearchScreen
@@ -40,7 +39,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun EntryProviderScope<NavKey>.mediaNavEntries(
     navigation: Navigator<*>,
     isExpanded: Boolean,
-    defaultInstanceType: InstanceType? = null
+    defaultInstanceType: InstanceType? = null,
 ) {
     entry<MediaScreen.Details> { details ->
         val resolvedInstanceType = details.type ?: details.requestType?.associatedInstanceType ?: defaultInstanceType
@@ -58,7 +57,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onNavigateToSeriesRelease = { seriesId, seasonNumber ->
                 navigation.toSeriesRelease(
                     seriesId,
-                    seasonNumber
+                    seasonNumber,
                 )
             },
             onNavigateToMovieFiles = { navigation.toMovieFiles(it) },
@@ -69,7 +68,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onNavigateToAudiobookFiles = { navigation.toAudiobookFiles(it) },
             onNavigateToAudiobookRelease = { id, query -> navigation.toAudiobookRelease(id, query ?: "") },
             onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) },
-            onPersonClick = { navigation.toPersonDetails(it) }
+            onPersonClick = { navigation.toPersonDetails(it) },
         )
     }
     entry<MediaScreen.PersonDetails> { details ->
@@ -78,7 +77,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onBack = { navigation.popBackStack() },
             onMediaClick = { tmdbId, type ->
                 navigation.toDetails(tmdbId = tmdbId, requestType = type)
-            }
+            },
         )
     }
     entry<MediaScreen.PersonWebView> { details ->
@@ -88,7 +87,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             bannerMessage = mokoString(MR.strings.setup_seerr_for_in_app_details),
             onBannerClick = { navManager.openNewInstanceScreen(InstanceType.Seerr) },
             wideRailIsVisible = isExpanded,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.MovieReleases> { params ->
@@ -96,55 +95,61 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
         InteractiveSearchScreen(
             instanceType = InstanceType.Radarr,
             releaseParams = releaseParams,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.SeriesRelease> { params ->
-        val releaseParams = ReleaseParams.Series(
-            params.seriesId,
-            params.seasonNumber,
-            params.episodeId
-        )
+        val releaseParams =
+            ReleaseParams.Series(
+                params.seriesId,
+                params.seasonNumber,
+                params.episodeId,
+            )
         InteractiveSearchScreen(
             instanceType = InstanceType.Sonarr,
             releaseParams = releaseParams,
-            defaultFilter = if (params.episodeId != null) {
-                ReleaseFilterBy.SingleEpisode
-            } else ReleaseFilterBy.SeasonPack,
-            onBack = { navigation.popBackStack() }
+            defaultFilter =
+                if (params.episodeId != null) {
+                    ReleaseFilterBy.SingleEpisode
+                } else {
+                    ReleaseFilterBy.SeasonPack
+                },
+            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.AlbumRelease> { params ->
-        val releaseParams = ReleaseParams.Album(
-            artistId = params.artistId,
-            mediaId = params.albumId
-        )
+        val releaseParams =
+            ReleaseParams.Album(
+                artistId = params.artistId,
+                mediaId = params.albumId,
+            )
         InteractiveSearchScreen(
             instanceType = InstanceType.Lidarr,
             releaseParams = releaseParams,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.BookRelease> { params ->
-        val releaseParams = ReleaseParams.Book(
-            mediaId = params.bookId
-        )
+        val releaseParams =
+            ReleaseParams.Book(
+                mediaId = params.bookId,
+            )
         InteractiveSearchScreen(
             instanceType = InstanceType.Booksehelf,
             releaseParams = releaseParams,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.MovieFiles> { params ->
         MovieFilesScreen(
             movie = params.movie,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.AuthorFiles> { params ->
         AuthorFilesScreen(
             author = params.author,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.EpisodeDetails> { params ->
@@ -154,7 +159,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onBack = { navigation.popBackStack() },
             onNavigateToSeriesRelease = { episodeId ->
                 navigation.toSeriesRelease(episodeId = episodeId)
-            }
+            },
         )
     }
     entry<MediaScreen.BookDetails> { params ->
@@ -164,24 +169,25 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onBack = { navigation.popBackStack() },
             onNavigateToBookRelease = { bookId ->
                 navigation.toBookRelease(bookId = bookId)
-            }
+            },
         )
     }
     entry<MediaScreen.AudiobookFiles> { params ->
         AudiobookFilesScreen(
             audiobook = params.audiobook,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.AudiobookRelease> { params ->
-        val releaseParams = ReleaseParams.Audiobook(
-            mediaId = params.audiobookId,
-            query = params.query
-        )
+        val releaseParams =
+            ReleaseParams.Audiobook(
+                mediaId = params.audiobookId,
+                query = params.query,
+            )
         InteractiveSearchScreen(
             instanceType = InstanceType.Listenarr,
             releaseParams = releaseParams,
-            onBack = { navigation.popBackStack() }
+            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.Search> { search ->
@@ -194,7 +200,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                 onBack = { navigation.popBackStack() },
                 onItemClick = {
                     navigation.toArrDetailsOrPreview(it, type)
-                }
+                },
             )
         }
     }
@@ -206,7 +212,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                 type = type,
                 isExpanded = isExpanded,
                 onBack = { navigation.popBackStack() },
-                onItemAdded = { navigation.toDetails(it) }
+                onItemAdded = { navigation.toDetails(it) },
             )
         }
     }

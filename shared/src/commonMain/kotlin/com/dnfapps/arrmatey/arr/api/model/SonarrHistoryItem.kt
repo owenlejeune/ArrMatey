@@ -15,7 +15,6 @@ data class SonarrHistoryItem(
     override val customFormats: List<CustomFormat> = emptyList(),
     override val customFormatScore: Int? = null,
     override val data: Map<String, String?> = emptyMap(),
-
     val seriesId: Long,
-    val episodeId: Long? = null
-): HistoryItem
+    val episodeId: Long? = null,
+) : HistoryItem

@@ -8,5 +8,5 @@ data class SeriesAddOptions(
     val ignoreEpisodesWithFiles: Boolean = false,
     val ignoreEpisodesWithoutFiles: Boolean = false,
     val searchForMissingEpisodes: Boolean = false,
-    val searchForCutoffUnmetEpisodes: Boolean = false
+    val searchForCutoffUnmetEpisodes: Boolean = false,
 )

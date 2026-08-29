@@ -14,7 +14,7 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.compose.utils.formatWithCommas
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
@@ -29,72 +29,79 @@ fun buildArrInfoItems(
     state: UnifiedMediaDetailsUiState.Success,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>,
-    onEditPath: () -> Unit
-): List<InfoItem> = buildList {
-    val arrMedia = state.arrMedia
-    if (arrMedia != null && state.hasArrId) {
-        val arrItems = when (arrMedia) {
-            is ArrSeries -> seriesInfo(arrMedia, qualityProfiles, tags, onEditPath)
-            is ArrMovie -> movieInfo(arrMedia, qualityProfiles, tags, onEditPath)
-            is Arrtist -> artistInfo(arrMedia, qualityProfiles, tags, onEditPath)
-            is Author -> authorInfo(arrMedia, qualityProfiles, tags, onEditPath)
-            is Audiobook -> audiobookInfo(arrMedia, onEditPath)
-            else -> emptyList()
+    onEditPath: () -> Unit,
+): List<InfoItem> =
+    buildList {
+        val arrMedia = state.arrMedia
+        if (arrMedia != null && state.hasArrId) {
+            val arrItems =
+                when (arrMedia) {
+                    is ArrSeries -> seriesInfo(arrMedia, qualityProfiles, tags, onEditPath)
+                    is ArrMovie -> movieInfo(arrMedia, qualityProfiles, tags, onEditPath)
+                    is Arrtist -> artistInfo(arrMedia, qualityProfiles, tags, onEditPath)
+                    is Author -> authorInfo(arrMedia, qualityProfiles, tags, onEditPath)
+                    is Audiobook -> audiobookInfo(arrMedia, onEditPath)
+                    else -> emptyList()
+                }
+            addAll(arrItems)
         }
-        addAll(arrItems)
     }
-}
 
 @Composable
-fun buildSeerrInfoItems(
-    state: UnifiedMediaDetailsUiState.Success
-): List<InfoItem> = buildList {
-    val seerrMedia = state.seerrMedia
-    if (seerrMedia != null && seerrMedia !is PersonDetails) {
-        val statusLabel = mokoString(MR.strings.status)
-        add(InfoItem(statusLabel, seerrMedia.status))
+fun buildSeerrInfoItems(state: UnifiedMediaDetailsUiState.Success): List<InfoItem> =
+    buildList {
+        val seerrMedia = state.seerrMedia
+        if (seerrMedia != null && seerrMedia !is PersonDetails) {
+            val statusLabel = mokoString(MR.strings.status)
+            add(InfoItem(statusLabel, seerrMedia.status))
 
-        (seerrMedia as? MovieDetails)?.let { movie ->
-            movie.releaseDate?.format("MMM dd, yyyy")?.let { releaseDate ->
-                add(InfoItem(mokoString(MR.strings.release_date), releaseDate))
+            (seerrMedia as? MovieDetails)?.let { movie ->
+                movie.releaseDate?.format("MMM dd, yyyy")?.let { releaseDate ->
+                    add(InfoItem(mokoString(MR.strings.release_date), releaseDate))
+                }
+                if (movie.revenue > 0L) {
+                    add(InfoItem(mokoString(MR.strings.revenue), movie.revenue.formatWithCommas()))
+                }
+                if (movie.budget > 0L) {
+                    add(InfoItem(mokoString(MR.strings.budget), movie.budget.formatWithCommas()))
+                }
             }
-            if (movie.revenue > 0L) {
-                add(InfoItem(mokoString(MR.strings.revenue), movie.revenue.formatWithCommas()))
-            }
-            if (movie.budget > 0L) {
-                add(InfoItem(mokoString(MR.strings.budget), movie.budget.formatWithCommas()))
-            }
-        }
 
-        val countriesText = seerrMedia.productionCountries.joinToString("\n") { it.name }
-        if (countriesText.isNotEmpty()) {
-            add(InfoItem(mokoString(MR.strings.production_countries), countriesText))
-        }
-        val studiosText = seerrMedia.productionCompanies.joinToString("\n") { it.name }
-        if (studiosText.isNotEmpty()) {
-            add(InfoItem(mokoString(MR.strings.studios), studiosText))
+            val countriesText = seerrMedia.productionCountries.joinToString("\n") { it.name }
+            if (countriesText.isNotEmpty()) {
+                add(InfoItem(mokoString(MR.strings.production_countries), countriesText))
+            }
+            val studiosText = seerrMedia.productionCompanies.joinToString("\n") { it.name }
+            if (studiosText.isNotEmpty()) {
+                add(InfoItem(mokoString(MR.strings.studios), studiosText))
+            }
         }
     }
-}
 
 @Composable
 fun seriesInfo(
     series: ArrSeries,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>,
-    onEditPath: () -> Unit
+    onEditPath: () -> Unit,
 ): List<InfoItem> {
     val qualityProfile = qualityProfiles.firstOrNull { it.id == series.qualityProfileId }
     val tagsLabel = series.formatTags(tags) ?: mokoString(MR.strings.none)
 
     val unknown = mokoString(MR.strings.unknown)
-    val monitorLabel = if (series.monitorNewItems == MonitorNewItems.All) {
-        mokoString(MR.strings.monitored)
-    } else { mokoString(MR.strings.unmonitored) }
+    val monitorLabel =
+        if (series.monitorNewItems == MonitorNewItems.All) {
+            mokoString(MR.strings.monitored)
+        } else {
+            mokoString(MR.strings.unmonitored)
+        }
 
-    val seasonFolderLabel = if (series.seasonFolder) {
-        mokoString(MR.strings.yes)
-    } else { mokoString(MR.strings.no) }
+    val seasonFolderLabel =
+        if (series.seasonFolder) {
+            mokoString(MR.strings.yes)
+        } else {
+            mokoString(MR.strings.no)
+        }
 
     val diskSize = series.fileSize.bytesAsFileSizeString()
 
@@ -107,7 +114,7 @@ fun seriesInfo(
         InfoItem(mokoString(MR.strings.new_seasons), monitorLabel),
         InfoItem(mokoString(MR.strings.season_folders), seasonFolderLabel),
         InfoItem(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown)),
-        InfoItem(mokoString(MR.strings.tags), tagsLabel)
+        InfoItem(mokoString(MR.strings.tags), tagsLabel),
     )
 }
 
@@ -117,15 +124,16 @@ fun movieInfo(
     movie: ArrMovie,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>,
-    onEditPath: () -> Unit
+    onEditPath: () -> Unit,
 ): List<InfoItem> {
     val qualityProfile = qualityProfiles.firstOrNull { it.id == movie.qualityProfileId }
     val tagsLabel = movie.formatTags(tags) ?: mokoString(MR.strings.none)
 
     val unknown = mokoString(MR.strings.unknown)
 
-    val rootFolderPathValue = movie.rootFolderPath.takeUnless { it.isBlank() }
-        ?: mokoString(MR.strings.unknown)
+    val rootFolderPathValue =
+        movie.rootFolderPath.takeUnless { it.isBlank() }
+            ?: mokoString(MR.strings.unknown)
 
     return buildList {
         add(InfoItem(mokoString(MR.strings.status), mokoString(movie.status.resource)))
@@ -144,7 +152,6 @@ fun movieInfo(
         add(InfoItem(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown)))
         add(InfoItem(mokoString(MR.strings.tags), tagsLabel))
     }
-
 }
 
 @Composable
@@ -152,18 +159,22 @@ fun artistInfo(
     artist: Arrtist,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>,
-    onEditPath: () -> Unit
+    onEditPath: () -> Unit,
 ): List<InfoItem> {
     val qualityProfile = qualityProfiles.firstOrNull { it.id == artist.qualityProfileId }
     val tagsLabel = artist.formatTags(tags) ?: mokoString(MR.strings.none)
 
     val unknown = mokoString(MR.strings.unknown)
-    val monitorLabel = if (artist.monitorNewItems == ArtistMonitorType.All) {
-        mokoString(MR.strings.monitored)
-    } else { mokoString(MR.strings.unmonitored) }
+    val monitorLabel =
+        if (artist.monitorNewItems == ArtistMonitorType.All) {
+            mokoString(MR.strings.monitored)
+        } else {
+            mokoString(MR.strings.unmonitored)
+        }
 
-    val rootFolderPathValue = artist.rootFolderPath?.takeUnless { it.isBlank() }
-        ?: mokoString(MR.strings.unknown)
+    val rootFolderPathValue =
+        artist.rootFolderPath?.takeUnless { it.isBlank() }
+            ?: mokoString(MR.strings.unknown)
 
     val diskSize = artist.fileSize.bytesAsFileSizeString()
 
@@ -183,18 +194,22 @@ fun authorInfo(
     author: Author,
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>,
-    onEditPath: () -> Unit
+    onEditPath: () -> Unit,
 ): List<InfoItem> {
     val qualityProfile = qualityProfiles.firstOrNull { it.id == author.qualityProfileId }
     val tagsLabel = author.formatTags(tags) ?: mokoString(MR.strings.none)
 
     val unknown = mokoString(MR.strings.unknown)
-    val monitorLabel = if (author.monitorNewItems == AuthorMonitorType.All) {
-        mokoString(MR.strings.monitored)
-    } else { mokoString(MR.strings.unmonitored) }
+    val monitorLabel =
+        if (author.monitorNewItems == AuthorMonitorType.All) {
+            mokoString(MR.strings.monitored)
+        } else {
+            mokoString(MR.strings.unmonitored)
+        }
 
-    val rootFolderPathValue = author.rootFolderPath?.takeUnless { it.isBlank() }
-        ?: mokoString(MR.strings.unknown)
+    val rootFolderPathValue =
+        author.rootFolderPath?.takeUnless { it.isBlank() }
+            ?: mokoString(MR.strings.unknown)
 
     val diskSize = author.fileSize.bytesAsFileSizeString()
 
@@ -212,22 +227,26 @@ fun authorInfo(
 @Composable
 fun audiobookInfo(
     audiobook: Audiobook,
-    onEditPath: () -> Unit
+    onEditPath: () -> Unit,
 ): List<InfoItem> {
     val unknown = mokoString(MR.strings.unknown)
 
     val diskSize = audiobook.fileSize.bytesAsFileSizeString()
 
-    val authorString = audiobook.authors.takeUnless { it.isEmpty() }?.joinToString(Bullet) ?: unknown
-    val narratorsString = audiobook.narrators.takeUnless { it.isEmpty() }?.joinToString(Bullet) ?: unknown
+    val authorString = audiobook.authors.takeUnless { it.isEmpty() }?.joinToString(BULLET) ?: unknown
+    val narratorsString = audiobook.narrators.takeUnless { it.isEmpty() }?.joinToString(BULLET) ?: unknown
 
     return buildList {
         add(InfoItem(mokoString(MR.strings.audiobook_info_authors), authorString))
         add(InfoItem(mokoString(MR.strings.audiobook_info_narrators), narratorsString))
         add(InfoItem(mokoString(MR.strings.publisher), (audiobook.publisher ?: unknown)))
         audiobook.language?.let { language ->
-            add(InfoItem(mokoString(MR.strings.language),
-                language.replaceFirstChar { if (it.isLowerCase()) it.titlecase(LocalLocale.current.platformLocale) else it.toString() }))
+            add(
+                InfoItem(
+                    mokoString(MR.strings.language),
+                    language.replaceFirstChar { if (it.isLowerCase()) it.titlecase(LocalLocale.current.platformLocale) else it.toString() },
+                ),
+            )
         }
         add(InfoItem(mokoString(MR.strings.size_on_disk), diskSize))
         add(InfoItem(mokoString(MR.strings.path), (audiobook.path ?: unknown), onClick = onEditPath))

@@ -8,17 +8,20 @@ import com.dnfapps.arrmatey.bazarr.api.model.WantedEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.WantedMovie
 
 sealed interface BazarrLibrary {
-    data object Initial: BazarrLibrary
-    data object Loading: BazarrLibrary
+    data object Initial : BazarrLibrary
+
+    data object Loading : BazarrLibrary
+
     data class Success(
         val series: List<BazarrSeries> = emptyList(),
         val movies: List<BazarrMovie> = emptyList(),
         val wantedEpisodes: List<WantedEpisode> = emptyList(),
         val wantedMovies: List<WantedMovie> = emptyList(),
-        val providers: List<ProviderStatus> = emptyList()
-    ): BazarrLibrary
+        val providers: List<ProviderStatus> = emptyList(),
+    ) : BazarrLibrary
+
     data class Error(
         val message: String,
-        val type: HttpErrorType = HttpErrorType.Http
-    ): BazarrLibrary
+        val type: HttpErrorType = HttpErrorType.Http,
+    ) : BazarrLibrary
 }

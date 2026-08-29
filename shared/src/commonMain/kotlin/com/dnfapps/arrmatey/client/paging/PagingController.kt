@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class PagingController<T: Any>(
+class PagingController<T : Any>(
     private val scope: CoroutineScope,
     private val keySelector: ((T) -> Any)? = null,
-    private val sourceFactory: () -> PagingSource<T>
+    private val sourceFactory: () -> PagingSource<T>,
 ) {
     private val _state = MutableStateFlow(PagedData<T>())
     val state: StateFlow<PagedData<T>> = _state.asStateFlow()
@@ -38,7 +38,7 @@ class PagingController<T: Any>(
                             currentPage = result.currentPage,
                             hasMore = result.hasNextPage,
                             isLoading = false,
-                            error = null
+                            error = null,
                         )
                     }
                 }
@@ -46,7 +46,7 @@ class PagingController<T: Any>(
                     _state.update {
                         PagedData(
                             isLoading = false,
-                            error = formatError(result.throwable)
+                            error = formatError(result.throwable),
                         )
                     }
                 }
@@ -54,7 +54,7 @@ class PagingController<T: Any>(
                     _state.update {
                         PagedData(
                             isLoading = false,
-                            error = "Failed to create paging source"
+                            error = "Failed to create paging source",
                         )
                     }
                 }
@@ -83,7 +83,7 @@ class PagingController<T: Any>(
                             currentPage = result.currentPage,
                             hasMore = result.hasNextPage,
                             isLoadingMore = false,
-                            error = null
+                            error = null,
                         )
                     }
                 }
@@ -91,7 +91,7 @@ class PagingController<T: Any>(
                     _state.update {
                         it.copy(
                             isLoadingMore = false,
-                            error = formatError(result.throwable, isLoadingMore = true)
+                            error = formatError(result.throwable, isLoadingMore = true),
                         )
                     }
                 }
@@ -126,17 +126,21 @@ class PagingController<T: Any>(
         }
     }
 
-    private fun formatError(throwable: Throwable, isLoadingMore: Boolean = false): String {
+    private fun formatError(
+        throwable: Throwable,
+        isLoadingMore: Boolean = false,
+    ): String {
         val prefix = if (isLoadingMore) "Failed to load more" else ""
 
         return when (val error = throwable as? NetworkException) {
             is NetworkException -> {
-                val message = when (error.errorType) {
-                    ErrorType.Network -> "Network error - check your connection"
-                    ErrorType.Http -> "Server error - try again later"
-                    ErrorType.Timeout -> "Request timed out"
-                    else -> error.message ?: "Unknown error"
-                }
+                val message =
+                    when (error.errorType) {
+                        ErrorType.Network -> "Network error - check your connection"
+                        ErrorType.Http -> "Server error - try again later"
+                        ErrorType.Timeout -> "Request timed out"
+                        else -> error.message ?: "Unknown error"
+                    }
                 if (prefix.isNotEmpty()) "$prefix - $message" else message
             }
             else -> {

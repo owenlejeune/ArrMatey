@@ -27,9 +27,8 @@ import kotlinx.coroutines.launch
 class ProwlarrIndexersViewModel(
     private val getProwlarrIndexersUseCase: GetProwlarrIndexersUseCase,
     private val getProwlarrInstanceRepositoryUseCase: GetProwlarrInstanceRepositoryUseCase,
-    private val getProwlarrIndexersStatusUseCase: GetProwlarrIndexersStatusUseCase
-): ViewModel() {
-
+    private val getProwlarrIndexersStatusUseCase: GetProwlarrIndexersStatusUseCase,
+) : ViewModel() {
     private val _indexers = MutableStateFlow<ProwlarrIndexersState>(ProwlarrIndexersState.Initial)
     val indexers: StateFlow<ProwlarrIndexersState> = _indexers.asStateFlow()
 
@@ -67,8 +66,7 @@ class ProwlarrIndexersViewModel(
                         }
                         else -> state
                     }
-                }
-                .collect { state ->
+                }.collect { state ->
                     _indexers.value = state
                 }
         }
@@ -82,27 +80,27 @@ class ProwlarrIndexersViewModel(
         }
     }
 
-
     fun refresh() {
-       currentRepository?.let {
-           loadData(it)
-       }
+        currentRepository?.let {
+            loadData(it)
+        }
     }
 
     private fun sortSuccessState(
         state: ProwlarrIndexersState.Success,
-        sortingState: IndexersSortingState
+        sortingState: IndexersSortingState,
     ): ProwlarrIndexersState.Success {
-        val comparator: Comparator<ProwlarrIndexer> = when (sortingState.sortBy) {
-            SortBy.Name -> compareBy { it.name?.lowercase() }
-            SortBy.Added -> compareBy { it.added }
-            SortBy.Protocol -> compareBy { it.protocol }
-            SortBy.Priority -> compareBy { it.priority }
-            SortBy.Privacy -> compareBy { it.privacy }
-            else -> throw IllegalStateException("Sorting indexers with unsupported sort option ${sortingState.sortBy}")
-        }
+        val comparator: Comparator<ProwlarrIndexer> =
+            when (sortingState.sortBy) {
+                SortBy.Name -> compareBy { it.name?.lowercase() }
+                SortBy.Added -> compareBy { it.added }
+                SortBy.Protocol -> compareBy { it.protocol }
+                SortBy.Priority -> compareBy { it.priority }
+                SortBy.Privacy -> compareBy { it.privacy }
+                else -> throw IllegalStateException("Sorting indexers with unsupported sort option ${sortingState.sortBy}")
+            }
         return state.copy(
-            items = state.items.orderedSortedWith(sortingState.sortOrder, comparator)
+            items = state.items.orderedSortedWith(sortingState.sortOrder, comparator),
         )
     }
 

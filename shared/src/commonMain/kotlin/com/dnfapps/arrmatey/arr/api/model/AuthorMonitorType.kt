@@ -4,7 +4,9 @@ import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 
-enum class AuthorMonitorType(val resource: StringResource) {
+enum class AuthorMonitorType(
+    val resource: StringResource,
+) {
     @SerialName("unknown")
     Unknown(MR.strings.unknown),
 
@@ -30,5 +32,5 @@ enum class AuthorMonitorType(val resource: StringResource) {
     New(MR.strings.new_books),
 
     @SerialName("none")
-    None(MR.strings.none)
+    None(MR.strings.none),
 }

@@ -7,5 +7,5 @@ data class Provider(
     val displayPriority: Int,
     val logoPath: String,
     val id: Long,
-    val name: String
+    val name: String,
 )

@@ -7,10 +7,11 @@ fun String.isValidUrl(): Boolean {
     // host can be anything except whitespace, / and :
     // port is 1-5 digits
     // path starts with /
-    val urlPattern = Regex(
-        "^https?://(?:[^\\s@]+@)?([^\\s/:]+)(?::([0-9]{1,5}))?(?:/.*)?$",
-        RegexOption.IGNORE_CASE
-    )
+    val urlPattern =
+        Regex(
+            "^https?://(?:[^\\s@]+@)?([^\\s/:]+)(?::([0-9]{1,5}))?(?:/.*)?$",
+            RegexOption.IGNORE_CASE,
+        )
 
     val match = urlPattern.matchEntire(this) ?: return false
 

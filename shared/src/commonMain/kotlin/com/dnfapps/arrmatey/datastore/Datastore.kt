@@ -13,12 +13,16 @@ fun createDataStore(producePath: () -> String): DataStore<Preferences> =
         producePath().toPath()
     }
 
-internal const val dataStoreFileName = "arrmatey.preferences_pb"
+internal const val DATA_STORE_FILE_NAME = "arrmatey.preferences_pb"
+
 internal fun instanceDataStoreFileName(id: Long) = "arrmatey.instance_$id.preferences_pb"
 
 expect class DataStoreFactory() {
     val defaultAppColor: AppColor
+
     fun provideDataStore(): DataStore<Preferences>
+
     fun provideInstanceDataStore(instanceId: Long): DataStore<Preferences>
+
     fun providePlatformDataStore(): DataStore<Preferences>
 }

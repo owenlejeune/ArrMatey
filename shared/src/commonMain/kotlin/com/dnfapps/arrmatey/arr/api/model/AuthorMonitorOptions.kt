@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AuthorMonitorOptions(
     val monitored: Boolean? = null,
-    val monitorNewItems: AuthorMonitorType? = null
+    val monitorNewItems: AuthorMonitorType? = null,
 )

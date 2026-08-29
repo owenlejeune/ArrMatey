@@ -20,27 +20,29 @@ import androidx.compose.ui.unit.sp
 fun GridBadge(
     count: Int,
     containerColor: Color,
-    contentColor: Color
+    contentColor: Color,
 ) {
     if (count <= 0) return
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Surface(
             color = containerColor,
             shape = CircleShape,
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier.size(16.dp),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
                     text = if (count > 9) "9+" else count.toString(),
                     fontSize = 8.sp,
                     color = contentColor,
-                    style = LocalTextStyle.current.copy(
-                        platformStyle = PlatformTextStyle(
-                            includeFontPadding = false
+                    style =
+                        LocalTextStyle.current.copy(
+                            platformStyle =
+                                PlatformTextStyle(
+                                    includeFontPadding = false,
+                                ),
+                            lineHeight = 8.sp,
+                            textAlign = TextAlign.Center,
                         ),
-                        lineHeight = 8.sp,
-                        textAlign = TextAlign.Center
-                    )
                 )
             }
         }

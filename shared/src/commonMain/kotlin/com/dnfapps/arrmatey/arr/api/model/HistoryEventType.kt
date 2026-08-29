@@ -4,7 +4,9 @@ import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 
-enum class HistoryEventType(val resource: StringResource) {
+enum class HistoryEventType(
+    val resource: StringResource,
+) {
     Unknown(MR.strings.unknown),
 
     @SerialName("grabbed")
@@ -55,5 +57,5 @@ enum class HistoryEventType(val resource: StringResource) {
     AudiobookFileRemoved(MR.strings.audiobook_file_deleted),
 
     @SerialName("File Added")
-    AudiobookFileAdded(MR.strings.audiobook_file_added)
+    AudiobookFileAdded(MR.strings.audiobook_file_added),
 }

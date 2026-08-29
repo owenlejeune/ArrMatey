@@ -4,5 +4,5 @@ enum class ErrorType {
     Http,
     Network,
     Timeout,
-    Unexpected
+    Unexpected,
 }

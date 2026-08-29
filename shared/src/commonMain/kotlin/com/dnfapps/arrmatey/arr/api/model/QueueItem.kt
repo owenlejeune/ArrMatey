@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.formatToOneDecimal
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
@@ -50,7 +49,8 @@ sealed interface QueueItem {
         get() = trackedDownloadStatus != QueueDownloadStatus.Ok || status == QueueItemStatus.Warning
 
     val needsManualImport: Boolean
-        get() = downloadId != null &&
+        get() =
+            downloadId != null &&
                 trackedDownloadStatus != QueueDownloadStatus.Warning &&
                 trackedDownloadState.isManualImport()
 
@@ -58,24 +58,27 @@ sealed interface QueueItem {
         get() = (downloadId ?: "") + (title ?: "") + size
 
     val statusLabel: String
-        get() = when (status) {
-            null -> "Unknown"
-            QueueItemStatus.Completed -> when (trackedDownloadState) {
-                QueueDownloadState.ImportPending -> "Import Pending"
-                QueueDownloadState.ImportBlocked -> "Import Blocked"
-                QueueDownloadState.Imported -> "Importing"
-                QueueDownloadState.FailedPending -> "Waiting"
-                else -> "Downloading"
+        get() =
+            when (status) {
+                null -> "Unknown"
+                QueueItemStatus.Completed ->
+                    when (trackedDownloadState) {
+                        QueueDownloadState.ImportPending -> "Import Pending"
+                        QueueDownloadState.ImportBlocked -> "Import Blocked"
+                        QueueDownloadState.Imported -> "Importing"
+                        QueueDownloadState.FailedPending -> "Waiting"
+                        else -> "Downloading"
+                    }
+                else -> status!!.name
             }
-            else -> status!!.name
-        }
 
     val progressPercent: Float
-        get() = if (sizeleft > 0f) {
-            (((size - sizeleft) / size) * 100)
-        } else {
-            0f
-        }
+        get() =
+            if (sizeleft > 0f) {
+                (((size - sizeleft) / size) * 100)
+            } else {
+                0f
+            }
 
     val progressLabel: String
         get() = "${progressPercent.formatToOneDecimal()}%"
@@ -103,7 +106,7 @@ sealed interface QueueItem {
         get() {
             return customFormatScore?.let { score ->
                 val symbol = if (score < 0) "" else "+"
-                 "$symbol$score"
+                "$symbol$score"
             }
         }
 
@@ -144,4 +147,3 @@ object QueueItemSerializer : JsonContentPolymorphicSerializer<QueueItem>(QueueIt
         }
     }
 }
-

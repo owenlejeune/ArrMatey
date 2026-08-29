@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DownloadClientDao {
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(downloadClient: DownloadClient): Long
 
@@ -44,10 +43,16 @@ interface DownloadClientDao {
     suspend fun findByLabel(label: String): Long?
 
     @Query("SELECT id FROM download_clients WHERE url = :url AND id != :currentId LIMIT 1")
-    suspend fun findOtherByUrl(url: String, currentId: Long): Long?
+    suspend fun findOtherByUrl(
+        url: String,
+        currentId: Long,
+    ): Long?
 
     @Query("SELECT id FROM download_clients WHERE label = :label AND id != :currentId LIMIT 1")
-    suspend fun findOtherByLabel(label: String, currentId: Long): Long?
+    suspend fun findOtherByLabel(
+        label: String,
+        currentId: Long,
+    ): Long?
 
     @Query("UPDATE download_clients SET selected = 0")
     suspend fun unselectAll()
@@ -76,7 +81,7 @@ interface DownloadClientDao {
             ORDER BY id
             LIMIT 1
         )
-    """
+    """,
     )
     suspend fun ensureFirstSelectedIfNone()
 

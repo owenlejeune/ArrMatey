@@ -7,8 +7,8 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrSection
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrLibraryUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.RefreshBazarrBadgesUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.ResetBazarrProvidersUseCase
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,9 +31,8 @@ class BazarrViewModel(
     private val getBazarrLibraryUseCase: GetBazarrLibraryUseCase,
     private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
     private val refreshBazarrBadgesUseCase: RefreshBazarrBadgesUseCase,
-    private val resetBazarrProvidersUseCase: ResetBazarrProvidersUseCase
+    private val resetBazarrProvidersUseCase: ResetBazarrProvidersUseCase,
 ) : ViewModel() {
-
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -42,43 +41,44 @@ class BazarrViewModel(
 
     private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1).apply { tryEmit(Unit) }
 
-    private val currentRepository = getBazarrInstanceRepositoryUseCase
-        .observeSelected()
-        .distinctUntilChanged { old, new -> old?.instance?.id == new?.instance?.id }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+    private val currentRepository =
+        getBazarrInstanceRepositoryUseCase
+            .observeSelected()
+            .distinctUntilChanged { old, new -> old?.instance?.id == new?.instance?.id }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null,
+            )
 
-    val uiState: StateFlow<BazarrLibrary> = combine(
-        currentRepository.filterNotNull(),
-        refreshTrigger
-    ) { repo, _ -> repo }
-        .flatMapLatest { repo ->
-            getBazarrLibraryUseCase(repo)
-        }
-        .combine(_searchQuery) { library, query ->
-            if (query.isBlank() || library !is BazarrLibrary.Success) {
-                library
-            } else {
-                library.copy(
-                    series = library.series.filter { it.title.contains(query, ignoreCase = true) },
-                    movies = library.movies.filter { it.title.contains(query, ignoreCase = true) },
-                    wantedEpisodes = library.wantedEpisodes.filter {
-                        it.seriesTitle.contains(query, ignoreCase = true) ||
-                                it.episodeTitle.contains(query, ignoreCase = true)
-                    },
-                    wantedMovies = library.wantedMovies.filter { it.title.contains(query, ignoreCase = true) },
-                    providers = library.providers.filter { it.name.contains(query, ignoreCase = true) }
-                )
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = BazarrLibrary.Initial
-        )
+    val uiState: StateFlow<BazarrLibrary> =
+        combine(
+            currentRepository.filterNotNull(),
+            refreshTrigger,
+        ) { repo, _ -> repo }
+            .flatMapLatest { repo ->
+                getBazarrLibraryUseCase(repo)
+            }.combine(_searchQuery) { library, query ->
+                if (query.isBlank() || library !is BazarrLibrary.Success) {
+                    library
+                } else {
+                    library.copy(
+                        series = library.series.filter { it.title.contains(query, ignoreCase = true) },
+                        movies = library.movies.filter { it.title.contains(query, ignoreCase = true) },
+                        wantedEpisodes =
+                            library.wantedEpisodes.filter {
+                                it.seriesTitle.contains(query, ignoreCase = true) ||
+                                    it.episodeTitle.contains(query, ignoreCase = true)
+                            },
+                        wantedMovies = library.wantedMovies.filter { it.title.contains(query, ignoreCase = true) },
+                        providers = library.providers.filter { it.name.contains(query, ignoreCase = true) },
+                    )
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = BazarrLibrary.Initial,
+            )
 
     fun selectSection(section: BazarrSection) {
         _selectedSection.value = section

@@ -4,22 +4,28 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 
 sealed interface InstanceTypeIdentifiable {
     val instanceType: InstanceType
-        get() = when(this) {
-            is ArrSeries,
-            is Episode,
-            is EpisodeGroup,
-            is MockMedia.Sonarr,
-            is MockMedia.Default -> InstanceType.Sonarr
-            is ArrMovie,
-            is MockMedia.Radarr -> InstanceType.Radarr
-            is Arrtist,
-            is ArrAlbum,
-            is MockMedia.Lidarr -> InstanceType.Lidarr
-            is Author,
-            is Book,
-            is MockMedia.Readarr -> InstanceType.Booksehelf
-            is Audiobook,
-            is SearchAudiobook,
-            is MockMedia.Listenarr -> InstanceType.Listenarr
-        }
+        get() =
+            when (this) {
+                is ArrSeries,
+                is Episode,
+                is EpisodeGroup,
+                is MockMedia.Sonarr,
+                is MockMedia.Default,
+                -> InstanceType.Sonarr
+                is ArrMovie,
+                is MockMedia.Radarr,
+                -> InstanceType.Radarr
+                is Arrtist,
+                is ArrAlbum,
+                is MockMedia.Lidarr,
+                -> InstanceType.Lidarr
+                is Author,
+                is Book,
+                is MockMedia.Readarr,
+                -> InstanceType.Booksehelf
+                is Audiobook,
+                is SearchAudiobook,
+                is MockMedia.Listenarr,
+                -> InstanceType.Listenarr
+            }
 }

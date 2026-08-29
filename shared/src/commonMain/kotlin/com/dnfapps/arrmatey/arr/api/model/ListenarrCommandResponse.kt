@@ -9,7 +9,7 @@ data class ListenarrCommandResponse(
     val downloadId: String? = null,
     val indexerUsed: String? = null,
     val downloadClientUsed: String? = null,
-    val searchResult: ListenarrSearchResult? = null
+    val searchResult: ListenarrSearchResult? = null,
 )
 
 @Serializable
@@ -54,5 +54,5 @@ data class ListenarrSearchResult(
     val genres: List<String>? = null,
     val isEnriched: Boolean? = null,
     val metadataSource: String? = null,
-    val subtitles: String? = null
+    val subtitles: String? = null,
 )

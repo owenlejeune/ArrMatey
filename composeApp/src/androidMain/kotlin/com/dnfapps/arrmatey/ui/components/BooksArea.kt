@@ -53,14 +53,13 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.extensions.isToday
 import com.dnfapps.arrmatey.extensions.isTodayOrAfter
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -76,31 +75,32 @@ fun BooksArea(
     onNavigateToAuthorFiles: (Author) -> Unit,
     onNavigateToBookDetails: (Author, Book) -> Unit,
     onNavigateToBookRelease: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
+        modifier = modifier,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             SecondaryTabRow(
                 selectedTabIndex = selectedTabIndex,
-                modifier = Modifier
-                    .weight(1.5f)
+                modifier =
+                    Modifier
+                        .weight(1.5f),
             ) {
                 Tab(
                     selected = selectedTabIndex == 0,
                     onClick = { selectedTabIndex = 0 },
-                    text = { Text(mokoString(MR.strings.books_area_books_tab, books.size)) }
+                    text = { Text(mokoString(MR.strings.books_area_books_tab, books.size)) },
                 )
                 Tab(
                     selected = selectedTabIndex == 1,
                     onClick = { selectedTabIndex = 1 },
-                    text = { Text(mokoString(MR.strings.books_area_series_tab, series.size)) }
+                    text = { Text(mokoString(MR.strings.books_area_series_tab, series.size)) },
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -109,9 +109,10 @@ fun BooksArea(
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.clickable {
-                    onNavigateToAuthorFiles(author)
-                }
+                modifier =
+                    Modifier.clickable {
+                        onNavigateToAuthorFiles(author)
+                    },
             )
         }
         AnimatedContent(
@@ -119,30 +120,32 @@ fun BooksArea(
             transitionSpec = {
                 expandVertically()
                     .togetherWith(shrinkVertically())
-            }
+            },
         ) { tabIndex ->
             when (tabIndex) {
-                0 -> BooksView(
-                    author = author,
-                    files = files,
-                    books = books,
-                    searchIds = searchIds,
-                    onToggleMonitor = onToggleMonitor,
-                    onAutomaticSearch = onAutomaticSearch,
-                    onNavigateToBookDetails = onNavigateToBookDetails,
-                    onNavigateToBookRelease = onNavigateToBookRelease
-                )
+                0 ->
+                    BooksView(
+                        author = author,
+                        files = files,
+                        books = books,
+                        searchIds = searchIds,
+                        onToggleMonitor = onToggleMonitor,
+                        onAutomaticSearch = onAutomaticSearch,
+                        onNavigateToBookDetails = onNavigateToBookDetails,
+                        onNavigateToBookRelease = onNavigateToBookRelease,
+                    )
 
-                1 -> SeriesView(
-                    series = series,
-                    files = files,
-                    books = books,
-                    searchIds = searchIds,
-                    onToggleMonitor = onToggleMonitor,
-                    onToggleSeriesMonitor = onToggleSeriesMonitor,
-                    onAutomaticSearch = onAutomaticSearch,
-                    onNavigateToBookRelease = onNavigateToBookRelease
-                )
+                1 ->
+                    SeriesView(
+                        series = series,
+                        files = files,
+                        books = books,
+                        searchIds = searchIds,
+                        onToggleMonitor = onToggleMonitor,
+                        onToggleSeriesMonitor = onToggleSeriesMonitor,
+                        onAutomaticSearch = onAutomaticSearch,
+                        onNavigateToBookRelease = onNavigateToBookRelease,
+                    )
             }
         }
     }
@@ -157,7 +160,7 @@ private fun BooksView(
     onToggleMonitor: (Book) -> Unit,
     onAutomaticSearch: (Long) -> Unit,
     onNavigateToBookDetails: (Author, Book) -> Unit,
-    onNavigateToBookRelease: (Long) -> Unit
+    onNavigateToBookRelease: (Long) -> Unit,
 ) {
     Column {
         books.forEach { book ->
@@ -171,7 +174,7 @@ private fun BooksView(
                 onNavigateToBookRelease = onNavigateToBookRelease,
                 onClick = {
                     onNavigateToBookDetails(author, book)
-                }
+                },
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
         }
@@ -190,49 +193,53 @@ fun BookRow(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     progressLabel: String? = null,
-    seriesPosition: String? = null
+    seriesPosition: String? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier.clickable(onClick = onClick)
+        modifier = modifier.clickable(onClick = onClick),
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            val titleString = buildAnnotatedString {
-                seriesPosition?.let { seriesPosition ->
-                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("${seriesPosition}. ")
+            val titleString =
+                buildAnnotatedString {
+                    seriesPosition?.let { seriesPosition ->
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                            append("$seriesPosition. ")
+                        }
                     }
+                    append(book.title)
                 }
-                append(book.title)
-            }
             Text(titleString)
 
             val releaseDate = book.releaseDate?.takeIf { it.isTodayOrAfter() }
-            val (statusText, statusColor) = when {
-                isActive && progressLabel != null -> progressLabel to ArrLightPurple
-                bookFile?.quality != null -> bookFile.fileQualityName!! to MaterialTheme.colorScheme.tertiary
-                releaseDate != null -> mokoString(MR.strings.unaired) to Color.Unspecified
-                else -> mokoString(MR.strings.missing) to MaterialTheme.colorScheme.error
-            }
+            val (statusText, statusColor) =
+                when {
+                    isActive && progressLabel != null -> progressLabel to ArrLightPurple
+                    bookFile?.quality != null -> bookFile.fileQualityName!! to MaterialTheme.colorScheme.tertiary
+                    releaseDate != null -> mokoString(MR.strings.unaired) to Color.Unspecified
+                    else -> mokoString(MR.strings.missing) to MaterialTheme.colorScheme.error
+                }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = statusText,
                     fontSize = 14.sp,
                     color = statusColor,
-                    fontStyle = if (statusColor != Color.Unspecified) FontStyle.Italic else FontStyle.Normal
+                    fontStyle = if (statusColor != Color.Unspecified) FontStyle.Italic else FontStyle.Normal,
                 )
 
-                val (weight, color) = if (book.releaseDate?.isToday() == true)
-                    FontWeight.Medium to MaterialTheme.colorScheme.primary
-                else
-                    FontWeight.Normal to Color.Unspecified
+                val (weight, color) =
+                    if (book.releaseDate?.isToday() == true) {
+                        FontWeight.Medium to MaterialTheme.colorScheme.primary
+                    } else {
+                        FontWeight.Normal to Color.Unspecified
+                    }
                 Text(
-                    text = "$Bullet${book.releaseDate?.format("MMM d, yyyy")}",
+                    text = "$BULLET${book.releaseDate?.format("MMM d, yyyy")}",
                     color = color,
                     fontWeight = weight,
-                    fontSize = 14.sp
+                    fontSize = 14.sp,
                 )
             }
         }
@@ -242,7 +249,7 @@ fun BookRow(
                 onNavigateToBookRelease(book.id)
             },
             modifier = Modifier.size(24.dp),
-            enabled = book.monitored
+            enabled = book.monitored,
         ) {
             Icon(
                 imageVector = Icons.Default.Person,
@@ -254,11 +261,11 @@ fun BookRow(
                 onAutomaticSearch(book.id)
             },
             enabled = book.monitored && !searchInProgress(book.id),
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         ) {
             if (searchInProgress(book.id)) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             } else {
                 Icon(
@@ -271,14 +278,15 @@ fun BookRow(
             onClick = {
                 onToggleMonitor(book)
             },
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         ) {
             Icon(
-                imageVector = if (book.monitored) {
-                    Icons.Default.Bookmark
-                } else {
-                    Icons.Default.BookmarkBorder
-                },
+                imageVector =
+                    if (book.monitored) {
+                        Icons.Default.Bookmark
+                    } else {
+                        Icons.Default.BookmarkBorder
+                    },
                 contentDescription = null,
             )
         }
@@ -295,15 +303,16 @@ private fun SeriesView(
     onToggleMonitor: (Book) -> Unit,
     onToggleSeriesMonitor: (List<Book>) -> Unit,
     onAutomaticSearch: (Long) -> Unit,
-    onNavigateToBookRelease: (Long) -> Unit
+    onNavigateToBookRelease: (Long) -> Unit,
 ) {
     Column {
         series.forEach { bookSeries ->
-            val seriesBooks = remember(series, books) {
-                bookSeries.links.mapNotNull { link ->
-                    books.firstOrNull { it.id == link.bookId }
+            val seriesBooks =
+                remember(series, books) {
+                    bookSeries.links.mapNotNull { link ->
+                        books.firstOrNull { it.id == link.bookId }
+                    }
                 }
-            }
             val monitoredBooksCount by remember {
                 derivedStateOf { seriesBooks.count { it.monitored } }
             }
@@ -315,47 +324,55 @@ private fun SeriesView(
             val iconRotation by animateFloatAsState(
                 targetValue = if (expanded) 180f else 0f,
                 animationSpec = tween(durationMillis = 200),
-                label = "iconRotation"
+                label = "iconRotation",
             )
             Column(
                 modifier = Modifier.padding(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                ContainerCard(modifier = Modifier.clickable {
-                    expanded = !expanded
-                }) {
+                ContainerCard(
+                    modifier =
+                        Modifier.clickable {
+                            expanded = !expanded
+                        },
+                ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column {
                             Text(
                                 text = bookSeries.title ?: mokoString(MR.strings.unknown),
-                                style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.titleLarge,
                             )
                             Text(
                                 text = "${bookSeries.links.size} books",
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))
                         Icon(
                             imageVector = Icons.Default.ExpandCircleDown,
                             contentDescription = null,
-                            modifier = Modifier.rotate(iconRotation)
+                            modifier = Modifier.rotate(iconRotation),
                         )
                         Icon(
-                            imageVector = if (wholeSeriesMonitored) {
-                                Icons.Default.Bookmark
-                            } else Icons.Default.BookmarkBorder,
-                            contentDescription = if (wholeSeriesMonitored) {
-                                mokoString(MR.strings.monitored)
-                            } else {
-                                mokoString(MR.strings.unmonitored)
-                            },
-                            modifier = Modifier.clickable {
-                                onToggleSeriesMonitor(seriesBooks)
-                            }
+                            imageVector =
+                                if (wholeSeriesMonitored) {
+                                    Icons.Default.Bookmark
+                                } else {
+                                    Icons.Default.BookmarkBorder
+                                },
+                            contentDescription =
+                                if (wholeSeriesMonitored) {
+                                    mokoString(MR.strings.monitored)
+                                } else {
+                                    mokoString(MR.strings.unmonitored)
+                                },
+                            modifier =
+                                Modifier.clickable {
+                                    onToggleSeriesMonitor(seriesBooks)
+                                },
                         )
                     }
                 }
@@ -363,7 +380,7 @@ private fun SeriesView(
                 AnimatedVisibility(
                     visible = expanded,
                     enter = expandVertically(),
-                    exit = shrinkVertically()
+                    exit = shrinkVertically(),
                 ) {
                     Column {
                         bookSeries.links.sortedBy { it.position }.forEach { link ->
@@ -379,7 +396,7 @@ private fun SeriesView(
                                     onClick = {
                                         onNavigateToBookRelease(book.id)
                                     },
-                                    seriesPosition = link.position
+                                    seriesPosition = link.position,
                                 )
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                             }

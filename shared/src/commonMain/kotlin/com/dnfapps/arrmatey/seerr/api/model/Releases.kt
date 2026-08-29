@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Releases(
-    val results: List<ReleaseInfo> = emptyList()
+    val results: List<ReleaseInfo> = emptyList(),
 )

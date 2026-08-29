@@ -6,9 +6,9 @@ import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
 import com.dnfapps.arrmatey.arr.state.ProwlarrSearchState
 import com.dnfapps.arrmatey.arr.usecase.GrabProwlarrReleaseUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformProwlarrSearchUseCase
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,9 +19,8 @@ import kotlinx.coroutines.launch
 class ProwlarrSearchViewModel(
     private val performProwlarrSearchUseCase: PerformProwlarrSearchUseCase,
     private val grabProwlarrReleaseUseCase: GrabProwlarrReleaseUseCase,
-    private val observeSelectedInstanceUseCase: ObserveSelectedInstanceUseCase
-): ViewModel() {
-
+    private val observeSelectedInstanceUseCase: ObserveSelectedInstanceUseCase,
+) : ViewModel() {
     private val _searchResults = MutableStateFlow<ProwlarrSearchState>(ProwlarrSearchState.Initial)
     val searchResults: StateFlow<ProwlarrSearchState> = _searchResults.asStateFlow()
 

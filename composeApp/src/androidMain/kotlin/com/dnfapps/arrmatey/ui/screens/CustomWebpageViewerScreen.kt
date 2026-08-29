@@ -37,8 +37,6 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -67,7 +65,7 @@ import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
 fun CustomWebpageViewerScreen(
     webpageId: Long,
     wideRailIsVisible: Boolean,
-    customWebpageViewModel: CustomWebpageViewerViewModel = koinInjectParams(webpageId)
+    customWebpageViewModel: CustomWebpageViewerViewModel = koinInjectParams(webpageId),
 ) {
     val webpage by customWebpageViewModel.webpage.collectAsStateWithLifecycle()
     var webView by remember { mutableStateOf<WebView?>(null) }
@@ -83,30 +81,31 @@ fun CustomWebpageViewerScreen(
     val context = LocalContext.current
 
     DisposableEffect(lifecyclerOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_PAUSE -> {
-                    webView?.onPause()
-                }
-
-                Lifecycle.Event.ON_RESUME -> {
-                    webView?.onResume()
-                }
-
-                Lifecycle.Event.ON_DESTROY -> {
-                    webView?.apply {
-                        stopLoading()
-                        loadUrl("about:blank")
-                        clearHistory()
-                        clearCache(true)
-                        destroy()
+        val observer =
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_PAUSE -> {
+                        webView?.onPause()
                     }
-                    webView = null
-                }
 
-                else -> {}
+                    Lifecycle.Event.ON_RESUME -> {
+                        webView?.onResume()
+                    }
+
+                    Lifecycle.Event.ON_DESTROY -> {
+                        webView?.apply {
+                            stopLoading()
+                            loadUrl("about:blank")
+                            clearHistory()
+                            clearCache(true)
+                            destroy()
+                        }
+                        webView = null
+                    }
+
+                    else -> {}
+                }
             }
-        }
 
         lifecyclerOwner.lifecycle.addObserver(observer)
 
@@ -139,7 +138,7 @@ fun CustomWebpageViewerScreen(
                             text = currentTitle.ifEmpty { webpage?.name ?: "" },
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                         if (currentUrl.isNotEmpty()) {
                             Text(
@@ -147,7 +146,7 @@ fun CustomWebpageViewerScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -160,13 +159,13 @@ fun CustomWebpageViewerScreen(
                 actions = {
                     IconButton(
                         onClick = { webView?.goBack() },
-                        enabled = canGoBack
+                        enabled = canGoBack,
                     ) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, null)
                     }
                     IconButton(
                         onClick = { webView?.goForward() },
-                        enabled = canGoForward
+                        enabled = canGoForward,
                     ) {
                         Icon(Icons.AutoMirrored.Default.ArrowForward, null)
                     }
@@ -178,10 +177,10 @@ fun CustomWebpageViewerScreen(
                         }
                         DropdownMenuPopup(
                             expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false }
+                            onDismissRequest = { menuExpanded = false },
                         ) {
                             DropdownMenuGroup(
-                                shapes = MenuDefaults.groupShape(0, 1)
+                                shapes = MenuDefaults.groupShape(0, 1),
                             ) {
                                 DropdownMenuItem(
                                     text = { Text(mokoString(MR.strings.refresh)) },
@@ -191,7 +190,7 @@ fun CustomWebpageViewerScreen(
                                     onClick = {
                                         menuExpanded = false
                                         webView?.reload()
-                                    }
+                                    },
                                 )
                                 DropdownMenuItem(
                                     text = { Text(mokoString(MR.strings.share)) },
@@ -200,12 +199,13 @@ fun CustomWebpageViewerScreen(
                                     leadingIcon = { Icon(Icons.Default.Share, null) },
                                     onClick = {
                                         menuExpanded = false
-                                        val intent = Intent(Intent.ACTION_SEND).apply {
-                                            type = "text/plain"
-                                            putExtra(Intent.EXTRA_TEXT, currentUrl.ifEmpty { webpage?.url ?: "" })
-                                        }
+                                        val intent =
+                                            Intent(Intent.ACTION_SEND).apply {
+                                                type = "text/plain"
+                                                putExtra(Intent.EXTRA_TEXT, currentUrl.ifEmpty { webpage?.url ?: "" })
+                                            }
                                         context.startActivity(Intent.createChooser(intent, null))
-                                    }
+                                    },
                                 )
                                 DropdownMenuItem(
                                     text = { Text(mokoString(MR.strings.open_in_browser)) },
@@ -215,7 +215,7 @@ fun CustomWebpageViewerScreen(
                                     onClick = {
                                         menuExpanded = false
                                         context.openLink(currentUrl.ifEmpty { webpage?.url ?: "" })
-                                    }
+                                    },
                                 )
                                 DropdownMenuItem(
                                     text = { Text(mokoString(MR.strings.copy_link)) },
@@ -227,7 +227,7 @@ fun CustomWebpageViewerScreen(
                                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                         val clip = ClipData.newPlainText("URL", currentUrl.ifEmpty { webpage?.url ?: "" })
                                         clipboard.setPrimaryClip(clip)
-                                    }
+                                    },
                                 )
                                 DropdownMenuItem(
                                     text = { Text(mokoString(MR.strings.replace_url_with_current)) },
@@ -237,61 +237,71 @@ fun CustomWebpageViewerScreen(
                                     onClick = {
                                         menuExpanded = false
                                         customWebpageViewModel.updateUrl(currentUrl)
-                                    }
+                                    },
                                 )
                             }
                         }
                     }
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
         ) {
             webpage?.let { webpage ->
                 AndroidView(
                     factory = { context ->
-                        WebView(context).apply {
-                            webViewClient = object : WebViewClient() {
-                                override fun doUpdateVisitedHistory(
-                                    view: WebView?,
-                                    url: String?,
-                                    isReload: Boolean
-                                ) {
-                                    super.doUpdateVisitedHistory(view, url, isReload)
-                                    canGoBack = view?.canGoBack() == true
-                                    canGoForward = view?.canGoForward() == true
-                                    currentUrl = url ?: ""
+                        WebView(context)
+                            .apply {
+                                webViewClient =
+                                    object : WebViewClient() {
+                                        override fun doUpdateVisitedHistory(
+                                            view: WebView?,
+                                            url: String?,
+                                            isReload: Boolean,
+                                        ) {
+                                            super.doUpdateVisitedHistory(view, url, isReload)
+                                            canGoBack = view?.canGoBack() == true
+                                            canGoForward = view?.canGoForward() == true
+                                            currentUrl = url ?: ""
+                                        }
+                                    }
+
+                                webChromeClient =
+                                    object : WebChromeClient() {
+                                        override fun onProgressChanged(
+                                            view: WebView?,
+                                            newProgress: Int,
+                                        ) {
+                                            progress = newProgress / 100f
+                                        }
+
+                                        override fun onReceivedTitle(
+                                            view: WebView?,
+                                            title: String?,
+                                        ) {
+                                            currentTitle = title ?: ""
+                                        }
+                                    }
+
+                                settings.apply {
+                                    javaScriptEnabled = true
+                                    domStorageEnabled = true
+                                    loadWithOverviewMode = true
+                                    useWideViewPort = true
+                                    setSupportZoom(true)
+                                    builtInZoomControls = true
+                                    displayZoomControls = false
                                 }
-                            }
 
-                            webChromeClient = object : WebChromeClient() {
-                                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                                    progress = newProgress / 100f
-                                }
-
-                                override fun onReceivedTitle(view: WebView?, title: String?) {
-                                    currentTitle = title ?: ""
-                                }
-                            }
-
-                            settings.apply {
-                                javaScriptEnabled = true
-                                domStorageEnabled = true
-                                loadWithOverviewMode = true
-                                useWideViewPort = true
-                                setSupportZoom(true)
-                                builtInZoomControls = true
-                                displayZoomControls = false
-                            }
-
-                            val headersMap = webpage.headers.associate { it.key to it.value }
-                            loadUrl(webpage.url, headersMap)
-                        }.also { webView = it }
+                                val headersMap = webpage.headers.associate { it.key to it.value }
+                                loadUrl(webpage.url, headersMap)
+                            }.also { webView = it }
                     },
                     update = { view ->
                         canGoBack = view.canGoBack()
@@ -306,16 +316,17 @@ fun CustomWebpageViewerScreen(
                         view.removeAllViews()
                         view.destroyDrawingCache()
                         view.destroy()
-                    }
+                    },
                 )
             }
 
             if (progress > 0f && progress < 1f) {
                 LinearProgressIndicator(
                     progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter),
                 )
             }
         }

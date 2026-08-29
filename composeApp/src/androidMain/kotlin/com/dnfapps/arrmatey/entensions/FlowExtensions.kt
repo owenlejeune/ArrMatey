@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 fun <T : Any> StateFlow<PagedData<T>>.collectAsLazyPagingItems(
     onLoadMore: () -> Unit,
     onRefresh: () -> Unit,
-    prefetchDistance: Int = 3
+    prefetchDistance: Int = 3,
 ): LazyPagingItems<T> {
     val pagedDataState = collectAsState()
 
@@ -20,7 +20,7 @@ fun <T : Any> StateFlow<PagedData<T>>.collectAsLazyPagingItems(
             pagedDataState = pagedDataState,
             onLoadMore = onLoadMore,
             onRefresh = onRefresh,
-            prefetchDistance = prefetchDistance
+            prefetchDistance = prefetchDistance,
         )
     }
 }

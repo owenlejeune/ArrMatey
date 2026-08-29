@@ -48,7 +48,7 @@ fun EditInstanceScreen(
     id: Long,
     viewModel: EditInstanceViewModel = koinInjectParams(id),
     onBack: () -> Unit = {},
-    onDelete: () -> Unit = onBack
+    onDelete: () -> Unit = onBack,
 ) {
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -79,11 +79,11 @@ fun EditInstanceScreen(
                 title = { Text(text = mokoString(MR.strings.edit_instance)) },
                 navigationIcon = {
                     IconButton(
-                        onClick = onBack
+                        onClick = onBack,
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(MR.strings.back)
+                            contentDescription = mokoString(MR.strings.back),
                         )
                     }
                 },
@@ -92,15 +92,16 @@ fun EditInstanceScreen(
                         onClick = {
                             confirmDelete = true
                         },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
-                        ),
-                        modifier = Modifier.padding(end = 4.dp)
+                        colors =
+                            IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                            ),
+                        modifier = Modifier.padding(end = 4.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
 
@@ -111,23 +112,24 @@ fun EditInstanceScreen(
                                 viewModel.testConnection()
                             }
                         },
-                        modifier = Modifier.padding(end = 12.dp)
+                        modifier = Modifier.padding(end = 12.dp),
                     ) {
                         Text(text = mokoString(MR.strings.save))
                     }
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { contentPadding ->
         Column(
-            modifier = Modifier
-                .padding(contentPadding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-                .padding(bottom = navigationBarBottomInset() + 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .padding(contentPadding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = navigationBarBottomInset() + 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             instance?.let { instance ->
                 ArrConfigurationScreen(
@@ -145,13 +147,13 @@ fun EditInstanceScreen(
                     onLocalNetworkUrlChanged = { viewModel.setLocalNetworkUrl(it) },
                     onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsids(it) },
                     onTestLocalConnection = { viewModel.testLocalConnection() },
-                    onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() }
+                    onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() },
                 )
             }
 
             if (confirmDelete) {
                 AlertDialog(
-                    onDismissRequest = { confirmDelete = false},
+                    onDismissRequest = { confirmDelete = false },
                     confirmButton = {
                         TextButton(
                             onClick = {
@@ -161,21 +163,20 @@ fun EditInstanceScreen(
                                         onDelete()
                                     }
                                 }
-                            }
+                            },
                         ) { Text(mokoString(MR.strings.yes)) }
                     },
                     dismissButton = {
                         TextButton(
                             onClick = {
                                 confirmDelete = false
-
-                            }
+                            },
                         ) { Text(mokoString(MR.strings.no)) }
                     },
                     title = { Text(mokoString(MR.strings.confirm)) },
                     text = {
                         Text(mokoString(MR.strings.confirm_delete_instance, instance?.label ?: ""))
-                    }
+                    },
                 )
             }
         }

@@ -49,22 +49,30 @@ fun LocalDate.isBeforeToday(timeZone: TimeZone = TimeZone.currentSystemDefault()
 fun LocalDate.isBeforeToday(): Boolean = isBeforeToday(TimeZone.currentSystemDefault())
 
 @OptIn(ExperimentalTime::class)
-fun Clock.Companion.localToday(): LocalDate {
-    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-}
+fun Clock.Companion.localToday(): LocalDate =
+    Clock.System
+        .now()
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .date
 
 fun Instant.isTodayOrAfter(): Boolean {
-    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val today =
+        Clock.System
+            .now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
     val instantDate = this.toLocalDateTime(TimeZone.currentSystemDefault()).date
     return instantDate >= today
 }
 
-fun Instant.ifTodayOrAfter(): Instant? {
-    return if (isTodayOrAfter()) this else null
-}
+fun Instant.ifTodayOrAfter(): Instant? = if (isTodayOrAfter()) this else null
 
 fun Instant.isToday(): Boolean {
-    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val today =
+        Clock.System
+            .now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
     val instantDate = this.toLocalDateTime(TimeZone.currentSystemDefault()).date
     return instantDate == today
 }
@@ -74,15 +82,19 @@ fun Instant.isEqual(date: LocalDate): Boolean {
     return this.toLocalDateTime(timeZone).date == date
 }
 
-fun Instant?.isBetween(start: LocalDate, end: LocalDate): Boolean {
+fun Instant?.isBetween(
+    start: LocalDate,
+    end: LocalDate,
+): Boolean {
     if (this == null) return false
 
     val timeZone = TimeZone.currentSystemDefault()
     val startInstant = start.atStartOfDayIn(timeZone)
-    val nextDay = LocalDate(end.year, end.month, end.day).run {
-        val instantOfEndDay = atStartOfDayIn(timeZone)
-        instantOfEndDay.plus(1.days)
-    }
+    val nextDay =
+        LocalDate(end.year, end.month, end.day).run {
+            val instantOfEndDay = atStartOfDayIn(timeZone)
+            instantOfEndDay.plus(1.days)
+        }
     return this in startInstant..<nextDay
 }
 

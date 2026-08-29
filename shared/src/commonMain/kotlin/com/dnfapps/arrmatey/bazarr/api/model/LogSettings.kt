@@ -7,5 +7,5 @@ data class LogSettings(
     val exclude_filter: String,
     val ignore_case: Boolean,
     val include_filter: String,
-    val use_regex: Boolean
+    val use_regex: Boolean,
 )

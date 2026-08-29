@@ -17,5 +17,5 @@ data class BazarrEpisode(
     val sonarrSeriesId: Long,
     val subtitles: List<BazarrSubtitle> = emptyList(),
     val title: String,
-    val sceneName: String? = null
+    val sceneName: String? = null,
 )

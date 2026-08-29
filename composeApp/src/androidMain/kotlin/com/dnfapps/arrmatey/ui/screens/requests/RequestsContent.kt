@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.dnfapps.arrmatey.ui.screens.requests
 
 import androidx.compose.foundation.layout.*
@@ -29,7 +31,7 @@ fun RequestsContent(
     onNavigateToDetails: (Long, RequestType) -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
-    onClearError: () -> Unit
+    onClearError: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -40,7 +42,7 @@ fun RequestsContent(
             pagedData.isEmpty -> {
                 EmptyRequestsState(
                     message = mokoString(MR.strings.no_requests_found),
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
 
@@ -57,7 +59,7 @@ fun RequestsContent(
                     onDelete = onDelete,
                     onRemoveFromService = onRemoveFromService,
                     onNavigateToDetails = onNavigateToDetails,
-                    onLoadMore = onLoadMore
+                    onLoadMore = onLoadMore,
                 )
             }
         }
@@ -67,9 +69,10 @@ fun RequestsContent(
                 error = error,
                 onRetry = onRetry,
                 onDismiss = onClearError,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
             )
         }
     }

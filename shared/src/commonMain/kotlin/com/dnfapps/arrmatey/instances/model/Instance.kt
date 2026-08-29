@@ -11,7 +11,6 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBazarr
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
-import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
@@ -26,8 +25,8 @@ import kotlinx.serialization.Serializable
     tableName = "instances",
     indices = [
         Index(value = ["url"], unique = true),
-        Index(value = ["label"], unique = true)
-    ]
+        Index(value = ["label"], unique = true),
+    ],
 )
 data class Instance(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -42,12 +41,10 @@ data class Instance(
     val selected: Boolean = false,
     val notificationsEnabled: Boolean = false,
     val headers: List<InstanceHeader> = emptyList(),
-
     val localNetworkEnabled: Boolean = false,
     val localNetworkSsids: List<String> = emptyList(),
-    val localNetworkEndpoint: String? = null
+    val localNetworkEndpoint: String? = null,
 ) {
-
     fun getEffectiveBaseUrl(): String {
         if (!localNetworkEnabled ||
             localNetworkSsids.isEmpty() ||
@@ -67,17 +64,16 @@ data class Instance(
         }
     }
 
-    fun isUsingLocalNetwork(): Boolean {
-        return try {
+    fun isUsingLocalNetwork(): Boolean =
+        try {
             val currentSsid = getNetworkUtils().getCurrentWifiSsid()
             localNetworkEnabled &&
-                    !localNetworkEndpoint.isNullOrBlank() &&
-                    currentSsid != null &&
-                    localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
+                !localNetworkEndpoint.isNullOrBlank() &&
+                currentSsid != null &&
+                localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
         } catch (e: Exception) {
             false
         }
-    }
 }
 
 @Serializable
@@ -98,7 +94,7 @@ enum class InstanceType(
     val mockCover: ImageResource? = null,
     val mockMedia: MockMedia = MockMedia.Default,
     val associatedColor: Color,
-    val associatedRequestType: RequestType? = null
+    val associatedRequestType: RequestType? = null,
 ) {
     Sonarr(
         resource = MR.strings.sonarr_description,
@@ -117,7 +113,7 @@ enum class InstanceType(
         mockCover = MR.images.sonarr_mock_poster,
         mockMedia = MockMedia.Sonarr,
         associatedColor = ArrBlue,
-        associatedRequestType = RequestType.Tv
+        associatedRequestType = RequestType.Tv,
     ),
     Radarr(
         resource = MR.strings.radarr_description,
@@ -136,7 +132,7 @@ enum class InstanceType(
         mockCover = MR.images.radarr_mock_poster,
         mockMedia = MockMedia.Radarr,
         associatedColor = ArrOrange,
-        associatedRequestType = RequestType.Movie
+        associatedRequestType = RequestType.Movie,
     ),
     Lidarr(
         resource = MR.strings.lidarr_description,
@@ -154,7 +150,7 @@ enum class InstanceType(
         supportsNotifications = true,
         mockCover = MR.images.lidarr_mock_cover,
         mockMedia = MockMedia.Lidarr,
-        associatedColor = ArrGreen
+        associatedColor = ArrGreen,
     ),
     Booksehelf(
         resource = MR.strings.bookshelf_description,
@@ -172,7 +168,7 @@ enum class InstanceType(
         supportsNotifications = true,
         mockCover = MR.images.readarr_mock_cover,
         mockMedia = MockMedia.Readarr,
-        associatedColor = ArrRed
+        associatedColor = ArrRed,
     ),
     Listenarr(
         resource = MR.strings.lidarr_description,
@@ -190,7 +186,7 @@ enum class InstanceType(
         supportsNotifications = true,
         mockCover = MR.images.readarr_mock_cover,
         mockMedia = MockMedia.Listenarr,
-        associatedColor = ArrLightPurple
+        associatedColor = ArrLightPurple,
     ),
     Seerr(
         resource = MR.strings.seerr_description,
@@ -206,7 +202,7 @@ enum class InstanceType(
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = false,
-        associatedColor = ArrPurple
+        associatedColor = ArrPurple,
     ),
     Prowlarr(
         resource = MR.strings.prowlarr_description,
@@ -222,7 +218,7 @@ enum class InstanceType(
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = false,
-        associatedColor = ArrOrange
+        associatedColor = ArrOrange,
     ),
     Bazarr(
         resource = MR.strings.bazarr_description,
@@ -238,8 +234,9 @@ enum class InstanceType(
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = false,
-        associatedColor = ArrBazarr
-    );
+        associatedColor = ArrBazarr,
+    ),
+    ;
 
     companion object {
         fun arrs() = listOf(Sonarr, Radarr, Lidarr, Booksehelf, Listenarr)

@@ -1,36 +1,39 @@
 package com.dnfapps.arrmatey.downloadclient.usecase
 
-import com.dnfapps.networking.NetworkResult
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
+import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class ResumeDownloadUseCase(
     private val downloadClientManager: DownloadClientManager,
-    private val logger: Logger
+    private val logger: Logger,
 ) {
+    operator fun invoke(
+        clientId: Long,
+        ids: List<String>,
+    ): Flow<OperationStatus> =
+        flow {
+            emit(OperationStatus.InProgress)
 
-    operator fun invoke(clientId: Long, ids: List<String>): Flow<OperationStatus> = flow {
-        emit(OperationStatus.InProgress)
-
-        val api = downloadClientManager.getOrCreateApi(clientId)
-        if (api == null) {
-            logger.error { "Resume failed: no download-client API for id $clientId" }
-            emit(OperationStatus.Error(message = "Download client not available"))
-            return@flow
-        }
-
-        when (val result = api.resumeDownload(ids)) {
-            is NetworkResult.Success -> emit(OperationStatus.Success("Downloads resumed"))
-            is NetworkResult.Error -> {
-                logger.error(result.cause) {
-                    "Resume failed on client $clientId (ids=$ids): ${result.message} (code=${result.code})"
-                }
-                emit(OperationStatus.Error(result.code, result.message, result.cause))
+            val api = downloadClientManager.getOrCreateApi(clientId)
+            if (api == null) {
+                logger.error { "Resume failed: no download-client API for id $clientId" }
+                emit(OperationStatus.Error(message = "Download client not available"))
+                return@flow
             }
-            is NetworkResult.Loading -> emit(OperationStatus.InProgress)
+
+            when (val result = api.resumeDownload(ids)) {
+                is NetworkResult.Success -> emit(OperationStatus.Success("Downloads resumed"))
+                is NetworkResult.Error -> {
+                    logger.error(result.cause) {
+                        "Resume failed on client $clientId (ids=$ids): ${result.message} (code=${result.code})"
+                    }
+                    emit(OperationStatus.Error(result.code, result.message, result.cause))
+                }
+                is NetworkResult.Loading -> emit(OperationStatus.InProgress)
+            }
         }
-    }
 }

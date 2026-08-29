@@ -12,15 +12,15 @@ import com.dnfapps.arrmatey.compose.utils.breakable
 @Composable
 fun ExtraFileCard(extraFile: ExtraFile) {
     ContainerCard(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
             text = extraFile.relativePath.breakable(),
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
         Text(
             text = extraFile.type.name,
-            fontSize = 12.sp
+            fontSize = 12.sp,
         )
     }
 }

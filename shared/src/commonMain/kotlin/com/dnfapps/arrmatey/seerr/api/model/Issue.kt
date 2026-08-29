@@ -15,6 +15,5 @@ data class Issue(
     @Contextual val updatedAt: Instant? = null,
     val media: RequestMedia? = null,
     val createdBy: RequestUser? = null,
-    val comments: List<Comment> = emptyList()
+    val comments: List<Comment> = emptyList(),
 )
-

@@ -8,5 +8,5 @@ import kotlinx.serialization.json.JsonElement
 data class DelugeJsonRpcRequest(
     @SerialName("method") val method: String,
     @SerialName("params") val params: List<JsonElement> = emptyList(),
-    @SerialName("id") val id: Int
+    @SerialName("id") val id: Int,
 )

@@ -8,7 +8,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.database.InstanceRepository
-import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsScreen
 import com.dnfapps.arrmatey.navigation.SettingsTabNavigator
@@ -41,7 +40,7 @@ fun SettingsTabNavHost(
     windowSizeClass: WindowSizeClass,
     navigationManager: NavigationManager = koinInject(),
     instanceRepository: InstanceRepository = koinInject(),
-    navigation: SettingsTabNavigator = navigationManager.settings
+    navigation: SettingsTabNavigator = navigationManager.settings,
 ) {
     val instances by instanceRepository.allInstancesFlow.collectAsStateWithLifecycle()
 
@@ -56,78 +55,79 @@ fun SettingsTabNavHost(
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-        entryProvider = entryProvider {
-            entry<SettingsScreen.Landing> {
-                SettingsScreen(
-                    onNavigateToInstance = { id, type -> navigation.onInstanceTap(id, type) },
-                    onNavigateToAddInstance = { navigation.toAddInstance() },
-                    onNavigateToEditDownloadClient = { id -> navigation.toEditDownloadClient(id) },
-                    onNavigateToAddDownloadClient = { navigation.toAddDownloadClient() },
-                    onNavigateToEditCustomWebpage = { id -> navigation.toEditCustomWebpage(id) },
-                    onNavigateToAddCustomWebpage = { navigation.toAddCustomWebpage() },
-                    onNavigateToTabPreferences = { navigation.toTabPreferences() },
-                    onNavigateToShortcutsPreferences = { navigation.toShortcutsPreferences() },
-                    onNavigateToDev = { navigation.toDev() }
-                )
-            }
-            entry<SettingsScreen.AddInstance> {
-                AddInstanceScreen(
-                    initialType = it.type,
-                    onBack = { navigation.popBackStack() }
-                )
-            }
-            entry<SettingsScreen.EditInstance> {
-                EditInstanceScreen(
-                    id = it.id,
-                    onBack = { navigation.popBackStack() },
-                    onDelete = { navigation.popToRoot() }
-                )
-            }
-            entry<SettingsScreen.Dev> {
-                DevSettingsScreen(
-                    onBack = { navigation.popBackStack() }
-                )
-            }
-            entry<SettingsScreen.TabPreferences> {
-                TabCustomizationScreen(
-                    onBack = { navigation.popBackStack() }
-                )
-            }
-            entry<SettingsScreen.ShortcutPreferences> {
-                ShortcutsCustomizationScreen(
-                    onBack = { navigation.popBackStack() }
-                )
-            }
-            entry<SettingsScreen.ArrDashboard> {
-                ArrInstanceDashboard(
-                    id = it.id,
-                    windowSizeClass = windowSizeClass,
-                    onBack = { navigation.popBackStack() },
-                    onNavigateToEditInstance = { instanceId -> navigation.toEditInstance(instanceId) }
-                )
-            }
-            entry<SettingsScreen.AddDownloadClient> {
-                AddEditDownloadClientScreen(
-                    onBack = { navigation.popBackStack() }
-                )
-            }
-            entry<SettingsScreen.EditDownloadClient> {
-                AddEditDownloadClientScreen(
-                    clientId = it.id,
-                    onBack = { navigation.popBackStack() }
-                )
-            }
-            entry<SettingsScreen.AddCustomWebpage> {
-                AddEditCustomWebpageScreen(
-                    onBack = { navigation.popBackStack() }
-                )
-            }
-            entry<SettingsScreen.EditCustomWebpage> {
-                AddEditCustomWebpageScreen(
-                    webpageId = it.id,
-                    onBack = { navigation.popBackStack() }
-                )
-            }
-        }
+        entryProvider =
+            entryProvider {
+                entry<SettingsScreen.Landing> {
+                    SettingsScreen(
+                        onNavigateToInstance = { id, type -> navigation.onInstanceTap(id, type) },
+                        onNavigateToAddInstance = { navigation.toAddInstance() },
+                        onNavigateToEditDownloadClient = { id -> navigation.toEditDownloadClient(id) },
+                        onNavigateToAddDownloadClient = { navigation.toAddDownloadClient() },
+                        onNavigateToEditCustomWebpage = { id -> navigation.toEditCustomWebpage(id) },
+                        onNavigateToAddCustomWebpage = { navigation.toAddCustomWebpage() },
+                        onNavigateToTabPreferences = { navigation.toTabPreferences() },
+                        onNavigateToShortcutsPreferences = { navigation.toShortcutsPreferences() },
+                        onNavigateToDev = { navigation.toDev() },
+                    )
+                }
+                entry<SettingsScreen.AddInstance> {
+                    AddInstanceScreen(
+                        initialType = it.type,
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.EditInstance> {
+                    EditInstanceScreen(
+                        id = it.id,
+                        onBack = { navigation.popBackStack() },
+                        onDelete = { navigation.popToRoot() },
+                    )
+                }
+                entry<SettingsScreen.Dev> {
+                    DevSettingsScreen(
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.TabPreferences> {
+                    TabCustomizationScreen(
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.ShortcutPreferences> {
+                    ShortcutsCustomizationScreen(
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.ArrDashboard> {
+                    ArrInstanceDashboard(
+                        id = it.id,
+                        windowSizeClass = windowSizeClass,
+                        onBack = { navigation.popBackStack() },
+                        onNavigateToEditInstance = { instanceId -> navigation.toEditInstance(instanceId) },
+                    )
+                }
+                entry<SettingsScreen.AddDownloadClient> {
+                    AddEditDownloadClientScreen(
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.EditDownloadClient> {
+                    AddEditDownloadClientScreen(
+                        clientId = it.id,
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.AddCustomWebpage> {
+                    AddEditCustomWebpageScreen(
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.EditCustomWebpage> {
+                    AddEditCustomWebpageScreen(
+                        webpageId = it.id,
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+            },
     )
 }

@@ -7,64 +7,75 @@ import com.dnfapps.arrmatey.arr.api.model.LidarrRelease
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
 import com.dnfapps.arrmatey.arr.api.model.MovieRelease
 import com.dnfapps.arrmatey.arr.api.model.SeriesRelease
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.firstOrNull
 
 class DownloadReleaseUseCase(
-    private val instanceManager: InstanceManager
+    private val instanceManager: InstanceManager,
 ) {
     suspend operator fun invoke(
         type: InstanceType,
         release: ArrRelease,
-        force: Boolean = false
+        force: Boolean = false,
     ): NetworkResult<Any> {
-        val repository = instanceManager.getSelectedArrRepository(type).firstOrNull()
-            ?: return NetworkResult.Error(message = "No instance selected")
+        val repository =
+            instanceManager.getSelectedArrRepository(type).firstOrNull()
+                ?: return NetworkResult.Error(message = "No instance selected")
 
-        val payload = when (release) {
-            is SeriesRelease -> buildSonarrPayload(release, force)
-            is MovieRelease -> buildRadarrPayload(release, force)
-            is LidarrRelease -> buildLidarrPayload(release, force)
-            is BookshelfRelease -> buildBookshelfPayload(release)
-            is ListenarrRelease -> buildListenarrPayload(release)
-        }
+        val payload =
+            when (release) {
+                is SeriesRelease -> buildSonarrPayload(release, force)
+                is MovieRelease -> buildRadarrPayload(release, force)
+                is LidarrRelease -> buildLidarrPayload(release, force)
+                is BookshelfRelease -> buildBookshelfPayload(release)
+                is ListenarrRelease -> buildListenarrPayload(release)
+            }
         return repository.downloadRelease(payload)
     }
 
-    private fun buildSonarrPayload(release: SeriesRelease, force: Boolean): DownloadReleasePayload =
+    private fun buildSonarrPayload(
+        release: SeriesRelease,
+        force: Boolean,
+    ): DownloadReleasePayload =
         DownloadReleasePayload.Series(
             guid = release.guid,
             indexerId = release.indexerId,
             seriesId = release.seriesId,
             seasonNumber = release.seasonNumber,
-            episodeId = release.episodeId
+            episodeId = release.episodeId,
         )
 
-    private fun buildRadarrPayload(release: MovieRelease, force: Boolean): DownloadReleasePayload =
+    private fun buildRadarrPayload(
+        release: MovieRelease,
+        force: Boolean,
+    ): DownloadReleasePayload =
         DownloadReleasePayload.Movie(
             guid = release.guid,
             indexerId = release.indexerId,
-            movieId = if (force) release.movieId else null
+            movieId = if (force) release.movieId else null,
         )
 
-    private fun buildLidarrPayload(release: LidarrRelease, force: Boolean): DownloadReleasePayload =
+    private fun buildLidarrPayload(
+        release: LidarrRelease,
+        force: Boolean,
+    ): DownloadReleasePayload =
         DownloadReleasePayload.Album(
             guid = release.guid,
             indexerId = release.indexerId,
-            albumId = if (force) release.albumId else null
+            albumId = if (force) release.albumId else null,
         )
 
     private fun buildBookshelfPayload(release: BookshelfRelease): DownloadReleasePayload =
         DownloadReleasePayload.Book(
             guid = release.guid,
-            indexerId = release.indexerId
+            indexerId = release.indexerId,
         )
-    
+
     private fun buildListenarrPayload(release: ListenarrRelease): DownloadReleasePayload =
         DownloadReleasePayload.AudioBook(
             audiobookId = release.mediaId ?: -1,
-            searchResult = release
+            searchResult = release,
         )
 }

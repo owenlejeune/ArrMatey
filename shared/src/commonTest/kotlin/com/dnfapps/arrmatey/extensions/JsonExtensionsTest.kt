@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class JsonExtensionsTest {
-
     @Test
     fun testToJsonArrayEmpty() {
         val array = emptyList<String>().toJsonArray()

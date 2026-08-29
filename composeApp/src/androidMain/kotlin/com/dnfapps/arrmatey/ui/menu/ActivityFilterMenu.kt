@@ -44,7 +44,7 @@ fun ActivityFilterMenu(
     sortBy: QueueSortBy,
     onSortByChanged: (QueueSortBy) -> Unit,
     sortOrder: SortOrder,
-    onSortOrderChanged: (SortOrder) -> Unit
+    onSortOrderChanged: (SortOrder) -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var instanceMenuExpanded by remember { mutableStateOf(false) }
@@ -58,35 +58,36 @@ fun ActivityFilterMenu(
         }
         DropdownMenuPopup(
             expanded = menuExpanded,
-            onDismissRequest = { menuExpanded = false }
+            onDismissRequest = { menuExpanded = false },
         ) {
             if (instances.size > 1) {
                 DropdownMenuGroup(
                     shapes = MenuDefaults.groupShape(0, 2),
-                    interactionSource = groupInteractionSource
+                    interactionSource = groupInteractionSource,
                 ) {
                     Box {
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = instances.firstOrNull { it.id == selectedInstanceId }?.label
-                                        ?: mokoString(MR.strings.instances)
+                                    text =
+                                        instances.firstOrNull { it.id == selectedInstanceId }?.label
+                                            ?: mokoString(MR.strings.instances),
                                 )
                             },
                             onClick = { instanceMenuExpanded = true },
                             trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-                            leadingIcon = { Icon(Hard_drive, null) }
+                            leadingIcon = { Icon(Hard_drive, null) },
                         )
 
                         DropdownMenuPopup(
                             expanded = instanceMenuExpanded,
                             onDismissRequest = { instanceMenuExpanded = false },
-                            offset = DpOffset(x = 350.dp, y = 0.dp)
+                            offset = DpOffset(x = 350.dp, y = 0.dp),
                         ) {
                             DropdownMenuGroup(
                                 shapes = MenuDefaults.groupShape(0, 1),
                                 interactionSource = groupInteractionSource,
-                                containerColor = MenuDefaults.groupVibrantContainerColor
+                                containerColor = MenuDefaults.groupVibrantContainerColor,
                             ) {
                                 DropdownMenuItem(
                                     text = { Text(mokoString(MR.strings.all)) },
@@ -94,20 +95,21 @@ fun ActivityFilterMenu(
                                     onClick = { onInstanceChange(null) },
                                     selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
                                     shapes = MenuDefaults.itemShape(0, instances.size + 1),
-                                    colors = MenuDefaults.selectableItemVibrantColors()
+                                    colors = MenuDefaults.selectableItemVibrantColors(),
                                 )
-                                HorizontalDivider(Modifier.padding( MenuDefaults.HorizontalDividerPadding))
+                                HorizontalDivider(Modifier.padding(MenuDefaults.HorizontalDividerPadding))
                                 instances.forEachIndexed { index, instance ->
                                     DropdownMenuItem(
                                         text = { Text(instance.label) },
                                         selected = selectedInstanceId == instance.id,
                                         onClick = { onInstanceChange(instance.id) },
                                         selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
-                                        shapes = MenuDefaults.itemShape(
-                                            index + 1,
-                                            instances.size + 1
-                                        ),
-                                        colors = MenuDefaults.selectableItemVibrantColors()
+                                        shapes =
+                                            MenuDefaults.itemShape(
+                                                index + 1,
+                                                instances.size + 1,
+                                            ),
+                                        colors = MenuDefaults.selectableItemVibrantColors(),
                                     )
                                 }
                             }
@@ -119,10 +121,13 @@ fun ActivityFilterMenu(
             }
 
             DropdownMenuGroup(
-                shapes = if (instances.size > 1) {
-                    MenuDefaults.groupShape(1, 2)
-                } else MenuDefaults.groupShape(0, 1),
-                interactionSource = groupInteractionSource
+                shapes =
+                    if (instances.size > 1) {
+                        MenuDefaults.groupShape(1, 2)
+                    } else {
+                        MenuDefaults.groupShape(0, 1)
+                    },
+                interactionSource = groupInteractionSource,
             ) {
                 QueueSortBy.entries.forEachIndexed { index, sort ->
                     DropdownMenuItem(
@@ -131,18 +136,23 @@ fun ActivityFilterMenu(
                         selected = sortBy == sort,
                         onClick = {
                             if (sortBy == sort) {
-                                onSortOrderChanged(when (sortOrder) {
-                                    SortOrder.Asc -> SortOrder.Desc
-                                    SortOrder.Desc -> SortOrder.Asc
-                                })
+                                onSortOrderChanged(
+                                    when (sortOrder) {
+                                        SortOrder.Asc -> SortOrder.Desc
+                                        SortOrder.Desc -> SortOrder.Asc
+                                    },
+                                )
                             } else {
                                 onSortByChanged(sort)
                             }
                         },
                         selectedLeadingIcon = {
-                            if (sortOrder == SortOrder.Asc) Icon(Icons.Default.ArrowDropUp, null)
-                            else Icon(Icons.Default.ArrowDropDown, null)
-                        }
+                            if (sortOrder == SortOrder.Asc) {
+                                Icon(Icons.Default.ArrowDropUp, null)
+                            } else {
+                                Icon(Icons.Default.ArrowDropDown, null)
+                            }
+                        },
                     )
                 }
             }

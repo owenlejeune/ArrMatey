@@ -14,5 +14,5 @@ data class MovieScoresSettings(
     val streaming_service: Int,
     val title: Int,
     val video_codec: Int,
-    val year: Int
+    val year: Int,
 )

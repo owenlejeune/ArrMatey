@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ArtistAddOptions(
     val monitor: ArtistMonitorType,
-    val searchForMissingAlbums: Boolean = false
+    val searchForMissingAlbums: Boolean = false,
 )

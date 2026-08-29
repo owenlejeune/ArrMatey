@@ -10,5 +10,5 @@ data class SpokenLanguage(
     @JsonNames("englishName", "english_name")
     val englishName: String,
     val iso_639_1: String,
-    val name: String
+    val name: String,
 )

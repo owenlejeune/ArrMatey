@@ -1,7 +1,5 @@
 package com.dnfapps.arrmatey.arr.api.model
 
-import com.dnfapps.arrmatey.shared.MR
-import dev.icerock.moko.resources.format
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -44,12 +42,10 @@ data class LidarrRelease(
     override val shouldOverride: Boolean = false,
     override val languages: List<Language> = emptyList(),
     override val magnetUrl: String? = null,
-
     override var mediaId: Long? = null,
-
     val artistName: String? = null,
     val albumTitle: String? = null,
     val discography: Boolean = false,
     val artistId: Long? = null,
-    val albumId: Long? = null
-): ArrRelease
+    val albumId: Long? = null,
+) : ArrRelease

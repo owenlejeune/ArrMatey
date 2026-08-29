@@ -18,9 +18,8 @@ import kotlinx.coroutines.launch
 class ArrInstanceDashboardViewModel(
     private val instanceId: Long,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
-    private val executeArrCommandUseCase: ExecuteArrCommandUseCase
+    private val executeArrCommandUseCase: ExecuteArrCommandUseCase,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow<ArrDashboardState>(ArrDashboardState.Initial)
     val state: StateFlow<ArrDashboardState> = _state.asStateFlow()
 
@@ -46,10 +45,11 @@ class ArrInstanceDashboardViewModel(
             repository = getArrInstanceRepositoryUseCase(instanceId)
             val currentRepo = repository
             if (currentRepo == null) {
-                _state.value = ArrDashboardState.Error(
-                    type = HttpErrorType.Unexpected,
-                    message = "Could not connect to instance repository"
-                )
+                _state.value =
+                    ArrDashboardState.Error(
+                        type = HttpErrorType.Unexpected,
+                        message = "Could not connect to instance repository",
+                    )
                 return@launch
             }
             _instance.value = currentRepo.instance
@@ -60,13 +60,13 @@ class ArrInstanceDashboardViewModel(
                 currentRepo.softwareStatus,
                 currentRepo.diskSpace,
                 currentRepo.health,
-                _isRefreshing
+                _isRefreshing,
             ) { software, disks, health, refreshing ->
                 ArrDashboardState.Success(
                     softwareStatus = software,
                     disks = disks,
                     healthItems = health,
-                    isRefreshing = refreshing
+                    isRefreshing = refreshing,
                 )
             }.collect { newState ->
                 _state.value = newState

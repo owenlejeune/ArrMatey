@@ -9,13 +9,12 @@ class SearchSeerrUseCase {
     fun createPagingController(
         query: String,
         repository: SeerrInstanceRepository,
-        scope: CoroutineScope
-    ): PagingController<DiscoverResult> {
-        return PagingController(
+        scope: CoroutineScope,
+    ): PagingController<DiscoverResult> =
+        PagingController(
             scope = scope,
-            keySelector = { "${it.mediaType.name}_${it.id}" }
+            keySelector = { "${it.mediaType.name}_${it.id}" },
         ) {
             repository.searchPaging(query)
         }
-    }
 }

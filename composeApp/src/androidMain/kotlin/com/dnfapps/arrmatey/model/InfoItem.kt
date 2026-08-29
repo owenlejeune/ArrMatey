@@ -7,8 +7,7 @@ data class InfoItem(
     val key: String,
     val value: String,
     @Transient
-    val onClick: (() -> Unit)? = null
+    val onClick: (() -> Unit)? = null,
 )
 
-fun Map<String, String>.toInfoList(): List<InfoItem> =
-    map { (k, v) -> InfoItem(k, v) }
+fun Map<String, String>.toInfoList(): List<InfoItem> = map { (k, v) -> InfoItem(k, v) }

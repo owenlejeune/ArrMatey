@@ -5,11 +5,11 @@ import com.dnfapps.arrmatey.arr.api.model.IndexerStatus
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrGrabPayload
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
 import com.dnfapps.networking.safePost
 import com.dnfapps.networking.safePut
-import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
@@ -19,13 +19,15 @@ import org.koin.core.component.KoinComponent
 
 class ProwlarrClient(
     val instance: Instance,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
 ) : KoinComponent {
-
     private val baseUrl: String
         get() {
             val cleanUrl = instance.getEffectiveBaseUrl().trim().trimEnd('|', '/', ' ')
-            val apiBase = instance.type.apiBase.trim().trimStart('/', ' ')
+            val apiBase =
+                instance.type.apiBase
+                    .trim()
+                    .trimStart('/', ' ')
             return "$cleanUrl/$apiBase"
         }
 
@@ -34,16 +36,14 @@ class ProwlarrClient(
         return httpClient.safeGet(url)
     }
 
-    suspend fun getStatus(): NetworkResult<ArrSoftwareStatus> =
-        httpClient.safeGet("$baseUrl/system/status")
+    suspend fun getStatus(): NetworkResult<ArrSoftwareStatus> = httpClient.safeGet("$baseUrl/system/status")
 
     suspend fun getIndexers(): NetworkResult<List<ProwlarrIndexer>> {
         val url = "$baseUrl/indexer"
         return httpClient.safeGet(url)
     }
 
-    suspend fun getIndexerStatus(): NetworkResult<List<IndexerStatus>> =
-        httpClient.safeGet("$baseUrl/indexerStatus")
+    suspend fun getIndexerStatus(): NetworkResult<List<IndexerStatus>> = httpClient.safeGet("$baseUrl/indexerStatus")
 
     suspend fun testIndexer(indexer: ProwlarrIndexer): NetworkResult<Unit> =
         httpClient.safePost("$baseUrl/indexer/${indexer.id}/test") {
@@ -61,7 +61,7 @@ class ProwlarrClient(
         query: String,
         type: String = "search",
         categories: List<Int> = emptyList(),
-        indexerIds: List<Long> = emptyList()
+        indexerIds: List<Long> = emptyList(),
     ): NetworkResult<List<ProwlarrSearchResult>> =
         httpClient.safeGet("$baseUrl/search") {
             url {
@@ -76,7 +76,10 @@ class ProwlarrClient(
             }
         }
 
-    suspend fun grab(guid: String, indexerId: Long): NetworkResult<ProwlarrSearchResult> =
+    suspend fun grab(
+        guid: String,
+        indexerId: Long,
+    ): NetworkResult<ProwlarrSearchResult> =
         httpClient.safePost("$baseUrl/release") {
             contentType(ContentType.Application.Json)
             setBody(ProwlarrGrabPayload(guid = guid, indexerId = indexerId.toInt()))

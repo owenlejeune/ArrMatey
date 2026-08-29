@@ -12,11 +12,19 @@ data class SettingItem(
     val backgroundColor: Color? = null,
     val titleExtraContent: @Composable (() -> Unit)? = null,
     val trailingContent: @Composable (() -> Unit)? = null,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
 )
 
 sealed interface IconSource {
-    data class Vector(val imageVector: ImageVector): IconSource
-    data class Resource(val resource: ImageResource): IconSource
-    data class Radio(val selected: Boolean): IconSource
+    data class Vector(
+        val imageVector: ImageVector,
+    ) : IconSource
+
+    data class Resource(
+        val resource: ImageResource,
+    ) : IconSource
+
+    data class Radio(
+        val selected: Boolean,
+    ) : IconSource
 }

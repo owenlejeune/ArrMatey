@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import dev.icerock.gradle.MultiplatformResourcesPluginExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 buildscript {
     dependencies {
@@ -36,7 +36,7 @@ kotlin {
 
     listOf(
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
@@ -117,7 +117,10 @@ kotlin {
 
 android {
     namespace = "com.dnfapps.arrmatey.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk =
+        libs.versions.android.compileSdk
+            .get()
+            .toInt()
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -125,7 +128,10 @@ android {
     }
 
     defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
     }
 
     buildFeatures {
@@ -183,20 +189,22 @@ abstract class CopyLibrariesToIOSTask : DefaultTask() {
     }
 }
 
-val exportLibrariesToIOS = tasks.register<CopyLibrariesToIOSTask>("exportLibrariesToIOS") {
-    group = "build"
-    description = "Export AboutLibraries JSON to iOS"
+val exportLibrariesToIOS =
+    tasks.register<CopyLibrariesToIOSTask>("exportLibrariesToIOS") {
+        group = "build"
+        description = "Export AboutLibraries JSON to iOS"
 
-    dependsOn("exportLibraryDefinitions")
+        dependsOn("exportLibraryDefinitions")
 
-    sourceFile.set(layout.buildDirectory.file("generated/aboutLibraries/aboutLibraries.json"))
-    targetFile.set(layout.projectDirectory.file("../iosApp/iosApp/Resources/aboutLibraries.json"))
-}
+        sourceFile.set(layout.buildDirectory.file("generated/aboutLibraries/aboutLibraries.json"))
+        targetFile.set(layout.projectDirectory.file("../iosApp/iosApp/Resources/aboutLibraries.json"))
+    }
 
 afterEvaluate {
-    tasks.matching {
-        it.name.contains("compileKotlin") && it.name.contains("Ios")
-    }.configureEach {
-        finalizedBy(exportLibrariesToIOS)
-    }
+    tasks
+        .matching {
+            it.name.contains("compileKotlin") && it.name.contains("Ios")
+        }.configureEach {
+            finalizedBy(exportLibrariesToIOS)
+        }
 }

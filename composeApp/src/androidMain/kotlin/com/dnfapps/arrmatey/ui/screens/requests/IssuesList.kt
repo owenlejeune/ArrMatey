@@ -24,18 +24,21 @@ fun IssuesList(
     hasMore: Boolean,
     isLoadingMore: Boolean,
     onLoadMore: () -> Unit,
-    onSelectIssue: (MediaIssuePackage) -> Unit
+    onSelectIssue: (MediaIssuePackage) -> Unit,
 ) {
     val listState = rememberLazyListState()
 
     LaunchedEffect(listState) {
         snapshotFlow {
-            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            listState.layoutInfo.visibleItemsInfo
+                .lastOrNull()
+                ?.index
         }.collect { lastVisibleIndex ->
             if (lastVisibleIndex != null &&
                 lastVisibleIndex >= items.size - 3 &&
                 hasMore &&
-                !isLoadingMore) {
+                !isLoadingMore
+            ) {
                 onLoadMore()
             }
         }
@@ -45,27 +48,28 @@ fun IssuesList(
         state = listState,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         items(
             items = items,
-            key = { it.issue.id }
+            key = { it.issue.id },
         ) { issuePackage ->
             IssueCard(
                 issuePackage = issuePackage,
                 onClick = {
                     onSelectIssue(issuePackage)
-                }
+                },
             )
         }
 
         if (isLoadingMore) {
             item {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }

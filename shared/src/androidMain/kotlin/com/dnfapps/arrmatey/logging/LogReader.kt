@@ -3,8 +3,8 @@ package com.dnfapps.arrmatey.logging
 import java.io.File
 
 actual object LogReader {
-    actual fun readLogs(): String {
-        return try {
+    actual fun readLogs(): String =
+        try {
             val logFile = File(LogFileManager.getLogFilePath("arrmatey.log"))
             if (logFile.exists()) {
                 logFile.readText()
@@ -14,7 +14,6 @@ actual object LogReader {
         } catch (e: Exception) {
             "Error reading logs: ${e.message}"
         }
-    }
 
     actual fun clearLogs() {
         try {
@@ -27,7 +26,5 @@ actual object LogReader {
         }
     }
 
-    actual fun getLogFilePath(): String {
-        return LogFileManager.getLogFilePath("arrmatey.log")
-    }
+    actual fun getLogFilePath(): String = LogFileManager.getLogFilePath("arrmatey.log")
 }

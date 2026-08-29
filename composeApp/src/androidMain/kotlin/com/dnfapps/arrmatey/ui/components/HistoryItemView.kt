@@ -21,50 +21,49 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 @Composable
-fun HistoryItemView(
-    item: HistoryItem
-) {
+fun HistoryItemView(item: HistoryItem) {
     ContainerCard(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
                 text = mokoString(item.eventType.resource),
                 color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp
+                fontSize = 14.sp,
             )
             Text(
                 text = item.date.format("MMM d, yyyy"),
-                fontSize = 12.sp
+                fontSize = 12.sp,
             )
         }
         Text(
             text = item.displayTitle?.breakable() ?: "---",
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
 
-        val subLabel = buildString {
-            item.quality?.let { quality ->
-                append(quality.qualityLabel)
-                bullet()
+        val subLabel =
+            buildString {
+                item.quality?.let { quality ->
+                    append(quality.qualityLabel)
+                    bullet()
+                }
+                if (item !is ListenarrHistoryItem) {
+                    append(item.languages.singleLanguageLabel())
+                }
+                item.indexerLabel?.let { indexerLabel ->
+                    bullet()
+                    append(indexerLabel)
+                }
+                if (item is ListenarrHistoryItem) {
+                    append(item.message)
+                }
             }
-            if (item !is ListenarrHistoryItem) {
-                append(item.languages.singleLanguageLabel())
-            }
-            item.indexerLabel?.let { indexerLabel ->
-                bullet()
-                append(indexerLabel)
-            }
-            if (item is ListenarrHistoryItem) {
-                append(item.message)
-            }
-        }
         subLabel.takeUnless { it.isEmpty() }?.let { subLabel ->
             Text(
                 text = subLabel,
-                fontSize = 12.sp
+                fontSize = 12.sp,
             )
         }
     }

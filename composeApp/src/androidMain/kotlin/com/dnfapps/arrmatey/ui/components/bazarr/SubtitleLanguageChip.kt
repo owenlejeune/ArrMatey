@@ -13,35 +13,36 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitleLanguage
 @Composable
 fun SubtitleLanguageChip(
     language: BazarrSubtitleLanguage,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     SubtitleLanguageChip(
         label = language.chipLabel(),
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
 @Composable
 fun SubtitleLanguageChip(
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.onSecondaryContainer,
         contentColor = MaterialTheme.colorScheme.secondaryContainer,
         shape = MaterialTheme.shapes.small,
-        modifier = modifier
+        modifier = modifier,
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
         )
     }
 }
 
-fun BazarrSubtitleLanguage.chipLabel(): String = buildString {
-    append(code2.orEmpty().uppercase().ifBlank { name })
-    if (forced) append(" · Forced")
-    if (hi) append(" · HI")
-}
+fun BazarrSubtitleLanguage.chipLabel(): String =
+    buildString {
+        append(code2.orEmpty().uppercase().ifBlank { name })
+        if (forced) append(" · Forced")
+        if (hi) append(" · HI")
+    }

@@ -18,38 +18,42 @@ fun MediaView(
     onItemClick: (ArrMedia) -> Unit,
     itemIsActive: (ArrMedia) -> Boolean,
     preferences: InstancePreferences,
-    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
 ) {
     when (preferences.viewType) {
-        ViewType.List -> MediaList(
-            aspectRatio = type.aspectRatio,
-            items = items,
-            onItemClick = onItemClick,
-            itemIsActive = itemIsActive,
-            showBannerBackground = preferences.showBannerBackground,
-            includeOverview = preferences.includeOverview,
-            blur = preferences.bannerBlur,
-            posterElevation = preferences.posterElevation,
-            posterRadius = preferences.posterRadius,
-            multiSelectState = multiSelectState,
-            modifier = Modifier
-                .padding(horizontal = 12.dp)
-                .fillMaxSize()
-        )
-        ViewType.Grid -> PosterGrid(
-            aspectRatio = type.aspectRatio,
-            items = items,
-            onItemClick = onItemClick,
-            itemIsActive = itemIsActive,
-            showFullDetails = preferences.showFullDetails,
-            showOverlay = preferences.showOverlay,
-            gridDensity = preferences.gridDensity,
-            gridSpacing = preferences.gridSpacing,
-            posterElevation = preferences.posterElevation,
-            posterRadius = preferences.posterRadius,
-            multiSelectState = multiSelectState,
-            modifier = Modifier
-                .fillMaxSize()
-        )
+        ViewType.List ->
+            MediaList(
+                aspectRatio = type.aspectRatio,
+                items = items,
+                onItemClick = onItemClick,
+                itemIsActive = itemIsActive,
+                showBannerBackground = preferences.showBannerBackground,
+                includeOverview = preferences.includeOverview,
+                blur = preferences.bannerBlur,
+                posterElevation = preferences.posterElevation,
+                posterRadius = preferences.posterRadius,
+                multiSelectState = multiSelectState,
+                modifier =
+                    Modifier
+                        .padding(horizontal = 12.dp)
+                        .fillMaxSize(),
+            )
+        ViewType.Grid ->
+            PosterGrid(
+                aspectRatio = type.aspectRatio,
+                items = items,
+                onItemClick = onItemClick,
+                itemIsActive = itemIsActive,
+                showFullDetails = preferences.showFullDetails,
+                showOverlay = preferences.showOverlay,
+                gridDensity = preferences.gridDensity,
+                gridSpacing = preferences.gridSpacing,
+                posterElevation = preferences.posterElevation,
+                posterRadius = preferences.posterRadius,
+                multiSelectState = multiSelectState,
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
+            )
     }
 }

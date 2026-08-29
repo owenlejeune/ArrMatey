@@ -7,5 +7,5 @@ data class SeasonInfo(
     val id: Long,
     val seasonNumber: Int,
     val status: Int,
-    val status4k: Int? = null
+    val status4k: Int? = null,
 )

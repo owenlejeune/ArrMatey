@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BazarrEpisodesResponse(
     val data: List<BazarrEpisode> = emptyList(),
-    val total: Int = 0
+    val total: Int = 0,
 )

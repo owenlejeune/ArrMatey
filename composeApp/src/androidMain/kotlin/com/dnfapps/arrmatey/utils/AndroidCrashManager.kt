@@ -3,7 +3,7 @@ package com.dnfapps.arrmatey.utils
 import com.dnfapps.arrmatey.logging.LogFileManager
 import java.io.File
 
-class AndroidCrashManager: CrashManager {
+class AndroidCrashManager : CrashManager {
     private val logFile = File(LogFileManager.getLogFilePath("arrmatey.log"))
 
     override fun initialize() {
@@ -13,5 +13,4 @@ class AndroidCrashManager: CrashManager {
             oldHandler?.uncaughtException(thread, throwable)
         }
     }
-
 }

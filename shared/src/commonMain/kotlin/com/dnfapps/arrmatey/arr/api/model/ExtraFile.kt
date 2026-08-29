@@ -12,7 +12,7 @@ data class ExtraFile(
     val extension: String,
     val languageTags: List<String>,
     val title: String? = null,
-    val type: ExtraFileType
+    val type: ExtraFileType,
 )
 
 enum class ExtraFileType {
@@ -23,5 +23,5 @@ enum class ExtraFileType {
     Metadata,
 
     @SerialName("other")
-    Other
+    Other,
 }

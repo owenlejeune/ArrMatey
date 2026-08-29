@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.model
 
-import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
@@ -16,6 +15,7 @@ import com.dnfapps.arrmatey.arr.api.model.toRatingItems
 import com.dnfapps.arrmatey.bazarr.state.BazarrDetails
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.getUpcomingDateString
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.model.ImdbRating
 import com.dnfapps.arrmatey.seerr.api.model.Keyword
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
@@ -28,18 +28,21 @@ import kotlin.math.roundToInt
 
 sealed interface UnifiedMediaDetailsUiState {
     object Initial : UnifiedMediaDetailsUiState
+
     object Loading : UnifiedMediaDetailsUiState
-    data class Error(val message: String?) : UnifiedMediaDetailsUiState
+
+    data class Error(
+        val message: String?,
+    ) : UnifiedMediaDetailsUiState
+
     data class Success(
         val arrMedia: ArrMedia? = null,
         val seerrMedia: RequestMediaDetails? = null,
         val bazarrMedia: BazarrDetails? = null,
         val rtRatings: RottenTomatoesRating? = null,
         val imdbRatings: ImdbRating? = null,
-
         val seasons: List<SeasonWrapper> = emptyList(),
         val episodes: List<EpisodeWrapper> = emptyList(),
-
         // Arr-specific additions (Seasons, Albums, etc.)
         val albums: List<ArrAlbum> = emptyList(),
         val tracks: Map<Long, List<LidarrTrack>> = emptyMap(),
@@ -48,17 +51,13 @@ sealed interface UnifiedMediaDetailsUiState {
         val bookFiles: List<BookFile> = emptyList(),
         val books: List<Book> = emptyList(),
         val extraFiles: List<ExtraFile> = emptyList(),
-
         val keywords: List<Keyword> = emptyList(),
-
         val isMonitored: Boolean = false,
-
         val availableInstances: List<Instance> = emptyList(),
         val selectedInstanceId: Long? = null,
         val instancePresences: List<InstanceMediaPresence> = emptyList(),
-        val queueItems: List<QueueItem> = emptyList()
+        val queueItems: List<QueueItem> = emptyList(),
     ) : UnifiedMediaDetailsUiState {
-
         val missingInstances: List<Instance>
             get() = instancePresences.filter { !it.isPresent }.map { it.instance }
 
@@ -88,22 +87,25 @@ sealed interface UnifiedMediaDetailsUiState {
 
         val ratings: List<RatingItem>
             get() {
-                val seerrRatings = if (seerrMedia != null) {
-                    buildList {
-                        rtRatings?.let { rt ->
-                            if (rt.criticsScore != null && rt.criticsRating != null) {
-                                add(RatingItem("${rt.criticsScore}%", rt.criticsRating.icon))
+                val seerrRatings =
+                    if (seerrMedia != null) {
+                        buildList {
+                            rtRatings?.let { rt ->
+                                if (rt.criticsScore != null && rt.criticsRating != null) {
+                                    add(RatingItem("${rt.criticsScore}%", rt.criticsRating.icon))
+                                }
+                                if (rt.audienceRating != null && rt.audienceScore != null) {
+                                    add(RatingItem("${rt.audienceScore}%", rt.audienceRating.icon))
+                                }
                             }
-                            if (rt.audienceRating != null && rt.audienceScore != null) {
-                                add(RatingItem("${rt.audienceScore}%", rt.audienceRating.icon))
+                            imdbRatings?.let { imdb ->
+                                add(RatingItem("${(imdb.criticsScore * 10).roundToInt()}%", MR.images.imdb))
                             }
+                            add(RatingItem("${(seerrMedia.voteAverage * 10).roundToInt()}%", MR.images.tmdb))
                         }
-                        imdbRatings?.let { imdb ->
-                            add(RatingItem("${(imdb.criticsScore * 10).roundToInt()}%", MR.images.imdb))
-                        }
-                        add(RatingItem("${(seerrMedia.voteAverage * 10).roundToInt()}%", MR.images.tmdb))
+                    } else {
+                        emptyList()
                     }
-                } else emptyList()
 
                 val arrRatings = arrMedia?.ratings?.toRatingItems() ?: emptyList()
 
@@ -144,19 +146,17 @@ sealed interface UnifiedMediaDetailsUiState {
         val genres: List<String>
             get() = seerrMedia?.genres?.map { it.name } ?: arrMedia?.genres ?: emptyList()
 
-        fun getCertification(countryCode: String): String? {
-            return seerrMedia?.getCertification(countryCode) ?: arrMedia?.certification
-        }
-
+        fun getCertification(countryCode: String): String? = seerrMedia?.getCertification(countryCode) ?: arrMedia?.certification
     }
 }
 
 private val RatingItem.provider: String?
-    get() = when (icon) {
-        MR.images.imdb -> "imdb"
-        MR.images.tmdb -> "tmdb"
-        MR.images.rt_fresh, MR.images.rt_rotten -> "rt_critics"
-        MR.images.rt_aud_fresh, MR.images.rt_aud_rotten -> "rt_audience"
-        MR.images.trakt -> "trakt"
-        else -> null
-    }
+    get() =
+        when (icon) {
+            MR.images.imdb -> "imdb"
+            MR.images.tmdb -> "tmdb"
+            MR.images.rt_fresh, MR.images.rt_rotten -> "rt_critics"
+            MR.images.rt_aud_fresh, MR.images.rt_aud_rotten -> "rt_audience"
+            MR.images.trakt -> "trakt"
+            else -> null
+        }

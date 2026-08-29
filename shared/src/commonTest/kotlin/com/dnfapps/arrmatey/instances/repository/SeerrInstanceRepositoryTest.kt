@@ -17,38 +17,43 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class SeerrInstanceRepositoryTest {
-
-    private val fakeInstance = Instance(
-        id = 1,
-        label = "Test Seerr",
-        url = "http://localhost:5055",
-        apiKey = EncryptedString("test-api-key"),
-        type = InstanceType.Seerr,
-        enabled = true
-    )
+    private val fakeInstance =
+        Instance(
+            id = 1,
+            label = "Test Seerr",
+            url = "http://localhost:5055",
+            apiKey = EncryptedString("test-api-key"),
+            type = InstanceType.Seerr,
+            enabled = true,
+        )
 
     @Test
-    fun testGetLoggedInUser() = runTest {
-        val mockEngine = MockEngine { _ ->
-            respond(
-                content = """{"id": 1, "displayName": "Admin", "email": "admin@test.com", "permissions": 0, "userType": 1}""",
-                status = HttpStatusCode.OK,
-                headers = headersOf("Content-Type", "application/json")
-            )
-        }
-        val httpClient = HttpClient(mockEngine) {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
-        val repository = SeerrInstanceRepository(fakeInstance, httpClient)
+    fun testGetLoggedInUser() =
+        runTest {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = """{"id": 1, "displayName": "Admin", "email": "admin@test.com", "permissions": 0, "userType": 1}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                }
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json(
+                            Json {
+                                ignoreUnknownKeys = true
+                            },
+                        )
+                    }
+                }
+            val repository = SeerrInstanceRepository(fakeInstance, httpClient)
 
-        repository.getLoggedInUser()
+            repository.getLoggedInUser()
 
-        assertNotNull(repository.loggedInUser.value)
-        assertEquals(1, repository.loggedInUser.value?.id)
-        assertEquals("Admin", repository.loggedInUser.value?.displayName)
-    }
+            assertNotNull(repository.loggedInUser.value)
+            assertEquals(1, repository.loggedInUser.value?.id)
+            assertEquals("Admin", repository.loggedInUser.value?.displayName)
+        }
 }

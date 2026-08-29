@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class IntExtensionsTest {
-
     @Test
     fun testFormatMinutesAsRuntimeZero() {
         assertEquals("0m", 0.formatMinutesAsRuntime())

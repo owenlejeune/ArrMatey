@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class BazarrAudioLanguage(
     val name: String,
     val code2: String? = null,
-    val code3: String? = null
+    val code3: String? = null,
 )

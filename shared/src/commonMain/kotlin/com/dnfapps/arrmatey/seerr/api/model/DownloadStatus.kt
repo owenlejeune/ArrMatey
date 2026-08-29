@@ -13,5 +13,5 @@ data class DownloadStatus(
     val status: String,
     val title: String,
     val downloadId: String,
-    @Contextual val estimatedCompletionTime: Instant? = null
+    @Contextual val estimatedCompletionTime: Instant? = null,
 )

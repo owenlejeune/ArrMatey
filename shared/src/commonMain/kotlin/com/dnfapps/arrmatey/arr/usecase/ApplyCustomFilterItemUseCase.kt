@@ -17,7 +17,10 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 class ApplyCustomFilterItemUseCase {
-    operator fun invoke(itemValue: Any?, filter: CustomFilterItem): Boolean {
+    operator fun invoke(
+        itemValue: Any?,
+        filter: CustomFilterItem,
+    ): Boolean {
         val filterValue = filter.value
         return when (filter.type) {
             "equal", "is" -> compareEqual(itemValue, filterValue)
@@ -37,9 +40,12 @@ class ApplyCustomFilterItemUseCase {
         }
     }
 
-    private fun compareEqual(itemValue: Any?, filterValue: JsonElement): Boolean {
+    private fun compareEqual(
+        itemValue: Any?,
+        filterValue: JsonElement,
+    ): Boolean {
         if (itemValue == null) return filterValue is JsonPrimitive && filterValue.content == "null"
-        
+
         return when (filterValue) {
             is JsonPrimitive -> {
                 val bool = filterValue.booleanOrNull
@@ -70,36 +76,50 @@ class ApplyCustomFilterItemUseCase {
         }
     }
 
-    private fun compareContains(itemValue: Any?, filterValue: JsonElement): Boolean {
+    private fun compareContains(
+        itemValue: Any?,
+        filterValue: JsonElement,
+    ): Boolean {
         if (itemValue == null) return false
-        
-        val filterValues: List<String> = when (filterValue) {
-            is JsonArray -> filterValue.map { it.asString().lowercase() }
-            else -> listOf(filterValue.asString().lowercase())
-        }
-        
-        val itemStrings: List<String> = when (itemValue) {
-            is List<*> -> itemValue.map { it.toString().lowercase() }
-            else -> listOf(itemValue.toString().lowercase())
-        }
-        
+
+        val filterValues: List<String> =
+            when (filterValue) {
+                is JsonArray -> filterValue.map { it.asString().lowercase() }
+                else -> listOf(filterValue.asString().lowercase())
+            }
+
+        val itemStrings: List<String> =
+            when (itemValue) {
+                is List<*> -> itemValue.map { it.toString().lowercase() }
+                else -> listOf(itemValue.toString().lowercase())
+            }
+
         return filterValues.any { filterStr ->
             itemStrings.any { itemStr -> itemStr.contains(filterStr) }
         }
     }
 
-    private fun compareNumber(itemValue: Any?, filterValue: JsonElement, predicate: (Double) -> Boolean): Boolean {
+    private fun compareNumber(
+        itemValue: Any?,
+        filterValue: JsonElement,
+        predicate: (Double) -> Boolean,
+    ): Boolean {
         val itemNum = (itemValue as? Number)?.toDouble() ?: return false
         val filterNum = filterValue.asDouble() ?: return false
         return predicate(itemNum - filterNum)
     }
 
-    private fun compareDate(itemValue: Any?, filterValue: JsonElement, filterType: String): Boolean {
-        val itemInstant: Instant = when (itemValue) {
-            is Long -> Instant.fromEpochMilliseconds(itemValue)
-            is Instant -> itemValue
-            else -> return false
-        }
+    private fun compareDate(
+        itemValue: Any?,
+        filterValue: JsonElement,
+        filterType: String,
+    ): Boolean {
+        val itemInstant: Instant =
+            when (itemValue) {
+                is Long -> Instant.fromEpochMilliseconds(itemValue)
+                is Instant -> itemValue
+                else -> return false
+            }
 
         val now = Clock.System.now()
 
@@ -107,15 +127,16 @@ class ApplyCustomFilterItemUseCase {
         val value = filterObj["value"]?.jsonPrimitive?.doubleOrNull ?: return false
         val timeUnit = filterObj["time"]?.jsonPrimitive?.content ?: "days"
 
-        val duration: Duration = when (timeUnit) {
-            "seconds" -> value.seconds
-            "minutes" -> value.minutes
-            "hours" -> value.hours
-            "days" -> value.days
-            "weeks" -> (value * 7).days
-            "months" -> (value * 30).days // Approximate
-            else -> value.days
-        }
+        val duration: Duration =
+            when (timeUnit) {
+                "seconds" -> value.seconds
+                "minutes" -> value.minutes
+                "hours" -> value.hours
+                "days" -> value.days
+                "weeks" -> (value * 7).days
+                "months" -> (value * 30).days // Approximate
+                else -> value.days
+            }
 
         return when (filterType) {
             "inLast" -> itemInstant >= now.minus(duration) && itemInstant <= now
@@ -127,5 +148,6 @@ class ApplyCustomFilterItemUseCase {
     }
 
     private fun JsonElement.asString(): String = (this as? JsonPrimitive)?.content ?: ""
+
     private fun JsonElement.asDouble(): Double? = (this as? JsonPrimitive)?.doubleOrNull
 }

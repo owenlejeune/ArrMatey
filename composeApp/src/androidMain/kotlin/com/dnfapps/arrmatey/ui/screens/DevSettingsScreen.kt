@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -58,7 +57,7 @@ import java.io.File
 @Composable
 fun DevSettingsScreen(
     preferenceStore: PreferencesStore = koinInject<PreferencesStore>(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -73,59 +72,61 @@ fun DevSettingsScreen(
                 title = { Text("Developer Settings") },
                 navigationIcon = {
                     IconButton(
-                        onClick = onBack
+                        onClick = onBack,
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(MR.strings.back)
+                            contentDescription = mokoString(MR.strings.back),
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { pv ->
         Box(modifier = Modifier.padding(pv)) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(12.dp)
+                modifier = Modifier.padding(12.dp),
             ) {
                 InstanceType.entries.forEach { instanceType ->
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .toggleable(
-                                value = showInfoCardMap[instanceType] ?: true,
-                                onValueChange = { preferenceStore.setInfoCardVisibility(instanceType, it) }
-                            ),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .toggleable(
+                                    value = showInfoCardMap[instanceType] ?: true,
+                                    onValueChange = { preferenceStore.setInfoCardVisibility(instanceType, it) },
+                                ),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Show ${instanceType.name} info card"
+                            text = "Show ${instanceType.name} info card",
                         )
                         Switch(
                             checked = showInfoCardMap[instanceType] ?: true,
-                            onCheckedChange = null
+                            onCheckedChange = null,
                         )
                     }
                 }
 
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .toggleable(
-                            value = activityPollingOn,
-                            onValueChange = { preferenceStore.toggleActivityPolling() }
-                        ),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .toggleable(
+                                value = activityPollingOn,
+                                onValueChange = { preferenceStore.toggleActivityPolling() },
+                            ),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Enable activity polling"
+                        text = "Enable activity polling",
                     )
                     Switch(
                         checked = activityPollingOn,
-                        onCheckedChange = null
+                        onCheckedChange = null,
                     )
                 }
 
@@ -134,38 +135,40 @@ fun DevSettingsScreen(
                     selectedOption = logLevel,
                     onOptionSelected = { preferenceStore.setLogLevel(it) },
                     label = { Text("HTTP Logging Level") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .toggleable(
-                                value = useDynamicTheme,
-                                onValueChange = { preferenceStore.toggleUseDynamicTheme() }
-                            ),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .toggleable(
+                                    value = useDynamicTheme,
+                                    onValueChange = { preferenceStore.toggleUseDynamicTheme() },
+                                ),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Use dynamic themeing"
+                            text = "Use dynamic themeing",
                         )
                         Switch(
                             checked = useDynamicTheme,
-                            onCheckedChange = null
+                            onCheckedChange = null,
                         )
                     }
                 }
 
                 val scrollState = rememberScrollState()
-                val logsFlow = flow {
-                    while(currentCoroutineContext().isActive) {
-                        val logs = LogReader.readLogs()
-                        emit(logs)
-                        delay(10_000L)
+                val logsFlow =
+                    flow {
+                        while (currentCoroutineContext().isActive) {
+                            val logs = LogReader.readLogs()
+                            emit(logs)
+                            delay(10_000L)
+                        }
                     }
-                }
                 val logContent by logsFlow.collectAsStateWithLifecycle("Loading...")
 
                 LaunchedEffect(logContent) {
@@ -173,26 +176,29 @@ fun DevSettingsScreen(
                 }
 
                 Box(
-                    modifier = Modifier
-                        .height(250.dp)
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                    modifier =
+                        Modifier
+                            .height(250.dp)
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.primaryContainer),
                 ) {
                     SelectionContainer {
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(scrollState)
-                                .horizontalScroll(rememberScrollState())
-                                .padding(16.dp)
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(scrollState)
+                                    .horizontalScroll(rememberScrollState())
+                                    .padding(16.dp),
                         ) {
                             Text(
                                 text = logContent.takeUnless { it.isEmpty() } ?: "NO LOGS",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontFamily = FontFamily.Monospace
-                                ),
+                                style =
+                                    MaterialTheme.typography.bodySmall.copy(
+                                        fontFamily = FontFamily.Monospace,
+                                    ),
                                 modifier = Modifier.fillMaxWidth(),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                             )
                         }
                     }
@@ -213,18 +219,20 @@ fun shareLogs(context: Context) {
             return
         }
 
-        val uri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            logFile
-        )
+        val uri =
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                logFile,
+            )
 
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_SUBJECT, "ArrMatey Application Logs")
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
+        val shareIntent =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, "ArrMatey Application Logs")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
 
         context.startActivity(Intent.createChooser(shareIntent, "Share Logs"))
     } catch (e: Exception) {

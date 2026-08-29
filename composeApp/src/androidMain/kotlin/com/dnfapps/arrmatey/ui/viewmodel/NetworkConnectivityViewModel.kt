@@ -8,16 +8,18 @@ import kotlinx.coroutines.flow.stateIn
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class NetworkConnectivityViewModel: ViewModel(), KoinComponent {
-
+class NetworkConnectivityViewModel :
+    ViewModel(),
+    KoinComponent {
     private val networkConnectivityRepository: NetworkConnectivityRepository by inject()
 
-    val isConnected = networkConnectivityRepository.isConnected
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+    val isConnected =
+        networkConnectivityRepository.isConnected
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
 
     init {
         networkConnectivityRepository.startObserving()
@@ -27,5 +29,4 @@ class NetworkConnectivityViewModel: ViewModel(), KoinComponent {
         super.onCleared()
         networkConnectivityRepository.stopObserving()
     }
-
 }

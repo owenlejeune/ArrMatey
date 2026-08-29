@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AvistazSettings(
     val cookies: String,
-    val user_agent: String
+    val user_agent: String,
 )

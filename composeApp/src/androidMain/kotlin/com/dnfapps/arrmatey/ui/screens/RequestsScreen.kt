@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.compose.SeerrTab
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.MR
@@ -39,7 +40,6 @@ import com.dnfapps.arrmatey.ui.screens.requests.IssuesContent
 import com.dnfapps.arrmatey.ui.screens.requests.RequestsContent
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.model.OperationStatus
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -48,7 +48,7 @@ fun RequestsScreen(
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onNavigateToDetails: (Long, RequestType) -> Unit,
-    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr)
+    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr),
 ) {
     val context = LocalContext.current
 
@@ -66,11 +66,12 @@ fun RequestsScreen(
     LaunchedEffect(requestActionStatus) {
         when (val status = requestActionStatus) {
             is OperationStatus.Success -> {
-                val msg = when (status.message) {
-                    "Request approved" -> requestApprovedMsg
-                    "Request declined" -> requestDeclinedMsg
-                    else -> status.message
-                }
+                val msg =
+                    when (status.message) {
+                        "Request approved" -> requestApprovedMsg
+                        "Request declined" -> requestDeclinedMsg
+                        else -> status.message
+                    }
                 msg?.let {
                     Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                 }
@@ -93,18 +94,19 @@ fun RequestsScreen(
                     if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         PullToRefreshBox(
             isRefreshing = pagedData.isLoading && pagedData.items.isNotEmpty(),
             onRefresh = { viewModel.refresh() },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+            contentAlignment = Alignment.Center,
         ) {
             if (instancesState.selectedInstance == null) {
                 NoInstanceView(InstanceType.Seerr)
@@ -112,31 +114,37 @@ fun RequestsScreen(
                 Column(modifier = Modifier.fillMaxSize()) {
                     if (!isExpanded) {
                         SecondaryTabRow(
-                            selectedTabIndex = SeerrTab.entries.indexOf(selectedTab)
+                            selectedTabIndex = SeerrTab.entries.indexOf(selectedTab),
                         ) {
                             Tab(
                                 selected = selectedTab == SeerrTab.Requests,
                                 onClick = { viewModel.setSelectedTab(SeerrTab.Requests) },
                                 text = {
-                                    Text(text = buildString {
-                                        append(mokoString(MR.strings.requests))
-                                        if (pagedData.totalItemCount > 0) {
-                                            append(" (${pagedData.totalItemCount})")
-                                        }
-                                    })
-                                }
+                                    Text(
+                                        text =
+                                            buildString {
+                                                append(mokoString(MR.strings.requests))
+                                                if (pagedData.totalItemCount > 0) {
+                                                    append(" (${pagedData.totalItemCount})")
+                                                }
+                                            },
+                                    )
+                                },
                             )
                             Tab(
                                 selected = selectedTab == SeerrTab.Issues,
                                 onClick = { viewModel.setSelectedTab(SeerrTab.Issues) },
                                 text = {
-                                    Text(text = buildString {
-                                        append(mokoString(MR.strings.issues))
-                                        if (issuesData.totalItemCount > 0) {
-                                            append(" (${issuesData.totalItemCount})")
-                                        }
-                                    })
-                                }
+                                    Text(
+                                        text =
+                                            buildString {
+                                                append(mokoString(MR.strings.issues))
+                                                if (issuesData.totalItemCount > 0) {
+                                                    append(" (${issuesData.totalItemCount})")
+                                                }
+                                            },
+                                    )
+                                },
                             )
                         }
 
@@ -153,7 +161,7 @@ fun RequestsScreen(
                                 onNavigateToDetails = onNavigateToDetails,
                                 onLoadMore = { viewModel.loadNextRequestsPage() },
                                 onRetry = { viewModel.retryRequests() },
-                                onClearError = { viewModel.clearRequestsError() }
+                                onClearError = { viewModel.clearRequestsError() },
                             )
                         } else {
                             IssuesContent(
@@ -161,7 +169,7 @@ fun RequestsScreen(
                                 onLoadMore = { viewModel.loadNextIssuesPage() },
                                 onRetry = { viewModel.retryIssues() },
                                 onClearError = { viewModel.clearIssuesError() },
-                                onRefresh = { viewModel.refresh() }
+                                onRefresh = { viewModel.refresh() },
                             )
                         }
                     } else {
@@ -170,12 +178,12 @@ fun RequestsScreen(
                                 Text(
                                     text = mokoString(MR.strings.requests),
                                     style = MaterialTheme.typography.titleMediumEmphasized,
-                                    modifier = Modifier.weight(1f).padding(horizontal = 24.dp)
+                                    modifier = Modifier.weight(1f).padding(horizontal = 24.dp),
                                 )
                                 Text(
                                     text = mokoString(MR.strings.issues),
                                     style = MaterialTheme.typography.titleMediumEmphasized,
-                                    modifier = Modifier.weight(1f).padding(horizontal = 24.dp)
+                                    modifier = Modifier.weight(1f).padding(horizontal = 24.dp),
                                 )
                             }
                             Row(modifier = Modifier.fillMaxSize()) {
@@ -192,7 +200,7 @@ fun RequestsScreen(
                                         onNavigateToDetails = onNavigateToDetails,
                                         onLoadMore = { viewModel.loadNextRequestsPage() },
                                         onRetry = { viewModel.retryRequests() },
-                                        onClearError = { viewModel.clearRequestsError() }
+                                        onClearError = { viewModel.clearRequestsError() },
                                     )
                                 }
                                 VerticalDivider(modifier = Modifier.padding(vertical = 24.dp))
@@ -202,7 +210,7 @@ fun RequestsScreen(
                                         onLoadMore = { viewModel.loadNextIssuesPage() },
                                         onRetry = { viewModel.retryIssues() },
                                         onClearError = { viewModel.clearIssuesError() },
-                                        onRefresh = { viewModel.refresh() }
+                                        onRefresh = { viewModel.refresh() },
                                     )
                                 }
                             }

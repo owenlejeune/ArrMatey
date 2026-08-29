@@ -35,18 +35,21 @@ fun RequestsList(
     onDelete: (Long) -> Unit,
     onRemoveFromService: (MediaRequest) -> Unit,
     onNavigateToDetails: (Long, RequestType) -> Unit,
-    onLoadMore: () -> Unit
+    onLoadMore: () -> Unit,
 ) {
     val listState = rememberLazyListState()
 
     LaunchedEffect(listState) {
         snapshotFlow {
-            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            listState.layoutInfo.visibleItemsInfo
+                .lastOrNull()
+                ?.index
         }.collect { lastVisibleIndex ->
             if (lastVisibleIndex != null &&
                 lastVisibleIndex >= items.size - 3 &&
                 hasMore &&
-                !isLoadingMore) {
+                !isLoadingMore
+            ) {
                 onLoadMore()
             }
         }
@@ -56,11 +59,11 @@ fun RequestsList(
         state = listState,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         items(
             items = items,
-            key = { it.request.id }
+            key = { it.request.id },
         ) { rPackage ->
             RequestCard(
                 mediaPackage = rPackage,
@@ -74,19 +77,20 @@ fun RequestsList(
                 onClick = {
                     onNavigateToDetails(
                         rPackage.request.media.tmdbId,
-                        rPackage.request.type
+                        rPackage.request.type,
                     )
-                }
+                },
             )
         }
 
         if (isLoadingMore) {
             item {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }

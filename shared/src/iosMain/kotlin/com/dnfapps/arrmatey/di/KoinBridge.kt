@@ -9,7 +9,6 @@ import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
-import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
@@ -24,6 +23,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
@@ -35,6 +35,7 @@ import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
@@ -44,7 +45,6 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
-import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
@@ -52,52 +52,53 @@ import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.parameter.parametersOf
 
-object KoinBridge: KoinComponent {
-    fun getActivityQueueViewModel(): ActivityQueueViewModel =
-        getKoin().get()
+object KoinBridge : KoinComponent {
+    fun getActivityQueueViewModel(): ActivityQueueViewModel = getKoin().get()
 
-    fun getArrMediaViewModel(type: InstanceType): ArrMediaViewModel =
-        getKoin().get { parametersOf(type) }
+    fun getArrMediaViewModel(type: InstanceType): ArrMediaViewModel = getKoin().get { parametersOf(type) }
 
-    fun getInstancesViewModel(type: InstanceType): InstancesViewModel =
-        getKoin().get { parametersOf(type) }
+    fun getInstancesViewModel(type: InstanceType): InstancesViewModel = getKoin().get { parametersOf(type) }
 
-    fun getArrSearchViewModel(type: InstanceType, instanceId: Long?): ArrSearchViewModel =
-        getKoin().get { parametersOf(type, instanceId) }
+    fun getArrSearchViewModel(
+        type: InstanceType,
+        instanceId: Long?,
+    ): ArrSearchViewModel = getKoin().get { parametersOf(type, instanceId) }
 
-    fun getMediaPreviewViewModel(preview: ArrMedia, type: InstanceType): MediaPreviewViewModel =
-        getKoin().get { parametersOf(preview, type) }
+    fun getMediaPreviewViewModel(
+        preview: ArrMedia,
+        type: InstanceType,
+    ): MediaPreviewViewModel = getKoin().get { parametersOf(preview, type) }
 
-    fun getInteractiveSearchViewModel(type: InstanceType, defaultFilter: ReleaseFilterBy): InteractiveSearchViewModel =
-        getKoin().get { parametersOf(type, defaultFilter) }
+    fun getInteractiveSearchViewModel(
+        type: InstanceType,
+        defaultFilter: ReleaseFilterBy,
+    ): InteractiveSearchViewModel = getKoin().get { parametersOf(type, defaultFilter) }
 
-    fun getMovieFilesViewModel(movieId: Long): MovieFilesViewModel =
-        getKoin().get { parametersOf(movieId) }
+    fun getMovieFilesViewModel(movieId: Long): MovieFilesViewModel = getKoin().get { parametersOf(movieId) }
 
-    fun getEpisodeDetailsViewModel(seriesId: Long, episode: Episode): EpisodeDetailsViewModel =
-        getKoin().get { parametersOf(seriesId, episode) }
+    fun getEpisodeDetailsViewModel(
+        seriesId: Long,
+        episode: Episode,
+    ): EpisodeDetailsViewModel = getKoin().get { parametersOf(seriesId, episode) }
 
     fun getMoreScreenViewModel(): MoreScreenViewModel = getKoin().get()
 
     fun getAddInstanceViewModel(): AddInstanceViewModel = getKoin().get()
 
-    fun getEditInstanceViewModel(instanceId: Long): EditInstanceViewModel =
-        getKoin().get { parametersOf(instanceId) }
+    fun getEditInstanceViewModel(instanceId: Long): EditInstanceViewModel = getKoin().get { parametersOf(instanceId) }
 
-    fun getCalendarViewModel(): CalendarViewModel =
-        getKoin().get()
+    fun getCalendarViewModel(): CalendarViewModel = getKoin().get()
 
-    fun getArrInstanceDashboardViewModel(instanceId: Long): ArrInstanceDashboardViewModel =
-        getKoin().get { parametersOf(instanceId) }
+    fun getArrInstanceDashboardViewModel(instanceId: Long): ArrInstanceDashboardViewModel = getKoin().get { parametersOf(instanceId) }
 
-    fun getRequestsViewModel(): RequestsViewModel =
-        getKoin().get()
+    fun getRequestsViewModel(): RequestsViewModel = getKoin().get()
 
-    fun getDiscoverViewModel(): DiscoverViewModel =
-        getKoin().get()
+    fun getDiscoverViewModel(): DiscoverViewModel = getKoin().get()
 
-    fun getSeerrMediaDetailsViewModel(tmdbId: Long, mediaType: RequestType): SeerrMediaDetailsViewModel =
-        getKoin().get { parametersOf(tmdbId, mediaType) }
+    fun getSeerrMediaDetailsViewModel(
+        tmdbId: Long,
+        mediaType: RequestType,
+    ): SeerrMediaDetailsViewModel = getKoin().get { parametersOf(tmdbId, mediaType) }
 
     fun getUnifiedMediaDetailsViewModel(
         arrId: Long?,
@@ -105,76 +106,59 @@ object KoinBridge: KoinComponent {
         tvdbId: Long?,
         instanceType: InstanceType?,
         requestType: RequestType?,
-        instanceId: Long?
-    ): UnifiedMediaDetailsViewModel =
-        getKoin().get { parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId) }
+        instanceId: Long?,
+    ): UnifiedMediaDetailsViewModel = getKoin().get { parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId) }
 
-    fun getIssueDetailsViewModel(issuePackage: MediaIssuePackage): IssueDetailsViewModel =
-        getKoin().get { parametersOf(issuePackage) }
+    fun getIssueDetailsViewModel(issuePackage: MediaIssuePackage): IssueDetailsViewModel = getKoin().get { parametersOf(issuePackage) }
 
-    fun getDownloadQueueViewModel(): DownloadQueueViewModel =
-        getKoin().get()
+    fun getDownloadQueueViewModel(): DownloadQueueViewModel = getKoin().get()
 
-    fun getDownloadClientSettingsViewModel(clientId: Long?): DownloadClientSettingsViewModel =
-        getKoin().get { parametersOf(clientId) }
+    fun getDownloadClientSettingsViewModel(clientId: Long?): DownloadClientSettingsViewModel = getKoin().get { parametersOf(clientId) }
 
-    fun getDownloadClientsViewModel(): DownloadClientsViewModel =
-        getKoin().get()
-    fun getProwlarrIndexersViewModel(): ProwlarrIndexersViewModel =
-        getKoin().get()
+    fun getDownloadClientsViewModel(): DownloadClientsViewModel = getKoin().get()
 
-    fun getProwlarrSearchViewModel(): ProwlarrSearchViewModel =
-        getKoin().get()
+    fun getProwlarrIndexersViewModel(): ProwlarrIndexersViewModel = getKoin().get()
 
-    fun getBazarrViewModel(): BazarrViewModel =
-        getKoin().get()
+    fun getProwlarrSearchViewModel(): ProwlarrSearchViewModel = getKoin().get()
 
-    fun getBazarrDetailsViewModel(id: Long, type: BazarrMediaType): BazarrDetailsViewModel =
-        getKoin().get { parametersOf(id, type) }
+    fun getBazarrViewModel(): BazarrViewModel = getKoin().get()
 
-    fun getBazarrSubtitleSearchViewModel(target: BazarrMediaTarget): BazarrSubtitleSearchViewModel =
-        getKoin().get { parametersOf(target) }
+    fun getBazarrDetailsViewModel(
+        id: Long,
+        type: BazarrMediaType,
+    ): BazarrDetailsViewModel = getKoin().get { parametersOf(id, type) }
 
-    fun getBazarrMediaSubtitlesViewModel(target: BazarrMediaTarget): BazarrMediaSubtitlesViewModel =
-        getKoin().get { parametersOf(target) }
+    fun getBazarrSubtitleSearchViewModel(target: BazarrMediaTarget): BazarrSubtitleSearchViewModel = getKoin().get { parametersOf(target) }
+
+    fun getBazarrMediaSubtitlesViewModel(target: BazarrMediaTarget): BazarrMediaSubtitlesViewModel = getKoin().get { parametersOf(target) }
 
     fun getCustomWebpageConfigurationViewModel(webpageId: Long?): CustomWebpageConfigurationViewModel =
         getKoin().get { parametersOf(webpageId) }
 
-    fun getCustomWebpageViewerViewModel(webpageId: Long): CustomWebpageViewerViewModel =
-        getKoin().get { parametersOf(webpageId) }
+    fun getCustomWebpageViewerViewModel(webpageId: Long): CustomWebpageViewerViewModel = getKoin().get { parametersOf(webpageId) }
 
-    fun getBookDetailsViewModel(authorId: Long, book: Book): BookDetailsViewModel =
-        getKoin().get { parametersOf(authorId, book) }
+    fun getBookDetailsViewModel(
+        authorId: Long,
+        book: Book,
+    ): BookDetailsViewModel = getKoin().get { parametersOf(authorId, book) }
 
-    fun getAuthorFilesViewModel(authorId: Long): AuthorFilesViewModel =
-        getKoin().get { parametersOf(authorId) }
+    fun getAuthorFilesViewModel(authorId: Long): AuthorFilesViewModel = getKoin().get { parametersOf(authorId) }
 
-    fun getAudiobookFilesViewModel(audiobookId: Long): AudiobookFilesViewModel =
-        getKoin().get { parametersOf(audiobookId) }
+    fun getAudiobookFilesViewModel(audiobookId: Long): AudiobookFilesViewModel = getKoin().get { parametersOf(audiobookId) }
 
-    fun getDashboardViewModel(): CombinedDashboardViewModel =
-        getKoin().get()
+    fun getDashboardViewModel(): CombinedDashboardViewModel = getKoin().get()
 
-    fun getBackupViewModel(): BackupViewModel =
-        getKoin().get()
+    fun getBackupViewModel(): BackupViewModel = getKoin().get()
 
-    fun getGenericClient(): GenericClient =
-        getKoin().get()
+    fun getGenericClient(): GenericClient = getKoin().get()
 
-    fun getTabManager(): TabManager =
-        getKoin().get()
+    fun getTabManager(): TabManager = getKoin().get()
 
-    fun getPreferencesStore(): PreferencesStore =
-        getKoin().get()
+    fun getPreferencesStore(): PreferencesStore = getKoin().get()
 
-    fun getMokoStrings(): MokoStrings =
-        getKoin().get()
+    fun getMokoStrings(): MokoStrings = getKoin().get()
 
-    fun getUnifiedLibraryViewModel(): UnifiedLibraryViewModel =
-        getKoin().get()
+    fun getUnifiedLibraryViewModel(): UnifiedLibraryViewModel = getKoin().get()
 
-    fun getInstanceRepository(): InstanceRepository =
-        getKoin().get()
-
+    fun getInstanceRepository(): InstanceRepository = getKoin().get()
 }

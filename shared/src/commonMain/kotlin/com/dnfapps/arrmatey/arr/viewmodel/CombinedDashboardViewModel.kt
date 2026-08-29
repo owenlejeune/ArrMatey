@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -12,7 +14,6 @@ import com.dnfapps.arrmatey.arr.state.InstanceNetworkStatus
 import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
-import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
@@ -25,6 +26,7 @@ import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.utils.getNetworkUtils
+import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -50,9 +52,8 @@ class CombinedDashboardViewModel(
     private val downloadQueueService: DownloadQueueService,
     private val calendarService: CalendarService,
     private val dashboardManager: DashboardManager,
-    private val preferencesStore: PreferencesStore
+    private val preferencesStore: PreferencesStore,
 ) : ViewModel() {
-
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
@@ -62,19 +63,21 @@ class CombinedDashboardViewModel(
     private val _isEditing = MutableStateFlow(false)
     val isEditing: StateFlow<Boolean> = _isEditing.asStateFlow()
 
-    val cards = dashboardManager.cardsOrder
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val cards =
+        dashboardManager.cardsOrder
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
-    val showFirstLaunchToast: StateFlow<Boolean> = preferencesStore.isFirstLaunch
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+    val showFirstLaunchToast: StateFlow<Boolean> =
+        preferencesStore.isFirstLaunch
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
 
     init {
         observeDashboard()
@@ -89,31 +92,32 @@ class CombinedDashboardViewModel(
                     if (arrRepos.isEmpty()) {
                         flowOf(emptyList())
                     } else {
-                        val flows = arrRepos.map { repo ->
-                            combine(
-                                repo.softwareStatus,
-                                repo.diskSpace,
-                                repo.health,
-                                repo.activityTasks,
-                                repo.library
-                            ) { software, disks, health, activity, library ->
-                                val libraryData = (library as? NetworkResult.Success)?.data ?: emptyList()
-                                val totalItems = libraryData.size
-                                val sizeOnDisk = libraryData.sumOf { it.fileSize }
+                        val flows =
+                            arrRepos.map { repo ->
+                                combine(
+                                    repo.softwareStatus,
+                                    repo.diskSpace,
+                                    repo.health,
+                                    repo.activityTasks,
+                                    repo.library,
+                                ) { software, disks, health, activity, library ->
+                                    val libraryData = (library as? NetworkResult.Success)?.data ?: emptyList()
+                                    val totalItems = libraryData.size
+                                    val sizeOnDisk = libraryData.sumOf { it.fileSize }
 
-                                ArrInstanceDashboardState(
-                                    instance = repo.instance,
-                                    softwareStatus = software,
-                                    disks = disks,
-                                    healthItems = health,
-                                    library = libraryData,
-                                    activityTasks = activity,
-                                    activeCount = activity.size,
-                                    totalItems = totalItems,
-                                    sizeOnDisk = sizeOnDisk
-                                )
+                                    ArrInstanceDashboardState(
+                                        instance = repo.instance,
+                                        softwareStatus = software,
+                                        disks = disks,
+                                        healthItems = health,
+                                        library = libraryData,
+                                        activityTasks = activity,
+                                        activeCount = activity.size,
+                                        totalItems = totalItems,
+                                        sizeOnDisk = sizeOnDisk,
+                                    )
+                                }
                             }
-                        }
                         combine(flows) { it.toList() }
                     }
                 },
@@ -122,18 +126,19 @@ class CombinedDashboardViewModel(
                     if (seerrRepos.isEmpty()) {
                         flowOf(emptyList())
                     } else {
-                        val flows = seerrRepos.map { repo ->
-                            combine(
-                                repo.pendingRequestsCount,
-                                repo.openIssuesCount
-                            ) { pending, issues ->
-                                SeerrDashboardState(
-                                    instance = repo.instance,
-                                    pendingRequestsCount = pending,
-                                    openIssuesCount = issues
-                                )
+                        val flows =
+                            seerrRepos.map { repo ->
+                                combine(
+                                    repo.pendingRequestsCount,
+                                    repo.openIssuesCount,
+                                ) { pending, issues ->
+                                    SeerrDashboardState(
+                                        instance = repo.instance,
+                                        pendingRequestsCount = pending,
+                                        openIssuesCount = issues,
+                                    )
+                                }
                             }
-                        }
                         combine(flows) { it.toList() }
                     }
                 },
@@ -142,22 +147,23 @@ class CombinedDashboardViewModel(
                     if (prowlarrRepos.isEmpty()) {
                         flowOf(emptyList())
                     } else {
-                        val flows = prowlarrRepos.map { repo ->
-                            combine(
-                                repo.softwareStatus,
-                                repo.indexerStatus,
-                                repo.indexers
-                            ) { software, status, indexers ->
-                                val failureCount = status.count { it.hasFailure }
-                                ProwlarrDashboardState(
-                                    instance = repo.instance,
-                                    softwareStatus = software,
-                                    totalIndexers = indexers.size,
-                                    healthyIndexers = indexers.size - failureCount,
-                                    failingIndexers = failureCount
-                                )
+                        val flows =
+                            prowlarrRepos.map { repo ->
+                                combine(
+                                    repo.softwareStatus,
+                                    repo.indexerStatus,
+                                    repo.indexers,
+                                ) { software, status, indexers ->
+                                    val failureCount = status.count { it.hasFailure }
+                                    ProwlarrDashboardState(
+                                        instance = repo.instance,
+                                        softwareStatus = software,
+                                        totalIndexers = indexers.size,
+                                        healthyIndexers = indexers.size - failureCount,
+                                        failingIndexers = failureCount,
+                                    )
+                                }
                             }
-                        }
                         combine(flows) { it.toList() }
                     }
                 },
@@ -166,57 +172,73 @@ class CombinedDashboardViewModel(
                     if (bazarrRepos.isEmpty()) {
                         flowOf(emptyList())
                     } else {
-                        val flows = bazarrRepos.map { repo ->
-                            combine(repo.wantedEpisodesCount, repo.wantedMoviesCount) { episodes, movies ->
-                                BazarrDashboardState(
-                                    instance = repo.instance,
-                                    wantedEpisodesCount = episodes,
-                                    wantedMoviesCount = movies
-                                )
+                        val flows =
+                            bazarrRepos.map { repo ->
+                                combine(repo.wantedEpisodesCount, repo.wantedMoviesCount) { episodes, movies ->
+                                    BazarrDashboardState(
+                                        instance = repo.instance,
+                                        wantedEpisodesCount = episodes,
+                                        wantedMoviesCount = movies,
+                                    )
+                                }
                             }
-                        }
                         combine(flows) { it.toList() }
                     }
                 },
                 downloadQueueService.allTransfers,
                 downloadClientManager.downloadClientApis,
                 calendarService.items.map { itemsByDate ->
-                    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    val today =
+                        Clock.System
+                            .now()
+                            .toLocalDateTime(TimeZone.currentSystemDefault())
+                            .date
                     val todayItems = (itemsByDate[today] ?: emptyList()).map { DashboardCalendarItem(it, today) }
-                    val upcomingItems = (1..7).flatMap { offset ->
-                        val date = today.plus(offset, DateTimeUnit.DAY)
-                        (itemsByDate[date] ?: emptyList()).map { DashboardCalendarItem(it, date) }
-                    }
+                    val upcomingItems =
+                        (1..7).flatMap { offset ->
+                            val date = today.plus(offset, DateTimeUnit.DAY)
+                            (itemsByDate[date] ?: emptyList()).map { DashboardCalendarItem(it, date) }
+                        }
                     todayItems to upcomingItems
                 },
-                _isRefreshing
+                _isRefreshing,
             ) { args ->
                 @Suppress("UNCHECKED_CAST")
                 val instances = args[0] as List<ArrInstanceDashboardState>
+
                 @Suppress("UNCHECKED_CAST")
                 val seerrInstances = args[1] as List<SeerrDashboardState>
+
                 @Suppress("UNCHECKED_CAST")
                 val prowlarrStats = args[2] as List<ProwlarrDashboardState>
+
                 @Suppress("UNCHECKED_CAST")
                 val bazarrStats = args[3] as List<BazarrDashboardState>
                 val downloads = args[4] as DownloadQueueBundle
+
                 @Suppress("UNCHECKED_CAST")
                 val clientApis = args[5] as Map<Long, *>
+
                 @Suppress("UNCHECKED_CAST")
                 val calendarPair = args[6] as Pair<List<DashboardCalendarItem>, List<DashboardCalendarItem>>
                 val todayCalendar = calendarPair.first
                 val upcomingCalendar = calendarPair.second
                 val refreshing = args[7] as Boolean
 
-                val downloadClients = downloads.transferInfo.map { transfer ->
-                    val clientItems = downloads.queueItems.filter { it.client.id == transfer.client.id }
-                    DownloadClientDashboardState(
-                        client = transfer.client,
-                        transferInfo = transfer,
-                        isOnline = true,
-                        activeDownloadsCount = clientItems.count { it.downloadSpeed > 0 || it.uploadSpeed > 0 || it.progress < 1.0 }
-                    )
-                }.toMutableList()
+                val downloadClients =
+                    downloads.transferInfo
+                        .map { transfer ->
+                            val clientItems = downloads.queueItems.filter { it.client.id == transfer.client.id }
+                            DownloadClientDashboardState(
+                                client = transfer.client,
+                                transferInfo = transfer,
+                                isOnline = true,
+                                activeDownloadsCount =
+                                    clientItems.count {
+                                        it.downloadSpeed > 0 || it.uploadSpeed > 0 || it.progress < 1.0
+                                    },
+                            )
+                        }.toMutableList()
 
                 clientApis.keys.forEach { clientId ->
                     if (downloadClients.none { it.client.id == clientId }) {
@@ -226,23 +248,33 @@ class CombinedDashboardViewModel(
                                 DownloadClientDashboardState(
                                     client = client,
                                     isOnline = false,
-                                    activeDownloadsCount = clientItems.count { it.downloadSpeed > 0 || it.uploadSpeed > 0 || it.progress < 1.0 }
-                                )
+                                    activeDownloadsCount =
+                                        clientItems.count {
+                                            it.downloadSpeed > 0 ||
+                                                it.uploadSpeed > 0 ||
+                                                it.progress < 1.0
+                                        },
+                                ),
                             )
                         }
                     }
                 }
 
-                val recentActivity = instances.flatMap { it.activityTasks }
-                    .sortedByDescending { it.added }
+                val recentActivity =
+                    instances
+                        .flatMap { it.activityTasks }
+                        .sortedByDescending { it.added }
 
-                val recentlyAdded = instances.flatMap { it.library }
-                    .filter { it.added != null }
-                    .sortedByDescending { it.added }
-                    .take(10)
+                val recentlyAdded =
+                    instances
+                        .flatMap { it.library }
+                        .filter { it.added != null }
+                        .sortedByDescending { it.added }
+                        .take(10)
 
-                val activeDownloads = downloads.queueItems
-                    .sortedByDescending { it.progress }
+                val activeDownloads =
+                    downloads.queueItems
+                        .sortedByDescending { it.progress }
 
                 CombinedDashboardState.Success(
                     instances = instances,
@@ -257,7 +289,7 @@ class CombinedDashboardViewModel(
                     prowlarrStats = prowlarrStats,
                     bazarrStats = bazarrStats,
                     networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats, bazarrStats, downloadClients),
-                    isRefreshing = refreshing
+                    isRefreshing = refreshing,
                 )
             }.collect { newState ->
                 _state.value = newState
@@ -270,14 +302,24 @@ class CombinedDashboardViewModel(
         seerrInstances: List<SeerrDashboardState>,
         prowlarrInstances: List<ProwlarrDashboardState>,
         bazarrInstances: List<BazarrDashboardState>,
-        downloadClients: List<DownloadClientDashboardState>
+        downloadClients: List<DownloadClientDashboardState>,
     ): NetworkStatusState {
         val networkUtils = getNetworkUtils()
-        val currentSsid = try { networkUtils.getCurrentWifiSsid() } catch (e: Exception) { null }
-        val isWifi = try { networkUtils.isConnectedToWifi() } catch (e: Exception) { false }
-        
+        val currentSsid =
+            try {
+                networkUtils.getCurrentWifiSsid()
+            } catch (e: Exception) {
+                null
+            }
+        val isWifi =
+            try {
+                networkUtils.isConnectedToWifi()
+            } catch (e: Exception) {
+                false
+            }
+
         val instanceStatuses = mutableListOf<InstanceNetworkStatus>()
-        
+
         arrInstances.forEach { state ->
             instanceStatuses.add(
                 InstanceNetworkStatus(
@@ -286,11 +328,11 @@ class CombinedDashboardViewModel(
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
                     icon = state.instance.type.icon,
                     isOnline = state.softwareStatus != null,
-                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled
-                )
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled,
+                ),
             )
         }
-        
+
         seerrInstances.forEach { state ->
             instanceStatuses.add(
                 InstanceNetworkStatus(
@@ -299,11 +341,11 @@ class CombinedDashboardViewModel(
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
                     icon = state.instance.type.icon,
                     isOnline = true, // Assume online if we have state
-                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled
-                )
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled,
+                ),
             )
         }
-        
+
         prowlarrInstances.forEach { state ->
             instanceStatuses.add(
                 InstanceNetworkStatus(
@@ -312,8 +354,8 @@ class CombinedDashboardViewModel(
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
                     icon = state.instance.type.icon,
                     isOnline = state.softwareStatus != null,
-                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled
-                )
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled,
+                ),
             )
         }
 
@@ -325,8 +367,8 @@ class CombinedDashboardViewModel(
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
                     icon = state.instance.type.icon,
                     isOnline = true, // Assume online if we have state
-                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled
-                )
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled,
+                ),
             )
         }
 
@@ -338,15 +380,15 @@ class CombinedDashboardViewModel(
                     currentEndpoint = state.client.getEffectiveBaseUrl(),
                     icon = state.client.type.icon,
                     isOnline = state.isOnline,
-                    isLocalSwitchingEnabled = state.client.localNetworkEnabled
-                )
+                    isLocalSwitchingEnabled = state.client.localNetworkEnabled,
+                ),
             )
         }
 
         return NetworkStatusState(
             ssid = currentSsid,
             isWifi = isWifi,
-            instanceStatuses = instanceStatuses.sortedBy { it.instanceName }
+            instanceStatuses = instanceStatuses.sortedBy { it.instanceName },
         )
     }
 
@@ -377,7 +419,9 @@ class CombinedDashboardViewModel(
                 }
             }
 
-            val prowlarrRepos = instanceManager.instanceRepositories.value.values.filterIsInstance<ProwlarrInstanceRepository>()
+            val prowlarrRepos =
+                instanceManager.instanceRepositories.value.values
+                    .filterIsInstance<ProwlarrInstanceRepository>()
             prowlarrRepos.forEach { repo ->
                 try {
                     repo.refreshStatus()
@@ -388,7 +432,9 @@ class CombinedDashboardViewModel(
                 }
             }
 
-            val bazarrRepos = instanceManager.instanceRepositories.value.values.filterIsInstance<BazarrInstanceRepository>()
+            val bazarrRepos =
+                instanceManager.instanceRepositories.value.values
+                    .filterIsInstance<BazarrInstanceRepository>()
             bazarrRepos.forEach { repo ->
                 try {
                     repo.refreshBadges()

@@ -5,8 +5,7 @@ import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.instances.model.Instance
 
 class CreateInstanceUseCase(
-    private val instanceRepository: InstanceRepository
+    private val instanceRepository: InstanceRepository,
 ) {
-    suspend operator fun invoke(instance: Instance): InsertResult =
-        instanceRepository.createInstance(instance)
+    suspend operator fun invoke(instance: Instance): InsertResult = instanceRepository.createInstance(instance)
 }

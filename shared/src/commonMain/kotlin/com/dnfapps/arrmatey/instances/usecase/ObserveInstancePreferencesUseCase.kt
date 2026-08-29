@@ -11,11 +11,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 
 class ObserveInstancePreferencesUseCase(
     private val instanceManager: InstanceManager,
-    private val preferencesStoreRepository: InstancePreferenceStoreRepository
+    private val preferencesStoreRepository: InstancePreferenceStoreRepository,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(type: InstanceType): Flow<InstancePreferences> =
-        instanceManager.getSelectedArrRepository(type)
+        instanceManager
+            .getSelectedArrRepository(type)
             .filterNotNull()
             .flatMapLatest {
                 preferencesStoreRepository.getInstancePreferences(it.instance.id).observePreferences()

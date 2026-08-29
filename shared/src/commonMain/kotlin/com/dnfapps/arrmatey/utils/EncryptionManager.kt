@@ -5,6 +5,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 interface EncryptionManager {
     fun encrypt(plainText: String): String
+
     fun decrypt(encryptedText: String): String
 }
 

@@ -41,50 +41,59 @@ fun CalendarDaySection(
     instances: List<Instance>,
     onItemClick: (CalendarItem, Long?) -> Unit,
 ) {
-    val today = remember {
-        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    }
+    val today =
+        remember {
+            Clock.System
+                .now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+        }
     val isToday = date == today
-    val relativeDate = when {
-        isToday -> mokoString(MR.strings.today)
-        date == today.plus(1, DateTimeUnit.DAY) -> mokoString(MR.strings.tomorrow)
-        date == today.minus(1, DateTimeUnit.DAY) -> mokoString(MR.strings.yesterday)
-        else -> null
-    }
+    val relativeDate =
+        when {
+            isToday -> mokoString(MR.strings.today)
+            date == today.plus(1, DateTimeUnit.DAY) -> mokoString(MR.strings.tomorrow)
+            date == today.minus(1, DateTimeUnit.DAY) -> mokoString(MR.strings.yesterday)
+            else -> null
+        }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = relativeDate ?: date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() },
+                    text =
+                        relativeDate ?: date.dayOfWeek.name
+                            .lowercase()
+                            .replaceFirstChar { it.uppercase() },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = "${date.month.name.take(3)} ${date.day}, ${date.year}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
             if (items.isNotEmpty()) {
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.secondaryContainer
+                    color = MaterialTheme.colorScheme.secondaryContainer,
                 ) {
                     Text(
                         text = items.size.toString(),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 }
             }
@@ -96,43 +105,49 @@ fun CalendarDaySection(
             }
 
             when (item) {
-                is ArrMovie -> MovieCalendarItem(
-                    date = date,
-                    movie = item,
-                    instances = instances,
-                    onNavigate = onNavigate
-                )
+                is ArrMovie ->
+                    MovieCalendarItem(
+                        date = date,
+                        movie = item,
+                        instances = instances,
+                        onNavigate = onNavigate,
+                    )
 
-                is EpisodeGroup -> EpisodeCalendarItem(
-                    episode = item.first,
-                    additional = item.additional,
-                    instances = instances,
-                    onNavigate = onNavigate
-                )
+                is EpisodeGroup ->
+                    EpisodeCalendarItem(
+                        episode = item.first,
+                        additional = item.additional,
+                        instances = instances,
+                        onNavigate = onNavigate,
+                    )
 
-                is Episode -> EpisodeCalendarItem(
-                    episode = item,
-                    instances = instances,
-                    onNavigate = onNavigate
-                )
+                is Episode ->
+                    EpisodeCalendarItem(
+                        episode = item,
+                        instances = instances,
+                        onNavigate = onNavigate,
+                    )
 
-                is ArrAlbum -> AlbumCalendarItem(
-                    album = item,
-                    instances = instances,
-                    onNavigate = onNavigate
-                )
+                is ArrAlbum ->
+                    AlbumCalendarItem(
+                        album = item,
+                        instances = instances,
+                        onNavigate = onNavigate,
+                    )
 
-                is Book -> BookCalendarItem(
-                    book = item,
-                    instances = instances,
-                    onNavigate = onNavigate
-                )
+                is Book ->
+                    BookCalendarItem(
+                        book = item,
+                        instances = instances,
+                        onNavigate = onNavigate,
+                    )
 
-                is Audiobook -> AudiobookCalendarItem(
-                    audiobook = item,
-                    instances = instances,
-                    onNavigate = onNavigate
-                )
+                is Audiobook ->
+                    AudiobookCalendarItem(
+                        audiobook = item,
+                        instances = instances,
+                        onNavigate = onNavigate,
+                    )
             }
         }
     }

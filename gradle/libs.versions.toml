@@ -42,6 +42,8 @@ adaptive = "1.2.0"
 flexible-bottomsheet = "0.3.0"
 turbine = "1.2.0"
 robolectric = "4.14.1"
+spotless = "7.0.2"
+ktlint = "1.5.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -120,3 +122,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
 moko-resources = { id = "dev.icerock.moko.multiplatform-resources", version.ref = "moko" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

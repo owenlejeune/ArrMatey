@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class LegendasTVSettings(
     val featured_only: Boolean,
     val password: String,
-    val username: String
+    val username: String,
 )

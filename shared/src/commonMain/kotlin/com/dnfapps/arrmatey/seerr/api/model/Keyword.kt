@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Keyword(
     val id: Long,
-    val name: String
+    val name: String,
 )

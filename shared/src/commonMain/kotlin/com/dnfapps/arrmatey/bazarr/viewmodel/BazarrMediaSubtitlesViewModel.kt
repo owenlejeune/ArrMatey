@@ -7,10 +7,10 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitleLanguage
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.BazarrSubtitlesUiState
 import com.dnfapps.arrmatey.bazarr.usecase.DownloadBazarrSubtitleToDeviceUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
-import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,9 +25,8 @@ import kotlinx.coroutines.launch
 class BazarrMediaSubtitlesViewModel(
     private val target: BazarrMediaTarget,
     private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
-    private val downloadBazarrSubtitleToDeviceUseCase: DownloadBazarrSubtitleToDeviceUseCase
+    private val downloadBazarrSubtitleToDeviceUseCase: DownloadBazarrSubtitleToDeviceUseCase,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow<BazarrSubtitlesUiState>(BazarrSubtitlesUiState.Loading)
     val state: StateFlow<BazarrSubtitlesUiState> = _state.asStateFlow()
 
@@ -38,8 +37,7 @@ class BazarrMediaSubtitlesViewModel(
         load()
     }
 
-    private suspend fun repo() =
-        getBazarrInstanceRepositoryUseCase.observeSelected().firstOrNull()
+    private suspend fun repo() = getBazarrInstanceRepositoryUseCase.observeSelected().firstOrNull()
 
     fun load() {
         viewModelScope.launch {
@@ -51,39 +49,41 @@ class BazarrMediaSubtitlesViewModel(
             }
             when (target) {
                 is BazarrMediaTarget.Episode -> {
-                    repo.getEpisodes(target.seriesId)
+                    repo
+                        .getEpisodes(target.seriesId)
                         .onSuccess { episodes ->
                             val episode = episodes.firstOrNull { it.sonarrEpisodeId == target.episodeId }
-                            _state.value = if (episode == null) {
-                                BazarrSubtitlesUiState.NotTracked
-                            } else {
-                                val grouped = episode.subtitles.groupBy { it.isEmbedded }
-                                BazarrSubtitlesUiState.Success(
-                                    present = grouped[false] ?: emptyList(),
-                                    embedded = grouped[true] ?: emptyList(),
-                                    missing = episode.missingSubtitles
-                                )
-                            }
-                        }
-                        .onError { _, message, _ ->
+                            _state.value =
+                                if (episode == null) {
+                                    BazarrSubtitlesUiState.NotTracked
+                                } else {
+                                    val grouped = episode.subtitles.groupBy { it.isEmbedded }
+                                    BazarrSubtitlesUiState.Success(
+                                        present = grouped[false] ?: emptyList(),
+                                        embedded = grouped[true] ?: emptyList(),
+                                        missing = episode.missingSubtitles,
+                                    )
+                                }
+                        }.onError { _, message, _ ->
                             _state.value = BazarrSubtitlesUiState.Error(message ?: "Failed to load subtitles")
                         }
                 }
                 is BazarrMediaTarget.Movie -> {
-                    repo.getMovie(target.radarrId)
+                    repo
+                        .getMovie(target.radarrId)
                         .onSuccess { movie ->
-                            _state.value = if (movie == null) {
-                                BazarrSubtitlesUiState.NotTracked
-                            } else {
-                                val grouped = movie.subtitles.groupBy { it.isEmbedded }
-                                BazarrSubtitlesUiState.Success(
-                                    present = grouped[false] ?: emptyList(),
-                                    embedded = grouped[true] ?: emptyList(),
-                                    missing = movie.missingSubtitles
-                                )
-                            }
-                        }
-                        .onError { _, message, _ ->
+                            _state.value =
+                                if (movie == null) {
+                                    BazarrSubtitlesUiState.NotTracked
+                                } else {
+                                    val grouped = movie.subtitles.groupBy { it.isEmbedded }
+                                    BazarrSubtitlesUiState.Success(
+                                        present = grouped[false] ?: emptyList(),
+                                        embedded = grouped[true] ?: emptyList(),
+                                        missing = movie.missingSubtitles,
+                                    )
+                                }
+                        }.onError { _, message, _ ->
                             _state.value = BazarrSubtitlesUiState.Error(message ?: "Failed to load subtitles")
                         }
                 }
@@ -95,17 +95,29 @@ class BazarrMediaSubtitlesViewModel(
         viewModelScope.launch {
             val repo = repo() ?: return@launch
             _operationState.value = OperationStatus.InProgress
-            val op = when (target) {
-                is BazarrMediaTarget.Episode -> repo.autoSearchEpisodeSubtitles(
-                    target.seriesId, target.episodeId, language.code2.orEmpty(), language.forced, language.hi
-                )
-                is BazarrMediaTarget.Movie -> repo.autoSearchMovieSubtitles(
-                    target.radarrId, language.code2.orEmpty(), language.forced, language.hi
-                )
-            }
+            val op =
+                when (target) {
+                    is BazarrMediaTarget.Episode ->
+                        repo.autoSearchEpisodeSubtitles(
+                            target.seriesId,
+                            target.episodeId,
+                            language.code2.orEmpty(),
+                            language.forced,
+                            language.hi,
+                        )
+                    is BazarrMediaTarget.Movie ->
+                        repo.autoSearchMovieSubtitles(
+                            target.radarrId,
+                            language.code2.orEmpty(),
+                            language.forced,
+                            language.hi,
+                        )
+                }
             op
-                .onSuccess { _operationState.value = OperationStatus.Success(); load() }
-                .onError { code, message, cause ->
+                .onSuccess {
+                    _operationState.value = OperationStatus.Success()
+                    load()
+                }.onError { code, message, cause ->
                     _operationState.value = OperationStatus.Error(code, message, cause)
                 }
         }
@@ -116,23 +128,40 @@ class BazarrMediaSubtitlesViewModel(
         viewModelScope.launch {
             val repo = repo() ?: return@launch
             _operationState.value = OperationStatus.InProgress
-            val op = when (target) {
-                is BazarrMediaTarget.Episode -> repo.deleteEpisodeSubtitle(
-                    target.seriesId, target.episodeId, subtitle.code2.orEmpty(), subtitle.forced, subtitle.hi, path
-                )
-                is BazarrMediaTarget.Movie -> repo.deleteMovieSubtitle(
-                    target.radarrId, subtitle.code2.orEmpty(), subtitle.forced, subtitle.hi, path
-                )
-            }
+            val op =
+                when (target) {
+                    is BazarrMediaTarget.Episode ->
+                        repo.deleteEpisodeSubtitle(
+                            target.seriesId,
+                            target.episodeId,
+                            subtitle.code2.orEmpty(),
+                            subtitle.forced,
+                            subtitle.hi,
+                            path,
+                        )
+                    is BazarrMediaTarget.Movie ->
+                        repo.deleteMovieSubtitle(
+                            target.radarrId,
+                            subtitle.code2.orEmpty(),
+                            subtitle.forced,
+                            subtitle.hi,
+                            path,
+                        )
+                }
             op
-                .onSuccess { _operationState.value = OperationStatus.Success(); load() }
-                .onError { code, message, cause ->
+                .onSuccess {
+                    _operationState.value = OperationStatus.Success()
+                    load()
+                }.onError { code, message, cause ->
                     _operationState.value = OperationStatus.Error(code, message, cause)
                 }
         }
     }
 
-    fun downloadToDevice(subtitle: BazarrSubtitle, onResult: (ByteArray?) -> Unit) {
+    fun downloadToDevice(
+        subtitle: BazarrSubtitle,
+        onResult: (ByteArray?) -> Unit,
+    ) {
         viewModelScope.launch {
             downloadBazarrSubtitleToDeviceUseCase(subtitle, onResult)
         }

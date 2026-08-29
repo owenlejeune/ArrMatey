@@ -14,5 +14,5 @@ data class DelugeTorrentData(
     @SerialName("state") val state: DelugeTorrentState = DelugeTorrentState.Unknown,
     @SerialName("label") val label: String = "",
     @SerialName("time_added") val timeAdded: Long = 0,
-    @SerialName("hash") val hash: String = ""
+    @SerialName("hash") val hash: String = "",
 )

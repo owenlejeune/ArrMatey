@@ -30,7 +30,7 @@ fun IndexersSortMenu(
     sortBy: SortBy,
     onSortByChanged: (SortBy) -> Unit,
     sortOrder: SortOrder,
-    onSortOrderChanged: (SortOrder) -> Unit
+    onSortOrderChanged: (SortOrder) -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val groupInteractionSource = remember { MutableInteractionSource() }
@@ -41,11 +41,11 @@ fun IndexersSortMenu(
         }
         DropdownMenuPopup(
             expanded = showMenu,
-            onDismissRequest = { showMenu = false }
+            onDismissRequest = { showMenu = false },
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 1),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 val sortOptions = SortBy.typeEntries(InstanceType.Prowlarr)
                 sortOptions.forEachIndexed { index, sort ->
@@ -57,17 +57,21 @@ fun IndexersSortMenu(
                                 onSortOrderChanged(
                                     if (sortOrder == SortOrder.Asc) {
                                         SortOrder.Desc
-                                    } else SortOrder.Asc
+                                    } else {
+                                        SortOrder.Asc
+                                    },
                                 )
                             } else {
                                 onSortByChanged(sort)
                             }
                         },
                         shapes = MenuDefaults.itemShape(index, sortOptions.size),
-                        selectedLeadingIcon = { when(sortOrder) {
-                            SortOrder.Asc -> Icon(Icons.Default.ArrowDropUp, null)
-                            SortOrder.Desc -> Icon(Icons.Default.ArrowDropDown, null)
-                        } }
+                        selectedLeadingIcon = {
+                            when (sortOrder) {
+                                SortOrder.Asc -> Icon(Icons.Default.ArrowDropUp, null)
+                                SortOrder.Desc -> Icon(Icons.Default.ArrowDropDown, null)
+                            }
+                        },
                     )
                 }
             }

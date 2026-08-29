@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class QualityInfo(
     val quality: Quality,
-    val revision: Revision
+    val revision: Revision,
 ) {
     val qualityLabel: String
         get() {

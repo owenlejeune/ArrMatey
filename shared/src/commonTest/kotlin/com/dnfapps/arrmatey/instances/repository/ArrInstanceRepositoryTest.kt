@@ -18,39 +18,44 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class ArrInstanceRepositoryTest {
-
-    private val fakeInstance = Instance(
-        id = 1,
-        label = "Test Sonarr",
-        url = "http://localhost:8989",
-        apiKey = EncryptedString("test-api-key"),
-        type = InstanceType.Sonarr,
-        enabled = true
-    )
+    private val fakeInstance =
+        Instance(
+            id = 1,
+            label = "Test Sonarr",
+            url = "http://localhost:8989",
+            apiKey = EncryptedString("test-api-key"),
+            type = InstanceType.Sonarr,
+            enabled = true,
+        )
 
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testRefreshStatus() = runTest {
-        val mockEngine = MockEngine { _ ->
-            respond(
-                content = """{"version": "4.0.0.648"}""",
-                status = HttpStatusCode.OK,
-                headers = headersOf("Content-Type", "application/json")
-            )
-        }
-        val httpClient = HttpClient(mockEngine) {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
-        val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger)
+    fun testRefreshStatus() =
+        runTest {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = """{"version": "4.0.0.648"}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                }
+            val httpClient =
+                HttpClient(mockEngine) {
+                    install(ContentNegotiation) {
+                        json(
+                            Json {
+                                ignoreUnknownKeys = true
+                            },
+                        )
+                    }
+                }
+            val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger)
 
-        repository.refreshStatus()
+            repository.refreshStatus()
 
-        assertNotNull(repository.softwareStatus.value)
-        assertEquals("4.0.0.648", repository.softwareStatus.value?.version)
-    }
+            assertNotNull(repository.softwareStatus.value)
+            assertEquals("4.0.0.648", repository.softwareStatus.value?.version)
+        }
 }

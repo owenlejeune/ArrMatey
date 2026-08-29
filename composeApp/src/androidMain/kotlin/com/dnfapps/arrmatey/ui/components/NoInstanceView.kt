@@ -29,28 +29,28 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun NoInstanceView(
     type: InstanceType,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val navManager = navigationManager
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        modifier = modifier,
     ) {
         Icon(
             imageVector = Icons.Default.CloudQueue,
             contentDescription = null,
-            modifier = Modifier.size(128.dp)
+            modifier = Modifier.size(128.dp),
         )
         Text(
             text = mokoString(MR.strings.no_type_instances, type.name),
             fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
         Text(
             text = mokoString(MR.strings.no_type_instances_message, type.name),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -59,20 +59,21 @@ fun NoInstanceView(
             onClick = {
                 navManager.openNewInstanceScreen(type)
             },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
         ) {
             Icon(
                 imageVector = Icons.Default.AddCircle,
-                contentDescription = null
+                contentDescription = null,
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = mokoString(MR.strings.add_instance),
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
         }
     }

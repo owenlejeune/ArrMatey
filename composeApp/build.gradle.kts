@@ -15,7 +15,7 @@ kotlin {
             freeCompilerArgs.add("-Xno-param-names")
         }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -39,7 +39,7 @@ kotlin {
             implementation(libs.compose.markdown)
             implementation(libs.google.fonts)
             implementation(libs.flexible.bottomsheet)
-            
+
             implementation(libs.kmp.logger)
         }
         commonMain.dependencies {
@@ -66,7 +66,7 @@ kotlin {
             implementation(libs.moko.resources.compose)
 
             implementation(libs.aboutlibraries)
-            
+
             implementation(libs.kmp.logger)
         }
         commonTest.dependencies {
@@ -87,7 +87,10 @@ kotlin {
 
 android {
     namespace = "com.dnfapps.arrmatey"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk =
+        libs.versions.android.compileSdk
+            .get()
+            .toInt()
 
     buildFeatures {
         buildConfig = true
@@ -95,8 +98,14 @@ android {
 
     defaultConfig {
         applicationId = "com.dnfapps.arrmatey"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
+        targetSdk =
+            libs.versions.android.targetSdk
+                .get()
+                .toInt()
         versionCode = 28
         versionName = "0.9.0"
     }

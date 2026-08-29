@@ -43,50 +43,54 @@ fun BazarrSection(
     val totalMovies = bazarrStats.sumOf { it.wantedMoviesCount }
 
     val containerColor by animateColorAsState(
-        targetValue = if (isEditing) {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        } else Color.Transparent,
-        label = "BazarrCardBackgroundAnimation"
+        targetValue =
+            if (isEditing) {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            } else {
+                Color.Transparent
+            },
+        label = "BazarrCardBackgroundAnimation",
     )
 
     val internalPadding by animateDpAsState(
         targetValue = if (isEditing) 16.dp else 0.dp,
-        label = "BazarrCardPaddingAnimation"
+        label = "BazarrCardPaddingAnimation",
     )
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = containerColor,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing
+                visible = isEditing,
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Image(
                         painter = painterResource(InstanceType.Bazarr.icon),
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                     Text(
                         text = mokoString(MR.strings.dashboard_bazarr_overview),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 CountStatItem(
                     modifier = Modifier.weight(1f),
@@ -94,14 +98,14 @@ fun BazarrSection(
                     label = mokoString(MR.strings.bazarr_wanted_episodes),
                     count = totalEpisodes,
                     containerColor = ArrBlue,
-                    contentColor = surfaceLight
+                    contentColor = surfaceLight,
                 )
                 CountStatItem(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.Movie,
                     label = mokoString(MR.strings.bazarr_wanted_movies),
                     count = totalMovies,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 )
             }
         }

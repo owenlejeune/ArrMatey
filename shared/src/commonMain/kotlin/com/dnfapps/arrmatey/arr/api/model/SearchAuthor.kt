@@ -11,5 +11,5 @@ data class SearchAuthor(
     val region: String? = null,
     val regions: List<String> = emptyList(),
     @Serializable(with = ListenarrInstantSerializer::class)
-    val updatedAt: Instant? = null
+    val updatedAt: Instant? = null,
 )

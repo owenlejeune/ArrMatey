@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.client.paging.BasePagingSource
 import com.dnfapps.arrmatey.client.paging.PageResult
 import com.dnfapps.arrmatey.client.paging.PagingSource
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClient
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClientImpl
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
@@ -14,10 +15,10 @@ import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
-import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
@@ -29,7 +30,6 @@ import com.dnfapps.arrmatey.seerr.service.MediaIssuePackageService
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
@@ -47,8 +47,8 @@ import kotlin.time.Clock
 
 class SeerrInstanceRepository(
     override val instance: Instance,
-    httpClient: HttpClient
-): InstanceScopedRepository {
+    httpClient: HttpClient,
+) : InstanceScopedRepository {
     val client: SeerrClient = SeerrClientImpl(instance, httpClient)
     private val mediaPackageService = MediaRequestPackageService(client)
     private val issuePackageService = MediaIssuePackageService(client)
@@ -76,16 +76,17 @@ class SeerrInstanceRepository(
     private val _openIssuesCount = MutableStateFlow(0)
     val openIssuesCount: StateFlow<Int> = _openIssuesCount.asStateFlow()
 
-    override suspend fun testConnection(): NetworkResult<Unit> =
-        client.testConnection()
+    override suspend fun testConnection(): NetworkResult<Unit> = client.testConnection()
 
     suspend fun getLoggedInUser() {
-        client.getUserInfo()
+        client
+            .getUserInfo()
             .onSuccess { _loggedInUser.value = it }
     }
 
     suspend fun getUsers() {
-        client.getUsers()
+        client
+            .getUsers()
             .onSuccess { _users.value = it.results }
     }
 
@@ -98,8 +99,8 @@ class SeerrInstanceRepository(
         }
     }
 
-    fun getRequestsPaging(): PagingSource<MediaRequestPackage> {
-        return BasePagingSource(
+    fun getRequestsPaging(): PagingSource<MediaRequestPackage> =
+        BasePagingSource(
             fetcher = { page ->
                 client.getRequests(page = page)
             },
@@ -108,14 +109,13 @@ class SeerrInstanceRepository(
                 PageResult(
                     items = enrichedRequests,
                     totalItemCount = response.pageInfo.results,
-                    hasNextPage = response.pageInfo.page < response.pageInfo.pages
+                    hasNextPage = response.pageInfo.page < response.pageInfo.pages,
                 )
-            }
+            },
         )
-    }
 
-    fun getTrendingPaging(): PagingSource<DiscoverResult> {
-        return BasePagingSource(
+    fun getTrendingPaging(): PagingSource<DiscoverResult> =
+        BasePagingSource(
             fetcher = { page ->
                 client.getTrending(page = page)
             },
@@ -123,14 +123,13 @@ class SeerrInstanceRepository(
                 PageResult(
                     items = response.results,
                     totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages
+                    hasNextPage = response.page < response.totalPages,
                 )
-            }
+            },
         )
-    }
 
-    fun getDiscoverMoviesPaging(): PagingSource<DiscoverResult> {
-        return BasePagingSource(
+    fun getDiscoverMoviesPaging(): PagingSource<DiscoverResult> =
+        BasePagingSource(
             fetcher = { page ->
                 client.getDiscoverMovies(page = page)
             },
@@ -138,14 +137,13 @@ class SeerrInstanceRepository(
                 PageResult(
                     items = response.results,
                     totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages
+                    hasNextPage = response.page < response.totalPages,
                 )
-            }
+            },
         )
-    }
 
-    fun getDiscoverTvPaging(): PagingSource<DiscoverResult> {
-        return BasePagingSource(
+    fun getDiscoverTvPaging(): PagingSource<DiscoverResult> =
+        BasePagingSource(
             fetcher = { page ->
                 client.getDiscoverTv(page = page)
             },
@@ -153,14 +151,18 @@ class SeerrInstanceRepository(
                 PageResult(
                     items = response.results,
                     totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages
+                    hasNextPage = response.page < response.totalPages,
                 )
-            }
+            },
         )
-    }
 
     fun getUpcomingMoviesPaging(): PagingSource<DiscoverResult> {
-        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        val today =
+            Clock.System
+                .now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+                .toString()
         return BasePagingSource(
             fetcher = { page ->
                 client.getUpcomingMovies(page = page, today = today)
@@ -169,14 +171,19 @@ class SeerrInstanceRepository(
                 PageResult(
                     items = response.results,
                     totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages
+                    hasNextPage = response.page < response.totalPages,
                 )
-            }
+            },
         )
     }
 
     fun getUpcomingTvPaging(): PagingSource<DiscoverResult> {
-        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        val today =
+            Clock.System
+                .now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+                .toString()
         return BasePagingSource(
             fetcher = { page ->
                 client.getUpcomingTv(page = page, today = today)
@@ -185,14 +192,14 @@ class SeerrInstanceRepository(
                 PageResult(
                     items = response.results,
                     totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages
+                    hasNextPage = response.page < response.totalPages,
                 )
-            }
+            },
         )
     }
 
-    fun searchPaging(query: String): PagingSource<DiscoverResult> {
-        return BasePagingSource(
+    fun searchPaging(query: String): PagingSource<DiscoverResult> =
+        BasePagingSource(
             fetcher = { page ->
                 client.search(query = query, page = page)
             },
@@ -200,22 +207,17 @@ class SeerrInstanceRepository(
                 PageResult(
                     items = response.results,
                     totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages
+                    hasNextPage = response.page < response.totalPages,
                 )
-            }
+            },
         )
-    }
 
     suspend fun getRequests(
         page: Int = 1,
-        pageSize: Int = 10
-    ): NetworkResult<RequestResponse> {
-        return client.getRequests(page = page, pageSize = pageSize)
-    }
+        pageSize: Int = 10,
+    ): NetworkResult<RequestResponse> = client.getRequests(page = page, pageSize = pageSize)
 
-    suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> {
-        return client.createRequest(request)
-    }
+    suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> = client.createRequest(request)
 
     suspend fun setRequestStatus(
         requestId: Long,
@@ -223,16 +225,16 @@ class SeerrInstanceRepository(
         profileId: Long? = null,
         rootFolder: String? = null,
         languageProfileId: Long? = null,
-        seasons: List<Int>? = null
+        seasons: List<Int>? = null,
     ): NetworkResult<MediaRequest> {
         updateOperationsState(requestId, status, OperationStatus.InProgress)
-        return client.setRequestStatus(requestId, status, profileId, rootFolder, languageProfileId, seasons)
+        return client
+            .setRequestStatus(requestId, status, profileId, rootFolder, languageProfileId, seasons)
             .onSuccess {
                 updateOperationsState(requestId, status, OperationStatus.Success())
                 delay(500)
                 updateOperationsState(requestId, status, OperationStatus.Idle)
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 updateOperationsState(requestId, status, OperationStatus.Error(code, message, cause))
                 delay(2000)
                 updateOperationsState(requestId, status, OperationStatus.Idle)
@@ -241,52 +243,61 @@ class SeerrInstanceRepository(
 
     suspend fun deleteRequest(requestId: Long): NetworkResult<Unit> {
         updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.InProgress)
-        return client.deleteRequest(requestId)
+        return client
+            .deleteRequest(requestId)
             .onSuccess {
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Success())
                 delay(500)
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Idle)
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Error(code, message, cause))
                 delay(2000)
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Idle)
             }
     }
 
-    suspend fun deleteMediaFile(requestId: Long, mediaId: Long, is4k: Boolean): NetworkResult<Unit> {
+    suspend fun deleteMediaFile(
+        requestId: Long,
+        mediaId: Long,
+        is4k: Boolean,
+    ): NetworkResult<Unit> {
         updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.InProgress)
-        return client.deleteMediaFile(mediaId, is4k)
+        return client
+            .deleteMediaFile(mediaId, is4k)
             .onSuccess {
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Success())
                 delay(500)
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Idle)
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Error(code, message, cause))
                 delay(2000)
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Idle)
             }
     }
 
-    suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit> {
-        return client.deleteMediaFile(mediaId, is4k)
-    }
+    suspend fun deleteMediaFile(
+        mediaId: Long,
+        is4k: Boolean,
+    ): NetworkResult<Unit> = client.deleteMediaFile(mediaId, is4k)
 
-    suspend fun clearMediaData(mediaId: Long): NetworkResult<Unit> {
-        return client.clearMediaData(mediaId)
-    }
+    suspend fun clearMediaData(mediaId: Long): NetworkResult<Unit> = client.clearMediaData(mediaId)
 
-    suspend fun markMediaAsAvailable(mediaId: Long, is4k: Boolean = false): NetworkResult<Unit> {
-        return client.markMediaAsAvailable(mediaId, is4k)
-    }
+    suspend fun markMediaAsAvailable(
+        mediaId: Long,
+        is4k: Boolean = false,
+    ): NetworkResult<Unit> = client.markMediaAsAvailable(mediaId, is4k)
 
-    private fun updateOperationsState(requestId: Long, status: ApprovalStatus, state: OperationStatus) {
+    private fun updateOperationsState(
+        requestId: Long,
+        status: ApprovalStatus,
+        state: OperationStatus,
+    ) {
         _operationsState.update {
-            val currentStates = when (status) {
-                ApprovalStatus.Approve -> it.approvalStates
-                ApprovalStatus.Decline -> it.cancelStates
-            }.toMutableMap()
+            val currentStates =
+                when (status) {
+                    ApprovalStatus.Approve -> it.approvalStates
+                    ApprovalStatus.Decline -> it.cancelStates
+                }.toMutableMap()
             if (state == OperationStatus.Idle) {
                 currentStates.remove(requestId)
             } else {
@@ -294,67 +305,63 @@ class SeerrInstanceRepository(
             }
             it.copy(
                 approvalStates = if (status == ApprovalStatus.Approve) currentStates else it.approvalStates,
-                cancelStates = if (status == ApprovalStatus.Decline) currentStates else it.cancelStates
+                cancelStates = if (status == ApprovalStatus.Decline) currentStates else it.cancelStates,
             )
         }
     }
 
     fun observeMediaDetails(
         tmdbId: Long,
-        mediaType: RequestType
-    ): Flow<NetworkResult<RequestMediaDetails>> = flow {
-        emit(NetworkResult.Loading)
+        mediaType: RequestType,
+    ): Flow<NetworkResult<RequestMediaDetails>> =
+        flow {
+            emit(NetworkResult.Loading)
 
-        _mediaDetailsCache.value[tmdbId]?.let {
-            emit(NetworkResult.Success(it))
-        }
-
-        val result = when (mediaType) {
-            RequestType.Movie -> client.getMovieDetails(tmdbId)
-            RequestType.Tv -> client.getTvDetails(tmdbId)
-            RequestType.Person -> client.getPersonDetails(tmdbId)
-        }
-        when (result) {
-            is NetworkResult.Success<*> -> {
-                val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache[tmdbId] = (result as NetworkResult.Success<RequestMediaDetails>).data
-                _mediaDetailsCache.value = currentCache
+            _mediaDetailsCache.value[tmdbId]?.let {
+                emit(NetworkResult.Success(it))
             }
 
-            is NetworkResult.Error -> {
-                emit(result)
-                return@flow
+            val result =
+                when (mediaType) {
+                    RequestType.Movie -> client.getMovieDetails(tmdbId)
+                    RequestType.Tv -> client.getTvDetails(tmdbId)
+                    RequestType.Person -> client.getPersonDetails(tmdbId)
+                }
+            when (result) {
+                is NetworkResult.Success<*> -> {
+                    val currentCache = _mediaDetailsCache.value.toMutableMap()
+                    currentCache[tmdbId] = (result as NetworkResult.Success<RequestMediaDetails>).data
+                    _mediaDetailsCache.value = currentCache
+                }
+
+                is NetworkResult.Error -> {
+                    emit(result)
+                    return@flow
+                }
+
+                is NetworkResult.Loading -> {}
             }
 
-            is NetworkResult.Loading -> {}
+            _mediaDetailsCache
+                .map { cache ->
+                    cache[tmdbId]?.let { NetworkResult.Success(it) }
+                        ?: NetworkResult.Error(message = "Media not found in cache")
+                }.collect { emit(it) }
         }
 
-        _mediaDetailsCache
-            .map { cache ->
-                cache[tmdbId]?.let { NetworkResult.Success(it) }
-                    ?: NetworkResult.Error(message = "Media not found in cache")
-            }
-            .collect { emit(it) }
-    }
+    suspend fun getTvRatings(tmdbId: Long): NetworkResult<RottenTomatoesRating> = client.getTvRatings(tmdbId)
 
-    suspend fun getTvRatings(tmdbId: Long): NetworkResult<RottenTomatoesRating> {
-        return client.getTvRatings(tmdbId)
-    }
+    suspend fun getMovieRatings(tmdbId: Long): NetworkResult<CombinedRatings> = client.getMovieRatings(tmdbId)
 
-    suspend fun getMovieRatings(tmdbId: Long): NetworkResult<CombinedRatings> {
-        return client.getMovieRatings(tmdbId)
-    }
+    suspend fun getSeasonDetails(
+        tmdbId: Long,
+        seasonNumber: Int,
+    ): NetworkResult<Season> = client.getSeasonDetails(tmdbId, seasonNumber)
 
-    suspend fun getSeasonDetails(tmdbId: Long, seasonNumber: Int): NetworkResult<Season> {
-        return client.getSeasonDetails(tmdbId, seasonNumber)
-    }
+    suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> = client.submitIssue(issue)
 
-    suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> {
-        return client.submitIssue(issue)
-    }
-
-    fun getIssuesPaging(): PagingSource<MediaIssuePackage> {
-        return BasePagingSource(
+    fun getIssuesPaging(): PagingSource<MediaIssuePackage> =
+        BasePagingSource(
             fetcher = { page ->
                 client.getIssues(page = page)
             },
@@ -363,45 +370,29 @@ class SeerrInstanceRepository(
                 PageResult(
                     items = enrichedIssues,
                     totalItemCount = response.pageInfo.results,
-                    hasNextPage = response.pageInfo.page < response.pageInfo.pages
+                    hasNextPage = response.pageInfo.page < response.pageInfo.pages,
                 )
-            }
+            },
         )
-    }
 
-    suspend fun submitIssueComment(issueId: Long, comment: String): NetworkResult<Issue> {
-        return client.submitIssueComment(issueId, comment)
-    }
+    suspend fun submitIssueComment(
+        issueId: Long,
+        comment: String,
+    ): NetworkResult<Issue> = client.submitIssueComment(issueId, comment)
 
-    suspend fun getIssueDetails(issueId: Long): NetworkResult<Issue> {
-        return client.getIssueDetails(issueId)
-    }
+    suspend fun getIssueDetails(issueId: Long): NetworkResult<Issue> = client.getIssueDetails(issueId)
 
-    suspend fun getRadarrServices(): NetworkResult<List<Service>> {
-        return client.getRadarrServices().onSuccess { _radarrServices.value = it }
-    }
+    suspend fun getRadarrServices(): NetworkResult<List<Service>> = client.getRadarrServices().onSuccess { _radarrServices.value = it }
 
-    suspend fun getSonarrServices(): NetworkResult<List<Service>> {
-        return client.getSonarrServices().onSuccess { _sonarrServices.value = it }
-    }
+    suspend fun getSonarrServices(): NetworkResult<List<Service>> = client.getSonarrServices().onSuccess { _sonarrServices.value = it }
 
-    suspend fun getRadarrDetails(serverId: Long): NetworkResult<ServiceDetails> {
-        return client.getRadarrDetails(serverId)
-    }
+    suspend fun getRadarrDetails(serverId: Long): NetworkResult<ServiceDetails> = client.getRadarrDetails(serverId)
 
-    suspend fun getSonarrDetails(serverId: Long): NetworkResult<ServiceDetails> {
-        return client.getSonarrDetails(serverId)
-    }
+    suspend fun getSonarrDetails(serverId: Long): NetworkResult<ServiceDetails> = client.getSonarrDetails(serverId)
 
-    suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails> {
-        return client.getPersonDetails(personId)
-    }
+    suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails> = client.getPersonDetails(personId)
 
-    suspend fun getPersonCredits(personId: Long): NetworkResult<PersonCredits> {
-        return client.getPersonCredits(personId)
-    }
+    suspend fun getPersonCredits(personId: Long): NetworkResult<PersonCredits> = client.getPersonCredits(personId)
 
-    suspend fun closeIssue(issueId: Long): NetworkResult<Unit> {
-        return client.closeIssue(issueId)
-    }
+    suspend fun closeIssue(issueId: Long): NetworkResult<Unit> = client.closeIssue(issueId)
 }

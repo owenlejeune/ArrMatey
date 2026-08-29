@@ -8,8 +8,8 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun IconButtonDefaults.headerBarColors(
     containerColor: Color = MaterialTheme.colorScheme.background,
-    contentColor: Color = MaterialTheme.colorScheme.onBackground
+    contentColor: Color = MaterialTheme.colorScheme.onBackground,
 ) = iconButtonColors(
     containerColor = containerColor.copy(alpha = .8f),
-    contentColor = contentColor
+    contentColor = contentColor,
 )

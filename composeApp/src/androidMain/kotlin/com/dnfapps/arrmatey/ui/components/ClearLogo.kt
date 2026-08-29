@@ -14,20 +14,19 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 
 @Composable
-fun ClearLogo(
-    item: ArrMedia
-) {
+fun ClearLogo(item: ArrMedia) {
     item.getClearLogo()?.remoteUrl?.let { logo ->
         Box(
-            modifier = Modifier.wrapContentSize()
+            modifier = Modifier.wrapContentSize(),
         ) {
             AsyncImage(
                 model = rememberRemoteImageData(logo),
                 contentDescription = item.title,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .height(120.dp)
-                    .padding(horizontal = 6.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterStart)
+                        .height(120.dp)
+                        .padding(horizontal = 6.dp),
                 contentScale = ContentScale.Fit,
             )
         }

@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
@@ -40,10 +39,10 @@ fun InstanceOptionsMenu(
         IconButton(onClick = onClick) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = null
+                contentDescription = null,
             )
         }
-    }
+    },
 ) {
     var expanded by remember { mutableStateOf(false) }
     val groupInteractionSource = remember { MutableInteractionSource() }
@@ -53,11 +52,11 @@ fun InstanceOptionsMenu(
 
         DropdownMenuPopup(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 1),
-                interactionSource = groupInteractionSource
+                interactionSource = groupInteractionSource,
             ) {
                 DropdownMenuItem(
                     text = { Text(mokoString(MR.strings.view_web_gui)) },
@@ -66,13 +65,13 @@ fun InstanceOptionsMenu(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Language,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     },
                     onClick = {
                         expanded = false
                         onViewWebGui()
-                    }
+                    },
                 )
 
                 DropdownMenuItem(
@@ -82,13 +81,13 @@ fun InstanceOptionsMenu(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.RssFeed,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     },
                     onClick = {
                         expanded = false
                         onRunRssSync()
-                    }
+                    },
                 )
 
                 DropdownMenuItem(
@@ -98,13 +97,13 @@ fun InstanceOptionsMenu(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     },
                     onClick = {
                         expanded = false
                         onSearchAllMissing()
-                    }
+                    },
                 )
 
                 DropdownMenuItem(
@@ -114,13 +113,13 @@ fun InstanceOptionsMenu(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     },
                     onClick = {
                         expanded = false
                         onUpdateLibrary()
-                    }
+                    },
                 )
 
                 DropdownMenuItem(
@@ -130,13 +129,13 @@ fun InstanceOptionsMenu(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Backup,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     },
                     onClick = {
                         expanded = false
                         onBackupDatabase()
-                    }
+                    },
                 )
             }
         }

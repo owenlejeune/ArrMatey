@@ -13,5 +13,5 @@ data class Season(
     val posterPath: String? = null,
     val seasonNumber: Int,
     val episodes: List<Episode> = emptyList(),
-    val episodeCount: Int = episodes.size
+    val episodeCount: Int = episodes.size,
 )

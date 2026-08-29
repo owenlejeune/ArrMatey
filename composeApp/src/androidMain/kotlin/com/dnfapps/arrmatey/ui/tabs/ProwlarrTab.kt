@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +28,7 @@ import org.koin.compose.koinInject
 fun ProwlarrTab(
     wideRailIsVisible: Boolean,
     indexersViewModel: ProwlarrIndexersViewModel = koinInject(),
-    searchViewModel: ProwlarrSearchViewModel = koinInject()
+    searchViewModel: ProwlarrSearchViewModel = koinInject(),
 ) {
     val textFieldState = rememberTextFieldState()
 
@@ -56,22 +54,23 @@ fun ProwlarrTab(
                         sortBy = sortingState.sortBy,
                         onSortByChanged = { indexersViewModel.updateSortBy(it) },
                         sortOrder = sortingState.sortOrder,
-                        onSortOrderChanged = { indexersViewModel.updateSortOrder(it) }
+                        onSortOrderChanged = { indexersViewModel.updateSortOrder(it) },
                     )
-                }
+                },
             ) {
                 ProwlarrSearchContent(
-                    viewModel = searchViewModel
+                    viewModel = searchViewModel,
                 )
             }
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         ProwlarrIndexersContent(
             viewModel = indexersViewModel,
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         )
     }
 }

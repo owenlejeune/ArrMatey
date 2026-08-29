@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SubSourceSettings(
-    val apikey: String
+    val apikey: String,
 )

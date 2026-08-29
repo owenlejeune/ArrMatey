@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class AudiobookMetadataResponse(
     val source: String,
     val sourceUrl: String,
-    val metadata: AudiobookMetadata
+    val metadata: AudiobookMetadata,
 )

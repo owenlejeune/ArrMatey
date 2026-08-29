@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class MediaRequestPackage(
     val request: MediaRequest,
     val details: RequestMediaDetails?,
-    val serviceDetails: ServiceDetails?
+    val serviceDetails: ServiceDetails?,
 )

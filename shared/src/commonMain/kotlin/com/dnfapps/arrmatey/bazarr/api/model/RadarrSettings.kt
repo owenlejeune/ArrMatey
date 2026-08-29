@@ -19,5 +19,5 @@ data class RadarrSettings(
     val port: Int,
     val ssl: Boolean,
     val sync_only_monitored_movies: Boolean,
-    val use_ffprobe_cache: Boolean
+    val use_ffprobe_cache: Boolean,
 )

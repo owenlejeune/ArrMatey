@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProwlarrGrabPayload(
     val guid: String,
-    val indexerId: Int
+    val indexerId: Int,
 )

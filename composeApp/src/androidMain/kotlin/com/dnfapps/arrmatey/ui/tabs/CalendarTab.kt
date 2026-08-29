@@ -74,67 +74,72 @@ fun CalendarTab(
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-        entryProvider = entryProvider {
-            entry<CalendarScreen.Home> {
-                CalendarHomeScreen(
-                    viewModel = viewModel,
-                    wideRailIsVisible = wideRailIsVisible,
-                    isExpanded = isExpanded,
-                    onItemClick = { item, instanceId ->
-                        when (item) {
-                            is ArrMovie -> navigation.toDetails(
-                                id = item.id,
-                                tmdbId = item.tmdbId,
-                                type = item.associatedType,
-                                instanceId = instanceId
-                            )
-
-                            is EpisodeGroup -> navigation.toDetails(
-                                id = item.first.seriesId,
-                                type = item.associatedType,
-                                instanceId = instanceId
-                            )
-
-                            is Episode -> {
-                                item.series?.let { series ->
+        entryProvider =
+            entryProvider {
+                entry<CalendarScreen.Home> {
+                    CalendarHomeScreen(
+                        viewModel = viewModel,
+                        wideRailIsVisible = wideRailIsVisible,
+                        isExpanded = isExpanded,
+                        onItemClick = { item, instanceId ->
+                            when (item) {
+                                is ArrMovie ->
                                     navigation.toDetails(
-                                        id = series.id,
-                                        tmdbId = series.tmdbId,
+                                        id = item.id,
+                                        tmdbId = item.tmdbId,
                                         type = item.associatedType,
-                                        instanceId = instanceId
+                                        instanceId = instanceId,
                                     )
-                                    navigation.toEpisodeDetails(series, item)
-                                }
-                            }
 
-                            is ArrAlbum -> navigation.toDetails(
-                                id = item.id,
-                                type = item.associatedType,
-                                instanceId = instanceId
-                            )
-
-                            is Book -> {
-                                item.author?.let { author ->
+                                is EpisodeGroup ->
                                     navigation.toDetails(
-                                        id = author.id,
+                                        id = item.first.seriesId,
                                         type = item.associatedType,
-                                        instanceId = instanceId
+                                        instanceId = instanceId,
                                     )
-                                    navigation.toBookDetails(author, item)
-                                }
-                            }
 
-                            is Audiobook -> navigation.toDetails(
-                                id = item.id,
-                                type = item.associatedType,
-                                instanceId = instanceId
-                            )
-                        }
-                    }
-                )
-            }
-            mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
-        }
+                                is Episode -> {
+                                    item.series?.let { series ->
+                                        navigation.toDetails(
+                                            id = series.id,
+                                            tmdbId = series.tmdbId,
+                                            type = item.associatedType,
+                                            instanceId = instanceId,
+                                        )
+                                        navigation.toEpisodeDetails(series, item)
+                                    }
+                                }
+
+                                is ArrAlbum ->
+                                    navigation.toDetails(
+                                        id = item.id,
+                                        type = item.associatedType,
+                                        instanceId = instanceId,
+                                    )
+
+                                is Book -> {
+                                    item.author?.let { author ->
+                                        navigation.toDetails(
+                                            id = author.id,
+                                            type = item.associatedType,
+                                            instanceId = instanceId,
+                                        )
+                                        navigation.toBookDetails(author, item)
+                                    }
+                                }
+
+                                is Audiobook ->
+                                    navigation.toDetails(
+                                        id = item.id,
+                                        type = item.associatedType,
+                                        instanceId = instanceId,
+                                    )
+                            }
+                        },
+                    )
+                }
+                mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
+            },
     )
 }
 
@@ -144,7 +149,7 @@ private fun CalendarHomeScreen(
     viewModel: CalendarViewModel,
     wideRailIsVisible: Boolean,
     isExpanded: Boolean,
-    onItemClick: (CalendarItem, Long?) -> Unit
+    onItemClick: (CalendarItem, Long?) -> Unit,
 ) {
     val calendarState by viewModel.calendarState.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
@@ -165,11 +170,12 @@ private fun CalendarHomeScreen(
                             viewModel.toggleViewMode()
                         }) {
                             Icon(
-                                imageVector = when (calendarState.filterState.viewMode) {
-                                    CalendarViewMode.List -> Icons.Default.CalendarMonth
-                                    CalendarViewMode.Month -> Icons.Default.CalendarViewDay
-                                },
-                                contentDescription = null
+                                imageVector =
+                                    when (calendarState.filterState.viewMode) {
+                                        CalendarViewMode.List -> Icons.Default.CalendarMonth
+                                        CalendarViewMode.Month -> Icons.Default.CalendarViewDay
+                                    },
+                                contentDescription = null,
                             )
                         }
                     }
@@ -181,26 +187,27 @@ private fun CalendarHomeScreen(
                         onToggleFilterPremiersOnly = { viewModel.toggleShowPremiersOnly() },
                         onToggleFilterFinalesOnly = { viewModel.toggleShowFinalesOnly() },
                     )
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+            contentAlignment = Alignment.Center,
         ) {
             if (!calendarState.hasLoaded && calendarState.isLoading && calendarState.items.isEmpty()) {
                 LoadingIndicator(
-                    modifier = Modifier.size(96.dp)
+                    modifier = Modifier.size(96.dp),
                 )
             } else {
                 PullToRefreshBox(
                     modifier = Modifier.fillMaxSize(),
                     isRefreshing = calendarState.isLoading,
-                    onRefresh = { viewModel.load() }
+                    onRefresh = { viewModel.load() },
                 ) {
                     if (isExpanded) {
                         Row(modifier = Modifier.fillMaxSize()) {
@@ -209,7 +216,7 @@ private fun CalendarHomeScreen(
                                     state = calendarState,
                                     instances = instances,
                                     onItemClick = onItemClick,
-                                    onLoadMore = { viewModel.loadMore() }
+                                    onLoadMore = { viewModel.loadMore() },
                                 )
                             }
                             VerticalDivider(modifier = Modifier.padding(horizontal = 8.dp))
@@ -218,7 +225,7 @@ private fun CalendarHomeScreen(
                                     state = calendarState,
                                     instances = instances,
                                     onItemClick = onItemClick,
-                                    onLoadMore = { viewModel.loadMore() }
+                                    onLoadMore = { viewModel.loadMore() },
                                 )
                             }
                         }
@@ -229,7 +236,7 @@ private fun CalendarHomeScreen(
                                     state = calendarState,
                                     instances = instances,
                                     onItemClick = onItemClick,
-                                    onLoadMore = { viewModel.loadMore() }
+                                    onLoadMore = { viewModel.loadMore() },
                                 )
                             }
 
@@ -238,7 +245,7 @@ private fun CalendarHomeScreen(
                                     state = calendarState,
                                     instances = instances,
                                     onItemClick = onItemClick,
-                                    onLoadMore = { viewModel.loadMore() }
+                                    onLoadMore = { viewModel.loadMore() },
                                 )
                             }
                         }

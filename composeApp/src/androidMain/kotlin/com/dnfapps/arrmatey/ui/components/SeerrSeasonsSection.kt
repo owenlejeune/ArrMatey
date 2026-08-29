@@ -9,17 +9,18 @@ import com.dnfapps.arrmatey.seerr.api.model.Season
 @Composable
 fun SeerrSeasonsSection(
     seasons: List<Season>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val wrappedSeasons = seasons.map { season ->
-        SeasonWrapper(
-            seasonNumber = season.seasonNumber,
-            seerrSeason = season,
-            episodes = season.episodes.map { ep -> EpisodeWrapper(seerrEpisode = ep) }
-        )
-    }
+    val wrappedSeasons =
+        seasons.map { season ->
+            SeasonWrapper(
+                seasonNumber = season.seasonNumber,
+                seerrSeason = season,
+                episodes = season.episodes.map { ep -> EpisodeWrapper(seerrEpisode = ep) },
+            )
+        }
     SeasonsArea(
         seasons = wrappedSeasons,
-        modifier = modifier
+        modifier = modifier,
     )
 }

@@ -23,36 +23,37 @@ fun CircularCheckbox(
     checked: Boolean,
     modifier: Modifier = Modifier,
     activeColor: Color = MaterialTheme.colorScheme.primary,
-    inactiveColor: Color = MaterialTheme.colorScheme.outline
+    inactiveColor: Color = MaterialTheme.colorScheme.outline,
 ) {
     val checkboxColor by animateColorAsState(
         targetValue = if (checked) activeColor else Color.Transparent,
-        label = "CheckboxColor"
+        label = "CheckboxColor",
     )
 
     val borderColor by animateColorAsState(
         targetValue = if (checked) activeColor else inactiveColor,
-        label = "BorderColor"
+        label = "BorderColor",
     )
 
     Box(
-        modifier = modifier
-            .size(24.dp)
-            .clip(CircleShape)
-            .background(checkboxColor)
-            .border(
-                width = 2.dp,
-                color = borderColor,
-                shape = CircleShape
-            ),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(checkboxColor)
+                .border(
+                    width = 2.dp,
+                    color = borderColor,
+                    shape = CircleShape,
+                ),
+        contentAlignment = Alignment.Center,
     ) {
         if (checked) {
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp),
             )
         }
     }

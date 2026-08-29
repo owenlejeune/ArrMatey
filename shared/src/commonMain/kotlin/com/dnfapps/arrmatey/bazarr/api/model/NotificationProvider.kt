@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class NotificationProvider(
     val enabled: Boolean,
     val name: String,
-    val url: String?
+    val url: String?,
 )

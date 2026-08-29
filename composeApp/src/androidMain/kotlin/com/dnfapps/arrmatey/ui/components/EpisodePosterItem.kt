@@ -16,14 +16,15 @@ import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 fun EpisodePosterItem(episode: Episode) {
     val url = episode.getPoster()?.remoteUrl
     Box(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .height(100.dp)
+        modifier =
+            Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .height(100.dp),
     ) {
         AsyncImage(
             model = rememberRemoteImageData(url),
             contentDescription = null,
-            contentScale = ContentScale.FillHeight
+            contentScale = ContentScale.FillHeight,
         )
     }
 }

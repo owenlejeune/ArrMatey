@@ -4,17 +4,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -59,21 +59,24 @@ fun AddSeriesSheet(
     onDismiss: () -> Unit,
     instances: List<Instance> = emptyList(),
     selectedInstance: Instance? = null,
-    onInstanceSelected: (Instance) -> Unit = {}
+    onInstanceSelected: (Instance) -> Unit = {},
 ) {
     var monitor by remember(preferences.addSeriesMonitor, selectedInstance?.id) { mutableStateOf(preferences.addSeriesMonitor) }
     var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId, selectedInstance?.id) {
         mutableStateOf(
             qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
-                ?: qualityProfiles.firstOrNull()
+                ?: qualityProfiles.firstOrNull(),
         )
     }
     var seriesType by remember(preferences.addSeriesType, selectedInstance?.id) { mutableStateOf(preferences.addSeriesType) }
-    var seasonFolders by remember(preferences.addSeriesSeasonFolder, selectedInstance?.id) { mutableStateOf(preferences.addSeriesSeasonFolder) }
+    var seasonFolders by remember(
+        preferences.addSeriesSeasonFolder,
+        selectedInstance?.id,
+    ) { mutableStateOf(preferences.addSeriesSeasonFolder) }
     var rootFolder by remember(rootFolders, preferences.addRootFolderPath, selectedInstance?.id) {
         mutableStateOf(
             rootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
-                ?: rootFolders.firstOrNull()
+                ?: rootFolders.firstOrNull(),
         )
     }
     val selectedTags = remember(selectedInstance?.id) { mutableStateListOf<Int>() }
@@ -85,32 +88,34 @@ fun AddSeriesSheet(
                 onDismiss()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !addInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !addInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column {
                 Text(
                     text = mokoString(MR.strings.type_series).uppercase(),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = item.title ?: "",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             if (instances.size > 1 && selectedInstance != null) {
@@ -121,28 +126,29 @@ fun AddSeriesSheet(
                     onOptionSelected = onInstanceSelected,
                     getOptionLabel = { it.label },
                     label = { Text(mokoString(MR.strings.instances)) },
-                    enabled = !addInProgress
+                    enabled = !addInProgress,
                 )
             }
             DropdownPicker(
-                options = SeriesMonitorType.entries.filter {
-                    it != SeriesMonitorType.Unknown &&
+                options =
+                    SeriesMonitorType.entries.filter {
+                        it != SeriesMonitorType.Unknown &&
                             it != SeriesMonitorType.LatestSeason &&
                             it != SeriesMonitorType.Skip
-                },
+                    },
                 modifier = Modifier.fillMaxWidth(),
                 selectedOption = monitor,
                 onOptionSelected = { monitor = it },
                 getOptionLabel = { mokoString(it.resource) },
                 label = { Text(mokoString(MR.strings.monitor)) },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             LabelledSwitch(
                 label = mokoString(MR.strings.season_folders),
                 checked = seasonFolders,
                 onCheckedChange = { seasonFolders = it },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             DropdownPicker(
@@ -152,7 +158,7 @@ fun AddSeriesSheet(
                 onOptionSelected = { qualityProfile = it },
                 getOptionLabel = { it.name ?: "" },
                 label = { Text(mokoString(MR.strings.quality_profile)) },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             DropdownPicker(
@@ -162,7 +168,7 @@ fun AddSeriesSheet(
                 onOptionSelected = { seriesType = it },
                 getOptionLabel = { mokoString(it.resource) },
                 label = { Text(mokoString(MR.strings.series_type)) },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             if (tags.isNotEmpty()) {
@@ -182,7 +188,7 @@ fun AddSeriesSheet(
                             ?: mokoString(MR.strings.unknown)
                     },
                     label = { Text(mokoString(MR.strings.tags)) },
-                    enabled = !addInProgress
+                    enabled = !addInProgress,
                 )
             }
 
@@ -194,7 +200,7 @@ fun AddSeriesSheet(
                     onOptionSelected = { rootFolder = it },
                     label = { Text(mokoString(MR.strings.root_folder)) },
                     getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
-                    enabled = !addInProgress
+                    enabled = !addInProgress,
                 )
             }
 
@@ -202,7 +208,7 @@ fun AddSeriesSheet(
                 label = mokoString(MR.strings.search_on_add_label),
                 checked = searchOnAdd,
                 onCheckedChange = { searchOnAdd = it },
-                enabled = !addInProgress
+                enabled = !addInProgress,
             )
 
             Button(
@@ -217,31 +223,32 @@ fun AddSeriesSheet(
                                 addSeriesType = seriesType,
                                 addSeriesSeasonFolder = seasonFolders,
                                 addRootFolderPath = rf.path,
-                                addSearchOnAdd = searchOnAdd
+                                addSearchOnAdd = searchOnAdd,
+                            ),
+                        )
+                        val newItem =
+                            item.copyForCreation(
+                                monitor = monitor,
+                                qualityProfileId = qp.id,
+                                seriesType = seriesType,
+                                seasonFolder = seasonFolders,
+                                rootFolderPath = rf.path,
+                                tags = selectedTags,
                             )
-                        )
-                        val newItem = item.copyForCreation(
-                            monitor = monitor,
-                            qualityProfileId = qp.id,
-                            seriesType = seriesType,
-                            seasonFolder = seasonFolders,
-                            rootFolderPath = rf.path,
-                            tags = selectedTags
-                        )
                         onAddItem(newItem, searchOnAdd)
                     }
                 },
-                enabled = !addInProgress && qualityProfile != null && rootFolder != null
+                enabled = !addInProgress && qualityProfile != null && rootFolder != null,
             ) {
                 if (addInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(
-                        text = mokoString(MR.strings.save)
+                        text = mokoString(MR.strings.save),
                     )
                 }
             }

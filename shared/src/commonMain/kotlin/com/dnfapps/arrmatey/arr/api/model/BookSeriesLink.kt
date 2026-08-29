@@ -8,5 +8,5 @@ data class BookSeriesLink(
     val position: String? = null,
     val seriesPosition: Int? = null,
     val seriesId: Long? = null,
-    val bookId: Long? = null
+    val bookId: Long? = null,
 )

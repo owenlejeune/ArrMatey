@@ -8,5 +8,5 @@ data class FeatureUpdate(
     val version: String,
     val title: StringResource,
     val androidContentFile: FileResource,
-    val iosContentFile: FileResource = androidContentFile
+    val iosContentFile: FileResource = androidContentFile,
 )

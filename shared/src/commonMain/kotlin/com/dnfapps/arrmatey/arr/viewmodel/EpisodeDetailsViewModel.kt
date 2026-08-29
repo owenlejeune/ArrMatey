@@ -12,10 +12,10 @@ import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetEpisodeHistoryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,9 +35,8 @@ class EpisodeDetailsViewModel(
     private val getEpisodeHistoryUseCase: GetEpisodeHistoryUseCase,
     private val deleteEpisodeUseCase: DeleteEpisodeFileUseCase,
     getActivityTasksUseCase: GetActivityTasksUseCase,
-    private val deleteQueueItemUseCase: DeleteQueueItemUseCase
-): ViewModel() {
-
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
+) : ViewModel() {
     private val _episode = MutableStateFlow(episode)
     val episode: StateFlow<Episode> = _episode.asStateFlow()
 
@@ -50,21 +49,22 @@ class EpisodeDetailsViewModel(
     private val _deleteStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val deleteStatus: StateFlow<OperationStatus> = _deleteStatus.asStateFlow()
 
-    val queueItems: StateFlow<List<QueueItem>> = getActivityTasksUseCase()
-        .map { tasks ->
-            val targetInstanceId = episode.instanceId ?: currentRepository?.instance?.id
-            tasks.filterIsInstance<SonarrQueueItem>().filter { task ->
-                (targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId) && (
-                    task.calcEpisodeId == episode.id ||
-                    (task.calcSeriesId == seriesId && task.seasonNumber == episode.seasonNumber && task.calcEpisodeId == null)
-                )
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val queueItems: StateFlow<List<QueueItem>> =
+        getActivityTasksUseCase()
+            .map { tasks ->
+                val targetInstanceId = episode.instanceId ?: currentRepository?.instance?.id
+                tasks.filterIsInstance<SonarrQueueItem>().filter { task ->
+                    (targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId) &&
+                        (
+                            task.calcEpisodeId == episode.id ||
+                                (task.calcSeriesId == seriesId && task.seasonNumber == episode.seasonNumber && task.calcEpisodeId == null)
+                        )
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
     private val _removeQueueItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val removeQueueItemStatus: StateFlow<OperationStatus> = _removeQueueItemStatus.asStateFlow()
@@ -86,7 +86,8 @@ class EpisodeDetailsViewModel(
 
     private fun observeSelectedInstance() {
         viewModelScope.launch {
-            getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Sonarr)
+            getArrInstanceRepositoryUseCase
+                .observeSelected(InstanceType.Sonarr)
                 .filterNotNull()
                 .collectLatest { repository ->
                     currentRepository = repository
@@ -101,8 +102,7 @@ class EpisodeDetailsViewModel(
             repository.episodes
                 .map { episodesMap ->
                     episodesMap[seriesId]?.firstOrNull { it.id == episode.value.id }
-                }
-                .collect { episode ->
+                }.collect { episode ->
                     episode?.let { _episode.value = it }
                 }
         }
@@ -117,7 +117,7 @@ class EpisodeDetailsViewModel(
     fun toggleMonitor() {
         viewModelScope.launch {
             currentRepository?.let {
-               toggleMonitorUseCase.toggleEpisode(_episode.value, it)
+                toggleMonitorUseCase.toggleEpisode(_episode.value, it)
             }
         }
     }
@@ -129,7 +129,7 @@ class EpisodeDetailsViewModel(
                     mediaId = seriesId,
                     type = InstanceType.Sonarr,
                     repository = it,
-                    episodeId = _episode.value.id
+                    episodeId = _episode.value.id,
                 )
             }
         }
@@ -166,14 +166,14 @@ class EpisodeDetailsViewModel(
         queueItem: QueueItem,
         removeFromClient: Boolean,
         addToBlocklist: Boolean,
-        skipRedownload: Boolean
+        skipRedownload: Boolean,
     ) {
         viewModelScope.launch {
             deleteQueueItemUseCase(
                 queueItem = queueItem,
                 removeFromClient = removeFromClient,
                 addToBlocklist = addToBlocklist,
-                skipRedownload = skipRedownload
+                skipRedownload = skipRedownload,
             ).collect { status ->
                 _removeQueueItemStatus.value = status
             }

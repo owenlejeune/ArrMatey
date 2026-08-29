@@ -1,8 +1,5 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
-import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.safeGet
-import com.dnfapps.networking.safePost
 import com.dnfapps.arrmatey.compose.utils.toSeconds
 import com.dnfapps.arrmatey.downloadclient.api.model.SABnzbdHistoryResponse
 import com.dnfapps.arrmatey.downloadclient.api.model.SABnzbdQueueResponse
@@ -11,58 +8,63 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeGet
+import com.dnfapps.networking.safePost
 import io.ktor.client.HttpClient
 import io.ktor.client.request.parameter
 import kotlin.math.max
 
 class SABnzbdClient(
     private val downloadClient: DownloadClient,
-    private val httpClient: HttpClient
-): DownloadClientApi {
-
-    override suspend fun testConnection(): NetworkResult<Unit> {
-        return httpClient.safeGet<SABnzbdQueueResponse>("api") {
-            parameter("mode", "queue")
-            parameter("apikey", downloadClient.apiKey.value)
-            parameter("output", "json")
-        }.map { }
-    }
+    private val httpClient: HttpClient,
+) : DownloadClientApi {
+    override suspend fun testConnection(): NetworkResult<Unit> =
+        httpClient
+            .safeGet<SABnzbdQueueResponse>("api") {
+                parameter("mode", "queue")
+                parameter("apikey", downloadClient.apiKey.value)
+                parameter("output", "json")
+            }.map { }
 
     override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> {
-        val queueResult = httpClient.safeGet<SABnzbdQueueResponse>("api") {
-            parameter("mode", "queue")
-            parameter("apikey", downloadClient.apiKey.value)
-            parameter("output", "json")
-        }
+        val queueResult =
+            httpClient.safeGet<SABnzbdQueueResponse>("api") {
+                parameter("mode", "queue")
+                parameter("apikey", downloadClient.apiKey.value)
+                parameter("output", "json")
+            }
 
         return when (queueResult) {
             is NetworkResult.Success -> {
-                val queueItems = queueResult.data.queue.slots.map { slot ->
-                    val totalMb = slot.mb.toDoubleOrNull() ?: 0.0
-                    val leftMb = slot.mbLeft.toDoubleOrNull() ?: 0.0
-                    val totalBytes = (max(totalMb, 0.0) * 1024 * 1024).toLong()
-                    val progress = if (totalMb <= 0.0) {
-                        0.0
-                    } else {
-                        ((totalMb - leftMb) / totalMb).coerceIn(0.0, 1.0)
-                    }
+                val queueItems =
+                    queueResult.data.queue.slots.map { slot ->
+                        val totalMb = slot.mb.toDoubleOrNull() ?: 0.0
+                        val leftMb = slot.mbLeft.toDoubleOrNull() ?: 0.0
+                        val totalBytes = (max(totalMb, 0.0) * 1024 * 1024).toLong()
+                        val progress =
+                            if (totalMb <= 0.0) {
+                                0.0
+                            } else {
+                                ((totalMb - leftMb) / totalMb).coerceIn(0.0, 1.0)
+                            }
 
-                    DownloadItem(
-                        client = downloadClient,
-                        id = slot.nzoId,
-                        name = slot.filename,
-                        size = totalBytes,
-                        progress = progress,
-                        downloaded = (totalBytes.toDouble() * progress).toLong(),
-                        downloadSpeed = 0,
-                        uploadSpeed = 0,
-                        eta = slot.timeLeft.toSeconds(),
-                        etaString = slot.timeLeft,
-                        status = DownloadItemStatus.from(slot.status),
-                        category = slot.category,
-                        addedOn = slot.added
-                    )
-                }
+                        DownloadItem(
+                            client = downloadClient,
+                            id = slot.nzoId,
+                            name = slot.filename,
+                            size = totalBytes,
+                            progress = progress,
+                            downloaded = (totalBytes.toDouble() * progress).toLong(),
+                            downloadSpeed = 0,
+                            uploadSpeed = 0,
+                            eta = slot.timeLeft.toSeconds(),
+                            etaString = slot.timeLeft,
+                            status = DownloadItemStatus.from(slot.status),
+                            category = slot.category,
+                            addedOn = slot.added,
+                        )
+                    }
                 NetworkResult.Success(queueItems)
             }
             is NetworkResult.Error -> queueResult
@@ -73,12 +75,14 @@ class SABnzbdClient(
     override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> {
         var lastError: NetworkResult.Error? = null
         for (id in ids) {
-            val result = httpClient.safePost<SABnzbdStatusResponse>("api") {
-                parameter("mode", "pause")
-                parameter("value", id)
-                parameter("apikey", downloadClient.apiKey.value)
-                parameter("output", "json")
-            }.map { }
+            val result =
+                httpClient
+                    .safePost<SABnzbdStatusResponse>("api") {
+                        parameter("mode", "pause")
+                        parameter("value", id)
+                        parameter("apikey", downloadClient.apiKey.value)
+                        parameter("output", "json")
+                    }.map { }
             if (result is NetworkResult.Error) {
                 lastError = result
             }
@@ -89,12 +93,14 @@ class SABnzbdClient(
     override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> {
         var lastError: NetworkResult.Error? = null
         for (id in ids) {
-            val result = httpClient.safePost<SABnzbdStatusResponse>("api") {
-                parameter("mode", "resume")
-                parameter("value", id)
-                parameter("apikey", downloadClient.apiKey.value)
-                parameter("output", "json")
-            }.map { }
+            val result =
+                httpClient
+                    .safePost<SABnzbdStatusResponse>("api") {
+                        parameter("mode", "resume")
+                        parameter("value", id)
+                        parameter("apikey", downloadClient.apiKey.value)
+                        parameter("output", "json")
+                    }.map { }
             if (result is NetworkResult.Error) {
                 lastError = result
             }
@@ -102,17 +108,21 @@ class SABnzbdClient(
         return lastError ?: NetworkResult.Success(Unit)
     }
 
-    override suspend fun deleteDownload(ids: List<String>, deleteFiles: Boolean): NetworkResult<Unit> {
+    override suspend fun deleteDownload(
+        ids: List<String>,
+        deleteFiles: Boolean,
+    ): NetworkResult<Unit> {
         var lastError: NetworkResult.Error? = null
         for (id in ids) {
-            val result = httpClient.safePost<SABnzbdStatusResponse>("api") {
-                parameter("mode", "queue")
-                parameter("name", "delete")
-                parameter("value", id)
-                parameter("del_files", if (deleteFiles) "1" else "0")
-                parameter("apikey", downloadClient.apiKey.value)
-                parameter("output", "json")
-            }
+            val result =
+                httpClient.safePost<SABnzbdStatusResponse>("api") {
+                    parameter("mode", "queue")
+                    parameter("name", "delete")
+                    parameter("value", id)
+                    parameter("del_files", if (deleteFiles) "1" else "0")
+                    parameter("apikey", downloadClient.apiKey.value)
+                    parameter("output", "json")
+                }
             if (result is NetworkResult.Error) {
                 lastError = result
             }
@@ -121,21 +131,24 @@ class SABnzbdClient(
     }
 
     override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> {
-        val queueResult = httpClient.safeGet<SABnzbdQueueResponse>("api") {
-            parameter("mode", "queue")
-            parameter("apikey", downloadClient.apiKey.value)
-            parameter("output", "json")
-        }
+        val queueResult =
+            httpClient.safeGet<SABnzbdQueueResponse>("api") {
+                parameter("mode", "queue")
+                parameter("apikey", downloadClient.apiKey.value)
+                parameter("output", "json")
+            }
 
         return when (queueResult) {
             is NetworkResult.Success -> {
-                val speedKb = queueResult.data.queue.kbPerSec.toDoubleOrNull() ?: 0.0
+                val speedKb =
+                    queueResult.data.queue.kbPerSec
+                        .toDoubleOrNull() ?: 0.0
                 NetworkResult.Success(
                     DownloadTransferInfo(
                         client = downloadClient,
                         downloadSpeed = (speedKb * 1024).toLong(),
-                        uploadSpeed = 0
-                    )
+                        uploadSpeed = 0,
+                    ),
                 )
             }
             is NetworkResult.Error -> queueResult
@@ -143,12 +156,10 @@ class SABnzbdClient(
         }
     }
 
-    suspend fun getHistory(): NetworkResult<SABnzbdHistoryResponse> {
-        return httpClient.safeGet("api") {
+    suspend fun getHistory(): NetworkResult<SABnzbdHistoryResponse> =
+        httpClient.safeGet("api") {
             parameter("mode", "history")
             parameter("apikey", downloadClient.apiKey.value)
             parameter("output", "json")
         }
-    }
-
 }

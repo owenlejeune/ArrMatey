@@ -21,28 +21,81 @@ import kotlinx.datetime.LocalDate
 
 interface ArrClient {
     suspend fun testConnection(): NetworkResult<Unit>
+
     suspend fun getStatus(): NetworkResult<ArrSoftwareStatus>
+
     suspend fun getDiskSpace(): NetworkResult<List<ArrDiskSpace>>
+
     suspend fun getHealth(): NetworkResult<List<ArrHealth>>
+
     suspend fun getLibrary(): NetworkResult<List<ArrMedia>>
+
     suspend fun getDetail(id: Long): NetworkResult<ArrMedia>
+
     suspend fun update(item: ArrMedia): NetworkResult<ArrMedia>
-    suspend fun edit(item: ArrMedia, moveFiles: Boolean = false): NetworkResult<Unit>
-    suspend fun delete(id: Long, deleteFiles: Boolean, addImportExclusion: Boolean): NetworkResult<Unit>
-    suspend fun setMonitorStatus(id: Long, monitorStatus: Boolean): NetworkResult<List<MonitoredResponse>>
+
+    suspend fun edit(
+        item: ArrMedia,
+        moveFiles: Boolean = false,
+    ): NetworkResult<Unit>
+
+    suspend fun delete(
+        id: Long,
+        deleteFiles: Boolean,
+        addImportExclusion: Boolean,
+    ): NetworkResult<Unit>
+
+    suspend fun setMonitorStatus(
+        id: Long,
+        monitorStatus: Boolean,
+    ): NetworkResult<List<MonitoredResponse>>
+
     suspend fun lookup(params: LookupParams): NetworkResult<List<ArrMedia>>
+
     suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>>
+
     suspend fun getRootFolders(): NetworkResult<List<RootFolder>>
+
     suspend fun getTags(): NetworkResult<List<Tag>>
+
     suspend fun getCustomFilters(): NetworkResult<List<CustomFilter>>
+
     suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrMedia>
+
     suspend fun command(payload: CommandPayload): NetworkResult<Any>
+
     suspend fun performAutomaticSearch(id: Long): NetworkResult<Any>
+
     suspend fun getReleases(params: ReleaseParams): NetworkResult<List<ArrRelease>>
-    suspend fun fetchActivityTasks(page: Int, pageSize: Int): NetworkResult<QueuePage>
-    suspend fun deleteActivityTask(id: Int, removeFromClient: Boolean, blocklist: Boolean, skipRedownload: Boolean): NetworkResult<Unit>
-    suspend fun getItemHistory(id: Long, page: Int, pageSize: Int, altId: Long? = null): NetworkResult<List<HistoryItem>>
+
+    suspend fun fetchActivityTasks(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<QueuePage>
+
+    suspend fun deleteActivityTask(
+        id: Int,
+        removeFromClient: Boolean,
+        blocklist: Boolean,
+        skipRedownload: Boolean,
+    ): NetworkResult<Unit>
+
+    suspend fun getItemHistory(
+        id: Long,
+        page: Int,
+        pageSize: Int,
+        altId: Long? = null,
+    ): NetworkResult<List<HistoryItem>>
+
     suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any>
-    suspend fun getCalendar(start: LocalDate, end: LocalDate): NetworkResult<List<CalendarItem>>
-    suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit>
+
+    suspend fun getCalendar(
+        start: LocalDate,
+        end: LocalDate,
+    ): NetworkResult<List<CalendarItem>>
+
+    suspend fun updateMonitoring(
+        ids: List<Long>,
+        monitor: Any,
+    ): NetworkResult<Unit>
 }

@@ -14,5 +14,5 @@ data class SubsyncSettings(
     val subsync_threshold: Int,
     val use_subsync: Boolean,
     val use_subsync_movie_threshold: Boolean,
-    val use_subsync_threshold: Boolean
+    val use_subsync_threshold: Boolean,
 )

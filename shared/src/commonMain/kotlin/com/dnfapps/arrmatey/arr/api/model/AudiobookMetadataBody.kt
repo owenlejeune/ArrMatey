@@ -23,5 +23,5 @@ data class AudiobookMetadataBody(
     val seriesNumber: String,
     val source: String,
     val tags: List<String>,
-    val title: String
+    val title: String,
 )

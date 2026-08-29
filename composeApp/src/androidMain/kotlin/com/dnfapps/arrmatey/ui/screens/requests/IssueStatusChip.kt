@@ -12,20 +12,22 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun IssueStatusChip(issue: Issue) {
     val issueStatus = IssueStatus.fromValue(issue.status)
-    val (label, container, content) = when(issueStatus) {
-        IssueStatus.Open ->
-            Triple(issueStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
-        else ->
-            Triple(issueStatus.resource, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
-    }
+    val (label, container, content) =
+        when (issueStatus) {
+            IssueStatus.Open ->
+                Triple(issueStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+            else ->
+                Triple(issueStatus.resource, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+        }
 
     AssistChip(
         onClick = {},
         label = { Text(mokoString(label)) },
-        colors = AssistChipDefaults.assistChipColors(
-            containerColor = container,
-            labelColor = content
-        ),
-        border = null
+        colors =
+            AssistChipDefaults.assistChipColors(
+                containerColor = container,
+                labelColor = content,
+            ),
+        border = null,
     )
 }

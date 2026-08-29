@@ -2,14 +2,12 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.model.OperationStatus
-import com.dnfapps.networking.onError
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.compose.SeerrTab
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
@@ -22,6 +20,8 @@ import com.dnfapps.arrmatey.seerr.usecase.GetIssuesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class RequestsViewModel(
     getSeerrInstanceRepositoryUseCase: GetSeerrInstanceRepositoryUseCase,
@@ -42,9 +41,8 @@ class RequestsViewModel(
     private val getIssuesUseCase: GetIssuesUseCase,
     private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase,
     private val cancelRequestUseCase: CancelRequestUseCase,
-    private val removeSeerrMediaFileUseCase: RemoveSeerrMediaFileUseCase
-): ViewModel() {
-
+    private val removeSeerrMediaFileUseCase: RemoveSeerrMediaFileUseCase,
+) : ViewModel() {
     private var requestsPagingController: PagingController<MediaRequestPackage>? = null
     private var issuesPagingController: PagingController<MediaIssuePackage>? = null
 
@@ -63,28 +61,28 @@ class RequestsViewModel(
     private val _requestActionStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val requestActionStatus: StateFlow<OperationStatus> = _requestActionStatus.asStateFlow()
 
-    private val selectedRepository = getSeerrInstanceRepositoryUseCase
-        .observeSelected()
-        .filterNotNull()
-        .distinctUntilChanged { old, new ->
-            old.instance.id == new.instance.id
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+    private val selectedRepository =
+        getSeerrInstanceRepositoryUseCase
+            .observeSelected()
+            .filterNotNull()
+            .distinctUntilChanged { old, new ->
+                old.instance.id == new.instance.id
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null,
+            )
 
-    val userState: StateFlow<SeerrUser?> = selectedRepository
-        .filterNotNull()
-        .flatMapLatest { repository ->
-            getCurrentSeerrUserUseCase(repository)
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+    val userState: StateFlow<SeerrUser?> =
+        selectedRepository
+            .filterNotNull()
+            .flatMapLatest { repository ->
+                getCurrentSeerrUserUseCase(repository)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null,
+            )
 
     init {
         initializePagingController()
@@ -167,8 +165,7 @@ class RequestsViewModel(
                 .onSuccess {
                     _requestActionStatus.value = OperationStatus.Success("Request approved")
                     refresh()
-                }
-                .onError { code, message, cause ->
+                }.onError { code, message, cause ->
                     _requestActionStatus.value = OperationStatus.Error(code, message, cause)
                 }
         }
@@ -182,8 +179,7 @@ class RequestsViewModel(
                 .onSuccess {
                     _requestActionStatus.value = OperationStatus.Success("Request declined")
                     refresh()
-                }
-                .onError { code, message, cause ->
+                }.onError { code, message, cause ->
                     _requestActionStatus.value = OperationStatus.Error(code, message, cause)
                 }
         }
@@ -197,8 +193,7 @@ class RequestsViewModel(
                 .onSuccess {
                     _requestActionStatus.value = OperationStatus.Success("Request cancelled")
                     refresh()
-                }
-                .onError { code, message, cause ->
+                }.onError { code, message, cause ->
                     _requestActionStatus.value = OperationStatus.Error(code, message, cause)
                 }
         }
@@ -212,20 +207,17 @@ class RequestsViewModel(
                 request.id,
                 request.media.id,
                 request.is4k,
-                repository
-            )
-                .onSuccess {
-                    _requestActionStatus.value = OperationStatus.Success("Media removed")
-                    refresh()
-                }
-                .onError { code, message, cause ->
-                    _requestActionStatus.value = OperationStatus.Error(code, message, cause)
-                }
+                repository,
+            ).onSuccess {
+                _requestActionStatus.value = OperationStatus.Success("Media removed")
+                refresh()
+            }.onError { code, message, cause ->
+                _requestActionStatus.value = OperationStatus.Error(code, message, cause)
+            }
         }
     }
 
     fun setSelectedTab(tab: SeerrTab) {
         _selectedTab.value = tab
     }
-
 }

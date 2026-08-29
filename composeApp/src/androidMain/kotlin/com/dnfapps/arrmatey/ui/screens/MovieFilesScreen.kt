@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ExtraFileCard
 import com.dnfapps.arrmatey.ui.components.FileCard
@@ -43,7 +44,6 @@ import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.model.OperationStatus
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
@@ -51,7 +51,7 @@ import kotlin.time.ExperimentalTime
 fun MovieFilesScreen(
     movie: ArrMovie,
     onBack: () -> Unit = {},
-    viewModel: MovieFilesViewModel = koinInjectParams(movie.id ?: 0L)
+    viewModel: MovieFilesViewModel = koinInjectParams(movie.id ?: 0L),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
@@ -66,34 +66,35 @@ fun MovieFilesScreen(
                 title = {},
                 navigationIcon = {
                     IconButton(
-                        onClick = onBack
+                        onClick = onBack,
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
-                }
+                },
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refreshHistory() },
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 if (queueItems.isNotEmpty()) {
                     item {
                         MediaActivitySection(
                             queueItems = queueItems,
-                            onQueueItemClicked = { selectedQueueItem = it }
+                            onQueueItemClicked = { selectedQueueItem = it },
                         )
                     }
                 }
@@ -101,7 +102,7 @@ fun MovieFilesScreen(
                     Text(
                         text = mokoString(MR.strings.files),
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
                 item {
@@ -116,11 +117,12 @@ fun MovieFilesScreen(
                     item {
                         Text(
                             text = mokoString(MR.strings.no_files),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
@@ -128,7 +130,7 @@ fun MovieFilesScreen(
                     Text(
                         text = mokoString(MR.strings.history),
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
                 items(uiState.history) { historyItem ->
@@ -149,7 +151,7 @@ fun MovieFilesScreen(
             QueueItemInfoSheet(
                 item = item,
                 onDismiss = { selectedQueueItem = null },
-                onRemove = { showConfirmRemoveQueueItem = true }
+                onRemove = { showConfirmRemoveQueueItem = true },
             )
         }
 
@@ -162,11 +164,11 @@ fun MovieFilesScreen(
                         queueItem = selectedQueueItem!!,
                         removeFromClient = clientRemove,
                         addToBlocklist = blocklist,
-                        skipRedownload = skipRedownload
+                        skipRedownload = skipRedownload,
                     )
                     showConfirmRemoveQueueItem = false
                     selectedQueueItem = null
-                }
+                },
             )
         }
     }

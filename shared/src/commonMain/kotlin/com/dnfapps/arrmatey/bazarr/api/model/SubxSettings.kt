@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SubxSettings(
-    val api_key: String
+    val api_key: String,
 )

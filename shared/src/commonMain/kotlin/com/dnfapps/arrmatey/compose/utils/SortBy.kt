@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class SortBy(
     val iosIcon: String,
-    val resource: StringResource
+    val resource: StringResource,
 ) {
     Title("textformat", MR.strings.title),
     Year("calendar", MR.strings.year),
@@ -41,10 +41,10 @@ enum class SortBy(
     Privacy("hand.raised", MR.strings.privacy),
 
     // Readarr
-    TitleLastFirst("textformat", MR.strings.title_last_first);
+    TitleLastFirst("textformat", MR.strings.title_last_first),
+    ;
 
     companion object {
-
         private val sonarrOps by lazy {
             listOf(Title, Year, Added, Rating, FileSize, NextAiring, PreviousAiring)
         }
@@ -81,8 +81,8 @@ enum class SortBy(
 @Serializable
 enum class SortOrder(
     val iosIcon: String,
-    val resource: StringResource
+    val resource: StringResource,
 ) {
     Asc("arrow.up", MR.strings.sort_ascending),
-    Desc("arrow.down", MR.strings.sort_descending)
+    Desc("arrow.down", MR.strings.sort_descending),
 }

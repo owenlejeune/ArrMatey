@@ -27,7 +27,7 @@ fun SeerrTab(
     wideRailIsVisible: Boolean,
     viewModel: RequestsViewModel = koinInject(),
     navigationManager: NavigationManager = koinInject(),
-    navigation: Navigator<NavKey> = navigationManager.requests
+    navigation: Navigator<NavKey> = navigationManager.requests,
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     NavDisplay(
@@ -36,18 +36,19 @@ fun SeerrTab(
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-        entryProvider = entryProvider {
-            entry<SeerrScreen.Home> {
-                RequestsScreen(
-                    viewModel = viewModel,
-                    isExpanded = isExpanded,
-                    wideRailIsVisible = wideRailIsVisible,
-                    onNavigateToDetails = { tmdbId, type ->
-                        navigation.toDetails(tmdbId = tmdbId, requestType = type)
-                    }
-                )
-            }
-            mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
-        }
+        entryProvider =
+            entryProvider {
+                entry<SeerrScreen.Home> {
+                    RequestsScreen(
+                        viewModel = viewModel,
+                        isExpanded = isExpanded,
+                        wideRailIsVisible = wideRailIsVisible,
+                        onNavigateToDetails = { tmdbId, type ->
+                            navigation.toDetails(tmdbId = tmdbId, requestType = type)
+                        },
+                    )
+                }
+                mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
+            },
     )
 }

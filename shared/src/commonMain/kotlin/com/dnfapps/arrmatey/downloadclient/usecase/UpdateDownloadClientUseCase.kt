@@ -6,14 +6,12 @@ import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientMutationState
 
 class UpdateDownloadClientUseCase(
-    private val downloadClientRepository: DownloadClientRepository
+    private val downloadClientRepository: DownloadClientRepository,
 ) {
-
-    suspend operator fun invoke(downloadClient: DownloadClient): DownloadClientMutationState {
-        return when (val result = downloadClientRepository.updateDownloadClient(downloadClient)) {
+    suspend operator fun invoke(downloadClient: DownloadClient): DownloadClientMutationState =
+        when (val result = downloadClientRepository.updateDownloadClient(downloadClient)) {
             is DownloadClientInsertResult.Success -> DownloadClientMutationState.Success(result.id)
             is DownloadClientInsertResult.Conflict -> DownloadClientMutationState.Conflict(result.fields)
             is DownloadClientInsertResult.Error -> DownloadClientMutationState.Error(result.message)
         }
-    }
 }

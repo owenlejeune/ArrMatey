@@ -21,7 +21,7 @@ fun LabelledCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    sublabel: String? = null
+    sublabel: String? = null,
 ) {
     Row(
         modifier
@@ -29,32 +29,33 @@ fun LabelledCheckbox(
             .selectable(
                 selected = checked,
                 onClick = { onCheckedChange(!checked) },
-                role = Role.Checkbox
+                role = Role.Checkbox,
             ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(
             checked = checked,
-            onCheckedChange = null
+            onCheckedChange = null,
         )
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 12.dp)
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp),
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             sublabel?.let {
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

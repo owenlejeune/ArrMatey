@@ -26,9 +26,8 @@ class EditInstanceViewModel(
     private val updateInstanceUseCase: UpdateInstanceUseCase,
     private val getInstanceByIdUseCase: GetInstanceByIdUseCase,
     private val deleteInstanceUseCase: DeleteInstanceUseCase,
-    private val notificationManager: NotificationManager
-): ViewModel() {
-
+    private val notificationManager: NotificationManager,
+) : ViewModel() {
     private val _uiState = MutableStateFlow(AddInstanceUiState())
     val uiState: StateFlow<AddInstanceUiState> = _uiState.asStateFlow()
 
@@ -55,7 +54,7 @@ class EditInstanceViewModel(
                         localNetworkEnabled = instance.localNetworkEnabled,
                         localNetworkUrl = instance.localNetworkEndpoint ?: "",
                         localNetworkSsids = instance.localNetworkSsids,
-                        notificationsEnabled = instance.notificationsEnabled
+                        notificationsEnabled = instance.notificationsEnabled,
                     )
                 }
             }
@@ -64,31 +63,34 @@ class EditInstanceViewModel(
 
     fun setApiEndpoint(endpoint: String) {
         _uiState.update {
-            it.copy(
-                apiEndpoint = endpoint,
-                testResult = null
-            ).validate()
+            it
+                .copy(
+                    apiEndpoint = endpoint,
+                    testResult = null,
+                ).validate()
         }
     }
 
     fun setApiKey(value: String) {
         _uiState.update {
-            it.copy(
-                apiKey = if (it.noApiKeyRequired) "" else value,
-                testing = false,
-                testResult = null
-            ).validate()
+            it
+                .copy(
+                    apiKey = if (it.noApiKeyRequired) "" else value,
+                    testing = false,
+                    testResult = null,
+                ).validate()
         }
     }
 
     fun setNoApiKeyRequired(enabled: Boolean) {
         _uiState.update {
-            it.copy(
-                noApiKeyRequired = enabled,
-                apiKey = if (enabled) "" else it.apiKey,
-                testing = false,
-                testResult = null
-            ).validate()
+            it
+                .copy(
+                    noApiKeyRequired = enabled,
+                    apiKey = if (enabled) "" else it.apiKey,
+                    testing = false,
+                    testResult = null,
+                ).validate()
         }
     }
 
@@ -97,7 +99,7 @@ class EditInstanceViewModel(
     }
 
     fun setCustomTimeout(value: Long?) {
-        _uiState.update { it.copy(customTimeout = value?.takeIf { v -> v > 0L } ).validate() }
+        _uiState.update { it.copy(customTimeout = value?.takeIf { v -> v > 0L }).validate() }
     }
 
     fun setInstanceLabel(value: String) {
@@ -147,19 +149,21 @@ class EditInstanceViewModel(
 
             _uiState.update { it.copy(testing = true, endpointError = false) }
 
-            val success = testNewInstanceConnectionUseCase(
-                state.apiEndpoint,
-                state.apiKey,
-                type,
-                state.headers,
-                state.noApiKeyRequired
-            )
+            val success =
+                testNewInstanceConnectionUseCase(
+                    state.apiEndpoint,
+                    state.apiKey,
+                    type,
+                    state.headers,
+                    state.noApiKeyRequired,
+                )
 
             _uiState.update {
-                it.copy(
-                    testing = false,
-                    testResult = success
-                ).validate()
+                it
+                    .copy(
+                        testing = false,
+                        testResult = success,
+                    ).validate()
             }
         }
     }
@@ -177,18 +181,19 @@ class EditInstanceViewModel(
 
             _uiState.update { it.copy(localTesting = true, localNetworkUrlError = false) }
 
-            val success = testNewInstanceConnectionUseCase(
-                state.localNetworkUrl,
-                state.apiKey,
-                type,
-                state.headers,
-                state.noApiKeyRequired
-            )
+            val success =
+                testNewInstanceConnectionUseCase(
+                    state.localNetworkUrl,
+                    state.apiKey,
+                    type,
+                    state.headers,
+                    state.noApiKeyRequired,
+                )
 
             _uiState.update {
                 it.copy(
                     localTesting = false,
-                    localTestResult = success
+                    localTestResult = success,
                 )
             }
         }
@@ -196,26 +201,30 @@ class EditInstanceViewModel(
 
     fun updateInstance() {
         val s = _uiState.value
-        val originalInstance = instance.value ?: run {
-            _uiState.update { it.copy(
-                editResult = InsertResult.Error("Instance doesn't exist")
-            ) }
-            return
-        }
+        val originalInstance =
+            instance.value ?: run {
+                _uiState.update {
+                    it.copy(
+                        editResult = InsertResult.Error("Instance doesn't exist"),
+                    )
+                }
+                return
+            }
 
-        val updated = originalInstance.copy(
-            label = s.instanceLabel,
-            url = s.apiEndpoint,
-            apiKey = EncryptedString(s.apiKey),
-            noApiKeyRequired = s.noApiKeyRequired,
-            slowInstance = s.isSlowInstance,
-            customTimeout = if (s.isSlowInstance) s.customTimeout else null,
-            headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
-            localNetworkEnabled = s.localNetworkEnabled,
-            localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
-            localNetworkSsids = s.localNetworkSsids.filter { it.isNotBlank() },
-            notificationsEnabled = s.notificationsEnabled
-        )
+        val updated =
+            originalInstance.copy(
+                label = s.instanceLabel,
+                url = s.apiEndpoint,
+                apiKey = EncryptedString(s.apiKey),
+                noApiKeyRequired = s.noApiKeyRequired,
+                slowInstance = s.isSlowInstance,
+                customTimeout = if (s.isSlowInstance) s.customTimeout else null,
+                headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
+                localNetworkEnabled = s.localNetworkEnabled,
+                localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
+                localNetworkSsids = s.localNetworkSsids.filter { it.isNotBlank() },
+                notificationsEnabled = s.notificationsEnabled,
+            )
 
         viewModelScope.launch {
             if (originalInstance.notificationsEnabled && !updated.notificationsEnabled) {
@@ -238,7 +247,8 @@ class EditInstanceViewModel(
     }
 
     private fun AddInstanceUiState.validate(): AddInstanceUiState {
-        val isValid = testResult == true &&
+        val isValid =
+            testResult == true &&
                 apiEndpoint.isNotEmpty() &&
                 (noApiKeyRequired || apiKey.isNotEmpty()) &&
                 instanceLabel.isNotEmpty() &&

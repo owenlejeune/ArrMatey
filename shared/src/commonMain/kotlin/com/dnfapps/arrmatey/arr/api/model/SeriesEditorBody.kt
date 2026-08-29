@@ -13,5 +13,5 @@ data class SeriesEditorBody(
     val rootFolderPath: String?,
     val tags: List<Int>,
     val applyTags: ApplyTags,
-    val moveFiles: Boolean
+    val moveFiles: Boolean,
 )

@@ -28,20 +28,18 @@ data class Book(
     @Contextual val added: Instant? = null,
     @Contextual val lastSearchTime: Instant? = null,
     val grabbed: Boolean = false,
-
     val author: Author? = null,
     override val instanceId: Long? = null,
-    override val instanceIds: List<Long> = listOfNotNull(instanceId)
-): CalendarItem, InstanceTypeIdentifiable {
-
+    override val instanceIds: List<Long> = listOfNotNull(instanceId),
+) : CalendarItem,
+    InstanceTypeIdentifiable {
     override val instanceType: InstanceType
         get() = InstanceType.Booksehelf
 
     override val calendarId: Long
         get() = id
 
-    override fun getCalendarDates(): List<Instant> =
-        listOfNotNull(releaseDate)
+    override fun getCalendarDates(): List<Instant> = listOfNotNull(releaseDate)
 
     override val notificationScheduledTime: Instant?
         get() = releaseDate
@@ -50,18 +48,15 @@ data class Book(
         get() = "${authorTitle ?: "Unknown Author"} - $title"
 
     companion object {
-        fun fromJson(value: String): Book {
-            return ArrMedia.json.decodeFromString(value)
+        fun fromJson(value: String): Book = ArrMedia.json.decodeFromString(value)
+    }
+
+    fun toJson(): String = ArrMedia.json.encodeToString(this)
+
+    fun getCover() =
+        images.firstOrNull {
+            it.coverType == CoverType.Cover
         }
-    }
-
-    fun toJson(): String {
-        return ArrMedia.json.encodeToString(this)
-    }
-
-    fun getCover() = images.firstOrNull {
-        it.coverType == CoverType.Cover
-    }
 
     val isDownloaded: Boolean
         get() = statistics?.percentOfBooks?.equals(100f) ?: false

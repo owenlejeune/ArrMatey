@@ -31,7 +31,7 @@ fun LabelledSwitch(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     sublabel: String? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     Row(
         modifier
@@ -40,21 +40,22 @@ fun LabelledSwitch(
                 selected = checked,
                 enabled = enabled,
                 onClick = { onCheckedChange(!checked) },
-                role = Role.Switch
+                role = Role.Switch,
             ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 12.dp)
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(end = 12.dp),
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.titleMediumEmphasized,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
             )
             sublabel?.let {
                 Text(
@@ -62,7 +63,14 @@ fun LabelledSwitch(
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    color = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                    color =
+                        if (enabled) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                alpha = 0.38f,
+                            )
+                        },
                 )
             }
         }
@@ -70,7 +78,7 @@ fun LabelledSwitch(
         Switch(
             checked = checked,
             onCheckedChange = null,
-            enabled = enabled
+            enabled = enabled,
         )
     }
 }
@@ -83,45 +91,48 @@ fun LargeLabelledSwitch(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     sublabel: String? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     Card(
         shape = MaterialTheme.shapes.extraLarge,
-        modifier = modifier
-            .fillMaxWidth()
-            .selectable(
-                selected = checked,
-                enabled = enabled,
-                onClick = { onCheckedChange(!checked) },
-                role = Role.Switch
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .selectable(
+                    selected = checked,
+                    enabled = enabled,
+                    onClick = { onCheckedChange(!checked) },
+                    role = Role.Switch,
+                ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = if (enabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
             ),
-        colors = CardDefaults.cardColors(
-            containerColor = if (enabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 12.dp)
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .padding(end = 12.dp),
             ) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleMediumEmphasized,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 sublabel?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
@@ -135,10 +146,10 @@ fun LargeLabelledSwitch(
                         Icon(
                             Icons.Default.Check,
                             null,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(14.dp),
                         )
                     }
-                }
+                },
             )
         }
     }

@@ -5,8 +5,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import kotlinx.coroutines.flow.Flow
 
 class ObserveAllInstancesUseCase(
-    private val instanceRepository: InstanceRepository
+    private val instanceRepository: InstanceRepository,
 ) {
-    operator fun invoke(): Flow<List<Instance>> =
-        instanceRepository.observeAllInstances()
+    operator fun invoke(): Flow<List<Instance>> = instanceRepository.observeAllInstances()
 }

@@ -31,47 +31,56 @@ sealed interface SearchResult {
     data class ArrMediaResult(
         val media: ArrMedia,
         val instanceId: Long? = null,
-        override var originalRank: Int = 0
+        override var originalRank: Int = 0,
     ) : SearchResult {
         override val id: String = "arr_${media.guid}"
         override val title: String = media.title.orEmpty()
         override val cleanTitle: String = media.cleanTitle ?: media.title.orEmpty()
         override val year: Int? = media.year
-        override val voteCount: Int = when (val ratings = media.ratings) {
-            is MovieRatings -> ratings.tmdb?.votes ?: ratings.imdb?.votes ?: 0
-            is SeriesRatings -> ratings.votes
-            is LidarrRatings -> ratings.votes
-            else -> 0
-        }
+        override val voteCount: Int =
+            when (val ratings = media.ratings) {
+                is MovieRatings -> ratings.tmdb?.votes ?: ratings.imdb?.votes ?: 0
+                is SeriesRatings -> ratings.votes
+                is LidarrRatings -> ratings.votes
+                else -> 0
+            }
         override val voteAverage: Double = media.ratingScore()
-        override val popularity: Double = when (media) {
-            is ArrMovie -> media.popularity
-            else -> 0.0
-        }
-        val aspectRatio: AspectRatio = when(media) {
-            is SearchAudiobook, Audiobook, Author, Arrtist -> AspectRatio.Cover
-            else -> AspectRatio.Poster
-        }
-        val instanceType: InstanceType = when(media) {
-            is ArrSeries,
-            is MockMedia.Sonarr,
-            is MockMedia.Default -> InstanceType.Sonarr
-            is ArrMovie,
-            is MockMedia.Radarr -> InstanceType.Radarr
-            is Arrtist,
-            is MockMedia.Lidarr -> InstanceType.Lidarr
-            is Author,
-            is MockMedia.Readarr -> InstanceType.Booksehelf
-            is Audiobook,
-            is SearchAudiobook,
-            is MockMedia.Listenarr -> InstanceType.Listenarr
-        }
+        override val popularity: Double =
+            when (media) {
+                is ArrMovie -> media.popularity
+                else -> 0.0
+            }
+        val aspectRatio: AspectRatio =
+            when (media) {
+                is SearchAudiobook, Audiobook, Author, Arrtist -> AspectRatio.Cover
+                else -> AspectRatio.Poster
+            }
+        val instanceType: InstanceType =
+            when (media) {
+                is ArrSeries,
+                is MockMedia.Sonarr,
+                is MockMedia.Default,
+                -> InstanceType.Sonarr
+                is ArrMovie,
+                is MockMedia.Radarr,
+                -> InstanceType.Radarr
+                is Arrtist,
+                is MockMedia.Lidarr,
+                -> InstanceType.Lidarr
+                is Author,
+                is MockMedia.Readarr,
+                -> InstanceType.Booksehelf
+                is Audiobook,
+                is SearchAudiobook,
+                is MockMedia.Listenarr,
+                -> InstanceType.Listenarr
+            }
     }
 
     @Serializable
     data class SeerrMediaResult(
         val result: DiscoverResult,
-        override var originalRank: Int = 0
+        override var originalRank: Int = 0,
     ) : SearchResult {
         override val id: String = "seerr_media_${result.id}"
         override val title: String = result.title ?: result.name.orEmpty()
@@ -85,7 +94,7 @@ sealed interface SearchResult {
     @Serializable
     data class SeerrPersonResult(
         val result: DiscoverResult,
-        override var originalRank: Int = 0
+        override var originalRank: Int = 0,
     ) : SearchResult {
         override val id: String = "seerr_person_${result.id}"
         override val title: String = result.name.orEmpty()

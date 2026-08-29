@@ -57,16 +57,19 @@ fun MediaDetailsActions(
     onDeclineRequestClicked: (Long) -> Unit,
     onRequestClicked: () -> Unit,
     onRequest4kClicked: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (
-        buttonState.showWatchButton || buttonState.showWatchTrailerOption ||
-        buttonState.showViewRequestButton || buttonState.showRequestMoreButton ||
-        buttonState.showRequestButton || buttonState.showRequest4kButton
+        buttonState.showWatchButton ||
+        buttonState.showWatchTrailerOption ||
+        buttonState.showViewRequestButton ||
+        buttonState.showRequestMoreButton ||
+        buttonState.showRequestButton ||
+        buttonState.showRequest4kButton
     ) {
         Row(
             modifier = modifier,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
                 WatchButton(buttonState, onWatchClicked, onWatchTrailerClicked)
@@ -76,13 +79,13 @@ fun MediaDetailsActions(
                     buttonState,
                     onViewRequestClicked,
                     onApproveRequestClicked,
-                    onDeclineRequestClicked
+                    onDeclineRequestClicked,
                 )
             }
             if (buttonState.showRequestMoreButton) {
                 RequestButton(
                     label = mokoString(MR.strings.request_more),
-                    onClick = onRequestClicked
+                    onClick = onRequestClicked,
                 )
             }
             if (buttonState.showRequestButton && buttonState.showRequest4kButton) {
@@ -92,9 +95,10 @@ fun MediaDetailsActions(
                     leadingButton = {
                         SplitButtonDefaults.LeadingButton(
                             onClick = onRequestClicked,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                ),
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Add, null)
@@ -107,18 +111,19 @@ fun MediaDetailsActions(
                         Box {
                             SplitButtonDefaults.TrailingButton(
                                 onClick = { showRequestMenu = true },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
-                                )
+                                colors =
+                                    ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                    ),
                             ) {
                                 Icon(Icons.Default.ArrowDropDown, null)
                             }
                             DropdownMenuPopup(
                                 expanded = showRequestMenu,
-                                onDismissRequest = { showRequestMenu = false }
+                                onDismissRequest = { showRequestMenu = false },
                             ) {
                                 DropdownMenuGroup(
-                                    shapes = MenuDefaults.groupShape(0, 1)
+                                    shapes = MenuDefaults.groupShape(0, 1),
                                 ) {
                                     DropdownMenuItem(
                                         selected = false,
@@ -130,31 +135,30 @@ fun MediaDetailsActions(
                                         leadingIcon = {
                                             Icon(
                                                 imageVector = Icons.Default.HighQuality,
-                                                contentDescription = null
+                                                contentDescription = null,
                                             )
                                         },
-                                        shapes = MenuDefaults.itemShape(0, 1)
+                                        shapes = MenuDefaults.itemShape(0, 1),
                                     )
                                 }
                             }
                         }
-                    }
+                    },
                 )
             } else if (buttonState.showRequestButton) {
                 RequestButton(
                     label = mokoString(MR.strings.request),
-                    onClick = onRequestClicked
+                    onClick = onRequestClicked,
                 )
             } else if (buttonState.showRequest4kButton) {
                 RequestButton(
                     label = mokoString(MR.strings.request_in_4k),
-                    onClick = onRequest4kClicked
+                    onClick = onRequest4kClicked,
                 )
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -162,13 +166,14 @@ private fun WatchButton(
     buttonState: MediaButtonState,
     onWatchClicked: (String, MediaProvider) -> Unit,
     onWatchTrailerClicked: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val (serviceButtonColor, serviceIconRes) = when (buttonState.mediaProvider) {
-        MediaProvider.Plex -> Color(0xFFE5A00D) to MR.images.plex
-        MediaProvider.Jellyfin -> Color(0xff4747ed) to MR.images.jellyfin
-        MediaProvider.None -> MaterialTheme.colorScheme.primary to Icons.Default.PlayArrow
-    }
+    val (serviceButtonColor, serviceIconRes) =
+        when (buttonState.mediaProvider) {
+            MediaProvider.Plex -> Color(0xFFE5A00D) to MR.images.plex
+            MediaProvider.Jellyfin -> Color(0xff4747ed) to MR.images.jellyfin
+            MediaProvider.None -> MaterialTheme.colorScheme.primary to Icons.Default.PlayArrow
+        }
 
     if (buttonState.showWatchButton && buttonState.showWatchTrailerOption) {
         var showWatchMenu by remember { mutableStateOf(false) }
@@ -181,15 +186,16 @@ private fun WatchButton(
                             onWatchClicked(url, buttonState.mediaProvider)
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = serviceButtonColor
-                    )
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = serviceButtonColor,
+                        ),
                 ) {
                     if (serviceIconRes is ImageResource) {
                         Image(
                             painter = painterResource(serviceIconRes),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
                         )
                     } else if (serviceIconRes is ImageVector) {
                         Icon(serviceIconRes, null)
@@ -202,18 +208,19 @@ private fun WatchButton(
                 Box {
                     SplitButtonDefaults.TrailingButton(
                         onClick = { showWatchMenu = true },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = serviceButtonColor
-                        )
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = serviceButtonColor,
+                            ),
                     ) {
                         Icon(Icons.Default.ArrowDropDown, null)
                     }
                     DropdownMenuPopup(
                         expanded = showWatchMenu,
-                        onDismissRequest = { showWatchMenu = false }
+                        onDismissRequest = { showWatchMenu = false },
                     ) {
                         DropdownMenuGroup(
-                            shapes = MenuDefaults.groupShape(0, 1)
+                            shapes = MenuDefaults.groupShape(0, 1),
                         ) {
                             DropdownMenuItem(
                                 text = { Text(mokoString(MR.strings.watch_trailer)) },
@@ -223,12 +230,12 @@ private fun WatchButton(
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Default.PlayArrow, null)
-                                }
+                                },
                             )
                         }
                     }
                 }
-            }
+            },
         )
     } else {
         val containerColor = if (buttonState.showWatchButton) serviceButtonColor else MaterialTheme.colorScheme.primary
@@ -244,17 +251,18 @@ private fun WatchButton(
                     buttonState.trailerUrl?.let(onWatchTrailerClicked)
                 }
             },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = containerColor
-            ),
-            modifier = modifier
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = containerColor,
+                ),
+            modifier = modifier,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (iconRes is ImageResource) {
                     Image(
                         painter = painterResource(iconRes),
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 } else if (iconRes is ImageVector) {
                     Icon(iconRes, null)
@@ -277,7 +285,7 @@ private fun ViewRequestButton(
     onViewRequestClicked: (Long) -> Unit,
     onApproveRequestClicked: (Long) -> Unit,
     onDeclineRequestClicked: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var showRequestMenu by remember { mutableStateOf(false) }
 
@@ -288,9 +296,10 @@ private fun ViewRequestButton(
                 onClick = {
                     buttonState.pendingRequestId?.let(onViewRequestClicked)
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary
-                )
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                    ),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Schedule, null)
@@ -303,18 +312,19 @@ private fun ViewRequestButton(
             Box {
                 SplitButtonDefaults.TrailingButton(
                     onClick = { showRequestMenu = true },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary
-                    )
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                        ),
                 ) {
                     Icon(Icons.Default.ArrowDropDown, null)
                 }
                 DropdownMenuPopup(
                     expanded = showRequestMenu,
-                    onDismissRequest = { showRequestMenu = false }
+                    onDismissRequest = { showRequestMenu = false },
                 ) {
                     DropdownMenuGroup(
-                        shapes = MenuDefaults.groupShape(0, 1)
+                        shapes = MenuDefaults.groupShape(0, 1),
                     ) {
                         if (buttonState.showApproveRequestButton) {
                             DropdownMenuItem(
@@ -347,7 +357,7 @@ private fun ViewRequestButton(
                     }
                 }
             }
-        }
+        },
     )
 }
 
@@ -355,11 +365,11 @@ private fun ViewRequestButton(
 private fun RequestButton(
     label: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier,
     ) {
         Icon(Icons.Default.Add, null)
         Spacer(Modifier.width(8.dp))

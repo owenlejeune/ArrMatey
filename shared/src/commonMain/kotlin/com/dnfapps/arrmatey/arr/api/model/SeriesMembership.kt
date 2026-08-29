@@ -10,5 +10,5 @@ data class SeriesMembership(
     val seriesNumber: String? = null,
     val seriesAsin: String? = null,
     val isPrimary: Boolean,
-    val sortOrder: Int
+    val sortOrder: Int,
 )

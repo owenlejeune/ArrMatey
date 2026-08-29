@@ -12,11 +12,12 @@ data class ListenarrDiskSpace(
     val totalFormatted: String,
     val freeFormatted: String,
     val driveName: String? = null,
-    val status: String? = null
+    val status: String? = null,
 ) {
-    fun toArrDiskSpace(): ArrDiskSpace = ArrDiskSpace(
-        freeSpace = freeBytes,
-        totalSpace = totalBytes,
-        path = driveName
-    )
+    fun toArrDiskSpace(): ArrDiskSpace =
+        ArrDiskSpace(
+            freeSpace = freeBytes,
+            totalSpace = totalBytes,
+            path = driveName,
+        )
 }

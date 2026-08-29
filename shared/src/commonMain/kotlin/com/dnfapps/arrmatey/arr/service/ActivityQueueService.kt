@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class ActivityQueueService(
     private val instanceManager: InstanceManager,
-    private val preferencesStore: PreferencesStore
+    private val preferencesStore: PreferencesStore,
 ) {
     private val pollingDelay = 30_000L
 
@@ -41,12 +41,13 @@ class ActivityQueueService(
     fun startPolling() {
         if (pollingJob?.isActive == true) return
 
-        pollingJob = scope.launch {
-            while (isActive) {
-                pollActivityTasks()
-                delay(pollingDelay)
+        pollingJob =
+            scope.launch {
+                while (isActive) {
+                    pollActivityTasks()
+                    delay(pollingDelay)
+                }
             }
-        }
     }
 
     fun stopPolling() {
@@ -57,15 +58,20 @@ class ActivityQueueService(
     private suspend fun pollActivityTasks() {
         if (preferencesStore.isPollingEnabled) {
             _isPolling.value = true
-            val repositories = instanceManager.getAllArrRepositories()
-                .filter { it.instance.type.supportsActivityQueue }
+            val repositories =
+                instanceManager
+                    .getAllArrRepositories()
+                    .filter { it.instance.type.supportsActivityQueue }
 
-            val allTasks = repositories.map { repo ->
-                scope.async {
-                    repo.refreshActivityTasks()
-                    repo.activityTasks.value
-                }
-            }.awaitAll().flatten()
+            val allTasks =
+                repositories
+                    .map { repo ->
+                        scope.async {
+                            repo.refreshActivityTasks()
+                            repo.activityTasks.value
+                        }
+                    }.awaitAll()
+                    .flatten()
 
             _allActivityTasks.value = allTasks
 

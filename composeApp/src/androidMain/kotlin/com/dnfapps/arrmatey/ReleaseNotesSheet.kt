@@ -22,33 +22,32 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ReleaseNotesSheet(
-    onDismiss: () -> Unit
-) {
+fun ReleaseNotesSheet(onDismiss: () -> Unit) {
     ModalBottomSheet(
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
+            modifier =
+                Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
         ) {
             ReleaseNotes.updates.forEach { update ->
                 val releaseNotes by update.androidContentFile.readTextAsState()
                 Column {
                     Text(
                         text = mokoString(update.title),
-                        style = MaterialTheme.typography.headlineMediumEmphasized
+                        style = MaterialTheme.typography.headlineMediumEmphasized,
                     )
                     Text(
                         text = update.version,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 }
                 MarkdownText(
-                    markdown = releaseNotes ?: ""
+                    markdown = releaseNotes ?: "",
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             }

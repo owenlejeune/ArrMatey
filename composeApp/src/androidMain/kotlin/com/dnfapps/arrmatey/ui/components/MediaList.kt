@@ -53,7 +53,7 @@ import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.discover.model.SearchResult
-import com.dnfapps.arrmatey.entensions.Bullet
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.colouredDropShadow
 import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
@@ -89,13 +89,13 @@ fun <T : ArrMedia> MediaList(
     blur: Blur = Blur.Normal,
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
-    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
 ) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(18.dp),
         userScrollEnabled = userScrollEnabled,
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp)
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp),
     ) {
         items(items) { item ->
             val isActive = itemIsActive(item)
@@ -109,7 +109,7 @@ fun <T : ArrMedia> MediaList(
                 blur = blur,
                 posterElevation = posterElevation,
                 posterRadius = posterRadius,
-                multiSelectState = multiSelectState
+                multiSelectState = multiSelectState,
             )
         }
     }
@@ -122,12 +122,12 @@ fun SearchResultList(
     modifier: Modifier = Modifier,
     includeOverview: Boolean = true,
     showBanners: Boolean = true,
-    showInstanceIndicatorShadow: Boolean = true
+    showInstanceIndicatorShadow: Boolean = true,
 ) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(18.dp),
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp)
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp),
     ) {
         items(items, key = { it.id }) { item ->
             SearchResultItem(
@@ -135,7 +135,7 @@ fun SearchResultList(
                 onItemClick = onItemClick,
                 includeOverview = includeOverview,
                 showBanners = showBanners,
-                showInstanceIndicatorShadow = showInstanceIndicatorShadow
+                showInstanceIndicatorShadow = showInstanceIndicatorShadow,
             )
         }
     }
@@ -147,22 +147,27 @@ fun SearchResultItem(
     onItemClick: (SearchResult) -> Unit,
     includeOverview: Boolean = true,
     showBanners: Boolean = true,
-    showInstanceIndicatorShadow: Boolean = true
+    showInstanceIndicatorShadow: Boolean = true,
 ) {
-    val shadowColor = if (showInstanceIndicatorShadow) {
-        when (item) {
-            is SearchResult.ArrMediaResult -> when (item.media) {
-                is ArrMovie -> ArrYellow
-                is ArrSeries -> ArrBlue
-                is Arrtist -> ArrGreen
-                is Author -> ArrRed
-                is SearchAudiobook, is Audiobook -> ArrLightPurple
-                else -> null
+    val shadowColor =
+        if (showInstanceIndicatorShadow) {
+            when (item) {
+                is SearchResult.ArrMediaResult ->
+                    when (item.media) {
+                        is ArrMovie -> ArrYellow
+                        is ArrSeries -> ArrBlue
+                        is Arrtist -> ArrGreen
+                        is Author -> ArrRed
+                        is SearchAudiobook, is Audiobook -> ArrLightPurple
+                        else -> null
+                    }
+                is SearchResult.SeerrMediaResult,
+                is SearchResult.SeerrPersonResult,
+                -> ArrPurple
             }
-            is SearchResult.SeerrMediaResult,
-            is SearchResult.SeerrPersonResult -> ArrPurple
+        } else {
+            null
         }
-    } else null
 
     Box(modifier = Modifier.colouredDropShadow(shadowColor)) {
         when (item) {
@@ -172,7 +177,7 @@ fun SearchResultItem(
                     item = item.media,
                     onItemClick = { onItemClick(item) },
                     includeOverview = includeOverview,
-                    showBannerBackground = showBanners
+                    showBannerBackground = showBanners,
                 )
             }
             is SearchResult.SeerrMediaResult -> {
@@ -180,14 +185,14 @@ fun SearchResultItem(
                     result = item,
                     onItemClick = onItemClick,
                     includeOverview = includeOverview,
-                    showBannerBackground = showBanners
+                    showBannerBackground = showBanners,
                 )
             }
             is SearchResult.SeerrPersonResult -> {
                 SeerrPersonItem(
                     result = item,
                     onItemClick = onItemClick,
-                    includeOverview = includeOverview
+                    includeOverview = includeOverview,
                 )
             }
         }
@@ -209,7 +214,7 @@ fun <T : ArrMedia> MediaItem(
     blur: Blur = Blur.Normal,
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
-    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
 ) {
     val isSelected = multiSelectState.isSelected(item.guid)
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
@@ -218,48 +223,51 @@ fun <T : ArrMedia> MediaItem(
     var contentHeight by remember { mutableIntStateOf(0) }
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = {
-                    if (isInSelectionMode) {
-                        multiSelectState.toggle(item.guid)
-                    } else {
-                        onItemClick(item)
-                    }
-                },
-                onLongClick = {
-                    if (isSelectionModeAvailable) {
-                        multiSelectState.toggle(item.guid)
-                    }
-                }
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .combinedClickable(
+                    onClick = {
+                        if (isInSelectionMode) {
+                            multiSelectState.toggle(item.guid)
+                        } else {
+                            onItemClick(item)
+                        }
+                    },
+                    onLongClick = {
+                        if (isSelectionModeAvailable) {
+                            multiSelectState.toggle(item.guid)
+                        }
+                    },
+                ),
         shape = RoundedCornerShape(posterRadius.radius),
         elevation = CardDefaults.cardElevation(defaultElevation = posterElevation.elevation),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 200.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 200.dp),
         ) {
             if (showBannerBackground && (bannerModel != null || item.getBanner()?.remoteUrl != null)) {
                 BannerView(
                     bannerModel = bannerModel ?: item.getBanner()?.remoteUrl?.let { rememberRemoteImageData(it) },
                     blur = blur,
-                    modifier = Modifier.height(contentHeight.pxToDp())
+                    modifier = Modifier.height(contentHeight.pxToDp()),
                 )
             }
 
             Row(
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .padding(12.dp)
-                    .onGloballyPositioned {
-                        contentHeight = it.size.height
-                    },
+                modifier =
+                    Modifier
+                        .wrapContentHeight()
+                        .padding(12.dp)
+                        .onGloballyPositioned {
+                            contentHeight = it.size.height
+                        },
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 PosterItem(
                     item = item,
@@ -268,12 +276,12 @@ fun <T : ArrMedia> MediaItem(
                     posterModel = posterModel,
                     elevation = posterElevation,
                     radius = posterRadius,
-                    multiSelectState = multiSelectState
+                    multiSelectState = multiSelectState,
                 )
 
                 Column(
                     modifier = Modifier.weight(1f).wrapContentHeight(),
-                    verticalArrangement = Arrangement.Top
+                    verticalArrangement = Arrangement.Top,
                 ) {
                     val titleColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
                     Text(
@@ -281,7 +289,7 @@ fun <T : ArrMedia> MediaItem(
                         style = MaterialTheme.typography.titleLarge,
                         color = titleColor,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                     Column {
                         MediaDetails(item, isActive, showBannerBackground)
@@ -292,11 +300,18 @@ fun <T : ArrMedia> MediaItem(
                         Text(
                             text = parsed,
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color =
+                                if (showBannerBackground) {
+                                    Color.White.copy(
+                                        alpha = 0.8f,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
                             maxLines = 6,
                             minLines = 3,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 8.dp)
+                            modifier = Modifier.padding(top = 8.dp),
                         )
                     }
                 }
@@ -313,49 +328,52 @@ fun SeerrMediaItem(
     modifier: Modifier = Modifier,
     includeOverview: Boolean = true,
     showBannerBackground: Boolean = true,
-    bannerModel: Any? = null
+    bannerModel: Any? = null,
 ) {
     var contentHeight by remember { mutableIntStateOf(0) }
 
     val item = result.result
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(onClick = { onItemClick(result) }),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .combinedClickable(onClick = { onItemClick(result) }),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 200.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 200.dp),
         ) {
             if (showBannerBackground && (bannerModel != null || item.fullBackdropPath != null)) {
                 BannerView(
                     bannerModel = bannerModel ?: item.fullBackdropPath?.let { rememberRemoteImageData(it) },
                     blur = Blur.Normal,
-                    modifier = Modifier.height(contentHeight.pxToDp())
+                    modifier = Modifier.height(contentHeight.pxToDp()),
                 )
             }
 
             Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp)
-                    .onGloballyPositioned {
-                        contentHeight = it.size.height
-                    },
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(12.dp)
+                        .onGloballyPositioned {
+                            contentHeight = it.size.height
+                        },
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 PosterItem(
                     item = item,
-                    modifier = Modifier.width(75.dp)
+                    modifier = Modifier.width(75.dp),
                 )
 
                 Column(
                     modifier = Modifier.weight(1f).wrapContentHeight(),
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
                 ) {
                     val titleColor =
                         if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
@@ -364,26 +382,33 @@ fun SeerrMediaItem(
                         style = MaterialTheme.typography.titleMedium,
                         color = titleColor,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
 
                     val releaseDate = item.releaseDate ?: item.firstAirDate
                     val year = releaseDate?.take(4)
-                    val secondLine = listOfNotNull(year, item.mediaType.name).joinToString(Bullet)
+                    val secondLine = listOfNotNull(year, item.mediaType.name).joinToString(BULLET)
                     Text(
                         text = secondLine,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
                     if (includeOverview && item.overview != null) {
                         Text(
                             text = item.overview ?: "",
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color =
+                                if (showBannerBackground) {
+                                    Color.White.copy(
+                                        alpha = 0.8f,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 8.dp)
+                            modifier = Modifier.padding(top = 8.dp),
                         )
                     }
                 }
@@ -397,39 +422,42 @@ fun SeerrMediaItem(
 fun SeerrPersonItem(
     result: SearchResult.SeerrPersonResult,
     onItemClick: (SearchResult) -> Unit,
-    includeOverview: Boolean = true
+    includeOverview: Boolean = true,
 ) {
     val item = result.result
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .combinedClickable(onClick = { onItemClick(result) }),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .combinedClickable(onClick = { onItemClick(result) }),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(18.dp),
             verticalAlignment = Alignment.Top,
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth()
-                .wrapContentHeight()
+            modifier =
+                Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
         ) {
             PersonProfileImage(item.fullPosterPath)
 
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .wrapContentHeight(),
-                verticalArrangement = Arrangement.Top
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .wrapContentHeight(),
+                verticalArrangement = Arrangement.Top,
             ) {
                 Text(
                     text = item.name ?: mokoString(MR.strings.unknown),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
 
                 if (includeOverview && item.knownFor.isNotEmpty()) {
@@ -440,7 +468,7 @@ fun SeerrPersonItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 8,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 8.dp)
+                        modifier = Modifier.padding(top = 8.dp),
                     )
                 }
             }
@@ -452,7 +480,7 @@ fun SeerrPersonItem(
 private fun MediaDetails(
     item: ArrMedia,
     isActive: Boolean,
-    showBannerBackground: Boolean
+    showBannerBackground: Boolean,
 ) {
     when (item) {
         is ArrSeries -> SeriesDetails(item, isActive, showBannerBackground)
@@ -469,21 +497,23 @@ private fun MediaDetails(
 private fun SeriesDetails(
     item: ArrSeries,
     isActive: Boolean,
-    showBannerBackground: Boolean
+    showBannerBackground: Boolean,
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     val seasonLabel = mokoPlural(MR.plurals.seasons, item.seasonCount)
     val fileSizeString = item.fileSize.bytesAsFileSizeString()
     val network = item.network
 
-    val secondLine = listOfNotNull(seasonLabel, fileSizeString, network).joinToString(Bullet)
+    val secondLine = listOfNotNull(seasonLabel, fileSizeString, network).joinToString(BULLET)
     Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
-    val statusStr = when (item.status) {
-        MediaStatus.Continuing -> item.nextAiring?.format()
-            ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
-        else -> mokoString(item.status.resource)
-    }
+    val statusStr =
+        when (item.status) {
+            MediaStatus.Continuing ->
+                item.nextAiring?.format()
+                    ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
+            else -> mokoString(item.status.resource)
+        }
     Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
     if (item.id != null) {
@@ -491,15 +521,16 @@ private fun SeriesDetails(
             text = "${item.episodeFileCount}/${item.episodeCount}",
             fontSize = 12.sp,
             color = contentColor,
-            modifier = Modifier.padding(top = 8.dp, bottom = 1.dp)
+            modifier = Modifier.padding(top = 8.dp, bottom = 1.dp),
         )
         LinearProgressIndicator(
             progress = { item.statusProgress },
             color = if (isActive) ArrPurple else item.statusColor,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp),
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(6.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
         )
     }
 }
@@ -508,7 +539,7 @@ private fun SeriesDetails(
 private fun MovieDetails(
     item: ArrMovie,
     isActive: Boolean,
-    showBannerBackground: Boolean
+    showBannerBackground: Boolean,
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     item.releaseDate?.format("MMMM d, yyyy")?.let {
@@ -520,9 +551,13 @@ private fun MovieDetails(
         Text(firstLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
     }
 
-    val qualityLabel = item.movieFile?.quality?.quality?.name
+    val qualityLabel =
+        item.movieFile
+            ?.quality
+            ?.quality
+            ?.name
     val fileSizeLabel = item.fileSize.bytesAsFileSizeString().takeIf { item.fileSize > 0 }
-    val thirdLine = listOfNotNull(qualityLabel, fileSizeLabel).joinToString(Bullet)
+    val thirdLine = listOfNotNull(qualityLabel, fileSizeLabel).joinToString(BULLET)
     thirdLine.unlessEmpty { thirdLine ->
         Text(thirdLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
     }
@@ -532,12 +567,12 @@ private fun MovieDetails(
 private fun ArtistDetails(
     item: Arrtist,
     isActive: Boolean,
-    showBannerBackground: Boolean
+    showBannerBackground: Boolean,
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     val albumLabel = mokoPlural(MR.plurals.albums, item.albumCount)
     val trackLabel = mokoPlural(MR.plurals.tracks, item.trackCount)
-    val secondLine = listOfNotNull(albumLabel, trackLabel).joinToString(Bullet)
+    val secondLine = listOfNotNull(albumLabel, trackLabel).joinToString(BULLET)
     Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
     val statusStr = mokoString(item.status.resource)
@@ -548,19 +583,21 @@ private fun ArtistDetails(
 private fun AuthorDetails(
     item: Author,
     isActive: Boolean,
-    showBannerBackground: Boolean
+    showBannerBackground: Boolean,
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
 
     val bookLabel = mokoPlural(MR.plurals.books, item.bookCount)
-    val firstLine = listOfNotNull(bookLabel).joinToString(Bullet)
+    val firstLine = listOfNotNull(bookLabel).joinToString(BULLET)
     Text(firstLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
-    val statusStr = when (item.status) {
-        MediaStatus.Continuing -> item.nextBook?.releaseDate?.format()
-            ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
-        else -> mokoString(item.status.resource)
-    }
+    val statusStr =
+        when (item.status) {
+            MediaStatus.Continuing ->
+                item.nextBook?.releaseDate?.format()
+                    ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
+            else -> mokoString(item.status.resource)
+        }
     Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
     if (item.id != null) {
@@ -568,15 +605,16 @@ private fun AuthorDetails(
             text = "${item.bookFileCount}/${item.bookCount}",
             fontSize = 12.sp,
             color = contentColor,
-            modifier = Modifier.padding(top = 8.dp, bottom = 1.dp)
+            modifier = Modifier.padding(top = 8.dp, bottom = 1.dp),
         )
         LinearProgressIndicator(
             progress = { item.statusProgress },
             color = if (isActive) ArrPurple else item.statusColor,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp),
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(6.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
         )
     }
 }
@@ -585,7 +623,7 @@ private fun AuthorDetails(
 private fun AudiobookDetails(
     item: Audiobook,
     isActive: Boolean,
-    showBannerBackground: Boolean
+    showBannerBackground: Boolean,
 ) {
     val contentColor =
         if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
@@ -593,12 +631,13 @@ private fun AudiobookDetails(
     val authorString = item.authors.joinToString(", ")
     Text(authorString, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
-    val seriesString = item.series?.let {
-        if (item.seriesNumber != null) "$it (#${item.seriesNumber})" else it
-    }
+    val seriesString =
+        item.series?.let {
+            if (item.seriesNumber != null) "$it (#${item.seriesNumber})" else it
+        }
     val fileSizeString = item.fileSize.bytesAsFileSizeString().takeIf { item.fileSize > 0 }
 
-    val secondLine = listOfNotNull(seriesString, fileSizeString, item.publisher).joinToString(Bullet)
+    val secondLine = listOfNotNull(seriesString, fileSizeString, item.publisher).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {
         Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
     }
@@ -610,7 +649,7 @@ private fun AudiobookDetails(
 @Composable
 private fun SearchAudiobookDetails(
     item: SearchAudiobook,
-    showBannerBackground: Boolean
+    showBannerBackground: Boolean,
 ) {
     val contentColor =
         if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
@@ -618,10 +657,11 @@ private fun SearchAudiobookDetails(
     val authorString = item.authors.joinToString(", ") { it.name }
     Text(authorString, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
-    val seriesString = item.series.firstOrNull()?.let {
-        if (it.position != null) "${it.name} (#${it.position})" else it.name
-    }
-    val secondLine = listOfNotNull(seriesString, item.publisher).joinToString(Bullet)
+    val seriesString =
+        item.series.firstOrNull()?.let {
+            if (it.position != null) "${it.name} (#${it.position})" else it.name
+        }
+    val secondLine = listOfNotNull(seriesString, item.publisher).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {
         Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
     }
@@ -634,7 +674,7 @@ private fun SearchAudiobookDetails(
 @Composable
 private fun MockDetails(
     item: MockMedia,
-    showBannerBackground: Boolean
+    showBannerBackground: Boolean,
 ) {
     val contentColor =
         if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
@@ -647,7 +687,7 @@ private fun MockDetails(
 fun BannerView(
     bannerModel: Any?,
     modifier: Modifier = Modifier,
-    blur: Blur = Blur.Normal
+    blur: Blur = Blur.Normal,
 ) {
     Box(modifier = modifier) {
         when (bannerModel) {
@@ -657,7 +697,7 @@ fun BannerView(
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                    alpha = 0.5f
+                    alpha = 0.5f,
                 )
             }
 
@@ -667,15 +707,16 @@ fun BannerView(
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                    alpha = 0.5f
+                    alpha = 0.5f,
                 )
             }
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(TranslucentBlack)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(TranslucentBlack),
         )
     }
 }

@@ -1,15 +1,18 @@
 package com.dnfapps.arrmatey.model
 
 sealed interface OperationStatus {
-    object Idle: OperationStatus
-    object InProgress: OperationStatus
+    object Idle : OperationStatus
+
+    object InProgress : OperationStatus
+
     data class Success(
         val message: String? = null,
-        val result: Any? = null
-    ): OperationStatus
+        val result: Any? = null,
+    ) : OperationStatus
+
     data class Error(
         val code: Int? = null,
         val message: String? = null,
-        val cause: Throwable? = null
-    ): OperationStatus
+        val cause: Throwable? = null,
+    ) : OperationStatus
 }

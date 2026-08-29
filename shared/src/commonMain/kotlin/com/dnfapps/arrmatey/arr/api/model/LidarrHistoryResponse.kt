@@ -7,5 +7,5 @@ data class LidarrHistoryResponse(
     val page: Int,
     val pageSize: Int,
     val totalRecords: Int,
-    val records: List<LidarrHistoryItem>
+    val records: List<LidarrHistoryItem>,
 )

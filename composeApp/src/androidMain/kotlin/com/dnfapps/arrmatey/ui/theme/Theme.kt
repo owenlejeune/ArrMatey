@@ -27,9 +27,7 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ArrMateyTheme(
-    content: @Composable () -> Unit
-) {
+fun ArrMateyTheme(content: @Composable () -> Unit) {
     val preferences = koinInject<PreferencesStore>()
 
     val themeSettings by remember(preferences) {
@@ -46,38 +44,40 @@ fun ArrMateyTheme(
             content = {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = if (isSystemDark) Color.Black else Color.White
+                    color = if (isSystemDark) Color.Black else Color.White,
                 ) {}
             },
-            typography = typography()
+            typography = typography(),
         )
         return
     }
 
     val (appTheme, appColor) = themeSettings!!
 
-    val isDarkTheme = when (appTheme) {
-        AppTheme.System -> isSystemDark
-        AppTheme.Light -> false
-        AppTheme.Dark -> true
-    }
+    val isDarkTheme =
+        when (appTheme) {
+            AppTheme.System -> isSystemDark
+            AppTheme.Light -> false
+            AppTheme.Dark -> true
+        }
 
     val context = LocalContext.current
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
-    val colorScheme = when (appColor) {
-        AppColor.Dynamic -> {
-            if (dynamicColor) {
-                if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            } else {
+    val colorScheme =
+        when (appColor) {
+            AppColor.Dynamic -> {
+                if (dynamicColor) {
+                    if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                } else {
+                    if (isDarkTheme) DarkColorPalette else LightColorPalette
+                }
+            }
+            AppColor.ArrMatey -> {
                 if (isDarkTheme) DarkColorPalette else LightColorPalette
             }
+            AppColor.Amoled -> AmoledDarkColorPalette
         }
-        AppColor.ArrMatey -> {
-            if (isDarkTheme) DarkColorPalette else LightColorPalette
-        }
-        AppColor.Amoled -> AmoledDarkColorPalette
-    }
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -90,6 +90,6 @@ fun ArrMateyTheme(
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
         content = content,
-        typography = typography()
+        typography = typography(),
     )
 }

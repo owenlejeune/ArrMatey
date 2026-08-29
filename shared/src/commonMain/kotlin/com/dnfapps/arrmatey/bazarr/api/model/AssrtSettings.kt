@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AssrtSettings(
-    val token: String
+    val token: String,
 )

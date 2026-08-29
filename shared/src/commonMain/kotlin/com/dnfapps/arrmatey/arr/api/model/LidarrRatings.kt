@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LidarrRatings(
     val votes: Int,
-    val value: Float
+    val value: Float,
 ) : ArrRatings

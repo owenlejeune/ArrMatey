@@ -16,7 +16,7 @@ data class CommandResponse(
     val sendUpdatesToClient: Boolean,
     val updateScheduledTask: Boolean,
     val id: Int,
-    val body: CommandResponseBody
+    val body: CommandResponseBody,
 )
 
 @Serializable
@@ -29,5 +29,5 @@ data class CommandResponseBody(
     val isLongRunning: Boolean = false,
     val name: String,
     val trigger: String,
-    val suppressMessages: String
+    val suppressMessages: String,
 )

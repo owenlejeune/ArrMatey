@@ -21,23 +21,22 @@ class AudiobookFilesViewModel(
     private val audiobookId: Long,
     private val getAudiobookFilesUseCase: GetAudiobookFilesUseCase,
     getActivityTasksUseCase: GetActivityTasksUseCase,
-    private val deleteQueueItemUseCase: DeleteQueueItemUseCase
-): ViewModel() {
-
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
+) : ViewModel() {
     private val _uiState = MutableStateFlow(AudiobookFilesState())
     val uiState: StateFlow<AudiobookFilesState> = _uiState.asStateFlow()
 
-    val queueItems: StateFlow<List<QueueItem>> = getActivityTasksUseCase()
-        .map { tasks ->
-            tasks.filterIsInstance<ListenarrQueueItem>().filter { task ->
-                task.audiobookId == audiobookId || task.mediaId == audiobookId
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val queueItems: StateFlow<List<QueueItem>> =
+        getActivityTasksUseCase()
+            .map { tasks ->
+                tasks.filterIsInstance<ListenarrQueueItem>().filter { task ->
+                    task.audiobookId == audiobookId || task.mediaId == audiobookId
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
     private val _removeQueueItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val removeQueueItemStatus: StateFlow<OperationStatus> = _removeQueueItemStatus.asStateFlow()
@@ -66,14 +65,14 @@ class AudiobookFilesViewModel(
         queueItem: QueueItem,
         removeFromClient: Boolean,
         addToBlocklist: Boolean,
-        skipRedownload: Boolean
+        skipRedownload: Boolean,
     ) {
         viewModelScope.launch {
             deleteQueueItemUseCase(
                 queueItem = queueItem,
                 removeFromClient = removeFromClient,
                 addToBlocklist = addToBlocklist,
-                skipRedownload = skipRedownload
+                skipRedownload = skipRedownload,
             ).collect { status ->
                 _removeQueueItemStatus.value = status
             }

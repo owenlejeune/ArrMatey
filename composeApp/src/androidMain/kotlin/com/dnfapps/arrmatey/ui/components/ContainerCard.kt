@@ -23,18 +23,18 @@ fun ContainerCard(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
         modifier = modifier,
         colors = colors,
-        shape = shape
+        shape = shape,
     ) {
         Column(
             modifier = Modifier.padding(contentPadding),
             content = content,
             verticalArrangement = verticalArrangement,
-            horizontalAlignment = horizontalAlignment
+            horizontalAlignment = horizontalAlignment,
         )
     }
 }
@@ -48,19 +48,19 @@ fun ContainerCard(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
         modifier = modifier,
         colors = colors,
         shape = shape,
-        onClick = onClick
+        onClick = onClick,
     ) {
         Column(
             modifier = Modifier.padding(contentPadding),
             content = content,
             verticalArrangement = verticalArrangement,
-            horizontalAlignment = horizontalAlignment
+            horizontalAlignment = horizontalAlignment,
         )
     }
 }

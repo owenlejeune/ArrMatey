@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class ViewType(
-    val resource: StringResource
+    val resource: StringResource,
 ) {
     Grid(MR.strings.grid_view),
-    List(MR.strings.list_view)
+    List(MR.strings.list_view),
 }

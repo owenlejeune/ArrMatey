@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 class EncryptionManagerTest {
-
     private val manager: EncryptionManager = SimpleEncryptionManager()
 
     @Test

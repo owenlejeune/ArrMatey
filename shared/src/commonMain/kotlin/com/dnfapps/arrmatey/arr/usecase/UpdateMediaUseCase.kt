@@ -3,31 +3,26 @@ package com.dnfapps.arrmatey.arr.usecase
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
-import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
-import kotlinx.coroutines.flow.firstOrNull
 
 class UpdateMediaUseCase {
     suspend operator fun invoke(
         item: ArrMedia,
-        repository: ArrInstanceRepository
-    ): NetworkResult<ArrMedia> {
-        return repository.updateMediaItem(item)
-    }
+        repository: ArrInstanceRepository,
+    ): NetworkResult<ArrMedia> = repository.updateMediaItem(item)
 
     suspend fun updateAlbum(
         album: ArrAlbum,
-        repository: ArrInstanceRepository
-    ): NetworkResult<ArrAlbum> {
-        return repository.updateAlbum(album)
-    }
+        repository: ArrInstanceRepository,
+    ): NetworkResult<ArrAlbum> = repository.updateAlbum(album)
 
     suspend fun edit(
         item: ArrMedia,
         moveFiles: Boolean,
-        repository: ArrInstanceRepository
+        repository: ArrInstanceRepository,
     ): NetworkResult<Unit> {
         val id = item.id ?: return repository.editMediaItem(item, moveFiles)
 
@@ -36,26 +31,27 @@ class UpdateMediaUseCase {
             previous = repository.getCacheMediaDetails(id) as? Audiobook
         }
 
-        return repository.editMediaItem(item, moveFiles)
+        return repository
+            .editMediaItem(item, moveFiles)
             .onSuccess {
                 if (item is Audiobook) {
                     if (moveFiles && previous != null) {
                         val sourcePath = previous.basePath
                         val destinationPath = item.basePath
                         if (sourcePath != null && destinationPath != null && sourcePath != destinationPath) {
-                            repository.listenarrClient.moveFiles(
-                                id = id,
-                                moveFiles = true,
-                                sourcePath = sourcePath,
-                                destinationPath = destinationPath
-                            ).onSuccess {
-                                repository.getMediaDetails(id)
-                            }
+                            repository.listenarrClient
+                                .moveFiles(
+                                    id = id,
+                                    moveFiles = true,
+                                    sourcePath = sourcePath,
+                                    destinationPath = destinationPath,
+                                ).onSuccess {
+                                    repository.getMediaDetails(id)
+                                }
                         }
                     }
                 }
-            }
-            .onError { code, message, cause ->
+            }.onError { code, message, cause ->
                 println("$code - $message - ${cause?.printStackTrace()}")
             }
     }
@@ -63,8 +59,6 @@ class UpdateMediaUseCase {
     suspend fun bulkUpdateMonitoring(
         ids: List<Long>,
         monitor: Any,
-        repository: ArrInstanceRepository
-    ): NetworkResult<Unit> {
-        return repository.updateMonitoring(ids, monitor)
-    }
+        repository: ArrInstanceRepository,
+    ): NetworkResult<Unit> = repository.updateMonitoring(ids, monitor)
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,14 +23,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
@@ -53,7 +48,7 @@ fun SeerrRequestSheet(
     users: List<SeerrUser>,
     requestInProgress: Boolean,
     onDismissRequest: () -> Unit,
-    onSubmitRequest: (Long?, String?, Long?, List<Int>?, Long?) -> Unit
+    onSubmitRequest: (Long?, String?, Long?, List<Int>?, Long?) -> Unit,
 ) {
     var selectedProfileId by remember { mutableStateOf<Long?>(null) }
     var selectedRootFolder by remember { mutableStateOf<String?>(null) }
@@ -73,8 +68,11 @@ fun SeerrRequestSheet(
 
     var selectedSeasons by remember {
         mutableStateOf(
-            if (details is TvDetails) details.seasons.map { it.seasonNumber }.toSet()
-            else emptySet()
+            if (details is TvDetails) {
+                details.seasons.map { it.seasonNumber }.toSet()
+            } else {
+                emptySet()
+            },
         )
     }
 
@@ -86,33 +84,37 @@ fun SeerrRequestSheet(
                 onDismissRequest()
             }
         },
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-            confirmValueChange = { !requestInProgress }
-        )
+        sheetState =
+            rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { !requestInProgress },
+            ),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column {
                 Text(
-                    text = mokoString(
-                        if (details is TvDetails) MR.strings.type_series else MR.strings.type_movie
-                    ).uppercase(),
+                    text =
+                        mokoString(
+                            if (details is TvDetails) MR.strings.type_series else MR.strings.type_movie,
+                        ).uppercase(),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = details.displayTitle,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
@@ -121,7 +123,7 @@ fun SeerrRequestSheet(
                     details = details,
                     selectedSeasons = selectedSeasons,
                     onSeasonsChanged = { selectedSeasons = it },
-                    enabled = !requestInProgress
+                    enabled = !requestInProgress,
                 )
             }
 
@@ -129,7 +131,7 @@ fun SeerrRequestSheet(
                 Text(
                     text = mokoString(MR.strings.advanced).uppercase(),
                     style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
 
                 val profiles = serviceDetails?.profiles ?: emptyList()
@@ -143,7 +145,7 @@ fun SeerrRequestSheet(
                     getOptionLabel = { profileId ->
                         profiles.find { it.id == profileId }?.name ?: profileId.toString()
                     },
-                    enabled = !requestInProgress
+                    enabled = !requestInProgress,
                 )
 
                 DropdownPicker(
@@ -152,7 +154,7 @@ fun SeerrRequestSheet(
                     selectedOption = selectedRootFolder,
                     onOptionSelected = { selectedRootFolder = it },
                     getOptionLabel = { it },
-                    enabled = !requestInProgress
+                    enabled = !requestInProgress,
                 )
 
                 if (isAdmin && users.isNotEmpty()) {
@@ -164,18 +166,18 @@ fun SeerrRequestSheet(
                         getOptionLabel = { userId ->
                             users.find { it.id == userId }?.displayName ?: userId.toString()
                         },
-                        enabled = !requestInProgress
+                        enabled = !requestInProgress,
                     )
                 }
 
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     OutlinedButton(
                         onClick = onDismissRequest,
                         modifier = Modifier.weight(1f),
-                        enabled = !requestInProgress
+                        enabled = !requestInProgress,
                     ) {
                         Text(mokoString(MR.strings.cancel))
                     }
@@ -187,11 +189,11 @@ fun SeerrRequestSheet(
                                 selectedRootFolder,
                                 null, // languageProfileId
                                 seasons,
-                                selectedUserId
+                                selectedUserId,
                             )
                         },
                         modifier = Modifier.weight(1f),
-                        enabled = !requestInProgress && if (details is TvDetails) selectedSeasons.isNotEmpty() else true
+                        enabled = !requestInProgress && if (details is TvDetails) selectedSeasons.isNotEmpty() else true,
                     ) {
                         if (requestInProgress) {
                             CircularProgressIndicator(Modifier.size(24.dp))
@@ -210,11 +212,11 @@ private fun SeasonSelector(
     details: TvDetails,
     selectedSeasons: Set<Int>,
     onSeasonsChanged: (Set<Int>) -> Unit,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     ContainerCard(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         val allSeasonsSelected = details.seasons.all { it.seasonNumber in selectedSeasons }
 
@@ -228,7 +230,7 @@ private fun SeasonSelector(
                     onSeasonsChanged(emptySet())
                 }
             },
-            enabled = enabled
+            enabled = enabled,
         )
         HorizontalDivider()
 
@@ -236,11 +238,12 @@ private fun SeasonSelector(
             val isSelected = season.seasonNumber in selectedSeasons
 
             LabelledSwitch(
-                label = if (season.seasonNumber == 0) {
-                    mokoString(MR.strings.specials)
-                } else {
-                    mokoString(MR.strings.season_label, season.seasonNumber)
-                },
+                label =
+                    if (season.seasonNumber == 0) {
+                        mokoString(MR.strings.specials)
+                    } else {
+                        mokoString(MR.strings.season_label, season.seasonNumber)
+                    },
                 sublabel = mokoPlural(MR.plurals.episodes, season.episodeCount),
                 checked = isSelected,
                 onCheckedChange = { checked ->
@@ -250,7 +253,7 @@ private fun SeasonSelector(
                         onSeasonsChanged(selectedSeasons - season.seasonNumber)
                     }
                 },
-                enabled = enabled
+                enabled = enabled,
             )
         }
     }

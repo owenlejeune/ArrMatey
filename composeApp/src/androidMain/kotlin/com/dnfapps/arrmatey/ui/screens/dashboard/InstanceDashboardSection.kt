@@ -39,31 +39,33 @@ import dev.icerock.moko.resources.compose.painterResource
 fun InstanceDashboardSection(
     state: CombinedDashboardState.Success,
     onInstanceClicked: (Long) -> Unit,
-    enabled: Boolean
+    enabled: Boolean,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    Icons.Default.Cloud, null,
-                    modifier = Modifier.size(20.dp)
+                    Icons.Default.Cloud,
+                    null,
+                    modifier = Modifier.size(20.dp),
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = mokoString(MR.strings.overview),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
@@ -73,12 +75,12 @@ fun InstanceDashboardSection(
                     enabled = enabled,
                     onClick = {
                         onInstanceClicked(instanceState.instance.id)
-                    }
+                    },
                 )
                 if (index < state.instances.size - 1) {
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 6.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                     )
                 }
             }
@@ -90,35 +92,45 @@ fun InstanceDashboardSection(
 private fun InstanceDashboardCard(
     state: ArrInstanceDashboardState,
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
-    val completion = if (state.library.isNotEmpty()) {
-        state.library.asSequence().map { it.statusProgress }.average().toFloat()
-    } else 0f
+    val completion =
+        if (state.library.isNotEmpty()) {
+            state.library
+                .asSequence()
+                .map { it.statusProgress }
+                .average()
+                .toFloat()
+        } else {
+            0f
+        }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.clickable(onClick = onClick, enabled = enabled)
+        modifier = Modifier.clickable(onClick = onClick, enabled = enabled),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Image(
                 painter = painterResource(state.instance.type.icon),
                 contentDescription = null,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp),
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = state.instance.label,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = "${state.totalItems} Items • ${state.sizeOnDisk.bytesAsFileSizeString()} • ${(completion * 100).toInt()}% Downloaded",
+                    text =
+                        "${state.totalItems} Items • " +
+                            "${state.sizeOnDisk.bytesAsFileSizeString()} • " +
+                            "${(completion * 100).toInt()}% Downloaded",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -130,14 +142,14 @@ private fun InstanceDashboardCard(
         }
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             state.disks.forEach { disk ->
                 val usedSpace = disk.totalSpace - disk.freeSpace
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = disk.path ?: mokoString(MR.strings.unknown),
@@ -149,13 +161,18 @@ private fun InstanceDashboardCard(
                     Text(
                         text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     )
                     Spacer(Modifier.weight(1f))
                     Text(
                         text = "${(disk.usedPercentage * 100).toInt()}% full",
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (disk.usedPercentage > 0.9f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        color =
+                            if (disk.usedPercentage > 0.9f) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
                     )
                 }
             }

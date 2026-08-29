@@ -67,5 +67,5 @@ enum class QBittorrentTorrentState {
     Moving,
 
     @SerialName("unknown")
-    Unknown
+    Unknown,
 }

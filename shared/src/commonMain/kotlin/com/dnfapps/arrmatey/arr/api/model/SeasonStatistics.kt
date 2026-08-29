@@ -11,5 +11,5 @@ data class SeasonStatistics(
     val percentOfEpisodes: Double,
     val nextAiring: String? = null,
     val previousAiring: String? = null,
-    val releaseGroups: List<String> = emptyList()
+    val releaseGroups: List<String> = emptyList(),
 )

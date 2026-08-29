@@ -44,7 +44,7 @@ import org.koin.compose.koinInject
 fun AddInstanceScreen(
     initialType: InstanceType = InstanceType.Sonarr,
     viewModel: AddInstanceViewModel = koinInject(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     var selectedInstanceType by remember { mutableStateOf(initialType) }
@@ -74,11 +74,11 @@ fun AddInstanceScreen(
                 title = { Text(text = mokoString(MR.strings.add_instance)) },
                 navigationIcon = {
                     IconButton(
-                        onClick = onBack
+                        onClick = onBack,
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(MR.strings.back)
+                            contentDescription = mokoString(MR.strings.back),
                         )
                     }
                 },
@@ -90,25 +90,26 @@ fun AddInstanceScreen(
                             }
                         },
                         enabled = uiState.saveButtonEnabled,
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier.padding(end = 16.dp),
                     ) {
                         Text(text = mokoString(MR.strings.save))
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
     ) { contentPadding ->
-        Column (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AnimatedVisibility(
-                visible = uiState.infoCardMaps[selectedInstanceType] ?: false
+                visible = uiState.infoCardMaps[selectedInstanceType] ?: false,
             ) {
                 InstanceInfoCard(selectedInstanceType) {
                     viewModel.dismissInfoCard(selectedInstanceType)
@@ -123,9 +124,9 @@ fun AddInstanceScreen(
                 label = {
                     Text(
                         text = mokoString(MR.strings.instance_type),
-                        style = androidx.compose.material3.MaterialTheme.typography.labelLarge
+                        style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
                     )
-                }
+                },
             )
 
             ArrConfigurationScreen(
@@ -143,7 +144,7 @@ fun AddInstanceScreen(
                 onLocalNetworkUrlChanged = { viewModel.setLocalNetworkUrl(it) },
                 onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsid(it) },
                 onTestLocalConnection = { viewModel.testLocalConnection(selectedInstanceType) },
-                onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() }
+                onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() },
             )
         }
     }

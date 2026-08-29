@@ -27,5 +27,5 @@ data class RequestUser(
     @Contextual val createdAt: Instant,
     @Contextual val updatedAt: Instant,
     val requestCount: Int,
-    val displayName: String
+    val displayName: String,
 )

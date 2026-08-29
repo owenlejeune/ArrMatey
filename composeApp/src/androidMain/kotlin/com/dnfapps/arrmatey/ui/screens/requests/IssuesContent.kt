@@ -14,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.shared.MR
@@ -27,7 +26,7 @@ fun IssuesContent(
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
     onClearError: () -> Unit,
-    onRefresh: () -> Unit = {}
+    onRefresh: () -> Unit = {},
 ) {
     var selectedIssue by remember { mutableStateOf<MediaIssuePackage?>(null) }
 
@@ -40,7 +39,7 @@ fun IssuesContent(
             pagedData.isEmpty -> {
                 EmptyIssuesState(
                     message = mokoString(MR.strings.no_issues_found),
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
 
@@ -52,7 +51,7 @@ fun IssuesContent(
                     onLoadMore = onLoadMore,
                     onSelectIssue = {
                         selectedIssue = it
-                    }
+                    },
                 )
             }
         }
@@ -62,9 +61,10 @@ fun IssuesContent(
                 error = error,
                 onRetry = onRetry,
                 onDismiss = onClearError,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
             )
         }
     }
@@ -76,7 +76,7 @@ fun IssuesContent(
             onIssueClosed = {
                 selectedIssue = null
                 onRefresh()
-            }
+            },
         )
     }
 }

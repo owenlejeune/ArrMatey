@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class QualityProfile(
     val id: Long,
-    val name: String
+    val name: String,
 )

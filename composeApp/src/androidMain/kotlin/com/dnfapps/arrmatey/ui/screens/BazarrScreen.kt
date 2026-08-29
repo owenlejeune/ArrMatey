@@ -93,7 +93,7 @@ fun BazarrScreen(
     wideRailIsVisible: Boolean,
     viewModel: BazarrViewModel = koinInject(),
     instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Bazarr),
-    onNavigateToDetails: (Long, BazarrMediaType) -> Unit = { _, _ -> }
+    onNavigateToDetails: (Long, BazarrMediaType) -> Unit = { _, _ -> },
 ) {
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val section by viewModel.selectedSection.collectAsStateWithLifecycle()
@@ -122,7 +122,7 @@ fun BazarrScreen(
                     Image(
                         painter = painterResource(InstanceType.Bazarr.icon),
                         contentDescription = mokoString(InstanceType.Bazarr.resource),
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 },
                 navigationIcon = {
@@ -130,68 +130,72 @@ fun BazarrScreen(
                         NavigationDrawerButton()
                     }
                 },
-                actions = {}
+                actions = {},
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         if (instancesState.selectedInstance == null) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                contentAlignment = Alignment.Center,
             ) {
                 NoInstanceView(InstanceType.Bazarr)
             }
         } else {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
             ) {
                 SecondaryScrollableTabRow(
                     selectedTabIndex = section.ordinal,
                     edgePadding = 16.dp,
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
-                    divider = {}
+                    divider = {},
                 ) {
                     BazarrSection.entries.forEach { entry ->
                         Tab(
                             selected = section == entry,
                             onClick = { viewModel.selectSection(entry) },
                             text = {
-                                val label = when (entry) {
-                                    BazarrSection.Series -> mokoString(MR.strings.series)
-                                    BazarrSection.Movies -> mokoString(MR.strings.movies)
-                                    BazarrSection.WantedEpisodes -> mokoString(MR.strings.bazarr_wanted_episodes)
-                                    BazarrSection.WantedMovies -> mokoString(MR.strings.bazarr_wanted_movies)
-                                    BazarrSection.Providers -> mokoString(MR.strings.bazarr_providers)
-                                }
-                                val count = (uiState as? BazarrLibrary.Success)?.let { state ->
+                                val label =
                                     when (entry) {
-                                        BazarrSection.Series -> state.series.size
-                                        BazarrSection.Movies -> state.movies.size
-                                        BazarrSection.WantedEpisodes -> state.wantedEpisodes.size
-                                        BazarrSection.WantedMovies -> state.wantedMovies.size
-                                        else -> 0
+                                        BazarrSection.Series -> mokoString(MR.strings.series)
+                                        BazarrSection.Movies -> mokoString(MR.strings.movies)
+                                        BazarrSection.WantedEpisodes -> mokoString(MR.strings.bazarr_wanted_episodes)
+                                        BazarrSection.WantedMovies -> mokoString(MR.strings.bazarr_wanted_movies)
+                                        BazarrSection.Providers -> mokoString(MR.strings.bazarr_providers)
                                     }
-                                } ?: 0
+                                val count =
+                                    (uiState as? BazarrLibrary.Success)?.let { state ->
+                                        when (entry) {
+                                            BazarrSection.Series -> state.series.size
+                                            BazarrSection.Movies -> state.movies.size
+                                            BazarrSection.WantedEpisodes -> state.wantedEpisodes.size
+                                            BazarrSection.WantedMovies -> state.wantedMovies.size
+                                            else -> 0
+                                        }
+                                    } ?: 0
                                 Text(sectionLabel(label, count))
-                            }
+                            },
                         )
                     }
                 }
 
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     when (val state = uiState) {
                         is BazarrLibrary.Initial, is BazarrLibrary.Loading -> {
                             LoadingIndicator(
-                                modifier = Modifier.size(96.dp)
+                                modifier = Modifier.size(96.dp),
                             )
                         }
 
@@ -199,7 +203,7 @@ fun BazarrScreen(
                             Text(
                                 text = state.message,
                                 modifier = Modifier.align(Alignment.Center),
-                                color = MaterialTheme.colorScheme.error
+                                color = MaterialTheme.colorScheme.error,
                             )
                         }
 
@@ -207,39 +211,44 @@ fun BazarrScreen(
                             PullToRefreshBox(
                                 isRefreshing = false,
                                 onRefresh = viewModel::refresh,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize(),
                             ) {
                                 when (section) {
-                                    BazarrSection.Series -> BazarrSeriesList(
-                                        series = state.series,
-                                        onClick = { series ->
-                                            onNavigateToDetails(series.serviceId, BazarrMediaType.Series)
-                                        }
-                                    )
+                                    BazarrSection.Series ->
+                                        BazarrSeriesList(
+                                            series = state.series,
+                                            onClick = { series ->
+                                                onNavigateToDetails(series.serviceId, BazarrMediaType.Series)
+                                            },
+                                        )
 
-                                    BazarrSection.Movies -> BazarrMoviesList(
-                                        movies = state.movies,
-                                        onClick = { movie ->
-                                            onNavigateToDetails(movie.serviceId, BazarrMediaType.Movie)
-                                        }
-                                    )
+                                    BazarrSection.Movies ->
+                                        BazarrMoviesList(
+                                            movies = state.movies,
+                                            onClick = { movie ->
+                                                onNavigateToDetails(movie.serviceId, BazarrMediaType.Movie)
+                                            },
+                                        )
 
-                                    BazarrSection.WantedEpisodes -> WantedEpisodesContent(
-                                        items = state.wantedEpisodes,
-                                        onSearch = {
-                                            searchTarget = BazarrMediaTarget.Episode(it.sonarrSeriesId, it.sonarrEpisodeId)
-                                        }
-                                    )
+                                    BazarrSection.WantedEpisodes ->
+                                        WantedEpisodesContent(
+                                            items = state.wantedEpisodes,
+                                            onSearch = {
+                                                searchTarget = BazarrMediaTarget.Episode(it.sonarrSeriesId, it.sonarrEpisodeId)
+                                            },
+                                        )
 
-                                    BazarrSection.WantedMovies -> WantedMoviesContent(
-                                        items = state.wantedMovies,
-                                        onSearch = { searchTarget = BazarrMediaTarget.Movie(it.radarrId) }
-                                    )
+                                    BazarrSection.WantedMovies ->
+                                        WantedMoviesContent(
+                                            items = state.wantedMovies,
+                                            onSearch = { searchTarget = BazarrMediaTarget.Movie(it.radarrId) },
+                                        )
 
-                                    BazarrSection.Providers -> ProvidersContent(
-                                        providers = state.providers,
-                                        onReset = viewModel::resetProviders
-                                    )
+                                    BazarrSection.Providers ->
+                                        ProvidersContent(
+                                            providers = state.providers,
+                                            onReset = viewModel::resetProviders,
+                                        )
                                 }
                             }
                         }
@@ -252,18 +261,20 @@ fun BazarrScreen(
     searchTarget?.let { target ->
         BazarrSubtitleSearchSheet(
             target = target,
-            onDismiss = { searchTarget = null }
+            onDismiss = { searchTarget = null },
         )
     }
 }
 
-private fun sectionLabel(base: String, count: Int): String =
-    if (count > 0) "$base ($count)" else base
+private fun sectionLabel(
+    base: String,
+    count: Int,
+): String = if (count > 0) "$base ($count)" else base
 
 @Composable
 private fun WantedEpisodesContent(
     items: List<WantedEpisode>,
-    onSearch: (WantedEpisode) -> Unit
+    onSearch: (WantedEpisode) -> Unit,
 ) {
     if (items.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -276,7 +287,7 @@ private fun WantedEpisodesContent(
             title = { it.seriesTitle },
             subtitle = { "${it.episodeNumber} · ${it.episodeTitle}" },
             missing = { it.missingSubtitles },
-            onSearch = onSearch
+            onSearch = onSearch,
         )
     }
 }
@@ -284,7 +295,7 @@ private fun WantedEpisodesContent(
 @Composable
 private fun WantedMoviesContent(
     items: List<WantedMovie>,
-    onSearch: (WantedMovie) -> Unit
+    onSearch: (WantedMovie) -> Unit,
 ) {
     if (items.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -297,7 +308,7 @@ private fun WantedMoviesContent(
             title = { it.title },
             subtitle = { null },
             missing = { it.missingSubtitles },
-            onSearch = onSearch
+            onSearch = onSearch,
         )
     }
 }
@@ -310,18 +321,18 @@ private fun <T> WantedList(
     title: (T) -> String,
     subtitle: (T) -> String?,
     missing: (T) -> List<BazarrSubtitleLanguage>,
-    onSearch: (T) -> Unit
+    onSearch: (T) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(items, key = { key(it) }) { item ->
             ContainerCard(
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { onSearch(item) }
+                onClick = { onSearch(item) },
             ) {
                 Column(modifier = Modifier.fillMaxWidth(1f)) {
                     Text(title(item), fontWeight = FontWeight.SemiBold)
@@ -343,14 +354,15 @@ private fun <T> WantedList(
 @Composable
 private fun ProvidersContent(
     providers: List<ProviderStatus>,
-    onReset: () -> Unit
+    onReset: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.End
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.End,
         ) {
             TextButton(onClick = onReset) {
                 Text(mokoString(MR.strings.bazarr_reset_providers))
@@ -359,7 +371,7 @@ private fun ProvidersContent(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(providers, key = { it.name }) { provider ->
                 ProviderRow(provider)
@@ -376,18 +388,19 @@ private fun ProviderRow(provider: ProviderStatus) {
     Surface(
         tonalElevation = 2.dp,
         shape = MaterialTheme.shapes.medium,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
                 color = if (healthy) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                 shape = CircleShape,
-                modifier = Modifier.size(10.dp)
+                modifier = Modifier.size(10.dp),
             ) {}
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -406,12 +419,12 @@ private fun ProviderRow(provider: ProviderStatus) {
 @Composable
 private fun BazarrSeriesList(
     series: List<BazarrSeries>,
-    onClick: (BazarrSeries) -> Unit
+    onClick: (BazarrSeries) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(series) { item ->
             BazarrItem(
@@ -421,12 +434,17 @@ private fun BazarrSeriesList(
                 poster = item.poster,
                 fanart = item.fanart,
                 monitored = item.monitored,
-                onClick = { onClick(item) }
+                onClick = { onClick(item) },
             ) {
                 Text(
-                    text = mokoString(MR.strings.bazarr_series_subtitle_count, item.episodeFileCount, item.episodeFileCount + item.episodeMissingCount),
+                    text =
+                        mokoString(
+                            MR.strings.bazarr_series_subtitle_count,
+                            item.episodeFileCount,
+                            item.episodeFileCount + item.episodeMissingCount,
+                        ),
                     color = Color.White,
-                    fontSize = 14.sp
+                    fontSize = 14.sp,
                 )
             }
         }
@@ -436,12 +454,12 @@ private fun BazarrSeriesList(
 @Composable
 private fun BazarrMoviesList(
     movies: List<BazarrMovie>,
-    onClick: (BazarrMovie) -> Unit
+    onClick: (BazarrMovie) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(movies) { item ->
             BazarrItem(
@@ -451,14 +469,14 @@ private fun BazarrMoviesList(
                 poster = item.poster,
                 fanart = item.fanart,
                 monitored = item.monitored,
-                onClick = { onClick(item) }
+                onClick = { onClick(item) },
             ) {
                 val subtitleCount = item.subtitles.size
                 val missingCount = item.missingSubtitles.size
                 Text(
                     text = mokoString(MR.strings.bazarr_movie_subtitle_count, subtitleCount, missingCount),
                     color = Color.White,
-                    fontSize = 14.sp
+                    fontSize = 14.sp,
                 )
             }
         }
@@ -475,76 +493,83 @@ private fun BazarrItem(
     monitored: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    details: @Composable () -> Unit = {}
+    details: @Composable () -> Unit = {},
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
-    ) {
-        Box(
-            modifier = Modifier
+        modifier =
+            modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
+                .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
         ) {
             BannerView(
                 bannerModel = fanart?.let { rememberRemoteImageData(it) },
-                modifier = Modifier.matchParentSize()
+                modifier = Modifier.matchParentSize(),
             )
             Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(TranslucentBlack)
+                modifier =
+                    Modifier
+                        .matchParentSize()
+                        .background(TranslucentBlack),
             )
 
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(18.dp),
                     verticalAlignment = Alignment.Top,
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .fillMaxWidth()
-                        .wrapContentHeight()
+                    modifier =
+                        Modifier
+                            .padding(12.dp)
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
                 ) {
                     BasePosterItem(
                         model = rememberRemoteImageData(poster),
                         modifier = Modifier.height(100.dp),
-                        aspectRatio = AspectRatio.Poster
+                        aspectRatio = AspectRatio.Poster,
                     )
 
                     Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .wrapContentHeight(),
-                        verticalArrangement = Arrangement.Top
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .wrapContentHeight(),
+                        verticalArrangement = Arrangement.Top,
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Text(
-                                text = buildString {
-                                    append(title)
-                                    append(" ($year)")
-                                },
+                                text =
+                                    buildString {
+                                        append(title)
+                                        append(" ($year)")
+                                    },
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             )
                             Icon(
                                 imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                                 contentDescription = null,
-                                tint = Color.White
+                                tint = Color.White,
                             )
                         }
                         details()
@@ -555,7 +580,7 @@ private fun BazarrItem(
                             lineHeight = 16.sp,
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis,
-                            color = Color.White
+                            color = Color.White,
                         )
                     }
                 }

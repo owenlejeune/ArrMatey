@@ -5,7 +5,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class AppMode {
-    @SerialName("console") CONSOLE,
-    @SerialName("service") SERVICE,
-    @SerialName("tray") TRAY
+    @SerialName("console")
+    CONSOLE,
+
+    @SerialName("service")
+    SERVICE,
+
+    @SerialName("tray")
+    TRAY,
 }

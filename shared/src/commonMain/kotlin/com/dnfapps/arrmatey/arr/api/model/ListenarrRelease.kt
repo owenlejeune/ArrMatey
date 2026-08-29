@@ -22,16 +22,17 @@ data class ListenarrRelease(
     @SerialName("seeders") val seedersVal: Int? = 0,
     @SerialName("leechers") val leechersVal: Int? = 0,
     val audiobookId: Long? = null,
-    override var mediaId: Long? = null
-): ArrRelease {
+    override var mediaId: Long? = null,
+) : ArrRelease {
     override val id: Int? get() = null
     override val guid: String get() = idStr ?: magnetLink ?: torrentUrl ?: nzbUrl ?: ""
-    override val quality: QualityInfo? get() = qualityStr?.let { 
-        QualityInfo(
-            quality = Quality(id = 0, name = it),
-            revision = Revision(version = 1, real = 0, isRepack = false)
-        ) 
-    }
+    override val quality: QualityInfo? get() =
+        qualityStr?.let {
+            QualityInfo(
+                quality = Quality(id = 0, name = it),
+                revision = Revision(version = 1, real = 0, isRepack = false),
+            )
+        }
     override val qualityWeight: Float get() = 0f
     override val age: Float get() = 0f
     override val ageHours: Float get() = 0f
@@ -46,7 +47,7 @@ data class ListenarrRelease(
     override val temporarilyRejected: Boolean get() = false
     override val rejected: Boolean get() = false
     override val rejections: List<String> get() = emptyList()
-    override val publishDate: Instant? get() = null 
+    override val publishDate: Instant? get() = null
     override val commentUrl: String? get() = null
     override val downloadUrl: String? get() = torrentUrl ?: nzbUrl
     override val infoUrl: String? get() = null
@@ -58,11 +59,12 @@ data class ListenarrRelease(
     override val infoHash: String? get() = null
     override val seeders: Int get() = seedersVal ?: seedersInt ?: 0
     override val leechers: Int get() = leechersVal ?: leechersInt ?: 0
-    override val protocol: ReleaseProtocol get() = when {
-        downloadType?.lowercase() == "torrent" || magnetLink != null || torrentUrl != null -> ReleaseProtocol.Torrent
-        downloadType?.lowercase() == "usenet" || nzbUrl != null -> ReleaseProtocol.Usenet
-        else -> ReleaseProtocol.Unknown
-    }
+    override val protocol: ReleaseProtocol get() =
+        when {
+            downloadType?.lowercase() == "torrent" || magnetLink != null || torrentUrl != null -> ReleaseProtocol.Torrent
+            downloadType?.lowercase() == "usenet" || nzbUrl != null -> ReleaseProtocol.Usenet
+            else -> ReleaseProtocol.Unknown
+        }
     override val downloadClientId: Int? get() = null
     override val downloadClient: String? get() = null
     override val shouldOverride: Boolean get() = false

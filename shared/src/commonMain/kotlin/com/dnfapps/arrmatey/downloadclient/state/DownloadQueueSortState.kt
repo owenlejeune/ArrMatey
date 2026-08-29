@@ -5,7 +5,7 @@ import com.dnfapps.arrmatey.compose.utils.SortOrder
 
 data class DownloadQueueSortState(
     val sortBy: SortBy = SortBy.Title,
-    val sortOrder: SortOrder = SortOrder.Asc
+    val sortOrder: SortOrder = SortOrder.Asc,
 ) {
-    constructor(): this(sortBy = SortBy.Title) // ios empty constructor
+    constructor() : this(sortBy = SortBy.Title) // ios empty constructor
 }

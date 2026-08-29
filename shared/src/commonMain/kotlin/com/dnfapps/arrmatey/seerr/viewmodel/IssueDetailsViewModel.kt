@@ -3,13 +3,13 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.model.OperationStatus
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.state.IssueDetailsUiState
 import com.dnfapps.arrmatey.seerr.usecase.CloseIssueUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetIssueDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueCommentUseCase
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -21,28 +21,27 @@ class IssueDetailsViewModel(
     issuePackage: MediaIssuePackage,
     private val submitIssueCommentUseCase: SubmitIssueCommentUseCase,
     private val getIssueDetailsUseCase: GetIssueDetailsUseCase,
-    private val closeIssueUseCase: CloseIssueUseCase
-): ViewModel() {
-
+    private val closeIssueUseCase: CloseIssueUseCase,
+) : ViewModel() {
     private val _commentSubmissionStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     private val _issueCloseStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     private val _issuePackage = MutableStateFlow(issuePackage)
 
-    val uiState = combine(
-        _issuePackage,
-        _commentSubmissionStatus,
-        _issueCloseStatus
-    ) { pacakge, comment, close ->
-        IssueDetailsUiState(
-            issuePackage = pacakge,
-            commentSubmissionStatus = comment,
-            issueCloseStatus = close
-        )
-    }
-        .stateIn(
+    val uiState =
+        combine(
+            _issuePackage,
+            _commentSubmissionStatus,
+            _issueCloseStatus,
+        ) { pacakge, comment, close ->
+            IssueDetailsUiState(
+                issuePackage = pacakge,
+                commentSubmissionStatus = comment,
+                issueCloseStatus = close,
+            )
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = IssueDetailsUiState(issuePackage)
+            initialValue = IssueDetailsUiState(issuePackage),
         )
 
     init {

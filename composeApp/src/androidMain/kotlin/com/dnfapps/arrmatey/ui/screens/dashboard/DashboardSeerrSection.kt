@@ -35,7 +35,7 @@ import dev.icerock.moko.resources.compose.painterResource
 @Composable
 fun SeerrSection(
     state: CombinedDashboardState.Success,
-    isEditing: Boolean
+    isEditing: Boolean,
 ) {
     val seerrInstances = state.seerrInstances
 
@@ -43,50 +43,54 @@ fun SeerrSection(
     val totalIssues = seerrInstances.sumOf { it.openIssuesCount }
 
     val containerColor by animateColorAsState(
-        targetValue = if (isEditing) {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        } else Color.Transparent,
-        label = "SeerrCardBackgroundAnimation"
+        targetValue =
+            if (isEditing) {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            } else {
+                Color.Transparent
+            },
+        label = "SeerrCardBackgroundAnimation",
     )
 
     val internalPadding by animateDpAsState(
         targetValue = if (isEditing) 16.dp else 0.dp,
-        label = "SeerrCardPaddingAnimation"
+        label = "SeerrCardPaddingAnimation",
     )
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = containerColor,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing
+                visible = isEditing,
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Image(
                         painter = painterResource(InstanceType.Seerr.icon),
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                     Text(
                         text = mokoString(MR.strings.dashboard_seerr_overview),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 CountStatItem(
                     modifier = Modifier.weight(1f),
@@ -94,17 +98,18 @@ fun SeerrSection(
                     label = mokoString(MR.strings.requests),
                     count = totalRequests,
                     containerColor = ArrPurple,
-                    contentColor = surfaceLight
+                    contentColor = surfaceLight,
                 )
                 CountStatItem(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.BugReport,
                     label = mokoString(MR.strings.issues),
                     count = totalIssues,
-                    containerColor = when {
-                        totalIssues > 0 -> MaterialTheme.colorScheme.errorContainer
-                        else -> MaterialTheme.colorScheme.secondaryContainer
-                    }
+                    containerColor =
+                        when {
+                            totalIssues > 0 -> MaterialTheme.colorScheme.errorContainer
+                            else -> MaterialTheme.colorScheme.secondaryContainer
+                        },
                 )
             }
         }

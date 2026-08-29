@@ -30,64 +30,72 @@ fun Modifier.selectionClickable(
     onLongClick: (() -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
     hapticFeedbackEnabled: Boolean = true,
-): Modifier = this.then(
-    Modifier.combinedClickable(
-        onClick = {
-            if (selectionState.isInSelectionMode.value) {
+): Modifier =
+    this.then(
+        Modifier.combinedClickable(
+            onClick = {
+                if (selectionState.isInSelectionMode.value) {
+                    selectionState.toggle(item)
+                } else {
+                    onClick()
+                }
+            },
+            onLongClick = {
                 selectionState.toggle(item)
-            } else {
-                onClick()
+                onLongClick?.invoke()
+            },
+            enabled = enabled,
+            role = role,
+            onLongClickLabel = onLongClickLabel,
+            interactionSource = interactionSource,
+            hapticFeedbackEnabled = hapticFeedbackEnabled,
+        ),
+    )
+
+fun Modifier.breakPadding(horizontal: Dp): Modifier =
+    this.then(
+        Modifier.layout { measurable, constraints ->
+            val paddingPx = horizontal.roundToPx()
+            val targetWidth = constraints.maxWidth + (paddingPx * 2)
+            val placeable =
+                measurable.measure(
+                    constraints.copy(
+                        minWidth = targetWidth,
+                        maxWidth = targetWidth,
+                    ),
+                )
+            layout(constraints.maxWidth, placeable.height) {
+                placeable.placeRelative(-paddingPx, 0)
             }
         },
-        onLongClick = {
-            selectionState.toggle(item)
-            onLongClick?.invoke()
-        },
-        enabled = enabled,
-        role = role,
-        onLongClickLabel = onLongClickLabel,
-        interactionSource = interactionSource,
-        hapticFeedbackEnabled = hapticFeedbackEnabled,
     )
-)
 
-fun Modifier.breakPadding(horizontal: Dp): Modifier = this.then(
-    Modifier.layout { measurable, constraints ->
-        val paddingPx = horizontal.roundToPx()
-        val targetWidth = constraints.maxWidth + (paddingPx * 2)
-        val placeable = measurable.measure(
-            constraints.copy(
-                minWidth = targetWidth,
-                maxWidth = targetWidth
-            )
-        )
-        layout(constraints.maxWidth, placeable.height) {
-            placeable.placeRelative(-paddingPx, 0)
-        }
-    }
-)
-
-fun Modifier.colouredDropShadow(shadowColor: Color?): Modifier = this.then(
-    if (shadowColor == null) Modifier
-    else
-        Modifier.drawBehind {
-            drawIntoCanvas { canvas ->
-                val nativePaint = Paint().apply {
-                    color = shadowColor.copy(alpha = 1.0f).toArgb()
-                    maskFilter = BlurMaskFilter(
-                        16.dp.toPx(),
-                        BlurMaskFilter.Blur.NORMAL
+fun Modifier.colouredDropShadow(shadowColor: Color?): Modifier =
+    this.then(
+        if (shadowColor == null) {
+            Modifier
+        } else {
+            Modifier.drawBehind {
+                drawIntoCanvas { canvas ->
+                    val nativePaint =
+                        Paint().apply {
+                            color = shadowColor.copy(alpha = 1.0f).toArgb()
+                            maskFilter =
+                                BlurMaskFilter(
+                                    16.dp.toPx(),
+                                    BlurMaskFilter.Blur.NORMAL,
+                                )
+                        }
+                    canvas.nativeCanvas.drawRoundRect(
+                        2.dp.toPx(),
+                        size.height * 0.2f,
+                        size.width - 2.dp.toPx(),
+                        size.height,
+                        12.dp.toPx(),
+                        12.dp.toPx(),
+                        nativePaint,
                     )
                 }
-                canvas.nativeCanvas.drawRoundRect(
-                    2.dp.toPx(),
-                    size.height * 0.2f,
-                    size.width - 2.dp.toPx(),
-                    size.height,
-                    12.dp.toPx(),
-                    12.dp.toPx(),
-                    nativePaint
-                )
             }
-        }
-)
+        },
+    )

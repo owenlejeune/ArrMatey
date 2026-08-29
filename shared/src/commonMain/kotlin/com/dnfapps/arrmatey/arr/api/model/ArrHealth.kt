@@ -7,5 +7,5 @@ data class ArrHealth(
     val type: ArrHealthType,
     val wikiUrl: String? = null,
     val source: String? = null,
-    val message: String? = null
+    val message: String? = null,
 )
