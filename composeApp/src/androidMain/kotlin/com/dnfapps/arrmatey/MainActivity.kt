@@ -15,7 +15,9 @@ import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toSearch
+import com.dnfapps.arrmatey.notifications.NotificationConstants
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import kotlinx.coroutines.launch
@@ -65,6 +67,22 @@ class MainActivity : ComponentActivity() {
                 }
                 AppShortcutManager.ACTION_OPEN_SCHEDULE -> {
                     navigationManager.navigateToTab(TabItem.Standard.CALENDAR)
+                    val itemId = intent.getStringExtra(NotificationConstants.EXTRA_ITEM_ID)?.toLongOrNull() ?: -1L
+                    val instanceId = intent.getStringExtra(NotificationConstants.EXTRA_INSTANCE_ID)?.toLongOrNull() ?: -1L
+                    val typeName = intent.getStringExtra(NotificationConstants.EXTRA_INSTANCE_TYPE)
+                    val type = InstanceType.entries.find { it.name == typeName }
+
+                    if (itemId != -1L && type != null) {
+                        val tmdbId = intent.getStringExtra(NotificationConstants.EXTRA_TMDB_ID)?.toLongOrNull()
+
+                        navigationManager.calendar.popToRoot()
+                        navigationManager.calendar.toDetails(
+                            id = itemId,
+                            tmdbId = tmdbId,
+                            type = type,
+                            instanceId = instanceId.takeIf { it != -1L },
+                        )
+                    }
                 }
                 AppShortcutManager.ACTION_OPEN_REQUESTS -> {
                     navigationManager.navigateToTab(TabItem.Standard.REQUESTS)

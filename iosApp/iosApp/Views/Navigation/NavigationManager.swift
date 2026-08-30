@@ -7,8 +7,9 @@
 
 import SwiftUI
 import Shared
+import UserNotifications
 
-class NavigationManager: ObservableObject {
+class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     private let tabManager: TabManager = KoinBridge.shared.getTabManager()
 
     @Published var settingsPath = NavigationPath()
@@ -23,14 +24,14 @@ class NavigationManager: ObservableObject {
     @Published var bazarrPath = NavigationPath()
     @Published var libraryPath = NavigationPath()
     @Published var calendarPath = NavigationPath()
-    
+
     @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemSettings.shared)
     @Published var selectedDrawerTab: AnyTabItem? = nil
-    
+
     @Published var showLauncher: Bool = false
-    
+
     private var pendingSettingsRoute: SettingsRoute? = nil
-    
+
     func go(to route: MediaRoute, of type: InstanceType) {
         if showLauncher {
             launcherPath.append(route)
@@ -92,7 +93,7 @@ class NavigationManager: ObservableObject {
         case .bazarr: break // Bazarr doesn't use media routes
         }
     }
-    
+
     func go(to route: SettingsRoute) {
         if showLauncher {
             launcherPath.append(route)
@@ -100,7 +101,7 @@ class NavigationManager: ObservableObject {
             settingsPath.append(route)
         }
     }
-    
+
     func go(to route: BazarrRoute) {
         if showLauncher {
             launcherPath.append(route)
@@ -108,18 +109,18 @@ class NavigationManager: ObservableObject {
             bazarrPath.append(route)
         }
     }
-    
+
     func setSelectedDrawerTab(_ tab: AnyTabItem?) {
         selectedDrawerTab = tab
     }
-    
+
     func setSelectedDrawerTab(_ tab: TabItem) {
         selectedDrawerTab = AnyTabItem(item: tab)
     }
-    
+
     func goToNewInstance(of type: InstanceType) {
         clearAllPaths()
-        
+
         if showLauncher {
             let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
             launcherPath.append(settingsTab)
@@ -132,7 +133,7 @@ class NavigationManager: ObservableObject {
 
     func goToEditInstance(of type: InstanceType, _ id: Int64) {
         clearAllPaths()
-        
+
         if showLauncher {
             let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
             launcherPath.append(settingsTab)
@@ -142,7 +143,7 @@ class NavigationManager: ObservableObject {
             showLauncher = true
         }
     }
-    
+
     private func clearAllPaths() {
         seriesPath = NavigationPath()
         moviePath = NavigationPath()
@@ -154,7 +155,7 @@ class NavigationManager: ObservableObject {
         bazarrPath = NavigationPath()
         libraryPath = NavigationPath()
     }
-    
+
     func maybeEditInstance(of type: InstanceType, _ instance: Instance?) {
         if let i = instance {
             goToEditInstance(of: type, i.id)
@@ -167,37 +168,37 @@ class NavigationManager: ObservableObject {
             pendingSettingsRoute = nil
         }
     }
-    
+
     func completeSetupAndDismiss() {
         self.showLauncher = false
-        
+
         self.launcherPath = NavigationPath()
         self.settingsPath = NavigationPath()
-        
+
         self.seriesPath = NavigationPath()
         self.moviePath = NavigationPath()
         self.musicPath = NavigationPath()
         self.bookPath = NavigationPath()
         self.audiobookPath = NavigationPath()
         self.libraryPath = NavigationPath()
-        
+
         self.seerrPath = NavigationPath()
     }
-    
+
     func goInLauncher(to route: SettingsRoute) {
         launcherPath.append(route)
     }
-    
+
     func popLauncherPath() {
         if !launcherPath.isEmpty {
             launcherPath.removeLast()
         }
     }
-    
+
     func clearLauncherPath() {
         launcherPath = NavigationPath()
     }
-    
+
     func openSettings() {
         openOverlay(TabItemSettings.shared)
     }
@@ -210,7 +211,7 @@ class NavigationManager: ObservableObject {
             settingsPath = NavigationPath()
         }
     }
-    
+
     func goToSeerrDetails(tmdbId: Int64, requestType: RequestType) {
         let route = SeerrRoute.details(tmdbId: tmdbId, requestType: requestType)
         if showLauncher {
@@ -271,11 +272,11 @@ class NavigationManager: ObservableObject {
             goToDetails(arrId: item.id?.int64Value, instanceType: type, instanceId: instanceId)
         }
     }
-    
+
     func navigateToTab(_ tab: TabItem) {
         let visibleTabs = tabManager.tabConfiguration.value.visibleTabs
         let visibleKeys = visibleTabs.map { $0.key }
-        
+
         DispatchQueue.main.async {
             if visibleKeys.contains(tab.key) {
                 self.closeOverlay()
@@ -296,7 +297,7 @@ class NavigationManager: ObservableObject {
         showLauncher = false
         clearLauncherPath()
     }
-    
+
     func openRequestsTab() {
         navigateToTab(TabItemStandard.requests as TabItem)
     }
@@ -304,7 +305,7 @@ class NavigationManager: ObservableObject {
     func openProwlarrTab() {
         navigateToTab(TabItemStandard.prowlarr as TabItem)
     }
-    
+
     func openBazarrTab() {
         navigateToTab(TabItemStandard.bazarr as TabItem)
     }
@@ -320,7 +321,57 @@ class NavigationManager: ObservableObject {
     func openScheduleTab() {
         navigateToTab(TabItemStandard.calendar as TabItem)
     }
-    
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        if let action = userInfo["action"] as? String {
+            handleAction(action, userInfo: userInfo)
+        }
+        completionHandler()
+    }
+
+    func handleAction(_ action: String, userInfo: [AnyHashable: Any] = [:]) {
+        switch action {
+        case NotificationConstants.shared.ACTION_OPEN_SCHEDULE:
+            openScheduleTab()
+
+            if let itemIdStr = userInfo[NotificationConstants.shared.EXTRA_ITEM_ID] as? String,
+               let itemId = Int64(itemIdStr),
+               let typeName = userInfo[NotificationConstants.shared.EXTRA_INSTANCE_TYPE] as? String,
+               let type = InstanceType.entries.first(where: { $0.name == typeName }) {
+
+                let tmdbId = (userInfo[NotificationConstants.shared.EXTRA_TMDB_ID] as? String).flatMap { Int64($0) }
+                let instanceId = (userInfo[NotificationConstants.shared.EXTRA_INSTANCE_ID] as? String).flatMap { Int64($0) }
+
+                calendarPath = NavigationPath()
+                calendarPath.append(MediaRoute.details(
+                    arrId: itemId,
+                    tmdbId: tmdbId,
+                    tvdbId: nil,
+                    instanceType: type,
+                    requestType: nil,
+                    instanceId: instanceId
+                ))
+            }
+        case NotificationConstants.shared.ACTION_OPEN_DOWNLOADS:
+            openDownloadsTab()
+        case NotificationConstants.shared.ACTION_OPEN_ACTIVITY:
+            openActivityTab()
+        case NotificationConstants.shared.ACTION_OPEN_REQUESTS:
+            openRequestsTab()
+        case NotificationConstants.shared.ACTION_OPEN_BAZARR:
+            openBazarrTab()
+        case NotificationConstants.shared.ACTION_OPEN_DASHBOARD:
+            closeOverlay()
+        default:
+            break
+        }
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .list, .sound])
+    }
+
     func openArrDashboard(id: Int64) {
         if showLauncher {
             launcherPath.append(SettingsRoute.arrDashboard(id))

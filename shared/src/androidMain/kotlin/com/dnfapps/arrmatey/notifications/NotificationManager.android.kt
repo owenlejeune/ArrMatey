@@ -43,6 +43,7 @@ actual class NotificationManager(
         message: String,
         scheduledTime: Instant,
         instanceName: String,
+        extras: Map<String, String>,
     ) {
         val channelId = ensureChannelExists(instanceName)
 
@@ -52,6 +53,7 @@ actual class NotificationManager(
                 putExtra("title", title)
                 putExtra("message", message)
                 putExtra("channelId", channelId)
+                extras.forEach { (key, value) -> putExtra(key, value) }
             }
 
         val pendingIntent =
@@ -102,6 +104,20 @@ actual class NotificationManager(
         instanceName: String,
     ) {
         val channelId = ensureChannelExists(instanceName)
+
+        val contentIntent =
+            context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                action = NotificationConstants.ACTION_OPEN_SCHEDULE
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                id,
+                contentIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+
         val builder =
             NotificationCompat
                 .Builder(context, channelId)
@@ -112,6 +128,7 @@ actual class NotificationManager(
                 .setOngoing(progress < 1f)
                 .setOnlyAlertOnce(true)
                 .setProgress(100, (progress * 100).toInt(), progress < 0f)
+                .setContentIntent(pendingIntent)
 
         notificationManager.notify(id, builder.build())
     }
@@ -123,6 +140,20 @@ actual class NotificationManager(
         instanceName: String,
     ) {
         val channelId = ensureChannelExists(instanceName)
+
+        val contentIntent =
+            context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                action = NotificationConstants.ACTION_OPEN_SCHEDULE
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                id,
+                contentIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+
         val builder =
             NotificationCompat
                 .Builder(context, channelId)
@@ -131,6 +162,7 @@ actual class NotificationManager(
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
 
         notificationManager.notify(id, builder.build())
     }

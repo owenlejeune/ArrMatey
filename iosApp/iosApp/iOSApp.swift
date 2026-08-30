@@ -1,12 +1,14 @@
 import SwiftUI
 import MarkdownView
 import Shared
+import UserNotifications
 
 @main
 struct iOSApp: App {
-    
+
     @ObservedObject private var preferences: PreferencesViewModel
-    
+    @StateObject private var navigationManager = NavigationManager()
+
     init() {
         KoinHelperKt.doInitKoin()
         LoggingHelperKt.doInitLogging()
@@ -14,9 +16,7 @@ struct iOSApp: App {
         IOSCrashManager.shared.initialize()
         preferences = PreferencesViewModel()
     }
-    
-    @StateObject private var navigationManager = NavigationManager()
-    
+
     private var latestUpdate: FeatureUpdate {
         ReleaseNotes.shared.latestUpdate
     }
@@ -25,6 +25,9 @@ struct iOSApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(navigationManager)
+                .onAppear {
+                    UNUserNotificationCenter.current().delegate = navigationManager
+                }
                 .sheet(isPresented: Binding<Bool>(
                     get: { preferences.shouldShowReleaseNotes },
                     set: { _ in preferences.markReleaseNotesAsSeen() }
@@ -37,7 +40,7 @@ struct iOSApp: App {
 
 extension View {
     func apply<V: View>(@ViewBuilder _ block: (Self) -> V) -> V { block(self) }
-    
+
     @ViewBuilder
     func glassCompatibleButtonStyle() -> some View {
         if #available(iOS 26, *) {

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.notifications
 
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -19,6 +20,20 @@ class NotificationReceiver : BroadcastReceiver() {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
+        val contentIntent =
+            context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                action = NotificationConstants.ACTION_OPEN_SCHEDULE
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                intent.extras?.let { putExtras(it) }
+            }
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                id,
+                contentIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+
         val builder =
             NotificationCompat
                 .Builder(context, channelId)
@@ -27,6 +42,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
 
         notificationManager.notify(id, builder.build())
     }

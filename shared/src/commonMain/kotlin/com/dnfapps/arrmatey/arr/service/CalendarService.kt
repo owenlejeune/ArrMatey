@@ -176,15 +176,10 @@ class CalendarService(
             )
 
             itemsWithId.forEach { item ->
-                item.notificationScheduledTime?.let { scheduledTime ->
-                    scheduleNotificationUseCase(
-                        instance = instance,
-                        message = item.notificationMessage,
-                        scheduledTime = scheduledTime,
-                        notificationId = item.calendarId.toInt(),
-                        releaseType = item.notificationReleaseType,
-                    )
-                }
+                scheduleNotificationUseCase(
+                    instance = instance,
+                    item = item,
+                )
             }
         }
     }

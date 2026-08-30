@@ -19,12 +19,19 @@ actual class NotificationManager(
         message: String,
         scheduledTime: Instant,
         instanceName: String,
+        extras: Map<String, String>,
     ) {
         val content =
             UNMutableNotificationContent().apply {
                 setTitle(title)
                 setBody(message)
-                setUserInfo(mapOf("instanceName" to instanceName))
+                setUserInfo(
+                    extras +
+                        mapOf(
+                            "instanceName" to instanceName,
+                            "action" to NotificationConstants.ACTION_OPEN_SCHEDULE,
+                        ),
+                )
             }
 
         val now = Clock.System.now()
@@ -82,6 +89,7 @@ actual class NotificationManager(
                 UNMutableNotificationContent().apply {
                     setTitle(title)
                     setBody("$message (${(progress * 100).toInt()}%)")
+                    setUserInfo(mapOf("action" to NotificationConstants.ACTION_OPEN_SCHEDULE))
                 }
             val request = UNNotificationRequest.requestWithIdentifier(id.toString(), content, null)
             notificationCenter.addNotificationRequest(request, null)
@@ -98,6 +106,7 @@ actual class NotificationManager(
             UNMutableNotificationContent().apply {
                 setTitle(title)
                 setBody(message)
+                setUserInfo(mapOf("action" to NotificationConstants.ACTION_OPEN_SCHEDULE))
             }
         val request = UNNotificationRequest.requestWithIdentifier(id.toString(), content, null)
         notificationCenter.addNotificationRequest(request, null)

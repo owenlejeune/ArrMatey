@@ -9,6 +9,7 @@ expect class NotificationManager {
         message: String,
         scheduledTime: Instant,
         instanceName: String,
+        extras: Map<String, String> = emptyMap(),
     )
 
     fun cancelNotification(id: Int)
