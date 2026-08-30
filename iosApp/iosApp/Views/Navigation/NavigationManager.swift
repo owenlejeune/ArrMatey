@@ -359,8 +359,6 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             openActivityTab()
         case NotificationConstants.shared.ACTION_OPEN_REQUESTS:
             openRequestsTab()
-        case NotificationConstants.shared.ACTION_OPEN_BAZARR:
-            openBazarrTab()
         case NotificationConstants.shared.ACTION_OPEN_DASHBOARD:
             closeOverlay()
         default:
