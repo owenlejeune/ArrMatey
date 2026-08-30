@@ -26,7 +26,7 @@ See the main README for setup instructions.
 
 1. Ensure there is an approved issue associated with the work (except for trivial docs-only changes).
 2. Update documentation for any user-facing changes.
-3. Follow Kotlin/Swift coding conventions.
+3. Follow Kotlin/Swift coding conventions. Run `./gradlew spotlessApply` to format Kotlin and Gradle files before submitting.
 4. Update the README if needed.
 5. Request review from maintainers.
 
