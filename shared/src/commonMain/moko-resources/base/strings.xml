@@ -82,7 +82,7 @@
     <string name="submit">Submit</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="confirm">Confirm</string>
     <string name="retry">Retry</string>
     <string name="search">Search</string>
@@ -111,7 +111,7 @@
     <string name="host_description">The URL used of the %1$s web interface. MUST be prefixed with &quot;http://&quot; or &quot;https://&quot;.</string>
     <string name="host_placeholder">eg. http://10.0.0.1:</string>
     <string name="api_key">API Key</string>
-    <string name="api_key_placeholder">0a1b2c3d4e...</string>
+    <string name="api_key_placeholder">0a1b2c3d4e…</string>
     <string name="test">Test</string>
     <string name="success">Success</string>
     <string name="failure">Failure</string>
@@ -384,9 +384,9 @@
     <string name="prowlarr_description">Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base stack to integrate with your various PVR apps. Prowlarr supports management of both Torrent Trackers and Usenet Indexers.</string>
     <string name="prowlarr">Prowlarr</string>
     <string name="no_indexers_configured">No indexers configured</string>
-    <string name="loading_indexers">Loading indexers...</string>
+    <string name="loading_indexers">Loading indexers…</string>
     <string name="prowlarr_search_hint">Search for releases across your indexers</string>
-    <string name="search_releases_placeholder">Search for releases...</string>
+    <string name="search_releases_placeholder">Search for releases…</string>
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
     <string name="seerr">Seerr</string>
@@ -803,7 +803,7 @@
 
     <!-- Downloads -->
     <string name="downloading_file">Downloading %1$s</string>
-    <string name="downloading_progress">In progress...</string>
+    <string name="downloading_progress">In progress…</string>
     <string name="download_complete">Download complete</string>
 
     <!-- Instance Actions Menu -->

@@ -23,9 +23,7 @@ class TrimTransparencyTransformation : Transformation() { // Remove the ()
 
         for (y in 0 until softwareBitmap.height) {
             for (x in 0 until softwareBitmap.width) {
-                // Using Color.alpha() is slightly more readable but slower
-                // (input[x, y] shr 24) and 0xFF is fine
-                val alpha = (softwareBitmap.getPixel(x, y) shr 24) and 0xFF
+                val alpha = (softwareBitmap[x, y] shr 24) and 0xFF
                 if (alpha > 5) { // Threshold of 5 to ignore stray compression artifacts
                     if (x < firstX) firstX = x
                     if (y < firstY) firstY = y

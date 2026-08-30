@@ -24,7 +24,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
-        android:hardwareAccelerated="true">
+        android:hardwareAccelerated="true"
+        tools:targetApi="33">
         <activity
             android:exported="true"
             android:name=".MainActivity"

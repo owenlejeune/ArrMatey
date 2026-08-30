@@ -47,9 +47,9 @@ fun ToolbarAddButton(
     onAddDirectlyClicked: () -> Unit,
     onViewRequestClicked: () -> Unit,
     onRequestClicked: () -> Unit,
+    modifier: Modifier = Modifier,
     showRequest4kButton: Boolean = false,
     onRequest4kClicked: () -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     if (canAddDirectly && isSeerrConfigured) {
         var showToolbarAddMenu by remember { mutableStateOf(false) }
