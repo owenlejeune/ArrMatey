@@ -88,7 +88,7 @@ class ScheduleNotificationUseCase(
                     id = item.calendarId.toInt(),
                     title = mokoStrings.getString(title),
                     message = item.notificationMessage,
-                    scheduledTime = Clock.System.now().plus(10, DateTimeUnit.SECOND),// finalScheduledTime,
+                    scheduledTime = Clock.System.now().plus(10, DateTimeUnit.SECOND), // finalScheduledTime,
                     instanceName = instance.label,
                     extras = extras,
                 )
