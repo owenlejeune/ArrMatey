@@ -277,7 +277,7 @@ val useCaseModule =
         factory { GetMediaDetailsUseCase(get()) }
         factory { UpdateInstancePreferencesUseCase(get()) }
         factory { ObserveInstancePreferencesUseCase(get(), get()) }
-        factory { AddMediaItemUseCase(get()) }
+        factory { AddMediaItemUseCase(get(), get()) }
         factory { GetActivityTasksUseCase(get()) }
         factory { ObserveAllInstancesByTypeUseCase(get()) }
         factory { ObserveAllInstancesUseCase(get()) }
@@ -287,7 +287,7 @@ val useCaseModule =
         factory { SetInstanceActiveUseCase(get()) }
         factory { GetLookupResultsUseCase(get()) }
         factory { PerformLookupUseCase(get()) }
-        factory { AddMediaItemUseCase(get()) }
+        factory { AddMediaItemUseCase(get(), get()) }
         factory { GetReleasesUseCase(get()) }
         factory { DownloadReleaseUseCase(get()) }
         factory { GetMovieFilesUseCase(get()) }
@@ -446,6 +446,7 @@ val viewModelModule =
                 removeSeerrMediaFileUseCase = get(),
                 clearSeerrMediaDataUseCase = get(),
                 markSeerrMediaAsAvailableUseCase = get(),
+                logger = get(),
             )
         }
         factory { (type: InstanceType) ->
@@ -455,7 +456,7 @@ val viewModelModule =
             ArrSearchViewModel(type, instanceId, get(), get(), get(), get(), get())
         }
         factory { (preview: ArrMedia, type: InstanceType) ->
-            MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get(), get())
+            MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get(), get(), get())
         }
         factory { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
             InteractiveSearchViewModel(type, defaultFilter, get(), get(), get(), get())

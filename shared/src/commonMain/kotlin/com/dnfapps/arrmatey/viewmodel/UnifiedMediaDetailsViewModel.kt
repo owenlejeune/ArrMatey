@@ -65,6 +65,7 @@ import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
+import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -119,6 +120,7 @@ class UnifiedMediaDetailsViewModel(
     private val removeSeerrMediaFileUseCase: RemoveSeerrMediaFileUseCase,
     private val clearSeerrMediaDataUseCase: ClearSeerrMediaDataUseCase,
     private val markSeerrMediaAsAvailableUseCase: MarkSeerrMediaAsAvailableUseCase,
+    private val logger: Logger,
 ) : ViewModel() {
     private var seerrMediaId: Long? = null
     private var initialInstanceId: Long? = null
@@ -702,10 +704,10 @@ class UnifiedMediaDetailsViewModel(
         if (selectedId != null) {
             getArrInstanceRepositoryUseCase(selectedId)?.let { return it }
         }
-        return activeArrRepoFlow.filterNotNull().firstOrNull()
+        return activeArrRepoFlow.firstOrNull()
     }
 
-    private suspend fun getSeerrRepository(): SeerrInstanceRepository? = seerrRepositoryFlow.filterNotNull().firstOrNull()
+    private suspend fun getSeerrRepository(): SeerrInstanceRepository? = seerrRepositoryFlow.firstOrNull()
 
     private fun getEffectiveArrMedia(): ArrMedia? {
         val selectedId = _selectedInstanceId.value
@@ -808,6 +810,15 @@ class UnifiedMediaDetailsViewModel(
         targetInstanceId: Long? = null,
     ) {
         viewModelScope.launch {
+            val type = resolvedInstanceType
+            if (type == null) {
+                logger.error {
+                    "UnifiedMediaDetailsViewModel.smartAdd: resolvedInstanceType is null (requestType=$requestType, instanceType=$instanceType); cannot add '${item.title}'"
+                }
+                emitFallbackAddError("Unsupported media type")
+                return@launch
+            }
+
             val seerrRepo = getSeerrRepository()
             val successState = uiState.value as? UnifiedMediaDetailsUiState.Success
             val effectiveInstanceId =
@@ -820,26 +831,40 @@ class UnifiedMediaDetailsViewModel(
                     getActiveArrRepository()
                 }
 
+            if (targetRepo == null) {
+                logger.error {
+                    "UnifiedMediaDetailsViewModel.smartAdd: no repository resolved (type=$type, effectiveInstanceId=$effectiveInstanceId); cannot add '${item.title}'"
+                }
+                emitFallbackAddError("No instance available")
+                return@launch
+            }
+
             val collectJob =
-                if (targetRepo != null) {
-                    launch {
-                        targetRepo.addItemStatus.collect { _addItemStatus.value = it }
-                    }
-                } else {
-                    null
+                launch {
+                    targetRepo.addItemStatus.collect { _addItemStatus.value = it }
                 }
 
+            logger.info {
+                "UnifiedMediaDetailsViewModel.smartAdd: adding '${item.title}' to instance ${targetRepo.instance.id} (${targetRepo.instance.label}) type=$type searchOnAdd=$searchOnAdd"
+            }
+
             smartAddMediaUseCase(
-                instanceType = resolvedInstanceType ?: return@launch,
+                instanceType = type,
+                repository = targetRepo,
                 item = item,
                 searchOnAdd = searchOnAdd,
                 seerrMediaDetails = successState?.seerrMedia,
                 seerrRepository = seerrRepo,
-                targetInstanceId = effectiveInstanceId,
             )
             refresh()
-            collectJob?.cancel()
+            collectJob.cancel()
         }
+    }
+
+    private suspend fun emitFallbackAddError(message: String) {
+        _addItemStatus.value = OperationStatus.Error(message = message)
+        delay(1500)
+        _addItemStatus.value = OperationStatus.Idle
     }
 
     fun submitRequest(

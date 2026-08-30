@@ -19,7 +19,10 @@ import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
+import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,6 +37,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MediaPreviewViewModel(
@@ -46,7 +50,9 @@ class MediaPreviewViewModel(
     observeInstancePreferencesUseCase: ObserveInstancePreferencesUseCase,
     private val updateInstancePreferencesUseCase: UpdateInstancePreferencesUseCase,
     private val observeScopedReposByTypeUseCase: ObserveScopedReposByTypeUseCase,
+    private val logger: Logger,
 ) : ViewModel() {
+    private val _fallbackAddItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     private val _selectedInstanceId = MutableStateFlow<Long?>(null)
     val selectedInstanceId: StateFlow<Long?> = _selectedInstanceId.asStateFlow()
 
@@ -189,6 +195,17 @@ class MediaPreviewViewModel(
                     repository.refreshAllMetadata()
                 }
 
+                val mergedAddItemStatus =
+                    combine(
+                        repository.addItemStatus,
+                        _fallbackAddItemStatus,
+                    ) { repoStatus, fallbackStatus ->
+                        if (repoStatus is OperationStatus.Idle && fallbackStatus !is OperationStatus.Idle) {
+                            fallbackStatus
+                        } else {
+                            repoStatus
+                        }
+                    }
                 combine(
                     combine(
                         repository.qualityProfiles,
@@ -198,7 +215,7 @@ class MediaPreviewViewModel(
                         Triple(qualityProfiles, rootFolders, tags)
                     },
                     combine(
-                        repository.addItemStatus,
+                        mergedAddItemStatus,
                         repository.lastAddedItemId,
                         previewPath,
                     ) { addItemStatus, lastAddedItemId, previewPath ->
@@ -235,9 +252,27 @@ class MediaPreviewViewModel(
         searchOnAdd: Boolean,
     ) {
         viewModelScope.launch {
+            val repository = selectedRepository.value
+            if (repository == null) {
+                logger.error {
+                    "MediaPreviewViewModel.addItem: selectedRepository is null (type=$instanceType); cannot add '${item.title}'"
+                }
+                _fallbackAddItemStatus.value = OperationStatus.Error(message = "No instance available")
+                delay(1500.milliseconds)
+                _fallbackAddItemStatus.value = OperationStatus.Idle
+                return@launch
+            }
             val metadata = metadataResponse.value
-            val targetId = selectedRepository.value?.instance?.id
-            addMediaUseCase(instanceType, item, metadata, searchOnAdd, targetInstanceId = targetId)
+            logger.info {
+                "MediaPreviewViewModel.addItem: adding '${item.title}' to instance ${repository.instance.id} (${repository.instance.label})"
+            }
+            addMediaUseCase(
+                instanceType = instanceType,
+                repository = repository,
+                item = item,
+                metadata = metadata,
+                searchOnAdd = searchOnAdd,
+            )
         }
     }
 

@@ -4,11 +4,14 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.flow.firstOrNull
 
 class AddMediaItemUseCase(
     private val instanceManager: InstanceManager,
+    private val logger: Logger,
 ) {
     suspend operator fun invoke(
         instanceType: InstanceType,
@@ -25,9 +28,23 @@ class AddMediaItemUseCase(
             }
 
         if (repository == null) {
+            logger.error {
+                "AddMediaItemUseCase: no repository resolved (type=$instanceType, targetInstanceId=$targetInstanceId); " +
+                    "add aborted for item '${item.title}'"
+            }
             return
         }
 
+        invoke(instanceType, repository, item, metadata, searchOnAdd)
+    }
+
+    suspend operator fun invoke(
+        instanceType: InstanceType,
+        repository: ArrInstanceRepository,
+        item: ArrMedia,
+        metadata: AudiobookMetadataResponse? = null,
+        searchOnAdd: Boolean = false,
+    ) {
         if (
             instanceType == InstanceType.Listenarr &&
             metadata != null &&
