@@ -254,7 +254,7 @@ fun <T : ArrMedia> MediaItem(
                 BannerView(
                     bannerModel = bannerModel ?: item.getBanner()?.remoteUrl?.let { rememberRemoteImageData(it) },
                     blur = blur,
-                    modifier = Modifier.height(contentHeight.pxToDp()),
+                    modifier = Modifier.height(contentHeight.pxToDp() + 24.dp),
                 )
             }
 
@@ -351,7 +351,7 @@ fun SeerrMediaItem(
                 BannerView(
                     bannerModel = bannerModel ?: item.fullBackdropPath?.let { rememberRemoteImageData(it) },
                     blur = Blur.Normal,
-                    modifier = Modifier.height(contentHeight.pxToDp()),
+                    modifier = Modifier.height(contentHeight.pxToDp() + 24.dp),
                 )
             }
 

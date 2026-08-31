@@ -179,7 +179,7 @@ fun BookDetailsScreen(
                 }
 
                 Column(
-                    modifier = Modifier.padding(horizontal = 24.dp).padding(top = 12.dp),
+                    modifier = Modifier.padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     Column {
