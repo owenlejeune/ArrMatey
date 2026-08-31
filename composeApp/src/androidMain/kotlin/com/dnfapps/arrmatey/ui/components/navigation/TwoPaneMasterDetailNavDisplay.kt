@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +19,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 
 @Composable
 fun TwoPaneMasterDetailNavDisplay(
@@ -66,14 +68,16 @@ fun TwoPaneMasterDetailNavDisplay(
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 if (lastValidDetailBackStack.value.isNotEmpty()) {
-                    NavDisplay(
-                        backStack = lastValidDetailBackStack.value,
-                        onBack = { navigation.popBackStack() },
-                        transitionSpec = { forwardSlideTransform() },
-                        popTransitionSpec = { popSlideTransform() },
-                        predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-                        entryProvider = entryProvider,
-                    )
+                    CompositionLocalProvider(LocalIsInTwoPane provides true) {
+                        NavDisplay(
+                            backStack = lastValidDetailBackStack.value,
+                            onBack = { navigation.popBackStack() },
+                            transitionSpec = { forwardSlideTransform() },
+                            popTransitionSpec = { popSlideTransform() },
+                            predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
+                            entryProvider = entryProvider,
+                        )
+                    }
                 }
             }
         }

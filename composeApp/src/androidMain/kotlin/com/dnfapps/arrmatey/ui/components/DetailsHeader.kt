@@ -41,6 +41,7 @@ import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.dp
 import com.dnfapps.arrmatey.utils.format
@@ -56,13 +57,14 @@ fun DetailsHeader(
     wideRailIsVisible: Boolean = false
 ) {
     var detailHeight by remember { mutableIntStateOf(0) }
+    val isInTwoPane = LocalIsInTwoPane.current
     Box(
         modifier = Modifier.fillMaxWidth(),
     ) {
         DetailHeaderBanner(
             bannerUrl = item.getBanner()?.remoteUrl,
             gradientHeight = detailHeight.times(2).dp(),
-            startGradient = isExpanded && wideRailIsVisible
+            startGradient = isExpanded && (wideRailIsVisible || isInTwoPane)
         )
 
         Row(

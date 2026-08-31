@@ -27,6 +27,7 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.RatingItem
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
 
@@ -49,11 +50,12 @@ fun UnifiedDetailsHeader(
     wideRailIsVisible: Boolean = false
 ) {
     var detailHeight by remember { mutableIntStateOf(0) }
+    val isInTwoPane = LocalIsInTwoPane.current
     Box(modifier = Modifier.fillMaxWidth()) {
         DetailHeaderBanner(
             bannerUrl = bannerUrl,
             gradientHeight = bannerGradientHeight ?: detailHeight.times(2).dp,
-            startGradient = isExpanded && wideRailIsVisible
+            startGradient = isExpanded && (wideRailIsVisible || isInTwoPane)
         )
 
         Row(

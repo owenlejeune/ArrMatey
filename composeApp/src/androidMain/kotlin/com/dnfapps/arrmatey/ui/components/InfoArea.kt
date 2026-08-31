@@ -145,7 +145,7 @@ fun InfoArea(
     cards: List<InfoCardData>,
     modifier: Modifier = Modifier,
     title: StringResource? = MR.strings.information,
-    isExpanded: Boolean = false
+    useDualColumn: Boolean = false
 ) {
     val validCards = cards.filter { it.items.isNotEmpty() }
     if (validCards.isEmpty()) return
@@ -157,7 +157,7 @@ fun InfoArea(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
         }
-        if (isExpanded) {
+        if (useDualColumn) {
             FlowRow(
                 maxItemsInEachRow = 2,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

@@ -260,11 +260,13 @@ fun HomeScreen(
                                         }
                                     val navigator = navigationManager.getNavigator(currentTab)
 
-                                    if (hasInstances && navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
-                                        FloatingActionButton(
-                                            onClick = { navigator.toSearch(type = currentTab?.associatedType) },
-                                        ) {
-                                            Icon(Icons.Default.Add, contentDescription = null)
+                                    Box(modifier = Modifier.size(56.dp)) {
+                                        if (hasInstances && navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
+                                            FloatingActionButton(
+                                                onClick = { navigator.toSearch(type = currentTab?.associatedType) },
+                                            ) {
+                                                Icon(Icons.Default.Add, contentDescription = null)
+                                            }
                                         }
                                     }
                                 }

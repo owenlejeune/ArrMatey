@@ -1,20 +1,21 @@
-# Walkthrough - Updated DetailHeaderBanner startGradient logic
+# Walkthrough - Updated DetailHeaderBanner startGradient logic (Refined)
 
-I have updated the `startGradient` logic for `DetailHeaderBanner` to correctly handle tablet layouts with and without the navigation rail visible.
+I have updated the `startGradient` logic for `DetailHeaderBanner` to correctly handle both the navigation rail visibility and the two-pane master-detail context.
 
 ## Changes Made
 
-- **Updated `DetailHeaderBanner` callers**:
-    - All screens and components that use `DetailHeaderBanner` (or call headers that use it) now accept a `wideRailIsVisible` parameter.
-    - The `startGradient` property of `DetailHeaderBanner` is now calculated as `isExpanded && wideRailIsVisible`.
-- **Navigation & Tabs**:
-    - Updated `mediaNavEntries` to accept and pass down the `wideRailIsVisible` flag.
-    - Updated all tabs (`ArrTab`, `SeerrTab`, `UnifiedLibraryTab`, `CalendarTab`, `DiscoverTab`, `BazarrTab`) to pass the `wideRailIsVisible` flag from the `HomeScreen`.
-- **Detail Screens & Components**:
-    - `UnifiedMediaDetailsScreen`, `EpisodeDetailsScreen`, `BookDetailsScreen`, `MediaPreviewScreen`, `BazarrDetailsScreen`, and `SeerrPersonDetailsScreen` now correctly handle the rail visibility.
-    - `DetailsHeader`, `UnifiedDetailsHeader`, and `PersonDetailsHeader` components were updated to support the new logic.
+- **Added `LocalIsInTwoPane` Context**:
+    - Created `LocalIsInTwoPane` in `CompositionLocals.kt`.
+    - `TwoPaneMasterDetailNavDisplay` now provides `true` for this context when rendering the detail pane.
+- **Refined `startGradient` Logic**:
+    - The `startGradient` is now shown if `isExpanded` is true AND either `wideRailIsVisible` is true OR `isInTwoPane` (from context) is true.
+    - This ensures the gradient is shown:
+        - When the navigation rail is visible on tablets.
+        - When a detail screen is shown in the right pane of a two-pane layout, even if the rail itself is hidden (e.g. in an overlay that still uses two panes).
+- **Updated Components & Screens**:
+    - `UnifiedDetailsHeader`, `DetailsHeader`, `PersonDetailsHeader`, `EpisodeDetailsScreen`, `BookDetailsScreen`, and `BazarrDetailsScreen` were updated to read `LocalIsInTwoPane` and apply the refined logic.
 
 ## Verification Results
 
 - **Build**: Successfully compiled the `:composeApp` module.
-- **Logic**: The `startGradient` will now only be shown on expanded screens when the navigation rail (or master pane in dual-pane) is actually visible on the left. This prevents the gradient from appearing when the detail screen is shown in a full-screen overlay (like Settings) on a tablet.
+- **Logic**: The refined condition `isExpanded && (wideRailIsVisible || isInTwoPane)` correctly addresses the user's requirements for two-pane views.

@@ -57,6 +57,7 @@ import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
+import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.utils.dp
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -168,11 +169,12 @@ fun BookDetailsScreen(
                 modifier = Modifier.verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                val isInTwoPane = LocalIsInTwoPane.current
                 Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
                     DetailHeaderBanner(
                         bannerUrl = currentBook.getCover()?.remoteUrl,
                         gradientHeight = 100.dp,
-                        startGradient = isExpanded && wideRailIsVisible
+                        startGradient = isExpanded && (wideRailIsVisible || isInTwoPane)
                     )
                 }
 

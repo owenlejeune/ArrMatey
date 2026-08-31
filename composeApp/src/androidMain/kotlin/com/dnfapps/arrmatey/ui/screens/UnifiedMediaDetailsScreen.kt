@@ -112,6 +112,7 @@ import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.components.buildArrInfoItems
 import com.dnfapps.arrmatey.ui.components.buildSeerrInfoItems
 import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
+import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAuthorSheet
@@ -170,6 +171,7 @@ fun UnifiedMediaDetailsScreen(
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    val isDualPanel = LocalIsInTwoPane.current
 
     var confirmDelete by remember { mutableStateOf(false) }
     var showEditSheet by remember { mutableStateOf(false) }
@@ -299,8 +301,8 @@ fun UnifiedMediaDetailsScreen(
                         colors = IconButtonDefaults.headerBarColors(),
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(MR.strings.back),
+                            imageVector = if (isDualPanel) Icons.Default.Close else Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = mokoString(if (isDualPanel) MR.strings.close else MR.strings.back),
                         )
                     }
                 },
@@ -648,7 +650,7 @@ fun UnifiedMediaDetailsScreen(
                                                 ),
                                             ),
                                         modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
-                                        isExpanded = isExpanded
+                                        useDualColumn = isExpanded && !isDualPanel
                                     )
                                 }
 
