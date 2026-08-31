@@ -25,7 +25,8 @@ fun PersonDetailsHeader(
     item: PersonDetails,
     credits: PersonCredits?,
     modifier: Modifier = Modifier,
-    isExpanded: Boolean = false
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false
 ) {
     val backdrops = credits?.backdrops ?: emptyList()
     var currentIndex by remember { mutableIntStateOf(0) }
@@ -50,7 +51,7 @@ fun PersonDetailsHeader(
                 DetailHeaderBanner(
                     bannerUrl = url,
                     gradientHeight = 150.dp,
-                    startGradient = isExpanded
+                    startGradient = isExpanded && wideRailIsVisible
                 )
             }
         }

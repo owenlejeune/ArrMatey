@@ -39,6 +39,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun EntryProviderScope<NavKey>.mediaNavEntries(
     navigation: Navigator<*>,
     isExpanded: Boolean,
+    wideRailIsVisible: Boolean = false,
     defaultInstanceType: InstanceType? = null,
 ) {
     entry<MediaScreen.Details> { details ->
@@ -52,6 +53,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             instanceType = resolvedInstanceType,
             instanceId = details.instanceId,
             isExpanded = isExpanded,
+            wideRailIsVisible = wideRailIsVisible,
             onBack = { navigation.popBackStack() },
             onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },
             onNavigateToSeriesRelease = { seriesId, seasonNumber ->
@@ -74,6 +76,8 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
     entry<MediaScreen.PersonDetails> { details ->
         SeerrPersonDetailsScreen(
             personId = details.personId,
+            isExpanded = isExpanded,
+            wideRailIsVisible = wideRailIsVisible,
             onBack = { navigation.popBackStack() },
             onMediaClick = { tmdbId, type ->
                 navigation.toDetails(tmdbId = tmdbId, requestType = type)
@@ -157,6 +161,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             series = params.series,
             episode = params.episode,
             isExpanded = isExpanded,
+            wideRailIsVisible = wideRailIsVisible,
             onBack = { navigation.popBackStack() },
             onNavigateToSeriesRelease = { episodeId ->
                 navigation.toSeriesRelease(episodeId = episodeId)
@@ -168,6 +173,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             book = params.book,
             author = params.author,
             isExpanded = isExpanded,
+            wideRailIsVisible = wideRailIsVisible,
             onBack = { navigation.popBackStack() },
             onNavigateToBookRelease = { bookId ->
                 navigation.toBookRelease(bookId = bookId)
@@ -213,6 +219,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                 item = preview.item,
                 type = type,
                 isExpanded = isExpanded,
+                wideRailIsVisible = wideRailIsVisible,
                 onBack = { navigation.popBackStack() },
                 onItemAdded = { navigation.toDetails(it) },
             )

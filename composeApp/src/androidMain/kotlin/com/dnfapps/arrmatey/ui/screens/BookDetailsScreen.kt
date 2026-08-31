@@ -67,6 +67,7 @@ fun BookDetailsScreen(
     book: Book,
     author: Author,
     isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToBookRelease: (Long) -> Unit = {},
     viewModel: BookDetailsViewModel = koinInjectParams(author.id, book),
@@ -171,7 +172,7 @@ fun BookDetailsScreen(
                     DetailHeaderBanner(
                         bannerUrl = currentBook.getCover()?.remoteUrl,
                         gradientHeight = 100.dp,
-                        startGradient = isExpanded
+                        startGradient = isExpanded && wideRailIsVisible
                     )
                 }
 

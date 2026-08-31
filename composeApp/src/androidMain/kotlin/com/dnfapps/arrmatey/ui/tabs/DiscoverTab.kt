@@ -94,7 +94,11 @@ fun DiscoverTab(
                         },
                     )
                 }
-                mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
+                mediaNavEntries(
+                    navigation = navigation,
+                    isExpanded = isExpanded,
+                    wideRailIsVisible = wideRailIsVisible
+                )
             },
     )
 }

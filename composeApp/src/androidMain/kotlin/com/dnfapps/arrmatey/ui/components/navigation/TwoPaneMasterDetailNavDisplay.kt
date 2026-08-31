@@ -23,6 +23,7 @@ import com.dnfapps.arrmatey.navigation.Navigator
 fun TwoPaneMasterDetailNavDisplay(
     navigation: Navigator<NavKey>,
     isExpanded: Boolean,
+    wideRailIsVisible: Boolean,
     entryProvider: (NavKey) -> NavEntry<NavKey>,
     modifier: Modifier = Modifier,
     isMasterScreen: (NavKey) -> Boolean = { it is ArrScreen.Library || it is MediaScreen.Search },
@@ -34,7 +35,9 @@ fun TwoPaneMasterDetailNavDisplay(
     val showDetails = isExpanded && detailBackStack.isNotEmpty()
 
     val detailsWeight by animateFloatAsState(
-        targetValue = if (showDetails) 1.2f else 0.001f,
+        targetValue = if (showDetails) {
+            if (wideRailIsVisible) 1.2f else 1f
+        } else 0.001f,
         label = "DetailsWeight",
     )
 

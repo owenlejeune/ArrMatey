@@ -52,7 +52,8 @@ fun DetailsHeader(
     item: ArrMedia,
     type: InstanceType,
     topPadding: Dp,
-    isExpanded: Boolean = false
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false
 ) {
     var detailHeight by remember { mutableIntStateOf(0) }
     Box(
@@ -61,7 +62,7 @@ fun DetailsHeader(
         DetailHeaderBanner(
             bannerUrl = item.getBanner()?.remoteUrl,
             gradientHeight = detailHeight.times(2).dp(),
-            startGradient = isExpanded
+            startGradient = isExpanded && wideRailIsVisible
         )
 
         Row(

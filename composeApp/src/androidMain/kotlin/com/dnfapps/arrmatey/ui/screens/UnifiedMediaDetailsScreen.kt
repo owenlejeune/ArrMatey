@@ -143,6 +143,7 @@ fun UnifiedMediaDetailsScreen(
     instanceType: InstanceType? = null,
     requestType: RequestType? = null,
     isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     onBack: () -> Unit,
     onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit,
     onNavigateToSeriesRelease: (Long?, Int) -> Unit,
@@ -435,7 +436,8 @@ fun UnifiedMediaDetailsScreen(
                                 releasedBy = state.releasedBy,
                                 seasonCount = state.seasonCount?.let { mokoPlural(MR.plurals.seasons, it) },
                                 genres = state.genres,
-                                isExpanded = isExpanded
+                                isExpanded = isExpanded,
+                                wideRailIsVisible = wideRailIsVisible
                             )
 
                             Column(

@@ -68,6 +68,7 @@ fun EpisodeDetailsScreen(
     series: ArrSeries,
     episode: Episode,
     isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToSeriesRelease: (Long) -> Unit = {},
     viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode),
@@ -173,7 +174,7 @@ fun EpisodeDetailsScreen(
                     DetailHeaderBanner(
                         bannerUrl = currentEpisode.getBanner()?.remoteUrl,
                         gradientHeight = 100.dp,
-                        startGradient = isExpanded
+                        startGradient = isExpanded && wideRailIsVisible
                     )
                 }
 

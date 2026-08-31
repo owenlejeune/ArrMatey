@@ -29,6 +29,7 @@ fun ArrTab(
     TwoPaneMasterDetailNavDisplay(
         navigation = navigation,
         isExpanded = isExpanded,
+        wideRailIsVisible = wideRailIsVisible,
         entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation),
     )
 }
@@ -48,5 +49,10 @@ private fun arrEntryProvider(
             onNavigateToDetails = { media, instanceId -> navigation.toMediaDetails(media, type, instanceId) },
         )
     }
-    mediaNavEntries(navigation = navigation, isExpanded = isExpanded, defaultInstanceType = type)
+    mediaNavEntries(
+        navigation = navigation,
+        isExpanded = isExpanded,
+        wideRailIsVisible = wideRailIsVisible,
+        defaultInstanceType = type
+    )
 }

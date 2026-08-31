@@ -46,7 +46,8 @@ fun BazarrTab(
                         id = details.id,
                         type = details.type,
                         onBack = { navigation.popBackStack() },
-                        isExpanded = isExpanded
+                        isExpanded = isExpanded,
+                        wideRailIsVisible = wideRailIsVisible
                     )
                 }
             },

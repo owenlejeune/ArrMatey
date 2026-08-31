@@ -93,6 +93,7 @@ fun BazarrDetailsScreen(
     id: Long,
     type: BazarrMediaType,
     isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     viewModel: BazarrDetailsViewModel = koinInjectParams(id, type),
     onBack: () -> Unit = {},
 ) {
@@ -196,7 +197,8 @@ fun BazarrDetailsScreen(
                 poster = uiState.details?.poster,
                 fanart = uiState.details?.fanart,
                 topPadding = paddingValues.calculateTopPadding(),
-                isExpanded = isExpanded
+                isExpanded = isExpanded,
+                wideRailIsVisible = wideRailIsVisible
             )
 
             Column(
@@ -292,7 +294,8 @@ private fun BazarrDetailsHeader(
     poster: String?,
     fanart: String?,
     topPadding: Dp,
-    isExpanded: Boolean = false
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false
 ) {
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -300,7 +303,7 @@ private fun BazarrDetailsHeader(
         DetailHeaderBanner(
             bannerUrl = fanart ?: poster,
             gradientHeight = 150.dp,
-            startGradient = isExpanded
+            startGradient = isExpanded && wideRailIsVisible
         )
 
         Row(

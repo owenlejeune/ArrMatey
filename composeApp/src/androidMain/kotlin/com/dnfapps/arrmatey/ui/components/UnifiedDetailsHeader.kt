@@ -45,14 +45,15 @@ fun UnifiedDetailsHeader(
     seasonCount: String?,
     genres: List<String>,
     bannerGradientHeight: Dp? = null,
-    isExpanded: Boolean = false
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false
 ) {
     var detailHeight by remember { mutableIntStateOf(0) }
     Box(modifier = Modifier.fillMaxWidth()) {
         DetailHeaderBanner(
             bannerUrl = bannerUrl,
             gradientHeight = bannerGradientHeight ?: detailHeight.times(2).dp,
-            startGradient = isExpanded
+            startGradient = isExpanded && wideRailIsVisible
         )
 
         Row(

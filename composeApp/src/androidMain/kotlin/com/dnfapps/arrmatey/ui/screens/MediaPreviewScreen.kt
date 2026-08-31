@@ -63,6 +63,7 @@ fun MediaPreviewScreen(
     onBack: () -> Unit,
     onItemAdded: (Long) -> Unit,
     isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     viewModel: MediaPreviewViewModel = koinInjectParams(item, type),
 ) {
     val context = LocalContext.current
@@ -138,7 +139,8 @@ fun MediaPreviewScreen(
                     item = item,
                     type = type,
                     topPadding = paddingValues.calculateTopPadding(),
-                    isExpanded = isExpanded
+                    isExpanded = isExpanded,
+                    wideRailIsVisible = wideRailIsVisible
                 )
 
                 Column(
