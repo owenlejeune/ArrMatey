@@ -338,7 +338,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             if let itemIdStr = userInfo[NotificationConstants.shared.EXTRA_ITEM_ID] as? String,
                let itemId = Int64(itemIdStr),
                let typeName = userInfo[NotificationConstants.shared.EXTRA_INSTANCE_TYPE] as? String,
-               let type = InstanceType.entries.first(where: { $0.name == typeName }) {
+               let type = InstanceType.allCases.first(where: { $0.name == typeName }) {
 
                 let tmdbId = (userInfo[NotificationConstants.shared.EXTRA_TMDB_ID] as? String).flatMap { Int64($0) }
                 let instanceId = (userInfo[NotificationConstants.shared.EXTRA_INSTANCE_ID] as? String).flatMap { Int64($0) }
