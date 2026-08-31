@@ -84,6 +84,14 @@ class MoreScreenViewModel(
                 initialValue = true,
             )
 
+    val dualPanelSupport =
+        preferencesStore.dualPanelSupport
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
     val testingStatus: StateFlow<Map<Long, OperationStatus>> = _testingStatus.asStateFlow()
 
@@ -202,5 +210,9 @@ class MoreScreenViewModel(
 
     fun toggleSearchShowInstanceIndicatorShadow() {
         preferencesStore.toggleSearchShowInstanceIndicatorShadow()
+    }
+
+    fun toggleDualPanelSupport() {
+        preferencesStore.toggleDualPanelSupport()
     }
 }

@@ -74,6 +74,7 @@ class PreferencesStore(
     private val localNetworkPermissionInfoDismissedKey = booleanPreferencesKey("localNetworkPermissionInfoDismissed")
     private val searchShowBannersKey = booleanPreferencesKey("searchShowBanners")
     private val searchShowInstanceIndicatorShadowKey = booleanPreferencesKey("searchShowInstanceIndicatorShadow")
+    private val dualPanelSupportKey = booleanPreferencesKey("dualPanelSupport")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> =
         when (type) {
@@ -155,6 +156,12 @@ class PreferencesStore(
         dataStore.data
             .map { preferences ->
                 preferences[searchShowInstanceIndicatorShadowKey] ?: true
+            }
+
+    val dualPanelSupport: Flow<Boolean> =
+        dataStore.data
+            .map { preferences ->
+                preferences[dualPanelSupportKey] ?: true
             }
 
     private val calendarViewMode: Flow<CalendarViewMode> =
@@ -299,6 +306,21 @@ class PreferencesStore(
                 val current = preferences[searchShowInstanceIndicatorShadowKey] ?: true
                 preferences[searchShowInstanceIndicatorShadowKey] = !current
             }
+        }
+    }
+
+    fun toggleDualPanelSupport() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[dualPanelSupportKey] ?: true
+                preferences[dualPanelSupportKey] = !current
+            }
+        }
+    }
+
+    fun setDualPanelSupport(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[dualPanelSupportKey] = value }
         }
     }
 

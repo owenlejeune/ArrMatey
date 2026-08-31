@@ -13,13 +13,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
+import org.koin.compose.koinInject
 
 @Composable
 fun TwoPaneMasterDetailNavDisplay(
@@ -29,12 +32,15 @@ fun TwoPaneMasterDetailNavDisplay(
     entryProvider: (NavKey) -> NavEntry<NavKey>,
     modifier: Modifier = Modifier,
     isMasterScreen: (NavKey) -> Boolean = { it is ArrScreen.Library || it is MediaScreen.Search },
+    preferencesStore: PreferencesStore = koinInject(),
 ) {
+    val dualPanelSupport by preferencesStore.dualPanelSupport.collectAsStateWithLifecycle(true)
+
     val baseIndex = navigation.backStack.indexOfLast(isMasterScreen).coerceAtLeast(0)
     val baseScreen = navigation.backStack[baseIndex]
 
     val detailBackStack = navigation.backStack.filterIndexed { index, _ -> index > baseIndex }
-    val showDetails = isExpanded && detailBackStack.isNotEmpty()
+    val showDetails = isExpanded && dualPanelSupport && detailBackStack.isNotEmpty()
 
     val detailsWeight by animateFloatAsState(
         targetValue = if (showDetails) {

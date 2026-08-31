@@ -18,6 +18,7 @@ data class SettingItem(
 sealed interface IconSource {
     data class Vector(
         val imageVector: ImageVector,
+        val rotation: Float = 0f
     ) : IconSource
 
     data class Resource(

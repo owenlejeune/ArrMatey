@@ -118,3 +118,6 @@ captures
 node_modules/
 composeApp/release
 composeApp/release/*
+
+.artifacts
+.artifacts/*

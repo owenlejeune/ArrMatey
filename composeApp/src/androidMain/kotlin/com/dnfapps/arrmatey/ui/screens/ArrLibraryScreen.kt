@@ -215,7 +215,7 @@ fun ArrLibraryScreen(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             AnimatedVisibility(
-                visible = (!isExpanded || !wideRailIsVisible) && !isInSelectionMode && instancesState.selectedInstance != null,
+                visible = !wideRailIsVisible && !isInSelectionMode && instancesState.selectedInstance != null,
                 enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
                 exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
             ) {

@@ -37,6 +37,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.navigation.DiscoverScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager

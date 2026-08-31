@@ -59,6 +59,7 @@ fun SettingsTabNavHost(
             entryProvider {
                 entry<SettingsScreen.Landing> {
                     SettingsScreen(
+                        windowSizeClass = windowSizeClass,
                         onNavigateToInstance = { id, type -> navigation.onInstanceTap(id, type) },
                         onNavigateToAddInstance = { navigation.toAddInstance() },
                         onNavigateToEditDownloadClient = { id -> navigation.toEditDownloadClient(id) },

@@ -194,7 +194,7 @@ fun UnifiedLibraryScreen(
             modifier = Modifier.fillMaxSize(),
             floatingActionButton = {
                 AnimatedVisibility(
-                    visible = !isExpanded && !isInSelectionMode,
+                    visible = !wideRailIsVisible && !isInSelectionMode,
                     enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
                     exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
                 ) {

@@ -49,6 +49,9 @@
     <string name="configure_links">Configure Links</string>
     <string name="links_verified">Links Verified</string>
     <string name="links_not_verified">Links Not Verified</string>
+    <string name="large_screen_settings_title">Large Screen</string>
+    <string name="dual_panel_support_title">Dual Panel Support</string>
+    <string name="dual_panel_support_description">Enable side-by-side layouts on tablets and foldables.</string>
 
     <!-- Messages -->
     <string name="confirm_delete_instance">Are you sure you want to delete %1$s?</string>

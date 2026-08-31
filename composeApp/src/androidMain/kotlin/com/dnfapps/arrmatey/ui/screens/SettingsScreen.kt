@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationUserState
 import android.net.Uri
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Splitscreen
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
@@ -60,6 +62,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,6 +74,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -110,6 +115,7 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    windowSizeClass: WindowSizeClass,
     viewModel: MoreScreenViewModel = koinInject(),
     backupViewModel: BackupViewModel = koinInject(),
     moko: MokoStrings = koinInject(),
@@ -125,6 +131,7 @@ fun SettingsScreen(
 ) {
     val navManager = navigationManager
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
 
     val allInstances by viewModel.instances.collectAsStateWithLifecycle()
     val allDownloadClients by viewModel.downloadClients.collectAsStateWithLifecycle()
@@ -175,8 +182,15 @@ fun SettingsScreen(
 
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
+    val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
     val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
+
+    val isLargeScreenSupported = remember(windowSizeClass, configuration) {
+        windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact ||
+            configuration.smallestScreenWidthDp >= 600 ||
+            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && context.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_HINGE_ANGLE))
+    }
 
     val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
     val appColor by viewModel.appColor.collectAsStateWithLifecycle()
@@ -488,6 +502,26 @@ fun SettingsScreen(
                         ),
                     ),
             )
+
+            if (isLargeScreenSupported) {
+                SettingsGroup(
+                    title = mokoString(MR.strings.large_screen_settings_title),
+                    items = listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Splitscreen, rotation = 90f),
+                            title = mokoString(MR.strings.dual_panel_support_title),
+                            subtitle = mokoString(MR.strings.dual_panel_support_description),
+                            trailingContent = {
+                                Switch(
+                                    checked = dualPanelSupport,
+                                    onCheckedChange = { viewModel.toggleDualPanelSupport() },
+                                )
+                            },
+                            onClick = { viewModel.toggleDualPanelSupport() },
+                        )
+                    )
+                )
+            }
 
             SettingsGroup(
                 title = mokoString(MR.strings.search_results),
