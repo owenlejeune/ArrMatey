@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -67,7 +68,7 @@ fun InfoAreaCard(
     footer: (@Composable () -> Unit)? = null,
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,//.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
     ) {
         Column(
@@ -144,25 +145,45 @@ fun InfoArea(
     cards: List<InfoCardData>,
     modifier: Modifier = Modifier,
     title: StringResource? = MR.strings.information,
+    isExpanded: Boolean = false
 ) {
     val validCards = cards.filter { it.items.isNotEmpty() }
     if (validCards.isEmpty()) return
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    Column(modifier = modifier) {
         if (title != null) {
             Text(
                 text = mokoString(title),
                 style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
         }
-        validCards.forEach { card ->
-            InfoAreaCard(
-                infoItems = card.items,
-                header = card.header,
-                footer = card.footer,
-            )
+        if (isExpanded) {
+            FlowRow(
+                maxItemsInEachRow = 2,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                validCards.forEach { card ->
+                    InfoAreaCard(
+                        infoItems = card.items,
+                        header = card.header,
+                        footer = card.footer,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        } else {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                validCards.forEach { card ->
+                    InfoAreaCard(
+                        infoItems = card.items,
+                        header = card.header,
+                        footer = card.footer,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
     }
 }

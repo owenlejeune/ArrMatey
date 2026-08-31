@@ -67,6 +67,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun EpisodeDetailsScreen(
     series: ArrSeries,
     episode: Episode,
+    isExpanded: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToSeriesRelease: (Long) -> Unit = {},
     viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode),
@@ -172,6 +173,7 @@ fun EpisodeDetailsScreen(
                     DetailHeaderBanner(
                         bannerUrl = currentEpisode.getBanner()?.remoteUrl,
                         gradientHeight = 100.dp,
+                        startGradient = isExpanded
                     )
                 }
 

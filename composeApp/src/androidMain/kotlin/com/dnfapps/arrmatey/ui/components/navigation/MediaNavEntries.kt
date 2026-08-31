@@ -156,6 +156,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
         EpisodeDetailsScreen(
             series = params.series,
             episode = params.episode,
+            isExpanded = isExpanded,
             onBack = { navigation.popBackStack() },
             onNavigateToSeriesRelease = { episodeId ->
                 navigation.toSeriesRelease(episodeId = episodeId)
@@ -166,6 +167,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
         BookDetailsScreen(
             book = params.book,
             author = params.author,
+            isExpanded = isExpanded,
             onBack = { navigation.popBackStack() },
             onNavigateToBookRelease = { bookId ->
                 navigation.toBookRelease(bookId = bookId)

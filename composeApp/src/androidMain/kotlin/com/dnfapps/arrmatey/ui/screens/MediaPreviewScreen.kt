@@ -134,7 +134,12 @@ fun MediaPreviewScreen(
                 modifier = Modifier.verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                DetailsHeader(item, type, topPadding = paddingValues.calculateTopPadding())
+                DetailsHeader(
+                    item = item,
+                    type = type,
+                    topPadding = paddingValues.calculateTopPadding(),
+                    isExpanded = isExpanded
+                )
 
                 Column(
                     modifier =
@@ -144,8 +149,6 @@ fun MediaPreviewScreen(
                             .padding(top = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
-//                    UpcomingDateView(item)
-
                     item.overview?.let { overview ->
                         ItemDescriptionCard(overview)
                     }

@@ -298,8 +298,8 @@ fun UnifiedMediaDetailsScreen(
                         colors = IconButtonDefaults.headerBarColors(),
                     ) {
                         Icon(
-                            imageVector = if (isExpanded) Icons.Default.Close else Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(if (isExpanded) MR.strings.close else MR.strings.back),
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = mokoString(MR.strings.back),
                         )
                     }
                 },
@@ -435,6 +435,7 @@ fun UnifiedMediaDetailsScreen(
                                 releasedBy = state.releasedBy,
                                 seasonCount = state.seasonCount?.let { mokoPlural(MR.plurals.seasons, it) },
                                 genres = state.genres,
+                                isExpanded = isExpanded
                             )
 
                             Column(
@@ -645,6 +646,7 @@ fun UnifiedMediaDetailsScreen(
                                                 ),
                                             ),
                                         modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
+                                        isExpanded = isExpanded
                                     )
                                 }
 

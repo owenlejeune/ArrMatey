@@ -3,8 +3,10 @@ package com.dnfapps.arrmatey.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,6 +16,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 
@@ -21,6 +24,7 @@ import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 fun BoxScope.DetailHeaderBanner(
     bannerUrl: String?,
     gradientHeight: Dp,
+    startGradient: Boolean = false
 ) {
     Box(
         modifier =
@@ -56,5 +60,26 @@ fun BoxScope.DetailHeaderBanner(
                         ),
                     ),
         )
+
+        if (startGradient) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .width(100.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors =
+                                    listOf(
+                                        MaterialTheme.colorScheme.background,
+                                        MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                                        Color.Transparent,
+                                    ),
+                                startX = 0f,
+                                endX = Float.POSITIVE_INFINITY,
+                            ),
+                        ),
+            )
+        }
     }
 }

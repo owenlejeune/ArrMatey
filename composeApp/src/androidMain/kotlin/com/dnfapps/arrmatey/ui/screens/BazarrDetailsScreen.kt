@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:max-line-length")
-
 package com.dnfapps.arrmatey.ui.screens
 
 import android.widget.Toast
@@ -94,6 +92,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun BazarrDetailsScreen(
     id: Long,
     type: BazarrMediaType,
+    isExpanded: Boolean = false,
     viewModel: BazarrDetailsViewModel = koinInjectParams(id, type),
     onBack: () -> Unit = {},
 ) {
@@ -197,6 +196,7 @@ fun BazarrDetailsScreen(
                 poster = uiState.details?.poster,
                 fanart = uiState.details?.fanart,
                 topPadding = paddingValues.calculateTopPadding(),
+                isExpanded = isExpanded
             )
 
             Column(
@@ -292,6 +292,7 @@ private fun BazarrDetailsHeader(
     poster: String?,
     fanart: String?,
     topPadding: Dp,
+    isExpanded: Boolean = false
 ) {
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -299,6 +300,7 @@ private fun BazarrDetailsHeader(
         DetailHeaderBanner(
             bannerUrl = fanart ?: poster,
             gradientHeight = 150.dp,
+            startGradient = isExpanded
         )
 
         Row(
