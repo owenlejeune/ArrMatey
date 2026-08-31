@@ -38,7 +38,7 @@ fun TwoPaneMasterDetailNavDisplay(
 
     val detailsWeight by animateFloatAsState(
         targetValue = if (showDetails) {
-            if (wideRailIsVisible) 1.2f else 1f
+            if (wideRailIsVisible) 1.25f else 1f
         } else 0.001f,
         label = "DetailsWeight",
     )
