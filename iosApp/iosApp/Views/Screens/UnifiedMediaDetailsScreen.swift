@@ -83,6 +83,10 @@ struct UnifiedMediaDetailsScreen: View {
             viewModel: viewModel,
             screen: self
         ))
+        .modifier(UnifiedMediaDetailsSmartAddSeerrModifier(
+            viewModel: viewModel,
+            screen: self
+        ))
     }
 }
 
@@ -135,22 +139,6 @@ extension UnifiedMediaDetailsScreen {
                                 .foregroundColor(.themePrimary)
                         }
                     }
-
-                    UnifiedMediaDetailsActions(
-                        buttonState: viewModel.buttonState,
-                        onWatch: { url in
-                            if let urlObj = URL(string: url) { openURL(urlObj) }
-                        },
-                        onWatchTrailer: { url in
-                            if let urlObj = URL(string: url) { openURL(urlObj) }
-                        },
-                        onRequest: { viewModel.showRequestSheet(is4k: false) },
-                        onRequest4k: { viewModel.showRequestSheet(is4k: true) },
-                        onViewRequest: { viewModel.showViewRequestSheet() },
-                        onApproveRequest: { viewModel.showViewRequestSheet() },
-                        onDeclineRequest: { viewModel.showViewRequestSheet() },
-                        onManage: { viewModel.showViewRequestSheet() }
-                    )
 
                     if let overview = success.overview {
                         ItemDescriptionCard(overview: overview)
@@ -883,114 +871,170 @@ extension UnifiedMediaDetailsScreen {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
+            let buttonState = viewModel.buttonState
             let canAddDirectly = !success.hasArrId && success.arrMedia != nil && viewModel.isArrConfigured
             let showArrActions = success.hasArrId && viewModel.isArrConfigured
-            let showSeerrActions = viewModel.isSeerrConfigured && (viewModel.buttonState.showRemoveFromServiceButton || viewModel.buttonState.showClearDataButton || viewModel.buttonState.showMarkAsAvailableButton)
+            let showSeerrActions = viewModel.isSeerrConfigured && (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
             let showMissingInstances = !success.missingInstances.isEmpty
             let showMenuButton = showArrActions || showSeerrActions || showMissingInstances
-            let showReportIssue = viewModel.buttonState.showReportIssueButton
+            let showReportIssue = buttonState.showReportIssueButton
             let showInstancePicker = success.availableInstances.count > 1
 
-            if showReportIssue || showArrActions || canAddDirectly || showMenuButton || showInstancePicker {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 12) {
-                        if showInstancePicker, let resolvedType = viewModel.resolvedInstanceType {
-                            InstancePickerMenu(
-                                instances: success.availableInstances,
-                                selectedInstanceId: success.selectedInstanceId?.int64Value,
-                                onChangeInstance: { inst in
-                                    withAnimation(.easeInOut(duration: 0.3)) {
-                                        viewModel.selectInstance(instanceId: inst.id)
+            ToolbarItem(placement: .navigationBarTrailing) {
+                HStack(spacing: 12) {
+                    if showReportIssue {
+                        Button(action: { viewModel.showReportIssueSheet() }) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                        }
+                    }
+
+                    // Watch Menu
+                    if buttonState.showWatchButton || buttonState.showWatchTrailerOption {
+                        Menu {
+                            if buttonState.showWatchButton, let url = buttonState.watchButtonUrl {
+                                Button(action: { if let urlObj = URL(string: url) { openURL(urlObj) } }) {
+                                    Label(buttonState.watchButtonLabel.localized(), systemImage: "play.fill")
+                                }
+                            }
+                            if buttonState.showWatchTrailerOption, let url = buttonState.trailerUrl {
+                                Button(action: { if let urlObj = URL(string: url) { openURL(urlObj) } }) {
+                                    Label(MR.strings().watch_trailer.localized(), systemImage: "film")
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "play.circle")
+                        }
+                    }
+
+                    // Add / Request Menu
+                    if canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton {
+                        Menu {
+                            if canAddDirectly {
+                                Button(action: { showAddSheet = true }) {
+                                    Label(MR.strings().add.localized(), systemImage: "plus")
+                                }
+                            }
+                            if buttonState.showRequestButton || buttonState.showRequestMoreButton {
+                                let title = buttonState.showRequestMoreButton ? MR.strings().request_more.localized() : MR.strings().request.localized()
+                                Button(action: { viewModel.showRequestSheet(is4k: false) }) {
+                                    Label(title, systemImage: "plus.circle")
+                                }
+                            }
+                            if buttonState.showRequest4kButton {
+                                Button(action: { viewModel.showRequestSheet(is4k: true) }) {
+                                    Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                    }
+
+                    // Approval Menu
+                    if buttonState.showViewRequestButton {
+                        Menu {
+                            Button(action: { viewModel.showViewRequestSheet() }) {
+                                Label(MR.strings().view_request.localized(), systemImage: "clock")
+                            }
+                            if buttonState.showApproveRequestButton {
+                                Button(action: { viewModel.showViewRequestSheet() }) {
+                                    Label(MR.strings().approve_request.localized(), systemImage: "checkmark")
+                                }
+                            }
+                            if buttonState.showDeclineRequestButton {
+                                Button(role: .destructive, action: { viewModel.declineRequest(requestId: buttonState.pendingRequestId?.int64Value ?? 0) }) {
+                                    Label(MR.strings().decline_request.localized(), systemImage: "xmark")
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "clock")
+                        }
+                    }
+
+                    if showArrActions {
+                        Button(action: { viewModel.toggleMonitored() }) {
+                            Image(systemName: viewModel.isMonitored ? "bookmark.fill" : "bookmark")
+                        }
+                    }
+
+                    if showInstancePicker, let resolvedType = viewModel.resolvedInstanceType {
+                        InstancePickerMenu(
+                            instances: success.availableInstances,
+                            selectedInstanceId: success.selectedInstanceId?.int64Value,
+                            onChangeInstance: { inst in
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    viewModel.selectInstance(instanceId: inst.id)
+                                }
+                            },
+                            onAddNewInstance: { navigationManager.goToNewInstance(of: resolvedType) }
+                        )
+                        .menuIndicator(.hidden)
+                    }
+
+                    if showMenuButton {
+                        Menu {
+                            if showArrActions {
+                                Section {
+                                    Button(action: { viewModel.performRefresh() }) {
+                                        Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
                                     }
-                                },
-                                onAddNewInstance: { navigationManager.goToNewInstance(of: resolvedType) }
-                            )
-                            .menuIndicator(.hidden)
-                        }
 
-                        if showReportIssue {
-                            Button(action: { viewModel.showReportIssueSheet() }) {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundColor(.orange)
-                            }
-                        }
-
-                        if showArrActions {
-                            Button(action: { viewModel.toggleMonitored() }) {
-                                Image(systemName: viewModel.isMonitored ? "bookmark.fill" : "bookmark")
-                            }
-                        }
-
-                        if canAddDirectly {
-                            Button(action: { showAddSheet = true }) {
-                                Image(systemName: "plus")
-                            }
-                        }
-
-                        if showMenuButton {
-                            Menu {
-                                if showArrActions {
-                                    Section {
-                                        Button(action: { viewModel.performRefresh() }) {
-                                            Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
+                                    if viewModel.resolvedInstanceType?.includeTopLevelAutomaticSearchOption == true {
+                                        Button(action: { viewModel.performAutomaticLookup() }) {
+                                            Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
                                         }
+                                        .disabled(!viewModel.isMonitored)
+                                    }
 
-                                        if viewModel.resolvedInstanceType?.includeTopLevelAutomaticSearchOption == true {
-                                            Button(action: { viewModel.performAutomaticLookup() }) {
-                                                Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
-                                            }
-                                            .disabled(!viewModel.isMonitored)
-                                        }
+                                    Button(action: { showEditSheet = true }) {
+                                        Label(MR.strings().edit.localized(), systemImage: "pencil")
+                                    }
 
-                                        Button(action: { showEditSheet = true }) {
-                                            Label(MR.strings().edit.localized(), systemImage: "pencil")
-                                        }
+                                    Button(role: .destructive, action: { showConfirmSheet = true }) {
+                                        Label(MR.strings().delete.localized(), systemImage: "trash")
+                                    }
+                                }
+                            }
 
-                                        Button(role: .destructive, action: { showConfirmSheet = true }) {
-                                            Label(MR.strings().delete.localized(), systemImage: "trash")
+                            if showMissingInstances {
+                                Section {
+                                    ForEach(success.missingInstances, id: \.id) { instance in
+                                        Button(action: {
+                                            viewModel.setAddSheetTargetInstance(instance: instance)
+                                            showAddSheet = true
+                                        }) {
+                                            Label(MR.strings().add_to_arr.formatted(args: [instance.label]), systemImage: "plus")
                                         }
                                     }
                                 }
-
-                                if showMissingInstances {
-                                    Section {
-                                        ForEach(success.missingInstances, id: \.id) { instance in
-                                            Button(action: {
-                                                viewModel.setAddSheetTargetInstance(instance: instance)
-                                                showAddSheet = true
-                                            }) {
-                                                Label(MR.strings().add_to_arr.formatted(args: [instance.label]), systemImage: "plus")
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if showSeerrActions {
-                                    Section {
-                                        if viewModel.buttonState.showMarkAsAvailableButton {
-                                            let markTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().mark_as_available.localized() : MR.strings().mark_all_seasons_as_available.localized()
-                                            Button(action: { viewModel.markSeerrMediaAsAvailable() }) {
-                                                Label(markTitle, systemImage: "checkmark.circle")
-                                            }
-                                        }
-
-                                        if viewModel.buttonState.showRemoveFromServiceButton {
-                                            let removeTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().remove_from_radarr.localized() : MR.strings().remove_from_sonarr.localized()
-                                            Button(role: .destructive, action: { confirmRemoveFromService = true }) {
-                                                Label(removeTitle, systemImage: "trash")
-                                            }
-                                        }
-
-                                        if viewModel.buttonState.showClearDataButton {
-                                            Button(role: .destructive, action: { confirmClearData = true }) {
-                                                Label(MR.strings().clear_data.localized(), systemImage: "xmark.bin")
-                                            }
-                                        }
-                                    }
-                                }
-                            } label: {
-                                Image(systemName: "ellipsis.circle")
                             }
+
+                            if showSeerrActions {
+                                Section {
+                                    if buttonState.showMarkAsAvailableButton {
+                                        let markTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().mark_as_available.localized() : MR.strings().mark_all_seasons_as_available.localized()
+                                        Button(action: { viewModel.markSeerrMediaAsAvailable() }) {
+                                            Label(markTitle, systemImage: "checkmark.circle")
+                                        }
+                                    }
+
+                                    if buttonState.showRemoveFromServiceButton {
+                                        let removeTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().remove_from_radarr.localized() : MR.strings().remove_from_sonarr.localized()
+                                        Button(role: .destructive, action: { confirmRemoveFromService = true }) {
+                                            Label(removeTitle, systemImage: "trash")
+                                        }
+                                    }
+
+                                    if buttonState.showClearDataButton {
+                                        Button(role: .destructive, action: { confirmClearData = true }) {
+                                            Label(MR.strings().clear_data.localized(), systemImage: "xmark.bin")
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
                         }
                     }
                 }
@@ -1418,6 +1462,65 @@ fileprivate struct UnifiedMediaDetailsEventsModifier: ViewModifier {
             }
             .onChange(of: viewModel.deleteErrorTrigger) { _, _ in
                 screen.onDeleteError()
+            }
+    }
+}
+
+struct IdentifiableMediaRequest: Identifiable {
+    let request: MediaRequest
+    var id: Int64 { request.id }
+}
+
+fileprivate struct UnifiedMediaDetailsSmartAddSeerrModifier: ViewModifier {
+    @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
+    let screen: UnifiedMediaDetailsScreen
+
+    @State private var rememberChoice: Bool = false
+
+    func body(content: Content) -> some View {
+        content
+            .sheet(item: Binding(
+                get: { viewModel.pendingSeerrRequest.map { IdentifiableMediaRequest(request: $0) } },
+                set: { if $0 == nil { viewModel.dismissPendingRequestDialog() } }
+            )) { wrapper in
+                let request = wrapper.request
+                VStack(spacing: 24) {
+                    Text(MR.strings().smart_add_seerr_title.localized())
+                        .font(.headline)
+
+                    Text(MR.strings().smart_add_seerr_message.localized())
+                        .multilineTextAlignment(.center)
+
+                    Toggle(isOn: $rememberChoice) {
+                        Text(MR.strings().remember_choice.localized())
+                    }
+                    .padding(.horizontal)
+
+                    HStack(spacing: 16) {
+                        Button(role: .destructive) {
+                            viewModel.handlePendingRequestAction(requestId: request.id, action: .decline, rememberChoice: rememberChoice)
+                        } label: {
+                            Text(MR.strings().decline.localized())
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red.opacity(0.1))
+                                .cornerRadius(8)
+                        }
+
+                        Button {
+                            viewModel.handlePendingRequestAction(requestId: request.id, action: .approve, rememberChoice: rememberChoice)
+                        } label: {
+                            Text(MR.strings().approve.localized())
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.accentColor)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                    }
+                }
+                .padding(24)
+                .presentationDetents([.medium])
             }
     }
 }

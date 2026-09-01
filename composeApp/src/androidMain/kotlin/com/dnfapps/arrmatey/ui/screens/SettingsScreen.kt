@@ -215,6 +215,7 @@ fun SettingsScreen(
                         SettingItem(
                             icon = IconSource.Vector(Icons.Default.Share),
                             title = mokoString(MR.strings.integrations),
+                            subtitle = mokoString(MR.strings.integrations_description),
                             onClick = onNavigateToIntegrations,
                             trailingContent = {
                                 Icon(Icons.Default.ChevronRight, null)
@@ -223,6 +224,7 @@ fun SettingsScreen(
                         SettingItem(
                             icon = IconSource.Vector(Icons.Default.Restore),
                             title = mokoString(MR.strings.backup_restore),
+                            subtitle = mokoString(MR.strings.backup_restore_description),
                             onClick = onNavigateToBackupRestore,
                             trailingContent = {
                                 Icon(Icons.Default.ChevronRight, null)

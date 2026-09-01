@@ -48,8 +48,32 @@ struct SettingsScreen: View {
                     }
                 }
 
+                NavigationLink(value: SettingsRoute.integrations) {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(MR.strings().integrations.localized())
+                            Text(MR.strings().integrations_description.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "link")
+                            .foregroundColor(.themePrimary)
+                    }
+                }
+
                 NavigationLink(value: SettingsRoute.backupRestore) {
-                    Label(MR.strings().backup_restore.localized(), systemImage: "arrow.clockwise.icloud")
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(MR.strings().backup_restore.localized())
+                            Text(MR.strings().backup_restore_description.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "arrow.clockwise.icloud")
+                            .foregroundColor(.themePrimary)
+                    }
                 }
             }
 

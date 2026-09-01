@@ -576,7 +576,7 @@ private fun AuthorDetails(
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
 
-    val bookLabel = mokoPlural(MR.plurals.books, item.bookCount)
+    val bookLabel = mokoPlural(MR.plurals.books_count, item.bookCount)
     val firstLine = listOfNotNull(bookLabel).joinToString(BULLET)
     Text(firstLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
 
