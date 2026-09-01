@@ -10,7 +10,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.extensions.isToday
@@ -65,6 +66,7 @@ fun EpisodeRow(
     onAutomaticSearch: (Long) -> Unit = {},
     onToggleMonitor: (ArrEpisode) -> Unit = {},
     onNavigateToSeriesRelease: (Long?) -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     bazarrDetailsIntegration: Boolean = true,
 ) {
@@ -73,9 +75,10 @@ fun EpisodeRow(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier =
-            modifier.clickable(
-                enabled = onClick != null,
+            modifier.combinedClickable(
+                enabled = onClick != null || onLongClick != null,
                 onClick = onClick ?: {},
+                onLongClick = onLongClick,
             ),
     ) {
         Row(
@@ -124,6 +127,8 @@ fun EpisodeRow(
                         else -> null to Color.Unspecified
                     }
 
+                val fileSizeString = arrEp?.episodeFile?.size?.bytesAsFileSizeString()
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -136,6 +141,15 @@ fun EpisodeRow(
                         )
                     }
 
+                    if (fileSizeString != null) {
+                        val prefix = if (statusText != null) BULLET else ""
+                        Text(
+                            text = "$prefix$fileSizeString",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 14.sp,
+                        )
+                    }
+
                     val formattedDate = episode.formatAirDateUtc() ?: episode.airDate?.format()
                     if (formattedDate != null) {
                         val (weight, color) =
@@ -144,7 +158,7 @@ fun EpisodeRow(
                             } else {
                                 FontWeight.Normal to Color.Unspecified
                             }
-                        val prefix = if (statusText != null) BULLET else ""
+                        val prefix = if (statusText != null || fileSizeString != null) BULLET else ""
                         Text(
                             text = "$prefix$formattedDate",
                             color = color,

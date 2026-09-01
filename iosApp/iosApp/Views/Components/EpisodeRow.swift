@@ -14,6 +14,7 @@ struct EpisodeRow: View {
     var onAutomaticSearch: (Int64) -> Void = { _ in }
     var onToggleMonitor: (Episode) -> Void = { _ in }
     var onNavigateToSeriesRelease: ((Int64) -> Void)? = nil
+    var onDeleteFile: ((Int64) -> Void)? = nil
     var onClick: (() -> Void)? = nil
     var bazarrDetailsIntegration: Bool = true
 
@@ -25,6 +26,7 @@ struct EpisodeRow: View {
         onAutomaticSearch: @escaping (Int64) -> Void = { _ in },
         onToggleMonitor: @escaping (Episode) -> Void = { _ in },
         onNavigateToSeriesRelease: ((Int64) -> Void)? = nil,
+        onDeleteFile: ((Int64) -> Void)? = nil,
         onClick: (() -> Void)? = nil,
         bazarrDetailsIntegration: Bool = true
     ) {
@@ -33,6 +35,7 @@ struct EpisodeRow: View {
         self.onAutomaticSearch = onAutomaticSearch
         self.onToggleMonitor = onToggleMonitor
         self.onNavigateToSeriesRelease = onNavigateToSeriesRelease
+        self.onDeleteFile = onDeleteFile
         self.onClick = onClick
         self.bazarrDetailsIntegration = bazarrDetailsIntegration
     }
@@ -75,6 +78,10 @@ struct EpisodeRow: View {
             return (MR.strings().missing.localized(), Color.red, true)
         }
         return nil
+    }
+
+    private var fileSizeString: String? {
+        arrEp?.episodeFile?.size.bytesAsFileSizeString()
     }
 
     private var formattedDate: String? {
@@ -122,9 +129,16 @@ struct EpisodeRow: View {
                                 .italic(status.italic)
                         }
 
+                        if let fileSize = fileSizeString {
+                            let prefix = (statusInfo != nil) ? " • " : ""
+                            Text("\(prefix)\(fileSize)")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+
                         if let dateStr = formattedDate {
                             let isToday = episode.airDate?.isToday() == true
-                            let prefix = statusInfo != nil ? " • " : ""
+                            let prefix = (statusInfo != nil || fileSizeString != nil) ? " • " : ""
                             Text("\(prefix)\(dateStr)")
                                 .font(.system(size: 14))
                                 .fontWeight(isToday ? .medium : .regular)
@@ -136,6 +150,11 @@ struct EpisodeRow: View {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     onClick?()
+                }
+                .onLongPressGesture {
+                    if let fileId = arrEp?.episodeFileId?.int64Value {
+                        onDeleteFile?(fileId)
+                    }
                 }
 
                 // Action buttons for arr episodes
@@ -231,6 +250,11 @@ struct EpisodeRow: View {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     onClick?()
+                }
+                .onLongPressGesture {
+                    if let fileId = arrEp?.episodeFileId?.int64Value {
+                        onDeleteFile?(fileId)
+                    }
                 }
             }
         }

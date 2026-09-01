@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
+import com.dnfapps.arrmatey.arr.usecase.DeleteEpisodeFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
@@ -88,6 +89,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -97,12 +99,12 @@ class UnifiedMediaDetailsViewModel(
     private val tvdbId: Long?,
     private val instanceType: InstanceType?,
     private val requestType: RequestType?,
-    private val initialForcedInstanceId: Long? = null,
+    initialForcedInstanceId: Long? = null,
     private val getUnifiedMediaDetailsUseCase: GetUnifiedMediaDetailsUseCase,
     private val smartAddMediaUseCase: SmartAddMediaUseCase,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
-    private val getSeerrInstanceRepositoryUseCase: GetSeerrInstanceRepositoryUseCase,
-    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
+    getSeerrInstanceRepositoryUseCase: GetSeerrInstanceRepositoryUseCase,
+    getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
     private val toggleMonitorUseCase: ToggleMonitorUseCase,
     private val updateMediaUseCase: UpdateMediaUseCase,
     private val deleteMediaUseCase: DeleteMediaUseCase,
@@ -114,10 +116,11 @@ class UnifiedMediaDetailsViewModel(
     private val deleteSeasonFilesUseCase: DeleteSeasonFilesUseCase,
     private val deleteAlbumFilesUseCase: DeleteAlbumFilesUseCase,
     private val deleteMovieFileUseCase: DeleteMovieFileUseCase,
+    private val deleteEpisodeFileUseCase: DeleteEpisodeFileUseCase,
     private val submitIssueUseCase: SubmitIssueUseCase,
     observeInstancePreferencesUseCase: ObserveInstancePreferencesUseCase,
     private val updateInstancePreferencesUseCase: UpdateInstancePreferencesUseCase,
-    private val observeScopedReposByTypeUseCase: ObserveScopedReposByTypeUseCase,
+    observeScopedReposByTypeUseCase: ObserveScopedReposByTypeUseCase,
     private val getInstancePresencesUseCase: GetInstancePresencesUseCase,
     private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
     private val activityQueueService: ActivityQueueService,
@@ -168,6 +171,9 @@ class UnifiedMediaDetailsViewModel(
 
     private val _deleteMovieFileStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val deleteMovieFileStatus: StateFlow<OperationStatus> = _deleteMovieFileStatus.asStateFlow()
+
+    private val _deleteEpisodeStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val deleteEpisodeStatus: StateFlow<OperationStatus> = _deleteEpisodeStatus.asStateFlow()
 
     private val _removeQueueItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val removeQueueItemStatus: StateFlow<OperationStatus> = _removeQueueItemStatus.asStateFlow()
@@ -941,7 +947,7 @@ class UnifiedMediaDetailsViewModel(
 
     private suspend fun emitFallbackAddError(message: String) {
         _addItemStatus.value = OperationStatus.Error(message = message)
-        delay(1500)
+        delay(1500.milliseconds)
         _addItemStatus.value = OperationStatus.Idle
     }
 
@@ -1197,11 +1203,11 @@ class UnifiedMediaDetailsViewModel(
                 .collect { status ->
                     _deleteSeasonStatus.value = status
                     if (status is OperationStatus.Success) {
-                        delay(500)
+                        delay(500.milliseconds)
                         _deleteSeasonStatus.value = OperationStatus.Idle
                         refresh()
                     } else if (status is OperationStatus.Error) {
-                        delay(2000)
+                        delay(2000.milliseconds)
                         _deleteSeasonStatus.value = OperationStatus.Idle
                     }
                 }
@@ -1216,11 +1222,11 @@ class UnifiedMediaDetailsViewModel(
                 .collect { status ->
                     _deleteAlbumStatus.value = status
                     if (status is OperationStatus.Success) {
-                        delay(500)
+                        delay(500.milliseconds)
                         _deleteAlbumStatus.value = OperationStatus.Idle
                         refresh()
                     } else if (status is OperationStatus.Error) {
-                        delay(2000)
+                        delay(2000.milliseconds)
                         _deleteAlbumStatus.value = OperationStatus.Idle
                     }
                 }
@@ -1235,12 +1241,31 @@ class UnifiedMediaDetailsViewModel(
                 .collect { status ->
                     _deleteMovieFileStatus.value = status
                     if (status is OperationStatus.Success) {
-                        delay(500)
+                        delay(500.milliseconds)
                         _deleteMovieFileStatus.value = OperationStatus.Idle
                         refresh()
                     } else if (status is OperationStatus.Error) {
-                        delay(2000)
+                        delay(2000.milliseconds)
                         _deleteMovieFileStatus.value = OperationStatus.Idle
+                    }
+                }
+        }
+    }
+
+    fun deleteEpisodeFile(episodeId: Long) {
+        viewModelScope.launch {
+            val repository = getActiveArrRepository() ?: return@launch
+            val effectiveId = getEffectiveArrId() ?: return@launch
+            deleteEpisodeFileUseCase(effectiveId, episodeId, repository)
+                .collect { status ->
+                    _deleteEpisodeStatus.value = status
+                    if (status is OperationStatus.Success) {
+                        delay(500.milliseconds)
+                        _deleteEpisodeStatus.value = OperationStatus.Idle
+                        refresh()
+                    } else if (status is OperationStatus.Error) {
+                        delay(2000.milliseconds)
+                        _deleteEpisodeStatus.value = OperationStatus.Idle
                     }
                 }
         }

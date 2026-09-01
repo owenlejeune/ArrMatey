@@ -220,6 +220,10 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.deleteMovieFile()
     }
 
+    func deleteEpisodeFile(episodeId: Int64) {
+        viewModel.deleteEpisodeFile(episodeId: episodeId)
+    }
+
     func toggleSeasonMonitored(seasonNumber: Int32) {
         viewModel.toggleSeasonMonitored(seasonNumber: seasonNumber)
     }

@@ -193,6 +193,7 @@ fun UnifiedMediaDetailsScreen(
     var moveFilesItem by remember { mutableStateOf<ArrMedia?>(null) }
     var confirmDeleteSeasonNumber by remember { mutableStateOf<Int?>(null) }
     var confirmDeleteAlbum by remember { mutableStateOf<Long?>(null) }
+    var confirmDeleteEpisodeId by remember { mutableStateOf<Long?>(null) }
     var confirmDeleteMovie by remember { mutableStateOf(false) }
     var editAlbum by remember { mutableStateOf<ArrAlbum?>(null) }
     var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
@@ -209,6 +210,7 @@ fun UnifiedMediaDetailsScreen(
     val deleteSeasonStatus by viewModel.deleteSeasonStatus.collectAsStateWithLifecycle()
     val deleteAlbumStatus by viewModel.deleteAlbumStatus.collectAsStateWithLifecycle()
     val deleteMovieFileStatus by viewModel.deleteMovieFileStatus.collectAsStateWithLifecycle()
+    val deleteEpisodeStatus by viewModel.deleteEpisodeStatus.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
     val requestStatus by viewModel.requestStatus.collectAsStateWithLifecycle()
     val pendingSeerrRequest by viewModel.pendingSeerrRequest.collectAsStateWithLifecycle()
@@ -532,6 +534,7 @@ fun UnifiedMediaDetailsScreen(
                                         onNavigateToEpisodeDetails = { episode ->
                                             arrSeries?.let { series -> onNavigateToEpisodeDetails(series, episode) }
                                         },
+                                        deleteEpisodeFile = { confirmDeleteEpisodeId = it },
                                         onNavigateToSeriesRelease = onNavigateToSeriesRelease,
                                         bazarrDetailsIntegration = state.bazarrDetailsIntegration,
                                     )
@@ -994,6 +997,40 @@ fun UnifiedMediaDetailsScreen(
                                 },
                             ) {
                                 Text(mokoString(MR.strings.no))
+                            }
+                        },
+                    )
+                }
+
+                confirmDeleteEpisodeId?.let { episodeFileId ->
+                    AlertDialog(
+                        onDismissRequest = { confirmDeleteEpisodeId = null },
+                        title = {
+                            Text(mokoString(MR.strings.confirm_delete))
+                        },
+                        text = {
+                            Text(mokoString(MR.strings.episode_delete_message))
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.deleteEpisodeFile(episodeFileId)
+                                    confirmDeleteEpisodeId = null
+                                },
+                            ) {
+                                Text(
+                                    text = mokoString(MR.strings.confirm),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    confirmDeleteEpisodeId = null
+                                },
+                            ) {
+                                Text(mokoString(MR.strings.cancel))
                             }
                         },
                     )
