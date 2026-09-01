@@ -77,6 +77,8 @@ class PreferencesStore(
     private val searchShowInstanceIndicatorShadowKey = booleanPreferencesKey("searchShowInstanceIndicatorShadow")
     private val dualPanelSupportKey = booleanPreferencesKey("dualPanelSupport")
     private val smartAddSeerrActionKey = stringPreferencesKey("smartAddSeerrAction")
+    private val combineSeerrArrMediaKey = booleanPreferencesKey("combineSeerrArrMedia")
+    private val bazarrDetailsIntegrationKey = booleanPreferencesKey("bazarrDetailsIntegration")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> =
         when (type) {
@@ -176,6 +178,18 @@ class PreferencesStore(
                         SmartAddSeerrAction.default
                     }
                 } ?: SmartAddSeerrAction.default
+            }
+
+    val combineSeerrArrMedia: Flow<Boolean> =
+        dataStore.data
+            .map { preferences ->
+                preferences[combineSeerrArrMediaKey] ?: true
+            }
+
+    val bazarrDetailsIntegration: Flow<Boolean> =
+        dataStore.data
+            .map { preferences ->
+                preferences[bazarrDetailsIntegrationKey] ?: true
             }
 
     private val calendarViewMode: Flow<CalendarViewMode> =
@@ -341,6 +355,36 @@ class PreferencesStore(
     fun setSmartAddSeerrAction(action: SmartAddSeerrAction) {
         scope.launch {
             dataStore.edit { it[smartAddSeerrActionKey] = action.name }
+        }
+    }
+
+    fun toggleCombineSeerrArrMedia() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[combineSeerrArrMediaKey] ?: true
+                preferences[combineSeerrArrMediaKey] = !current
+            }
+        }
+    }
+
+    fun setCombineSeerrArrMedia(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[combineSeerrArrMediaKey] = value }
+        }
+    }
+
+    fun toggleBazarrDetailsIntegration() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[bazarrDetailsIntegrationKey] ?: true
+                preferences[bazarrDetailsIntegrationKey] = !current
+            }
+        }
+    }
+
+    fun setBazarrDetailsIntegration(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[bazarrDetailsIntegrationKey] = value }
         }
     }
 

@@ -287,8 +287,21 @@ class UnifiedMediaDetailsViewModel(
             }
         }
 
-    private val seerrRepositoryFlow = getSeerrInstanceRepositoryUseCase.observeSelected()
-    private val bazarrRepositoryFlow = getBazarrInstanceRepositoryUseCase.observeSelected()
+    private val seerrRepositoryFlow =
+        combine(
+            getSeerrInstanceRepositoryUseCase.observeSelected(),
+            preferencesStore.combineSeerrArrMedia,
+        ) { repo, combine ->
+            if (!combine && arrId != null) null else repo
+        }
+
+    private val bazarrRepositoryFlow =
+        combine(
+            getBazarrInstanceRepositoryUseCase.observeSelected(),
+            preferencesStore.bazarrDetailsIntegration,
+        ) { repo, enabled ->
+            if (enabled) repo else null
+        }
 
     val activeInstance: StateFlow<Instance?> =
         activeArrRepoFlow
@@ -415,12 +428,14 @@ class UnifiedMediaDetailsViewModel(
             val targetMedia =
                 _instancePresencesMap.value[instanceId]
                     ?: currentSuccess.instancePresences.firstOrNull { it.instance.id == instanceId }?.arrMedia
+            val hasTargetArrId = targetMedia?.let { it.id != null && it.id != 0L } ?: false
             _isMonitored.value = targetMedia?.monitored == true
             _uiState.value =
                 currentSuccess.copy(
                     arrMedia = targetMedia,
                     selectedInstanceId = instanceId,
                     queueItems = if (targetMedia == null) emptyList() else currentSuccess.queueItems,
+                    seerrMedia = if (!currentSuccess.combineSeerrArrMedia && hasTargetArrId) null else currentSuccess.seerrMedia,
                 )
             val targetInst =
                 availableInstances.value.firstOrNull { it.id == instanceId }
@@ -621,15 +636,21 @@ class UnifiedMediaDetailsViewModel(
                         cachedArrMedia?.id
                     }
 
+                val combineMedia = preferencesStore.combineSeerrArrMedia.first()
+                val showBazarr = preferencesStore.bazarrDetailsIntegration.first()
+
+                val effectiveSeerrRepo = if (!combineMedia && targetArrId != null) null else seerrRepo
+                val effectiveArrRepo = if (!combineMedia && targetArrId == null && seerrRepo != null) null else activeRepo
+
                 getUnifiedMediaDetailsUseCase(
                     arrId = targetArrId,
                     tmdbId = tmdbId,
                     tvdbId = tvdbId,
                     instanceType = resolvedInstanceType,
                     requestType = resolvedRequestType,
-                    arrRepository = activeRepo,
-                    seerrRepository = seerrRepo,
-                    bazarrRepository = bazarrRepo,
+                    arrRepository = effectiveArrRepo,
+                    seerrRepository = effectiveSeerrRepo,
+                    bazarrRepository = if (showBazarr) bazarrRepo else null,
                 ).collect { rawState ->
                     if (rawState is UnifiedMediaDetailsUiState.Success) {
                         _isMonitored.value = rawState.arrMedia?.monitored ?: false
@@ -693,9 +714,11 @@ class UnifiedMediaDetailsViewModel(
 
                         _uiState.value =
                             rawState.copy(
-                                availableInstances = allRepos.map { it.instance },
+                                availableInstances = if (!combineMedia && !rawState.hasArrId) emptyList() else allRepos.map { it.instance },
                                 selectedInstanceId = activeRepo?.instance?.id ?: _selectedInstanceId.value,
-                                instancePresences = presences,
+                                instancePresences = if (!combineMedia && !rawState.hasArrId) emptyList() else presences,
+                                combineSeerrArrMedia = combineMedia,
+                                bazarrDetailsIntegration = showBazarr,
                             )
                     } else {
                         if (_uiState.value !is UnifiedMediaDetailsUiState.Success) {

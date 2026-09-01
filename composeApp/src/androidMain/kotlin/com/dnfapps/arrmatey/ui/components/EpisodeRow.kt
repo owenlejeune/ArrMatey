@@ -66,6 +66,7 @@ fun EpisodeRow(
     onToggleMonitor: (ArrEpisode) -> Unit = {},
     onNavigateToSeriesRelease: (Long?) -> Unit = {},
     onClick: (() -> Unit)? = null,
+    bazarrDetailsIntegration: Boolean = true,
 ) {
     val arrEp = episode.arrEpisode
 
@@ -253,11 +254,13 @@ fun EpisodeRow(
                         )
                     }
 
-                    episode.bazarrEpisode?.let { bazarrEp ->
-                        EpisodeSubtitlesRow(
-                            bazarrEpisode = bazarrEp,
-                            modifier = Modifier.padding(top = 2.dp),
-                        )
+                    if (bazarrDetailsIntegration) {
+                        episode.bazarrEpisode?.let { bazarrEp ->
+                            EpisodeSubtitlesRow(
+                                bazarrEpisode = bazarrEp,
+                                modifier = Modifier.padding(top = 2.dp),
+                            )
+                        }
                     }
                 }
             }

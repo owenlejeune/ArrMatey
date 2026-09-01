@@ -101,6 +101,22 @@ class MoreScreenViewModel(
                 initialValue = SmartAddSeerrAction.default,
             )
 
+    val combineSeerrArrMedia =
+        preferencesStore.combineSeerrArrMedia
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
+    val bazarrDetailsIntegration =
+        preferencesStore.bazarrDetailsIntegration
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
     val testingStatus: StateFlow<Map<Long, OperationStatus>> = _testingStatus.asStateFlow()
 
@@ -227,5 +243,13 @@ class MoreScreenViewModel(
 
     fun setSmartAddSeerrAction(action: SmartAddSeerrAction) {
         preferencesStore.setSmartAddSeerrAction(action)
+    }
+
+    fun toggleCombineSeerrArrMedia() {
+        preferencesStore.toggleCombineSeerrArrMedia()
+    }
+
+    fun toggleBazarrDetailsIntegration() {
+        preferencesStore.toggleBazarrDetailsIntegration()
     }
 }

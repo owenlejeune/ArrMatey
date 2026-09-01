@@ -57,6 +57,8 @@ sealed interface UnifiedMediaDetailsUiState {
         val selectedInstanceId: Long? = null,
         val instancePresences: List<InstanceMediaPresence> = emptyList(),
         val queueItems: List<QueueItem> = emptyList(),
+        val combineSeerrArrMedia: Boolean = true,
+        val bazarrDetailsIntegration: Boolean = true,
     ) : UnifiedMediaDetailsUiState {
         val missingInstances: List<Instance>
             get() = instancePresences.filter { !it.isPresent }.map { it.instance }

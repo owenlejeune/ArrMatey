@@ -21,6 +21,8 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var searchShowBanners: Bool = true
     @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
     @Published private(set) var smartAddSeerrAction: SmartAddSeerrAction = .alwaysAsk
+    @Published private(set) var combineSeerrArrMedia: Bool = true
+    @Published private(set) var bazarrDetailsIntegration: Bool = true
 
     init() {
         self.viewModel = KoinBridge.shared.getMoreScreenViewModel()
@@ -41,6 +43,12 @@ class MoreScreenViewModelS: ObservableObject {
         viewModel.searchShowInstanceIndicatorShadow.observeAsync(on: self) { owner, show in
             owner.searchShowInstanceIndicatorShadow = show.boolValue
         }
+        viewModel.combineSeerrArrMedia.observeAsync(on: self) { owner, combine in
+            owner.combineSeerrArrMedia = combine.boolValue
+        }
+        viewModel.bazarrDetailsIntegration.observeAsync(on: self) { owner, enabled in
+            owner.bazarrDetailsIntegration = enabled.boolValue
+        }
         viewModel.smartAddSeerrAction.observeAsync(on: self, to: \.smartAddSeerrAction)
     }
 
@@ -58,6 +66,14 @@ class MoreScreenViewModelS: ObservableObject {
 
     func toggleSearchShowInstanceIndicatorShadow() {
         viewModel.toggleSearchShowInstanceIndicatorShadow()
+    }
+
+    func toggleCombineSeerrArrMedia() {
+        viewModel.toggleCombineSeerrArrMedia()
+    }
+
+    func toggleBazarrDetailsIntegration() {
+        viewModel.toggleBazarrDetailsIntegration()
     }
 
     func setSmartAddSeerrAction(action: SmartAddSeerrAction) {

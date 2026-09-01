@@ -211,7 +211,8 @@ extension UnifiedMediaDetailsScreen {
                     let route: MediaRoute = .seriesReleases(seriesId: sId, seasonNumber: seasonNum, episodeId: nil)
                     navigationManager.go(to: route, of: .sonarr)
                 }
-            }
+            },
+            bazarrDetailsIntegration: success.bazarrDetailsIntegration
         )
     }
 
@@ -232,9 +233,11 @@ extension UnifiedMediaDetailsScreen {
                 )
 
                 if let arrId = movie.id?.int64Value {
-                    BazarrSubtitlesSection(
-                        target: BazarrMediaTargetMovie(radarrId: arrId)
-                    )
+                    if success.bazarrDetailsIntegration {
+                        BazarrSubtitlesSection(
+                            target: BazarrMediaTargetMovie(radarrId: arrId)
+                        )
+                    }
                 }
             }
         } else if let artist = success.arrMedia as? Arrtist {

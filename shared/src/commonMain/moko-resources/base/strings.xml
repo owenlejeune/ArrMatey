@@ -65,6 +65,10 @@
     <string name="remember_choice">Remember my choice</string>
     <string name="smart_add_seerr_action_title">Automatic Seerr Approval</string>
     <string name="smart_add_seerr_action_description">Control how pending requests are handled when media is added directly to Sonarr or Radarr.</string>
+    <string name="combine_seerr_arr_media_title">Seerr/Arr Combined Media</string>
+    <string name="combine_seerr_arr_media_description">When enabled, the media details screen will combine information from Seerr and your Arr instances. If disabled, details will only display data based on the context.</string>
+    <string name="bazarr_details_integration_title">Bazarr Subtitles Integration</string>
+    <string name="bazarr_details_integration_description">Display subtitle information and management options from Bazarr in media and episode details.</string>
     <string name="always_ask">Always Ask</string>
     <string name="appearance">Appearance</string>
     <string name="navigation">Navigation</string>
