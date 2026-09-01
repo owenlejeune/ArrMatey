@@ -315,7 +315,7 @@ val useCaseModule =
         factory { GrabProwlarrReleaseUseCase(get()) }
         factory { UpdateCalendarFilterPreferenceUseCase(get()) }
         factory { GetSeerrInstanceRepositoryUseCase(get()) }
-        factory { SmartAddMediaUseCase(get(), get()) }
+        factory { SmartAddMediaUseCase(get()) }
         factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get(), get()) }
         factory { GetBazarrInstanceRepositoryUseCase(get()) }
         factory { GetCurrentSeerrUserUseCase() }
@@ -383,9 +383,6 @@ val useCaseModule =
         factory { CredentialMigrationUseCase(get(), get(), get()) }
         factory { ExportDataUseCase(get(), get(), get(), get(), get(), get()) }
         factory { ImportDataUseCase(get(), get(), get(), get(), get(), get()) }
-        factory { SmartAddMediaUseCase(get(), get()) }
-        factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get(), get()) }
-        factory { GetBazarrInstanceRepositoryUseCase(get()) }
         factory { GetInstancePresencesUseCase() }
         factory { UpdateAllPreferencesUseCase(get(), get()) }
     }
@@ -446,6 +443,7 @@ val viewModelModule =
                 removeSeerrMediaFileUseCase = get(),
                 clearSeerrMediaDataUseCase = get(),
                 markSeerrMediaAsAvailableUseCase = get(),
+                preferencesStore = get(),
                 logger = get(),
             )
         }

@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +40,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
@@ -89,6 +91,7 @@ import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.model.SmartAddSeerrAction
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
@@ -198,6 +201,7 @@ fun UnifiedMediaDetailsScreen(
     val deleteMovieFileStatus by viewModel.deleteMovieFileStatus.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
     val requestStatus by viewModel.requestStatus.collectAsStateWithLifecycle()
+    val pendingSeerrRequest by viewModel.pendingSeerrRequest.collectAsStateWithLifecycle()
 
     val isRequestSheetVisible by viewModel.isRequestSheetVisible.collectAsStateWithLifecycle()
     val isReportIssueSheetVisible by viewModel.isReportIssueSheetVisible.collectAsStateWithLifecycle()
@@ -1111,6 +1115,41 @@ fun UnifiedMediaDetailsScreen(
                         dismissButton = {
                             TextButton(onClick = { confirmClearData = false }) {
                                 Text(mokoString(MR.strings.no))
+                            }
+                        },
+                    )
+                }
+
+                pendingSeerrRequest?.let { request ->
+                    var rememberChoice by remember { mutableStateOf(false) }
+                    AlertDialog(
+                        onDismissRequest = { viewModel.dismissPendingRequestDialog() },
+                        title = { Text(mokoString(MR.strings.smart_add_seerr_title)) },
+                        text = {
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                Text(mokoString(MR.strings.smart_add_seerr_message))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.clickable { rememberChoice = !rememberChoice },
+                                ) {
+                                    Checkbox(checked = rememberChoice, onCheckedChange = { rememberChoice = it })
+                                    Text(mokoString(MR.strings.remember_choice))
+                                }
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                viewModel.handlePendingRequestAction(request.id, SmartAddSeerrAction.Approve, rememberChoice)
+                            }) {
+                                Text(mokoString(MR.strings.approve))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                viewModel.handlePendingRequestAction(request.id, SmartAddSeerrAction.Decline, rememberChoice)
+                            }) {
+                                Text(mokoString(MR.strings.decline))
                             }
                         },
                     )

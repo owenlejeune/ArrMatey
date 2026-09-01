@@ -29,6 +29,7 @@ import com.dnfapps.arrmatey.arr.usecase.SmartAddMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
 import com.dnfapps.arrmatey.datastore.InstancePreferences
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
@@ -41,10 +42,12 @@ import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.model.AddSheetUiState
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.model.SmartAddSeerrAction
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
+import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -77,6 +80,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -120,6 +124,7 @@ class UnifiedMediaDetailsViewModel(
     private val removeSeerrMediaFileUseCase: RemoveSeerrMediaFileUseCase,
     private val clearSeerrMediaDataUseCase: ClearSeerrMediaDataUseCase,
     private val markSeerrMediaAsAvailableUseCase: MarkSeerrMediaAsAvailableUseCase,
+    private val preferencesStore: PreferencesStore,
     private val logger: Logger,
 ) : ViewModel() {
     private var seerrMediaId: Long? = null
@@ -133,6 +138,9 @@ class UnifiedMediaDetailsViewModel(
 
     private val _uiState = MutableStateFlow<UnifiedMediaDetailsUiState>(UnifiedMediaDetailsUiState.Initial)
     val uiState: StateFlow<UnifiedMediaDetailsUiState> = _uiState.asStateFlow()
+
+    private val _pendingSeerrRequest = MutableStateFlow<MediaRequest?>(null)
+    val pendingSeerrRequest: StateFlow<MediaRequest?> = _pendingSeerrRequest.asStateFlow()
 
     private val _qualityProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
     val qualityProfiles: StateFlow<List<QualityProfile>> = _qualityProfiles.asStateFlow()
@@ -819,8 +827,21 @@ class UnifiedMediaDetailsViewModel(
                 return@launch
             }
 
-            val seerrRepo = getSeerrRepository()
             val successState = uiState.value as? UnifiedMediaDetailsUiState.Success
+            val seerrMediaDetails = successState?.seerrMedia
+            val pendingRequest = seerrMediaDetails?.mediaInfo?.requests?.firstOrNull { it.status == 1 }
+
+            if (pendingRequest != null) {
+                val action = preferencesStore.smartAddSeerrAction.first()
+                if (action == SmartAddSeerrAction.AlwaysAsk) {
+                    _pendingSeerrRequest.value = pendingRequest
+                } else if (action == SmartAddSeerrAction.Approve) {
+                    handlePendingRequestAction(pendingRequest.id, SmartAddSeerrAction.Approve, false)
+                } else if (action == SmartAddSeerrAction.Decline) {
+                    handlePendingRequestAction(pendingRequest.id, SmartAddSeerrAction.Decline, false)
+                }
+            }
+
             val effectiveInstanceId =
                 targetInstanceId ?: _addSheetUiState.value.targetInstance?.id ?: _selectedInstanceId.value
 
@@ -853,12 +874,46 @@ class UnifiedMediaDetailsViewModel(
                 repository = targetRepo,
                 item = item,
                 searchOnAdd = searchOnAdd,
-                seerrMediaDetails = successState?.seerrMedia,
-                seerrRepository = seerrRepo,
             )
+            if (effectiveInstanceId != null) {
+                selectInstance(effectiveInstanceId)
+            }
             refresh()
             collectJob.cancel()
         }
+    }
+
+    fun handlePendingRequestAction(
+        requestId: Long,
+        action: SmartAddSeerrAction,
+        rememberChoice: Boolean,
+    ) {
+        viewModelScope.launch {
+            if (rememberChoice) {
+                preferencesStore.setSmartAddSeerrAction(action)
+            }
+
+            val seerrRepo = getSeerrRepository() ?: return@launch
+            if (action == SmartAddSeerrAction.Approve) {
+                setRequestApprovalStatusUseCase(
+                    requestId = requestId,
+                    approvalStatus = ApprovalStatus.Approve,
+                    repository = seerrRepo,
+                )
+            } else if (action == SmartAddSeerrAction.Decline) {
+                setRequestApprovalStatusUseCase(
+                    requestId = requestId,
+                    approvalStatus = ApprovalStatus.Decline,
+                    repository = seerrRepo,
+                )
+            }
+            _pendingSeerrRequest.value = null
+            refresh()
+        }
+    }
+
+    fun dismissPendingRequestDialog() {
+        _pendingSeerrRequest.value = null
     }
 
     private suspend fun emitFallbackAddError(message: String) {

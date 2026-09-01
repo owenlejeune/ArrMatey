@@ -432,6 +432,7 @@ enum SeerrRoute: Hashable {
 enum SettingsRoute : Hashable {
     case services
     case userInterface
+    case integrations
     case backupRestore
     case newInstance(_ : InstanceType = .sonarr)
     case dev

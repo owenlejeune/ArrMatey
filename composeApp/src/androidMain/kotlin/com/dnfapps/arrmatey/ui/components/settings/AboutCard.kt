@@ -60,23 +60,24 @@ fun AboutCard(
             AppIcon(
                 modifier =
                     Modifier
-                        .size(48.dp)
+                        .size(72.dp)
                         .padding(top = 8.dp),
             )
 
-            Text(
-                text = mokoString(MR.strings.app_name),
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 16.dp),
-            )
-
-            Text(
-                text = mokoString(MR.strings.version_label, BuildConfig.VERSION_NAME),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
+            Column {
+                Text(
+                    text = mokoString(MR.strings.app_name),
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 16.dp),
+                )
+                Text(
+                    text = mokoString(MR.strings.version_label, BuildConfig.VERSION_NAME),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
 
             FlowRow(
                 modifier =

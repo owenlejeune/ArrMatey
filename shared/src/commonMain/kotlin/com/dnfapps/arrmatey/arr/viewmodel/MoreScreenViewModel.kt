@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.model.SmartAddSeerrAction
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -90,6 +91,14 @@ class MoreScreenViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = true,
+            )
+
+    val smartAddSeerrAction =
+        preferencesStore.smartAddSeerrAction
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = SmartAddSeerrAction.default,
             )
 
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
@@ -214,5 +223,9 @@ class MoreScreenViewModel(
 
     fun toggleDualPanelSupport() {
         preferencesStore.toggleDualPanelSupport()
+    }
+
+    fun setSmartAddSeerrAction(action: SmartAddSeerrAction) {
+        preferencesStore.setSmartAddSeerrAction(action)
     }
 }
