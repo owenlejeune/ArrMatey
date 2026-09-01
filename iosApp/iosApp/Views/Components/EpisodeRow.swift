@@ -15,9 +15,9 @@ struct EpisodeRow: View {
     var onToggleMonitor: (Episode) -> Void = { _ in }
     var onNavigateToSeriesRelease: ((Int64) -> Void)? = nil
     var onClick: (() -> Void)? = nil
-    
+
     @EnvironmentObject private var navigation: NavigationManager
-    
+
     init(
         episode: EpisodeWrapper,
         searchInProgress: @escaping (Int64) -> Bool = { _ in false },
@@ -33,7 +33,7 @@ struct EpisodeRow: View {
         self.onNavigateToSeriesRelease = onNavigateToSeriesRelease
         self.onClick = onClick
     }
-    
+
     init(
         episode: Episode,
         onToggleEpisodeMonitor: @escaping (Episode) -> Void,
@@ -54,11 +54,11 @@ struct EpisodeRow: View {
         self.onNavigateToSeriesRelease = nil
         self.onClick = onClicked
     }
-    
+
     private var arrEp: Episode? {
         episode.arrEpisode
     }
-    
+
     private var statusInfo: (text: String, color: Color, italic: Bool)? {
         if episode.isActive, let progress = episode.activityProgress {
             return (progress, Color.purple, false)
@@ -71,11 +71,15 @@ struct EpisodeRow: View {
         }
         return nil
     }
-    
+
+    private var fileSizeString: String? {
+        arrEp?.episodeFile?.size.bytesAsFileSizeString()
+    }
+
     private var formattedDate: String? {
         episode.formatAirDateUtc() ?? episode.airDate?.format(pattern: "MMM d, yyyy")
     }
-    
+
     private var resolvedStillUrl: URL? {
         guard let stillPath = episode.stillPath, !stillPath.isEmpty else { return nil }
         if stillPath.hasPrefix("http") {
@@ -84,7 +88,7 @@ struct EpisodeRow: View {
             return URL(string: "https://image.tmdb.org/t/p/w500\(stillPath)")
         }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             // Main row with title, status, and action buttons
@@ -95,19 +99,19 @@ struct EpisodeRow: View {
                         Text("\(episode.episodeNumber). ")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.themePrimary)
-                        
+
                         Text(episode.title ?? "")
                             .font(.system(size: 16, weight: .medium))
                             .lineLimit(1)
                             .foregroundColor(.primary)
-                        
+
                         if let finaleType = episode.finaleType {
                             Text(" • \(finaleType.resource.localized())")
                                 .font(.system(size: 12))
                                 .foregroundColor(.secondary)
                         }
                     }
-                    
+
                     // Status & Air date line
                     HStack(spacing: 4) {
                         if let status = statusInfo {
@@ -116,10 +120,17 @@ struct EpisodeRow: View {
                                 .foregroundColor(status.color)
                                 .italic(status.italic)
                         }
-                        
+
+                        if let fileSize = fileSizeString {
+                            let prefix = (statusInfo != nil) ? " • " : ""
+                            Text("\(prefix)\(fileSize)")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+
                         if let dateStr = formattedDate {
                             let isToday = episode.airDate?.isToday() == true
-                            let prefix = statusInfo != nil ? " • " : ""
+                            let prefix = (statusInfo != nil || fileSizeString != nil) ? " • " : ""
                             Text("\(prefix)\(dateStr)")
                                 .font(.system(size: 14))
                                 .fontWeight(isToday ? .medium : .regular)
@@ -132,7 +143,7 @@ struct EpisodeRow: View {
                 .onTapGesture {
                     onClick?()
                 }
-                
+
                 // Action buttons for arr episodes
                 if let arrEp = arrEp {
                     HStack(spacing: 12) {
@@ -149,7 +160,7 @@ struct EpisodeRow: View {
                                 .foregroundColor(.primary)
                         }
                         .buttonStyle(.plain)
-                        
+
                         let isSearching = searchInProgress(arrEp.id)
                         Button {
                             onAutomaticSearch(arrEp.id)
@@ -165,7 +176,7 @@ struct EpisodeRow: View {
                         }
                         .buttonStyle(.plain)
                         .disabled(!arrEp.monitored || isSearching)
-                        
+
                         Button {
                             onToggleMonitor(arrEp)
                         } label: {
@@ -179,12 +190,12 @@ struct EpisodeRow: View {
                     .padding(.top, 2)
                 }
             }
-            
+
             // Still image + Overview + Bazarr Subtitles
             let epOverview = episode.overview?.trimmingCharacters(in: .whitespacesAndNewlines)
             let hasOverview = epOverview != nil && !epOverview!.isEmpty
             let hasStill = resolvedStillUrl != nil
-            
+
             if hasStill || hasOverview || episode.bazarrEpisode != nil {
                 HStack(alignment: .top, spacing: 10) {
                     if let stillUrl = resolvedStillUrl {
@@ -206,7 +217,7 @@ struct EpisodeRow: View {
                         .clipped()
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-                    
+
                     VStack(alignment: .leading, spacing: 4) {
                         if let overview = epOverview, !overview.isEmpty {
                             Text(overview)
@@ -215,7 +226,7 @@ struct EpisodeRow: View {
                                 .lineLimit(3)
                                 .truncationMode(.tail)
                         }
-                        
+
                         if let bazarrEp = episode.bazarrEpisode {
                             EpisodeSubtitlesRow(bazarrEpisode: bazarrEp)
                                 .padding(.top, 2)
@@ -237,7 +248,7 @@ struct EpisodeRow: View {
 
 struct EpisodeSubtitlesRow: View {
     let bazarrEpisode: BazarrEpisode
-    
+
     private var existingSubs: [BazarrSubtitle] {
         var seen = Set<String>()
         return bazarrEpisode.subtitles.filter { !$0.isEmbedded }.filter { sub in
@@ -247,7 +258,7 @@ struct EpisodeSubtitlesRow: View {
             return true
         }
     }
-    
+
     private var missingSubs: [BazarrSubtitleLanguage] {
         var seen = Set<String>()
         return bazarrEpisode.missingSubtitles.filter { missing in
@@ -257,7 +268,7 @@ struct EpisodeSubtitlesRow: View {
             return true
         }
     }
-    
+
     var body: some View {
         if !existingSubs.isEmpty || !missingSubs.isEmpty {
             FlowLayout(spacing: 4) {
@@ -265,7 +276,7 @@ struct EpisodeSubtitlesRow: View {
                     .font(.system(size: 13))
                     .foregroundColor(.secondary.opacity(0.8))
                     .padding(.trailing, 2)
-                
+
                 ForEach(Array(existingSubs.enumerated()), id: \.offset) { _, sub in
                     let label = subtitleLabel(sub)
                     Text(label)
@@ -276,7 +287,7 @@ struct EpisodeSubtitlesRow: View {
                         .background(Color(.secondarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                 }
-                
+
                 ForEach(Array(missingSubs.enumerated()), id: \.offset) { _, missing in
                     let label = missingLabel(missing)
                     HStack(spacing: 2) {
@@ -296,7 +307,7 @@ struct EpisodeSubtitlesRow: View {
             }
         }
     }
-    
+
     private func subtitleLabel(_ subtitle: BazarrSubtitle) -> String {
         let code2 = subtitle.code2 ?? ""
         var label = code2.isEmpty ? subtitle.name : code2.uppercased()
@@ -304,7 +315,7 @@ struct EpisodeSubtitlesRow: View {
         if subtitle.forced { label += " · Forced" }
         return label
     }
-    
+
     private func missingLabel(_ lang: BazarrSubtitleLanguage) -> String {
         let code2 = lang.code2 ?? ""
         var label = code2.isEmpty ? lang.name : code2.uppercased()
