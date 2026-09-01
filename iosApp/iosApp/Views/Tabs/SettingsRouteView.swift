@@ -12,6 +12,12 @@ struct SettingsRouteView: View {
 
     var body: some View {
         switch route {
+        case .services:
+            ServicesSettingsView()
+        case .userInterface:
+            UiSettingsView()
+        case .backupRestore:
+            BackupRestoreSettingsView()
         case .newInstance(let initialType):
             NewInstanceView(initialType: initialType) {
                 navigationManager.completeSetupAndDismiss()

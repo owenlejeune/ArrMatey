@@ -19,8 +19,6 @@
     <string name="home">Home</string>
     <string name="requests">Requests</string>
     <string name="discover">Discover</string>
-    <string name="deep_links">Deep Links</string>
-    <string name="setup_seerr_for_in_app_details">Setup Seerr (Overseerr/Jellyseerr) to view person and media details directly in the app.</string>
     <string name="issues">Issues</string>
 
     <string name="type_series">series</string>
@@ -52,6 +50,16 @@
     <string name="large_screen_settings_title">Large Screen</string>
     <string name="dual_panel_support_title">Dual Panel Support</string>
     <string name="dual_panel_support_description">Enable side-by-side layouts on tablets and foldables.</string>
+
+    <!-- Settings -->
+    <string name="deep_links">Deep Links</string>
+    <string name="services">Services</string>
+    <string name="integrations">Integrations</string>
+    <string name="setup_seerr_for_in_app_details">Setup Seerr (Overseerr/Jellyseerr) to view person and media details directly in the app.</string>
+    <string name="services_description">Services, Download Clients, and Custom Webpages</string>
+    <string name="user_interface_description">Theming and customization options</string>
+    <string name="appearance">Appearance</string>
+    <string name="navigation">Navigation</string>
 
     <!-- Messages -->
     <string name="confirm_delete_instance">Are you sure you want to delete %1$s?</string>
@@ -324,7 +332,9 @@
 
     <string name="search_results">Search Results</string>
     <string name="search_show_banners">Show banners</string>
+    <string name="search_show_banners_description">Display wide banner images instead of posters in search results.</string>
     <string name="search_show_instance_indicator_shadow">Show instance indicator shadow</string>
+    <string name="search_show_instance_indicator_shadow_description">Add a subtle shadow behind the instance indicator for better visibility on bright backgrounds.</string>
     <string name="confirm_delete">Confirm delete</string>
     <string name="confirm_delete_file">This file will be deleted</string>
     <string name="audiobook_info_authors">Author(s)</string>

@@ -120,6 +120,14 @@ sealed interface SettingsScreen : NavKey {
 
     data object ShortcutPreferences : SettingsScreen
 
+    data object Services : SettingsScreen
+
+    data object UserInterface : SettingsScreen
+
+    data object Integrations : SettingsScreen
+
+    data object BackupRestore : SettingsScreen
+
     data class ArrDashboard(
         val id: Long,
     ) : SettingsScreen

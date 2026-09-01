@@ -103,7 +103,7 @@ fun seriesInfo(
             mokoString(MR.strings.no)
         }
 
-    val diskSize = series.fileSize.bytesAsFileSizeString()
+    val diskSize = series.fileSize?.bytesAsFileSizeString() ?: mokoString(MR.strings.unknown)
 
     return listOf(
         InfoItem(mokoString(MR.strings.status), mokoString(series.status.resource)),
@@ -176,7 +176,7 @@ fun artistInfo(
         artist.rootFolderPath?.takeUnless { it.isBlank() }
             ?: mokoString(MR.strings.unknown)
 
-    val diskSize = artist.fileSize.bytesAsFileSizeString()
+    val diskSize = artist.fileSize?.bytesAsFileSizeString() ?: mokoString(MR.strings.unknown)
 
     return buildList {
         add(InfoItem(mokoString(MR.strings.status), mokoString(artist.status.resource)))
@@ -211,7 +211,7 @@ fun authorInfo(
         author.rootFolderPath?.takeUnless { it.isBlank() }
             ?: mokoString(MR.strings.unknown)
 
-    val diskSize = author.fileSize.bytesAsFileSizeString()
+    val diskSize = author.fileSize?.bytesAsFileSizeString() ?: mokoString(MR.strings.unknown)
 
     return buildList {
         add(InfoItem(mokoString(MR.strings.status), mokoString(author.status.resource)))

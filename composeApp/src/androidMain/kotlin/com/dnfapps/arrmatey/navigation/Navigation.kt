@@ -217,25 +217,78 @@ fun Navigator<*>.toPersonWebView(url: String) = nav().navigateTo(MediaScreen.Per
  */
 fun Navigator<SettingsScreen>.toLanding() = navigateTo(SettingsScreen.Landing)
 
-fun Navigator<SettingsScreen>.toAddInstance(type: InstanceType = InstanceType.Sonarr) = navigateTo(SettingsScreen.AddInstance(type))
+fun Navigator<SettingsScreen>.toAddInstance(type: InstanceType = InstanceType.Sonarr) {
+    if (backStack.lastOrNull() != SettingsScreen.Services) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.AddInstance(type))
+}
 
-fun Navigator<SettingsScreen>.toEditInstance(id: Long) = navigateTo(SettingsScreen.EditInstance(id))
+fun Navigator<SettingsScreen>.toEditInstance(id: Long) {
+    if (backStack.lastOrNull() !is SettingsScreen.ArrDashboard) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.EditInstance(id))
+}
 
 fun Navigator<SettingsScreen>.toDev() = navigateTo(SettingsScreen.Dev)
 
-fun Navigator<SettingsScreen>.toTabPreferences() = navigateTo(SettingsScreen.TabPreferences)
+fun Navigator<SettingsScreen>.toTabPreferences() {
+    if (backStack.lastOrNull() != SettingsScreen.UserInterface) {
+        navigateTo(SettingsScreen.UserInterface)
+    }
+    navigateTo(SettingsScreen.TabPreferences)
+}
 
-fun Navigator<SettingsScreen>.toShortcutsPreferences() = navigateTo(SettingsScreen.ShortcutPreferences)
+fun Navigator<SettingsScreen>.toShortcutsPreferences() {
+    if (backStack.lastOrNull() != SettingsScreen.UserInterface) {
+        navigateTo(SettingsScreen.UserInterface)
+    }
+    navigateTo(SettingsScreen.ShortcutPreferences)
+}
 
-fun Navigator<SettingsScreen>.toArrDashboard(id: Long) = navigateTo(SettingsScreen.ArrDashboard(id))
+fun Navigator<SettingsScreen>.toArrDashboard(id: Long) {
+    if (backStack.lastOrNull() != SettingsScreen.Services) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.ArrDashboard(id))
+}
 
-fun Navigator<SettingsScreen>.toAddDownloadClient() = navigateTo(SettingsScreen.AddDownloadClient)
+fun Navigator<SettingsScreen>.toAddDownloadClient() {
+    if (backStack.lastOrNull() != SettingsScreen.Services) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.AddDownloadClient)
+}
 
-fun Navigator<SettingsScreen>.toEditDownloadClient(id: Long) = navigateTo(SettingsScreen.EditDownloadClient(id))
+fun Navigator<SettingsScreen>.toEditDownloadClient(id: Long) {
+    if (backStack.lastOrNull() != SettingsScreen.Services) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.EditDownloadClient(id))
+}
 
-fun Navigator<SettingsScreen>.toAddCustomWebpage() = navigateTo(SettingsScreen.AddCustomWebpage)
+fun Navigator<SettingsScreen>.toAddCustomWebpage() {
+    if (backStack.lastOrNull() != SettingsScreen.Services) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.AddCustomWebpage)
+}
 
-fun Navigator<SettingsScreen>.toEditCustomWebpage(id: Long) = navigateTo(SettingsScreen.EditCustomWebpage(id))
+fun Navigator<SettingsScreen>.toEditCustomWebpage(id: Long) {
+    if (backStack.lastOrNull() != SettingsScreen.Services) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.EditCustomWebpage(id))
+}
+
+fun Navigator<SettingsScreen>.toServices() = navigateTo(SettingsScreen.Services)
+
+fun Navigator<SettingsScreen>.toUserInterface() = navigateTo(SettingsScreen.UserInterface)
+
+fun Navigator<SettingsScreen>.toIntegrations() = navigateTo(SettingsScreen.Integrations)
+
+fun Navigator<SettingsScreen>.toBackupRestore() = navigateTo(SettingsScreen.BackupRestore)
 
 fun Navigator<SettingsScreen>.onInstanceTap(
     id: Long,

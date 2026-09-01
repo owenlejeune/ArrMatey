@@ -1,18 +1,11 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.pm.verify.domain.DomainVerificationManager
-import android.content.pm.verify.domain.DomainVerificationUserState
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.compose.PredictiveBackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -24,32 +17,17 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Shortcut
-import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.BrightnessLow
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Contrast
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.MiscellaneousServices
-import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Splitscreen
-import androidx.compose.material.icons.filled.Upload
-import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -57,13 +35,10 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,24 +47,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.ReleaseNotesSheet
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
-import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.entensions.openLink
-import com.dnfapps.arrmatey.extensions.nowTimestamp
-import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.isDebug
-import com.dnfapps.arrmatey.model.AppColor
-import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.model.IconSource
-import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.permissions.rememberLocalNetworkPermissionHandler
@@ -98,8 +64,6 @@ import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.settings.AboutCard
 import com.dnfapps.arrmatey.ui.icons.Hard_drive
-import com.dnfapps.arrmatey.ui.screens.settings.ExportDialog
-import com.dnfapps.arrmatey.ui.screens.settings.ImportDialog
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
@@ -111,100 +75,35 @@ import com.mikepenz.aboutlibraries.util.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    windowSizeClass: WindowSizeClass,
     viewModel: MoreScreenViewModel = koinInject(),
-    backupViewModel: BackupViewModel = koinInject(),
     moko: MokoStrings = koinInject(),
-    onNavigateToInstance: (Long, InstanceType) -> Unit = { _, _ -> },
-    onNavigateToAddInstance: () -> Unit = {},
-    onNavigateToEditDownloadClient: (Long) -> Unit = {},
-    onNavigateToAddDownloadClient: () -> Unit = {},
-    onNavigateToEditCustomWebpage: (Long) -> Unit = {},
-    onNavigateToAddCustomWebpage: () -> Unit = {},
-    onNavigateToTabPreferences: () -> Unit = {},
-    onNavigateToShortcutsPreferences: () -> Unit = {},
+    onNavigateToServices: () -> Unit = {},
+    onNavigateToUserInterface: () -> Unit = {},
+    onNavigateToIntegrations: () -> Unit = {},
+    onNavigateToBackupRestore: () -> Unit = {},
     onNavigateToDev: () -> Unit = {},
 ) {
     val navManager = navigationManager
     val context = LocalContext.current
-    val configuration = LocalConfiguration.current
-
-    val allInstances by viewModel.instances.collectAsStateWithLifecycle()
-    val allDownloadClients by viewModel.downloadClients.collectAsStateWithLifecycle()
-    val allCustomWebPages by viewModel.customWebpages.collectAsStateWithLifecycle()
-    val instanceConnectionStatues by viewModel.testingStatus.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     var showLibrariesSheet by remember { mutableStateOf(false) }
     var confirmShareLastLog by remember { mutableStateOf(false) }
-
-    var showExportDialog by remember { mutableStateOf(false) }
-    var showImportDialog by remember { mutableStateOf(false) }
-    var pendingImportData by remember { mutableStateOf<String?>(null) }
-
     var showChangelogSheet by remember { mutableStateOf(false) }
 
-    val exportLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.CreateDocument("application/json"),
-            onResult = { uri ->
-                uri?.let {
-                    backupViewModel.exportData { encryptedData ->
-                        context.contentResolver.openOutputStream(it)?.use { outputStream ->
-                            outputStream.write(encryptedData.toByteArray())
-                        }
-                        Toast.makeText(context, moko.getString(MR.strings.export_ready), Toast.LENGTH_SHORT).show()
-                    }
-                }
-            },
-        )
-
-    val importLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
-            onResult = { uri ->
-                uri?.let {
-                    val encryptedData =
-                        context.contentResolver.openInputStream(it)?.use { inputStream ->
-                            inputStream.readBytes().decodeToString()
-                        }
-                    if (encryptedData != null) {
-                        pendingImportData = encryptedData
-                        showImportDialog = true
-                    }
-                }
-            },
-        )
-
-    val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
-    val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
-    val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
-    val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
-    val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
-
-    val isLargeScreenSupported = remember(windowSizeClass, configuration) {
-        windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact ||
-            configuration.smallestScreenWidthDp >= 600 ||
-            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && context.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_HINGE_ANGLE))
-    }
-
-    val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
-    val appColor by viewModel.appColor.collectAsStateWithLifecycle()
     val localNetworkPermissionInfoDismissed by viewModel.localNetworkPermissionInfoDismissed.collectAsStateWithLifecycle()
     val localNetworkPermissionHandler = rememberLocalNetworkPermissionHandler()
-
-    var showThemeDropdown by remember { mutableStateOf(false) }
-    var showColorDropdown by remember { mutableStateOf(false) }
 
     PredictiveBackHandler { progress ->
         try {
             progress.collect { }
             navManager.openDrawer()
-        } catch (_: kotlinx.coroutines.CancellationException) {
+        } catch (_: CancellationException) {
             // Gesture cancelled
         }
     }
@@ -293,362 +192,42 @@ fun SettingsScreen(
             }
 
             SettingsGroup(
-                title = mokoString(MR.strings.instances),
-                items =
-                    allInstances.map { instance ->
-                        SettingItem(
-                            icon = IconSource.Resource(instance.type.icon),
-                            title = instance.label,
-                            subtitle = instance.url,
-                            trailingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
-                            onClick = {
-                                onNavigateToInstance(instance.id, instance.type)
-                            },
-                            titleExtraContent = {
-                                Box(
-                                    modifier = Modifier.size(18.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    when (instanceConnectionStatues[instance.id]) {
-                                        is OperationStatus.InProgress -> CircularProgressIndicator()
-                                        is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = Color.Red)
-                                        else -> {}
-                                    }
-                                }
-                            },
-                        )
-                    } +
-                        SettingItem(
-                            title = mokoString(MR.strings.add_instance),
-                            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                            icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                            onClick = {
-                                onNavigateToAddInstance()
-                            },
-                        ),
-            )
-
-            SettingsGroup(
-                title = mokoString(MR.strings.download_clients),
-                items =
-                    allDownloadClients.map { downloadClient ->
-                        SettingItem(
-                            icon = IconSource.Resource(downloadClient.type.icon),
-                            title = downloadClient.label,
-                            subtitle = downloadClient.url,
-                            trailingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
-                            onClick = {
-                                onNavigateToEditDownloadClient(downloadClient.id)
-                            },
-                            titleExtraContent = {
-                                Box(
-                                    modifier = Modifier.size(18.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    when (instanceConnectionStatues[downloadClient.id + 100_000]) {
-                                        is OperationStatus.InProgress -> CircularProgressIndicator()
-                                        is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = Color.Red)
-                                        else -> {}
-                                    }
-                                }
-                            },
-                        )
-                    } +
-                        SettingItem(
-                            title = mokoString(MR.strings.add_download_client),
-                            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                            icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                            onClick = {
-                                onNavigateToAddDownloadClient()
-                            },
-                        ),
-            )
-
-            SettingsGroup(
-                title = mokoString(MR.strings.custom_webpages),
-                items =
-                    allCustomWebPages.map { webpage ->
-                        SettingItem(
-                            title = webpage.name,
-                            subtitle = webpage.url,
-                            icon = IconSource.Vector(Icons.Default.Language),
-                            onClick = {
-                                onNavigateToEditCustomWebpage(webpage.id)
-                            },
-                            trailingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
-                        )
-                    } +
-                        SettingItem(
-                            title = mokoString(MR.strings.add_custom_webpage),
-                            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                            icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                            onClick = {
-                                onNavigateToAddCustomWebpage()
-                            },
-                        ),
-            )
-
-            SettingsGroup(
-                title = mokoString(MR.strings.user_interface),
-                items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Contrast),
-                            title = mokoString(MR.strings.theme),
-                            subtitle = mokoString(appTheme.resource),
-                            onClick = { showThemeDropdown = true },
-                            trailingContent = {
-                                Box {
-                                    DropdownMenu(
-                                        expanded = showThemeDropdown,
-                                        onDismissRequest = { showThemeDropdown = false },
-                                    ) {
-                                        AppTheme.entries.forEach { theme ->
-                                            DropdownMenuItem(
-                                                text = { Text(mokoString(theme.resource)) },
-                                                onClick = {
-                                                    viewModel.setAppTheme(theme)
-                                                    showThemeDropdown = false
-                                                },
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Palette),
-                            title = mokoString(MR.strings.color),
-                            subtitle = mokoString(appColor.resource),
-                            onClick = { showColorDropdown = true },
-                            trailingContent = {
-                                Box {
-                                    DropdownMenu(
-                                        expanded = showColorDropdown,
-                                        onDismissRequest = { showColorDropdown = false },
-                                    ) {
-                                        AppColor.entries
-                                            .filter { it != AppColor.Dynamic || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S }
-                                            .forEach { color ->
-                                                DropdownMenuItem(
-                                                    text = { Text(mokoString(color.resource)) },
-                                                    onClick = {
-                                                        viewModel.setAppColor(color)
-                                                        showColorDropdown = false
-                                                    },
-                                                )
-                                            }
-                                    }
-                                }
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Navigation),
-                            title = mokoString(MR.strings.navigation_bar_configuration),
-                            onClick = {
-                                onNavigateToTabPreferences()
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.AutoMirrored.Default.Shortcut),
-                            title = mokoString(MR.strings.shortcuts_configuration),
-                            onClick = {
-                                onNavigateToShortcutsPreferences()
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.MiscellaneousServices),
-                            title = mokoString(MR.strings.service_icons_title),
-                            subtitle = mokoString(MR.strings.service_icons_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = useServiceNavLogos,
-                                    onCheckedChange = { viewModel.toggleUseServiceNavLogos() },
-                                )
-                            },
-                            onClick = { viewModel.toggleUseServiceNavLogos() },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Hard_drive),
-                            title = mokoString(MR.strings.instance_switcher_toggle_title),
-                            subtitle = mokoString(MR.strings.instance_switcher_toggle_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = hideInstanceSwitcher,
-                                    onCheckedChange = { viewModel.toggleInstanceSwitcher() },
-                                )
-                            },
-                            onClick = { viewModel.toggleInstanceSwitcher() },
-                        ),
+                items = listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Hard_drive),
+                        title = mokoString(MR.strings.services),
+                        subtitle = mokoString(MR.strings.services_description),
+                        onClick = onNavigateToServices,
+                        trailingContent = {
+                            Icon(Icons.Default.ChevronRight, null)
+                        }
                     ),
-            )
-
-            if (isLargeScreenSupported) {
-                SettingsGroup(
-                    title = mokoString(MR.strings.large_screen_settings_title),
-                    items = listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Splitscreen, rotation = 90f),
-                            title = mokoString(MR.strings.dual_panel_support_title),
-                            subtitle = mokoString(MR.strings.dual_panel_support_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = dualPanelSupport,
-                                    onCheckedChange = { viewModel.toggleDualPanelSupport() },
-                                )
-                            },
-                            onClick = { viewModel.toggleDualPanelSupport() },
-                        )
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Palette),
+                        title = mokoString(MR.strings.user_interface),
+                        subtitle = mokoString(MR.strings.user_interface_description),
+                        onClick = onNavigateToUserInterface,
+                        trailingContent = {
+                            Icon(Icons.Default.ChevronRight, null)
+                        }
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Share),
+                        title = mokoString(MR.strings.integrations),
+                        onClick = onNavigateToIntegrations,
+                        trailingContent = {
+                            Icon(Icons.Default.ChevronRight, null)
+                        }
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Restore),
+                        title = mokoString(MR.strings.backup_restore),
+                        onClick = onNavigateToBackupRestore,
+                        trailingContent = {
+                            Icon(Icons.Default.ChevronRight, null)
+                        }
                     )
                 )
-            }
-
-            SettingsGroup(
-                title = mokoString(MR.strings.search_results),
-                items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Image),
-                            title = mokoString(MR.strings.search_show_banners),
-                            trailingContent = {
-                                Switch(
-                                    checked = searchShowBanners,
-                                    onCheckedChange = { viewModel.toggleSearchShowBanners() },
-                                )
-                            },
-                            onClick = { viewModel.toggleSearchShowBanners() },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.BrightnessLow),
-                            title = mokoString(MR.strings.search_show_instance_indicator_shadow),
-                            trailingContent = {
-                                Switch(
-                                    checked = searchShowInstanceIndicatorShadow,
-                                    onCheckedChange = { viewModel.toggleSearchShowInstanceIndicatorShadow() },
-                                )
-                            },
-                            onClick = { viewModel.toggleSearchShowInstanceIndicatorShadow() },
-                        ),
-                    ),
-            )
-
-            SettingsGroup(
-                title = mokoString(MR.strings.deep_links_title),
-                items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Link),
-                            title = mokoString(MR.strings.tmdb_links),
-                            subtitle = mokoString(MR.strings.tmdb_links_description),
-                            onClick = {
-                                val intent =
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        Intent(
-                                            Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
-                                            "package:${context.packageName}".toUri(),
-                                        )
-                                    } else {
-                                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                            data = Uri.fromParts("package", context.packageName, null)
-                                        }
-                                    }
-                                context.startActivity(intent)
-                            },
-                            trailingContent = {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    val isVerified =
-                                        remember(context) {
-                                            val manager = context.getSystemService(DomainVerificationManager::class.java)
-                                            val userState = manager.getDomainVerificationUserState(context.packageName)
-                                            userState?.hostToStateMap?.entries?.any { (host, state) ->
-                                                host.contains("themoviedb.org") &&
-                                                    (
-                                                        state == DomainVerificationUserState.DOMAIN_STATE_VERIFIED ||
-                                                            state == DomainVerificationUserState.DOMAIN_STATE_SELECTED
-                                                    )
-                                            } == true
-                                        }
-
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    ) {
-                                        Text(
-                                            text =
-                                                if (isVerified) {
-                                                    mokoString(
-                                                        MR.strings.links_verified,
-                                                    )
-                                                } else {
-                                                    mokoString(MR.strings.links_not_verified)
-                                                },
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = if (isVerified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                                        )
-                                        if (isVerified) {
-                                            Icon(
-                                                imageVector = Icons.Default.CheckCircle,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.primary,
-                                            )
-                                        } else {
-                                            Icon(
-                                                imageVector = Icons.Default.ChevronRight,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(24.dp),
-                                            )
-                                        }
-                                    }
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.ChevronRight,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
-                            },
-                        ),
-                    ),
-            )
-
-            SettingsGroup(
-                title = mokoString(MR.strings.backup_restore),
-                items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Upload),
-                            title = mokoString(MR.strings.backup),
-                            subtitle = mokoString(MR.strings.backup_description),
-                            onClick = { showExportDialog = true },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Download),
-                            title = mokoString(MR.strings.restore),
-                            subtitle = mokoString(MR.strings.restore_description),
-                            onClick = { importLauncher.launch(arrayOf("application/json")) },
-                        ),
-                    ),
             )
 
             AboutCard(
@@ -758,54 +337,6 @@ fun SettingsScreen(
                 title = { Text(mokoString(MR.strings.share_crash_log)) },
                 text = {
                     Text(mokoString(MR.strings.share_crash_log_message))
-                },
-            )
-        }
-
-        if (showExportDialog) {
-            val exportState by backupViewModel.exportUiState.collectAsStateWithLifecycle()
-
-            ExportDialog(
-                exportState = exportState,
-                onDismiss = { showExportDialog = false },
-                onConfirm = {
-                    showExportDialog = false
-                    exportLauncher.launch("${nowTimestamp()}_ArrMatey_Backup.json")
-                },
-                onPasswordChanged = { backupViewModel.setExportPassword(it) },
-                onToggleIncludeInstancePreferences = { backupViewModel.toggleIncludePreferences() },
-                onToggleIncludeTabPreferences = { backupViewModel.toggleIncludeTabPreferences() },
-                onToggleIncludeUiPreferences = { backupViewModel.toggleIncludeUiPreferences() },
-                onToggleInstanceSelection = { backupViewModel.toggleInstanceSelection(it) },
-                onToggleDownloadClientSelection = { backupViewModel.toggleDownloadClientSelection(it) },
-            )
-        }
-
-        if (showImportDialog) {
-            val importState by backupViewModel.importUiState.collectAsStateWithLifecycle()
-
-            ImportDialog(
-                importState = importState,
-                onDismiss = {
-                    showImportDialog = false
-                    pendingImportData = null
-                },
-                onPasswordChanged = { backupViewModel.setImportPassword(it) },
-                onToggleInstanceSelection = { backupViewModel.toggleImportInstanceSelection(it) },
-                onToggleDownloadClientSelection = { backupViewModel.toggleImportDownloadClientSelection(it) },
-                onToggleImportTabPreferences = { backupViewModel.toggleImportTabPreferences() },
-                onToggleImportUiPreferences = { backupViewModel.toggleImportUiPreferences() },
-                onConfirmDecrypt = {
-                    pendingImportData?.let { data ->
-                        backupViewModel.prepareImport(data)
-                    }
-                },
-                onConfirmImport = {
-                    backupViewModel.executeImport {
-                        showImportDialog = false
-                        pendingImportData = null
-                        Toast.makeText(context, moko.getString(MR.strings.import_complete), Toast.LENGTH_SHORT).show()
-                    }
                 },
             )
         }

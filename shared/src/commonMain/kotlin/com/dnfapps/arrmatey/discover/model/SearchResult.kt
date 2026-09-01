@@ -27,6 +27,34 @@ sealed interface SearchResult {
     val popularity: Double
     var originalRank: Int
 
+    val instanceType: InstanceType
+        get() = when (this) {
+            is ArrMediaResult -> {
+                when (media) {
+                    is ArrSeries,
+                    is MockMedia.Sonarr,
+                    is MockMedia.Default,
+                        -> InstanceType.Sonarr
+                    is ArrMovie,
+                    is MockMedia.Radarr,
+                        -> InstanceType.Radarr
+                    is Arrtist,
+                    is MockMedia.Lidarr,
+                        -> InstanceType.Lidarr
+                    is Author,
+                    is MockMedia.Readarr,
+                        -> InstanceType.Booksehelf
+                    is Audiobook,
+                    is SearchAudiobook,
+                    is MockMedia.Listenarr,
+                        -> InstanceType.Listenarr
+                }
+            }
+            is SeerrMediaResult,
+            is SeerrPersonResult -> InstanceType.Seerr
+        }
+
+
     @Serializable
     data class ArrMediaResult(
         val media: ArrMedia,
@@ -54,26 +82,6 @@ sealed interface SearchResult {
             when (media) {
                 is SearchAudiobook, Audiobook, Author, Arrtist -> AspectRatio.Cover
                 else -> AspectRatio.Poster
-            }
-        val instanceType: InstanceType =
-            when (media) {
-                is ArrSeries,
-                is MockMedia.Sonarr,
-                is MockMedia.Default,
-                -> InstanceType.Sonarr
-                is ArrMovie,
-                is MockMedia.Radarr,
-                -> InstanceType.Radarr
-                is Arrtist,
-                is MockMedia.Lidarr,
-                -> InstanceType.Lidarr
-                is Author,
-                is MockMedia.Readarr,
-                -> InstanceType.Booksehelf
-                is Audiobook,
-                is SearchAudiobook,
-                is MockMedia.Listenarr,
-                -> InstanceType.Listenarr
             }
     }
 

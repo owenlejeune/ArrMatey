@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -54,18 +55,12 @@ import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.BULLET
-import com.dnfapps.arrmatey.entensions.colouredDropShadow
 import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.extensions.pxToDp
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
-import com.dnfapps.arrmatey.ui.theme.ArrBlue
-import com.dnfapps.arrmatey.ui.theme.ArrGreen
-import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
-import com.dnfapps.arrmatey.ui.theme.ArrRed
-import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.Blur
@@ -149,27 +144,17 @@ fun SearchResultItem(
     showBanners: Boolean = true,
     showInstanceIndicatorShadow: Boolean = true,
 ) {
-    val shadowColor =
-        if (showInstanceIndicatorShadow) {
-            when (item) {
-                is SearchResult.ArrMediaResult ->
-                    when (item.media) {
-                        is ArrMovie -> ArrYellow
-                        is ArrSeries -> ArrBlue
-                        is Arrtist -> ArrGreen
-                        is Author -> ArrRed
-                        is SearchAudiobook, is Audiobook -> ArrLightPurple
-                        else -> null
-                    }
-                is SearchResult.SeerrMediaResult,
-                is SearchResult.SeerrPersonResult,
-                -> ArrPurple
-            }
-        } else {
-            null
-        }
+    val shadowColor = remember(item, showInstanceIndicatorShadow) {
+        if (showInstanceIndicatorShadow) item.instanceType.associatedColor else Color.Unspecified
+    }
 
-    Box(modifier = Modifier.colouredDropShadow(shadowColor)) {
+    Box(modifier = Modifier//.colouredDropShadow(shadowColor)
+        .shadow(
+            elevation = 10.dp,
+            shape = RoundedCornerShape(10.dp),
+            ambientColor = shadowColor,
+            spotColor = shadowColor)
+    ) {
         when (item) {
             is SearchResult.ArrMediaResult -> {
                 MediaItem(
@@ -291,9 +276,7 @@ fun <T : ArrMedia> MediaItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Column {
-                        MediaDetails(item, isActive, showBannerBackground)
-                    }
+                    MediaDetails(item, isActive, showBannerBackground)
 
                     if (includeOverview && item.overview != null) {
                         val parsed = item.overview?.rememberHtml() ?: ""
@@ -482,14 +465,16 @@ private fun MediaDetails(
     isActive: Boolean,
     showBannerBackground: Boolean,
 ) {
-    when (item) {
-        is ArrSeries -> SeriesDetails(item, isActive, showBannerBackground)
-        is ArrMovie -> MovieDetails(item, isActive, showBannerBackground)
-        is Arrtist -> ArtistDetails(item, isActive, showBannerBackground)
-        is Author -> AuthorDetails(item, isActive, showBannerBackground)
-        is Audiobook -> AudiobookDetails(item, isActive, showBannerBackground)
-        is SearchAudiobook -> SearchAudiobookDetails(item, showBannerBackground)
-        is MockMedia -> MockDetails(item, showBannerBackground)
+    Column {
+        when (item) {
+            is ArrSeries -> SeriesDetails(item, isActive, showBannerBackground)
+            is ArrMovie -> MovieDetails(item, isActive, showBannerBackground)
+            is Arrtist -> ArtistDetails(item, isActive, showBannerBackground)
+            is Author -> AuthorDetails(item, isActive, showBannerBackground)
+            is Audiobook -> AudiobookDetails(item, isActive, showBannerBackground)
+            is SearchAudiobook -> SearchAudiobookDetails(item, showBannerBackground)
+            is MockMedia -> MockDetails(item, showBannerBackground)
+        }
     }
 }
 
@@ -501,7 +486,7 @@ private fun SeriesDetails(
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     val seasonLabel = mokoPlural(MR.plurals.seasons, item.seasonCount)
-    val fileSizeString = item.fileSize.bytesAsFileSizeString()
+    val fileSizeString = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
     val network = item.network
 
     val secondLine = listOfNotNull(seasonLabel, fileSizeString, network).joinToString(BULLET)
@@ -556,7 +541,7 @@ private fun MovieDetails(
             ?.quality
             ?.quality
             ?.name
-    val fileSizeLabel = item.fileSize.bytesAsFileSizeString().takeIf { item.fileSize > 0 }
+    val fileSizeLabel = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
     val thirdLine = listOfNotNull(qualityLabel, fileSizeLabel).joinToString(BULLET)
     thirdLine.unlessEmpty { thirdLine ->
         Text(thirdLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
@@ -635,7 +620,7 @@ private fun AudiobookDetails(
         item.series?.let {
             if (item.seriesNumber != null) "$it (#${item.seriesNumber})" else it
         }
-    val fileSizeString = item.fileSize.bytesAsFileSizeString().takeIf { item.fileSize > 0 }
+    val fileSizeString = item.fileSize.bytesAsFileSizeString().takeUnless { item.id == null }
 
     val secondLine = listOfNotNull(seriesString, fileSizeString, item.publisher).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {

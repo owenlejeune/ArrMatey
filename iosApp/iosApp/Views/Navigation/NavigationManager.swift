@@ -124,6 +124,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         if showLauncher {
             let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
             launcherPath.append(settingsTab)
+            launcherPath.append(SettingsRoute.services)
             launcherPath.append(SettingsRoute.newInstance(type))
         } else {
             pendingSettingsRoute = .newInstance(type)
@@ -137,6 +138,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         if showLauncher {
             let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
             launcherPath.append(settingsTab)
+            launcherPath.append(SettingsRoute.services)
             launcherPath.append(SettingsRoute.editInstance(id))
         } else {
             pendingSettingsRoute = .editInstance(id)
@@ -164,6 +166,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func applyPendingRoute() {
         if let route = pendingSettingsRoute {
+            launcherPath.append(SettingsRoute.services)
             launcherPath.append(route)
             pendingSettingsRoute = nil
         }
@@ -427,6 +430,9 @@ enum SeerrRoute: Hashable {
 }
 
 enum SettingsRoute : Hashable {
+    case services
+    case userInterface
+    case backupRestore
     case newInstance(_ : InstanceType = .sonarr)
     case dev
     case editInstance(Int64)

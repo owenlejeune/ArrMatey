@@ -124,7 +124,7 @@ data class ArrMovie(
                 else -> Color.Unspecified
             }
 
-    override val fileSize: Long
+    override val fileSize: Long?
         get() = movieFile?.size ?: super.fileSize
 
     override val releasedBy: String?

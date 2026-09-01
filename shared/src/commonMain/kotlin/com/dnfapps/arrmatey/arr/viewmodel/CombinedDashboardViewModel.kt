@@ -103,7 +103,7 @@ class CombinedDashboardViewModel(
                                 ) { software, disks, health, activity, library ->
                                     val libraryData = (library as? NetworkResult.Success)?.data ?: emptyList()
                                     val totalItems = libraryData.size
-                                    val sizeOnDisk = libraryData.sumOf { it.fileSize }
+                                    val sizeOnDisk = libraryData.sumOf { it.fileSize ?: 0L }
 
                                     ArrInstanceDashboardState(
                                         instance = repo.instance,

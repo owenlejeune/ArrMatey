@@ -15,12 +15,16 @@ import com.dnfapps.arrmatey.navigation.onInstanceTap
 import com.dnfapps.arrmatey.navigation.toAddCustomWebpage
 import com.dnfapps.arrmatey.navigation.toAddDownloadClient
 import com.dnfapps.arrmatey.navigation.toAddInstance
+import com.dnfapps.arrmatey.navigation.toBackupRestore
 import com.dnfapps.arrmatey.navigation.toDev
 import com.dnfapps.arrmatey.navigation.toEditCustomWebpage
 import com.dnfapps.arrmatey.navigation.toEditDownloadClient
 import com.dnfapps.arrmatey.navigation.toEditInstance
+import com.dnfapps.arrmatey.navigation.toIntegrations
+import com.dnfapps.arrmatey.navigation.toServices
 import com.dnfapps.arrmatey.navigation.toShortcutsPreferences
 import com.dnfapps.arrmatey.navigation.toTabPreferences
+import com.dnfapps.arrmatey.navigation.toUserInterface
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
@@ -33,6 +37,10 @@ import com.dnfapps.arrmatey.ui.screens.EditInstanceScreen
 import com.dnfapps.arrmatey.ui.screens.SettingsScreen
 import com.dnfapps.arrmatey.ui.screens.ShortcutsCustomizationScreen
 import com.dnfapps.arrmatey.ui.screens.TabCustomizationScreen
+import com.dnfapps.arrmatey.ui.screens.settings.BackupRestoreSettingsScreen
+import com.dnfapps.arrmatey.ui.screens.settings.IntegrationsSettingsScreen
+import com.dnfapps.arrmatey.ui.screens.settings.ServicesSettingsScreen
+import com.dnfapps.arrmatey.ui.screens.settings.UiSettingsScreen
 import org.koin.compose.koinInject
 
 @Composable
@@ -59,16 +67,40 @@ fun SettingsTabNavHost(
             entryProvider {
                 entry<SettingsScreen.Landing> {
                     SettingsScreen(
-                        windowSizeClass = windowSizeClass,
+                        onNavigateToServices = { navigation.toServices() },
+                        onNavigateToUserInterface = { navigation.toUserInterface() },
+                        onNavigateToIntegrations = { navigation.toIntegrations() },
+                        onNavigateToBackupRestore = { navigation.toBackupRestore() },
+                        onNavigateToDev = { navigation.toDev() },
+                    )
+                }
+                entry<SettingsScreen.Services> {
+                    ServicesSettingsScreen(
                         onNavigateToInstance = { id, type -> navigation.onInstanceTap(id, type) },
                         onNavigateToAddInstance = { navigation.toAddInstance() },
                         onNavigateToEditDownloadClient = { id -> navigation.toEditDownloadClient(id) },
                         onNavigateToAddDownloadClient = { navigation.toAddDownloadClient() },
                         onNavigateToEditCustomWebpage = { id -> navigation.toEditCustomWebpage(id) },
                         onNavigateToAddCustomWebpage = { navigation.toAddCustomWebpage() },
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.UserInterface> {
+                    UiSettingsScreen(
+                        windowSizeClass = windowSizeClass,
                         onNavigateToTabPreferences = { navigation.toTabPreferences() },
                         onNavigateToShortcutsPreferences = { navigation.toShortcutsPreferences() },
-                        onNavigateToDev = { navigation.toDev() },
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.Integrations> {
+                    IntegrationsSettingsScreen(
+                        onBack = { navigation.popBackStack() },
+                    )
+                }
+                entry<SettingsScreen.BackupRestore> {
+                    BackupRestoreSettingsScreen(
+                        onBack = { navigation.popBackStack() },
                     )
                 }
                 entry<SettingsScreen.AddInstance> {

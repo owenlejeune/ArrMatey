@@ -70,8 +70,8 @@ sealed interface ArrMedia {
     val statusColor: Color
     val releasedBy: String?
     val statusString: String
-    val fileSize: Long
-        get() = statistics?.sizeOnDisk ?: 0L
+    val fileSize: Long?
+        get() = statistics?.sizeOnDisk
     val runtimeString: String
         get() = runtime?.formatMinutesAsRuntime() ?: ""
 

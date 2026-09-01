@@ -7,175 +7,52 @@
 
 import SwiftUI
 import Shared
-import UniformTypeIdentifiers
 
 struct SettingsScreen: View {
-    
+
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var navigationManager: NavigationManager
-    
-    @ObservedObject private var viewModel = MoreScreenViewModelS()
-    @StateObject private var backupViewModel = BackupViewModelS()
-    
+
     @State private var showLibrariesSheet: Bool = false
     @State private var showShareLogAlert: Bool = false
-    
-    @State private var showExportSheet: Bool = false
-    @State private var showImportSheet: Bool = false
-    @State private var showFileExporter: Bool = false
-    @State private var showFileImporter: Bool = false
-    @State private var exportData: String = ""
-    @State private var importData: String = ""
-    @State private var showExportSuccess: Bool = false
-    @State private var showImportSuccess: Bool = false
     @State private var showChangelogSheet: Bool = false
-    
-    private let crashManager = IOSCrashManager.shared
-    
-    private var instances: [Instance] {
-        viewModel.instances
-    }
-    
-    private var downloadClients: [DownloadClient] {
-        viewModel.downloadClients
-    }
-    
-    private var customWebpages: [CustomWebpage] {
-        viewModel.customWebpages
-    }
-    
-    private func route(for instance: Instance) -> SettingsRoute {
-        switch instance.type {
-        case .sonarr, .radarr, .lidarr:
-            return .arrDashboard(instance.id)
-        default:
-            return .editInstance(instance.id)
-        }
-    }
-    
+
     var body: some View {
         Form {
             Section {
-                ForEach(instances, id: \.self) { instance in
-                    InstanceCard(instance: instance, route: route(for: instance), connectionStatuses: viewModel.connectionStatuses)
+                NavigationLink(value: SettingsRoute.services) {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(MR.strings().services.localized())
+                            Text(MR.strings().services_description.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "server.rack")
+                            .foregroundColor(.themePrimary)
+                    }
                 }
-                NavigationLink(value: SettingsRoute.newInstance()) {
-                    Text(MR.strings().add_instance.localized())
-                        .foregroundColor(.themePrimary)
+
+                NavigationLink(value: SettingsRoute.userInterface) {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(MR.strings().user_interface.localized())
+                            Text(MR.strings().user_interface_description.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "paintpalette")
+                            .foregroundColor(.themePrimary)
+                    }
                 }
-            } header: {
-                Text(MR.strings().instances.localized())
-            }
-            
-            Section {
-                ForEach(downloadClients, id: \.self) { client in
-                    DownloadClientCard(client: client, connectionStatuses: viewModel.connectionStatuses)
-                }
-                NavigationLink(value: SettingsRoute.newDownloadClient) {
-                    Text(MR.strings().add_download_client.localized())
-                        .foregroundColor(.themePrimary)
-                }
-            } header: {
-                Text(MR.strings().download_clients.localized())
-            }
-            
-            Section {
-                ForEach(customWebpages, id: \.self) { webpage in
-                    WebpageCard(webpage: webpage)
-                }
-                NavigationLink(value: SettingsRoute.newCustomWebpage) {
-                    Text("Add custom webpage")
-                        .foregroundColor(.themePrimary)
+
+                NavigationLink(value: SettingsRoute.backupRestore) {
+                    Label(MR.strings().backup_restore.localized(), systemImage: "arrow.clockwise.icloud")
                 }
             }
 
-            Section {
-                NavigationLink(value: SettingsRoute.navigationConfig) {
-                    HStack(spacing: 24) {
-                        Image(systemName: "location.north.fill")
-                            .foregroundColor(.themePrimary)
-                            .frame(width: 32, height: 32)
-                        
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(MR.strings().navigation_bar_configuration.localized())
-                                .font(.system(size: 18, weight: .medium))
-                        }
-                    }
-                }
-                Toggle(isOn: Binding(
-                    get: { viewModel.useServiceNavLogos },
-                    set: { _ in viewModel.toggleUseServiceNavLogos() }
-                )) {
-                    Text(MR.strings().service_icons_title.localized())
-                }
-                Toggle(isOn: Binding(
-                    get: { viewModel.hideInstanceSwitcher },
-                    set: { _ in viewModel.toggleInstanceSwitcher() }
-                )) {
-                    Text(MR.strings().instance_switcher_toggle_title.localized())
-                    Text(MR.strings().instance_switcher_toggle_description.localized())
-                }
-            }
-            
-            Section {
-                Toggle(isOn: Binding(
-                    get: { viewModel.searchShowBanners },
-                    set: { _ in viewModel.toggleSearchShowBanners() }
-                )) {
-                    Text(MR.strings().search_show_banners.localized())
-                }
-                Toggle(isOn: Binding(
-                    get: { viewModel.searchShowInstanceIndicatorShadow },
-                    set: { _ in viewModel.toggleSearchShowInstanceIndicatorShadow() }
-                )) {
-                    Text(MR.strings().search_show_instance_indicator_shadow.localized())
-                }
-            } header: {
-                Text(MR.strings().search_results.localized())
-            }
-            
-            Section {
-                Button {
-                    showExportSheet = true
-                } label: {
-                    HStack(spacing: 24) {
-                        Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(.themePrimary)
-                            .frame(width: 32, height: 32)
-                        
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(MR.strings().backup.localized())
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(.primary)
-                            Text(MR.strings().backup_description.localized())
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-                
-                Button {
-                    showFileImporter = true
-                } label: {
-                    HStack(spacing: 24) {
-                        Image(systemName: "square.and.arrow.down")
-                            .foregroundColor(.themePrimary)
-                            .frame(width: 32, height: 32)
-                        
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(MR.strings().import_data.localized())
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(.primary)
-                            Text(MR.strings().restore_description.localized())
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-            } header: {
-                Text(MR.strings().backup_restore.localized())
-            }
-            
             AboutCard(
                 onChangelogClick: {
                     showChangelogSheet = true
@@ -194,7 +71,7 @@ struct SettingsScreen: View {
                 } },
                 onLibrariesClick: { showLibrariesSheet = true }
             )
-            
+
             Section {
                 if isDebug() {
                     Button("Simulate crash") {
@@ -224,50 +101,15 @@ struct SettingsScreen: View {
         .sheet(isPresented: $showLibrariesSheet) {
             LibrariesSheet()
         }
-        .sheet(isPresented: $showExportSheet) {
-            ExportSheet(viewModel: backupViewModel, isPresented: $showExportSheet) { data in
-                self.exportData = data
-                self.showFileExporter = true
-            }
-        }
-        .sheet(isPresented: $showImportSheet) {
-            ImportSheet(viewModel: backupViewModel, isPresented: $showImportSheet, encryptedData: importData) {
-                self.importData = ""
-                self.showImportSuccess = true
-            }
-        }
         .sheet(isPresented: $showChangelogSheet) {
             ReleaseNotesSheet()
-        }
-        .fileExporter(isPresented: $showFileExporter, document: BackupFile(data: exportData), contentType: .json, defaultFilename: "\(TimeExtensionsKt.nowTimestamp())_ArrMatey_Backup.json") { result in
-            switch result {
-            case .success:
-                self.exportData = ""
-                self.showExportSuccess = true
-            case .failure(let error):
-                print("Export failed: \(error.localizedDescription)")
-            }
-        }
-        .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.json]) { result in
-            switch result {
-            case .success(let url):
-                if url.startAccessingSecurityScopedResource() {
-                    defer { url.stopAccessingSecurityScopedResource() }
-                    if let data = try? Data(contentsOf: url), let string = String(data: data, encoding: .utf8) {
-                        self.importData = string
-                        self.showImportSheet = true
-                    }
-                }
-            case .failure(let error):
-                print("Import failed: \(error.localizedDescription)")
-            }
         }
         .alert(MR.strings().share_crash_log.localized(), isPresented: $showShareLogAlert) {
             Button(MR.strings().yes.localized()) {
                 shareLogs()
                 showShareLogAlert = false
             }
-            
+
             Button(MR.strings().no.localized(), role: .cancel) {
                 showShareLogAlert = false
                 if let url = URL(string: MR.strings().bug_report_link.localized()) {
@@ -277,18 +119,8 @@ struct SettingsScreen: View {
         } message: {
             Text(MR.strings().share_crash_log_message.localized())
         }
-        .alert(MR.strings().success.localized(), isPresented: $showExportSuccess) {
-            Button(MR.strings().ok.localized(), role: .cancel) { }
-        } message: {
-            Text(MR.strings().export_ready.localized())
-        }
-        .alert(MR.strings().success.localized(), isPresented: $showImportSuccess) {
-            Button(MR.strings().ok.localized(), role: .cancel) { }
-        } message: {
-            Text(MR.strings().import_complete.localized())
-        }
     }
-    
+
     func shareLogs() {
         let logPath = LogReader.shared.getLogFilePath()
         let logURL = URL(fileURLWithPath: logPath)
@@ -312,112 +144,20 @@ struct SettingsScreen: View {
             print("Could not find a valid view controller to present the share sheet")
             return
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             if let popover = activityViewController.popoverPresentationController {
                 popover.sourceView = topController.view
                 popover.sourceRect = CGRect(x: topController.view.bounds.midX, y: topController.view.bounds.midY, width: 0, height: 0)
                 popover.permittedArrowDirections = []
             }
-            
+
             if topController.presentedViewController != nil {
                 print("Already presenting a view controller, skipping share presentation")
                 return
             }
-            
+
             topController.present(activityViewController, animated: true, completion: nil)
-        }
-    }
-}
-
-struct InstanceCard: View {
-    let instance: Instance
-    let route: SettingsRoute
-    let connectionStatuses: [KotlinLong:OperationStatus]
-    
-    var body: some View {
-        NavigationLink(value: route) {
-            HStack(spacing: 8) {
-                instance.type.icon.toImage(renderingMode: .original)
-                    .frame(width: 32, height: 32)
-                VStack(alignment: .leading, spacing: 1) {
-                    HStack(alignment: .center, spacing: 12) {
-                        Text(instance.label)
-                            .font(.system(size: 18, weight: .medium))
-                        Group {
-                            switch connectionStatuses[instance.id.asKotlinLong] {
-                            case is OperationStatusInProgress:
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle())
-                            case is OperationStatusError:
-                                Image(systemName: "wifi.slash")
-                                    .tint(.red)
-                            case is OperationStatusSuccess:
-                                Image(systemName: "wifi")
-                            default: ZStack{}
-                            }
-                        }
-                        .frame(width: 8, height: 8)
-                    }
-                    Text(instance.url)
-                        .font(.system(size: 16))
-                }
-            }
-        }
-    }
-}
-
-struct DownloadClientCard: View {
-    let client: DownloadClient
-    let connectionStatuses: [KotlinLong:OperationStatus]
-    
-    var body: some View {
-        NavigationLink(value: SettingsRoute.editDownloadClient(client.id)) {
-            HStack(spacing: 8) {
-                client.type.icon.toImage(renderingMode: .original)
-                    .frame(width: 32, height: 32)
-                VStack(alignment: .leading, spacing: 1) {
-                    HStack(alignment: .center, spacing: 12) {
-                        Text(client.label)
-                            .font(.system(size: 18, weight: .medium))
-                        Group {
-                            switch connectionStatuses[client.id.asKotlinLong] {
-                            case is OperationStatusInProgress:
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle())
-                            case is OperationStatusError:
-                                Image(systemName: "wifi.slash")
-                                    .tint(.red)
-                            case is OperationStatusSuccess:
-                                Image(systemName: "wifi")
-                            default: ZStack{}
-                            }
-                        }
-                        .frame(width: 8, height: 8)
-                    }
-                    Text(client.url)
-                        .font(.system(size: 16))
-                }
-            }
-        }
-    }
-}
-
-struct WebpageCard: View {
-    let webpage: CustomWebpage
-    
-    var body: some View {
-        NavigationLink(value: SettingsRoute.editCustomWebpage(webpage.id)) {
-            HStack(spacing: 8) {
-                Image(systemName: "globe")
-                    .frame(width: 32, height: 32)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(webpage.name)
-                        .font(.system(size: 18, weight: .medium))
-                    Text(webpage.url)
-                        .font(.system(size: 16))
-                }
-            }
         }
     }
 }
