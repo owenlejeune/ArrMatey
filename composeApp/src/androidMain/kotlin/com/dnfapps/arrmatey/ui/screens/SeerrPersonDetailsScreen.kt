@@ -135,7 +135,7 @@ fun SeerrPersonDetailsScreen(
                                     credits = credits,
                                     modifier = Modifier.breakPadding(24.dp),
                                     isExpanded = isExpanded,
-                                    wideRailIsVisible = wideRailIsVisible
+                                    wideRailIsVisible = wideRailIsVisible,
                                 )
                             }
 

@@ -37,7 +37,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
-import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.navigation.DiscoverScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
@@ -51,10 +50,7 @@ import com.dnfapps.arrmatey.ui.components.DiscoverSection
 import com.dnfapps.arrmatey.ui.components.SearchResultList
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
-import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
-import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
-import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 
@@ -97,7 +93,7 @@ fun DiscoverTab(
                 mediaNavEntries(
                     navigation = navigation,
                     isExpanded = isExpanded,
-                    wideRailIsVisible = wideRailIsVisible
+                    wideRailIsVisible = wideRailIsVisible,
                 )
             },
     )

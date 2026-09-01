@@ -140,7 +140,7 @@ fun MediaPreviewScreen(
                     type = type,
                     topPadding = paddingValues.calculateTopPadding(),
                     isExpanded = isExpanded,
-                    wideRailIsVisible = wideRailIsVisible
+                    wideRailIsVisible = wideRailIsVisible,
                 )
 
                 Column(

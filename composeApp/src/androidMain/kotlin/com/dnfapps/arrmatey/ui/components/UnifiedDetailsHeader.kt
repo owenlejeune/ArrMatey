@@ -47,7 +47,7 @@ fun UnifiedDetailsHeader(
     genres: List<String>,
     bannerGradientHeight: Dp? = null,
     isExpanded: Boolean = false,
-    wideRailIsVisible: Boolean = false
+    wideRailIsVisible: Boolean = false,
 ) {
     var detailHeight by remember { mutableIntStateOf(0) }
     val isInTwoPane = LocalIsInTwoPane.current
@@ -55,7 +55,7 @@ fun UnifiedDetailsHeader(
         DetailHeaderBanner(
             bannerUrl = bannerUrl,
             gradientHeight = bannerGradientHeight ?: detailHeight.times(2).dp,
-            startGradient = isExpanded && (wideRailIsVisible || isInTwoPane)
+            startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
         )
 
         Row(

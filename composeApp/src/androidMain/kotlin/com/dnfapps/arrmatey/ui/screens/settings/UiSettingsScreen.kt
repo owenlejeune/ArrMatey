@@ -73,11 +73,15 @@ fun UiSettingsScreen(
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
     val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
 
-    val isLargeScreenSupported = remember(windowSizeClass, configuration) {
-        windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact ||
-            configuration.smallestScreenWidthDp >= 600 ||
-            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && context.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_HINGE_ANGLE))
-    }
+    val isLargeScreenSupported =
+        remember(windowSizeClass, configuration) {
+            windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact ||
+                configuration.smallestScreenWidthDp >= 600 ||
+                (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                        context.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_HINGE_ANGLE)
+                )
+        }
 
     val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
     val appColor by viewModel.appColor.collectAsStateWithLifecycle()
@@ -177,53 +181,55 @@ fun UiSettingsScreen(
 
             SettingsGroup(
                 title = mokoString(MR.strings.navigation),
-                items = listOf(
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Navigation),
-                        title = mokoString(MR.strings.navigation_bar_configuration),
-                        onClick = {
-                            onNavigateToTabPreferences()
-                        },
+                items =
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Navigation),
+                            title = mokoString(MR.strings.navigation_bar_configuration),
+                            onClick = {
+                                onNavigateToTabPreferences()
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.AutoMirrored.Default.Shortcut),
+                            title = mokoString(MR.strings.shortcuts_configuration),
+                            onClick = {
+                                onNavigateToShortcutsPreferences()
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Hard_drive),
+                            title = mokoString(MR.strings.instance_switcher_toggle_title),
+                            subtitle = mokoString(MR.strings.instance_switcher_toggle_description),
+                            trailingContent = {
+                                Switch(
+                                    checked = hideInstanceSwitcher,
+                                    onCheckedChange = { viewModel.toggleInstanceSwitcher() },
+                                )
+                            },
+                            onClick = { viewModel.toggleInstanceSwitcher() },
+                        ),
                     ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.AutoMirrored.Default.Shortcut),
-                        title = mokoString(MR.strings.shortcuts_configuration),
-                        onClick = {
-                            onNavigateToShortcutsPreferences()
-                        },
-                    ),
-                    SettingItem(
-                        icon = IconSource.Vector(Hard_drive),
-                        title = mokoString(MR.strings.instance_switcher_toggle_title),
-                        subtitle = mokoString(MR.strings.instance_switcher_toggle_description),
-                        trailingContent = {
-                            Switch(
-                                checked = hideInstanceSwitcher,
-                                onCheckedChange = { viewModel.toggleInstanceSwitcher() },
-                            )
-                        },
-                        onClick = { viewModel.toggleInstanceSwitcher() },
-                    ),
-                )
             )
 
             if (isLargeScreenSupported) {
                 SettingsGroup(
                     title = mokoString(MR.strings.large_screen_settings_title),
-                    items = listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Splitscreen, rotation = 90f),
-                            title = mokoString(MR.strings.dual_panel_support_title),
-                            subtitle = mokoString(MR.strings.dual_panel_support_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = dualPanelSupport,
-                                    onCheckedChange = { viewModel.toggleDualPanelSupport() },
-                                )
-                            },
-                            onClick = { viewModel.toggleDualPanelSupport() },
-                        )
-                    )
+                    items =
+                        listOf(
+                            SettingItem(
+                                icon = IconSource.Vector(Icons.Default.Splitscreen, rotation = 90f),
+                                title = mokoString(MR.strings.dual_panel_support_title),
+                                subtitle = mokoString(MR.strings.dual_panel_support_description),
+                                trailingContent = {
+                                    Switch(
+                                        checked = dualPanelSupport,
+                                        onCheckedChange = { viewModel.toggleDualPanelSupport() },
+                                    )
+                                },
+                                onClick = { viewModel.toggleDualPanelSupport() },
+                            ),
+                        ),
                 )
             }
 

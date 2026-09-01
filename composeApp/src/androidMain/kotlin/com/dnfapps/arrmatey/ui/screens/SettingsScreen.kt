@@ -192,42 +192,43 @@ fun SettingsScreen(
             }
 
             SettingsGroup(
-                items = listOf(
-                    SettingItem(
-                        icon = IconSource.Vector(Hard_drive),
-                        title = mokoString(MR.strings.services),
-                        subtitle = mokoString(MR.strings.services_description),
-                        onClick = onNavigateToServices,
-                        trailingContent = {
-                            Icon(Icons.Default.ChevronRight, null)
-                        }
+                items =
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Hard_drive),
+                            title = mokoString(MR.strings.services),
+                            subtitle = mokoString(MR.strings.services_description),
+                            onClick = onNavigateToServices,
+                            trailingContent = {
+                                Icon(Icons.Default.ChevronRight, null)
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Palette),
+                            title = mokoString(MR.strings.user_interface),
+                            subtitle = mokoString(MR.strings.user_interface_description),
+                            onClick = onNavigateToUserInterface,
+                            trailingContent = {
+                                Icon(Icons.Default.ChevronRight, null)
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Share),
+                            title = mokoString(MR.strings.integrations),
+                            onClick = onNavigateToIntegrations,
+                            trailingContent = {
+                                Icon(Icons.Default.ChevronRight, null)
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Restore),
+                            title = mokoString(MR.strings.backup_restore),
+                            onClick = onNavigateToBackupRestore,
+                            trailingContent = {
+                                Icon(Icons.Default.ChevronRight, null)
+                            },
+                        ),
                     ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Palette),
-                        title = mokoString(MR.strings.user_interface),
-                        subtitle = mokoString(MR.strings.user_interface_description),
-                        onClick = onNavigateToUserInterface,
-                        trailingContent = {
-                            Icon(Icons.Default.ChevronRight, null)
-                        }
-                    ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Share),
-                        title = mokoString(MR.strings.integrations),
-                        onClick = onNavigateToIntegrations,
-                        trailingContent = {
-                            Icon(Icons.Default.ChevronRight, null)
-                        }
-                    ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Restore),
-                        title = mokoString(MR.strings.backup_restore),
-                        onClick = onNavigateToBackupRestore,
-                        trailingContent = {
-                            Icon(Icons.Default.ChevronRight, null)
-                        }
-                    )
-                )
             )
 
             AboutCard(

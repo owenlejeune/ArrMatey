@@ -68,7 +68,7 @@ fun InfoAreaCard(
     footer: (@Composable () -> Unit)? = null,
 ) {
     Card(
-        modifier = modifier,//.fillMaxWidth(),
+        modifier = modifier, // .fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
     ) {
         Column(
@@ -145,7 +145,7 @@ fun InfoArea(
     cards: List<InfoCardData>,
     modifier: Modifier = Modifier,
     title: StringResource? = MR.strings.information,
-    useDualColumn: Boolean = false
+    useDualColumn: Boolean = false,
 ) {
     val validCards = cards.filter { it.items.isNotEmpty() }
     if (validCards.isEmpty()) return
@@ -154,33 +154,33 @@ fun InfoArea(
             Text(
                 text = mokoString(title),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier.padding(bottom = 12.dp),
             )
         }
         if (useDualColumn) {
             FlowRow(
                 maxItemsInEachRow = 2,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 validCards.forEach { card ->
                     InfoAreaCard(
                         infoItems = card.items,
                         header = card.header,
                         footer = card.footer,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
         } else {
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 validCards.forEach { card ->
                     InfoAreaCard(
                         infoItems = card.items,
                         header = card.header,
                         footer = card.footer,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }

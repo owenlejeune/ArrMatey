@@ -6,11 +6,9 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.SeerrScreen
@@ -54,7 +52,7 @@ fun SeerrTab(
                 mediaNavEntries(
                     navigation = navigation,
                     isExpanded = isExpanded,
-                    wideRailIsVisible = wideRailIsVisible
+                    wideRailIsVisible = wideRailIsVisible,
                 )
             },
     )

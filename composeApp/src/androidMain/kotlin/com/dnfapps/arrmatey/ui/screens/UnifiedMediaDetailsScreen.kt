@@ -439,7 +439,7 @@ fun UnifiedMediaDetailsScreen(
                                 seasonCount = state.seasonCount?.let { mokoPlural(MR.plurals.seasons, it) },
                                 genres = state.genres,
                                 isExpanded = isExpanded,
-                                wideRailIsVisible = wideRailIsVisible
+                                wideRailIsVisible = wideRailIsVisible,
                             )
 
                             Column(
@@ -650,7 +650,7 @@ fun UnifiedMediaDetailsScreen(
                                                 ),
                                             ),
                                         modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
-                                        useDualColumn = isExpanded && !isDualPanel
+                                        useDualColumn = isExpanded && !isDualPanel,
                                     )
                                 }
 

@@ -95,7 +95,7 @@ fun SettingsRow(
                                 imageVector = source.imageVector,
                                 contentDescription = null,
                                 modifier = Modifier.size(36.dp).rotate(source.rotation),
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         is IconSource.Resource ->
                             Image(

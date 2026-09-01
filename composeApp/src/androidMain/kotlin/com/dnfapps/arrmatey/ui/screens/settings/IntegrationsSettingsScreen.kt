@@ -45,9 +45,7 @@ import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IntegrationsSettingsScreen(
-    onBack: () -> Unit,
-) {
+fun IntegrationsSettingsScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 

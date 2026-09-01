@@ -54,7 +54,7 @@ fun DetailsHeader(
     type: InstanceType,
     topPadding: Dp,
     isExpanded: Boolean = false,
-    wideRailIsVisible: Boolean = false
+    wideRailIsVisible: Boolean = false,
 ) {
     var detailHeight by remember { mutableIntStateOf(0) }
     val isInTwoPane = LocalIsInTwoPane.current
@@ -64,7 +64,7 @@ fun DetailsHeader(
         DetailHeaderBanner(
             bannerUrl = item.getBanner()?.remoteUrl,
             gradientHeight = detailHeight.times(2).dp(),
-            startGradient = isExpanded && (wideRailIsVisible || isInTwoPane)
+            startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
         )
 
         Row(

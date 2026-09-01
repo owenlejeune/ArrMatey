@@ -40,7 +40,6 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
-import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.navigation.CalendarScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
@@ -142,7 +141,7 @@ fun CalendarTab(
                 mediaNavEntries(
                     navigation = navigation,
                     isExpanded = isExpanded,
-                    wideRailIsVisible = wideRailIsVisible
+                    wideRailIsVisible = wideRailIsVisible,
                 )
             },
     )

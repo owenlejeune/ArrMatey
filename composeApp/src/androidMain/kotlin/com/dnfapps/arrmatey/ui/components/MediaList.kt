@@ -144,16 +144,20 @@ fun SearchResultItem(
     showBanners: Boolean = true,
     showInstanceIndicatorShadow: Boolean = true,
 ) {
-    val shadowColor = remember(item, showInstanceIndicatorShadow) {
-        if (showInstanceIndicatorShadow) item.instanceType.associatedColor else Color.Unspecified
-    }
+    val shadowColor =
+        remember(item, showInstanceIndicatorShadow) {
+            if (showInstanceIndicatorShadow) item.instanceType.associatedColor else Color.Unspecified
+        }
 
-    Box(modifier = Modifier//.colouredDropShadow(shadowColor)
-        .shadow(
-            elevation = 10.dp,
-            shape = RoundedCornerShape(10.dp),
-            ambientColor = shadowColor,
-            spotColor = shadowColor)
+    Box(
+        modifier =
+            Modifier // .colouredDropShadow(shadowColor)
+                .shadow(
+                    elevation = 10.dp,
+                    shape = RoundedCornerShape(10.dp),
+                    ambientColor = shadowColor,
+                    spotColor = shadowColor,
+                ),
     ) {
         when (item) {
             is SearchResult.ArrMediaResult -> {

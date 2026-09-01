@@ -59,8 +59,6 @@ sealed interface TabItem {
     ) : TabItem {
         override val iosIcon: String = "globe"
         override val resource: StringResource = MR.strings.custom_webpage // Will use name instead
-
-//        override val drawerOnly: Boolean = false
         override val isDisabled: Boolean = false
         override val associatedType: InstanceType? = null
         override val key: String = "webpage_$id"
@@ -71,11 +69,11 @@ sealed interface TabItem {
 
         fun defaultStandardEntries(): List<Standard> =
             listOf(
-                Standard.SHOWS,
-                Standard.MOVIES,
-                Standard.MUSIC,
+                Standard.LIBRARY,
+                Standard.DISCOVER,
                 Standard.ACTIVITY,
                 Standard.CALENDAR,
+                Standard.DASHBOARD
             )
 
         fun defaultHiddenStandard(): List<Standard> = standardEntries().filter { !defaultStandardEntries().contains(it) }

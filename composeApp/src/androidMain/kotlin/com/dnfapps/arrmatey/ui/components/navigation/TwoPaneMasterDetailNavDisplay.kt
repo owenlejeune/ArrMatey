@@ -43,9 +43,12 @@ fun TwoPaneMasterDetailNavDisplay(
     val showDetails = isExpanded && dualPanelSupport && detailBackStack.isNotEmpty()
 
     val detailsWeight by animateFloatAsState(
-        targetValue = if (showDetails) {
-            if (wideRailIsVisible) 1.25f else 1f
-        } else 0.001f,
+        targetValue =
+            if (showDetails) {
+                if (wideRailIsVisible) 1.25f else 1f
+            } else {
+                0.001f
+            },
         label = "DetailsWeight",
     )
 

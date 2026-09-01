@@ -24,7 +24,7 @@ import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 fun BoxScope.DetailHeaderBanner(
     bannerUrl: String?,
     gradientHeight: Dp,
-    startGradient: Boolean = false
+    startGradient: Boolean = false,
 ) {
     Box(
         modifier =

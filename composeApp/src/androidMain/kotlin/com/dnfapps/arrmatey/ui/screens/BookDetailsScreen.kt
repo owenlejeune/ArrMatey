@@ -174,7 +174,7 @@ fun BookDetailsScreen(
                     DetailHeaderBanner(
                         bannerUrl = currentBook.getCover()?.remoteUrl,
                         gradientHeight = 100.dp,
-                        startGradient = isExpanded && (wideRailIsVisible || isInTwoPane)
+                        startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
                     )
                 }
 

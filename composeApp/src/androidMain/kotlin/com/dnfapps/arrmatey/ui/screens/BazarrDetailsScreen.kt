@@ -199,7 +199,7 @@ fun BazarrDetailsScreen(
                 fanart = uiState.details?.fanart,
                 topPadding = paddingValues.calculateTopPadding(),
                 isExpanded = isExpanded,
-                wideRailIsVisible = wideRailIsVisible
+                wideRailIsVisible = wideRailIsVisible,
             )
 
             Column(
@@ -296,7 +296,7 @@ private fun BazarrDetailsHeader(
     fanart: String?,
     topPadding: Dp,
     isExpanded: Boolean = false,
-    wideRailIsVisible: Boolean = false
+    wideRailIsVisible: Boolean = false,
 ) {
     val isInTwoPane = LocalIsInTwoPane.current
     Box(
@@ -305,7 +305,7 @@ private fun BazarrDetailsHeader(
         DetailHeaderBanner(
             bannerUrl = fanart ?: poster,
             gradientHeight = 150.dp,
-            startGradient = isExpanded && (wideRailIsVisible || isInTwoPane)
+            startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
         )
 
         Row(

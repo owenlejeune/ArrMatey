@@ -176,7 +176,7 @@ fun EpisodeDetailsScreen(
                     DetailHeaderBanner(
                         bannerUrl = currentEpisode.getBanner()?.remoteUrl,
                         gradientHeight = 100.dp,
-                        startGradient = isExpanded && (wideRailIsVisible || isInTwoPane)
+                        startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
                     )
                 }
 
