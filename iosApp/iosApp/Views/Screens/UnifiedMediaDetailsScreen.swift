@@ -1379,6 +1379,7 @@ struct UnifiedMediaDetailsActions: View {
 }
 
 // MARK: - View Modifiers
+@MainActor
 fileprivate struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
     @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
     @Binding var showEditSheet: Bool
@@ -1390,24 +1391,39 @@ fileprivate struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
     let screen: UnifiedMediaDetailsScreen
 
     func body(content: Content) -> some View {
+        let requestSheetBinding = SwiftUI.Binding<Bool>(
+            get: { viewModel.isRequestSheetVisible },
+            set: { if !$0 { viewModel.hideRequestSheet() } }
+        )
+        let reportIssueSheetBinding = SwiftUI.Binding<Bool>(
+            get: { viewModel.isReportIssueSheetVisible },
+            set: { if !$0 { viewModel.hideReportIssueSheet() } }
+        )
+        let viewRequestSheetBinding = SwiftUI.Binding<Bool>(
+            get: { viewModel.isViewRequestSheetVisible },
+            set: { if !$0 { viewModel.hideViewRequestSheet() } }
+        )
+        let queueItemBinding = SwiftUI.Binding<IdentifiableQueueItem?>(
+            get: { selectedQueueItem.map { IdentifiableQueueItem(item: $0) } },
+            set: { selectedQueueItem = $0?.item }
+        )
+
         content
             .sheet(isPresented: $showEditSheet) { screen.editSheetContent }
             .sheet(isPresented: $showEditPathSheet) { screen.editPathSheetContent }
             .sheet(isPresented: $showAddSheet) { screen.addSheetContent }
             .sheet(isPresented: $showConfirmSheet) { screen.confirmSheetContent }
             .sheet(item: $editAlbum) { screen.editAlbumSheetContent($0) }
-            .sheet(isPresented: $viewModel.isRequestSheetVisible) { screen.requestSheetContent }
-            .sheet(isPresented: $viewModel.isReportIssueSheetVisible) { screen.reportIssueSheetContent }
-            .sheet(isPresented: $viewModel.isViewRequestSheetVisible) { screen.viewRequestSheetContent }
-            .sheet(item: Binding(
-                get: { selectedQueueItem.map { IdentifiableQueueItem(item: $0) } },
-                set: { selectedQueueItem = $0?.item }
-            )) {
+            .sheet(isPresented: requestSheetBinding) { screen.requestSheetContent }
+            .sheet(isPresented: reportIssueSheetBinding) { screen.reportIssueSheetContent }
+            .sheet(isPresented: viewRequestSheetBinding) { screen.viewRequestSheetContent }
+            .sheet(item: queueItemBinding) {
                 screen.queueItemSheetContent($0)
             }
     }
 }
 
+@MainActor
 fileprivate struct UnifiedMediaDetailsArrAlertsModifier: ViewModifier {
     @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
     @Binding var confirmDeleteMovie: Bool
@@ -1417,16 +1433,26 @@ fileprivate struct UnifiedMediaDetailsArrAlertsModifier: ViewModifier {
     let screen: UnifiedMediaDetailsScreen
 
     func body(content: Content) -> some View {
+        let confirmDeleteEpisodeBinding = SwiftUI.Binding<Bool>(
+            get: { confirmDeleteEpisodeId != nil },
+            set: { if !$0 { confirmDeleteEpisodeId = nil } }
+        )
+        let deleteSeasonBinding = SwiftUI.Binding<Bool>(
+            get: { confirmDeleteSeasonNumber != nil },
+            set: { if !$0 { confirmDeleteSeasonNumber = nil } }
+        )
+        let deleteAlbumBinding = SwiftUI.Binding<Bool>(
+            get: { confirmDeleteAlbumId != nil },
+            set: { if !$0 { confirmDeleteAlbumId = nil } }
+        )
+
         content
             .alert(MR.strings().confirm_delete.localized(), isPresented: $confirmDeleteMovie) {
                 screen.deleteMovieAlertContent
             } message: {
                 Text(MR.strings().confirm_delete_file.localized())
             }
-            .alert(MR.strings().confirm_delete.localized(), isPresented: Binding(
-                get: { confirmDeleteEpisodeId != nil },
-                set: { if !$0 { confirmDeleteEpisodeId = nil } }
-            )) {
+            .alert(MR.strings().confirm_delete.localized(), isPresented: confirmDeleteEpisodeBinding) {
                 Button(MR.strings().cancel.localized(), role: .cancel) { }
                 Button(MR.strings().confirm.localized(), role: .destructive) {
                     if let fileId = confirmDeleteEpisodeId {
@@ -1437,18 +1463,12 @@ fileprivate struct UnifiedMediaDetailsArrAlertsModifier: ViewModifier {
             } message: {
                 Text(MR.strings().episode_delete_message.localized())
             }
-            .confirmationDialog("", isPresented: Binding(
-                get: { confirmDeleteSeasonNumber != nil },
-                set: { if !$0 { confirmDeleteSeasonNumber = nil } }
-            )) {
+            .confirmationDialog("", isPresented: deleteSeasonBinding) {
                 screen.deleteSeasonDialogContent
             } message: {
                 screen.deleteSeasonDialogMessage
             }
-            .confirmationDialog("", isPresented: Binding(
-                get: { confirmDeleteAlbumId != nil },
-                set: { if !$0 { confirmDeleteAlbumId = nil } }
-            )) {
+            .confirmationDialog("", isPresented: deleteAlbumBinding) {
                 screen.deleteAlbumDialogContent
             } message: {
                 Text(MR.strings().delete_album_confirm.localized())
@@ -1456,6 +1476,7 @@ fileprivate struct UnifiedMediaDetailsArrAlertsModifier: ViewModifier {
     }
 }
 
+@MainActor
 fileprivate struct UnifiedMediaDetailsSeerrAlertsModifier: ViewModifier {
     @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
     @Binding var confirmRemoveFromService: Bool
@@ -1488,6 +1509,7 @@ fileprivate struct UnifiedMediaDetailsSeerrAlertsModifier: ViewModifier {
     }
 }
 
+@MainActor
 fileprivate struct UnifiedMediaDetailsEventsModifier: ViewModifier {
     @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
     let screen: UnifiedMediaDetailsScreen
@@ -1517,6 +1539,7 @@ struct IdentifiableMediaRequest: Identifiable {
     var id: Int64 { request.id }
 }
 
+@MainActor
 fileprivate struct UnifiedMediaDetailsSmartAddSeerrModifier: ViewModifier {
     @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
     let screen: UnifiedMediaDetailsScreen
@@ -1524,11 +1547,13 @@ fileprivate struct UnifiedMediaDetailsSmartAddSeerrModifier: ViewModifier {
     @State private var rememberChoice: Bool = false
 
     func body(content: Content) -> some View {
+        let pendingRequestBinding = SwiftUI.Binding<IdentifiableMediaRequest?>(
+            get: { viewModel.pendingSeerrRequest.map { IdentifiableMediaRequest(request: $0) } },
+            set: { if $0 == nil { viewModel.dismissPendingRequestDialog() } }
+        )
+
         content
-            .sheet(item: Binding(
-                get: { viewModel.pendingSeerrRequest.map { IdentifiableMediaRequest(request: $0) } },
-                set: { if $0 == nil { viewModel.dismissPendingRequestDialog() } }
-            )) { wrapper in
+            .sheet(item: pendingRequestBinding) { wrapper in
                 let request = wrapper.request
                 VStack(spacing: 24) {
                     Text(MR.strings().smart_add_seerr_title.localized())
