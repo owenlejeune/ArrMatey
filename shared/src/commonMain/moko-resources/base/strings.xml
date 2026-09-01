@@ -57,7 +57,15 @@
     <string name="integrations">Integrations</string>
     <string name="setup_seerr_for_in_app_details">Setup Seerr (Overseerr/Jellyseerr) to view person and media details directly in the app.</string>
     <string name="services_description">Services, Download Clients, and Custom Webpages</string>
+    <string name="integrations_description">Control how your services work together</string>
+    <string name="backup_restore_description">Save and restore your services and app configurations</string>
     <string name="user_interface_description">Theming and customization options</string>
+    <string name="smart_add_seerr_title">Pending Request Found</string>
+    <string name="smart_add_seerr_message">There is a pending Seerr request for this media. Would you like to approve it or decline it?</string>
+    <string name="remember_choice">Remember my choice</string>
+    <string name="smart_add_seerr_action_title">Automatic Seerr Approval</string>
+    <string name="smart_add_seerr_action_description">Control how pending requests are handled when media is added directly to Sonarr or Radarr.</string>
+    <string name="always_ask">Always Ask</string>
     <string name="appearance">Appearance</string>
     <string name="navigation">Navigation</string>
 

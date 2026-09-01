@@ -63,6 +63,7 @@ class UnifiedMediaDetailsViewModelTest {
                 clearSeerrMediaDataUseCase = mockk(),
                 markSeerrMediaAsAvailableUseCase = mockk(),
                 logger = mockk(relaxed = true),
+                preferencesStore = mockk(),
             )
 
         assertEquals(InstanceType.Radarr, viewModel.resolvedInstanceType)

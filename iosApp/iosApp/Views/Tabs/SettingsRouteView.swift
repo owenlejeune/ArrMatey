@@ -16,6 +16,8 @@ struct SettingsRouteView: View {
             ServicesSettingsView()
         case .userInterface:
             UiSettingsView()
+        case .integrations:
+            IntegrationsSettingsView()
         case .backupRestore:
             BackupRestoreSettingsView()
         case .newInstance(let initialType):

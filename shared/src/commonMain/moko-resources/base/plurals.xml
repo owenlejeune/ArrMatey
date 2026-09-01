@@ -19,10 +19,6 @@
         <item quantity="one">%d track</item>
         <item quantity="other">%d tracks</item>
     </plurals>
-    <plurals name="books">
-        <item quantity="one">%d book</item>
-        <item quantity="other">%d books</item>
-    </plurals>
     <plurals name="books_count">
         <item quantity="one">%d book</item>
         <item quantity="other">%d books</item>

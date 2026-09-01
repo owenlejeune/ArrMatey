@@ -11,7 +11,7 @@ import SwiftUI
 @MainActor
 class MoreScreenViewModelS: ObservableObject {
     private let viewModel: MoreScreenViewModel
-    
+
     @Published private(set) var instances: [Instance] = []
     @Published private(set) var downloadClients: [DownloadClient] = []
     @Published private(set) var customWebpages: [CustomWebpage] = []
@@ -20,10 +20,11 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var hideInstanceSwitcher: Bool = false
     @Published private(set) var searchShowBanners: Bool = true
     @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
-    
+    @Published private(set) var smartAddSeerrAction: SmartAddSeerrAction = .alwaysAsk
+
     init() {
         self.viewModel = KoinBridge.shared.getMoreScreenViewModel()
-        
+
         viewModel.instances.observeAsync(on: self, to: \.instances)
         viewModel.downloadClients.observeAsync(on: self, to: \.downloadClients)
         viewModel.customWebpages.observeAsync(on: self, to: \.customWebpages)
@@ -40,21 +41,26 @@ class MoreScreenViewModelS: ObservableObject {
         viewModel.searchShowInstanceIndicatorShadow.observeAsync(on: self) { owner, show in
             owner.searchShowInstanceIndicatorShadow = show.boolValue
         }
+        viewModel.smartAddSeerrAction.observeAsync(on: self, to: \.smartAddSeerrAction)
     }
-    
+
     func toggleUseServiceNavLogos() {
         viewModel.toggleUseServiceNavLogos()
     }
-    
+
     func toggleInstanceSwitcher() {
         viewModel.toggleInstanceSwitcher()
     }
-    
+
     func toggleSearchShowBanners() {
         viewModel.toggleSearchShowBanners()
     }
-    
+
     func toggleSearchShowInstanceIndicatorShadow() {
         viewModel.toggleSearchShowInstanceIndicatorShadow()
+    }
+
+    func setSmartAddSeerrAction(action: SmartAddSeerrAction) {
+        viewModel.setSmartAddSeerrAction(action: action)
     }
 }

@@ -19,6 +19,7 @@ import com.dnfapps.arrmatey.features.ReleaseNotes
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
+import com.dnfapps.arrmatey.model.SmartAddSeerrAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -75,6 +76,7 @@ class PreferencesStore(
     private val searchShowBannersKey = booleanPreferencesKey("searchShowBanners")
     private val searchShowInstanceIndicatorShadowKey = booleanPreferencesKey("searchShowInstanceIndicatorShadow")
     private val dualPanelSupportKey = booleanPreferencesKey("dualPanelSupport")
+    private val smartAddSeerrActionKey = stringPreferencesKey("smartAddSeerrAction")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> =
         when (type) {
@@ -162,6 +164,18 @@ class PreferencesStore(
         dataStore.data
             .map { preferences ->
                 preferences[dualPanelSupportKey] ?: true
+            }
+
+    val smartAddSeerrAction: Flow<SmartAddSeerrAction> =
+        dataStore.data
+            .map { preferences ->
+                preferences[smartAddSeerrActionKey]?.let {
+                    try {
+                        SmartAddSeerrAction.valueOf(it)
+                    } catch (e: Exception) {
+                        SmartAddSeerrAction.default
+                    }
+                } ?: SmartAddSeerrAction.default
             }
 
     private val calendarViewMode: Flow<CalendarViewMode> =
@@ -321,6 +335,12 @@ class PreferencesStore(
     fun setDualPanelSupport(value: Boolean) {
         scope.launch {
             dataStore.edit { it[dualPanelSupportKey] = value }
+        }
+    }
+
+    fun setSmartAddSeerrAction(action: SmartAddSeerrAction) {
+        scope.launch {
+            dataStore.edit { it[smartAddSeerrActionKey] = action.name }
         }
     }
 
