@@ -64,7 +64,11 @@ class UnifiedMediaDetailsViewModelTest {
                 markSeerrMediaAsAvailableUseCase = mockk(),
                 deleteEpisodeFileUseCase = mockk(),
                 logger = mockk(relaxed = true),
-                preferencesStore = mockk(),
+                preferencesStore =
+                    mockk {
+                        every { combineSeerrArrMedia } returns flowOf(true)
+                        every { bazarrDetailsIntegration } returns flowOf(true)
+                    },
             )
 
         assertEquals(InstanceType.Radarr, viewModel.resolvedInstanceType)
