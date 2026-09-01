@@ -42,7 +42,6 @@ import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Warning
@@ -121,7 +120,6 @@ import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.components.buildArrInfoItems
 import com.dnfapps.arrmatey.ui.components.buildSeerrInfoItems
-import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
@@ -1267,7 +1265,8 @@ private fun MediaActionsToolbarMenus(
     }
 
     // Add / Request Menu
-    val showAddMenu = canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton
+    val showAddMenu =
+        canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton
     if (showAddMenu) {
         var showAddMenuState by remember { mutableStateOf(false) }
         Box {
@@ -1301,7 +1300,11 @@ private fun MediaActionsToolbarMenus(
                     }
                     if (buttonState.showRequestButton || buttonState.showRequestMoreButton) {
                         DropdownMenuItem(
-                            text = { Text(mokoString(if (buttonState.showRequestMoreButton) MR.strings.request_more else MR.strings.request)) },
+                            text = {
+                                Text(
+                                    mokoString(if (buttonState.showRequestMoreButton) MR.strings.request_more else MR.strings.request),
+                                )
+                            },
                             onClick = {
                                 onRequestClicked()
                                 showAddMenuState = false
