@@ -42,8 +42,8 @@ struct MovieDetailsView: View {
     }
     
     private var fileSizeString: String? {
-        guard item.fileSize > 0 else { return nil }
-        return ByteCountFormatter.string(fromByteCount: item.fileSize, countStyle: .file)
+        guard let size = item.fileSize?.int64Value, size > 0 else { return nil }
+        return ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
     }
     
     private var statusLabel: String? {

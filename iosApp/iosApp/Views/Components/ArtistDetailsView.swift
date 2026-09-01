@@ -16,8 +16,9 @@ struct ArtistDetailsView: View {
         return MR.plurals().albums.localized(item.albumCount)
     }
     
-    private var fileSizeString: String {
-        ByteCountFormatter.string(fromByteCount: item.fileSize, countStyle: .file)
+    private var fileSizeString: String? {
+        guard let size = item.fileSize?.int64Value, size > 0 else { return nil }
+        return ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
     }
     
     private var firstLine: String {

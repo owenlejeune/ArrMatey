@@ -19,18 +19,18 @@ struct SeasonCard: View {
     let automaticSearchIds: Set<Int64>
     let onDeleteSeason: () -> Void
     let seasonDeleteInProgress: Bool
-    
+
     @State private var expanded: Bool = false
-    
+
     @EnvironmentObject private var navigation: NavigationManager
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             seasonHeader
-            
+
             if expanded {
                 seasonDetails
-                
+
                 HStack(spacing: 6) {
                     Button(action: onDeleteSeason) {
                         if seasonDeleteInProgress {
@@ -42,7 +42,7 @@ struct SeasonCard: View {
                     .tint(.red)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
-                    
+
                     ReleaseDownloadButtons(onInteractiveClicked: {
                         if let id = series.id?.int64Value {
                             let route: MediaRoute = .seriesReleases(seriesId: id, seasonNumber: season.seasonNumber)
@@ -53,7 +53,7 @@ struct SeasonCard: View {
                     }, automaticSearchInProgress: false)
                 }
                 .padding(.bottom, 4)
-                
+
                 ForEach(episodes, id: \.id) { episode in
                     EpisodeRow(episode: episode, onToggleEpisodeMonitor: { ep in
                         onToggleEpisodeMonitor(ep)
@@ -77,7 +77,7 @@ struct SeasonCard: View {
         )
         .animation(.easeInOut(duration: 0.3), value: expanded)
     }
-    
+
     private var seasonTitle: String {
         if season.seasonNumber == 0 {
             MR.strings().specials.localized()
@@ -85,13 +85,13 @@ struct SeasonCard: View {
             MR.strings().season_label.formatted(args: [season.seasonNumber])
         }
     }
-    
+
     private var episodeStats: String {
         if let stats = season.statistics {
             "\(stats.episodeFileCount)/\(stats.totalEpisodeCount)"
         } else { "" }
     }
-    
+
     private var year: String {
         episodes.compactMap { $0.airDateUtc }
             .compactMap { instant in
@@ -100,7 +100,7 @@ struct SeasonCard: View {
             .min()
         ?? String(localized: LocalizedStringResource("tba"))
     }
-    
+
     private var runtime: String? {
         let items = episodes.compactMap { episode -> Int? in
             episode.runtime.flatMap { runtime in
@@ -112,32 +112,32 @@ struct SeasonCard: View {
         let median = sorted[sorted.count / 2]
         return median.formatAsRuntime()
     }
-    
+
     private var seasonInfo: [String] {
         [year, runtime, season.statistics?.sizeOnDisk.bytesAsFileSizeString()]
             .compactMap { $0 }
     }
-    
+
     private var infoString: String {
         seasonInfo.joined(separator: " • ")
     }
-    
+
     private var seasonHeader: some View {
         HStack(alignment: .center, spacing: 12) {
             HStack(alignment: .center, spacing: 12) {
                 Text(seasonTitle)
                     .font(.system(size: 22, weight: .medium))
-                
+
                 Text(episodeStats)
                     .font(.system(size: 16))
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.down.circle.fill")
                     .rotationEffect(.degrees(expanded ? 180 : 0))
                     .animation(.easeInOut(duration: 0.3), value: expanded)
             }
-            
+
             Image(systemName: season.monitored ? "bookmark.fill" : "bookmark")
                 .onTapGesture {
                     onToggleSeasonMonitor(season.seasonNumber)
@@ -148,7 +148,7 @@ struct SeasonCard: View {
             expanded = !expanded
         }
     }
-    
+
     private var seasonDetails: some View {
         VStack(alignment: .leading) {
             Text(infoString)

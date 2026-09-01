@@ -19,11 +19,11 @@ struct AlbumRowView: View {
     let automaticSearchIds: Set<Int64>
     let onDeleteAlbum: (ArrAlbum) -> Void
     let albumDeleteInProgress: Bool
-    
+
     @State private var expanded: Bool = false
-    
+
     @EnvironmentObject private var navigation: NavigationManager
-    
+
     private var titleLabel: String {
         var result = album.title ?? MR.strings().unknown.localized()
         if let year = album.releaseDate?.format(pattern: "YYYY"),
@@ -33,14 +33,14 @@ struct AlbumRowView: View {
         }
         return result
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             albumHeader
-            
+
             if expanded {
                 albumDetails
-                
+
                 HStack(spacing: 6) {
                     Button(action: { onDeleteAlbum(album) }) {
                         if albumDeleteInProgress {
@@ -52,7 +52,7 @@ struct AlbumRowView: View {
                     .tint(.red)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.regular)
-                    
+
                     ReleaseDownloadButtons(
                         onInteractiveClicked: {
                             if let artistId = artist.id?.int64Value {
@@ -67,13 +67,13 @@ struct AlbumRowView: View {
                         automaticSearchInProgress: automaticSearchIds.contains(album.id)
                     )
                 }
-                
+
                 ForEach(Array(tracks.enumerated()), id: \.element.id) { index, track in
                     TrackRow(
                         track: track,
                         trackFile: trackFiles.first(where: { $0.albumId == album.id })
                     )
-                    
+
                     if track != tracks.last {
                         Divider()
                     }
@@ -89,30 +89,30 @@ struct AlbumRowView: View {
         )
         .animation(.easeInOut(duration: 0.3), value: expanded)
     }
-    
+
     private var albumHeader: some View {
         HStack(alignment: .center, spacing: 12) {
             HStack(alignment: .center, spacing: 24) {
                 AlbumCoverView(album: album)
                     .frame(width: 60, height: 60)
-                
+
                 VStack(alignment: .leading, spacing: 0) {
                     Text(titleLabel)
                         .font(.system(size: 16, weight: .medium))
                         .lineLimit(2)
-                    
+
                     Text(trackStats)
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.down.circle.fill")
                     .rotationEffect(.degrees(expanded ? 180 : 0))
             }
             .onTapGesture { expanded.toggle() }
-            
+
             Image(systemName: "pencil")
                 .onTapGesture {
                     onEditAlbum(album)
@@ -124,7 +124,7 @@ struct AlbumRowView: View {
                 }
         }
     }
-    
+
     private var albumDetails: some View {
         VStack(alignment: .leading) {
             Text(infoString)
@@ -135,25 +135,25 @@ struct AlbumRowView: View {
         .padding(.vertical, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-    
-    
+
+
     private var trackStats: String {
         if let stats = album.statistics {
             return "\(stats.trackFileCount)/\(stats.totalTrackCount)"
         }
         return ""
     }
-    
+
     private var releaseDate: String {
         album.releaseDate?.format(pattern: "MMM d, yyyy")
         ?? MR.strings().tba.localized()
     }
-    
+
     private var runtime: String {
         let totalMs = tracks.reduce(0) { $0 + $1.duration }
         return (Int(totalMs) / 60_000).formatAsRuntime()
     }
-    
+
     private var infoString: String {
         [releaseDate, runtime, album.statistics?.sizeOnDisk.bytesAsFileSizeString()]
             .compactMap { $0 }

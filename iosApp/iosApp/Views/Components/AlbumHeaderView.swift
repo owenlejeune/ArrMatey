@@ -16,23 +16,23 @@ struct AlbumHeaderView: View {
     let isSearching: Bool
     let onDelete: () -> Void
     let deleteInProgress: Bool
-    
+
     // Assuming these are injected or provided via a Parent
     // let navigation = ...
 
     private var infoString: String {
         let release = album.releaseDate?.format(pattern: "MMM d, yyyy")
             ?? MR.strings().tba.localized()
-        
+
         let totalDurationMs = tracks.reduce(0) { $0 + ($1.duration) }
         let runtime = (Int(totalDurationMs) / 60_000).formatAsRuntime()
-        
+
         var parts = [release, runtime]
-        
+
         if let size = album.statistics?.sizeOnDisk {
             parts.append(size.bytesAsFileSizeString())
         }
-        
+
         return parts.joined(separator: " • ")
     }
 
@@ -41,7 +41,7 @@ struct AlbumHeaderView: View {
             Text(infoString)
                 .font(.system(size: 16))
                 .foregroundColor(.secondary)
-            
+
             HStack(spacing: 12) {
                 // Interactive Search / Release button
                 Button(action: {
@@ -51,7 +51,7 @@ struct AlbumHeaderView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
-                
+
                 // Automatic Search Button
                 Button(action: onAutomaticSearch) {
                     if isSearching {

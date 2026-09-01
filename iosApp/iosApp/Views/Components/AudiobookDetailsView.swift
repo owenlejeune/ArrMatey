@@ -26,6 +26,11 @@ struct AudiobookDetailsView: View {
         isActive ? .arrPurple : statusColor
     }
     
+    private var fileSizeString: String? {
+        guard let size = item.fileSize?.int64Value, size > 0 else { return nil }
+        return ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(item.authors.joined(separator: ", "))
@@ -41,8 +46,6 @@ struct AudiobookDetailsView: View {
                 }
                 return nil
             }()
-            
-            let fileSizeString = item.fileSize > 0 ? item.fileSize.bytesAsFileSizeString() : nil
             
             let secondLine = [seriesString, fileSizeString, item.publisher]
                 .compactMap { $0 }

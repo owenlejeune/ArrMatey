@@ -11,26 +11,26 @@ struct UnifiedMediaDetailsScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     @State private var showConfirmSheet = false
     @State private var showEditSheet = false
     @State private var showEditPathSheet = false
     @State private var showAddSheet = false
     @State private var editAlbum: ArrAlbum? = nil
-    
+
     @State private var confirmDeleteSeasonNumber: Int32? = nil
     @State private var confirmDeleteAlbumId: Int64? = nil
     @State private var confirmDeleteMovie = false
     @State private var confirmRemoveFromService = false
     @State private var confirmClearData = false
     @State private var selectedQueueItem: QueueItem? = nil
-    
+
     @State private var toastMessage: String? = nil
-    
+
     private var removeServiceName: String {
         viewModel.buttonState.serviceName ?? (viewModel.resolvedRequestType == RequestType.movie ? "Radarr" : "Sonarr")
     }
-    
+
     init(
         arrId: Int64? = nil,
         tmdbId: Int64? = nil,
@@ -48,7 +48,7 @@ struct UnifiedMediaDetailsScreen: View {
             instanceId: instanceId
         ))
     }
-    
+
     var body: some View {
         ZStack {
             contentForState()
@@ -108,33 +108,33 @@ extension UnifiedMediaDetailsScreen {
             EmptyView()
         }
     }
-    
+
     @ViewBuilder
     private func successView(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 UnifiedMediaDetailsHeader(success: success, type: viewModel.resolvedInstanceType)
-                
+
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(success.displayTitle ?? MR.strings().unknown.localized())
                             .font(.system(size: 28, weight: .bold))
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        
+
                         if let tagline = success.tagline, !tagline.isEmpty {
                             Text(tagline)
                                 .font(.system(size: 16))
                                 .italic()
                                 .foregroundColor(.secondary)
                         }
-                        
+
                         if let airingString = success.upcomingDateString {
                             Text(airingString)
                                 .font(.system(size: 16, weight: .medium))
                                 .foregroundColor(.themePrimary)
                         }
                     }
-                    
+
                     UnifiedMediaDetailsActions(
                         buttonState: viewModel.buttonState,
                         onWatch: { url in
@@ -150,11 +150,11 @@ extension UnifiedMediaDetailsScreen {
                         onDeclineRequest: { viewModel.showViewRequestSheet() },
                         onManage: { viewModel.showViewRequestSheet() }
                     )
-                    
+
                     if let overview = success.overview {
                         ItemDescriptionCard(overview: overview)
                     }
-                    
+
                     if !success.queueItems.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             Text(MR.strings().activity.localized())
@@ -165,20 +165,20 @@ extension UnifiedMediaDetailsScreen {
                         }
                         .transition(.opacity.combined(with: .move(edge: .top)))
                     }
-                    
+
                     seasonsArea(success)
-                    
+
                     if success.hasArrId {
                         arrLibraryFilesArea(success)
                             .transition(.opacity.combined(with: .move(edge: .top)))
                     }
-                    
+
                     if let credits = success.seerrMedia?.credits {
                         creditsSection(credits)
                     }
-                    
+
                     unifiedInfoArea(success)
-                    
+
                     if !success.keywords.isEmpty {
                         keywordsSection(success.keywords)
                     }
@@ -198,7 +198,7 @@ extension UnifiedMediaDetailsScreen {
 
 // MARK: - Components and Sections
 extension UnifiedMediaDetailsScreen {
-    
+
     @ViewBuilder
     private func seasonsArea(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
         let arrSeries = success.arrMedia as? ArrSeries
@@ -242,7 +242,7 @@ extension UnifiedMediaDetailsScreen {
                     onAutomaticSearch: { viewModel.performAutomaticLookup() },
                     onDeleteFile: { confirmDeleteMovie = true }
                 )
-                
+
                 if let arrId = movie.id?.int64Value {
                     BazarrSubtitlesSection(
                         target: BazarrMediaTargetMovie(radarrId: arrId)
@@ -281,14 +281,14 @@ extension UnifiedMediaDetailsScreen {
             )
         }
     }
-    
+
     @ViewBuilder
     private func creditsSection(_ credits: Credits) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             if !credits.cast.isEmpty {
                 Text(MR.strings().cast.localized())
                     .font(.title3.bold())
-                
+
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(credits.cast.prefix(20), id: \.id) { member in
@@ -299,11 +299,11 @@ extension UnifiedMediaDetailsScreen {
                     }
                 }
             }
-            
+
             if !credits.crew.isEmpty {
                 Text(MR.strings().crew.localized())
                     .font(.title3.bold())
-                
+
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(credits.crew.prefix(20), id: \.creditId) { member in
@@ -316,7 +316,7 @@ extension UnifiedMediaDetailsScreen {
             }
         }
     }
-    
+
     @ViewBuilder
     private func unifiedInfoArea(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
         let arrItems = buildArrInfoItems(success: success)
@@ -332,14 +332,14 @@ extension UnifiedMediaDetailsScreen {
             )
         }
     }
-    
+
     @ViewBuilder
     private func keywordsSection(_ keywords: [Keyword]) -> some View {
         let rowCount = min(3, max(1, keywords.count))
         let rows = (0..<rowCount).map { rowIndex in
             keywords.enumerated().filter { $0.offset % rowCount == rowIndex }.map { $0.element }
         }
-        
+
         ScrollView(.horizontal, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(0..<rows.count, id: \.self) { rowIndex in
@@ -359,7 +359,7 @@ extension UnifiedMediaDetailsScreen {
             }
         }
     }
-    
+
     private func buildArrInfoItems(success: UnifiedMediaDetailsUiStateSuccess) -> [InfoItem] {
         if success.hasArrId, let arrMedia = success.arrMedia {
             return buildArrInfoItems(
@@ -370,23 +370,23 @@ extension UnifiedMediaDetailsScreen {
         }
         return []
     }
-    
+
     private func buildSeerrInfoItems(success: UnifiedMediaDetailsUiStateSuccess) -> [InfoItem] {
         var items: [InfoItem] = []
         if let seerrMedia = success.seerrMedia {
             items.append(InfoItem(label: MR.strings().status.localized(), value: seerrMedia.status))
-            
+
             if let movie = seerrMedia as? MovieDetails {
                 if let releaseDate = movie.releaseDate {
                     items.append(InfoItem(label: MR.strings().release_date.localized(), value: releaseDate.format(pattern: "MMM dd, yyyy")))
                 }
             }
-            
+
             let countries = seerrMedia.productionCountries.map { $0.name }.joined(separator: "\n")
             if !countries.isEmpty {
                 items.append(InfoItem(label: MR.strings().production_countries.localized(), value: countries))
             }
-            
+
             let studios = seerrMedia.productionCompanies.map { $0.name }.joined(separator: "\n")
             if !studios.isEmpty {
                 items.append(InfoItem(label: MR.strings().studios.localized(), value: studios))
@@ -394,11 +394,11 @@ extension UnifiedMediaDetailsScreen {
         }
         return items
     }
-    
+
     private func buildUnifiedInfoItems(success: UnifiedMediaDetailsUiStateSuccess) -> [InfoItem] {
         buildArrInfoItems(success: success) + buildSeerrInfoItems(success: success)
     }
-    
+
     private func buildArrInfoItems(arrMedia: ArrMedia, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
         if let series = arrMedia as? ArrSeries {
             return seriesInfoItems(series, qualityProfiles: qualityProfiles, tags: tags)
@@ -413,7 +413,7 @@ extension UnifiedMediaDetailsScreen {
         }
         return []
     }
-    
+
     private func seriesInfoItems(_ series: ArrSeries, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
         let unknown = MR.strings().unknown.localized()
         let qualityLabel = qualityProfiles.first(where: { $0.id == series.qualityProfileId })?.name ?? unknown
@@ -423,7 +423,7 @@ extension UnifiedMediaDetailsScreen {
         return [
             InfoItem(label: MR.strings().status.localized(), value: series.status.resource.localized()),
             InfoItem(label: MR.strings().series_type.localized(), value: series.seriesType.name),
-            InfoItem(label: MR.strings().size_on_disk.localized(), value: series.fileSize.bytesAsFileSizeString()),
+            InfoItem(label: MR.strings().size_on_disk.localized(), value: series.fileSize?.int64Value.bytesAsFileSizeString() ?? unknown),
             InfoItem(label: MR.strings().root_folder.localized(), value: series.rootFolderPath ?? unknown, onClick: { showEditPathSheet = true }),
             InfoItem(label: MR.strings().path.localized(), value: series.path ?? unknown, onClick: { showEditPathSheet = true }),
             InfoItem(label: MR.strings().new_seasons.localized(), value: monitorLabel),
@@ -432,7 +432,7 @@ extension UnifiedMediaDetailsScreen {
             InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
         ]
     }
-    
+
     private func movieInfoItems(_ movie: ArrMovie, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
         let unknown = MR.strings().unknown.localized()
         let qualityLabel = qualityProfiles.first(where: { $0.id == movie.qualityProfileId })?.name ?? unknown
@@ -457,7 +457,7 @@ extension UnifiedMediaDetailsScreen {
         info.append(InfoItem(label: MR.strings().tags.localized(), value: tagsLabel))
         return info
     }
-    
+
     private func artistInfoItems(_ artist: Arrtist, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
         let unknown = MR.strings().unknown.localized()
         let qualityLabel = qualityProfiles.first(where: { $0.id == artist.qualityProfileId })?.name ?? unknown
@@ -466,7 +466,7 @@ extension UnifiedMediaDetailsScreen {
         let rootFolderValue = (artist.rootFolderPath?.isEmpty == false) ? artist.rootFolderPath! : unknown
         return [
             InfoItem(label: MR.strings().status.localized(), value: artist.status.resource.localized()),
-            InfoItem(label: MR.strings().size_on_disk.localized(), value: artist.fileSize.bytesAsFileSizeString()),
+            InfoItem(label: MR.strings().size_on_disk.localized(), value: artist.fileSize?.int64Value.bytesAsFileSizeString() ?? unknown),
             InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue, onClick: { showEditPathSheet = true }),
             InfoItem(label: MR.strings().path.localized(), value: artist.path ?? unknown, onClick: { showEditPathSheet = true }),
             InfoItem(label: MR.strings().new_albums.localized(), value: monitorLabel),
@@ -474,7 +474,7 @@ extension UnifiedMediaDetailsScreen {
             InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
         ]
     }
-    
+
     private func authorInfoItems(_ author: Author, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
         let unknown = MR.strings().unknown.localized()
         let qualityLabel = qualityProfiles.first(where: { $0.id == author.qualityProfileId })?.name ?? unknown
@@ -483,7 +483,7 @@ extension UnifiedMediaDetailsScreen {
         let rootFolderValue = (author.rootFolderPath?.isEmpty == false) ? author.rootFolderPath! : unknown
         return [
             InfoItem(label: MR.strings().status.localized(), value: author.status.resource.localized()),
-            InfoItem(label: MR.strings().size_on_disk.localized(), value: author.fileSize.bytesAsFileSizeString()),
+            InfoItem(label: MR.strings().size_on_disk.localized(), value: author.fileSize?.int64Value.bytesAsFileSizeString() ?? unknown),
             InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue, onClick: { showEditPathSheet = true }),
             InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown, onClick: { showEditPathSheet = true }),
             InfoItem(label: MR.strings().new_books.localized(), value: monitorLabel),
@@ -491,7 +491,7 @@ extension UnifiedMediaDetailsScreen {
             InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
         ]
     }
-    
+
     private func audiobookInfoItems(_ audiobook: Audiobook) -> [InfoItem] {
         let unknown = MR.strings().unknown.localized()
         let authorString = audiobook.authors.joined(separator: " • ")
@@ -504,7 +504,7 @@ extension UnifiedMediaDetailsScreen {
         if let language = audiobook.language {
             info.append(InfoItem(label: MR.strings().language.localized(), value: language.capitalized))
         }
-        info.append(InfoItem(label: MR.strings().size_on_disk.localized(), value: audiobook.fileSize.bytesAsFileSizeString()))
+        info.append(InfoItem(label: MR.strings().size_on_disk.localized(), value: audiobook.fileSize?.int64Value.bytesAsFileSizeString() ?? unknown))
         info.append(InfoItem(label: MR.strings().path.localized(), value: audiobook.path ?? unknown, onClick: { showEditPathSheet = true }))
         return info
     }
@@ -614,7 +614,7 @@ extension UnifiedMediaDetailsScreen {
             EmptyView()
         }
     }
-    
+
     @ViewBuilder
     fileprivate var editPathSheetContent: some View {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess, let arrMedia = success.arrMedia {
@@ -630,7 +630,7 @@ extension UnifiedMediaDetailsScreen {
             EmptyView()
         }
     }
-    
+
     @ViewBuilder
     fileprivate var editSheetContent: some View {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
@@ -700,7 +700,7 @@ extension UnifiedMediaDetailsScreen {
             EmptyView()
         }
     }
-    
+
     @ViewBuilder
     fileprivate var confirmSheetContent: some View {
         DeleteMediaSheet(
@@ -712,7 +712,7 @@ extension UnifiedMediaDetailsScreen {
             }
         )
     }
-    
+
     @ViewBuilder
     fileprivate func queueItemSheetContent(_ wrapper: IdentifiableQueueItem) -> some View {
         QueueItemInfoSheet(
@@ -725,14 +725,14 @@ extension UnifiedMediaDetailsScreen {
         )
         .presentationDetents([.medium])
     }
-    
+
     @ViewBuilder
     fileprivate func editAlbumSheetContent(_ album: ArrAlbum) -> some View {
         EditAlbumSheet(album: album, editInProgress: viewModel.editStatus is OperationStatusInProgress, onEditAlbum: { updatedAlbum in
             viewModel.updateAlbum(album: updatedAlbum)
         })
     }
-    
+
     @ViewBuilder
     fileprivate var requestSheetContent: some View {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess, let seerrMedia = success.seerrMedia {
@@ -756,19 +756,19 @@ extension UnifiedMediaDetailsScreen {
             )
         }
     }
-    
+
     @ViewBuilder
     fileprivate var reportIssueSheetContent: some View {
         SeerrReportIssueSheet(viewModel: viewModel, onDismiss: { viewModel.hideReportIssueSheet() })
     }
-    
+
     @ViewBuilder
     fileprivate var viewRequestSheetContent: some View {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess, let seerrMedia = success.seerrMedia {
             SeerrViewRequestSheet(details: seerrMedia, viewModel: viewModel, onDismissRequest: { viewModel.hideViewRequestSheet() })
         }
     }
-    
+
     @ViewBuilder
     fileprivate var deleteMovieAlertContent: some View {
         Button(MR.strings().cancel.localized(), role: .cancel) { }
@@ -776,7 +776,7 @@ extension UnifiedMediaDetailsScreen {
             viewModel.deleteMovieFile()
         }
     }
-    
+
     @ViewBuilder
     fileprivate var deleteSeasonDialogContent: some View {
         Button(MR.strings().confirm.localized(), role: .destructive) {
@@ -789,14 +789,14 @@ extension UnifiedMediaDetailsScreen {
             confirmDeleteSeasonNumber = nil
         }
     }
-    
+
     @ViewBuilder
     fileprivate var deleteSeasonDialogMessage: some View {
         if let season = confirmDeleteSeasonNumber {
             Text(MR.strings().delete_season_confirm.formatted(args: [season]))
         }
     }
-    
+
     @ViewBuilder
     fileprivate var deleteAlbumDialogContent: some View {
         Button(MR.strings().confirm.localized(), role: .destructive) {
@@ -837,7 +837,7 @@ extension UnifiedMediaDetailsScreen {
             }
         }
     }
-    
+
     fileprivate func onLastSearchResultChanged(_ newVal: Bool?) {
         if let result = newVal {
             withAnimation {
@@ -845,7 +845,7 @@ extension UnifiedMediaDetailsScreen {
             }
         }
     }
-    
+
     fileprivate func onEditSuccess() {
         withAnimation {
             toastMessage = MR.strings().item_edited_successfully.localized()
@@ -853,13 +853,13 @@ extension UnifiedMediaDetailsScreen {
         showEditSheet = false
         editAlbum = nil
     }
-    
+
     fileprivate func onEditError() {
         withAnimation {
             toastMessage = MR.strings().error_editing_item.localized()
         }
     }
-    
+
     fileprivate func onDeleteSuccess() {
         withAnimation {
             toastMessage = MR.strings().item_deleted_successfully.localized()
@@ -868,7 +868,7 @@ extension UnifiedMediaDetailsScreen {
             dismiss()
         }
     }
-    
+
     fileprivate func onDeleteError() {
         withAnimation {
             toastMessage = MR.strings().error_deleting_item.localized()
@@ -888,7 +888,7 @@ extension UnifiedMediaDetailsScreen {
             let showMenuButton = showArrActions || showSeerrActions || showMissingInstances
             let showReportIssue = viewModel.buttonState.showReportIssueButton
             let showInstancePicker = success.availableInstances.count > 1
-            
+
             if showReportIssue || showArrActions || canAddDirectly || showMenuButton || showInstancePicker {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
@@ -912,19 +912,19 @@ extension UnifiedMediaDetailsScreen {
                                     .foregroundColor(.orange)
                             }
                         }
-                        
+
                         if showArrActions {
                             Button(action: { viewModel.toggleMonitored() }) {
                                 Image(systemName: viewModel.isMonitored ? "bookmark.fill" : "bookmark")
                             }
                         }
-                        
+
                         if canAddDirectly {
                             Button(action: { showAddSheet = true }) {
                                 Image(systemName: "plus")
                             }
                         }
-                        
+
                         if showMenuButton {
                             Menu {
                                 if showArrActions {
@@ -932,24 +932,24 @@ extension UnifiedMediaDetailsScreen {
                                         Button(action: { viewModel.performRefresh() }) {
                                             Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
                                         }
-                                        
+
                                         if viewModel.resolvedInstanceType?.includeTopLevelAutomaticSearchOption == true {
                                             Button(action: { viewModel.performAutomaticLookup() }) {
                                                 Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
                                             }
                                             .disabled(!viewModel.isMonitored)
                                         }
-                                        
+
                                         Button(action: { showEditSheet = true }) {
                                             Label(MR.strings().edit.localized(), systemImage: "pencil")
                                         }
-                                        
+
                                         Button(role: .destructive, action: { showConfirmSheet = true }) {
                                             Label(MR.strings().delete.localized(), systemImage: "trash")
                                         }
                                     }
                                 }
-                                
+
                                 if showMissingInstances {
                                     Section {
                                         ForEach(success.missingInstances, id: \.id) { instance in
@@ -962,7 +962,7 @@ extension UnifiedMediaDetailsScreen {
                                         }
                                     }
                                 }
-                                
+
                                 if showSeerrActions {
                                     Section {
                                         if viewModel.buttonState.showMarkAsAvailableButton {
@@ -971,14 +971,14 @@ extension UnifiedMediaDetailsScreen {
                                                 Label(markTitle, systemImage: "checkmark.circle")
                                             }
                                         }
-                                        
+
                                         if viewModel.buttonState.showRemoveFromServiceButton {
                                             let removeTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().remove_from_radarr.localized() : MR.strings().remove_from_sonarr.localized()
                                             Button(role: .destructive, action: { confirmRemoveFromService = true }) {
                                                 Label(removeTitle, systemImage: "trash")
                                             }
                                         }
-                                        
+
                                         if viewModel.buttonState.showClearDataButton {
                                             Button(role: .destructive, action: { confirmClearData = true }) {
                                                 Label(MR.strings().clear_data.localized(), systemImage: "xmark.bin")
@@ -1002,7 +1002,7 @@ struct UnifiedMediaDetailsHeader: View {
     let success: UnifiedMediaDetailsUiStateSuccess
     let type: InstanceType?
     @State private var infoHeight: CGFloat = 0
-    
+
     private var infoString: String {
         var items: [String] = []
         if let year = success.year {
@@ -1019,7 +1019,7 @@ struct UnifiedMediaDetailsHeader: View {
         }
         return items.joined(separator: " • ")
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             MediaHeaderBanner(
@@ -1027,7 +1027,7 @@ struct UnifiedMediaDetailsHeader: View {
                 height: 400,
                 gradientHeight: infoHeight * 2
             )
-            
+
             HStack(alignment: .bottom, spacing: 24) {
                 if let posterUrl = success.posterUrl {
                     GenericPosterItem(posterUrl: posterUrl)
@@ -1036,12 +1036,12 @@ struct UnifiedMediaDetailsHeader: View {
                     PosterItem(item: arrMedia, aspectRatio: type?.aspectRatio ?? .poster)
                         .frame(width: 150)
                 }
-                
+
                 VStack(alignment: .leading, spacing: 8) {
                     if let arrMedia = success.arrMedia {
                         ClearLogoView(item: arrMedia)
                     }
-                    
+
                     VStack(alignment: .leading, spacing: 4) {
                         let ratings = success.ratings
                         if !ratings.isEmpty {
@@ -1064,17 +1064,17 @@ struct UnifiedMediaDetailsHeader: View {
                                 }
                             }
                         }
-                        
+
                         if !infoString.isEmpty {
                             Text(infoString)
                                 .font(.system(size: 16))
                         }
-                        
+
                         if let releasedBy = success.releasedBy {
                             Text(releasedBy)
                                 .font(.system(size: 14))
                         }
-                        
+
                         Text(success.genres.joined(separator: " • "))
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
@@ -1109,7 +1109,7 @@ struct UnifiedMediaDetailsActions: View {
     let onApproveRequest: () -> Void
     let onDeclineRequest: () -> Void
     let onManage: () -> Void
-    
+
     var body: some View {
         HStack(spacing: 12) {
             // Watch Button / Trailer Button
@@ -1124,11 +1124,11 @@ struct UnifiedMediaDetailsActions: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                         }
-                        
+
                         Divider()
                             .frame(height: 24)
                             .background(Color.white.opacity(0.5))
-                        
+
                         Menu {
                             Button(action: { onWatchTrailer(trailerUrl) }) {
                                 Label(MR.strings().watch_trailer.localized(), systemImage: "film")
@@ -1168,7 +1168,7 @@ struct UnifiedMediaDetailsActions: View {
                     .cornerRadius(8)
                 }
             }
-            
+
             // View Request Button
             if buttonState.showViewRequestButton {
                 if buttonState.showApproveRequestButton || buttonState.showDeclineRequestButton {
@@ -1181,11 +1181,11 @@ struct UnifiedMediaDetailsActions: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                         }
-                        
+
                         Divider()
                             .frame(height: 24)
                             .background(Color.primary.opacity(0.2))
-                        
+
                         Menu {
                             if buttonState.showApproveRequestButton {
                                 Button(action: onApproveRequest) {
@@ -1220,7 +1220,7 @@ struct UnifiedMediaDetailsActions: View {
                     }
                 }
             }
-            
+
             // Request More Button
             if buttonState.showRequestMoreButton {
                 Button(action: onRequest) {
@@ -1235,7 +1235,7 @@ struct UnifiedMediaDetailsActions: View {
                     .cornerRadius(8)
                 }
             }
-            
+
             // Request Button
             if buttonState.showRequestButton {
                 if buttonState.showRequest4kButton {
@@ -1248,11 +1248,11 @@ struct UnifiedMediaDetailsActions: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                         }
-                        
+
                         Divider()
                             .frame(height: 24)
                             .background(Color.white.opacity(0.5))
-                        
+
                         Menu {
                             Button(action: onRequest4k) {
                                 Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
@@ -1306,7 +1306,7 @@ fileprivate struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
     @Binding var editAlbum: ArrAlbum?
     @Binding var selectedQueueItem: QueueItem?
     let screen: UnifiedMediaDetailsScreen
-    
+
     func body(content: Content) -> some View {
         content
             .sheet(isPresented: $showEditSheet) { screen.editSheetContent }
@@ -1335,7 +1335,7 @@ fileprivate struct UnifiedMediaDetailsAlertsModifier: ViewModifier {
     @Binding var confirmDeleteAlbumId: Int64?
     let removeServiceName: String
     let screen: UnifiedMediaDetailsScreen
-    
+
     func body(content: Content) -> some View {
         content
             .alert(MR.strings().confirm_delete.localized(), isPresented: $confirmDeleteMovie) {
@@ -1385,7 +1385,7 @@ fileprivate struct UnifiedMediaDetailsAlertsModifier: ViewModifier {
 fileprivate struct UnifiedMediaDetailsEventsModifier: ViewModifier {
     @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
     let screen: UnifiedMediaDetailsScreen
-    
+
     func body(content: Content) -> some View {
         content
             .onChange(of: viewModel.lastSearchResult) { _, newVal in

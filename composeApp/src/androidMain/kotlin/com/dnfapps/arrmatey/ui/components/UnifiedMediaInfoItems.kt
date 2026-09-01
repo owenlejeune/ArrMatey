@@ -230,8 +230,7 @@ fun audiobookInfo(
     onEditPath: () -> Unit,
 ): List<InfoItem> {
     val unknown = mokoString(MR.strings.unknown)
-
-    val diskSize = audiobook.fileSize.bytesAsFileSizeString()
+    val diskSize = audiobook.fileSize?.bytesAsFileSizeString() ?: unknown
 
     val authorString = audiobook.authors.takeUnless { it.isEmpty() }?.joinToString(BULLET) ?: unknown
     val narratorsString = audiobook.narrators.takeUnless { it.isEmpty() }?.joinToString(BULLET) ?: unknown

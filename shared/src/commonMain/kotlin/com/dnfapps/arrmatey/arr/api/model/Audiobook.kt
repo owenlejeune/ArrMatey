@@ -120,7 +120,7 @@ data class Audiobook(
         get() = null
 
     override val statistics: ArrStatistics
-        get() = AudiobookStatistics(fileSize)
+        get() = AudiobookStatistics(fileSize ?: 0L)
 
     override val added: Instant?
         get() = publishedDate
@@ -138,7 +138,7 @@ data class Audiobook(
     override fun ratingScore(): Double = 0.0
 
     override val statusProgress: Float
-        get() = if (fileSize > 0 || fileCount > 0) 1.0f else 0.0f
+        get() = if ((fileSize ?: 0) > 0 || fileCount > 0) 1.0f else 0.0f
 
     override val statusColor: Color
         get() =
@@ -169,8 +169,8 @@ data class Audiobook(
                 else -> runtime.formatMinutesAsRuntime()
             }
 
-    override val fileSize: Long
-        get() = remoteFileSize ?: files.sumOf { it.size ?: 0 }
+    override val fileSize: Long?
+        get() = remoteFileSize ?: files.takeUnless { it.isEmpty() }?.sumOf { it.size ?: 0 }
 
     override fun getPoster(): ArrImage? = images.firstOrNull()
 

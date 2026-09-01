@@ -624,7 +624,7 @@ private fun AudiobookDetails(
         item.series?.let {
             if (item.seriesNumber != null) "$it (#${item.seriesNumber})" else it
         }
-    val fileSizeString = item.fileSize.bytesAsFileSizeString().takeUnless { item.id == null }
+    val fileSizeString = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
 
     val secondLine = listOfNotNull(seriesString, fileSizeString, item.publisher).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {
