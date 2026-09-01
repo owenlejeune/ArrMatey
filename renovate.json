@@ -1,0 +1,108 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":dependencyDashboard"
+  ],
+  "schedule": ["before 6am on monday"],
+  "timezone": "America/New_York",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "minimumReleaseAge": "3 days",
+  "packageRules": [
+    {
+      "description": "Kotlin + Compose group (lockstep)",
+      "matchPackagePatterns": [
+        "^org\\.jetbrains\\.kotlin",
+        "^org\\.jetbrains\\.compose",
+        "^androidx\\.compose",
+        "^com\\.google\\.devtools\\.ksp"
+      ],
+      "groupName": "kotlin + compose",
+      "schedule": ["before 6am on the first day of the month"]
+    },
+    {
+      "description": "AGP + Gradle wrapper (lockstep)",
+      "matchPackagePatterns": ["^com\\.android"],
+      "matchManagers": ["gradle", "gradle-wrapper"],
+      "groupName": "AGP + Gradle"
+    },
+    {
+      "description": "Ktor group",
+      "matchPackagePatterns": ["^io\\.ktor"],
+      "groupName": "ktor"
+    },
+    {
+      "description": "Coil group",
+      "matchPackagePatterns": ["^io\\.coil-kt"],
+      "groupName": "coil"
+    },
+    {
+      "description": "Koin group",
+      "matchPackagePatterns": ["^io\\.insert-koin"],
+      "groupName": "koin"
+    },
+    {
+      "description": "Skie → Kotlin group",
+      "matchPackagePatterns": ["^co\\.touchlab\\.skie"],
+      "groupName": "kotlin + compose"
+    },
+    {
+      "description": "moko-resources → Kotlin group",
+      "matchPackagePatterns": ["^dev\\.icerock"],
+      "groupName": "kotlin + compose"
+    },
+    {
+      "description": "Test/build tooling: automerge patch+minor",
+      "matchPackagePatterns": [
+        "^io\\.mockk",
+        "^app\\.cash\\.turbine",
+        "^org\\.robolectric",
+        "^com\\.diffplug\\.spotless",
+        "^androidx\\.test"
+      ],
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Runtime libs: automerge patch only (add per-family minor rules as integration tests land)",
+      "matchDepTypes": ["dependencies", "implementation", "api"],
+      "matchUpdateTypes": ["patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Majors: manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "addLabels": ["major-update"]
+    },
+    {
+      "description": "0.x libs: manual review",
+      "matchCurrentVersion": "/^0/",
+      "automerge": false
+    },
+    {
+      "description": "GitHub Actions: automerge patch/minor/digest",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["patch", "minor", "digest"],
+      "automerge": true,
+      "platformAutomerge": true
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "schedule": ["at any time"],
+    "automerge": false
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"]
+  }
+}
