@@ -76,6 +76,7 @@ struct UnifiedMediaDetailsScreen: View {
             confirmClearData: $confirmClearData,
             confirmDeleteSeasonNumber: $confirmDeleteSeasonNumber,
             confirmDeleteAlbumId: $confirmDeleteAlbumId,
+            confirmDeleteEpisodeId: $confirmDeleteEpisodeId,
             removeServiceName: removeServiceName,
             screen: self
         ))
@@ -1379,6 +1380,7 @@ fileprivate struct UnifiedMediaDetailsAlertsModifier: ViewModifier {
     @Binding var confirmClearData: Bool
     @Binding var confirmDeleteSeasonNumber: Int32?
     @Binding var confirmDeleteAlbumId: Int64?
+    @Binding var confirmDeleteEpisodeId: Int64?
     let removeServiceName: String
     let screen: UnifiedMediaDetailsScreen
 
