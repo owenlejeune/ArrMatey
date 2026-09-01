@@ -69,14 +69,18 @@ struct UnifiedMediaDetailsScreen: View {
             selectedQueueItem: $selectedQueueItem,
             screen: self
         ))
-        .modifier(UnifiedMediaDetailsAlertsModifier(
+        .modifier(UnifiedMediaDetailsArrAlertsModifier(
             viewModel: viewModel,
             confirmDeleteMovie: $confirmDeleteMovie,
-            confirmRemoveFromService: $confirmRemoveFromService,
-            confirmClearData: $confirmClearData,
             confirmDeleteSeasonNumber: $confirmDeleteSeasonNumber,
             confirmDeleteAlbumId: $confirmDeleteAlbumId,
             confirmDeleteEpisodeId: $confirmDeleteEpisodeId,
+            screen: self
+        ))
+        .modifier(UnifiedMediaDetailsSeerrAlertsModifier(
+            viewModel: viewModel,
+            confirmRemoveFromService: $confirmRemoveFromService,
+            confirmClearData: $confirmClearData,
             removeServiceName: removeServiceName,
             screen: self
         ))
@@ -872,173 +876,204 @@ extension UnifiedMediaDetailsScreen {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
-            let buttonState = viewModel.buttonState
-            let canAddDirectly = !success.hasArrId && success.arrMedia != nil && viewModel.isArrConfigured
-            let showArrActions = success.hasArrId && viewModel.isArrConfigured
-            let showSeerrActions = viewModel.isSeerrConfigured && (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
-            let showMissingInstances = !success.missingInstances.isEmpty
-            let showMenuButton = showArrActions || showSeerrActions || showMissingInstances
-            let showReportIssue = buttonState.showReportIssueButton
-            let showInstancePicker = success.availableInstances.count > 1
-
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack(spacing: 12) {
-                    if showReportIssue {
-                        Button(action: { viewModel.showReportIssueSheet() }) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
+                    reportIssueButton
+                    watchMenu
+                    addRequestMenu
+                    approvalMenu
+                    monitorButton
+                    instanceSwitcher(success)
+                    overflowMenu(success)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var reportIssueButton: some View {
+        if viewModel.buttonState.showReportIssueButton {
+            Button(action: { viewModel.showReportIssueSheet() }) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var watchMenu: some View {
+        let buttonState = viewModel.buttonState
+        if buttonState.showWatchButton || buttonState.showWatchTrailerOption {
+            Menu {
+                if buttonState.showWatchButton, let url = buttonState.watchButtonUrl {
+                    Button(action: { if let urlObj = URL(string: url) { openURL(urlObj) } }) {
+                        Label(buttonState.watchButtonLabel.localized(), systemImage: "play.fill")
+                    }
+                }
+                if buttonState.showWatchTrailerOption, let url = buttonState.trailerUrl {
+                    Button(action: { if let urlObj = URL(string: url) { openURL(urlObj) } }) {
+                        Label(MR.strings().watch_trailer.localized(), systemImage: "film")
+                    }
+                }
+            } label: {
+                Image(systemName: "play.circle")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var addRequestMenu: some View {
+        let buttonState = viewModel.buttonState
+        let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess
+        let canAddDirectly = success?.hasArrId == false && success?.arrMedia != nil && viewModel.isArrConfigured
+
+        if canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton {
+            Menu {
+                if canAddDirectly {
+                    Button(action: { showAddSheet = true }) {
+                        Label(MR.strings().add.localized(), systemImage: "plus")
+                    }
+                }
+                if buttonState.showRequestButton || buttonState.showRequestMoreButton {
+                    let title = buttonState.showRequestMoreButton ? MR.strings().request_more.localized() : MR.strings().request.localized()
+                    Button(action: { viewModel.showRequestSheet(is4k: false) }) {
+                        Label(title, systemImage: "plus.circle")
+                    }
+                }
+                if buttonState.showRequest4kButton {
+                    Button(action: { viewModel.showRequestSheet(is4k: true) }) {
+                        Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
+                    }
+                }
+            } label: {
+                Image(systemName: "plus")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var approvalMenu: some View {
+        let buttonState = viewModel.buttonState
+        if buttonState.showViewRequestButton {
+            Menu {
+                Button(action: { viewModel.showViewRequestSheet() }) {
+                    Label(MR.strings().view_request.localized(), systemImage: "clock")
+                }
+                if buttonState.showApproveRequestButton {
+                    Button(action: { viewModel.showViewRequestSheet() }) {
+                        Label(MR.strings().approve_request.localized(), systemImage: "checkmark")
+                    }
+                }
+                if buttonState.showDeclineRequestButton {
+                    Button(role: .destructive, action: { viewModel.declineRequest(requestId: buttonState.pendingRequestId?.int64Value ?? 0) }) {
+                        Label(MR.strings().decline_request.localized(), systemImage: "xmark")
+                    }
+                }
+            } label: {
+                Image(systemName: "clock")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var monitorButton: some View {
+        let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess
+        let showArrActions = success?.hasArrId == true && viewModel.isArrConfigured
+        if showArrActions {
+            Button(action: { viewModel.toggleMonitored() }) {
+                Image(systemName: viewModel.isMonitored ? "bookmark.fill" : "bookmark")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func instanceSwitcher(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
+        if success.availableInstances.count > 1, let resolvedType = viewModel.resolvedInstanceType {
+            InstancePickerMenu(
+                instances: success.availableInstances,
+                selectedInstanceId: success.selectedInstanceId?.int64Value,
+                onChangeInstance: { inst in
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        viewModel.selectInstance(instanceId: inst.id)
+                    }
+                },
+                onAddNewInstance: { navigationManager.goToNewInstance(of: resolvedType) }
+            )
+            .menuIndicator(.hidden)
+        }
+    }
+
+    @ViewBuilder
+    private func overflowMenu(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
+        let buttonState = viewModel.buttonState
+        let showArrActions = success.hasArrId && viewModel.isArrConfigured
+        let showSeerrActions = viewModel.isSeerrConfigured && (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
+        let showMissingInstances = !success.missingInstances.isEmpty
+        let showMenuButton = showArrActions || showSeerrActions || showMissingInstances
+
+        if showMenuButton {
+            Menu {
+                if showArrActions {
+                    Section {
+                        Button(action: { viewModel.performRefresh() }) {
+                            Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
                         }
-                    }
 
-                    // Watch Menu
-                    if buttonState.showWatchButton || buttonState.showWatchTrailerOption {
-                        Menu {
-                            if buttonState.showWatchButton, let url = buttonState.watchButtonUrl {
-                                Button(action: { if let urlObj = URL(string: url) { openURL(urlObj) } }) {
-                                    Label(buttonState.watchButtonLabel.localized(), systemImage: "play.fill")
-                                }
+                        if viewModel.resolvedInstanceType?.includeTopLevelAutomaticSearchOption == true {
+                            Button(action: { viewModel.performAutomaticLookup() }) {
+                                Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
                             }
-                            if buttonState.showWatchTrailerOption, let url = buttonState.trailerUrl {
-                                Button(action: { if let urlObj = URL(string: url) { openURL(urlObj) } }) {
-                                    Label(MR.strings().watch_trailer.localized(), systemImage: "film")
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "play.circle")
+                            .disabled(!viewModel.isMonitored)
                         }
-                    }
 
-                    // Add / Request Menu
-                    if canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton {
-                        Menu {
-                            if canAddDirectly {
-                                Button(action: { showAddSheet = true }) {
-                                    Label(MR.strings().add.localized(), systemImage: "plus")
-                                }
-                            }
-                            if buttonState.showRequestButton || buttonState.showRequestMoreButton {
-                                let title = buttonState.showRequestMoreButton ? MR.strings().request_more.localized() : MR.strings().request.localized()
-                                Button(action: { viewModel.showRequestSheet(is4k: false) }) {
-                                    Label(title, systemImage: "plus.circle")
-                                }
-                            }
-                            if buttonState.showRequest4kButton {
-                                Button(action: { viewModel.showRequestSheet(is4k: true) }) {
-                                    Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "plus")
+                        Button(action: { showEditSheet = true }) {
+                            Label(MR.strings().edit.localized(), systemImage: "pencil")
                         }
-                    }
 
-                    // Approval Menu
-                    if buttonState.showViewRequestButton {
-                        Menu {
-                            Button(action: { viewModel.showViewRequestSheet() }) {
-                                Label(MR.strings().view_request.localized(), systemImage: "clock")
-                            }
-                            if buttonState.showApproveRequestButton {
-                                Button(action: { viewModel.showViewRequestSheet() }) {
-                                    Label(MR.strings().approve_request.localized(), systemImage: "checkmark")
-                                }
-                            }
-                            if buttonState.showDeclineRequestButton {
-                                Button(role: .destructive, action: { viewModel.declineRequest(requestId: buttonState.pendingRequestId?.int64Value ?? 0) }) {
-                                    Label(MR.strings().decline_request.localized(), systemImage: "xmark")
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "clock")
-                        }
-                    }
-
-                    if showArrActions {
-                        Button(action: { viewModel.toggleMonitored() }) {
-                            Image(systemName: viewModel.isMonitored ? "bookmark.fill" : "bookmark")
-                        }
-                    }
-
-                    if showInstancePicker, let resolvedType = viewModel.resolvedInstanceType {
-                        InstancePickerMenu(
-                            instances: success.availableInstances,
-                            selectedInstanceId: success.selectedInstanceId?.int64Value,
-                            onChangeInstance: { inst in
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    viewModel.selectInstance(instanceId: inst.id)
-                                }
-                            },
-                            onAddNewInstance: { navigationManager.goToNewInstance(of: resolvedType) }
-                        )
-                        .menuIndicator(.hidden)
-                    }
-
-                    if showMenuButton {
-                        Menu {
-                            if showArrActions {
-                                Section {
-                                    Button(action: { viewModel.performRefresh() }) {
-                                        Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
-                                    }
-
-                                    if viewModel.resolvedInstanceType?.includeTopLevelAutomaticSearchOption == true {
-                                        Button(action: { viewModel.performAutomaticLookup() }) {
-                                            Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
-                                        }
-                                        .disabled(!viewModel.isMonitored)
-                                    }
-
-                                    Button(action: { showEditSheet = true }) {
-                                        Label(MR.strings().edit.localized(), systemImage: "pencil")
-                                    }
-
-                                    Button(role: .destructive, action: { showConfirmSheet = true }) {
-                                        Label(MR.strings().delete.localized(), systemImage: "trash")
-                                    }
-                                }
-                            }
-
-                            if showMissingInstances {
-                                Section {
-                                    ForEach(success.missingInstances, id: \.id) { instance in
-                                        Button(action: {
-                                            viewModel.setAddSheetTargetInstance(instance: instance)
-                                            showAddSheet = true
-                                        }) {
-                                            Label(MR.strings().add_to_arr.formatted(args: [instance.label]), systemImage: "plus")
-                                        }
-                                    }
-                                }
-                            }
-
-                            if showSeerrActions {
-                                Section {
-                                    if buttonState.showMarkAsAvailableButton {
-                                        let markTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().mark_as_available.localized() : MR.strings().mark_all_seasons_as_available.localized()
-                                        Button(action: { viewModel.markSeerrMediaAsAvailable() }) {
-                                            Label(markTitle, systemImage: "checkmark.circle")
-                                        }
-                                    }
-
-                                    if buttonState.showRemoveFromServiceButton {
-                                        let removeTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().remove_from_radarr.localized() : MR.strings().remove_from_sonarr.localized()
-                                        Button(role: .destructive, action: { confirmRemoveFromService = true }) {
-                                            Label(removeTitle, systemImage: "trash")
-                                        }
-                                    }
-
-                                    if buttonState.showClearDataButton {
-                                        Button(role: .destructive, action: { confirmClearData = true }) {
-                                            Label(MR.strings().clear_data.localized(), systemImage: "xmark.bin")
-                                        }
-                                    }
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
+                        Button(role: .destructive, action: { showConfirmSheet = true }) {
+                            Label(MR.strings().delete.localized(), systemImage: "trash")
                         }
                     }
                 }
+
+                if showMissingInstances {
+                    Section {
+                        ForEach(success.missingInstances, id: \.id) { instance in
+                            Button(action: {
+                                viewModel.setAddSheetTargetInstance(instance: instance)
+                                showAddSheet = true
+                            }) {
+                                Label(MR.strings().add_to_arr.formatted(args: [instance.label]), systemImage: "plus")
+                            }
+                        }
+                    }
+                }
+
+                if showSeerrActions {
+                    Section {
+                        if buttonState.showMarkAsAvailableButton {
+                            let markTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().mark_as_available.localized() : MR.strings().mark_all_seasons_as_available.localized()
+                            Button(action: { viewModel.markSeerrMediaAsAvailable() }) {
+                                Label(markTitle, systemImage: "checkmark.circle")
+                            }
+                        }
+
+                        if buttonState.showRemoveFromServiceButton {
+                            let removeTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().remove_from_radarr.localized() : MR.strings().remove_from_sonarr.localized()
+                            Button(role: .destructive, action: { confirmRemoveFromService = true }) {
+                                Label(removeTitle, systemImage: "trash")
+                            }
+                        }
+
+                        if buttonState.showClearDataButton {
+                            Button(role: .destructive, action: { confirmClearData = true }) {
+                                Label(MR.strings().clear_data.localized(), systemImage: "xmark.bin")
+                            }
+                        }
+                    }
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
             }
         }
     }
@@ -1373,15 +1408,12 @@ fileprivate struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
     }
 }
 
-fileprivate struct UnifiedMediaDetailsAlertsModifier: ViewModifier {
+fileprivate struct UnifiedMediaDetailsArrAlertsModifier: ViewModifier {
     @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
     @Binding var confirmDeleteMovie: Bool
-    @Binding var confirmRemoveFromService: Bool
-    @Binding var confirmClearData: Bool
     @Binding var confirmDeleteSeasonNumber: Int32?
     @Binding var confirmDeleteAlbumId: Int64?
     @Binding var confirmDeleteEpisodeId: Int64?
-    let removeServiceName: String
     let screen: UnifiedMediaDetailsScreen
 
     func body(content: Content) -> some View {
@@ -1390,26 +1422,6 @@ fileprivate struct UnifiedMediaDetailsAlertsModifier: ViewModifier {
                 screen.deleteMovieAlertContent
             } message: {
                 Text(MR.strings().confirm_delete_file.localized())
-            }
-            .alert(MR.strings().are_you_sure.localized(), isPresented: $confirmRemoveFromService) {
-                Button(MR.strings().no.localized(), role: .cancel) {}
-                Button(role: .destructive) {
-                    viewModel.deleteSeerrMediaFile(is4k: false)
-                } label: {
-                    Text(MR.strings().yes.localized())
-                }
-            } message: {
-                Text(MR.strings().remove_from_service_confirm.formatted(args: [removeServiceName]))
-            }
-            .alert(MR.strings().are_you_sure.localized(), isPresented: $confirmClearData) {
-                Button(MR.strings().no.localized(), role: .cancel) {}
-                Button(role: .destructive) {
-                    viewModel.clearSeerrMediaData()
-                } label: {
-                    Text(MR.strings().yes.localized())
-                }
-            } message: {
-                Text(MR.strings().clear_data_confirm.localized())
             }
             .alert(MR.strings().confirm_delete.localized(), isPresented: Binding(
                 get: { confirmDeleteEpisodeId != nil },
@@ -1440,6 +1452,38 @@ fileprivate struct UnifiedMediaDetailsAlertsModifier: ViewModifier {
                 screen.deleteAlbumDialogContent
             } message: {
                 Text(MR.strings().delete_album_confirm.localized())
+            }
+    }
+}
+
+fileprivate struct UnifiedMediaDetailsSeerrAlertsModifier: ViewModifier {
+    @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
+    @Binding var confirmRemoveFromService: Bool
+    @Binding var confirmClearData: Bool
+    let removeServiceName: String
+    let screen: UnifiedMediaDetailsScreen
+
+    func body(content: Content) -> some View {
+        content
+            .alert(MR.strings().are_you_sure.localized(), isPresented: $confirmRemoveFromService) {
+                Button(MR.strings().no.localized(), role: .cancel) {}
+                Button(role: .destructive) {
+                    viewModel.deleteSeerrMediaFile(is4k: false)
+                } label: {
+                    Text(MR.strings().yes.localized())
+                }
+            } message: {
+                Text(MR.strings().remove_from_service_confirm.formatted(args: [removeServiceName]))
+            }
+            .alert(MR.strings().are_you_sure.localized(), isPresented: $confirmClearData) {
+                Button(MR.strings().no.localized(), role: .cancel) {}
+                Button(role: .destructive) {
+                    viewModel.clearSeerrMediaData()
+                } label: {
+                    Text(MR.strings().yes.localized())
+                }
+            } message: {
+                Text(MR.strings().clear_data_confirm.localized())
             }
     }
 }
