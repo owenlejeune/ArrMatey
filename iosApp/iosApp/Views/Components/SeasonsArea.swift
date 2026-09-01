@@ -18,6 +18,7 @@ struct SeasonsArea: View {
     var onEpisodeAutomaticSearch: (Int64) -> Void = { _ in }
     var onSeasonAutomaticSearch: (Int32) -> Void = { _ in }
     var deleteSeasonFiles: (Int32) -> Void = { _ in }
+    var onDeleteEpisodeFile: (Int64) -> Void = { _ in }
     var seasonDeleteInProgress: Bool = false
     var onNavigateToEpisodeDetails: ((Episode) -> Void)? = nil
     var onNavigateToSeriesRelease: ((Int64?, Int32) -> Void)? = nil
@@ -41,6 +42,7 @@ struct SeasonsArea: View {
                         onEpisodeAutomaticSearch: onEpisodeAutomaticSearch,
                         onSeasonAutomaticSearch: onSeasonAutomaticSearch,
                         deleteSeasonFiles: deleteSeasonFiles,
+                        onDeleteEpisodeFile: onDeleteEpisodeFile,
                         seasonDeleteInProgress: seasonDeleteInProgress,
                         onNavigateToEpisodeDetails: onNavigateToEpisodeDetails,
                         onNavigateToSeriesRelease: onNavigateToSeriesRelease
@@ -62,6 +64,7 @@ struct SeasonAreaRow: View {
     let onEpisodeAutomaticSearch: (Int64) -> Void
     let onSeasonAutomaticSearch: (Int32) -> Void
     let deleteSeasonFiles: (Int32) -> Void
+    let onDeleteEpisodeFile: (Int64) -> Void
     let seasonDeleteInProgress: Bool
     var onNavigateToEpisodeDetails: ((Episode) -> Void)? = nil
     var onNavigateToSeriesRelease: ((Int64?, Int32) -> Void)? = nil
@@ -181,6 +184,7 @@ struct SeasonAreaRow: View {
                                     navigation.go(to: .seriesReleases(seriesId: seriesId, seasonNumber: nil, episodeId: epId), of: .sonarr)
                                 }
                             },
+                            onDeleteFile: { onDeleteEpisodeFile($0) },
                             onClick: {
                                 if let arrEp = wrapper.arrEpisode {
                                     onNavigateToEpisodeDetails?(arrEp)

@@ -14,6 +14,7 @@ struct EpisodeRow: View {
     var onAutomaticSearch: (Int64) -> Void = { _ in }
     var onToggleMonitor: (Episode) -> Void = { _ in }
     var onNavigateToSeriesRelease: ((Int64) -> Void)? = nil
+    var onDeleteFile: ((Int64) -> Void)? = nil
     var onClick: (() -> Void)? = nil
 
     @EnvironmentObject private var navigation: NavigationManager
@@ -24,6 +25,7 @@ struct EpisodeRow: View {
         onAutomaticSearch: @escaping (Int64) -> Void = { _ in },
         onToggleMonitor: @escaping (Episode) -> Void = { _ in },
         onNavigateToSeriesRelease: ((Int64) -> Void)? = nil,
+        onDeleteFile: ((Int64) -> Void)? = nil,
         onClick: (() -> Void)? = nil
     ) {
         self.episode = episode
@@ -31,6 +33,7 @@ struct EpisodeRow: View {
         self.onAutomaticSearch = onAutomaticSearch
         self.onToggleMonitor = onToggleMonitor
         self.onNavigateToSeriesRelease = onNavigateToSeriesRelease
+        self.onDeleteFile = onDeleteFile
         self.onClick = onClick
     }
 
@@ -143,6 +146,11 @@ struct EpisodeRow: View {
                 .onTapGesture {
                     onClick?()
                 }
+                .onLongPressGesture {
+                    if let fileId = arrEp?.episodeFileId?.int64Value {
+                        onDeleteFile?(fileId)
+                    }
+                }
 
                 // Action buttons for arr episodes
                 if let arrEp = arrEp {
@@ -237,6 +245,11 @@ struct EpisodeRow: View {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     onClick?()
+                }
+                .onLongPressGesture {
+                    if let fileId = arrEp?.episodeFileId?.int64Value {
+                        onDeleteFile?(fileId)
+                    }
                 }
             }
         }

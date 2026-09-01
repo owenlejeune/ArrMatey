@@ -436,6 +436,7 @@ val viewModelModule =
                 deleteSeasonFilesUseCase = get(),
                 deleteAlbumFilesUseCase = get(),
                 deleteMovieFileUseCase = get(),
+                deleteEpisodeFileUseCase = get(),
                 submitIssueUseCase = get(),
                 observeInstancePreferencesUseCase = get(),
                 updateInstancePreferencesUseCase = get(),

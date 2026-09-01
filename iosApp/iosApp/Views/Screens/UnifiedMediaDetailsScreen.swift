@@ -20,6 +20,7 @@ struct UnifiedMediaDetailsScreen: View {
 
     @State private var confirmDeleteSeasonNumber: Int32? = nil
     @State private var confirmDeleteAlbumId: Int64? = nil
+    @State private var confirmDeleteEpisodeId: Int64? = nil
     @State private var confirmDeleteMovie = false
     @State private var confirmRemoveFromService = false
     @State private var confirmClearData = false
@@ -212,6 +213,7 @@ extension UnifiedMediaDetailsScreen {
             onEpisodeAutomaticSearch: { viewModel.performEpisodeAutomaticLookup(episodeId: $0) },
             onSeasonAutomaticSearch: { viewModel.performSeasonAutomaticLookup(seasonNumber: $0) },
             deleteSeasonFiles: { confirmDeleteSeasonNumber = $0 },
+            onDeleteEpisodeFile: { confirmDeleteEpisodeId = $0 },
             seasonDeleteInProgress: viewModel.deleteSeasonStatus is OperationStatusInProgress,
             onNavigateToEpisodeDetails: { episode in
                 if let series = arrSeries {
@@ -1362,6 +1364,20 @@ fileprivate struct UnifiedMediaDetailsAlertsModifier: ViewModifier {
                 }
             } message: {
                 Text(MR.strings().clear_data_confirm.localized())
+            }
+            .alert(MR.strings().confirm_delete.localized(), isPresented: Binding(
+                get: { confirmDeleteEpisodeId != nil },
+                set: { if !$0 { confirmDeleteEpisodeId = nil } }
+            )) {
+                Button(MR.strings().cancel.localized(), role: .cancel) { }
+                Button(MR.strings().confirm.localized(), role: .destructive) {
+                    if let fileId = confirmDeleteEpisodeId {
+                        viewModel.deleteEpisodeFile(episodeId: fileId)
+                    }
+                    confirmDeleteEpisodeId = nil
+                }
+            } message: {
+                Text(MR.strings().episode_delete_message.localized())
             }
             .confirmationDialog("", isPresented: Binding(
                 get: { confirmDeleteSeasonNumber != nil },

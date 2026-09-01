@@ -10,7 +10,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,6 +66,7 @@ fun EpisodeRow(
     onAutomaticSearch: (Long) -> Unit = {},
     onToggleMonitor: (ArrEpisode) -> Unit = {},
     onNavigateToSeriesRelease: (Long?) -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val arrEp = episode.arrEpisode
@@ -73,9 +74,10 @@ fun EpisodeRow(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier =
-            modifier.clickable(
-                enabled = onClick != null,
+            modifier.combinedClickable(
+                enabled = onClick != null || onLongClick != null,
                 onClick = onClick ?: {},
+                onLongClick = onLongClick,
             ),
     ) {
         Row(
