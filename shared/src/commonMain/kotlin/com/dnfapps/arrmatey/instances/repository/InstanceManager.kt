@@ -85,15 +85,28 @@ class InstanceManager(
 
             InstanceType.Bazarr -> BazarrInstanceRepository(instance, httpClient)
 
-            InstanceType.Sonarr,
-            InstanceType.Radarr,
-            InstanceType.Lidarr,
-            InstanceType.Booksehelf,
-            InstanceType.Listenarr,
-            -> ArrInstanceRepository(instance, httpClient, logger)
+            InstanceType.Sonarr -> SonarrRepository(instance, httpClient, logger)
+
+            InstanceType.Radarr -> RadarrRepository(instance, httpClient, logger)
+
+            InstanceType.Lidarr -> LidarrRepository(instance, httpClient, logger)
+
+            InstanceType.Booksehelf -> ReadarrRepository(instance, httpClient, logger)
+
+            InstanceType.Listenarr -> ListenarrRepository(instance, httpClient, logger)
         }
 
     fun getArrRepository(instanceId: Long): ArrInstanceRepository? = _instanceRepositories.value[instanceId] as? ArrInstanceRepository?
+
+    fun getSonarrRepository(instanceId: Long): SonarrRepository? = _instanceRepositories.value[instanceId] as? SonarrRepository
+
+    fun getRadarrRepository(instanceId: Long): RadarrRepository? = _instanceRepositories.value[instanceId] as? RadarrRepository
+
+    fun getLidarrRepository(instanceId: Long): LidarrRepository? = _instanceRepositories.value[instanceId] as? LidarrRepository
+
+    fun getReadarrRepository(instanceId: Long): ReadarrRepository? = _instanceRepositories.value[instanceId] as? ReadarrRepository
+
+    fun getListenarrRepository(instanceId: Long): ListenarrRepository? = _instanceRepositories.value[instanceId] as? ListenarrRepository
 
     fun getSeerrRepository(instanceId: Long): SeerrInstanceRepository? = _instanceRepositories.value[instanceId] as? SeerrInstanceRepository
 
@@ -105,14 +118,26 @@ class InstanceManager(
 
     fun getRepository(instanceId: Long): InstanceScopedRepository? = _instanceRepositories.value[instanceId]
 
-    fun getSelectedArrRepository(type: InstanceType): Flow<ArrInstanceRepository?> =
+    fun getSelectedArrRepository(type: InstanceType): Flow<ArrInstanceRepository?> = getSelectedArrRepositoryTyped<ArrInstanceRepository>(type)
+
+    fun getSelectedSonarrRepository(): Flow<SonarrRepository?> = getSelectedArrRepositoryTyped<SonarrRepository>(InstanceType.Sonarr)
+
+    fun getSelectedRadarrRepository(): Flow<RadarrRepository?> = getSelectedArrRepositoryTyped<RadarrRepository>(InstanceType.Radarr)
+
+    fun getSelectedLidarrRepository(): Flow<LidarrRepository?> = getSelectedArrRepositoryTyped<LidarrRepository>(InstanceType.Lidarr)
+
+    fun getSelectedReadarrRepository(): Flow<ReadarrRepository?> = getSelectedArrRepositoryTyped<ReadarrRepository>(InstanceType.Booksehelf)
+
+    fun getSelectedListenarrRepository(): Flow<ListenarrRepository?> = getSelectedArrRepositoryTyped<ListenarrRepository>(InstanceType.Listenarr)
+
+    private inline fun <reified T : ArrInstanceRepository> getSelectedArrRepositoryTyped(type: InstanceType): Flow<T?> =
         instanceRepository
             .observeSelectedInstance(type)
             .flatMapLatest { instance ->
                 if (instance == null) {
                     flowOf(null)
                 } else {
-                    _instanceRepositories.map { repos -> repos[instance.id] as? ArrInstanceRepository }
+                    _instanceRepositories.map { repos -> repos[instance.id] as? T }
                 }
             }
 

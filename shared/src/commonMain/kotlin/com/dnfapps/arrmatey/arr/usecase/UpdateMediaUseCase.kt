@@ -39,10 +39,9 @@ class UpdateMediaUseCase {
                         val sourcePath = previous.basePath
                         val destinationPath = item.basePath
                         if (sourcePath != null && destinationPath != null && sourcePath != destinationPath) {
-                            repository.listenarrClient
-                                .moveFiles(
+                            repository
+                                .moveAudiobookFiles(
                                     id = id,
-                                    moveFiles = true,
                                     sourcePath = sourcePath,
                                     destinationPath = destinationPath,
                                 ).onSuccess {
