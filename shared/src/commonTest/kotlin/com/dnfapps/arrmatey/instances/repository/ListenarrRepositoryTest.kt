@@ -36,7 +36,20 @@ class ListenarrRepositoryTest {
             val mockEngine =
                 MockEngine { _ ->
                     respond(
-                        content = """{"id": 3, "title": "Audiobook Title", "files": [{"id": 30, "audiobookId": 3, "path": "/path/to/file.m4b"}]}""",
+                        content =
+                            """
+                            {
+                                "id": 3,
+                                "title": "Audiobook Title",
+                                "files": [
+                                    {
+                                        "id": 30,
+                                        "audiobookId": 3,
+                                        "path": "/path/to/file.m4b"
+                                    }
+                                ]
+                            }
+                            """.trimIndent(),
                         status = HttpStatusCode.OK,
                         headers = headersOf("Content-Type", "application/json"),
                     )

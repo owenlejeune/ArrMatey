@@ -106,8 +106,7 @@ class GetLibraryUseCase(
                     }
                     null -> ArrLibrary.Initial
                 }
-            }
-                .flowOn(Dispatchers.Default)
+            }.flowOn(Dispatchers.Default)
                 .collect { emit(it) }
         }
 

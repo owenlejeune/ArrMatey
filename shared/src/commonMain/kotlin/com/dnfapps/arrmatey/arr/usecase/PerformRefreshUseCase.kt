@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.arr.usecase
 
-import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload.RefreshAlbum
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload.RefreshAuthor
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload.RefreshMovie

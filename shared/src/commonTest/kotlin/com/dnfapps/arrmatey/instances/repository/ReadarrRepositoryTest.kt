@@ -57,6 +57,11 @@ class ReadarrRepositoryTest {
 
             assertNotNull(repository.authorSeries.value[10])
             assertEquals(1, repository.authorSeries.value[10]?.size)
-            assertEquals("Foundation", repository.authorSeries.value[10]?.first()?.title)
+            assertEquals(
+                "Foundation",
+                repository.authorSeries.value[10]
+                    ?.first()
+                    ?.title,
+            )
         }
 }

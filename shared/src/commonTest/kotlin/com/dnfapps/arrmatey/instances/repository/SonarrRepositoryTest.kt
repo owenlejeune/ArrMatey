@@ -39,7 +39,19 @@ class SonarrRepositoryTest {
             val mockEngine =
                 MockEngine { _ ->
                     respond(
-                        content = """[{"id": 10, "seriesId": 1, "episodeNumber": 1, "seasonNumber": 1, "title": "Pilot", "hasFile": false, "monitored": true, "unverifiedSceneNumbering": false}]""",
+                        content =
+                            """
+                            [{
+                                "id": 10,
+                                "seriesId": 1,
+                                "episodeNumber": 1,
+                                "seasonNumber": 1,
+                                 "title": "Pilot",
+                                 "hasFile": false,
+                                 "monitored": true,
+                                 "unverifiedSceneNumbering": false
+                             }]
+                            """.trimIndent(),
                         status = HttpStatusCode.OK,
                         headers = headersOf("Content-Type", "application/json"),
                     )
@@ -68,6 +80,11 @@ class SonarrRepositoryTest {
 
             assertNotNull(repository.episodes.value[1])
             assertEquals(1, repository.episodes.value[1]?.size)
-            assertEquals("Pilot", repository.episodes.value[1]?.first()?.title)
+            assertEquals(
+                "Pilot",
+                repository.episodes.value[1]
+                    ?.first()
+                    ?.title,
+            )
         }
 }

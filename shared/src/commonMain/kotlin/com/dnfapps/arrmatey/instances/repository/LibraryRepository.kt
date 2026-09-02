@@ -77,7 +77,10 @@ class LibraryRepository(
     private val _historyStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val historyStatus: StateFlow<OperationStatus> = _historyStatus.asStateFlow()
 
-    suspend fun refreshLibrary(onBookLibraryUpdate: (suspend () -> Unit)? = null, onListenarrConfigUpdate: (suspend () -> Unit)? = null) {
+    suspend fun refreshLibrary(
+        onBookLibraryUpdate: (suspend () -> Unit)? = null,
+        onListenarrConfigUpdate: (suspend () -> Unit)? = null,
+    ) {
         _library.value = NetworkResult.Loading
         _library.value = client.getLibrary()
         onBookLibraryUpdate?.invoke()
@@ -107,7 +110,11 @@ class LibraryRepository(
             }
     }
 
-    suspend fun performLookup(query: String, defaultSearchLanguage: String? = null, defaultSearchRegion: String? = null) {
+    suspend fun performLookup(
+        query: String,
+        defaultSearchLanguage: String? = null,
+        defaultSearchRegion: String? = null,
+    ) {
         if (query.isBlank()) {
             _lookupResults.value = null
             return
@@ -132,7 +139,11 @@ class LibraryRepository(
         _lookupResults.value = null
     }
 
-    suspend fun directLookup(query: String, defaultSearchLanguage: String? = null, defaultSearchRegion: String? = null): NetworkResult<List<ArrMedia>> {
+    suspend fun directLookup(
+        query: String,
+        defaultSearchLanguage: String? = null,
+        defaultSearchRegion: String? = null,
+    ): NetworkResult<List<ArrMedia>> {
         if (query.isBlank()) return NetworkResult.Success(emptyList())
         val queryParams = LookupParams(query, defaultSearchLanguage, defaultSearchRegion)
         val result = client.lookup(queryParams)
@@ -458,7 +469,10 @@ class LibraryRepository(
         _editItemStatus.value = status
     }
 
-    fun updateMediaDetailsCache(id: Long, media: ArrMedia) {
+    fun updateMediaDetailsCache(
+        id: Long,
+        media: ArrMedia,
+    ) {
         val currentCache = _mediaDetailsCache.value.toMutableMap()
         currentCache[id] = media
         _mediaDetailsCache.value = currentCache

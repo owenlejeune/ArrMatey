@@ -118,7 +118,8 @@ class InstanceManager(
 
     fun getRepository(instanceId: Long): InstanceScopedRepository? = _instanceRepositories.value[instanceId]
 
-    fun getSelectedArrRepository(type: InstanceType): Flow<ArrInstanceRepository?> = getSelectedArrRepositoryTyped<ArrInstanceRepository>(type)
+    fun getSelectedArrRepository(type: InstanceType): Flow<ArrInstanceRepository?> =
+        getSelectedArrRepositoryTyped<ArrInstanceRepository>(type)
 
     fun getSelectedSonarrRepository(): Flow<SonarrRepository?> = getSelectedArrRepositoryTyped<SonarrRepository>(InstanceType.Sonarr)
 
@@ -128,7 +129,8 @@ class InstanceManager(
 
     fun getSelectedReadarrRepository(): Flow<ReadarrRepository?> = getSelectedArrRepositoryTyped<ReadarrRepository>(InstanceType.Bookshelf)
 
-    fun getSelectedListenarrRepository(): Flow<ListenarrRepository?> = getSelectedArrRepositoryTyped<ListenarrRepository>(InstanceType.Listenarr)
+    fun getSelectedListenarrRepository(): Flow<ListenarrRepository?> =
+        getSelectedArrRepositoryTyped<ListenarrRepository>(InstanceType.Listenarr)
 
     private inline fun <reified T : ArrInstanceRepository> getSelectedArrRepositoryTyped(type: InstanceType): Flow<T?> =
         instanceRepository

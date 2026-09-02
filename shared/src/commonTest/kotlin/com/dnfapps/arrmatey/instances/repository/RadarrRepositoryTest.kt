@@ -36,7 +36,18 @@ class RadarrRepositoryTest {
             val mockEngine =
                 MockEngine { _ ->
                     respond(
-                        content = """[{"id": 100, "movieId": 5, "movieFileId": 1, "relativePath": "sub.srt", "extension": ".srt", "languageTags": [], "type": "subtitle"}]""",
+                        content =
+                            """
+                            [{
+                                "id": 100,
+                                "movieId": 5,
+                                "movieFileId": 1,
+                                "relativePath": "sub.srt",
+                                "extension": ".srt",
+                                "languageTags": [],
+                                "type": "subtitle"
+                            }]
+                            """.trimIndent(),
                         status = HttpStatusCode.OK,
                         headers = headersOf("Content-Type", "application/json"),
                     )

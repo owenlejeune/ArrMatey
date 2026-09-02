@@ -36,7 +36,20 @@ class LidarrRepositoryTest {
             val mockEngine =
                 MockEngine { _ ->
                     respond(
-                        content = """[{"id": 50, "artistId": 2, "foreignAlbumId": "foreign-123", "anyReleaseOk": true, "profileId": 1, "duration": 3600, "title": "Greatest Hits", "monitored": true}]""",
+                        content =
+                            """
+                            [{
+                                "id": 50,
+                                "artistId": 2,
+                                "foreignAlbumId":
+                                "foreign-123",
+                                "anyReleaseOk": true,
+                                "profileId": 1,
+                                "duration": 3600,
+                                "title": "Greatest Hits",
+                                "monitored": true
+                            }]
+                            """.trimIndent(),
                         status = HttpStatusCode.OK,
                         headers = headersOf("Content-Type", "application/json"),
                     )
@@ -57,6 +70,11 @@ class LidarrRepositoryTest {
 
             assertNotNull(repository.artistAlbums.value[2])
             assertEquals(1, repository.artistAlbums.value[2]?.size)
-            assertEquals("Greatest Hits", repository.artistAlbums.value[2]?.first()?.title)
+            assertEquals(
+                "Greatest Hits",
+                repository.artistAlbums.value[2]
+                    ?.first()
+                    ?.title,
+            )
         }
 }

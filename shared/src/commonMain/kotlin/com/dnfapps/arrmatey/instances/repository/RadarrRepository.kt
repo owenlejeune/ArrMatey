@@ -30,6 +30,5 @@ class RadarrRepository(
                 _movieExtraFiles.value = currentMap
             }
 
-    override suspend fun deleteMovieFile(movieId: Long): NetworkResult<Unit> =
-        radarrClient.deleteMovieFile(movieId)
+    override suspend fun deleteMovieFile(movieId: Long): NetworkResult<Unit> = radarrClient.deleteMovieFile(movieId)
 }

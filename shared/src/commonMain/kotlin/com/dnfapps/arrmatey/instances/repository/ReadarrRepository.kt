@@ -71,8 +71,7 @@ class ReadarrRepository(
                 _authorBookFiles.value = currentMap
             }
 
-    override suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
-        bookshelfClient.deleteBookFiles(bookFilesIds)
+    override suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> = bookshelfClient.deleteBookFiles(bookFilesIds)
 
     override suspend fun toggleBookMonitor(book: Book): NetworkResult<Book> {
         libraryRepository.setMonitorStatus(OperationStatus.InProgress)
@@ -108,6 +107,5 @@ class ReadarrRepository(
         }
     }
 
-    override suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =
-        bookshelfClient.getBookEditions(bookId)
+    override suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> = bookshelfClient.getBookEditions(bookId)
 }
