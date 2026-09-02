@@ -297,7 +297,7 @@ fun Navigator<SettingsScreen>.onInstanceTap(
     InstanceType.Sonarr,
     InstanceType.Radarr,
     InstanceType.Lidarr,
-    InstanceType.Booksehelf,
+    InstanceType.Bookshelf,
     InstanceType.Listenarr,
     -> toArrDashboard(id)
     InstanceType.Seerr,

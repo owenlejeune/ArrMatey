@@ -24,7 +24,7 @@ class ReadarrRepositoryTest {
             label = "Test Readarr",
             url = "http://localhost:8787",
             apiKey = EncryptedString("test-api-key"),
-            type = InstanceType.Booksehelf,
+            type = InstanceType.Bookshelf,
             enabled = true,
         )
 

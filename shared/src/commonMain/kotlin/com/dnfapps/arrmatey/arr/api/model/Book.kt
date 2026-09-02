@@ -34,7 +34,7 @@ data class Book(
 ) : CalendarItem,
     InstanceTypeIdentifiable {
     override val instanceType: InstanceType
-        get() = InstanceType.Booksehelf
+        get() = InstanceType.Bookshelf
 
     override val calendarId: Long
         get() = id

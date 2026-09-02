@@ -139,7 +139,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                 mediaId = params.bookId,
             )
         InteractiveSearchScreen(
-            instanceType = InstanceType.Booksehelf,
+            instanceType = InstanceType.Bookshelf,
             releaseParams = releaseParams,
             onBack = { navigation.popBackStack() },
         )

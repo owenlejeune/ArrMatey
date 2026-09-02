@@ -62,7 +62,7 @@ class NavigationManager(
             InstanceType.Sonarr -> TabItem.Standard.SHOWS
             InstanceType.Radarr -> TabItem.Standard.MOVIES
             InstanceType.Lidarr -> TabItem.Standard.MUSIC
-            InstanceType.Booksehelf -> TabItem.Standard.BOOKS
+            InstanceType.Bookshelf -> TabItem.Standard.BOOKS
             InstanceType.Listenarr -> TabItem.Standard.AUDIOBOOKS
             else -> throw IllegalStateException("Invalid arr type $type")
         }

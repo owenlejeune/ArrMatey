@@ -192,7 +192,7 @@ class CalendarService(
             InstanceType.Radarr -> item is ArrMovie
             InstanceType.Sonarr -> item is Episode || item is EpisodeGroup
             InstanceType.Lidarr -> item is ArrAlbum
-            InstanceType.Booksehelf -> item is Book
+            InstanceType.Bookshelf -> item is Book
             InstanceType.Listenarr -> item is Audiobook
             else -> false
         }
@@ -353,13 +353,11 @@ class CalendarService(
         start: LocalDate,
         end: LocalDate,
     ) {
-        val currentDates = _dates.value.toMutableList()
+        val currentDates = _dates.value.toMutableSet()
         var current = start
 
         while (current <= end) {
-            if (!currentDates.contains(current)) {
-                currentDates.add(current)
-            }
+            currentDates.add(current)
             current = current.plus(1, DateTimeUnit.DAY)
         }
 

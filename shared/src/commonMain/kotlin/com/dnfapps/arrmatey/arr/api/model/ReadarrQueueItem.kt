@@ -37,7 +37,7 @@ data class ReadarrQueueItem(
     val bookId: Long? = null,
     val book: Book? = null,
 ) : QueueItem {
-    override val type = InstanceType.Booksehelf
+    override val type = InstanceType.Bookshelf
 
     override val taskGroup: String
         get() = super.taskGroup + id

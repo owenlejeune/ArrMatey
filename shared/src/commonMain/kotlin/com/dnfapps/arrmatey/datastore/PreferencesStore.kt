@@ -86,7 +86,7 @@ class PreferencesStore(
             InstanceType.Radarr -> radarrInfoCardKey
             InstanceType.Lidarr -> lidarrInfoCardKey
             InstanceType.Seerr -> seerrInfoCardKey
-            InstanceType.Booksehelf -> bookshelfInfoCardKey
+            InstanceType.Bookshelf -> bookshelfInfoCardKey
             InstanceType.Prowlarr -> prowlarrInfoCardKey
             InstanceType.Listenarr -> listenarrInfoCardKey
             InstanceType.Bazarr -> bazarrInfoCardKey

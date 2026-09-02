@@ -796,7 +796,7 @@ internal fun MonitorOptionsSheet(
     onDismissRequest: () -> Unit,
     onOptionSelected: (Any) -> Unit,
 ) {
-    if (type == InstanceType.Booksehelf) {
+    if (type == InstanceType.Bookshelf) {
         BookshelfMonitorOptionsSheet(onDismissRequest, onOptionSelected)
         return
     }
@@ -949,7 +949,7 @@ internal fun EmptySearchResultsView(
             InstanceType.Sonarr -> mokoString(MR.strings.type_series)
             InstanceType.Radarr -> mokoString(MR.strings.type_movie)
             InstanceType.Lidarr -> mokoString(MR.strings.type_artist)
-            InstanceType.Booksehelf -> mokoString(MR.strings.type_author)
+            InstanceType.Bookshelf -> mokoString(MR.strings.type_author)
             else -> mokoString(MR.strings.unknown)
         }
     Column(

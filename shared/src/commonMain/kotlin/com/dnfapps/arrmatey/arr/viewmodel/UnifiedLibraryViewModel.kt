@@ -38,6 +38,7 @@ import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -525,8 +526,12 @@ class UnifiedLibraryViewModel(
             updateDeleteAddExclusion(addExclusion)
 
             val selectedIds = selectionState.selectedItems.value
-            selectedIds.forEach { id ->
-                repository.delete(id, deleteFiles, addExclusion)
+            coroutineScope {
+                selectedIds.forEach { id ->
+                    launch {
+                        repository.delete(id, deleteFiles, addExclusion)
+                    }
+                }
             }
 
             selectionState.exitSelectionMode()

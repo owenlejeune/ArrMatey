@@ -28,6 +28,7 @@ import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
+import dev.shivathapaa.logger.api.Logger
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import com.dnfapps.networking.NetworkResult
@@ -64,6 +65,7 @@ class CombinedDashboardViewModel(
     private val calendarService: CalendarService,
     private val dashboardManager: DashboardManager,
     private val preferencesStore: PreferencesStore,
+    private val logger: Logger,
 ) : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -514,8 +516,8 @@ class CombinedDashboardViewModel(
                     if (repo.library.value == null) {
                         repo.refreshLibrary()
                     }
-                } catch (_: Exception) {
-                    // Log error but continue with other instances
+                } catch (e: Exception) {
+                    logger.error(e) { "Error refreshing Arr instance ${repo.instance.label}" }
                 }
             }
 
@@ -523,8 +525,8 @@ class CombinedDashboardViewModel(
             seerrRepos.forEach { repo ->
                 try {
                     repo.refreshCounts()
-                } catch (_: Exception) {
-                    // Log error
+                } catch (e: Exception) {
+                    logger.error(e) { "Error refreshing Seerr instance ${repo.instance.label}" }
                 }
             }
 
@@ -536,8 +538,8 @@ class CombinedDashboardViewModel(
                     repo.refreshStatus()
                     repo.getIndexerStatus()
                     repo.getIndexers()
-                } catch (_: Exception) {
-                    // Log error
+                } catch (e: Exception) {
+                    logger.error(e) { "Error refreshing Prowlarr instance ${repo.instance.label}" }
                 }
             }
 
@@ -547,8 +549,8 @@ class CombinedDashboardViewModel(
             bazarrRepos.forEach { repo ->
                 try {
                     repo.refreshBadges()
-                } catch (_: Exception) {
-                    // Log error
+                } catch (e: Exception) {
+                    logger.error(e) { "Error refreshing Bazarr instance ${repo.instance.label}" }
                 }
             }
 

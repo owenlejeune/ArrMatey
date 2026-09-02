@@ -74,7 +74,7 @@ struct BookDetailsScreen: View {
 
                     ReleaseDownloadButtons(
                         onInteractiveClicked: {
-                            navigation.go(to: .bookReleases(bookId: viewModel.book.id), of: .booksehelf)
+                            navigation.go(to: .bookReleases(bookId: viewModel.book.id), of: .bookshelf)
                         },
                         automaticSearchEnabled: viewModel.book.monitored,
                         onAutomaticClicked: {

@@ -601,7 +601,7 @@ private fun StandardTabContent(
         TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr, windowSizeClass, wideRailIsVisible)
         TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr, windowSizeClass, wideRailIsVisible)
         TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr, windowSizeClass, wideRailIsVisible)
-        TabItem.Standard.BOOKS -> ArrTab(InstanceType.Booksehelf, windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.BOOKS -> ArrTab(InstanceType.Bookshelf, windowSizeClass, wideRailIsVisible)
         TabItem.Standard.AUDIOBOOKS -> ArrTab(InstanceType.Listenarr, windowSizeClass, wideRailIsVisible)
         TabItem.Standard.ACTIVITY -> ActivityTab(wideRailIsVisible)
         TabItem.Standard.DOWNLOADS -> DownloadsTab(wideRailIsVisible)

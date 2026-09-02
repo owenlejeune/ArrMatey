@@ -10,7 +10,7 @@ import Shared
 
 struct MediaRouteDestination: View {
     let route: MediaRoute
-    
+
     var body: some View {
         switch route {
         case .details(let arrId, let tmdbId, let tvdbId, let instanceType, let requestType, let instanceId):
@@ -22,20 +22,20 @@ struct MediaRouteDestination: View {
                 requestType: requestType,
                 instanceId: instanceId
             )
-            
+
         case .search(let query, let type, let instanceId):
             MediaSearchScreen(query: query, type: type, instanceId: instanceId)
-            
+
         case .preview(let json, let type):
             MediaPreviewScreen(json: json, type: type)
-            
+
         case .movieRelease(let movieId):
             let releaseParams = ReleaseParamsMovie(mediaId: movieId)
             InteractiveSearchScreen(type: .radarr, releaseParams: releaseParams)
-            
+
         case .movieFiles(let json):
             MovieFilesScreen(json: json)
-            
+
         case .seriesReleases(let seriesId, let seasonNumber, let episodeId):
             let releaseParams = ReleaseParamsSeries(
                 seriesId: seriesId?.asKotlinLong,
@@ -44,31 +44,31 @@ struct MediaRouteDestination: View {
             )
             let defaultFilter: ReleaseFilterBy = if episodeId != nil { .singleEpisode } else { .seasonPack }
             InteractiveSearchScreen(type: .sonarr, releaseParams: releaseParams, defaultFilter: defaultFilter)
-            
+
         case .episodeDetails(let seriesJson, let episodeJson):
             EpisodeDetailsScreen(seriesJson: seriesJson, episodeJson: episodeJson)
-            
+
         case .albumReleases(let albumId, let artistId):
             let releaseParams = ReleaseParamsAlbum(
                 mediaId: albumId,
                 artistId: artistId?.asKotlinLong
             )
             InteractiveSearchScreen(type: .lidarr, releaseParams: releaseParams)
-            
+
         case .bookReleases(let bookId):
             let releaseParams = ReleaseParamsBook(mediaId: bookId)
-            InteractiveSearchScreen(type: .booksehelf, releaseParams: releaseParams)
-            
+            InteractiveSearchScreen(type: .bookshelf, releaseParams: releaseParams)
+
         case .audiobookReleases(let id, let query):
             let releaseParams = ReleaseParamsAudiobook(mediaId: id?.asKotlinLong, query: query)
             InteractiveSearchScreen(type: .listenarr, releaseParams: releaseParams)
-            
+
         case .authorFiles(let authorJson):
             AuthorFilesScreen(authorJson: authorJson)
-            
+
         case .audiobookFiles(let audiobookJson):
             AudiobookFilesScreen(audiobookJson: audiobookJson)
-            
+
         case .bookDetails(let bookJson, let authorJson):
             BookDetailsScreen(bookJson: bookJson, authorJson: authorJson)
         }

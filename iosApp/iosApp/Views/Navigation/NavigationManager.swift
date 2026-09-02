@@ -49,7 +49,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .sonarr: seriesPath.append(route)
         case .radarr: moviePath.append(route)
         case .lidarr: musicPath.append(route)
-        case .booksehelf: bookPath.append(route)
+        case .bookshelf: bookPath.append(route)
         case .listenarr: audiobookPath.append(route)
         case .seerr: break
         case .prowlarr: break
@@ -82,7 +82,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .lidarr:
             if !musicPath.isEmpty { musicPath.removeLast() }
             musicPath.append(route)
-        case .booksehelf:
+        case .bookshelf:
             if !bookPath.isEmpty { bookPath.removeLast() }
             bookPath.append(route)
         case .listenarr:
@@ -386,7 +386,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .sonarr: return TabItemStandard.shows as TabItem
         case .radarr: return TabItemStandard.movies as TabItem
         case .lidarr: return TabItemStandard.music as TabItem
-        case .booksehelf: return TabItemStandard.books as TabItem
+        case .bookshelf: return TabItemStandard.books as TabItem
         case .listenarr: return TabItemStandard.audiobooks as TabItem
         case .seerr: return TabItemStandard.requests as TabItem
         case .prowlarr: return TabItemStandard.prowlarr as TabItem

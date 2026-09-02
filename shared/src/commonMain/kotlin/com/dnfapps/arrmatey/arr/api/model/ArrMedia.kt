@@ -173,7 +173,7 @@ object AuthorSerializer :
         val obj = element.jsonObject
         return buildJsonObject {
             obj.forEach { (k, v) -> put(k, v) }
-            put("mediaType", InstanceType.Booksehelf.name)
+            put("mediaType", InstanceType.Bookshelf.name)
         }
     }
 }
@@ -215,7 +215,7 @@ object AnyArrMediaSerializer : KSerializer<ArrMedia> {
             InstanceType.Sonarr.name -> decoder.json.decodeFromJsonElement(ArrSeries.serializer(), element)
             InstanceType.Radarr.name -> decoder.json.decodeFromJsonElement(ArrMovie.serializer(), element)
             InstanceType.Lidarr.name -> decoder.json.decodeFromJsonElement(Arrtist.serializer(), element)
-            InstanceType.Booksehelf.name -> decoder.json.decodeFromJsonElement(Author.serializer(), element)
+            InstanceType.Bookshelf.name -> decoder.json.decodeFromJsonElement(Author.serializer(), element)
             InstanceType.Listenarr.name -> decoder.json.decodeFromJsonElement(Audiobook.serializer(), element)
             InstanceType.Listenarr.name + "_search" -> decoder.json.decodeFromJsonElement(SearchAudiobook.serializer(), element)
             else -> error("Unknown mediaType: $mediaType")

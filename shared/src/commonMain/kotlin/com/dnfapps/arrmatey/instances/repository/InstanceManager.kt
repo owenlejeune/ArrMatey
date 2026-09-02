@@ -91,7 +91,7 @@ class InstanceManager(
 
             InstanceType.Lidarr -> LidarrRepository(instance, httpClient, logger)
 
-            InstanceType.Booksehelf -> ReadarrRepository(instance, httpClient, logger)
+            InstanceType.Bookshelf -> ReadarrRepository(instance, httpClient, logger)
 
             InstanceType.Listenarr -> ListenarrRepository(instance, httpClient, logger)
         }
@@ -126,7 +126,7 @@ class InstanceManager(
 
     fun getSelectedLidarrRepository(): Flow<LidarrRepository?> = getSelectedArrRepositoryTyped<LidarrRepository>(InstanceType.Lidarr)
 
-    fun getSelectedReadarrRepository(): Flow<ReadarrRepository?> = getSelectedArrRepositoryTyped<ReadarrRepository>(InstanceType.Booksehelf)
+    fun getSelectedReadarrRepository(): Flow<ReadarrRepository?> = getSelectedArrRepositoryTyped<ReadarrRepository>(InstanceType.Bookshelf)
 
     fun getSelectedListenarrRepository(): Flow<ListenarrRepository?> = getSelectedArrRepositoryTyped<ListenarrRepository>(InstanceType.Listenarr)
 

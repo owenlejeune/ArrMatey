@@ -18,21 +18,21 @@ private val MIGRATION_2_3 =
         override fun migrate(connection: SQLiteConnection) {
             connection.execSQL(
                 """
-                ALTER TABLE instances 
+                ALTER TABLE instances
                 ADD COLUMN localNetworkEnabled INTEGER NOT NULL DEFAULT 0
                 """.trimIndent(),
             )
 
             connection.execSQL(
                 """
-                ALTER TABLE instances 
+                ALTER TABLE instances
                 ADD COLUMN localNetworkEndpoint TEXT DEFAULT NULL
                 """.trimIndent(),
             )
 
             connection.execSQL(
                 """
-                ALTER TABLE instances 
+                ALTER TABLE instances
                 ADD COLUMN localNetworkSsid TEXT DEFAULT NULL
                 """.trimIndent(),
             )
@@ -140,6 +140,13 @@ private val MIGRATION_10_11 =
         }
     }
 
+private val MIGRATION_11_12 =
+    object : Migration(11, 12) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("UPDATE instances SET type = 'Bookshelf' WHERE type = 'Booksehelf'")
+        }
+    }
+
 val migrations =
     arrayOf(
         MIGRATION_1_2,
@@ -152,4 +159,5 @@ val migrations =
         MIGRATION_8_9,
         MIGRATION_9_10,
         MIGRATION_10_11,
+        MIGRATION_11_12,
     )

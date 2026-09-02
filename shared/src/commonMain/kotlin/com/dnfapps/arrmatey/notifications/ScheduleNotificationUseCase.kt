@@ -46,7 +46,7 @@ class ScheduleNotificationUseCase(
                     InstanceType.Sonarr -> MR.strings.new_episode
                     InstanceType.Radarr -> item.notificationReleaseType ?: MR.strings.new_release
                     InstanceType.Lidarr -> MR.strings.new_album
-                    InstanceType.Booksehelf -> MR.strings.new_book
+                    InstanceType.Bookshelf -> MR.strings.new_book
                     else -> MR.strings.new_release
                 }
 

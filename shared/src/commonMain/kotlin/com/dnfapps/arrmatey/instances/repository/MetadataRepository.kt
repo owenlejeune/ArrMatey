@@ -16,6 +16,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.time.Clock
 
 class MetadataRepository(
     private val client: ArrClient,
@@ -90,12 +93,23 @@ class MetadataRepository(
             .onSuccess { _health.value = it }
     }
 
-    suspend fun refreshAllMetadata() {
-        coroutineScope {
-            launch { refreshQualityProfiles() }
-            launch { refreshRootFolders() }
-            launch { refreshTags() }
-            launch { refreshCustomFilters() }
+    private val metadataMutex = Mutex()
+    private var lastMetadataRefreshTime: Long = 0L
+    private val refreshThresholdMs: Long = 30_000L
+
+    suspend fun refreshAllMetadata(force: Boolean = false) {
+        metadataMutex.withLock {
+            val now = Clock.System.now().toEpochMilliseconds()
+            if (!force && (now - lastMetadataRefreshTime) < refreshThresholdMs) {
+                return
+            }
+            lastMetadataRefreshTime = now
+            coroutineScope {
+                launch { refreshQualityProfiles() }
+                launch { refreshRootFolders() }
+                launch { refreshTags() }
+                launch { refreshCustomFilters() }
+            }
         }
     }
 

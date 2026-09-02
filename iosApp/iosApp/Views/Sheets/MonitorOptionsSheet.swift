@@ -11,16 +11,16 @@ import Shared
 struct MonitorOptionsSheet: View {
     let type: InstanceType
     let onOptionSelected: (Any) -> Void
-    
+
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var monitorAuthor: Bool? = nil
     @State private var monitorNewBooks: AuthorMonitorType? = nil
-    
+
     var body: some View {
         NavigationStack {
             Group {
-                if type == .booksehelf {
+                if type == .bookshelf {
                     bookshelfOptions
                 } else {
                     genericOptions
@@ -34,8 +34,8 @@ struct MonitorOptionsSheet: View {
                         dismiss()
                     }
                 }
-                
-                if type == .booksehelf {
+
+                if type == .bookshelf {
                     ToolbarItem(placement: .confirmationAction) {
                         Button(MR.strings().save.localized()) {
                             let options = AuthorMonitorOptions(
@@ -51,7 +51,7 @@ struct MonitorOptionsSheet: View {
             }
         }
     }
-    
+
     private var genericOptions: some View {
         List {
             let options: [Any] = {
@@ -61,7 +61,7 @@ struct MonitorOptionsSheet: View {
                 default: return []
                 }
             }()
-            
+
             ForEach(options.indices, id: \.self) { index in
                 let option = options[index]
                 let label: String = {
@@ -69,7 +69,7 @@ struct MonitorOptionsSheet: View {
                     if let a = option as? ArtistMonitorType { return a.resource.localized() }
                     return ""
                 }()
-                
+
                 Button(action: {
                     onOptionSelected(option)
                     dismiss()
@@ -79,7 +79,7 @@ struct MonitorOptionsSheet: View {
             }
         }
     }
-    
+
     private var bookshelfOptions: some View {
         Form {
             Section(MR.strings().monitor_author.localized()) {
@@ -90,7 +90,7 @@ struct MonitorOptionsSheet: View {
                 }
                 .pickerStyle(.segmented)
             }
-            
+
             Section(MR.strings().monitor_new_books.localized()) {
                 let bookOptions: [AuthorMonitorType?] = [
                     nil,
@@ -98,7 +98,7 @@ struct MonitorOptionsSheet: View {
                     AuthorMonitorType.none,
                     AuthorMonitorType.theNew
                 ]
-                
+
                 Picker(MR.strings().monitor_new_books.localized(), selection: $monitorNewBooks) {
                     ForEach(bookOptions, id: \.self) { option in
                         if let option = option {

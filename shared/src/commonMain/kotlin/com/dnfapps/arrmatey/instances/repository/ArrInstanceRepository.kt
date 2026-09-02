@@ -98,7 +98,7 @@ open class ArrInstanceRepository(
             InstanceType.Sonarr -> SonarrClient(instance, httpClient)
             InstanceType.Radarr -> RadarrClient(instance, httpClient)
             InstanceType.Lidarr -> LidarrClient(instance, httpClient)
-            InstanceType.Booksehelf -> BookshelfClient(instance, httpClient)
+            InstanceType.Bookshelf -> BookshelfClient(instance, httpClient)
             InstanceType.Listenarr -> ListenarrClient(instance, httpClient)
             else -> TODO()
         }
@@ -140,8 +140,8 @@ open class ArrInstanceRepository(
         metadataRepository.refreshHealth()
     }
 
-    open suspend fun refreshAllMetadata() {
-        metadataRepository.refreshAllMetadata()
+    open suspend fun refreshAllMetadata(force: Boolean = false) {
+        metadataRepository.refreshAllMetadata(force)
     }
 
     open suspend fun refreshInstanceStatuses() {

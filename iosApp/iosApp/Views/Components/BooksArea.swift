@@ -17,11 +17,11 @@ struct BooksArea: View {
     let onToggleMonitor: (Book) -> Void
     let onToggleSeriesMonitor: ([Book]) -> Void
     let onAutomaticSearch: (Int64) -> Void
-    
+
     @EnvironmentObject private var navigation: NavigationManager
-    
+
     @State private var selectedTab: Int = 0
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -31,18 +31,18 @@ struct BooksArea: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     let authorJson = author.toJson()
-                    navigation.go(to: .authorFiles(authorJson: authorJson), of: .booksehelf)
+                    navigation.go(to: .authorFiles(authorJson: authorJson), of: .bookshelf)
                 }) {
                     Text(MR.strings().history.localized())
                         .font(.system(size: 18, weight: .medium))
                 }
             }
-            
+
             if selectedTab == 0 {
                 booksView
             } else {
@@ -50,7 +50,7 @@ struct BooksArea: View {
             }
         }
     }
-    
+
     private var booksView: some View {
         VStack(spacing: 0) {
             ForEach(books, id: \.id) { book in
@@ -66,20 +66,20 @@ struct BooksArea: View {
             }
         }
     }
-    
+
     private func navigateToBook(_ book: Book) {
         let bookJson = book.toJson()
         let authorJson = author.toJson()
-        navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson), of: .booksehelf)
+        navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson), of: .bookshelf)
     }
-    
+
     private var seriesView: some View {
         VStack(spacing: 12) {
             ForEach(series, id: \.id) { bookSeries in
                 let seriesBooks = bookSeries.links.compactMap { link in
                     books.first(where: { $0.id == link.bookId?.int64Value })
                 }
-                
+
                 SeriesSection(
                     author: author,
                     bookSeries: bookSeries,
@@ -103,9 +103,9 @@ struct BookRow: View {
     let searchInProgress: Bool
     let onClick: () -> Void
     var seriesPosition: String? = nil
-    
+
     @EnvironmentObject private var navigation: NavigationManager
-    
+
     var body: some View {
         HStack(spacing: 8) {
             VStack(alignment: .leading) {
@@ -116,14 +116,14 @@ struct BookRow: View {
                     }
                     Text(book.title)
                 }
-                
+
                 HStack {
                     let status = getStatus()
                     Text(status.text)
                         .font(.system(size: 14))
                         .foregroundColor(status.color)
                         .italic(status.color != .primary)
-                    
+
                     if let releaseDate = book.releaseDate {
                         Text(" \u{2022} \(releaseDate.format(pattern: "MMM d, yyyy"))")
                             .font(.system(size: 14))
@@ -133,15 +133,15 @@ struct BookRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .onTapGesture(perform: onClick)
-            
+
             HStack(spacing: 12) {
                 Button(action: {
-                    navigation.go(to: .bookReleases(bookId: book.id), of: .booksehelf)
+                    navigation.go(to: .bookReleases(bookId: book.id), of: .bookshelf)
                 }) {
                     Image(systemName: "person.fill")
                 }
                 .disabled(!book.monitored)
-                
+
                 Button(action: {
                     onAutomaticSearch(book.id)
                 }) {
@@ -152,7 +152,7 @@ struct BookRow: View {
                     }
                 }
                 .disabled(!book.monitored || searchInProgress)
-                
+
                 Button(action: {
                     onToggleMonitor(book)
                 }) {
@@ -163,7 +163,7 @@ struct BookRow: View {
         }
         .padding(.vertical, 4)
     }
-    
+
     private func getStatus() -> (text: String, color: Color) {
         if let quality = bookFile?.fileQualityName {
             return (quality, .themeTertiary)
@@ -182,10 +182,10 @@ struct SeriesSection: View {
     let onToggleSeriesMonitor: ([Book]) -> Void
     let onAutomaticSearch: (Int64) -> Void
     let searchIds: Set<Int64>
-    
+
     @State private var expanded: Bool = true
     @EnvironmentObject private var navigation: NavigationManager
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -196,13 +196,13 @@ struct SeriesSection: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.down")
                     .rotationEffect(.degrees(expanded ? 180 : 0))
                     .onTapGesture { withAnimation { expanded.toggle() } }
-                
+
                 let wholeSeriesMonitored = seriesBooks.allSatisfy { $0.monitored }
                 Image(systemName: wholeSeriesMonitored ? "bookmark.fill" : "bookmark")
                     .onTapGesture { onToggleSeriesMonitor(seriesBooks) }
@@ -211,7 +211,7 @@ struct SeriesSection: View {
             .background(Color.secondary.opacity(0.1))
             .cornerRadius(10)
             .onTapGesture { withAnimation { expanded.toggle() } }
-            
+
             if expanded {
                 VStack(spacing: 0) {
                     ForEach(bookSeries.links.sorted(by: { ($0.position ?? "") < ($1.position ?? "") }), id: \.bookId) { (link: BookSeriesLink) in
@@ -225,7 +225,7 @@ struct SeriesSection: View {
                                 onClick: {
                                     let bookJson = book.toJson()
                                     let authorJson = author.toJson()
-                                    navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson), of: .booksehelf)
+                                    navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson), of: .bookshelf)
                                 },
                                 seriesPosition: link.position
                             )
