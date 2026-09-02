@@ -303,6 +303,7 @@ fun Navigator<SettingsScreen>.onInstanceTap(
     InstanceType.Seerr,
     InstanceType.Bazarr,
     InstanceType.Prowlarr,
+    InstanceType.Tracearr
     -> toEditInstance(id)
 }
 
