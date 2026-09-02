@@ -4,6 +4,8 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.BazarrDashboardState
@@ -17,6 +19,8 @@ import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
+import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
@@ -27,14 +31,20 @@ import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import com.dnfapps.networking.NetworkResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -44,8 +54,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class CombinedDashboardViewModel(
     private val instanceManager: InstanceManager,
     private val downloadClientManager: DownloadClientManager,
@@ -79,6 +90,247 @@ class CombinedDashboardViewModel(
                 initialValue = false,
             )
 
+    private val arrInstancesFlow =
+        instanceManager.instanceRepositories
+            .flatMapLatest { repoMap ->
+                val arrRepos = repoMap.values.filterIsInstance<ArrInstanceRepository>()
+                if (arrRepos.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    val flows =
+                        arrRepos.map { repo ->
+                            combine(
+                                repo.softwareStatus,
+                                repo.diskSpace,
+                                repo.health,
+                                repo.activityTasks.debounce(500.milliseconds),
+                                repo.library,
+                            ) { software, disks, health, activity, library ->
+                                val libraryData = (library as? NetworkResult.Success)?.data ?: emptyList()
+                                val totalItems = libraryData.size
+                                val sizeOnDisk = libraryData.sumOf { it.fileSize ?: 0L }
+
+                                ArrInstanceDashboardState(
+                                    instance = repo.instance,
+                                    softwareStatus = software,
+                                    disks = disks,
+                                    healthItems = health,
+                                    library = libraryData,
+                                    activityTasks = activity,
+                                    activeCount = activity.size,
+                                    totalItems = totalItems,
+                                    sizeOnDisk = sizeOnDisk,
+                                )
+                            }
+                        }
+                    combine(flows) { it.toList() }
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    private val seerrInstancesFlow =
+        instanceManager.instanceRepositories
+            .flatMapLatest { repoMap ->
+                val seerrRepos = repoMap.values.filterIsInstance<SeerrInstanceRepository>()
+                if (seerrRepos.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    val flows =
+                        seerrRepos.map { repo ->
+                            combine(
+                                repo.pendingRequestsCount,
+                                repo.openIssuesCount,
+                            ) { pending, issues ->
+                                SeerrDashboardState(
+                                    instance = repo.instance,
+                                    pendingRequestsCount = pending,
+                                    openIssuesCount = issues,
+                                )
+                            }
+                        }
+                    combine(flows) { it.toList() }
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    private val prowlarrInstancesFlow =
+        instanceManager.instanceRepositories
+            .flatMapLatest { repoMap ->
+                val prowlarrRepos = repoMap.values.filterIsInstance<ProwlarrInstanceRepository>()
+                if (prowlarrRepos.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    val flows =
+                        prowlarrRepos.map { repo ->
+                            combine(
+                                repo.softwareStatus,
+                                repo.indexerStatus,
+                                repo.indexers,
+                            ) { software, status, indexers ->
+                                val failureCount = status.count { it.hasFailure }
+                                ProwlarrDashboardState(
+                                    instance = repo.instance,
+                                    softwareStatus = software,
+                                    totalIndexers = indexers.size,
+                                    healthyIndexers = indexers.size - failureCount,
+                                    failingIndexers = failureCount,
+                                )
+                            }
+                        }
+                    combine(flows) { it.toList() }
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    private val bazarrInstancesFlow =
+        instanceManager.instanceRepositories
+            .flatMapLatest { repoMap ->
+                val bazarrRepos = repoMap.values.filterIsInstance<BazarrInstanceRepository>()
+                if (bazarrRepos.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    val flows =
+                        bazarrRepos.map { repo ->
+                            combine(repo.wantedEpisodesCount, repo.wantedMoviesCount) { episodes, movies ->
+                                BazarrDashboardState(
+                                    instance = repo.instance,
+                                    wantedEpisodesCount = episodes,
+                                    wantedMoviesCount = movies,
+                                )
+                            }
+                        }
+                    combine(flows) { it.toList() }
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    private val downloadsFlow =
+        downloadQueueService.allTransfers
+            .debounce(500.milliseconds)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = DownloadQueueBundle()
+            )
+
+    private val calendarFlow =
+        calendarService.items
+            .map { itemsByDate ->
+                val today =
+                    Clock.System
+                        .now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .date
+                val todayItems = (itemsByDate[today] ?: emptyList()).map { DashboardCalendarItem(it, today) }
+                val upcomingItems =
+                    (1..7).flatMap { offset ->
+                        val date = today.plus(offset, DateTimeUnit.DAY)
+                        (itemsByDate[date] ?: emptyList()).map { DashboardCalendarItem(it, date) }
+                    }
+                todayItems to upcomingItems
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList<DashboardCalendarItem>() to emptyList(),
+            )
+
+    private val recentlyAddedFlow =
+        arrInstancesFlow
+            .map { instances -> instances.flatMap { it.library } }
+            .distinctUntilChangedBy { it.size }
+            .flowOn(Dispatchers.Default)
+            .map { library ->
+                library
+                    .asSequence()
+                    .filter { it.added != null }
+                    .sortedByDescending { it.added }
+                    .take(10)
+                    .toList()
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    private val recentActivityFlow =
+        arrInstancesFlow
+            .map { instances -> instances.flatMap { it.activityTasks } }
+            .distinctUntilChanged()
+            .flowOn(Dispatchers.Default)
+            .map { tasks -> tasks.sortedByDescending { it.added } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    private val downloadClientsFlow =
+        combine(
+            downloadsFlow,
+            downloadClientManager.downloadClientApis,
+        ) { downloads, clientApis ->
+            val downloadClients =
+                downloads.transferInfo
+                    .asSequence()
+                    .map { transfer ->
+                        val clientItems = downloads.queueItems.filter { it.client.id == transfer.client.id }
+                        DownloadClientDashboardState(
+                            client = transfer.client,
+                            transferInfo = transfer,
+                            isOnline = true,
+                            activeDownloadsCount =
+                                clientItems.count {
+                                    (it.downloadSpeed > 0) || (it.uploadSpeed > 0) || (it.progress < 1.0)
+                                },
+                        )
+                    }.toMutableList()
+
+            clientApis.keys.forEach { clientId ->
+                if (downloadClients.none { it.client.id == clientId }) {
+                    downloadClientManager.getDownloadClientById(clientId)?.let { client ->
+                        val clientItems = downloads.queueItems.filter { it.client.id == clientId }
+                        downloadClients.add(
+                            DownloadClientDashboardState(
+                                client = client,
+                                isOnline = false,
+                                activeDownloadsCount =
+                                    clientItems.count {
+                                        (it.downloadSpeed > 0) || (it.uploadSpeed > 0) || (it.progress < 1.0)
+                                    },
+                            ),
+                        )
+                    }
+                }
+            }
+            downloadClients
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    private val activeDownloadsFlow =
+        downloadsFlow
+            .map { downloads ->
+                downloads.queueItems.sortedByDescending { it.progress }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
     init {
         observeDashboard()
         refresh()
@@ -87,120 +339,16 @@ class CombinedDashboardViewModel(
     private fun observeDashboard() {
         viewModelScope.launch {
             combine(
-                instanceManager.instanceRepositories.flatMapLatest { repoMap ->
-                    val arrRepos = repoMap.values.filterIsInstance<ArrInstanceRepository>()
-                    if (arrRepos.isEmpty()) {
-                        flowOf(emptyList())
-                    } else {
-                        val flows =
-                            arrRepos.map { repo ->
-                                combine(
-                                    repo.softwareStatus,
-                                    repo.diskSpace,
-                                    repo.health,
-                                    repo.activityTasks,
-                                    repo.library,
-                                ) { software, disks, health, activity, library ->
-                                    val libraryData = (library as? NetworkResult.Success)?.data ?: emptyList()
-                                    val totalItems = libraryData.size
-                                    val sizeOnDisk = libraryData.sumOf { it.fileSize ?: 0L }
-
-                                    ArrInstanceDashboardState(
-                                        instance = repo.instance,
-                                        softwareStatus = software,
-                                        disks = disks,
-                                        healthItems = health,
-                                        library = libraryData,
-                                        activityTasks = activity,
-                                        activeCount = activity.size,
-                                        totalItems = totalItems,
-                                        sizeOnDisk = sizeOnDisk,
-                                    )
-                                }
-                            }
-                        combine(flows) { it.toList() }
-                    }
-                },
-                instanceManager.instanceRepositories.flatMapLatest { repoMap ->
-                    val seerrRepos = repoMap.values.filterIsInstance<SeerrInstanceRepository>()
-                    if (seerrRepos.isEmpty()) {
-                        flowOf(emptyList())
-                    } else {
-                        val flows =
-                            seerrRepos.map { repo ->
-                                combine(
-                                    repo.pendingRequestsCount,
-                                    repo.openIssuesCount,
-                                ) { pending, issues ->
-                                    SeerrDashboardState(
-                                        instance = repo.instance,
-                                        pendingRequestsCount = pending,
-                                        openIssuesCount = issues,
-                                    )
-                                }
-                            }
-                        combine(flows) { it.toList() }
-                    }
-                },
-                instanceManager.instanceRepositories.flatMapLatest { repoMap ->
-                    val prowlarrRepos = repoMap.values.filterIsInstance<ProwlarrInstanceRepository>()
-                    if (prowlarrRepos.isEmpty()) {
-                        flowOf(emptyList())
-                    } else {
-                        val flows =
-                            prowlarrRepos.map { repo ->
-                                combine(
-                                    repo.softwareStatus,
-                                    repo.indexerStatus,
-                                    repo.indexers,
-                                ) { software, status, indexers ->
-                                    val failureCount = status.count { it.hasFailure }
-                                    ProwlarrDashboardState(
-                                        instance = repo.instance,
-                                        softwareStatus = software,
-                                        totalIndexers = indexers.size,
-                                        healthyIndexers = indexers.size - failureCount,
-                                        failingIndexers = failureCount,
-                                    )
-                                }
-                            }
-                        combine(flows) { it.toList() }
-                    }
-                },
-                instanceManager.instanceRepositories.flatMapLatest { repoMap ->
-                    val bazarrRepos = repoMap.values.filterIsInstance<BazarrInstanceRepository>()
-                    if (bazarrRepos.isEmpty()) {
-                        flowOf(emptyList())
-                    } else {
-                        val flows =
-                            bazarrRepos.map { repo ->
-                                combine(repo.wantedEpisodesCount, repo.wantedMoviesCount) { episodes, movies ->
-                                    BazarrDashboardState(
-                                        instance = repo.instance,
-                                        wantedEpisodesCount = episodes,
-                                        wantedMoviesCount = movies,
-                                    )
-                                }
-                            }
-                        combine(flows) { it.toList() }
-                    }
-                },
-                downloadQueueService.allTransfers,
-                downloadClientManager.downloadClientApis,
-                calendarService.items.map { itemsByDate ->
-                    val today =
-                        Clock.System
-                            .now()
-                            .toLocalDateTime(TimeZone.currentSystemDefault())
-                            .date
-                    val todayItems = (itemsByDate[today] ?: emptyList()).map { DashboardCalendarItem(it, today) }
-                    val upcomingItems =
-                        (1..7).flatMap { offset ->
-                            val date = today.plus(offset, DateTimeUnit.DAY)
-                            (itemsByDate[date] ?: emptyList()).map { DashboardCalendarItem(it, date) }
-                        }
-                    todayItems to upcomingItems
-                },
+                arrInstancesFlow,
+                seerrInstancesFlow,
+                prowlarrInstancesFlow,
+                bazarrInstancesFlow,
+                downloadClientsFlow,
+                recentActivityFlow,
+                recentlyAddedFlow,
+                downloadsFlow.map { it.transferInfo },
+                activeDownloadsFlow,
+                calendarFlow,
                 _isRefreshing,
             ) { args ->
                 @Suppress("UNCHECKED_CAST")
@@ -214,75 +362,36 @@ class CombinedDashboardViewModel(
 
                 @Suppress("UNCHECKED_CAST")
                 val bazarrStats = args[3] as List<BazarrDashboardState>
-                val downloads = args[4] as DownloadQueueBundle
 
                 @Suppress("UNCHECKED_CAST")
-                val clientApis = args[5] as Map<Long, *>
+                val downloadClients = args[4] as List<DownloadClientDashboardState>
 
                 @Suppress("UNCHECKED_CAST")
-                val calendarPair = args[6] as Pair<List<DashboardCalendarItem>, List<DashboardCalendarItem>>
+                val activityQueue = args[5] as List<QueueItem>
+
+                @Suppress("UNCHECKED_CAST")
+                val recentlyAdded = args[6] as List<ArrMedia>
+
+                @Suppress("UNCHECKED_CAST")
+                val downloadTransfers = args[7] as List<DownloadTransferInfo>
+
+                @Suppress("UNCHECKED_CAST")
+                val activeDownloads = args[8] as List<DownloadItem>
+
+                @Suppress("UNCHECKED_CAST")
+                val calendarPair = args[9] as Pair<List<DashboardCalendarItem>, List<DashboardCalendarItem>>
                 val todayCalendar = calendarPair.first
                 val upcomingCalendar = calendarPair.second
-                val refreshing = args[7] as Boolean
 
-                val downloadClients =
-                    downloads.transferInfo
-                        .map { transfer ->
-                            val clientItems = downloads.queueItems.filter { it.client.id == transfer.client.id }
-                            DownloadClientDashboardState(
-                                client = transfer.client,
-                                transferInfo = transfer,
-                                isOnline = true,
-                                activeDownloadsCount =
-                                    clientItems.count {
-                                        it.downloadSpeed > 0 || it.uploadSpeed > 0 || it.progress < 1.0
-                                    },
-                            )
-                        }.toMutableList()
-
-                clientApis.keys.forEach { clientId ->
-                    if (downloadClients.none { it.client.id == clientId }) {
-                        downloadClientManager.getDownloadClientById(clientId)?.let { client ->
-                            val clientItems = downloads.queueItems.filter { it.client.id == clientId }
-                            downloadClients.add(
-                                DownloadClientDashboardState(
-                                    client = client,
-                                    isOnline = false,
-                                    activeDownloadsCount =
-                                        clientItems.count {
-                                            it.downloadSpeed > 0 ||
-                                                it.uploadSpeed > 0 ||
-                                                it.progress < 1.0
-                                        },
-                                ),
-                            )
-                        }
-                    }
-                }
-
-                val recentActivity =
-                    instances
-                        .flatMap { it.activityTasks }
-                        .sortedByDescending { it.added }
-
-                val recentlyAdded =
-                    instances
-                        .flatMap { it.library }
-                        .filter { it.added != null }
-                        .sortedByDescending { it.added }
-                        .take(10)
-
-                val activeDownloads =
-                    downloads.queueItems
-                        .sortedByDescending { it.progress }
+                val refreshing = args[10] as Boolean
 
                 CombinedDashboardState.Success(
                     instances = instances,
                     seerrInstances = seerrInstances,
                     downloadClients = downloadClients,
-                    activityQueue = recentActivity,
+                    activityQueue = activityQueue,
                     recentlyAdded = recentlyAdded,
-                    downloadTransfers = downloads.transferInfo,
+                    downloadTransfers = downloadTransfers,
                     activeDownloads = activeDownloads,
                     calendarItems = todayCalendar,
                     upcomingCalendarItems = upcomingCalendar,
@@ -308,13 +417,13 @@ class CombinedDashboardViewModel(
         val currentSsid =
             try {
                 networkUtils.getCurrentWifiSsid()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         val isWifi =
             try {
                 networkUtils.isConnectedToWifi()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 false
             }
 
@@ -405,7 +514,7 @@ class CombinedDashboardViewModel(
                     if (repo.library.value == null) {
                         repo.refreshLibrary()
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Log error but continue with other instances
                 }
             }
@@ -414,7 +523,7 @@ class CombinedDashboardViewModel(
             seerrRepos.forEach { repo ->
                 try {
                     repo.refreshCounts()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Log error
                 }
             }
@@ -427,7 +536,7 @@ class CombinedDashboardViewModel(
                     repo.refreshStatus()
                     repo.getIndexerStatus()
                     repo.getIndexers()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Log error
                 }
             }
@@ -438,7 +547,7 @@ class CombinedDashboardViewModel(
             bazarrRepos.forEach { repo ->
                 try {
                     repo.refreshBadges()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Log error
                 }
             }
