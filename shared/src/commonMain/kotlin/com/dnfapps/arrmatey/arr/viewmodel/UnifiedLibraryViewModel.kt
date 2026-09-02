@@ -113,7 +113,7 @@ class UnifiedLibraryViewModel(
                 } else {
                     val libraryFlows =
                         instances.map { instance ->
-                            getLibraryUseCase(instance.id).map { libraryState ->
+                            getLibraryUseCase(instance.id, _searchQuery).map { libraryState ->
                                 instance.id to libraryState
                             }
                         }
@@ -215,17 +215,11 @@ class UnifiedLibraryViewModel(
         combine(
             _selectedInstance,
             libraries,
-            _searchQuery,
-        ) { instance, libMap, query ->
+        ) { instance, libMap ->
             if (instance == null) {
                 ArrLibrary.Initial
             } else {
-                val state = libMap[instance.id] ?: ArrLibrary.Initial
-                if (state is ArrLibrary.Success && query.isNotEmpty()) {
-                    state.copy(items = state.items.filter { it.title?.contains(query, ignoreCase = true) == true })
-                } else {
-                    state
-                }
+                libMap[instance.id] ?: ArrLibrary.Initial
             }
         }.stateIn(
             scope = viewModelScope,
