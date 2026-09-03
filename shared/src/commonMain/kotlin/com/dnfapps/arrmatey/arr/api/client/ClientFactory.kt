@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ClientRequestException
@@ -75,7 +76,12 @@ fun createInstanceClient(
 
         instance?.let { instance ->
             if (!instance.noApiKeyRequired) {
-                header(HEADER_X_API_KEY, instance.apiKey.value)
+                when (instance.type) {
+                    InstanceType.Tracearr ->
+                        header(HttpHeaders.Authorization, "Bearer ${instance.apiKey.value}")
+                    else ->
+                        header(HEADER_X_API_KEY, instance.apiKey.value)
+                }
             }
             instance.headers.forEach { header ->
                 val shouldSend =

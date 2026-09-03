@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.tracearr.api.client.TracearrClient
 import com.dnfapps.networking.NetworkResult
 import io.ktor.client.HttpClient
 
@@ -9,8 +10,9 @@ class TracearrRepository(
     httpClient: HttpClient
 ): InstanceScopedRepository {
 
-    override suspend fun testConnection(): NetworkResult<Unit> {
-        TODO("Not yet implemented")
-    }
+    private val tracearrClient = TracearrClient(instance, httpClient)
+
+    override suspend fun testConnection(): NetworkResult<Unit> =
+        tracearrClient.testConnection()
 
 }
