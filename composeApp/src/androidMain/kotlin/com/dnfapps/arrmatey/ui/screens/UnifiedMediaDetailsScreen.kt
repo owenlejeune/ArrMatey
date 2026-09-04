@@ -440,23 +440,9 @@ fun UnifiedMediaDetailsScreen(
                     .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
                     .fillMaxSize(),
         ) {
-            when (val state = uiState) {
-                is UnifiedMediaDetailsUiState.Initial,
-                is UnifiedMediaDetailsUiState.Loading,
-                -> {
-                    LoadingIndicator(
-                        modifier =
-                            Modifier
-                                .size(96.dp)
-                                .align(Alignment.Center),
-                    )
-                }
-
-                is UnifiedMediaDetailsUiState.Error -> {
-                    Text(text = state.message ?: "")
-                }
-
-                is UnifiedMediaDetailsUiState.Success -> {
+            when {
+                successState != null -> {
+                    val state = successState
                     PullToRefreshBox(
                         isRefreshing = false,
                         onRefresh = { viewModel.refresh() },
@@ -707,6 +693,20 @@ fun UnifiedMediaDetailsScreen(
                             }
                         }
                     }
+                }
+                uiState is UnifiedMediaDetailsUiState.Error -> {
+                    Text(
+                        text = (uiState as UnifiedMediaDetailsUiState.Error).message ?: "",
+                        modifier = Modifier.align(Alignment.Center).padding(24.dp),
+                    )
+                }
+                else -> {
+                    LoadingIndicator(
+                        modifier =
+                            Modifier
+                                .size(96.dp)
+                                .align(Alignment.Center),
+                    )
                 }
             }
             lastSuccessState?.let { state ->

@@ -21,6 +21,9 @@ data class SeasonWrapper(
     val episodeFileCount: Int?
         get() = arrSeason?.statistics?.episodeFileCount
 
+    val activeEpisodeCount: Int
+        get() = episodes.count { it.isActive }
+
     val monitored: Boolean?
         get() = arrSeason?.monitored
 

@@ -89,6 +89,30 @@ struct SeasonAreaRow: View {
         }
     }
 
+    private var activeCount: Int {
+        season.episodes.filter { $0.isActive }.count
+    }
+
+    @ViewBuilder
+    private var statsView: some View {
+        if activeCount > 0 {
+            let fileCount = season.episodeFileCount?.intValue ?? 0
+            HStack(spacing: 0) {
+                Text("\(fileCount)")
+                Text("+\(activeCount)")
+                    .fontWeight(.bold)
+                    .foregroundColor(.arrLightPurple)
+                Text("/\(season.totalEpisodeCount)")
+            }
+            .font(.system(size: 15))
+            .foregroundColor(.secondary)
+        } else {
+            Text(statsText)
+                .font(.system(size: 15))
+                .foregroundColor(.secondary)
+        }
+    }
+
     /// True when arr season data is present and series has been added to an arr instance.
     private var showArrControls: Bool {
         season.arrSeason != nil && (seriesId ?? 0) > 0
@@ -103,9 +127,7 @@ struct SeasonAreaRow: View {
                         Text(seasonTitle)
                             .font(.system(size: 20, weight: .medium))
 
-                        Text(statsText)
-                            .font(.system(size: 15))
-                            .foregroundColor(.secondary)
+                        statsView
                     }
 
                     if !season.infoString.isEmpty {

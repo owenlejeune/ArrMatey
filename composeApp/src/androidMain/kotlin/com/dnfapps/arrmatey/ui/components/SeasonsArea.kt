@@ -39,9 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.arr.api.model.Episode as ArrEpisode
@@ -110,13 +115,27 @@ fun SeasonsArea(
                                         },
                                     style = MaterialTheme.typography.titleLarge,
                                 )
-                                val statsText =
-                                    season.episodeFileCount?.let {
-                                        "$it/${season.totalEpisodeCount}"
-                                    } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
+                                val activeCount = season.activeEpisodeCount
+                                val statsAnnotatedString =
+                                    if (activeCount > 0) {
+                                        val fileCount = season.episodeFileCount ?: 0
+                                        buildAnnotatedString {
+                                            append(fileCount.toString())
+                                            withStyle(SpanStyle(color = ArrLightPurple, fontWeight = FontWeight.Bold)) {
+                                                append("+$activeCount")
+                                            }
+                                            append("/${season.totalEpisodeCount}")
+                                        }
+                                    } else {
+                                        val statsText =
+                                            season.episodeFileCount?.let {
+                                                "$it/${season.totalEpisodeCount}"
+                                            } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
+                                        buildAnnotatedString { append(statsText) }
+                                    }
 
                                 AnimatedContent(
-                                    targetState = statsText,
+                                    targetState = statsAnnotatedString,
                                     transitionSpec = {
                                         (fadeIn() + slideInVertically { it }).togetherWith(fadeOut() + slideOutVertically { -it })
                                     },
