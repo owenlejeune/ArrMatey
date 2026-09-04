@@ -57,7 +57,16 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        intent?.action?.let { action ->
+        val shortcutId = intent?.getStringExtra(AppShortcutManager.EXTRA_SHORTCUT_ID)
+        val action = intent?.action
+        if (shortcutId != null) {
+            shortcutManager.pushShortcut(shortcutId)
+        } else if (action != null) {
+            val instanceType = intent.getStringExtra(AppShortcutManager.EXTRA_INSTANCE_TYPE)
+            shortcutManager.pushShortcutForAction(action, instanceType)
+        }
+
+        action?.let {
             when (action) {
                 AppShortcutManager.ACTION_OPEN_DOWNLOADS -> {
                     navigationManager.navigateToTab(TabItem.Standard.DOWNLOADS)
