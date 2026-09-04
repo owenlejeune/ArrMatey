@@ -9,7 +9,7 @@ on:
 
 jobs:
   check-and-build:
-    name: Lint, Test, and Build
+    name: Lint, Test, and Build Android
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
