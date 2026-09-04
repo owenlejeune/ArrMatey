@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -291,7 +292,9 @@ fun CustomWebpageViewerScreen(
                                         }
                                     }
 
+                                @SuppressLint("SetJavaScriptEnabled")
                                 settings.apply {
+                                    // JavaScript is required to render custom web applications (e.g., Arr web UIs)
                                     javaScriptEnabled = true
                                     domStorageEnabled = true
                                     loadWithOverviewMode = true
