@@ -49,7 +49,8 @@ fun RequestsScreen(
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onNavigateToDetails: (Long, RequestType) -> Unit,
-    instancesViewModel: InstancesViewModel = koinViewModel(key = InstanceType.Seerr.name, parameters = { parametersOf(InstanceType.Seerr) }),
+    instancesViewModel: InstancesViewModel =
+        koinViewModel(key = InstanceType.Seerr.name, parameters = { parametersOf(InstanceType.Seerr) }),
 ) {
     val context = LocalContext.current
 

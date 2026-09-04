@@ -92,7 +92,8 @@ import org.koin.core.parameter.parametersOf
 fun BazarrScreen(
     wideRailIsVisible: Boolean,
     viewModel: BazarrViewModel = koinViewModel(),
-    instancesViewModel: InstancesViewModel = koinViewModel(key = InstanceType.Bazarr.name, parameters = { parametersOf(InstanceType.Bazarr) }),
+    instancesViewModel: InstancesViewModel =
+        koinViewModel(key = InstanceType.Bazarr.name, parameters = { parametersOf(InstanceType.Bazarr) }),
     onNavigateToDetails: (Long, BazarrMediaType) -> Unit = { _, _ -> },
 ) {
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()

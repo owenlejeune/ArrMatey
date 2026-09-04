@@ -76,7 +76,8 @@ fun InteractiveSearchScreen(
     releaseParams: ReleaseParams,
     defaultFilter: ReleaseFilterBy = ReleaseFilterBy.Any,
     onBack: () -> Unit = {},
-    viewModel: InteractiveSearchViewModel = koinViewModel(key = "${instanceType.name}_$defaultFilter", parameters = { parametersOf(instanceType, defaultFilter) }),
+    viewModel: InteractiveSearchViewModel =
+        koinViewModel(key = "${instanceType.name}_$defaultFilter", parameters = { parametersOf(instanceType, defaultFilter) }),
     instanceViewModel: InstancesViewModel = koinViewModel(key = instanceType.name, parameters = { parametersOf(instanceType) }),
     navigationManager: NavigationManager = koinInject(),
 ) {

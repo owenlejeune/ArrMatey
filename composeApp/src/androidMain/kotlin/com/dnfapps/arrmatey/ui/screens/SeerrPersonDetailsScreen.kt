@@ -73,7 +73,8 @@ fun SeerrPersonDetailsScreen(
     onMediaClick: (Long, RequestType) -> Unit = { _, _ -> },
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
-    viewModel: SeerrMediaDetailsViewModel = koinViewModel(key = "${personId}_${RequestType.Person}", parameters = { parametersOf(personId, RequestType.Person) }),
+    viewModel: SeerrMediaDetailsViewModel =
+        koinViewModel(key = "${personId}_${RequestType.Person}", parameters = { parametersOf(personId, RequestType.Person) }),
 ) {
     val navManager = navigationManager
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

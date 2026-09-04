@@ -173,7 +173,10 @@ fun UnifiedMediaDetailsScreen(
     onNavigateToAlbumRelease: (Long, Long) -> Unit,
     onPersonClick: (Long) -> Unit,
     instanceId: Long? = null,
-    viewModel: UnifiedMediaDetailsViewModel = koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_${instanceId}", parameters = { parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId) }),
+    viewModel: UnifiedMediaDetailsViewModel =
+        koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_$instanceId", parameters = {
+            parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId)
+        }),
     moko: MokoStrings = koinInject(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

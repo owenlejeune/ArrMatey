@@ -73,7 +73,8 @@ fun EpisodeDetailsScreen(
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToSeriesRelease: (Long) -> Unit = {},
-    viewModel: EpisodeDetailsViewModel = koinViewModel(key = "${series.id}_${episode.id}", parameters = { parametersOf(series.id, episode) }),
+    viewModel: EpisodeDetailsViewModel =
+        koinViewModel(key = "${series.id}_${episode.id}", parameters = { parametersOf(series.id, episode) }),
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()

@@ -35,9 +35,9 @@ import com.dnfapps.arrmatey.bazarr.state.SubtitleSearchState
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import com.dnfapps.arrmatey.utils.mokoString
 
 /**
  * Modal sheet listing manual provider subtitle results for a single episode or movie,

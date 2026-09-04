@@ -7,8 +7,7 @@ import org.koin.core.parameter.parametersOf
 import kotlin.reflect.KClass
 
 @Composable
-inline fun <reified T : Any> koinInjectParams(vararg params: Any?): T =
-    koinInjectWithParams(T::class, *params)
+inline fun <reified T : Any> koinInjectParams(vararg params: Any?): T = koinInjectWithParams(T::class, *params)
 
 @Composable
 fun <T : Any> koinInjectWithParams(

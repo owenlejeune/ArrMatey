@@ -53,7 +53,8 @@ import org.koin.core.parameter.parametersOf
 fun AudiobookFilesScreen(
     audiobook: Audiobook,
     onBack: () -> Unit = {},
-    viewModel: AudiobookFilesViewModel = koinViewModel(key = (audiobook.id ?: 0L).toString(), parameters = { parametersOf(audiobook.id ?: 0L) }),
+    viewModel: AudiobookFilesViewModel =
+        koinViewModel(key = (audiobook.id ?: 0L).toString(), parameters = { parametersOf(audiobook.id ?: 0L) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()

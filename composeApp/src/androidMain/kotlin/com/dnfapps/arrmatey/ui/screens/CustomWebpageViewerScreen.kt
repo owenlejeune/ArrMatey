@@ -66,7 +66,8 @@ import org.koin.core.parameter.parametersOf
 fun CustomWebpageViewerScreen(
     webpageId: Long,
     wideRailIsVisible: Boolean,
-    customWebpageViewModel: CustomWebpageViewerViewModel = koinViewModel(key = webpageId.toString(), parameters = { parametersOf(webpageId) }),
+    customWebpageViewModel: CustomWebpageViewerViewModel =
+        koinViewModel(key = webpageId.toString(), parameters = { parametersOf(webpageId) }),
 ) {
     val webpage by customWebpageViewModel.webpage.collectAsStateWithLifecycle()
     var webView by remember { mutableStateOf<WebView?>(null) }
