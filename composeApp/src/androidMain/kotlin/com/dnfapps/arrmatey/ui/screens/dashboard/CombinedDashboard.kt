@@ -58,16 +58,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
+import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.DashboardCards
-import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.PaddingValues
+import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toDetails
+import com.dnfapps.arrmatey.navigation.toPersonDetails
+import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
+import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.screens.requests.IssueDetailsSheet
+import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
+import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
+import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
@@ -96,12 +113,26 @@ fun CombinedDashboard(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val cards by viewModel.cards.collectAsStateWithLifecycle()
     val isEditing by viewModel.isEditing.collectAsStateWithLifecycle()
+    val removeItemStatus by viewModel.removeItemState.collectAsStateWithLifecycle()
     val availableCards = remember(cards) { DashboardCards.entries.filter { it !in cards } }
 
     val gridState = rememberLazyStaggeredGridState()
 
     var showAddCardSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+
+    var selectedRequestForSheet by remember { mutableStateOf<MediaRequestPackage?>(null) }
+    var selectedIssueForSheet by remember { mutableStateOf<MediaIssuePackage?>(null) }
+    var selectedActivityItem by remember { mutableStateOf<QueueItem?>(null) }
+    var showConfirmRemoveActivity by remember { mutableStateOf(false) }
+
+    LaunchedEffect(removeItemStatus) {
+        if (removeItemStatus is OperationStatus.Success) {
+            selectedActivityItem = null
+            showConfirmRemoveActivity = false
+            viewModel.resetRemoveItemState()
+        }
+    }
 
     LaunchedEffect(showFirstLaunchToast) {
         if (showFirstLaunchToast) {
@@ -235,9 +266,6 @@ fun CombinedDashboard(
                                                 DashboardCards.PendingIssues -> {
                                                     { navManager.openRequestsTab() }
                                                 }
-                                                DashboardCards.UniversalSearch -> {
-                                                    { navManager.openDiscoverTab() }
-                                                }
                                                 DashboardCards.ProwlarrOverview -> {
                                                     { navManager.openProwlarrTab() }
                                                 }
@@ -290,6 +318,9 @@ fun CombinedDashboard(
                                                 currentState = currentState,
                                                 isEditing = isEditing,
                                                 onNavigateToArrDashboard = onNavigateToArrDashboard,
+                                                onRequestClick = { selectedRequestForSheet = it },
+                                                onIssueClick = { selectedIssueForSheet = it },
+                                                onRequestActivityItem = { selectedActivityItem = it },
                                             )
                                         }
                                         if (isEditing) {
@@ -340,7 +371,7 @@ fun CombinedDashboard(
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Fixed(count = if (isCompact) 1 else 2),
                     verticalItemSpacing = 16.dp,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(all = 16.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -376,6 +407,55 @@ fun CombinedDashboard(
             }
         }
     }
+
+    selectedRequestForSheet?.let { pkg ->
+        pkg.details?.let { details ->
+            SeerrViewRequestSheet(
+                details = details,
+                serviceDetails = pkg.serviceDetails,
+                requestInProgress = false,
+                requestOverride = pkg.request,
+                onDismissRequest = { selectedRequestForSheet = null },
+                onApproveRequest = { id, profileId, rootFolder, lang, seasons ->
+                    viewModel.approveRequest(id, profileId, rootFolder, lang, seasons)
+                    selectedRequestForSheet = null
+                },
+                onDeclineRequest = { id ->
+                    viewModel.declineRequest(id)
+                    selectedRequestForSheet = null
+                },
+            )
+        }
+    }
+
+    selectedIssueForSheet?.let { issuePackage ->
+        IssueDetailsSheet(
+            ip = issuePackage,
+            onDismiss = { selectedIssueForSheet = null },
+            onIssueClosed = {
+                selectedIssueForSheet = null
+                viewModel.refresh()
+            },
+        )
+    }
+
+    selectedActivityItem?.let { item ->
+        QueueItemInfoSheet(
+            item = item,
+            onDismiss = { selectedActivityItem = null },
+            onRemove = { showConfirmRemoveActivity = true },
+        )
+    }
+
+    if (showConfirmRemoveActivity && selectedActivityItem != null) {
+        ConfirmDeleteItemSheet(
+            onDismiss = { showConfirmRemoveActivity = false },
+            deleteInProgress = removeItemStatus is OperationStatus.InProgress,
+            onDelete = { clientRemove, blocklist, skipRedownload ->
+                viewModel.removeQueueItem(selectedActivityItem!!, clientRemove, blocklist, skipRedownload)
+            },
+        )
+    }
 }
 
 @Composable
@@ -386,6 +466,9 @@ private fun DashboardCardContent(
     enabled: Boolean = true,
     navManager: NavigationManager = navigationManager,
     onNavigateToArrDashboard: (Long) -> Unit = {},
+    onRequestClick: (MediaRequestPackage) -> Unit = {},
+    onIssueClick: (MediaIssuePackage) -> Unit = {},
+    onRequestActivityItem: (QueueItem) -> Unit = {},
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
@@ -414,7 +497,7 @@ private fun DashboardCardContent(
                 enabled = !isEditing && enabled,
                 state = currentState,
                 onOpenItem = { id, type ->
-                    navManager.arr(type).toDetails(id)
+                    navManager.dashboard.toDetails(id = id, type = type)
                 },
             )
 
@@ -428,18 +511,30 @@ private fun DashboardCardContent(
             DashboardActivityQueueSection(
                 state = currentState,
                 isEditing = isEditing,
+                enabled = enabled,
+                onItemClick = { item ->
+                    if (!isEditing && enabled) onRequestActivityItem(item)
+                },
             )
 
         DashboardCards.OnToday ->
             DashboardTodaySection(
                 state = currentState,
                 isEditing = isEditing,
+                enabled = enabled,
+                onItemClick = { calendarItem ->
+                    if (!isEditing && enabled) navigateCalendarItem(navManager, calendarItem)
+                },
             )
 
         DashboardCards.UpcomingReleases ->
             DashboardUpcomingSection(
                 state = currentState,
                 isEditing = isEditing,
+                enabled = enabled,
+                onItemClick = { calendarItem ->
+                    if (!isEditing && enabled) navigateCalendarItem(navManager, calendarItem)
+                },
             )
 
         DashboardCards.BazarrOverview ->
@@ -453,10 +548,7 @@ private fun DashboardCardContent(
                 state = currentState,
                 enabled = !isEditing && enabled,
                 onRequestClick = { mediaPackage ->
-                    navManager.openSeerrDetails(
-                        tmdbId = mediaPackage.request.media.tmdbId,
-                        requestType = mediaPackage.request.type,
-                    )
+                    if (!isEditing && enabled) onRequestClick(mediaPackage)
                 },
             )
 
@@ -465,29 +557,7 @@ private fun DashboardCardContent(
                 state = currentState,
                 enabled = !isEditing && enabled,
                 onIssueClick = { mediaPackage ->
-                    mediaPackage.issue.media?.let { media ->
-                        navManager.openSeerrDetails(
-                            tmdbId = media.tmdbId,
-                            requestType = media.mediaType,
-                        )
-                    }
-                },
-            )
-
-        DashboardCards.UniversalSearch ->
-            DashboardSearchSection(
-                onItemClick = { result ->
-                    when (result) {
-                        is SearchResult.ArrMediaResult -> {
-                            navManager.arr(result.instanceType).toDetails(result.media.id)
-                        }
-                        is SearchResult.SeerrMediaResult -> {
-                            navManager.openSeerrDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
-                        }
-                        is SearchResult.SeerrPersonResult -> {
-                            navManager.navigateToPersonDetails(result.result.id)
-                        }
-                    }
+                    if (!isEditing && enabled) onIssueClick(mediaPackage)
                 },
             )
 
@@ -499,5 +569,16 @@ private fun DashboardCardContent(
                     onNavigateToArrDashboard(id)
                 },
             )
+    }
+}
+
+private fun navigateCalendarItem(navManager: NavigationManager, item: CalendarItem) {
+    when (item) {
+        is Episode -> navManager.dashboard.toDetails(id = item.seriesId, type = InstanceType.Sonarr)
+        is EpisodeGroup -> navManager.dashboard.toDetails(id = item.first.seriesId, type = InstanceType.Sonarr)
+        is ArrMovie -> navManager.dashboard.toDetails(id = item.id, type = InstanceType.Radarr)
+        is ArrAlbum -> navManager.dashboard.toDetails(id = item.artistId, type = InstanceType.Lidarr)
+        is Book -> navManager.dashboard.toDetails(id = item.authorId, type = InstanceType.Bookshelf)
+        is Audiobook -> navManager.dashboard.toDetails(id = item.id, type = InstanceType.Listenarr)
     }
 }

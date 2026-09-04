@@ -43,6 +43,7 @@ import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.screens.requests.StatusChip
+import com.dnfapps.arrmatey.ui.screens.requests.UserInfoRow
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
@@ -184,28 +185,11 @@ private fun CompactRequestCard(
                         StatusChip(request)
                     }
                 }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    AsyncImage(
-                        model = request.requestedBy.avatar,
-                        contentDescription = null,
-                        modifier =
-                            Modifier
-                                .size(20.dp)
-                                .clip(CircleShape),
-                        contentScale = ContentScale.Crop,
-                    )
-                    Text(
-                        text = request.requestedBy.displayName,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                UserInfoRow(
+                    label = mokoString(MR.strings.requested_by),
+                    displayName = request.requestedBy.displayName,
+                    avatar = request.requestedBy.avatar,
+                )
             }
         }
     }

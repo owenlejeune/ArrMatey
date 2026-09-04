@@ -98,7 +98,7 @@ class AudiobooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
 
-class DashboardTabNavigator : BaseNavigator<DashboardScreen>(DashboardScreen.Main)
+class DashboardTabNavigator : BaseNavigator<NavKey>(DashboardScreen.Main)
 
 class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
 
@@ -310,12 +310,12 @@ fun Navigator<SettingsScreen>.onInstanceTap(
 /**
  * Domain-specific navigation extensions for Dashboard feature set.
  */
-fun Navigator<DashboardScreen>.toMain() = navigateTo(DashboardScreen.Main)
+fun Navigator<*>.toMain() = nav().navigateTo(DashboardScreen.Main)
 
 @JvmName("toDashboardArrDashboard")
-fun Navigator<DashboardScreen>.toArrDashboard(id: Long) = navigateTo(DashboardScreen.ArrDashboard(id))
+fun Navigator<*>.toArrDashboard(id: Long) = nav().navigateTo(DashboardScreen.ArrDashboard(id))
 
-fun Navigator<DashboardScreen>.openArrDashboard(id: Long) = toArrDashboard(id)
+fun Navigator<*>.openArrDashboard(id: Long) = nav().navigateTo(DashboardScreen.ArrDashboard(id))
 
 /**
  * Domain-specific navigation extensions for Bazarr feature set.

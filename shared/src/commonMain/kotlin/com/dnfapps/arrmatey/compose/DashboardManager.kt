@@ -64,7 +64,6 @@ class DashboardManager(
 enum class DashboardCards(
     val title: StringResource,
 ) {
-    UniversalSearch(MR.strings.search),
     ArrOverview(MR.strings.dashboard_arr_overview),
     SeerrOverview(MR.strings.dashboard_seerr_overview),
     PendingRequests(MR.strings.requests),
@@ -84,7 +83,6 @@ enum class DashboardCards(
         val defaultEntries: List<DashboardCards>
             get() =
                 listOf(
-                    UniversalSearch,
                     ArrOverview,
                     SeerrOverview,
                     PendingRequests,

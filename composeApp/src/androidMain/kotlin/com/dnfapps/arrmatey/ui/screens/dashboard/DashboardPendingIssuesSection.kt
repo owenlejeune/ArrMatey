@@ -45,6 +45,7 @@ import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.screens.requests.IssueStatusChip
+import com.dnfapps.arrmatey.ui.screens.requests.UserInfoRow
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
@@ -217,27 +218,11 @@ private fun CompactIssueCard(
                 }
 
                 issue.createdBy?.let { createdBy ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        AsyncImage(
-                            model = createdBy.avatar,
-                            contentDescription = null,
-                            modifier =
-                                Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape),
-                            contentScale = ContentScale.Crop,
-                        )
-                        Text(
-                            text = createdBy.displayName,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+                    UserInfoRow(
+                        label = mokoString(MR.strings.opened_by),
+                        displayName = createdBy.displayName,
+                        avatar = createdBy.avatar,
+                    )
                 }
             }
         }

@@ -276,6 +276,70 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         }
     }
 
+    func goToDetailsOnDashboard(
+        arrId: Int64? = nil,
+        tmdbId: Int64? = nil,
+        tvdbId: Int64? = nil,
+        instanceType: InstanceType? = nil,
+        requestType: RequestType? = nil,
+        instanceId: Int64? = nil
+    ) {
+        let route = MediaRoute.details(
+            arrId: arrId,
+            tmdbId: tmdbId,
+            tvdbId: tvdbId,
+            instanceType: instanceType,
+            requestType: requestType,
+            instanceId: instanceId
+        )
+        if showLauncher {
+            launcherPath.append(route)
+        } else {
+            dashboardPath.append(route)
+        }
+    }
+
+    func goToSeerrDetailsOnDashboard(tmdbId: Int64, requestType: RequestType) {
+        if requestType == .person {
+            goToPersonDetailsOnDashboard(id: tmdbId)
+        } else {
+            let route = SeerrRoute.details(tmdbId: tmdbId, requestType: requestType)
+            if showLauncher {
+                launcherPath.append(route)
+            } else {
+                dashboardPath.append(route)
+            }
+        }
+    }
+
+    func goToPersonDetailsOnDashboard(id: Int64) {
+        let route = MediaRoute.details(tmdbId: id, requestType: .person)
+        if showLauncher {
+            launcherPath.append(route)
+        } else {
+            dashboardPath.append(route)
+        }
+    }
+
+    func goToArrDetailsOrPreviewOnDashboard(item: ArrMedia, type: InstanceType? = nil, instanceId: Int64? = nil) {
+        if item.id == nil {
+            if item is ArrMovie || item is ArrSeries {
+                let tmdbId = (item as? ArrMovie)?.tmdbId ?? (item as? ArrSeries)?.tmdbId?.int64Value
+                let tvdbId = (item as? ArrSeries)?.tvdbId
+                goToDetailsOnDashboard(arrId: nil, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, instanceId: instanceId)
+            } else if let type = type {
+                let route = MediaRoute.preview(item.toJson(), type: type)
+                if showLauncher {
+                    launcherPath.append(route)
+                } else {
+                    dashboardPath.append(route)
+                }
+            }
+        } else {
+            goToDetailsOnDashboard(arrId: item.id?.int64Value, instanceType: type, instanceId: instanceId)
+        }
+    }
+
     func navigateToTab(_ tab: TabItem) {
         let visibleTabs = tabManager.tabConfiguration.value.visibleTabs
         let visibleKeys = visibleTabs.map { $0.key }

@@ -26,7 +26,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
+import com.dnfapps.arrmatey.arr.api.model.QueueDownloadState
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -34,6 +38,8 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun DashboardActivityQueueSection(
     state: CombinedDashboardState.Success,
     isEditing: Boolean,
+    enabled: Boolean = true,
+    onItemClick: (QueueItem) -> Unit = {},
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -78,6 +84,7 @@ fun DashboardActivityQueueSection(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.clickable(enabled = !isEditing && enabled) { onItemClick(item) },
                 ) {
                     Box(
                         Modifier
@@ -104,27 +111,32 @@ fun DashboardActivityQueueSection(
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f, fill = false),
                             )
-                            item.taskGroupCount?.let { count ->
-                                if (count > 1) {
-                                    Text(
-                                        text = mokoString(MR.strings.additional_items_count, count),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
+                        }
+
+                        val statusRow =
+                            buildString {
+                                append(item.statusLabel)
+                                if (item.trackedDownloadState == QueueDownloadState.Downloading) {
+                                    bullet()
+                                    append(item.progressLabel)
+                                    item.remainingTimeLabel?.let { remainingTimeLabel ->
+                                        bullet()
+                                        append(remainingTimeLabel)
+                                        append(" left")
+                                    }
                                 }
                             }
-                        }
+
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             item.instanceName?.let {
                                 Text(
-                                    it,
+                                    "$it • ",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
                                 )
                             }
                             Text(
-                                item.statusLabel,
+                                statusRow,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (item.hasIssue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                             )

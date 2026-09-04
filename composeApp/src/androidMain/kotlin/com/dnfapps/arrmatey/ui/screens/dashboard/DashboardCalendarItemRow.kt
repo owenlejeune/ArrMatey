@@ -27,15 +27,20 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 
+import androidx.compose.foundation.clickable
+
 @Composable
 fun DashboardCalendarItemRow(
     dashboardItem: DashboardCalendarItem,
+    modifier: Modifier = Modifier,
     showDate: Boolean = false,
+    onClick: () -> Unit = {},
 ) {
     val item = dashboardItem.item
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier.clickable(onClick = onClick),
     ) {
         val title =
             when (item) {

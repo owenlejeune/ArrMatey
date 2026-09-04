@@ -47,6 +47,9 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
+import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -66,8 +69,11 @@ class CombinedDashboardViewModel(
     private val calendarService: CalendarService,
     private val dashboardManager: DashboardManager,
     private val preferencesStore: PreferencesStore,
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
     private val logger: Logger,
 ) : ViewModel() {
+    private val _removeItemState = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val removeItemState: StateFlow<OperationStatus> = _removeItemState.asStateFlow()
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
@@ -584,6 +590,63 @@ class CombinedDashboardViewModel(
 
     fun addCard(card: DashboardCards) {
         dashboardManager.addCard(card)
+    }
+
+    fun approveRequest(
+        requestId: Long,
+        profileId: Long? = null,
+        rootFolder: String? = null,
+        languageProfileId: Long? = null,
+        seasons: List<Int>? = null,
+    ) {
+        viewModelScope.launch {
+            val seerrRepos = instanceManager.getAllSeerrRepositories()
+            seerrRepos.forEach { repo ->
+                repo.setRequestStatus(
+                    requestId = requestId,
+                    status = ApprovalStatus.Approve,
+                    profileId = profileId,
+                    rootFolder = rootFolder,
+                    languageProfileId = languageProfileId,
+                    seasons = seasons,
+                )
+            }
+            refresh()
+        }
+    }
+
+    fun declineRequest(requestId: Long) {
+        viewModelScope.launch {
+            val seerrRepos = instanceManager.getAllSeerrRepositories()
+            seerrRepos.forEach { repo ->
+                repo.setRequestStatus(
+                    requestId = requestId,
+                    status = ApprovalStatus.Decline,
+                )
+            }
+            refresh()
+        }
+    }
+
+    fun removeQueueItem(
+        item: QueueItem,
+        removeFromClient: Boolean,
+        addToBlocklist: Boolean,
+        skipRedownload: Boolean,
+    ) {
+        viewModelScope.launch {
+            deleteQueueItemUseCase(item, removeFromClient, addToBlocklist, skipRedownload)
+                .collect { status ->
+                    _removeItemState.value = status
+                    if (status is OperationStatus.Success) {
+                        refresh()
+                    }
+                }
+        }
+    }
+
+    fun resetRemoveItemState() {
+        _removeItemState.value = OperationStatus.Idle
     }
 
     fun setFirstLaunchComplete() {

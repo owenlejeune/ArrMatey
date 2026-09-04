@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
@@ -29,6 +30,8 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun DashboardTodaySection(
     state: CombinedDashboardState.Success,
     isEditing: Boolean,
+    enabled: Boolean = true,
+    onItemClick: (CalendarItem) -> Unit = {},
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -69,7 +72,10 @@ fun DashboardTodaySection(
             }
 
             state.calendarItems.forEach { item ->
-                DashboardCalendarItemRow(item)
+                DashboardCalendarItemRow(
+                    dashboardItem = item,
+                    onClick = { if (!isEditing && enabled) onItemClick(item.item) },
+                )
             }
         }
     }

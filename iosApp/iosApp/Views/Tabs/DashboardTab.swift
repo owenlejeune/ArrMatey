@@ -26,9 +26,14 @@ struct DashboardTab: View {
 
 struct DashboardTabContent: View {
     @StateObject private var viewModel = DashboardViewModelS()
+    @StateObject private var activityViewModel = ActivityQueueViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var showAddCardSheet = false
     @State private var draggedCard: DashboardCards?
+
+    @State private var selectedRequestForSheet: MediaRequestPackage? = nil
+    @State private var selectedIssueForSheet: MediaIssuePackage? = nil
+    @State private var selectedActivityItem: IdentifiableQueueItem? = nil
 
     private let columns = [
         GridItem(.adaptive(minimum: 300, maximum: .infinity), spacing: 16)
@@ -96,6 +101,50 @@ struct DashboardTabContent: View {
         .sheet(isPresented: $showAddCardSheet) {
             AddDashboardCardSheet(viewModel: viewModel)
         }
+        .sheet(item: Binding(
+            get: { selectedRequestForSheet.map { IdentifiableRequestPackage(package: $0) } },
+            set: { selectedRequestForSheet = $0?.package }
+        )) { wrapper in
+            if let details = wrapper.package.details {
+                SeerrViewRequestSheet(
+                    details: details,
+                    request: wrapper.package.request,
+                    serviceDetails: wrapper.package.serviceDetails,
+                    onDismissRequest: { selectedRequestForSheet = nil },
+                    onApproveRequest: { requestId, profileId, rootFolder, languageProfileId, seasons in
+                        viewModel.approveRequest(requestId: requestId, profileId: profileId, rootFolder: rootFolder, languageProfileId: languageProfileId, seasons: seasons)
+                        selectedRequestForSheet = nil
+                    },
+                    onDeclineRequest: { requestId in
+                        viewModel.declineRequest(requestId: requestId)
+                        selectedRequestForSheet = nil
+                    }
+                )
+            }
+        }
+        .sheet(item: Binding(
+            get: { selectedIssueForSheet.map { IdentifiableIssue(package: $0) } },
+            set: { selectedIssueForSheet = $0?.package }
+        )) { wrapper in
+            SeerrIssueDetailsSheet(
+                issuePackage: wrapper.package,
+                onDismiss: { selectedIssueForSheet = nil },
+                onIssueClosed: {
+                    selectedIssueForSheet = nil
+                    viewModel.refresh()
+                }
+            )
+        }
+        .sheet(item: $selectedActivityItem) { wrapper in
+            QueueItemInfoSheet(
+                item: wrapper.item,
+                deleteInProgress: activityViewModel.removeInProgress,
+                onDelete: { remove, block, skip in
+                    activityViewModel.removeQueueItem(wrapper.item, remove, block, skip)
+                }
+            )
+            .presentationDetents([.fraction(0.7)])
+        }
     }
 
     @ViewBuilder
@@ -103,7 +152,14 @@ struct DashboardTabContent: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(viewModel.cards, id: \.self) { card in
-                    DashboardCardWrapper(card: card, state: state, isEditing: viewModel.isEditing) {
+                    DashboardCardWrapper(
+                        card: card,
+                        state: state,
+                        isEditing: viewModel.isEditing,
+                        onRequestClick: { selectedRequestForSheet = $0 },
+                        onIssueClick: { selectedIssueForSheet = $0 },
+                        onActivityClick: { selectedActivityItem = IdentifiableQueueItem(item: $0) }
+                    ) {
                         viewModel.removeCard(card: card)
                     }
                     .onTapGesture {
@@ -145,13 +201,15 @@ struct DashboardTabContent: View {
         .navigationDestination(for: MediaRoute.self) { route in
             MediaRouteDestination(route: route)
         }
+        .navigationDestination(for: SeerrRoute.self) { route in
+            SeerrRouteDestination(route: route)
+        }
     }
 
     private func handleCardClick(_ card: DashboardCards) {
         switch card {
         case .arrOverview: navigationManager.openSettings()
         case .seerrOverview, .pendingRequests, .pendingIssues: navigationManager.openRequestsTab()
-        case .universalSearch: navigationManager.openDiscoverTab()
         case .prowlarrOverview: navigationManager.openProwlarrTab()
         case .bazarrOverview: navigationManager.openBazarrTab()
         case .downloadClients: navigationManager.openDownloadsTab()
@@ -206,14 +264,24 @@ struct DashboardCardWrapper: View {
     let card: DashboardCards
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
+    var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
+    var onActivityClick: ((QueueItem) -> Void)? = nil
     let onRemove: () -> Void
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            DashboardCardView(card: card, state: state, isEditing: isEditing)
-                .padding(12)
-                .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
-                .cornerRadius(12)
+            DashboardCardView(
+                card: card,
+                state: state,
+                isEditing: isEditing,
+                onRequestClick: onRequestClick,
+                onIssueClick: onIssueClick,
+                onActivityClick: onActivityClick
+            )
+            .padding(12)
+            .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
+            .cornerRadius(12)
 
             if isEditing {
                 Button(action: onRemove) {
@@ -233,20 +301,22 @@ struct DashboardCardView: View {
     let card: DashboardCards
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
+    var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
+    var onActivityClick: ((QueueItem) -> Void)? = nil
 
     var body: some View {
         Group {
             switch card {
-            case .universalSearch: DashboardSearchSection()
             case .arrOverview: DashboardOverviewSection(state: state, isEditing: isEditing)
             case .seerrOverview: DashboardSeerrSection(state: state, isEditing: isEditing)
-            case .pendingRequests: DashboardPendingRequestsSection(state: state, isEditing: isEditing)
-            case .pendingIssues: DashboardPendingIssuesSection(state: state, isEditing: isEditing)
+            case .pendingRequests: DashboardPendingRequestsSection(state: state, isEditing: isEditing, onRequestClick: onRequestClick)
+            case .pendingIssues: DashboardPendingIssuesSection(state: state, isEditing: isEditing, onIssueClick: onIssueClick)
             case .prowlarrOverview: DashboardProwlarrSection(state: state, isEditing: isEditing)
             case .network: DashboardNetworkSection(state: state)
             case .recentlyAdded: DashboardRecentlyAddedSection(state: state)
             case .downloadClients: DashboardDownloadClientsSection(state: state, isEditing: isEditing)
-            case .activityQueue: DashboardActivityQueueSection(state: state, isEditing: isEditing)
+            case .activityQueue: DashboardActivityQueueSection(state: state, isEditing: isEditing, onItemClick: onActivityClick)
             case .onToday: DashboardTodaySection(state: state, isEditing: isEditing)
             case .upcomingReleases: DashboardUpcomingSection(state: state, isEditing: isEditing)
             case .bazarrOverview: DashboardBazarrSection(state: state, isEditing: isEditing)
@@ -516,7 +586,7 @@ struct DashboardRecentlyAddedSection: View {
 
                             PosterItem(item: item, instanceType: type, aspectRatio: ratio, elevation: .none, posterHeight: 150, showFooter: true) { clickedItem in
                                 if let type = type, let id = clickedItem.id {
-                                    navigationManager.go(to: .details(id: id.int64Value, type: type), of: type)
+                                    navigationManager.goToDetailsOnDashboard(arrId: id.int64Value, instanceType: type)
                                 }
                             }
                             .frame(width: width)
@@ -628,6 +698,7 @@ struct DashboardDownloadClientsSection: View {
 struct DashboardActivityQueueSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onItemClick: ((QueueItem) -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -645,40 +716,47 @@ struct DashboardActivityQueueSection: View {
                     .padding(.vertical)
             } else {
                 ForEach(state.activityQueue.prefix(5), id: \.id) { item in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 6) {
-                                Text(item.titleLabel)
-                                    .font(.subheadline)
-                                    .bold()
-                                    .lineLimit(1)
-                                if let groupCount = item.taskGroupCount?.intValue, groupCount > 1 {
-                                    Text(MR.strings().additional_items_count.formatted(args: [groupCount]).localized())
-                                        .font(.caption2.bold())
-                                        .foregroundColor(.accentColor)
+                    Button(action: {
+                        if !isEditing {
+                            onItemClick?(item)
+                        }
+                    }) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 6) {
+                                    Text(item.titleLabel)
+                                        .font(.subheadline)
+                                        .bold()
+                                        .lineLimit(1)
+                                    if let groupCount = item.taskGroupCount?.intValue, groupCount > 1 {
+                                        Text(MR.strings().additional_items_count.formatted(args: [groupCount]).localized())
+                                            .font(.caption2.bold())
+                                            .foregroundColor(.accentColor)
+                                    }
                                 }
-                            }
-                            HStack(spacing: 4) {
-                                if let instanceName = item.instanceName {
-                                    Text(instanceName)
+                                HStack(spacing: 4) {
+                                    if let instanceName = item.instanceName {
+                                        Text("\(instanceName) •")
+                                            .font(.caption)
+                                            .foregroundColor(.accentColor)
+                                    }
+                                    Text(activityStatusText(for: item))
                                         .font(.caption)
-                                        .foregroundColor(.accentColor)
+                                        .foregroundColor(item.hasIssue ? .red : .secondary)
                                 }
-                                Text(item.statusLabel)
+                            }
+                            Spacer()
+                            if item.sizeleft > 0 {
+                                Text(item.progressLabel)
                                     .font(.caption)
-                                    .foregroundColor(item.hasIssue ? .red : .secondary)
+                                    .bold()
                             }
                         }
-                        Spacer()
-                        if item.sizeleft > 0 {
-                            Text(item.progressLabel)
-                                .font(.caption)
-                                .bold()
-                        }
+                        .padding(12)
+                        .background(Color(UIColor.tertiarySystemBackground))
+                        .cornerRadius(12)
                     }
-                    .padding(12)
-                    .background(Color(UIColor.tertiarySystemBackground))
-                    .cornerRadius(12)
+                    .buttonStyle(.plain)
                 }
 
                 if state.activityQueue.count > 5 {
@@ -691,6 +769,17 @@ struct DashboardActivityQueueSection: View {
                 }
             }
         }
+    }
+
+    private func activityStatusText(for item: QueueItem) -> String {
+        var text = item.statusLabel
+        if item.trackedDownloadState == .downloading {
+            text += " • \(item.progressLabel)"
+            if let remainingTime = item.remainingTimeLabel {
+                text += " • \(remainingTime) left"
+            }
+        }
+        return text
     }
 }
 
@@ -751,47 +840,53 @@ struct DashboardUpcomingSection: View {
 struct CalendarItemRow: View {
     let dashboardItem: DashboardCalendarItem
     var showDate: Bool = false
+    @EnvironmentObject private var navigationManager: NavigationManager
 
     private var item: CalendarItem { dashboardItem.item }
 
     var body: some View {
-        HStack(spacing: 12) {
-            let color: Color = {
-                if let type = item.associatedType {
-                    // Extract color from Compose Color object
-                    return Color(hex: type.associatedColor)
-                }
-                return .accentColor
-            }()
+        Button(action: {
+            navigateCalendarItemOnDashboard(item: item, navigationManager: navigationManager)
+        }) {
+            HStack(spacing: 12) {
+                let color: Color = {
+                    if let type = item.associatedType {
+                        // Extract color from Compose Color object
+                        return Color(hex: type.associatedColor)
+                    }
+                    return .accentColor
+                }()
 
-            Circle()
-                .fill(color)
-                .frame(width: 4, height: 4)
+                Circle()
+                    .fill(color)
+                    .frame(width: 4, height: 4)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.subheadline)
-                    .bold()
-                    .lineLimit(1)
-
-                if !subTitle.isEmpty {
-                    Text(subTitle)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.subheadline)
+                        .bold()
                         .lineLimit(1)
-                }
 
-                if showDate {
-                    Text(formatDate(dashboardItem.date))
-                        .font(.system(size: 10))
-                        .foregroundColor(.accentColor)
+                    if !subTitle.isEmpty {
+                        Text(subTitle)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+
+                    if showDate {
+                        Text(formatDate(dashboardItem.date))
+                            .font(.system(size: 10))
+                            .foregroundColor(.accentColor)
+                    }
                 }
+                Spacer()
             }
-            Spacer()
+            .padding(12)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .cornerRadius(12)
         }
-        .padding(12)
-        .background(Color(UIColor.tertiarySystemBackground))
-        .cornerRadius(12)
+        .buttonStyle(.plain)
     }
 
     private var title: String {
@@ -1216,54 +1311,22 @@ struct CompactIssueCard: View {
     }
 }
 
-struct DashboardSearchSection: View {
-    @StateObject private var viewModel = DiscoverViewModelS()
-    @EnvironmentObject private var navigationManager: NavigationManager
-    @State private var searchQuery = ""
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                TextField(MR.strings().search.localized(), text: $searchQuery)
-                    .textFieldStyle(.plain)
-                if !searchQuery.isEmpty {
-                    Button(action: { searchQuery = "" }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-            .padding(10)
-            .background(Color(UIColor.tertiarySystemBackground))
-            .cornerRadius(10)
-            .onChange(of: searchQuery) { _, newValue in
-                viewModel.updateSearchQuery(newValue)
-            }
-
-            if !searchQuery.isEmpty {
-                DiscoverSearchOverlay(
-                    items: viewModel.searchResults,
-                    isLoading: viewModel.isSearching,
-                    showBanners: viewModel.searchShowBanners,
-                    showInstanceIndicatorShadow: viewModel.searchShowInstanceIndicatorShadow,
-                    onItemClick: { result in
-                        handleSearchItemClick(result)
-                    }
-                )
-                .frame(maxHeight: 400)
-            }
+private func navigateCalendarItemOnDashboard(item: CalendarItem, navigationManager: NavigationManager) {
+    if let episode = item as? Episode {
+        if let seriesId = episode.series?.id {
+            navigationManager.goToDetailsOnDashboard(arrId: seriesId.int64Value, instanceType: .sonarr)
         }
-    }
-
-    private func handleSearchItemClick(_ result: SearchResult) {
-        if let arrResult = result as? SearchResultArrMediaResult {
-            navigationManager.goToArrDetailsOrPreview(item: arrResult.media, type: arrResult.instanceType, instanceId: arrResult.instanceId?.int64Value)
-        } else if let seerrMedia = result as? SearchResultSeerrMediaResult {
-            navigationManager.goToSeerrDetails(tmdbId: seerrMedia.result.id, requestType: seerrMedia.result.mediaType)
-        } else if let seerrPerson = result as? SearchResultSeerrPersonResult {
-            navigationManager.goToPersonDetails(id: seerrPerson.result.id)
+    } else if let group = item as? EpisodeGroup {
+        if let seriesId = group.first.series?.id {
+            navigationManager.goToDetailsOnDashboard(arrId: seriesId.int64Value, instanceType: .sonarr)
         }
+    } else if let album = item as? ArrAlbum {
+        navigationManager.goToDetailsOnDashboard(arrId: album.artistId, instanceType: .lidarr)
+    } else if let movie = item as? ArrMovie {
+        navigationManager.goToDetailsOnDashboard(arrId: movie.id, instanceType: .radarr)
+    } else if let audiobook = item as? Audiobook {
+        navigationManager.goToDetailsOnDashboard(arrId: audiobook.id, instanceType = .listenarr)
+    } else if let book = item as? Book {
+        navigationManager.goToDetailsOnDashboard(arrId: book.authorId, instanceType = .bookshelf)
     }
 }

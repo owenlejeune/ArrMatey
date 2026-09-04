@@ -426,12 +426,12 @@ private struct ErrorBannerView: View {
 
 // MARK: - Helpers
 
-private struct IdentifiableRequestPackage: Identifiable {
+struct IdentifiableRequestPackage: Identifiable {
     let package: MediaRequestPackage
     var id: Int64 { package.request.id }
 }
 
-private struct IdentifiableIssue: Identifiable {
+struct IdentifiableIssue: Identifiable {
     let package: MediaIssuePackage
     var id: Int64 { package.issue.id }
 }
