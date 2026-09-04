@@ -77,18 +77,19 @@ import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.getNetworkUtils
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import com.dnfapps.arrmatey.utils.thenGet
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditDownloadClientScreen(
     clientId: Long? = null,
-    viewModel: DownloadClientSettingsViewModel = koinInjectParams(clientId),
+    viewModel: DownloadClientSettingsViewModel = koinViewModel(key = clientId?.toString(), parameters = { parametersOf(clientId) }),
     onBack: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()

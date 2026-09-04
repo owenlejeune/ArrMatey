@@ -57,13 +57,14 @@ import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.menu.CalendarFilterMenu
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
-    viewModel: CalendarViewModel = koinInject(),
+    viewModel: CalendarViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.calendar,
 ) {

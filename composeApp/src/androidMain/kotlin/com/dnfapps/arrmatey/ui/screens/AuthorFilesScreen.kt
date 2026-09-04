@@ -37,15 +37,16 @@ import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthorFilesScreen(
     author: Author,
     onBack: () -> Unit = {},
-    viewModel: AuthorFilesViewModel = koinInjectParams(author.id ?: 0L),
+    viewModel: AuthorFilesViewModel = koinViewModel(key = (author.id ?: 0L).toString(), parameters = { parametersOf(author.id ?: 0L) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()

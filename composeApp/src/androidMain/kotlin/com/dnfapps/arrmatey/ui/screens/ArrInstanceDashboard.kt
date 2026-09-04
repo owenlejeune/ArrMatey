@@ -48,17 +48,18 @@ import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.MokoStrings
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ArrInstanceDashboard(
     id: Long,
     windowSizeClass: WindowSizeClass,
-    viewModel: ArrInstanceDashboardViewModel = koinInjectParams(id),
+    viewModel: ArrInstanceDashboardViewModel = koinViewModel(key = id.toString(), parameters = { parametersOf(id) }),
     moko: MokoStrings = koinInject(),
     onBack: () -> Unit = {},
     onNavigateToEditInstance: (Long) -> Unit = {},

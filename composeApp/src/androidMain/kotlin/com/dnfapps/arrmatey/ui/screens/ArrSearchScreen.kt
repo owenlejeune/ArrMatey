@@ -34,11 +34,12 @@ import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.MediaList
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.menu.SearchSortMenu
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(
@@ -53,7 +54,7 @@ fun ArrSearchScreen(
     onBack: () -> Unit,
     onItemClick: (ArrMedia) -> Unit,
     instanceId: Long? = null,
-    viewModel: ArrSearchViewModel = koinInjectParams(type, instanceId),
+    viewModel: ArrSearchViewModel = koinViewModel(key = "${type.name}_$instanceId", parameters = { parametersOf(type, instanceId) }),
 ) {
     val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()
     val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()

@@ -188,6 +188,8 @@ import dev.shivathapaa.logger.sink.DefaultLogSink
 import io.ktor.client.plugins.logging.Logger
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import dev.shivathapaa.logger.api.Logger as FLogger
 
@@ -389,9 +391,9 @@ val useCaseModule =
 
 val viewModelModule =
     module {
-        factory { DiscoverViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-        factory { ActivityQueueViewModel(get(), get(), get(), get()) }
-        factory { (type: InstanceType) ->
+        viewModelOf(::DiscoverViewModel)
+        viewModelOf(::ActivityQueueViewModel)
+        viewModel { (type: InstanceType) ->
             ArrMediaViewModel(
                 instanceType = type,
                 getArrInstanceRepositoryUseCase = get(),
@@ -409,7 +411,7 @@ val viewModelModule =
                 getActivityTasksUseCase = get(),
             )
         }
-        factory { params ->
+        viewModel { params ->
             UnifiedMediaDetailsViewModel(
                 arrId = if (params.size() > 0) params[0] else null,
                 tmdbId = if (params.size() > 1) params[1] else null,
@@ -448,92 +450,75 @@ val viewModelModule =
                 logger = get(),
             )
         }
-        factory { (type: InstanceType) ->
+        viewModel { (type: InstanceType) ->
             InstancesViewModel(type, get(), get(), get())
         }
-        factory { (type: InstanceType, instanceId: Long?) ->
+        viewModel { (type: InstanceType, instanceId: Long?) ->
             ArrSearchViewModel(type, instanceId, get(), get(), get(), get(), get())
         }
-        factory { (preview: ArrMedia, type: InstanceType) ->
+        viewModel { (preview: ArrMedia, type: InstanceType) ->
             MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get(), get(), get())
         }
-        factory { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
+        viewModel { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
             InteractiveSearchViewModel(type, defaultFilter, get(), get(), get(), get())
         }
-        factory { (movieId: Long) ->
+        viewModel { (movieId: Long) ->
             MovieFilesViewModel(movieId, get(), get(), get())
         }
-        factory { (seriesId: Long, episode: Episode) ->
+        viewModel { (seriesId: Long, episode: Episode) ->
             EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get())
         }
-        factory { MoreScreenViewModel(get(), get(), get(), get(), get(), get()) }
-        factory { AddInstanceViewModel(get(), get(), get(), get()) }
-        factory { (instanceId: Long) ->
+        viewModelOf(::MoreScreenViewModel)
+        viewModelOf(::AddInstanceViewModel)
+        viewModel { (instanceId: Long) ->
             EditInstanceViewModel(instanceId, get(), get(), get(), get(), get())
         }
-        factory { (instanceId: Long) ->
+        viewModel { (instanceId: Long) ->
             ArrInstanceDashboardViewModel(instanceId, get(), get())
         }
-        factory { CalendarViewModel(get(), get(), get(), get()) }
-        factory { RequestsViewModel(get(), get(), get(), get(), get(), get(), get()) }
-        factory { (tmdbId: Long, mediaType: RequestType) ->
+        viewModelOf(::CalendarViewModel)
+        viewModelOf(::RequestsViewModel)
+        viewModel { (tmdbId: Long, mediaType: RequestType) ->
             SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
-        factory { BazarrViewModel(get(), get(), get(), get()) }
-        factory { (target: BazarrMediaTarget) ->
+        viewModelOf(::BazarrViewModel)
+        viewModel { (target: BazarrMediaTarget) ->
             BazarrSubtitleSearchViewModel(target, get())
         }
-        factory { (target: BazarrMediaTarget) ->
+        viewModel { (target: BazarrMediaTarget) ->
             BazarrMediaSubtitlesViewModel(target, get(), get())
         }
-        factory { ProwlarrIndexersViewModel(get(), get(), get()) }
-        factory { ProwlarrSearchViewModel(get(), get(), get()) }
-        factory { DownloadQueueViewModel(get(), get(), get(), get(), get(), get(), get()) }
-        factory { (clientId: Long?) ->
+        viewModelOf(::ProwlarrIndexersViewModel)
+        viewModelOf(::ProwlarrSearchViewModel)
+        viewModelOf(::DownloadQueueViewModel)
+        viewModel { (clientId: Long?) ->
             DownloadClientSettingsViewModel(clientId, get(), get(), get(), get(), get(), get())
         }
-        factory { DownloadClientsViewModel(get(), get(), get(), get(), get()) }
-        factory { (webpageId: Long?) ->
+        viewModelOf(::DownloadClientsViewModel)
+        viewModel { (webpageId: Long?) ->
             CustomWebpageConfigurationViewModel(webpageId, get(), get(), get(), get())
         }
-        factory { (webpageId: Long) ->
+        viewModel { (webpageId: Long) ->
             CustomWebpageViewerViewModel(webpageId, get(), get())
         }
-        factory { (issuePackage: MediaIssuePackage) ->
+        viewModel { (issuePackage: MediaIssuePackage) ->
             IssueDetailsViewModel(issuePackage, get(), get(), get())
         }
-        factory { (authorId: Long, book: Book) ->
+        viewModel { (authorId: Long, book: Book) ->
             BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get())
         }
-        factory { (authorId: Long) ->
+        viewModel { (authorId: Long) ->
             AuthorFilesViewModel(authorId, get(), get(), get())
         }
-        factory { (audiobookId: Long) ->
+        viewModel { (audiobookId: Long) ->
             AudiobookFilesViewModel(audiobookId, get(), get(), get())
         }
-        factory { (id: Long, type: BazarrMediaType) ->
+        viewModel { (id: Long, type: BazarrMediaType) ->
             BazarrDetailsViewModel(id, type, get(), get(), get(), get(), get())
         }
-        factory { CombinedDashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
-        factory { BackupViewModel(get(), get(), get(), get()) }
-        factory {
-            UnifiedLibraryViewModel(
-                observeAllInstancesUseCase = get(),
-                instanceManager = get(),
-                getLibraryUseCase = get(),
-                instancePreferenceStoreRepository = get(),
-                updateInstancePreferencesUseCase = get(),
-                updateAllPreferencesUseCase = get(),
-                toggleMonitorUseCase = get(),
-                performAutomaticSearchUseCase = get(),
-                performRefreshUseCase = get(),
-                updateMediaUseCase = get(),
-                deleteMediaUseCase = get(),
-                getBazarrInstanceRepositoryUseCase = get(),
-                executeArrCommandUseCase = get(),
-                getActivityTasksUseCase = get(),
-            )
-        }
+        viewModelOf(::CombinedDashboardViewModel)
+        viewModelOf(::BackupViewModel)
+        viewModelOf(::UnifiedLibraryViewModel)
     }
 
 val resourcesModule =

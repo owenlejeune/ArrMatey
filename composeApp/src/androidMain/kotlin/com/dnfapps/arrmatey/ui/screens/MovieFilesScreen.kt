@@ -42,8 +42,9 @@ import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
@@ -51,7 +52,7 @@ import kotlin.time.ExperimentalTime
 fun MovieFilesScreen(
     movie: ArrMovie,
     onBack: () -> Unit = {},
-    viewModel: MovieFilesViewModel = koinInjectParams(movie.id ?: 0L),
+    viewModel: MovieFilesViewModel = koinViewModel(key = (movie.id ?: 0L).toString(), parameters = { parametersOf(movie.id ?: 0L) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()

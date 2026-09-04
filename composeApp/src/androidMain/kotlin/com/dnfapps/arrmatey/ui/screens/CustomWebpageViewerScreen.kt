@@ -56,16 +56,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CustomWebpageViewerScreen(
     webpageId: Long,
     wideRailIsVisible: Boolean,
-    customWebpageViewModel: CustomWebpageViewerViewModel = koinInjectParams(webpageId),
+    customWebpageViewModel: CustomWebpageViewerViewModel = koinViewModel(key = webpageId.toString(), parameters = { parametersOf(webpageId) }),
 ) {
     val webpage by customWebpageViewModel.webpage.collectAsStateWithLifecycle()
     var webView by remember { mutableStateOf<WebView?>(null) }

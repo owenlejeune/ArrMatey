@@ -53,13 +53,14 @@ import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDispl
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DiscoverTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
-    viewModel: DiscoverViewModel = koinInject(),
+    viewModel: DiscoverViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.discover,
 ) {

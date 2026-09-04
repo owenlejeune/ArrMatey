@@ -119,7 +119,6 @@ import com.dnfapps.arrmatey.ui.sheets.EditAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
 import com.dnfapps.arrmatey.ui.sheets.EditMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
 import com.skydoves.flexible.core.FlexibleSheetSize
@@ -127,6 +126,8 @@ import com.skydoves.flexible.core.FlexibleSheetValue
 import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -137,8 +138,8 @@ fun ArrLibraryScreen(
     wideRailIsVisible: Boolean = false,
     onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
     onNavigateToDetails: (ArrMedia, Long?) -> Unit,
-    arrMediaViewModel: ArrMediaViewModel = koinInjectParams(type),
-    instancesViewModel: InstancesViewModel = koinInjectParams(type),
+    arrMediaViewModel: ArrMediaViewModel = koinViewModel(key = type.name, parameters = { parametersOf(type) }),
+    instancesViewModel: InstancesViewModel = koinViewModel(key = type.name, parameters = { parametersOf(type) }),
     globalPreferencesStore: PreferencesStore = koinInject(),
 ) {
     val context = LocalContext.current

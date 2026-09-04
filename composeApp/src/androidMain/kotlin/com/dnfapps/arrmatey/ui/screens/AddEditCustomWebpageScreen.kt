@@ -40,16 +40,17 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.MokoStrings
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditCustomWebpageScreen(
     webpageId: Long? = null,
-    viewModel: CustomWebpageConfigurationViewModel = koinInjectParams(webpageId),
+    viewModel: CustomWebpageConfigurationViewModel = koinViewModel(key = webpageId?.toString(), parameters = { parametersOf(webpageId) }),
     moko: MokoStrings = koinInject(),
     onBack: () -> Unit = {},
 ) {

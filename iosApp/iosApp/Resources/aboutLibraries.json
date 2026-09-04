@@ -3023,7 +3023,7 @@
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-backhandler",
-            "artifactVersion": "1.10.0",
+            "artifactVersion": "1.10.2",
             "name": "Compose Multiplatform BackHandler",
             "description": "Provides BackHandler in Compose Multiplatform projects",
             "website": "https://github.com/JetBrains/compose-jb",
@@ -3170,7 +3170,7 @@
         },
         {
             "uniqueId": "org.jetbrains.compose.ui:ui-uikit",
-            "artifactVersion": "1.7.0",
+            "artifactVersion": "1.10.2",
             "name": "Compose UIKit Utils",
             "description": "Internal iOS UIKit utilities including Objective-C library.",
             "website": "https://github.com/JetBrains/compose-jb",
@@ -3236,27 +3236,6 @@
             "artifactVersion": "2.3.21",
             "name": "Kotlin Stdlib",
             "description": "Kotlin Standard Library",
-            "website": "https://kotlinlang.org/",
-            "developers": [
-                {
-                    "name": "Kotlin Team",
-                    "organisationUrl": "https://www.jetbrains.com"
-                }
-            ],
-            "scm": {
-                "connection": "scm:git:https://github.com/JetBrains/kotlin.git",
-                "developerConnection": "scm:git:https://github.com/JetBrains/kotlin.git",
-                "url": "https://github.com/JetBrains/kotlin"
-            },
-            "licenses": [
-                "Apache-2.0"
-            ]
-        },
-        {
-            "uniqueId": "org.jetbrains.kotlin:kotlin-stdlib-common",
-            "artifactVersion": "2.3.21",
-            "name": "Kotlin Stdlib Common",
-            "description": "Kotlin Common Standard Library (legacy, use kotlin-stdlib instead)",
             "website": "https://kotlinlang.org/",
             "developers": [
                 {
@@ -3522,7 +3501,7 @@
         },
         {
             "uniqueId": "org.jetbrains.skiko:skiko",
-            "artifactVersion": "0.9.37.3",
+            "artifactVersion": "0.9.37.4",
             "name": "Skiko MPP",
             "description": "Kotlin Skia bindings",
             "website": "https://www.github.com/JetBrains/skiko",

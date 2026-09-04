@@ -140,13 +140,14 @@ import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.handleWatchClick
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -172,7 +173,7 @@ fun UnifiedMediaDetailsScreen(
     onNavigateToAlbumRelease: (Long, Long) -> Unit,
     onPersonClick: (Long) -> Unit,
     instanceId: Long? = null,
-    viewModel: UnifiedMediaDetailsViewModel = koinInjectParams(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId),
+    viewModel: UnifiedMediaDetailsViewModel = koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_${instanceId}", parameters = { parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId) }),
     moko: MokoStrings = koinInject(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

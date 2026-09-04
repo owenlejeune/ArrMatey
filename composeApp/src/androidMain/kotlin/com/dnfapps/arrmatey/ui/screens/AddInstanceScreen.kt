@@ -37,13 +37,13 @@ import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.InstanceInfoCard
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddInstanceScreen(
     initialType: InstanceType = InstanceType.Sonarr,
-    viewModel: AddInstanceViewModel = koinInject(),
+    viewModel: AddInstanceViewModel = koinViewModel(),
     onBack: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()

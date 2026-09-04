@@ -40,12 +40,13 @@ import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupRestoreSettingsScreen(
     onBack: () -> Unit,
-    backupViewModel: BackupViewModel = koinInject(),
+    backupViewModel: BackupViewModel = koinViewModel(),
     moko: MokoStrings = koinInject(),
 ) {
     val context = LocalContext.current

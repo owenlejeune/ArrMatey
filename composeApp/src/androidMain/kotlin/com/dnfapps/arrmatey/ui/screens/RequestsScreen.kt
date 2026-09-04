@@ -38,8 +38,9 @@ import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.screens.requests.IssuesContent
 import com.dnfapps.arrmatey.ui.screens.requests.RequestsContent
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -48,7 +49,7 @@ fun RequestsScreen(
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onNavigateToDetails: (Long, RequestType) -> Unit,
-    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr),
+    instancesViewModel: InstancesViewModel = koinViewModel(key = InstanceType.Seerr.name, parameters = { parametersOf(InstanceType.Seerr) }),
 ) {
     val context = LocalContext.current
 

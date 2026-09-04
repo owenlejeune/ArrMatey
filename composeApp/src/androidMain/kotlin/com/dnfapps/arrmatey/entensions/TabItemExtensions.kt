@@ -14,13 +14,13 @@ import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun BadgeContent(
     tabItem: TabItem,
     activityQueueIssuesCount: Int,
-    requestsViewModel: RequestsViewModel = koinInject(),
+    requestsViewModel: RequestsViewModel = koinViewModel(),
 ) {
     when (tabItem) {
         TabItem.Standard.ACTIVITY -> {

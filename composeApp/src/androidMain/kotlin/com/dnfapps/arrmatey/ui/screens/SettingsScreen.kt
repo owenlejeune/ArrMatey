@@ -75,12 +75,13 @@ import com.mikepenz.aboutlibraries.util.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    viewModel: MoreScreenViewModel = koinInject(),
+    viewModel: MoreScreenViewModel = koinViewModel(),
     moko: MokoStrings = koinInject(),
     onNavigateToServices: () -> Unit = {},
     onNavigateToUserInterface: () -> Unit = {},
