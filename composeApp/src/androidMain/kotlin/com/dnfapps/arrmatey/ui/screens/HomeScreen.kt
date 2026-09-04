@@ -515,7 +515,11 @@ private fun DrawerContent(
                             }
                         },
                         onClick = {
-                            tabManager.restoreTab(item)
+                            if (isEditMode) {
+                                tabManager.restoreTab(item)
+                            } else {
+                                onDrawerTabClick(item)
+                            }
                             showHiddenSection = false
                         },
                     )
@@ -523,7 +527,7 @@ private fun DrawerContent(
             }
         }
 
-        HorizontalDivider()
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
