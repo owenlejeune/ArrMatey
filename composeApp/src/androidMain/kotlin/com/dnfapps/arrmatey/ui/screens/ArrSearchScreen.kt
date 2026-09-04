@@ -29,8 +29,8 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.MediaList
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton

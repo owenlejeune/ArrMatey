@@ -211,7 +211,10 @@ class AppShortcutManager(
         }
     }
 
-    fun pushShortcutForAction(action: String, instanceType: String? = null) {
+    fun pushShortcutForAction(
+        action: String,
+        instanceType: String? = null,
+    ) {
         val id =
             when (action) {
                 ACTION_OPEN_DOWNLOADS -> "downloads"
