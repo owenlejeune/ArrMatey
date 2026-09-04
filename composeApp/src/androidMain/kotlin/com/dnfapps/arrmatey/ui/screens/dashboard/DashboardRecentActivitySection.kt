@@ -92,13 +92,29 @@ fun DashboardActivityQueueSection(
                             ),
                     )
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            item.titleLabel,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(
+                                item.titleLabel,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false),
+                            )
+                            item.taskGroupCount?.let { count ->
+                                if (count > 1) {
+                                    Text(
+                                        text = mokoString(MR.strings.additional_items_count, count),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                        }
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             item.instanceName?.let {
                                 Text(

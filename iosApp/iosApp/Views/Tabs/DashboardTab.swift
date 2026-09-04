@@ -150,7 +150,8 @@ struct DashboardTabContent: View {
     private func handleCardClick(_ card: DashboardCards) {
         switch card {
         case .arrOverview: navigationManager.openSettings()
-        case .seerrOverview: navigationManager.openRequestsTab()
+        case .seerrOverview, .pendingRequests, .pendingIssues: navigationManager.openRequestsTab()
+        case .universalSearch: navigationManager.openDiscoverTab()
         case .prowlarrOverview: navigationManager.openProwlarrTab()
         case .bazarrOverview: navigationManager.openBazarrTab()
         case .downloadClients: navigationManager.openDownloadsTab()
@@ -236,8 +237,11 @@ struct DashboardCardView: View {
     var body: some View {
         Group {
             switch card {
+            case .universalSearch: DashboardSearchSection()
             case .arrOverview: DashboardOverviewSection(state: state, isEditing: isEditing)
             case .seerrOverview: DashboardSeerrSection(state: state, isEditing: isEditing)
+            case .pendingRequests: DashboardPendingRequestsSection(state: state, isEditing: isEditing)
+            case .pendingIssues: DashboardPendingIssuesSection(state: state, isEditing: isEditing)
             case .prowlarrOverview: DashboardProwlarrSection(state: state, isEditing: isEditing)
             case .network: DashboardNetworkSection(state: state)
             case .recentlyAdded: DashboardRecentlyAddedSection(state: state)
@@ -642,14 +646,28 @@ struct DashboardActivityQueueSection: View {
             } else {
                 ForEach(state.activityQueue.prefix(5), id: \.id) { item in
                     HStack {
-                        VStack(alignment: .leading) {
-                            Text(item.titleLabel)
-                                .font(.subheadline)
-                                .bold()
-                                .lineLimit(1)
-                            Text(item.statusLabel)
-                                .font(.caption)
-                                .foregroundColor(item.hasIssue ? .red : .secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 6) {
+                                Text(item.titleLabel)
+                                    .font(.subheadline)
+                                    .bold()
+                                    .lineLimit(1)
+                                if let groupCount = item.taskGroupCount?.intValue, groupCount > 1 {
+                                    Text(MR.strings().additional_items_count.formatted(args: [groupCount]).localized())
+                                        .font(.caption2.bold())
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
+                            HStack(spacing: 4) {
+                                if let instanceName = item.instanceName {
+                                    Text(instanceName)
+                                        .font(.caption)
+                                        .foregroundColor(.accentColor)
+                                }
+                                Text(item.statusLabel)
+                                    .font(.caption)
+                                    .foregroundColor(item.hasIssue ? .red : .secondary)
+                            }
                         }
                         Spacer()
                         if item.sizeleft > 0 {
@@ -797,8 +815,12 @@ struct CalendarItemRow: View {
         if let episode = item as? Episode {
             return "\(episode.seasonEpLabel): \(episode.title ?? "")"
         } else if let group = item as? EpisodeGroup {
-            let episodes = [group.first] + group.additional
-            return episodes.map { "\($0.seasonEpLabel): \($0.title ?? "")" }.joined(separator: ", ")
+            let first = group.first
+            let base = "\(first.seasonEpLabel): \(first.title ?? "")"
+            if !group.additional.isEmpty {
+                return "\(base) (\(MR.strings().additional_items_count.formatted(args: [group.additional.count]).localized()))"
+            }
+            return base
         } else if let album = item as? ArrAlbum {
             return album.title ?? ""
         } else if let movie = item as? ArrMovie {
@@ -960,6 +982,288 @@ struct AddDashboardCardSheet: View {
                     }
                 }
             }
+        }
+    }
+}
+
+struct DashboardPendingRequestsSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    @EnvironmentObject private var navigationManager: NavigationManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "tray")
+                Text(MR.strings().requests.localized())
+                    .font(.headline)
+                    .bold()
+            }
+
+            let pendingRequests = state.pendingRequests
+            if pendingRequests.isEmpty {
+                Text(MR.strings().no_requests_found.localized())
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(pendingRequests, id: \.request.id) { mediaPackage in
+                            CompactRequestCard(mediaPackage: mediaPackage) {
+                                navigationManager.goToSeerrDetails(
+                                    tmdbId: mediaPackage.request.media.tmdbId,
+                                    requestType: mediaPackage.request.type
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct CompactRequestCard: View {
+    let mediaPackage: MediaRequestPackage
+    let onClick: () -> Void
+
+    private var request: MediaRequest { mediaPackage.request }
+    private var details: RequestMediaDetails? { mediaPackage.details }
+
+    var body: some View {
+        Button(action: onClick) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top, spacing: 8) {
+                    if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
+                        AsyncImage(url: url) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Color(.systemGray4)
+                        }
+                        .frame(width: 48, height: 72)
+                        .clipShape(RoundedCornerShape(cornerRadius: 8))
+                    } else {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemGray4))
+                            .frame(width: 48, height: 72)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            if let year = details?.displayDate?.year {
+                                Text(String(year))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            RequestTypeChip(type: request.type)
+                        }
+
+                        Text(details?.displayTitle ?? MR.strings().unknown.localized())
+                            .font(.subheadline.bold())
+                            .lineLimit(2)
+
+                        SeerrStatusChip(request: request)
+                    }
+                }
+
+                HStack(spacing: 6) {
+                    if let avatarUrl = URL(string: request.requestedBy.avatar) {
+                        AsyncImage(url: avatarUrl) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Image(systemName: "person.circle.fill")
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(width: 20, height: 20)
+                        .clipShape(Circle())
+                    }
+
+                    Text(request.requestedBy.displayName)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .lineLimit(1)
+                }
+            }
+            .padding(12)
+            .frame(width: 260, alignment: .leading)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct DashboardPendingIssuesSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    @EnvironmentObject private var navigationManager: NavigationManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "ladybug")
+                Text(MR.strings().issues.localized())
+                    .font(.headline)
+                    .bold()
+            }
+
+            let openIssues = state.openIssues
+            if openIssues.isEmpty {
+                Text(MR.strings().no_issues_found.localized())
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(openIssues, id: \.issue.id) { issuePackage in
+                            CompactIssueCard(issuePackage: issuePackage) {
+                                if let media = issuePackage.issue.media {
+                                    navigationManager.goToSeerrDetails(
+                                        tmdbId: media.tmdbId,
+                                        requestType: media.mediaType
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct CompactIssueCard: View {
+    let issuePackage: MediaIssuePackage
+    let onClick: () -> Void
+
+    private var issue: Issue { issuePackage.issue }
+    private var details: RequestMediaDetails? { issuePackage.details }
+
+    var body: some View {
+        Button(action: onClick) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top, spacing: 8) {
+                    if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
+                        AsyncImage(url: url) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Color(.systemGray4)
+                        }
+                        .frame(width: 48, height: 72)
+                        .clipShape(RoundedCornerShape(cornerRadius: 8))
+                    } else {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemGray4))
+                            .frame(width: 48, height: 72)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            if let year = details?.displayDate?.year {
+                                Text(String(year))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            if let mediaType = issue.media?.mediaType {
+                                RequestTypeChip(type: mediaType)
+                            }
+                        }
+
+                        Text(details?.displayTitle ?? MR.strings().unknown.localized())
+                            .font(.subheadline.bold())
+                            .lineLimit(2)
+
+                        SeerrIssueStatusChip(issue: issue)
+                    }
+                }
+
+                if issue.media?.mediaType == .tv {
+                    let seasonLabel = issue.problemSeason == 0 ? MR.strings().all.localized() : "\(issue.problemSeason)"
+                    let episodeLabel = issue.problemEpisode == 0 ? MR.strings().all.localized() : "\(issue.problemEpisode)"
+                    Text("S\(seasonLabel) E\(episodeLabel)")
+                        .font(.caption2.bold())
+                        .foregroundColor(.accentColor)
+                }
+
+                if let createdBy = issue.createdBy {
+                    HStack(spacing: 6) {
+                        if let avatarUrl = URL(string: createdBy.avatar) {
+                            AsyncImage(url: avatarUrl) { image in
+                                image.resizable().aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Image(systemName: "person.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(width: 20, height: 20)
+                            .clipShape(Circle())
+                        }
+
+                        Text(createdBy.displayName)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .lineLimit(1)
+                    }
+                }
+            }
+            .padding(12)
+            .frame(width: 260, alignment: .leading)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct DashboardSearchSection: View {
+    @StateObject private var viewModel = DiscoverViewModelS()
+    @EnvironmentObject private var navigationManager: NavigationManager
+    @State private var searchQuery = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                TextField(MR.strings().search.localized(), text: $searchQuery)
+                    .textFieldStyle(.plain)
+                if !searchQuery.isEmpty {
+                    Button(action: { searchQuery = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(10)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .cornerRadius(10)
+            .onChange(of: searchQuery) { _, newValue in
+                viewModel.updateSearchQuery(newValue)
+            }
+
+            if !searchQuery.isEmpty {
+                DiscoverSearchOverlay(
+                    items: viewModel.searchResults,
+                    isLoading: viewModel.isSearching,
+                    showBanners: viewModel.searchShowBanners,
+                    showInstanceIndicatorShadow: viewModel.searchShowInstanceIndicatorShadow,
+                    onItemClick: { result in
+                        handleSearchItemClick(result)
+                    }
+                )
+                .frame(maxHeight: 400)
+            }
+        }
+    }
+
+    private func handleSearchItemClick(_ result: SearchResult) {
+        if let arrResult = result as? SearchResultArrMediaResult {
+            navigationManager.goToArrDetailsOrPreview(item: arrResult.media, type: arrResult.instanceType, instanceId: arrResult.instanceId?.int64Value)
+        } else if let seerrMedia = result as? SearchResultSeerrMediaResult {
+            navigationManager.goToSeerrDetails(tmdbId: seerrMedia.result.id, requestType: seerrMedia.result.mediaType)
+        } else if let seerrPerson = result as? SearchResultSeerrPersonResult {
+            navigationManager.goToPersonDetails(id: seerrPerson.result.id)
         }
     }
 }

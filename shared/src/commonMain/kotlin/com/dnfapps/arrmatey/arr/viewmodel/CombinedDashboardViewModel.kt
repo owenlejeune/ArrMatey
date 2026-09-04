@@ -146,11 +146,15 @@ class CombinedDashboardViewModel(
                             combine(
                                 repo.pendingRequestsCount,
                                 repo.openIssuesCount,
-                            ) { pending, issues ->
+                                repo.pendingRequests,
+                                repo.openIssues,
+                            ) { pendingCount, issuesCount, requests, issues ->
                                 SeerrDashboardState(
                                     instance = repo.instance,
-                                    pendingRequestsCount = pending,
-                                    openIssuesCount = issues,
+                                    pendingRequestsCount = pendingCount,
+                                    openIssuesCount = issuesCount,
+                                    pendingRequests = requests,
+                                    openIssues = issues,
                                 )
                             }
                         }

@@ -61,6 +61,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.DashboardCards
+import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.navigationManager
@@ -227,6 +228,15 @@ fun CombinedDashboard(
                                                 }
                                                 DashboardCards.SeerrOverview -> {
                                                     { navManager.openRequestsTab() }
+                                                }
+                                                DashboardCards.PendingRequests -> {
+                                                    { navManager.openRequestsTab() }
+                                                }
+                                                DashboardCards.PendingIssues -> {
+                                                    { navManager.openRequestsTab() }
+                                                }
+                                                DashboardCards.UniversalSearch -> {
+                                                    { navManager.openDiscoverTab() }
                                                 }
                                                 DashboardCards.ProwlarrOverview -> {
                                                     { navManager.openProwlarrTab() }
@@ -436,6 +446,49 @@ private fun DashboardCardContent(
             BazarrSection(
                 state = currentState,
                 isEditing = isEditing,
+            )
+
+        DashboardCards.PendingRequests ->
+            DashboardPendingRequestsSection(
+                state = currentState,
+                enabled = !isEditing && enabled,
+                onRequestClick = { mediaPackage ->
+                    navManager.openSeerrDetails(
+                        tmdbId = mediaPackage.request.media.tmdbId,
+                        requestType = mediaPackage.request.type,
+                    )
+                },
+            )
+
+        DashboardCards.PendingIssues ->
+            DashboardPendingIssuesSection(
+                state = currentState,
+                enabled = !isEditing && enabled,
+                onIssueClick = { mediaPackage ->
+                    mediaPackage.issue.media?.let { media ->
+                        navManager.openSeerrDetails(
+                            tmdbId = media.tmdbId,
+                            requestType = media.mediaType,
+                        )
+                    }
+                },
+            )
+
+        DashboardCards.UniversalSearch ->
+            DashboardSearchSection(
+                onItemClick = { result ->
+                    when (result) {
+                        is SearchResult.ArrMediaResult -> {
+                            navManager.arr(result.instanceType).toDetails(result.media.id)
+                        }
+                        is SearchResult.SeerrMediaResult -> {
+                            navManager.openSeerrDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
+                        }
+                        is SearchResult.SeerrPersonResult -> {
+                            navManager.navigateToPersonDetails(result.result.id)
+                        }
+                    }
+                },
             )
 
         DashboardCards.InstanceDashboard ->

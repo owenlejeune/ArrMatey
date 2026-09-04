@@ -9,7 +9,7 @@ import Shared
 struct DiscoverTab: View {
     @Environment(\.navigationContext) private var context
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     var body: some View {
         switch context {
         case .mainTab:
@@ -145,7 +145,7 @@ private struct DiscoverTabContent: View {
             }
         }
     }
-    
+
     private func handleItemClick(_ result: SearchResult) {
         if let arrResult = result as? SearchResultArrMediaResult {
             navigationManager.goToArrDetailsOrPreview(item: arrResult.media, type: arrResult.instanceType, instanceId: arrResult.instanceId?.int64Value)
@@ -165,7 +165,7 @@ private struct DiscoverSection: View {
     let onItemClickArr: ((SearchResult) -> Void)?
     let onLoadMore: () -> Void
     var showOverlays: Bool = true
-    
+
     init(
         title: String,
         icon: String,
@@ -183,7 +183,7 @@ private struct DiscoverSection: View {
         self.onLoadMore = onLoadMore
         self.showOverlays = showOverlays
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
@@ -193,7 +193,7 @@ private struct DiscoverSection: View {
                     .font(.headline)
             }
             .padding(.horizontal, 16)
-            
+
             if data.isLoading && data.items.isEmpty {
                 HStack {
                     Spacer()
@@ -224,7 +224,7 @@ private struct DiscoverSection: View {
                                 }
                             }
                         }
-                        
+
                         if data.isLoadingMore {
                             ProgressView()
                                 .padding(.horizontal, 16)
@@ -242,13 +242,13 @@ private struct DiscoverSection: View {
     }
 }
 
-private struct DiscoverSearchOverlay: View {
+struct DiscoverSearchOverlay: View {
     let items: [SearchResult]
     let isLoading: Bool
     let showBanners: Bool
     let showInstanceIndicatorShadow: Bool
     let onItemClick: (SearchResult) -> Void
-    
+
     var body: some View {
         Group {
             if isLoading && items.isEmpty {
@@ -273,12 +273,12 @@ private struct DiscoverSearchOverlay: View {
     }
 }
 
-private struct DiscoverSearchResultRow: View {
+struct DiscoverSearchResultRow: View {
     let item: SearchResult
     let showBanners: Bool
     let showInstanceIndicatorShadow: Bool
     let onItemClick: (SearchResult) -> Void
-    
+
     private var shadowColor: Color? {
         guard showInstanceIndicatorShadow else { return nil }
         if let arrResult = item as? SearchResultArrMediaResult {
@@ -314,7 +314,7 @@ private struct DiscoverSearchResultRow: View {
 struct SeerrMediaSearchResultView: View {
     let result: SearchResultSeerrMediaResult
     let showBannerBackground: Bool
-    
+
     var body: some View {
         let item = result.result
         VStack(alignment: .leading, spacing: 0) {
@@ -324,18 +324,18 @@ struct SeerrMediaSearchResultView: View {
                     aspectRatio: .poster
                 )
                 .frame(height: 75)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.title ?? item.name ?? MR.strings().unknown.localized())
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(showBannerBackground ? .white : .primary)
-                    
+
                     if let date = item.releaseDate ?? item.firstAirDate {
                         Text(String(date.prefix(4)))
                             .font(.system(size: 14))
                             .foregroundColor(showBannerBackground ? .white.opacity(0.8) : .secondary)
                     }
-                    
+
                     if let overview = item.overview {
                         Text(overview)
                             .font(.system(size: 14))
@@ -369,7 +369,7 @@ struct SeerrMediaSearchResultView: View {
 
 struct SeerrPersonSearchResultView: View {
     let result: SearchResultSeerrPersonResult
-    
+
     var body: some View {
         let item = result.result
         HStack(alignment: .top, spacing: 18) {
@@ -385,11 +385,11 @@ struct SeerrPersonSearchResultView: View {
             .frame(width: 80, height: 80)
             .cornerRadius(8)
             .clipped()
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.name ?? MR.strings().unknown.localized())
                     .font(.system(size: 18, weight: .bold))
-                
+
                 let knownFor = item.knownFor.compactMap { $0.title ?? $0.name }.joined(separator: ", ")
                 if !knownFor.isEmpty {
                     Text("Known for: \(knownFor)")
@@ -397,7 +397,7 @@ struct SeerrPersonSearchResultView: View {
                         .foregroundColor(.secondary)
                         .lineLimit(2)
                 }
-                
+
                 if let overview = item.overview {
                     Text(overview)
                         .font(.system(size: 14))

@@ -50,8 +50,13 @@ fun DashboardCalendarItemRow(
             when (item) {
                 is Episode -> "${item.seasonEpLabel}: ${item.title ?: ""}"
                 is EpisodeGroup -> {
-                    val episodes = listOf(item.first) + item.additional
-                    episodes.joinToString(", ") { "${it.seasonEpLabel}: ${it.title ?: ""}" }
+                    val first = item.first
+                    val base = "${first.seasonEpLabel}: ${first.title ?: ""}"
+                    if (item.additional.isNotEmpty()) {
+                        "$base (${mokoString(MR.strings.additional_items_count, item.additional.size)})"
+                    } else {
+                        base
+                    }
                 }
                 is ArrAlbum -> item.title ?: ""
                 is ArrMovie -> {

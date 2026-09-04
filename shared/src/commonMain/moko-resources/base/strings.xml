@@ -779,6 +779,11 @@
     <string name="add_dashboard_cards">Add Cards</string>
     <string name="dashboard_arr_overview">Arr Software</string>
     <string name="dashboard_seerr_overview">Requests &amp; Issues</string>
+    <string name="dashboard_pending_requests">Pending Requests</string>
+    <string name="dashboard_pending_issues">Pending Issues</string>
+    <string name="universal_search">Universal Search</string>
+    <string name="no_pending_requests">No pending requests</string>
+    <string name="no_pending_issues">No pending issues</string>
     <string name="dashboard_prowlarr_overview">Indexers</string>
     <string name="dashboard_network_monitor">Network Status</string>
     <string name="dashboard_recently_added">Recently Added Media</string>

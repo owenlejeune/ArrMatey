@@ -53,7 +53,7 @@ fun DashboardUpcomingSection(
                 )
             }
 
-            if (state.calendarItems.isEmpty()) {
+            if (state.upcomingCalendarItems.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.nothing_upcoming),
                     modifier =
