@@ -768,7 +768,7 @@ struct DashboardDownloadClientsSection: View {
                 if state.activeDownloads.count > 5 {
                     HStack {
                         Spacer()
-                        Text(MR.strings().additional_items_count.format(args: [Int32(state.activeDownloads.count - 5)]).localized())
+                        Text(MR.strings().additional_items_count.formatted(args: [Int32(state.activeDownloads.count - 5)]))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -812,7 +812,7 @@ struct DashboardActivityQueueSection: View {
                                         .bold()
                                         .lineLimit(1)
                                     if let groupCount = item.taskGroupCount?.intValue, groupCount > 1 {
-                                        Text(MR.strings().additional_items_count.formatted(args: [groupCount]).localized())
+                                        Text(MR.strings().additional_items_count.formatted(args: [groupCount]))
                                             .font(.caption2.bold())
                                             .foregroundColor(.accentColor)
                                     }
@@ -845,7 +845,7 @@ struct DashboardActivityQueueSection: View {
                 if state.activityQueue.count > 5 {
                     HStack {
                         Spacer()
-                        Text(MR.strings().additional_items_count.format(args: [Int32(state.activityQueue.count - 5)]).localized())
+                        Text(MR.strings().additional_items_count.formatted(args: [Int32(state.activityQueue.count - 5)]))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -996,7 +996,7 @@ struct CalendarItemRow: View {
             let first = group.first
             let base = "\(first.seasonEpLabel): \(first.title ?? "")"
             if !group.additional.isEmpty {
-                return "\(base) (\(MR.strings().additional_items_count.formatted(args: [group.additional.count]).localized()))"
+                return "\(base) (\(MR.strings().additional_items_count.formatted(args: [group.additional.count])))"
             }
             return base
         } else if let album = item as? ArrAlbum {
@@ -1167,6 +1167,7 @@ struct AddDashboardCardSheet: View {
 struct DashboardPendingRequestsSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
     @EnvironmentObject private var navigationManager: NavigationManager
 
     var body: some View {
@@ -1189,10 +1190,14 @@ struct DashboardPendingRequestsSection: View {
                     HStack(spacing: 12) {
                         ForEach(pendingRequests, id: \.request.id) { mediaPackage in
                             CompactRequestCard(mediaPackage: mediaPackage) {
-                                navigationManager.goToSeerrDetails(
-                                    tmdbId: mediaPackage.request.media.tmdbId,
-                                    requestType: mediaPackage.request.type
-                                )
+                                if let onRequestClick = onRequestClick {
+                                    onRequestClick(mediaPackage)
+                                } else {
+                                    navigationManager.goToSeerrDetails(
+                                        tmdbId: mediaPackage.request.media.tmdbId,
+                                        requestType: mediaPackage.request.type
+                                    )
+                                }
                             }
                         }
                     }
@@ -1220,7 +1225,7 @@ struct CompactRequestCard: View {
                             Color(.systemGray4)
                         }
                         .frame(width: 48, height: 72)
-                        .clipShape(RoundedCornerShape(cornerRadius: 8))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                     } else {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color(.systemGray4))
@@ -1275,6 +1280,7 @@ struct CompactRequestCard: View {
 struct DashboardPendingIssuesSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
     @EnvironmentObject private var navigationManager: NavigationManager
 
     var body: some View {
@@ -1297,7 +1303,9 @@ struct DashboardPendingIssuesSection: View {
                     HStack(spacing: 12) {
                         ForEach(openIssues, id: \.issue.id) { issuePackage in
                             CompactIssueCard(issuePackage: issuePackage) {
-                                if let media = issuePackage.issue.media {
+                                if let onIssueClick = onIssueClick {
+                                    onIssueClick(issuePackage)
+                                } else if let media = issuePackage.issue.media {
                                     navigationManager.goToSeerrDetails(
                                         tmdbId: media.tmdbId,
                                         requestType: media.mediaType
@@ -1330,7 +1338,7 @@ struct CompactIssueCard: View {
                             Color(.systemGray4)
                         }
                         .frame(width: 48, height: 72)
-                        .clipShape(RoundedCornerShape(cornerRadius: 8))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                     } else {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color(.systemGray4))
@@ -1406,10 +1414,79 @@ private func navigateCalendarItemOnDashboard(item: CalendarItem, navigationManag
     } else if let album = item as? ArrAlbum {
         navigationManager.goToDetailsOnDashboard(arrId: album.artistId, instanceType: .lidarr)
     } else if let movie = item as? ArrMovie {
-        navigationManager.goToDetailsOnDashboard(arrId: movie.id, instanceType: .radarr)
+        if let movieId = movie.id?.int64Value {
+            navigationManager.goToDetailsOnDashboard(arrId: movieId, instanceType: .radarr)
+        }
     } else if let audiobook = item as? Audiobook {
-        navigationManager.goToDetailsOnDashboard(arrId: audiobook.id, instanceType = .listenarr)
+        if let audiobookId = audiobook.id?.int64Value {
+            navigationManager.goToDetailsOnDashboard(arrId: audiobookId, instanceType: .listenarr)
+        }
     } else if let book = item as? Book {
-        navigationManager.goToDetailsOnDashboard(arrId: book.authorId, instanceType = .bookshelf)
+        if let authorId = book.authorId?.int64Value {
+            navigationManager.goToDetailsOnDashboard(arrId: authorId, instanceType: .bookshelf)
+        }
+    }
+}
+
+struct HealthNoticesSheet: View {
+    let instances: [ArrInstanceDashboardState]
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    let healthInstances = instances.filter { !$0.healthItems.isEmpty }
+                    if healthInstances.isEmpty {
+                        Text(MR.strings().no_issues.localized())
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical)
+                    } else {
+                        ForEach(healthInstances, id: \.instance.id) { instanceState in
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 8) {
+                                    Image(resource: instanceState.instance.type.icon)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 20, height: 20)
+                                    Text(instanceState.instance.label)
+                                        .font(.headline)
+                                        .bold()
+                                }
+
+                                ForEach(instanceState.healthItems.indices, id: \.self) { index in
+                                    let health = instanceState.healthItems[index]
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        if let message = health.message {
+                                            Text(message)
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                        }
+                                        if let source = health.source {
+                                            Text(source)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .padding(12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(health.type == .error ? Color.red.opacity(0.15) : Color(UIColor.secondarySystemBackground))
+                                    .cornerRadius(10)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(16)
+            }
+            .navigationTitle(MR.strings().health.localized())
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(MR.strings().close.localized()) { dismiss() }
+                }
+            }
+        }
     }
 }
