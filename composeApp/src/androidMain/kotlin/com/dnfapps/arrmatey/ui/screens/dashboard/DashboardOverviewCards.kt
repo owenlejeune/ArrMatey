@@ -37,6 +37,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun DashboardOverviewCards(
     state: CombinedDashboardState.Success,
     isEditing: Boolean,
+    onHealthClick: () -> Unit = {},
 ) {
     val totalSize = state.instances.sumOf { it.sizeOnDisk }
     val totalIssues = state.instances.sumOf { it.healthItems.size }
@@ -112,6 +113,7 @@ fun DashboardOverviewCards(
                             totalIssues > 0 -> ArrYellow.copy(alpha = 0.2f)
                             else -> MaterialTheme.colorScheme.secondaryContainer
                         },
+                    onClick = if (!isEditing) onHealthClick else null,
                 )
             }
         }

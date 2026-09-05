@@ -777,6 +777,7 @@
 
     <!-- Dashboard Cards -->
     <string name="add_dashboard_cards">Add Cards</string>
+    <string name="view_media">View Media</string>
     <string name="dashboard_arr_overview">Arr Software</string>
     <string name="dashboard_seerr_overview">Requests &amp; Issues</string>
     <string name="dashboard_pending_requests">Pending Requests</string>

@@ -28,8 +28,11 @@ struct DashboardTabContent: View {
     @StateObject private var viewModel = DashboardViewModelS()
     @StateObject private var discoverViewModel = DiscoverViewModelS()
     @StateObject private var activityViewModel = ActivityQueueViewModelS()
+    @StateObject private var requestsViewModel = RequestsViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var showAddCardSheet = false
+    @State private var showHealthSheet = false
+    @State private var showSeerrSheet = false
     @State private var draggedCard: DashboardCards?
     @State private var searchQuery = ""
 
@@ -149,6 +152,10 @@ struct DashboardTabContent: View {
                     onDeclineRequest: { requestId in
                         viewModel.declineRequest(requestId: requestId)
                         selectedRequestForSheet = nil
+                    },
+                    onViewMedia: { tmdbId, type in
+                        selectedRequestForSheet = nil
+                        navigationManager.goToSeerrDetailsOnDashboard(tmdbId: tmdbId, requestType: type)
                     }
                 )
             }
@@ -176,6 +183,14 @@ struct DashboardTabContent: View {
             )
             .presentationDetents([.fraction(0.7)])
         }
+        .sheet(isPresented: $showHealthSheet) {
+            if let success = viewModel.state as? CombinedDashboardStateSuccess {
+                HealthNoticesSheet(instances: success.instances)
+            }
+        }
+        .sheet(isPresented: $showSeerrSheet) {
+            SeerrSheetView(viewModel: requestsViewModel)
+        }
     }
 
     @ViewBuilder
@@ -189,7 +204,16 @@ struct DashboardTabContent: View {
                         isEditing: viewModel.isEditing,
                         onRequestClick: { selectedRequestForSheet = $0 },
                         onIssueClick: { selectedIssueForSheet = $0 },
-                        onActivityClick: { selectedActivityItem = IdentifiableQueueItem(item: $0) }
+                        onActivityClick: { selectedActivityItem = IdentifiableQueueItem(item: $0) },
+                        onHealthClick: { showHealthSheet = true },
+                        onSeerrRequestsStatClick: {
+                            requestsViewModel.setSelectedTab(.requests)
+                            showSeerrSheet = true
+                        },
+                        onSeerrIssuesStatClick: {
+                            requestsViewModel.setSelectedTab(.issues)
+                            showSeerrSheet = true
+                        }
                     ) {
                         viewModel.removeCard(card: card)
                     }
@@ -308,6 +332,9 @@ struct DashboardCardWrapper: View {
     var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
     var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
     var onActivityClick: ((QueueItem) -> Void)? = nil
+    var onHealthClick: (() -> Void)? = nil
+    var onSeerrRequestsStatClick: (() -> Void)? = nil
+    var onSeerrIssuesStatClick: (() -> Void)? = nil
     let onRemove: () -> Void
 
     var body: some View {
@@ -318,7 +345,10 @@ struct DashboardCardWrapper: View {
                 isEditing: isEditing,
                 onRequestClick: onRequestClick,
                 onIssueClick: onIssueClick,
-                onActivityClick: onActivityClick
+                onActivityClick: onActivityClick,
+                onHealthClick: onHealthClick,
+                onSeerrRequestsStatClick: onSeerrRequestsStatClick,
+                onSeerrIssuesStatClick: onSeerrIssuesStatClick
             )
             .padding(12)
             .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
@@ -345,12 +375,15 @@ struct DashboardCardView: View {
     var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
     var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
     var onActivityClick: ((QueueItem) -> Void)? = nil
+    var onHealthClick: (() -> Void)? = nil
+    var onSeerrRequestsStatClick: (() -> Void)? = nil
+    var onSeerrIssuesStatClick: (() -> Void)? = nil
 
     var body: some View {
         Group {
             switch card {
-            case .arrOverview: DashboardOverviewSection(state: state, isEditing: isEditing)
-            case .seerrOverview: DashboardSeerrSection(state: state, isEditing: isEditing)
+            case .arrOverview: DashboardOverviewSection(state: state, isEditing: isEditing, onHealthClick: onHealthClick)
+            case .seerrOverview: DashboardSeerrSection(state: state, isEditing: isEditing, onRequestClick: onSeerrRequestsStatClick, onIssueClick: onSeerrIssuesStatClick)
             case .pendingRequests: DashboardPendingRequestsSection(state: state, isEditing: isEditing, onRequestClick: onRequestClick)
             case .pendingIssues: DashboardPendingIssuesSection(state: state, isEditing: isEditing, onIssueClick: onIssueClick)
             case .prowlarrOverview: DashboardProwlarrSection(state: state, isEditing: isEditing)
@@ -372,6 +405,7 @@ struct StatCard: View {
     let label: String
     let value: String
     let color: Color
+    var onClick: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -390,12 +424,17 @@ struct StatCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(color.opacity(0.1))
         .cornerRadius(12)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onClick?()
+        }
     }
 }
 
 struct DashboardOverviewSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onHealthClick: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -434,7 +473,8 @@ struct DashboardOverviewSection: View {
                     icon: totalIssues > 0 ? "exclamationmark.triangle" : "checkmark.circle",
                     label: MR.strings().health.localized(),
                     value: totalIssues == 0 ? MR.strings().no_issues.localized() : "\(totalIssues) Issues",
-                    color: issueColor
+                    color: issueColor,
+                    onClick: isEditing ? nil : onHealthClick
                 )
             }
         }
@@ -444,6 +484,8 @@ struct DashboardOverviewSection: View {
 struct DashboardSeerrSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onRequestClick: (() -> Void)? = nil
+    var onIssueClick: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -460,8 +502,8 @@ struct DashboardSeerrSection: View {
             let totalIssues = state.seerrInstances.reduce(0) { $0 + Int($1.openIssuesCount) }
 
             HStack(spacing: 12) {
-                StatCard(icon: "tray", label: MR.strings().requests.localized(), value: "\(totalRequests)", color: .purple)
-                StatCard(icon: "ladybug", label: MR.strings().issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary)
+                StatCard(icon: "tray", label: MR.strings().requests.localized(), value: "\(totalRequests)", color: .purple, onClick: isEditing ? nil : onRequestClick)
+                StatCard(icon: "ladybug", label: MR.strings().issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary, onClick: isEditing ? nil : onIssueClick)
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -23,9 +24,10 @@ fun StatCard(
     label: String,
     value: String,
     color: Color,
+    onClick: (() -> Unit)? = null,
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.then(onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier),
         colors = CardDefaults.cardColors(containerColor = color),
         shape = MaterialTheme.shapes.large,
     ) {

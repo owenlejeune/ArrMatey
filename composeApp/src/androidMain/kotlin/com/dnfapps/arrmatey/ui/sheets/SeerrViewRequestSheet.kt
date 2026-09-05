@@ -34,8 +34,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.Icon
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.shared.MR
@@ -55,6 +61,7 @@ fun SeerrViewRequestSheet(
     onApproveRequest: (Long, Long?, String?, Long?, List<Int>?) -> Unit,
     onDeclineRequest: (Long) -> Unit,
     requestOverride: MediaRequest? = null,
+    onViewMedia: ((Long, RequestType) -> Unit)? = null,
 ) {
     val request =
         requestOverride
@@ -146,6 +153,13 @@ fun SeerrViewRequestSheet(
                     )
                 },
                 onDeclineRequest = { onDeclineRequest(request.id) },
+                onViewMedia =
+                    onViewMedia?.let { viewMedia ->
+                        {
+                            viewMedia(request.media.tmdbId, request.type)
+                            onDismissRequest()
+                        }
+                    },
             )
         }
     }
@@ -236,6 +250,7 @@ private fun AdvancedSection(
     requestInProgress: Boolean,
     onApproveRequest: () -> Unit,
     onDeclineRequest: () -> Unit,
+    onViewMedia: (() -> Unit)? = null,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         val profiles = serviceDetails?.profiles ?: emptyList()
@@ -288,6 +303,22 @@ private fun AdvancedSection(
                 ),
         ) {
             Text(mokoString(MR.strings.decline_request))
+        }
+
+        onViewMedia?.let { viewMedia ->
+            OutlinedButton(
+                onClick = viewMedia,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !requestInProgress,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Visibility,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(mokoString(MR.strings.show_full_details))
+            }
         }
     }
 }

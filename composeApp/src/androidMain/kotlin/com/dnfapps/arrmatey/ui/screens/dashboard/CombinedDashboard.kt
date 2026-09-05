@@ -58,7 +58,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material3.rememberSearchBarState
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
@@ -69,27 +74,25 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.DashboardCards
-import com.dnfapps.arrmatey.entensions.PaddingValues
-import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.model.OperationStatus
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.navigationManager
-import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
-import com.dnfapps.arrmatey.navigation.toDetails
-import com.dnfapps.arrmatey.navigation.toPersonDetails
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material3.rememberSearchBarState
+import com.dnfapps.arrmatey.compose.SeerrTab
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
+import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.entensions.isExpanded
+import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.screens.RequestsScreen
 import com.dnfapps.arrmatey.ui.screens.requests.IssueDetailsSheet
+import com.dnfapps.arrmatey.ui.screens.requests.IssuesList
+import com.dnfapps.arrmatey.ui.screens.requests.RequestsList
+import com.dnfapps.arrmatey.ui.sheets.HealthNoticesSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.DiscoverSearchOverlay
@@ -104,14 +107,17 @@ import org.koin.compose.viewmodel.koinViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
 
-fun navigateCalendarItem(navManager: NavigationManager, item: CalendarItem) {
+fun navigateCalendarItem(
+    onNavigateToMediaDetails: (id: Long, instanceType: InstanceType) -> Unit,
+    item: CalendarItem,
+) {
     when (item) {
-        is Episode -> navManager.dashboard.toDetails(id = item.seriesId, type = InstanceType.Sonarr)
-        is EpisodeGroup -> navManager.dashboard.toDetails(id = item.first.seriesId, type = InstanceType.Sonarr)
-        is ArrMovie -> navManager.dashboard.toDetails(id = item.id, type = InstanceType.Radarr)
-        is ArrAlbum -> navManager.dashboard.toDetails(id = item.artistId, type = InstanceType.Lidarr)
-        is Book -> navManager.dashboard.toDetails(id = item.authorId, type = InstanceType.Bookshelf)
-        is Audiobook -> navManager.dashboard.toDetails(id = item.id, type = InstanceType.Listenarr)
+        is Episode -> onNavigateToMediaDetails(item.seriesId, InstanceType.Sonarr)
+        is EpisodeGroup -> onNavigateToMediaDetails(item.first.seriesId, InstanceType.Sonarr)
+        is ArrMovie -> item.id?.let { onNavigateToMediaDetails(it, InstanceType.Radarr) }
+        is ArrAlbum -> onNavigateToMediaDetails(item.artistId, InstanceType.Lidarr)
+        is Book -> item.authorId?.let { onNavigateToMediaDetails(it, InstanceType.Bookshelf) }
+        is Audiobook -> item.id?.let { onNavigateToMediaDetails(it, InstanceType.Listenarr) }
     }
 }
 
@@ -121,23 +127,35 @@ fun DashboardCardContent(
     currentState: CombinedDashboardState.Success,
     isEditing: Boolean,
     enabled: Boolean = true,
-    navManager: NavigationManager = navigationManager,
     onNavigateToArrDashboard: (Long) -> Unit = {},
+    onNavigateToMediaDetails: (id: Long, instanceType: InstanceType) -> Unit = { _, _ -> },
     onRequestClick: (MediaRequestPackage) -> Unit = {},
     onIssueClick: (MediaIssuePackage) -> Unit = {},
     onRequestActivityItem: (QueueItem) -> Unit = {},
+    onHealthClick: () -> Unit = {},
+    onSeerrRequestsStatClick: () -> Unit = {},
+    onSeerrIssuesStatClick: () -> Unit = {},
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
             DashboardOverviewCards(
                 state = currentState,
                 isEditing = isEditing,
+                onHealthClick = {
+                    if (!isEditing && enabled) onHealthClick()
+                },
             )
 
         DashboardCards.SeerrOverview ->
             SeerrSection(
                 state = currentState,
                 isEditing = isEditing,
+                onRequestClick = {
+                    if (!isEditing && enabled) onSeerrRequestsStatClick()
+                },
+                onIssueClick = {
+                    if (!isEditing && enabled) onSeerrIssuesStatClick()
+                },
             )
 
         DashboardCards.ProwlarrOverview ->
@@ -154,7 +172,7 @@ fun DashboardCardContent(
                 enabled = !isEditing && enabled,
                 state = currentState,
                 onOpenItem = { id, type ->
-                    navManager.dashboard.toDetails(id = id, type = type)
+                    onNavigateToMediaDetails(id, type)
                 },
             )
 
@@ -180,7 +198,7 @@ fun DashboardCardContent(
                 isEditing = isEditing,
                 enabled = enabled,
                 onItemClick = { calendarItem ->
-                    if (!isEditing && enabled) navigateCalendarItem(navManager, calendarItem)
+                    if (!isEditing && enabled) navigateCalendarItem(onNavigateToMediaDetails, calendarItem)
                 },
             )
 
@@ -190,7 +208,7 @@ fun DashboardCardContent(
                 isEditing = isEditing,
                 enabled = enabled,
                 onItemClick = { calendarItem ->
-                    if (!isEditing && enabled) navigateCalendarItem(navManager, calendarItem)
+                    if (!isEditing && enabled) navigateCalendarItem(onNavigateToMediaDetails, calendarItem)
                 },
             )
 
@@ -235,8 +253,20 @@ fun CombinedDashboard(
     windowSizeClass: WindowSizeClass,
     viewModel: CombinedDashboardViewModel = koinViewModel(),
     discoverViewModel: DiscoverViewModel = koinViewModel(),
+    requestsViewModel: RequestsViewModel = koinViewModel(),
     moko: MokoStrings = koinInject(),
     onNavigateToArrDashboard: (Long) -> Unit = {},
+    onNavigateToMediaDetails: (id: Long, instanceType: InstanceType) -> Unit = { _, _ -> },
+    onNavigateToSeerrMediaDetails: (tmdbId: Long, requestType: RequestType) -> Unit = { _, _ -> },
+    onNavigateToSeerrPersonDetails: (personId: Long) -> Unit = {},
+    onNavigateToArrMediaDetailsOrPreview: (media: ArrMedia, instanceType: InstanceType) -> Unit = { _, _ -> },
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToRequestsTab: () -> Unit = {},
+    onNavigateToProwlarrTab: () -> Unit = {},
+    onNavigateToDownloadsTab: () -> Unit = {},
+    onNavigateToActivityTab: () -> Unit = {},
+    onNavigateToScheduleTab: () -> Unit = {},
+    onNavigateToBazarrTab: () -> Unit = {},
 ) {
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
     val hapticFeedback = LocalHapticFeedback.current
@@ -258,6 +288,11 @@ fun CombinedDashboard(
     val searchShowBanners by discoverViewModel.searchShowBanners.collectAsStateWithLifecycle()
     val searchShowInstanceIndicatorShadow by discoverViewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
 
+    val requestsState by requestsViewModel.requestsState.collectAsStateWithLifecycle()
+    val issuesState by requestsViewModel.issuesState.collectAsStateWithLifecycle()
+    val userState by requestsViewModel.userState.collectAsStateWithLifecycle()
+    val operationsState by requestsViewModel.operationsState.collectAsStateWithLifecycle()
+
     val textFieldState = rememberTextFieldState(searchQuery)
     val searchBarState = rememberSearchBarState()
 
@@ -274,6 +309,9 @@ fun CombinedDashboard(
     var selectedIssueForSheet by remember { mutableStateOf<MediaIssuePackage?>(null) }
     var selectedActivityItem by remember { mutableStateOf<QueueItem?>(null) }
     var showConfirmRemoveActivity by remember { mutableStateOf(false) }
+    var showHealthNoticesSheet by remember { mutableStateOf(false) }
+    var showSeerrRequestsSheet by remember { mutableStateOf(false) }
+    var showSeerrIssuesSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(removeItemStatus) {
         if (removeItemStatus is OperationStatus.Success) {
@@ -386,7 +424,6 @@ fun CombinedDashboard(
                     .fillMaxSize(),
         ) {
             if (showDashboardSearch && searchBarState.isExpanded()) {
-                val navManager = navigationManager
                 DiscoverSearchOverlay(
                     items = searchState,
                     isLoading = isSearching,
@@ -395,13 +432,13 @@ fun CombinedDashboard(
                     onItemClick = { result ->
                         when (result) {
                             is SearchResult.ArrMediaResult -> {
-                                navManager.dashboard.toArrDetailsOrPreview(result.media, result.instanceType)
+                                onNavigateToArrMediaDetailsOrPreview(result.media, result.instanceType)
                             }
                             is SearchResult.SeerrMediaResult -> {
-                                navManager.dashboard.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
+                                onNavigateToSeerrMediaDetails(result.result.id, result.result.mediaType)
                             }
                             is SearchResult.SeerrPersonResult -> {
-                                navManager.dashboard.toPersonDetails(result.result.id)
+                                onNavigateToSeerrPersonDetails(result.result.id)
                             }
                         }
                     },
@@ -474,39 +511,31 @@ fun CombinedDashboard(
                                             val innerPadding by animateDpAsState(if (isEditing) 4.dp else 0.dp)
 
                                             Box(contentAlignment = Alignment.Center) {
-                                                val navManager = navigationManager
-
                                                 val cardOnClick: (() -> Unit)? =
                                                     when (dashboardCard) {
                                                         DashboardCards.ArrOverview -> {
-                                                            { navManager.openSettings() }
+                                                            { onNavigateToSettings() }
                                                         }
-                                                        DashboardCards.SeerrOverview -> {
-                                                            { navManager.openRequestsTab() }
-                                                        }
-                                                        DashboardCards.PendingRequests -> {
-                                                            { navManager.openRequestsTab() }
-                                                        }
+                                                        DashboardCards.SeerrOverview,
+                                                        DashboardCards.PendingRequests,
                                                         DashboardCards.PendingIssues -> {
-                                                            { navManager.openRequestsTab() }
+                                                            { onNavigateToRequestsTab() }
                                                         }
                                                         DashboardCards.ProwlarrOverview -> {
-                                                            { navManager.openProwlarrTab() }
+                                                            { onNavigateToProwlarrTab() }
                                                         }
                                                         DashboardCards.DownloadClients -> {
-                                                            { navManager.openDownloadClientsTab() }
+                                                            { onNavigateToDownloadsTab() }
                                                         }
                                                         DashboardCards.ActivityQueue -> {
-                                                            { navManager.openActivityTab() }
+                                                            { onNavigateToActivityTab() }
                                                         }
-                                                        DashboardCards.OnToday -> {
-                                                            { navManager.openScheduleTab() }
-                                                        }
+                                                        DashboardCards.OnToday,
                                                         DashboardCards.UpcomingReleases -> {
-                                                            { navManager.openScheduleTab() }
+                                                            { onNavigateToScheduleTab() }
                                                         }
                                                         DashboardCards.BazarrOverview -> {
-                                                            { navManager.openBazarrTab() }
+                                                            { onNavigateToBazarrTab() }
                                                         }
                                                         else -> null
                                                     }
@@ -542,9 +571,17 @@ fun CombinedDashboard(
                                                         currentState = currentState,
                                                         isEditing = isEditing,
                                                         onNavigateToArrDashboard = onNavigateToArrDashboard,
+                                                        onNavigateToMediaDetails = onNavigateToMediaDetails,
                                                         onRequestClick = { selectedRequestForSheet = it },
                                                         onIssueClick = { selectedIssueForSheet = it },
                                                         onRequestActivityItem = { selectedActivityItem = it },
+                                                        onHealthClick = { showHealthNoticesSheet = true },
+                                                        onSeerrRequestsStatClick = {
+                                                            showSeerrRequestsSheet = true
+                                                        },
+                                                        onSeerrIssuesStatClick = {
+                                                            showSeerrIssuesSheet = true
+                                                        },
                                                     )
                                                 }
                                                 if (isEditing) {
@@ -647,6 +684,10 @@ fun CombinedDashboard(
                                 viewModel.declineRequest(id)
                                 selectedRequestForSheet = null
                             },
+                            onViewMedia = { tmdbId, type ->
+                                selectedRequestForSheet = null
+                                onNavigateToSeerrMediaDetails(tmdbId, type)
+                            },
                         )
                     }
                 }
@@ -678,6 +719,78 @@ fun CombinedDashboard(
                             viewModel.removeQueueItem(selectedActivityItem!!, clientRemove, blocklist, skipRedownload)
                         },
                     )
+                }
+
+                if (showHealthNoticesSheet && state is CombinedDashboardState.Success) {
+                    HealthNoticesSheet(
+                        instances = (state as CombinedDashboardState.Success).instances,
+                        onDismiss = { showHealthNoticesSheet = false },
+                    )
+                }
+
+                if (showSeerrRequestsSheet) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showSeerrRequestsSheet = false },
+                        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            Text(
+                                text = mokoString(MR.strings.requests),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                            )
+                            RequestsList(
+                                items = requestsState.items.filterIsInstance<MediaRequestPackage>(),
+                                hasMore = requestsState.hasMore,
+                                isLoadingMore = requestsState.isLoadingMore,
+                                userState = userState,
+                                operationsState = operationsState,
+                                onApprove = { requestsViewModel.approveRequest(it) },
+                                onDecline = { requestsViewModel.declineRequest(it) },
+                                onEdit = {},
+                                onDelete = { requestsViewModel.cancelRequest(it) },
+                                onRemoveFromService = { requestsViewModel.deleteMediaFile(it) },
+                                onNavigateToDetails = { tmdbId, type ->
+                                    showSeerrRequestsSheet = false
+                                    onNavigateToSeerrMediaDetails(tmdbId, type)
+                                },
+                                onLoadMore = { requestsViewModel.loadNextRequestsPage() },
+                                onViewRequest = { pkg ->
+                                    selectedRequestForSheet = pkg
+                                },
+                            )
+                        }
+                    }
+                }
+
+                if (showSeerrIssuesSheet) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showSeerrIssuesSheet = false },
+                        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            Text(
+                                text = mokoString(MR.strings.issues),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                            )
+                            IssuesList(
+                                items = issuesState.items,
+                                hasMore = issuesState.hasMore,
+                                isLoadingMore = issuesState.isLoadingMore,
+                                onLoadMore = { requestsViewModel.loadNextIssuesPage() },
+                                onSelectIssue = { issuePkg ->
+                                    selectedIssueForSheet = issuePkg
+                                },
+                            )
+                        }
+                    }
                 }
             }
         }
