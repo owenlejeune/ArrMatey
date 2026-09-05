@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.arr.state.InstanceNetworkStatus
 import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
+import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
@@ -30,6 +31,8 @@ import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
+import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
@@ -47,9 +50,6 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
-import com.dnfapps.arrmatey.model.OperationStatus
-import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update

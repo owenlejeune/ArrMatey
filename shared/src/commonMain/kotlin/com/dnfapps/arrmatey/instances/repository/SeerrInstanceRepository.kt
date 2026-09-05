@@ -97,20 +97,24 @@ class SeerrInstanceRepository(
     }
 
     suspend fun refreshCounts() {
-        client.getRequests(page = 1, pageSize = 20).onSuccess { response ->
-            _pendingRequestsCount.value = response.pageInfo.results
-            val enrichedRequests = mediaPackageService.enrichRequests(response.results)
-            _pendingRequests.value = enrichedRequests
-        }.onError { _, _, _ ->
-            _pendingRequests.value = emptyList()
-        }
-        client.getIssues(page = 1, pageSize = 20).onSuccess { response ->
-            _openIssuesCount.value = response.pageInfo.results
-            val enrichedIssues = issuePackageService.enrichIssues(response.results)
-            _openIssues.value = enrichedIssues
-        }.onError { _, _, _ ->
-            _openIssues.value = emptyList()
-        }
+        client
+            .getRequests(page = 1, pageSize = 20)
+            .onSuccess { response ->
+                _pendingRequestsCount.value = response.pageInfo.results
+                val enrichedRequests = mediaPackageService.enrichRequests(response.results)
+                _pendingRequests.value = enrichedRequests
+            }.onError { _, _, _ ->
+                _pendingRequests.value = emptyList()
+            }
+        client
+            .getIssues(page = 1, pageSize = 20)
+            .onSuccess { response ->
+                _openIssuesCount.value = response.pageInfo.results
+                val enrichedIssues = issuePackageService.enrichIssues(response.results)
+                _openIssues.value = enrichedIssues
+            }.onError { _, _, _ ->
+                _openIssues.value = emptyList()
+            }
     }
 
     fun getRequestsPaging(): PagingSource<MediaRequestPackage> =

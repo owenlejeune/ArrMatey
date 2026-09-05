@@ -18,10 +18,13 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -38,6 +41,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -58,10 +62,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material3.rememberSearchBarState
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
@@ -74,7 +74,6 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.DashboardCards
-import com.dnfapps.arrmatey.compose.SeerrTab
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.entensions.PaddingValues
@@ -88,7 +87,6 @@ import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.ui.screens.RequestsScreen
 import com.dnfapps.arrmatey.ui.screens.requests.IssueDetailsSheet
 import com.dnfapps.arrmatey.ui.screens.requests.IssuesList
 import com.dnfapps.arrmatey.ui.screens.requests.RequestsList
@@ -518,7 +516,8 @@ fun CombinedDashboard(
                                                         }
                                                         DashboardCards.SeerrOverview,
                                                         DashboardCards.PendingRequests,
-                                                        DashboardCards.PendingIssues -> {
+                                                        DashboardCards.PendingIssues,
+                                                        -> {
                                                             { onNavigateToRequestsTab() }
                                                         }
                                                         DashboardCards.ProwlarrOverview -> {
@@ -531,7 +530,8 @@ fun CombinedDashboard(
                                                             { onNavigateToActivityTab() }
                                                         }
                                                         DashboardCards.OnToday,
-                                                        DashboardCards.UpcomingReleases -> {
+                                                        DashboardCards.UpcomingReleases,
+                                                        -> {
                                                             { onNavigateToScheduleTab() }
                                                         }
                                                         DashboardCards.BazarrOverview -> {

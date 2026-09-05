@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,8 +27,6 @@ import com.dnfapps.arrmatey.extensions.isEqual
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
-
-import androidx.compose.foundation.clickable
 
 @Composable
 fun DashboardCalendarItemRow(

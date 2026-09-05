@@ -107,7 +107,7 @@ fun BazarrSection(
                     label = mokoString(MR.strings.bazarr_wanted_movies),
                     count = totalMovies,
                     containerColor = ArrYellow,
-                    contentColor = surfaceLight
+                    contentColor = surfaceLight,
                 )
             }
         }
