@@ -16,6 +16,14 @@ class TracearrRepository(
     override suspend fun testConnection(): NetworkResult<Unit> =
         tracearrClient.testConnection()
 
-    suspend fun getPublicStreams(): NetworkResult<TracearrStreamsResponse> =
-        tracearrClient.getPublicStreams()
+    suspend fun getPublicStreams(): NetworkResult<TracearrStreamsResponse> {
+        val baseUrl = instance.getEffectiveBaseUrl()
+        return tracearrClient.getPublicStreams().map { response ->
+            response.copy(
+                data = response.data.map { session ->
+                    session.rebuildWithInstanceBaseUrl(baseUrl)
+                },
+            )
+        }
+    }
 }

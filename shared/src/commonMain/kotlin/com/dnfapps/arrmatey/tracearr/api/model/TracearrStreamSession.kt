@@ -104,4 +104,23 @@ data class TracearrStreamSession(
 
     val effectiveServerName: String
         get() = server?.name ?: serverName ?: ""
+
+    fun rebuildWithInstanceBaseUrl(instanceBaseUrl: String): TracearrStreamSession {
+        val cleanBaseUrl = instanceBaseUrl.trimEnd('/')
+        fun fixUrl(path: String?): String? {
+            if (path.isNullOrEmpty()) return null
+            return if (path.startsWith("/")) "$cleanBaseUrl$path" else path
+        }
+
+        return copy(
+            thumbPath = fixUrl(thumbPath),
+            posterUrl = fixUrl(posterUrl),
+            userThumb = fixUrl(userThumb),
+            userAvatarUrl = fixUrl(userAvatarUrl),
+            user = user?.copy(
+                thumbUrl = fixUrl(user.thumbUrl),
+                avatarUrl = fixUrl(user.avatarUrl),
+            ),
+        )
+    }
 }

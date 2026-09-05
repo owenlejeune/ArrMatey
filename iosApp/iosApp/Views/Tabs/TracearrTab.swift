@@ -142,11 +142,32 @@ struct TracearrStreamCardView: View {
         return 0.0
     }
 
+    private var edgeColor: Color {
+        let serverType = session.server?.type ?? session.serverType
+        if serverType == .plex {
+            return Color(hex: 0xE5A00D)
+        } else if serverType == .jellyfin {
+            return Color(hex: 0xAA5CC3)
+        } else if serverType == .emby {
+            return Color(hex: 0x52B54B)
+        } else {
+            let name = (session.server?.name ?? session.serverName ?? "").lowercased()
+            if name.contains("plex") {
+                return Color(hex: 0xE5A00D)
+            } else if name.contains("jellyfin") {
+                return Color(hex: 0xAA5CC3)
+            } else if name.contains("emby") {
+                return Color(hex: 0x52B54B)
+            }
+            return .accentColor
+        }
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             // Left Accent Bar
             Rectangle()
-                .fill(stateColor)
+                .fill(edgeColor)
                 .frame(width: 4)
 
             VStack(alignment: .leading, spacing: 12) {
@@ -154,15 +175,10 @@ struct TracearrStreamCardView: View {
                     // Poster / Thumbnail
                     ZStack {
                         let imageUrl = session.posterUrl ?? session.thumbPath
-                        if let urlStr = imageUrl, urlStr.hasPrefix("http://") || urlStr.hasPrefix("https://"), let url = URL(string: urlStr) {
-                            AsyncImage(url: url) { image in
-                                image.resizable().aspectRatio(contentMode: .fill)
-                            } placeholder: {
-                                Color(UIColor.secondarySystemBackground)
-                            }
-                        } else {
+                        TracearrImage(urlString: imageUrl) {
                             Color(UIColor.secondarySystemBackground)
                         }
+                        .aspectRatio(contentMode: .fill)
 
                         // Play/Pause Overlay Icon
                         Circle()
@@ -184,12 +200,11 @@ struct TracearrStreamCardView: View {
                             let username = session.effectiveUsername.isEmpty ? MR.strings().user.localized() : session.effectiveUsername
                             let avatarUrl = session.effectiveUserAvatar
 
-                            if let avatarStr = avatarUrl, let url = URL(string: avatarStr) {
-                                AsyncImage(url: url) { image in
-                                    image.resizable().aspectRatio(contentMode: .fill)
-                                } placeholder: {
+                            if let avatarStr = avatarUrl, !avatarStr.isEmpty {
+                                TracearrImage(urlString: avatarStr) {
                                     Circle().fill(Color.orange)
                                 }
+                                .aspectRatio(contentMode: .fill)
                                 .frame(width: 22, height: 22)
                                 .clipShape(Circle())
                             } else {
@@ -332,6 +347,67 @@ struct TracearrStreamCardView: View {
             return "\(hours):\(minutesStr):\(secondsStr)"
         } else {
             return "\(minutes):\(secondsStr)"
+        }
+    }
+}
+
+struct TracearrImage<Placeholder: View>: View {
+    let urlString: String?
+    let placeholder: () -> Placeholder
+
+    @State private var image: UIImage? = nil
+    @State private var isLoading: Bool = false
+
+    init(urlString: String?, @ViewBuilder placeholder: @escaping () -> Placeholder) {
+        self.urlString = urlString
+        self.placeholder = placeholder
+    }
+
+    var body: some View {
+        ZStack {
+            if let uiImage = image {
+                Image(uiImage: uiImage)
+                    .resizable()
+            } else {
+                placeholder()
+            }
+        }
+        .task(id: urlString) {
+            await loadImage()
+        }
+    }
+
+    private func loadImage() async {
+        guard let urlStr = urlString,
+              !urlStr.isEmpty,
+              (urlStr.hasPrefix("http://") || urlStr.hasPrefix("https://")),
+              let url = URL(string: urlStr) else {
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("image/*", forHTTPHeaderField: "Accept")
+
+        if let instance = KoinBridge.shared.getInstanceRepository().getAllInstances().first(where: {
+            urlStr.hasPrefix($0.getEffectiveBaseUrl()) || urlStr.hasPrefix($0.url)
+        }) {
+            if instance.type == .tracearr {
+                request.setValue("Bearer \(instance.apiKey.value)", forHTTPHeaderField: "Authorization")
+            } else {
+                request.setValue(instance.apiKey.value, forHTTPHeaderField: "X-Api-Key")
+            }
+        }
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode),
+               let downloadedImage = UIImage(data: data) {
+                await MainActor.run {
+                    self.image = downloadedImage
+                }
+            }
+        } catch {
+            // image remains nil -> placeholder shown
         }
     }
 }

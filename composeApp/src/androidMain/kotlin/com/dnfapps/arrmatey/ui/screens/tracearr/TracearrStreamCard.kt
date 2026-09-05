@@ -30,19 +30,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.extensions.pxToDp
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamDecision
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
+import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
@@ -63,6 +71,23 @@ fun TracearrStreamCard(
             else -> Color(0xFF2196F3)
         }
 
+    val serverType = session.server?.type ?: session.serverType
+    val edgeColor =
+        when (serverType) {
+            TracearrServerType.Plex -> Color(0xFFE5A00D)
+            TracearrServerType.Jellyfin -> Color(0xFFAA5CC3)
+            TracearrServerType.Emby -> Color(0xFF52B54B)
+            null -> {
+                val name = (session.server?.name ?: session.serverName ?: "").lowercase()
+                when {
+                    name.contains("plex") -> Color(0xFFE5A00D)
+                    name.contains("jellyfin") -> Color(0xFFAA5CC3)
+                    name.contains("emby") -> Color(0xFF52B54B)
+                    else -> TracearrBlue
+                }
+            }
+        }
+
     val stateText =
         when {
             isPaused -> mokoString(MR.strings.paused)
@@ -72,6 +97,7 @@ fun TracearrStreamCard(
 
     val totalMs = session.totalDurationMs ?: session.durationMs ?: 0L
     val progressMs = session.progressMs ?: 0L
+    val remainingMs = totalMs - progressMs
     val progressFraction =
         if (totalMs > 0) {
             (progressMs.toFloat() / totalMs.toFloat()).coerceIn(0f, 1f)
@@ -79,8 +105,12 @@ fun TracearrStreamCard(
             0f
         }
 
+    var cardHeight by remember { mutableIntStateOf(0) }
+
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().onGloballyPositioned {
+            cardHeight = it.size.height
+        },
         shape = MaterialTheme.shapes.large,
         colors =
             CardDefaults.cardColors(
@@ -93,8 +123,8 @@ fun TracearrStreamCard(
                 modifier =
                     Modifier
                         .width(4.dp)
-                        .height(180.dp)
-                        .background(stateColor),
+                        .height(cardHeight.pxToDp())
+                        .background(edgeColor),
             )
 
             Column(
@@ -121,32 +151,11 @@ fun TracearrStreamCard(
                         val imageUrl = session.posterUrl ?: session.thumbPath
                         if (!imageUrl.isNullOrRelative()) {
                             AsyncImage(
-                                model = imageUrl,
+                                model = rememberRemoteImageData(imageUrl, trim = false),
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxWidth(),
                                 contentScale = ContentScale.Crop,
                             )
-                        }
-
-                        // State overlay icon
-                        Surface(
-                            shape = CircleShape,
-                            color = Color.Black.copy(alpha = 0.6f),
-                            modifier = Modifier.size(36.dp),
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector =
-                                        if (isPaused) {
-                                            Icons.Default.Pause
-                                        } else {
-                                            Icons.Default.PlayArrow
-                                        },
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
                         }
                     }
 
@@ -166,7 +175,7 @@ fun TracearrStreamCard(
 
                             if (!avatarUrl.isNullOrEmpty()) {
                                 AsyncImage(
-                                    model = avatarUrl,
+                                    model = rememberRemoteImageData(avatarUrl, trim = false),
                                     contentDescription = null,
                                     modifier =
                                         Modifier
@@ -300,7 +309,14 @@ fun TracearrStreamCard(
                             )
                         }
 
-                        Spacer(Modifier.height(4.dp))
+//                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = stateText,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = stateColor,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
 
                         // Progress Bar
                         LinearProgressIndicator(
@@ -327,10 +343,9 @@ fun TracearrStreamCard(
                             )
 
                             Text(
-                                text = stateText,
+                                text = "-${formatTimeMs(remainingMs)}",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = stateColor,
-                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }

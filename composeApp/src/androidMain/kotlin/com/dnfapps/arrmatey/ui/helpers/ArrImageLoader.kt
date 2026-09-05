@@ -6,6 +6,7 @@ import coil3.intercept.Interceptor
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.crossfade
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 
 class ArrImageLoader(
@@ -19,25 +20,34 @@ class ArrImageLoader(
 
             val repository =
                 instanceManager.getAllRepositories().find { repository ->
-                    url.startsWith(repository.instance.url)
+                    url.startsWith(repository.instance.url) ||
+                        url.startsWith(repository.instance.getEffectiveBaseUrl())
                 }
             val instance = repository?.instance
 
             val newRequest =
-                if (instance != null && !url.contains("apikey=")) {
-                    val separator = if (url.contains("?")) "&" else "?"
-                    val authenticatedUrl = "$url${separator}apikey=${instance.apiKey.value}"
+                if (instance != null) {
+                    val headersBuilder = NetworkHeaders.Builder().set("Accept", "image/*")
+
+                    val authenticatedUrl =
+                        if (instance.type == InstanceType.Tracearr) {
+                            headersBuilder.set("Authorization", "Bearer ${instance.apiKey.value}")
+                            url
+                        } else {
+                            headersBuilder.set("X-Api-Key", instance.apiKey.value)
+                            if (!url.contains("apikey=")) {
+                                val separator = if (url.contains("?")) "&" else "?"
+                                "$url${separator}apikey=${instance.apiKey.value}"
+                            } else {
+                                url
+                            }
+                        }
 
                     request
                         .newBuilder()
                         .data(authenticatedUrl)
-                        .httpHeaders(
-                            NetworkHeaders
-                                .Builder()
-                                .set("X-Api-Key", instance.apiKey.value)
-                                .set("Accept", "image/*")
-                                .build(),
-                        ).build()
+                        .httpHeaders(headersBuilder.build())
+                        .build()
                 } else {
                     request
                 }
