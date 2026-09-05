@@ -70,6 +70,7 @@ class PreferencesStore(
     private val downloadClientSortOrderKey = stringPreferencesKey("downloadClientSortOrder")
     private val dashboardCardsOrderKey = stringPreferencesKey("dashboardCardsOrderKey")
     private val dashboardFirstLaunchKey = booleanPreferencesKey("dashboardFirstLaunchKey")
+    private val showDashboardSearchKey = booleanPreferencesKey("showDashboardSearchKey")
     private val credentialsMigratedKey = booleanPreferencesKey("credentialsMigrated")
     private val localNetworkNoticeSeenKey = booleanPreferencesKey("localNetworkNoticeSeen")
     private val localNetworkPermissionInfoDismissedKey = booleanPreferencesKey("localNetworkPermissionInfoDismissed")
@@ -604,6 +605,20 @@ class PreferencesStore(
         scope.launch {
             dataStore.edit {
                 it[dashboardFirstLaunchKey] = false
+            }
+        }
+    }
+
+    val showDashboardSearch: Flow<Boolean> =
+        dataStore.data
+            .map { preferences ->
+                preferences[showDashboardSearchKey] ?: true
+            }
+
+    fun setShowDashboardSearch(show: Boolean) {
+        scope.launch {
+            dataStore.edit {
+                it[showDashboardSearchKey] = show
             }
         }
     }

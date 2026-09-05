@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.shrinkOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,8 +25,10 @@ import androidx.compose.material3.SearchBarState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import com.dnfapps.arrmatey.entensions.isCollapsed
@@ -51,46 +54,71 @@ fun ArrAppBarWithSearch(
     trailingIcon: @Composable () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(textFieldEnabled) {
+        if (!textFieldEnabled && searchBarState.isExpanded()) {
+            searchBarState.animateToCollapsed()
+        }
+    }
+
     val inputField =
         @Composable {
-            SearchBarDefaults.InputField(
-                modifier = inputFieldModifier,
-                textFieldState = textFieldState,
-                searchBarState = searchBarState,
-                enabled = textFieldEnabled,
-                colors = SearchBarDefaults.inputFieldColors(),
-                onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
-                placeholder = {
-                    Text(
-                        modifier = Modifier.clearAndSetSemantics {},
-                        text = searchPlaceholder,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-                leadingIcon = {
-                    if (searchBarState.isExpanded()) {
-                        IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
-                        }
-                    } else {
-                        leadingIcon()
-                    }
-                },
-                trailingIcon = {
-                    AnimatedContent(
-                        targetState = textFieldState.text.isNotEmpty(),
-                    ) { isNotEmpty ->
-                        if (isNotEmpty) {
-                            IconButton(onClick = { textFieldState.clearText() }) {
-                                Icon(Icons.Default.Close, null)
+            Box {
+                SearchBarDefaults.InputField(
+                    modifier = inputFieldModifier,
+                    textFieldState = textFieldState,
+                    searchBarState = searchBarState,
+                    enabled = textFieldEnabled,
+                    colors = SearchBarDefaults.inputFieldColors(),
+                    onSearch = { scope.launch { searchBarState.animateToCollapsed() } },
+                    placeholder = {
+                        Text(
+                            modifier = Modifier.clearAndSetSemantics {},
+                            text = searchPlaceholder,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    leadingIcon = {
+                        if (searchBarState.isExpanded()) {
+                            IconButton(onClick = { scope.launch { searchBarState.animateToCollapsed() } }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                             }
                         } else {
-                            trailingIcon()
+                            leadingIcon()
                         }
-                    }
-                },
-            )
+                    },
+                    trailingIcon = {
+                        AnimatedContent(
+                            targetState = textFieldState.text.isNotEmpty(),
+                        ) { isNotEmpty ->
+                            if (isNotEmpty) {
+                                IconButton(onClick = { textFieldState.clearText() }) {
+                                    Icon(Icons.Default.Close, null)
+                                }
+                            } else {
+                                trailingIcon()
+                            }
+                        }
+                    },
+                )
+
+                if (!textFieldEnabled) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .matchParentSize()
+                                .pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            val event = awaitPointerEvent()
+                                            event.changes.forEach { it.consume() }
+                                        }
+                                    }
+                                },
+                    )
+                }
+            }
         }
 
     AppBarWithSearch(

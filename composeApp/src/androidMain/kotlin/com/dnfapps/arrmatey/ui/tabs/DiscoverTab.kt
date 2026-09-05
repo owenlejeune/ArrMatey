@@ -219,7 +219,7 @@ private fun DiscoverHomeScreen(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun DiscoverSearchOverlay(
+fun DiscoverSearchOverlay(
     items: List<SearchResult>,
     isLoading: Boolean,
     onItemClick: (SearchResult) -> Unit,

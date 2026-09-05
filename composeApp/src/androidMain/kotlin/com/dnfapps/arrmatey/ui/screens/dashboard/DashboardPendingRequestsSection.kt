@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -123,7 +125,7 @@ private fun CompactRequestCard(
     Card(
         modifier =
             Modifier
-                .width(260.dp)
+                .widthIn(max = 260.dp)
                 .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.medium,
         colors =
@@ -131,7 +133,7 @@ private fun CompactRequestCard(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
             ),
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.wrapContentWidth()) {
             BannerView(
                 bannerModel = details?.fullBackdropPath?.let { rememberRemoteImageData(it) },
                 modifier = Modifier.matchParentSize(),
@@ -151,7 +153,7 @@ private fun CompactRequestCard(
                         contentDescription = null,
                         modifier =
                             Modifier
-                                .height(72.dp)
+                                .height(80.dp)
                                 .aspectRatio(AspectRatio.Poster.ratio, true)
                                 .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Fit,

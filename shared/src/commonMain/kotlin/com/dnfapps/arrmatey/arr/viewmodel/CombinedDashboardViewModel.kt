@@ -99,6 +99,14 @@ class CombinedDashboardViewModel(
                 initialValue = false,
             )
 
+    val showDashboardSearch: StateFlow<Boolean> =
+        preferencesStore.showDashboardSearch
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
     private val arrInstancesFlow =
         instanceManager.instanceRepositories
             .flatMapLatest { repoMap ->
@@ -651,5 +659,9 @@ class CombinedDashboardViewModel(
 
     fun setFirstLaunchComplete() {
         preferencesStore.markDashboardAsSeen()
+    }
+
+    fun toggleDashboardSearch() {
+        preferencesStore.setShowDashboardSearch(!showDashboardSearch.value)
     }
 }

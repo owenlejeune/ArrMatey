@@ -26,10 +26,12 @@ struct DashboardTab: View {
 
 struct DashboardTabContent: View {
     @StateObject private var viewModel = DashboardViewModelS()
+    @StateObject private var discoverViewModel = DiscoverViewModelS()
     @StateObject private var activityViewModel = ActivityQueueViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var showAddCardSheet = false
     @State private var draggedCard: DashboardCards?
+    @State private var searchQuery = ""
 
     @State private var selectedRequestForSheet: MediaRequestPackage? = nil
     @State private var selectedIssueForSheet: MediaIssuePackage? = nil
@@ -46,19 +48,44 @@ struct DashboardTabContent: View {
     }
 
     var body: some View {
-        ZStack {
-            if let success = viewModel.state as? CombinedDashboardStateSuccess {
-                if viewModel.cards.isEmpty {
-                    emptyView
-                } else {
-                    dashboardGrid(success)
+        Group {
+            if viewModel.showDashboardSearch && !searchQuery.isEmpty {
+                DiscoverSearchOverlay(
+                    items: discoverViewModel.searchResults,
+                    isLoading: discoverViewModel.isSearching,
+                    showBanners: discoverViewModel.searchShowBanners,
+                    showInstanceIndicatorShadow: discoverViewModel.searchShowInstanceIndicatorShadow,
+                    onItemClick: { result in
+                        handleSearchItemClick(result)
+                    }
+                )
+            } else {
+                ZStack {
+                    if let success = viewModel.state as? CombinedDashboardStateSuccess {
+                        if viewModel.cards.isEmpty {
+                            emptyView
+                        } else {
+                            dashboardGrid(success)
+                        }
+                    } else if viewModel.state is CombinedDashboardStateLoading {
+                        ProgressView()
+                    }
                 }
-            } else if viewModel.state is CombinedDashboardStateLoading {
-                ProgressView()
             }
         }
         .navigationTitle(MR.strings().dashboard.localized())
         .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always))
+        .onChange(of: searchQuery) { _, newValue in
+            if viewModel.showDashboardSearch && !viewModel.isEditing {
+                discoverViewModel.updateSearchQuery(newValue)
+            }
+        }
+        .onChange(of: viewModel.isEditing) { _, isEditing in
+            if isEditing {
+                searchQuery = ""
+            }
+        }
         .toolbar {
             if !viewModel.isEditing {
                 ToolbarItem(placement: .topBarLeading) {
@@ -79,6 +106,10 @@ struct DashboardTabContent: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
+                        Button(action: { viewModel.toggleDashboardSearch() }) {
+                            Image(systemName: viewModel.showDashboardSearch ? "magnifyingglass" : "magnifyingglass.slash")
+                        }
+
                         Button(action: { viewModel.resetCardsOrder() }) {
                             Image(systemName: "arrow.counterclockwise")
                         }
@@ -216,6 +247,16 @@ struct DashboardTabContent: View {
         case .activityQueue: navigationManager.openActivityTab()
         case .onToday, .upcomingReleases: navigationManager.openScheduleTab()
         default: break
+        }
+    }
+
+    private func handleSearchItemClick(_ result: SearchResult) {
+        if let arrResult = result as? SearchResultArrMediaResult {
+            navigationManager.goToArrDetailsOrPreviewOnDashboard(item: arrResult.media, type: arrResult.instanceType, instanceId: arrResult.instanceId?.int64Value)
+        } else if let seerrMedia = result as? SearchResultSeerrMediaResult {
+            navigationManager.goToSeerrDetailsOnDashboard(tmdbId: seerrMedia.result.id, requestType: seerrMedia.result.mediaType)
+        } else if let seerrPerson = result as? SearchResultSeerrPersonResult {
+            navigationManager.goToPersonDetailsOnDashboard(id: seerrPerson.result.id)
         }
     }
 
