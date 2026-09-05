@@ -36,6 +36,8 @@ import dev.icerock.moko.resources.compose.painterResource
 fun SeerrSection(
     state: CombinedDashboardState.Success,
     isEditing: Boolean,
+    onRequestClick: () -> Unit = {},
+    onIssueClick: () -> Unit = {},
 ) {
     val seerrInstances = state.seerrInstances
 
@@ -99,6 +101,7 @@ fun SeerrSection(
                     count = totalRequests,
                     containerColor = ArrPurple,
                     contentColor = surfaceLight,
+                    onClick = if (!isEditing) onRequestClick else null,
                 )
                 CountStatItem(
                     modifier = Modifier.weight(1f),
@@ -110,6 +113,7 @@ fun SeerrSection(
                             totalIssues > 0 -> MaterialTheme.colorScheme.errorContainer
                             else -> MaterialTheme.colorScheme.secondaryContainer
                         },
+                    onClick = if (!isEditing) onIssueClick else null,
                 )
             }
         }

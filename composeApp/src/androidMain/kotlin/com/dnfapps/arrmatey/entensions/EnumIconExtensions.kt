@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AudioFile
+import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CloudDownload
@@ -71,7 +72,7 @@ val TabItem.androidIcon: ImageVector
                     TabItem.Standard.PROWLARR -> Icons.AutoMirrored.Filled.ManageSearch
                     TabItem.Standard.BAZARR -> Icons.Default.Subtitles
                     TabItem.Standard.DASHBOARD -> Icons.Default.Dashboard
-                    TabItem.Standard.TRACEARR -> Icons.Default.Tv
+                    TabItem.Standard.TRACEARR -> Icons.Default.AutoGraph
                 }
             is TabItem.CustomWebpage -> Icons.Default.Language
             is TabItem.Settings -> Icons.Default.Settings

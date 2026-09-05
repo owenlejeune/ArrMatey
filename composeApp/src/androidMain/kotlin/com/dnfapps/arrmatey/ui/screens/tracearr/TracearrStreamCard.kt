@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamDecision
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
@@ -46,6 +47,7 @@ import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun TracearrStreamCard(
@@ -63,9 +65,9 @@ fun TracearrStreamCard(
 
     val stateText =
         when {
-            isPaused -> "Paused"
-            isPlaying -> "Playing"
-            else -> session.state?.replaceFirstChar { it.uppercase() } ?: "Active"
+            isPaused -> mokoString(MR.strings.paused)
+            isPlaying -> mokoString(MR.strings.playing)
+            else -> session.state?.replaceFirstChar { it.uppercase() } ?: mokoString(MR.strings.active)
         }
 
     val totalMs = session.totalDurationMs ?: session.durationMs ?: 0L
@@ -159,8 +161,8 @@ fun TracearrStreamCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
-                            val username = session.user?.username ?: "User"
-                            val avatarUrl = session.user?.avatarUrl ?: session.user?.thumbUrl
+                            val username = session.effectiveUsername.ifEmpty { mokoString(MR.strings.user) }
+                            val avatarUrl = session.effectiveUserAvatar
 
                             if (!avatarUrl.isNullOrEmpty()) {
                                 AsyncImage(
@@ -215,7 +217,7 @@ fun TracearrStreamCard(
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             imageVector = Icons.Default.ElectricBolt,
-                                            contentDescription = "Transcoding",
+                                            contentDescription = mokoString(MR.strings.transcoding),
                                             tint = ArrYellow,
                                             modifier = Modifier.size(14.dp),
                                         )
@@ -249,7 +251,7 @@ fun TracearrStreamCard(
                             if (session.canTerminate == true) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Terminate",
+                                    contentDescription = mokoString(MR.strings.terminate),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(18.dp),
                                 )
@@ -261,7 +263,7 @@ fun TracearrStreamCard(
                             session.grandparentTitle
                                 ?: session.showTitle
                                 ?: session.mediaTitle
-                                ?: "Unknown Title"
+                                ?: mokoString(MR.strings.unknown)
 
                         Text(
                             text = displayTitle,
@@ -342,8 +344,8 @@ fun TracearrStreamCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    val serverName = session.server?.name ?: "Server"
-                    val location = session.geoCountry ?: session.ipAddress ?: "Local Network"
+                    val serverName = session.effectiveServerName.ifEmpty { mokoString(MR.strings.server) }
+                    val location = session.geoCountry ?: session.ipAddress ?: mokoString(MR.strings.local_network)
 
                     Text(
                         text = "$serverName · $location",

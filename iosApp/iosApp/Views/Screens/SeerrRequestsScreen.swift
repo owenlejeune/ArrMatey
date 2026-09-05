@@ -153,7 +153,7 @@ struct SeerrTabContent: View {
 
 // MARK: - Requests Content
 
-private struct RequestsContentView: View {
+struct RequestsContentView: View {
     let pagedData: PagedData<MediaRequestPackage>
     let userState: SeerrUser?
     let operationsState: RequestOperationsState
@@ -235,6 +235,10 @@ private struct RequestsContentView: View {
                     onDeclineRequest: { requestId in
                         onDecline(requestId)
                         selectedPackageForSheet = nil
+                    },
+                    onViewMedia: { tmdbId, type in
+                        selectedPackageForSheet = nil
+                        onNavigateToDetails(tmdbId, type)
                     }
                 )
             }
@@ -244,7 +248,7 @@ private struct RequestsContentView: View {
 
 // MARK: - Issues Content
 
-private struct IssuesContentView: View {
+struct IssuesContentView: View {
     let pagedData: PagedData<MediaIssuePackage>
     let onLoadMore: () -> Void
     let onRetry: () -> Void
@@ -426,12 +430,75 @@ private struct ErrorBannerView: View {
 
 // MARK: - Helpers
 
-private struct IdentifiableRequestPackage: Identifiable {
+struct IdentifiableRequestPackage: Identifiable {
     let package: MediaRequestPackage
     var id: Int64 { package.request.id }
 }
 
-private struct IdentifiableIssue: Identifiable {
+struct IdentifiableIssue: Identifiable {
     let package: MediaIssuePackage
     var id: Int64 { package.issue.id }
+}
+
+struct SeerrSheetView: View {
+    @ObservedObject var viewModel: RequestsViewModelS
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject private var navigationManager: NavigationManager
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                Picker("", selection: Binding(
+                    get: { viewModel.selectedTab == .requests ? 0 : 1 },
+                    set: { viewModel.setSelectedTab($0 == 0 ? .requests : .issues) }
+                )) {
+                    Text(MR.strings().requests.localized()).tag(0)
+                    Text(MR.strings().issues.localized()).tag(1)
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+
+                if viewModel.selectedTab == .requests {
+                    RequestsContentView(
+                        pagedData: viewModel.requestsState,
+                        userState: viewModel.userState,
+                        operationsState: viewModel.operationsState,
+                        onApprove: { viewModel.approveRequest($0) },
+                        onApproveWithDetails: { id, profileId, rootFolder, lang, seasons in
+                            viewModel.approveRequest(id, profileId: profileId, rootFolder: rootFolder, languageProfileId: lang, seasons: seasons)
+                        },
+                        onDecline: { viewModel.declineRequest($0) },
+                        onEdit: { _ in },
+                        onDelete: { viewModel.cancelRequest($0) },
+                        onRemoveFromService: { viewModel.deleteMediaFile($0) },
+                        onNavigateToDetails: { tmdbId, type in
+                            dismiss()
+                            navigationManager.goToSeerrDetailsOnDashboard(tmdbId: tmdbId, requestType: type)
+                        },
+                        onLoadMore: { viewModel.loadNextRequestsPage() },
+                        onRetry: { viewModel.retryRequests() },
+                        onClearError: { viewModel.clearRequestsError() }
+                    )
+                } else {
+                    IssuesContentView(
+                        pagedData: viewModel.issuesState,
+                        onLoadMore: { viewModel.loadNextIssuesPage() },
+                        onRetry: { viewModel.retryIssues() },
+                        onClearError: { viewModel.clearIssuesError() },
+                        onRefresh: { viewModel.refresh() }
+                    )
+                }
+            }
+            .navigationTitle(MR.strings().seerr.localized())
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(MR.strings().close.localized()) {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
 }

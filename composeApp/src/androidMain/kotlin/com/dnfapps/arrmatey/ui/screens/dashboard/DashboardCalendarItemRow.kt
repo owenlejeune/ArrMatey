@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,12 +31,15 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun DashboardCalendarItemRow(
     dashboardItem: DashboardCalendarItem,
+    modifier: Modifier = Modifier,
     showDate: Boolean = false,
+    onClick: () -> Unit = {},
 ) {
     val item = dashboardItem.item
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier.clickable(onClick = onClick),
     ) {
         val title =
             when (item) {
@@ -50,8 +54,13 @@ fun DashboardCalendarItemRow(
             when (item) {
                 is Episode -> "${item.seasonEpLabel}: ${item.title ?: ""}"
                 is EpisodeGroup -> {
-                    val episodes = listOf(item.first) + item.additional
-                    episodes.joinToString(", ") { "${it.seasonEpLabel}: ${it.title ?: ""}" }
+                    val first = item.first
+                    val base = "${first.seasonEpLabel}: ${first.title ?: ""}"
+                    if (item.additional.isNotEmpty()) {
+                        "$base (${mokoString(MR.strings.additional_items_count, item.additional.size)})"
+                    } else {
+                        base
+                    }
                 }
                 is ArrAlbum -> item.title ?: ""
                 is ArrMovie -> {

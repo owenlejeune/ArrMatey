@@ -1,16 +1,17 @@
 package com.dnfapps.arrmatey.tracearr.api.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class TracearrTranscodeInfo(
-    val containerDecision: TracearrStreamDecision? = null,
-    val hwDecoding: String? = null,
-    val hwEncoding: String? = null,
-    val hwRequested: Boolean? = null,
+    @SerialName("container_decision") val containerDecision: TracearrStreamDecision? = null,
+    @SerialName("hw_decoding") val hwDecoding: String? = null,
+    @SerialName("hw_encoding") val hwEncoding: String? = null,
+    @SerialName("hw_requested") val hwRequested: Boolean? = null,
     val reasons: List<String> = emptyList(),
-    val sourceContainer: String? = null,
+    @SerialName("source_container") val sourceContainer: String? = null,
     val speed: Double? = null,
-    val streamContainer: String? = null,
+    @SerialName("stream_container") val streamContainer: String? = null,
     val throttled: Boolean? = null,
 )

@@ -28,6 +28,7 @@ import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
+import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.surfaceLight
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
@@ -105,7 +106,8 @@ fun BazarrSection(
                     icon = Icons.Default.Movie,
                     label = mokoString(MR.strings.bazarr_wanted_movies),
                     count = totalMovies,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    containerColor = ArrYellow,
+                    contentColor = surfaceLight,
                 )
             }
         }

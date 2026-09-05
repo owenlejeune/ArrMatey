@@ -154,6 +154,10 @@ class NavigationManager(
         navigateToTab(TabItem.Standard.CALENDAR)
     }
 
+    fun openDiscoverTab() {
+        navigateToTab(TabItem.Standard.DISCOVER)
+    }
+
     fun openSeerrDetails(
         tmdbId: Long,
         requestType: RequestType,

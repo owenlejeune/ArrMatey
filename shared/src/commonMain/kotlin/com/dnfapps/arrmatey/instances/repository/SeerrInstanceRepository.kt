@@ -76,6 +76,12 @@ class SeerrInstanceRepository(
     private val _openIssuesCount = MutableStateFlow(0)
     val openIssuesCount: StateFlow<Int> = _openIssuesCount.asStateFlow()
 
+    private val _pendingRequests = MutableStateFlow<List<MediaRequestPackage>>(emptyList())
+    val pendingRequests: StateFlow<List<MediaRequestPackage>> = _pendingRequests.asStateFlow()
+
+    private val _openIssues = MutableStateFlow<List<MediaIssuePackage>>(emptyList())
+    val openIssues: StateFlow<List<MediaIssuePackage>> = _openIssues.asStateFlow()
+
     override suspend fun testConnection(): NetworkResult<Unit> = client.testConnection()
 
     suspend fun getLoggedInUser() {
@@ -91,12 +97,24 @@ class SeerrInstanceRepository(
     }
 
     suspend fun refreshCounts() {
-        client.getRequests(page = 1, pageSize = 1).onSuccess {
-            _pendingRequestsCount.value = it.pageInfo.results
-        }
-        client.getIssues(page = 1, pageSize = 1).onSuccess {
-            _openIssuesCount.value = it.pageInfo.results
-        }
+        client
+            .getRequests(page = 1, pageSize = 20)
+            .onSuccess { response ->
+                _pendingRequestsCount.value = response.pageInfo.results
+                val enrichedRequests = mediaPackageService.enrichRequests(response.results)
+                _pendingRequests.value = enrichedRequests
+            }.onError { _, _, _ ->
+                _pendingRequests.value = emptyList()
+            }
+        client
+            .getIssues(page = 1, pageSize = 20)
+            .onSuccess { response ->
+                _openIssuesCount.value = response.pageInfo.results
+                val enrichedIssues = issuePackageService.enrichIssues(response.results)
+                _openIssues.value = enrichedIssues
+            }.onError { _, _, _ ->
+                _openIssues.value = emptyList()
+            }
     }
 
     fun getRequestsPaging(): PagingSource<MediaRequestPackage> =

@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.arr.state.InstanceNetworkStatus
 import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
+import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
@@ -30,6 +31,8 @@ import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
+import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
@@ -66,8 +69,11 @@ class CombinedDashboardViewModel(
     private val calendarService: CalendarService,
     private val dashboardManager: DashboardManager,
     private val preferencesStore: PreferencesStore,
+    private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
     private val logger: Logger,
 ) : ViewModel() {
+    private val _removeItemState = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val removeItemState: StateFlow<OperationStatus> = _removeItemState.asStateFlow()
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
@@ -91,6 +97,14 @@ class CombinedDashboardViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = false,
+            )
+
+    val showDashboardSearch: StateFlow<Boolean> =
+        preferencesStore.showDashboardSearch
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
             )
 
     private val arrInstancesFlow =
@@ -146,11 +160,15 @@ class CombinedDashboardViewModel(
                             combine(
                                 repo.pendingRequestsCount,
                                 repo.openIssuesCount,
-                            ) { pending, issues ->
+                                repo.pendingRequests,
+                                repo.openIssues,
+                            ) { pendingCount, issuesCount, requests, issues ->
                                 SeerrDashboardState(
                                     instance = repo.instance,
-                                    pendingRequestsCount = pending,
-                                    openIssuesCount = issues,
+                                    pendingRequestsCount = pendingCount,
+                                    openIssuesCount = issuesCount,
+                                    pendingRequests = requests,
+                                    openIssues = issues,
                                 )
                             }
                         }
@@ -582,7 +600,68 @@ class CombinedDashboardViewModel(
         dashboardManager.addCard(card)
     }
 
+    fun approveRequest(
+        requestId: Long,
+        profileId: Long? = null,
+        rootFolder: String? = null,
+        languageProfileId: Long? = null,
+        seasons: List<Int>? = null,
+    ) {
+        viewModelScope.launch {
+            val seerrRepos = instanceManager.getAllSeerrRepositories()
+            seerrRepos.forEach { repo ->
+                repo.setRequestStatus(
+                    requestId = requestId,
+                    status = ApprovalStatus.Approve,
+                    profileId = profileId,
+                    rootFolder = rootFolder,
+                    languageProfileId = languageProfileId,
+                    seasons = seasons,
+                )
+            }
+            refresh()
+        }
+    }
+
+    fun declineRequest(requestId: Long) {
+        viewModelScope.launch {
+            val seerrRepos = instanceManager.getAllSeerrRepositories()
+            seerrRepos.forEach { repo ->
+                repo.setRequestStatus(
+                    requestId = requestId,
+                    status = ApprovalStatus.Decline,
+                )
+            }
+            refresh()
+        }
+    }
+
+    fun removeQueueItem(
+        item: QueueItem,
+        removeFromClient: Boolean,
+        addToBlocklist: Boolean,
+        skipRedownload: Boolean,
+    ) {
+        viewModelScope.launch {
+            deleteQueueItemUseCase(item, removeFromClient, addToBlocklist, skipRedownload)
+                .collect { status ->
+                    _removeItemState.value = status
+                    if (status is OperationStatus.Success) {
+                        refresh()
+                    }
+                }
+        }
+    }
+
+    fun resetRemoveItemState() {
+        _removeItemState.value = OperationStatus.Idle
+    }
+
     fun setFirstLaunchComplete() {
         preferencesStore.markDashboardAsSeen()
+    }
+
+    fun toggleDashboardSearch() {
+        preferencesStore.setShowDashboardSearch(!showDashboardSearch.value)
     }
 }

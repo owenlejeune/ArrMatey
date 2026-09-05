@@ -66,6 +66,8 @@ enum class DashboardCards(
 ) {
     ArrOverview(MR.strings.dashboard_arr_overview),
     SeerrOverview(MR.strings.dashboard_seerr_overview),
+    PendingRequests(MR.strings.requests),
+    PendingIssues(MR.strings.issues),
     ProwlarrOverview(MR.strings.dashboard_prowlarr_overview),
     Network(MR.strings.dashboard_network_monitor),
     RecentlyAdded(MR.strings.dashboard_recently_added),
@@ -83,6 +85,8 @@ enum class DashboardCards(
                 listOf(
                     ArrOverview,
                     SeerrOverview,
+                    PendingRequests,
+                    PendingIssues,
                     ProwlarrOverview,
                     BazarrOverview,
                     ActivityQueue,

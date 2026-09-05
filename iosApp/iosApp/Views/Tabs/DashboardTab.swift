@@ -26,9 +26,19 @@ struct DashboardTab: View {
 
 struct DashboardTabContent: View {
     @StateObject private var viewModel = DashboardViewModelS()
+    @StateObject private var discoverViewModel = DiscoverViewModelS()
+    @StateObject private var activityViewModel = ActivityQueueViewModelS()
+    @StateObject private var requestsViewModel = RequestsViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var showAddCardSheet = false
+    @State private var showHealthSheet = false
+    @State private var showSeerrSheet = false
     @State private var draggedCard: DashboardCards?
+    @State private var searchQuery = ""
+
+    @State private var selectedRequestForSheet: MediaRequestPackage? = nil
+    @State private var selectedIssueForSheet: MediaIssuePackage? = nil
+    @State private var selectedActivityItem: IdentifiableQueueItem? = nil
 
     private let columns = [
         GridItem(.adaptive(minimum: 300, maximum: .infinity), spacing: 16)
@@ -41,19 +51,44 @@ struct DashboardTabContent: View {
     }
 
     var body: some View {
-        ZStack {
-            if let success = viewModel.state as? CombinedDashboardStateSuccess {
-                if viewModel.cards.isEmpty {
-                    emptyView
-                } else {
-                    dashboardGrid(success)
+        Group {
+            if viewModel.showDashboardSearch && !searchQuery.isEmpty {
+                DiscoverSearchOverlay(
+                    items: discoverViewModel.searchResults,
+                    isLoading: discoverViewModel.isSearching,
+                    showBanners: discoverViewModel.searchShowBanners,
+                    showInstanceIndicatorShadow: discoverViewModel.searchShowInstanceIndicatorShadow,
+                    onItemClick: { result in
+                        handleSearchItemClick(result)
+                    }
+                )
+            } else {
+                ZStack {
+                    if let success = viewModel.state as? CombinedDashboardStateSuccess {
+                        if viewModel.cards.isEmpty {
+                            emptyView
+                        } else {
+                            dashboardGrid(success)
+                        }
+                    } else if viewModel.state is CombinedDashboardStateLoading {
+                        ProgressView()
+                    }
                 }
-            } else if viewModel.state is CombinedDashboardStateLoading {
-                ProgressView()
             }
         }
         .navigationTitle(MR.strings().dashboard.localized())
         .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always))
+        .onChange(of: searchQuery) { _, newValue in
+            if viewModel.showDashboardSearch && !viewModel.isEditing {
+                discoverViewModel.updateSearchQuery(newValue)
+            }
+        }
+        .onChange(of: viewModel.isEditing) { _, isEditing in
+            if isEditing {
+                searchQuery = ""
+            }
+        }
         .toolbar {
             if !viewModel.isEditing {
                 ToolbarItem(placement: .topBarLeading) {
@@ -74,6 +109,10 @@ struct DashboardTabContent: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
+                        Button(action: { viewModel.toggleDashboardSearch() }) {
+                            Image(systemName: viewModel.showDashboardSearch ? "magnifyingglass" : "magnifyingglass.slash")
+                        }
+
                         Button(action: { viewModel.resetCardsOrder() }) {
                             Image(systemName: "arrow.counterclockwise")
                         }
@@ -96,6 +135,62 @@ struct DashboardTabContent: View {
         .sheet(isPresented: $showAddCardSheet) {
             AddDashboardCardSheet(viewModel: viewModel)
         }
+        .sheet(item: Binding(
+            get: { selectedRequestForSheet.map { IdentifiableRequestPackage(package: $0) } },
+            set: { selectedRequestForSheet = $0?.package }
+        )) { wrapper in
+            if let details = wrapper.package.details {
+                SeerrViewRequestSheet(
+                    details: details,
+                    request: wrapper.package.request,
+                    serviceDetails: wrapper.package.serviceDetails,
+                    onDismissRequest: { selectedRequestForSheet = nil },
+                    onApproveRequest: { requestId, profileId, rootFolder, languageProfileId, seasons in
+                        viewModel.approveRequest(requestId: requestId, profileId: profileId, rootFolder: rootFolder, languageProfileId: languageProfileId, seasons: seasons)
+                        selectedRequestForSheet = nil
+                    },
+                    onDeclineRequest: { requestId in
+                        viewModel.declineRequest(requestId: requestId)
+                        selectedRequestForSheet = nil
+                    },
+                    onViewMedia: { tmdbId, type in
+                        selectedRequestForSheet = nil
+                        navigationManager.goToSeerrDetailsOnDashboard(tmdbId: tmdbId, requestType: type)
+                    }
+                )
+            }
+        }
+        .sheet(item: Binding(
+            get: { selectedIssueForSheet.map { IdentifiableIssue(package: $0) } },
+            set: { selectedIssueForSheet = $0?.package }
+        )) { wrapper in
+            SeerrIssueDetailsSheet(
+                issuePackage: wrapper.package,
+                onDismiss: { selectedIssueForSheet = nil },
+                onIssueClosed: {
+                    selectedIssueForSheet = nil
+                    viewModel.refresh()
+                }
+            )
+        }
+        .sheet(item: $selectedActivityItem) { wrapper in
+            QueueItemInfoSheet(
+                item: wrapper.item,
+                deleteInProgress: activityViewModel.removeInProgress,
+                onDelete: { remove, block, skip in
+                    activityViewModel.removeQueueItem(wrapper.item, remove, block, skip)
+                }
+            )
+            .presentationDetents([.fraction(0.7)])
+        }
+        .sheet(isPresented: $showHealthSheet) {
+            if let success = viewModel.state as? CombinedDashboardStateSuccess {
+                HealthNoticesSheet(instances: success.instances)
+            }
+        }
+        .sheet(isPresented: $showSeerrSheet) {
+            SeerrSheetView(viewModel: requestsViewModel)
+        }
     }
 
     @ViewBuilder
@@ -103,7 +198,23 @@ struct DashboardTabContent: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(viewModel.cards, id: \.self) { card in
-                    DashboardCardWrapper(card: card, state: state, isEditing: viewModel.isEditing) {
+                    DashboardCardWrapper(
+                        card: card,
+                        state: state,
+                        isEditing: viewModel.isEditing,
+                        onRequestClick: { selectedRequestForSheet = $0 },
+                        onIssueClick: { selectedIssueForSheet = $0 },
+                        onActivityClick: { selectedActivityItem = IdentifiableQueueItem(item: $0) },
+                        onHealthClick: { showHealthSheet = true },
+                        onSeerrRequestsStatClick: {
+                            requestsViewModel.setSelectedTab(.requests)
+                            showSeerrSheet = true
+                        },
+                        onSeerrIssuesStatClick: {
+                            requestsViewModel.setSelectedTab(.issues)
+                            showSeerrSheet = true
+                        }
+                    ) {
                         viewModel.removeCard(card: card)
                     }
                     .onTapGesture {
@@ -145,18 +256,31 @@ struct DashboardTabContent: View {
         .navigationDestination(for: MediaRoute.self) { route in
             MediaRouteDestination(route: route)
         }
+        .navigationDestination(for: SeerrRoute.self) { route in
+            SeerrRouteDestination(route: route)
+        }
     }
 
     private func handleCardClick(_ card: DashboardCards) {
         switch card {
         case .arrOverview: navigationManager.openSettings()
-        case .seerrOverview: navigationManager.openRequestsTab()
+        case .seerrOverview, .pendingRequests, .pendingIssues: navigationManager.openRequestsTab()
         case .prowlarrOverview: navigationManager.openProwlarrTab()
         case .bazarrOverview: navigationManager.openBazarrTab()
         case .downloadClients: navigationManager.openDownloadsTab()
         case .activityQueue: navigationManager.openActivityTab()
         case .onToday, .upcomingReleases: navigationManager.openScheduleTab()
         default: break
+        }
+    }
+
+    private func handleSearchItemClick(_ result: SearchResult) {
+        if let arrResult = result as? SearchResultArrMediaResult {
+            navigationManager.goToArrDetailsOrPreviewOnDashboard(item: arrResult.media, type: arrResult.instanceType, instanceId: arrResult.instanceId?.int64Value)
+        } else if let seerrMedia = result as? SearchResultSeerrMediaResult {
+            navigationManager.goToSeerrDetailsOnDashboard(tmdbId: seerrMedia.result.id, requestType: seerrMedia.result.mediaType)
+        } else if let seerrPerson = result as? SearchResultSeerrPersonResult {
+            navigationManager.goToPersonDetailsOnDashboard(id: seerrPerson.result.id)
         }
     }
 
@@ -205,14 +329,30 @@ struct DashboardCardWrapper: View {
     let card: DashboardCards
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
+    var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
+    var onActivityClick: ((QueueItem) -> Void)? = nil
+    var onHealthClick: (() -> Void)? = nil
+    var onSeerrRequestsStatClick: (() -> Void)? = nil
+    var onSeerrIssuesStatClick: (() -> Void)? = nil
     let onRemove: () -> Void
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            DashboardCardView(card: card, state: state, isEditing: isEditing)
-                .padding(12)
-                .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
-                .cornerRadius(12)
+            DashboardCardView(
+                card: card,
+                state: state,
+                isEditing: isEditing,
+                onRequestClick: onRequestClick,
+                onIssueClick: onIssueClick,
+                onActivityClick: onActivityClick,
+                onHealthClick: onHealthClick,
+                onSeerrRequestsStatClick: onSeerrRequestsStatClick,
+                onSeerrIssuesStatClick: onSeerrIssuesStatClick
+            )
+            .padding(12)
+            .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
+            .cornerRadius(12)
 
             if isEditing {
                 Button(action: onRemove) {
@@ -232,17 +372,25 @@ struct DashboardCardView: View {
     let card: DashboardCards
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
+    var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
+    var onActivityClick: ((QueueItem) -> Void)? = nil
+    var onHealthClick: (() -> Void)? = nil
+    var onSeerrRequestsStatClick: (() -> Void)? = nil
+    var onSeerrIssuesStatClick: (() -> Void)? = nil
 
     var body: some View {
         Group {
             switch card {
-            case .arrOverview: DashboardOverviewSection(state: state, isEditing: isEditing)
-            case .seerrOverview: DashboardSeerrSection(state: state, isEditing: isEditing)
+            case .arrOverview: DashboardOverviewSection(state: state, isEditing: isEditing, onHealthClick: onHealthClick)
+            case .seerrOverview: DashboardSeerrSection(state: state, isEditing: isEditing, onRequestClick: onSeerrRequestsStatClick, onIssueClick: onSeerrIssuesStatClick)
+            case .pendingRequests: DashboardPendingRequestsSection(state: state, isEditing: isEditing, onRequestClick: onRequestClick)
+            case .pendingIssues: DashboardPendingIssuesSection(state: state, isEditing: isEditing, onIssueClick: onIssueClick)
             case .prowlarrOverview: DashboardProwlarrSection(state: state, isEditing: isEditing)
             case .network: DashboardNetworkSection(state: state)
             case .recentlyAdded: DashboardRecentlyAddedSection(state: state)
             case .downloadClients: DashboardDownloadClientsSection(state: state, isEditing: isEditing)
-            case .activityQueue: DashboardActivityQueueSection(state: state, isEditing: isEditing)
+            case .activityQueue: DashboardActivityQueueSection(state: state, isEditing: isEditing, onItemClick: onActivityClick)
             case .onToday: DashboardTodaySection(state: state, isEditing: isEditing)
             case .upcomingReleases: DashboardUpcomingSection(state: state, isEditing: isEditing)
             case .bazarrOverview: DashboardBazarrSection(state: state, isEditing: isEditing)
@@ -257,6 +405,7 @@ struct StatCard: View {
     let label: String
     let value: String
     let color: Color
+    var onClick: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -275,12 +424,17 @@ struct StatCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(color.opacity(0.1))
         .cornerRadius(12)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onClick?()
+        }
     }
 }
 
 struct DashboardOverviewSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onHealthClick: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -319,7 +473,8 @@ struct DashboardOverviewSection: View {
                     icon: totalIssues > 0 ? "exclamationmark.triangle" : "checkmark.circle",
                     label: MR.strings().health.localized(),
                     value: totalIssues == 0 ? MR.strings().no_issues.localized() : "\(totalIssues) Issues",
-                    color: issueColor
+                    color: issueColor,
+                    onClick: isEditing ? nil : onHealthClick
                 )
             }
         }
@@ -329,6 +484,8 @@ struct DashboardOverviewSection: View {
 struct DashboardSeerrSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onRequestClick: (() -> Void)? = nil
+    var onIssueClick: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -345,8 +502,8 @@ struct DashboardSeerrSection: View {
             let totalIssues = state.seerrInstances.reduce(0) { $0 + Int($1.openIssuesCount) }
 
             HStack(spacing: 12) {
-                StatCard(icon: "tray", label: MR.strings().requests.localized(), value: "\(totalRequests)", color: .purple)
-                StatCard(icon: "ladybug", label: MR.strings().issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary)
+                StatCard(icon: "tray", label: MR.strings().requests.localized(), value: "\(totalRequests)", color: .purple, onClick: isEditing ? nil : onRequestClick)
+                StatCard(icon: "ladybug", label: MR.strings().issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary, onClick: isEditing ? nil : onIssueClick)
             }
         }
     }
@@ -512,7 +669,7 @@ struct DashboardRecentlyAddedSection: View {
 
                             PosterItem(item: item, instanceType: type, aspectRatio: ratio, elevation: .none, posterHeight: 150, showFooter: true) { clickedItem in
                                 if let type = type, let id = clickedItem.id {
-                                    navigationManager.go(to: .details(id: id.int64Value, type: type), of: type)
+                                    navigationManager.goToDetailsOnDashboard(arrId: id.int64Value, instanceType: type)
                                 }
                             }
                             .frame(width: width)
@@ -611,7 +768,7 @@ struct DashboardDownloadClientsSection: View {
                 if state.activeDownloads.count > 5 {
                     HStack {
                         Spacer()
-                        Text(MR.strings().additional_items_count.format(args: [Int32(state.activeDownloads.count - 5)]).localized())
+                        Text(MR.strings().additional_items_count.formatted(args: [Int32(state.activeDownloads.count - 5)]))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -624,6 +781,7 @@ struct DashboardDownloadClientsSection: View {
 struct DashboardActivityQueueSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var onItemClick: ((QueueItem) -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -641,38 +799,70 @@ struct DashboardActivityQueueSection: View {
                     .padding(.vertical)
             } else {
                 ForEach(state.activityQueue.prefix(5), id: \.id) { item in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(item.titleLabel)
-                                .font(.subheadline)
-                                .bold()
-                                .lineLimit(1)
-                            Text(item.statusLabel)
-                                .font(.caption)
-                                .foregroundColor(item.hasIssue ? .red : .secondary)
+                    Button(action: {
+                        if !isEditing {
+                            onItemClick?(item)
                         }
-                        Spacer()
-                        if item.sizeleft > 0 {
-                            Text(item.progressLabel)
-                                .font(.caption)
-                                .bold()
+                    }) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 6) {
+                                    Text(item.titleLabel)
+                                        .font(.subheadline)
+                                        .bold()
+                                        .lineLimit(1)
+                                    if let groupCount = item.taskGroupCount?.intValue, groupCount > 1 {
+                                        Text(MR.strings().additional_items_count.formatted(args: [groupCount]))
+                                            .font(.caption2.bold())
+                                            .foregroundColor(.accentColor)
+                                    }
+                                }
+                                HStack(spacing: 4) {
+                                    if let instanceName = item.instanceName {
+                                        Text("\(instanceName) •")
+                                            .font(.caption)
+                                            .foregroundColor(.accentColor)
+                                    }
+                                    Text(activityStatusText(for: item))
+                                        .font(.caption)
+                                        .foregroundColor(item.hasIssue ? .red : .secondary)
+                                }
+                            }
+                            Spacer()
+                            if item.sizeleft > 0 {
+                                Text(item.progressLabel)
+                                    .font(.caption)
+                                    .bold()
+                            }
                         }
+                        .padding(12)
+                        .background(Color(UIColor.tertiarySystemBackground))
+                        .cornerRadius(12)
                     }
-                    .padding(12)
-                    .background(Color(UIColor.tertiarySystemBackground))
-                    .cornerRadius(12)
+                    .buttonStyle(.plain)
                 }
 
                 if state.activityQueue.count > 5 {
                     HStack {
                         Spacer()
-                        Text(MR.strings().additional_items_count.format(args: [Int32(state.activityQueue.count - 5)]).localized())
+                        Text(MR.strings().additional_items_count.formatted(args: [Int32(state.activityQueue.count - 5)]))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
             }
         }
+    }
+
+    private func activityStatusText(for item: QueueItem) -> String {
+        var text = item.statusLabel
+        if item.trackedDownloadState == .downloading {
+            text += " • \(item.progressLabel)"
+            if let remainingTime = item.remainingTimeLabel {
+                text += " • \(remainingTime) left"
+            }
+        }
+        return text
     }
 }
 
@@ -733,47 +923,53 @@ struct DashboardUpcomingSection: View {
 struct CalendarItemRow: View {
     let dashboardItem: DashboardCalendarItem
     var showDate: Bool = false
+    @EnvironmentObject private var navigationManager: NavigationManager
 
     private var item: CalendarItem { dashboardItem.item }
 
     var body: some View {
-        HStack(spacing: 12) {
-            let color: Color = {
-                if let type = item.associatedType {
-                    // Extract color from Compose Color object
-                    return Color(hex: type.associatedColor)
-                }
-                return .accentColor
-            }()
+        Button(action: {
+            navigateCalendarItemOnDashboard(item: item, navigationManager: navigationManager)
+        }) {
+            HStack(spacing: 12) {
+                let color: Color = {
+                    if let type = item.associatedType {
+                        // Extract color from Compose Color object
+                        return Color(hex: type.associatedColor)
+                    }
+                    return .accentColor
+                }()
 
-            Circle()
-                .fill(color)
-                .frame(width: 4, height: 4)
+                Circle()
+                    .fill(color)
+                    .frame(width: 4, height: 4)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.subheadline)
-                    .bold()
-                    .lineLimit(1)
-
-                if !subTitle.isEmpty {
-                    Text(subTitle)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.subheadline)
+                        .bold()
                         .lineLimit(1)
-                }
 
-                if showDate {
-                    Text(formatDate(dashboardItem.date))
-                        .font(.system(size: 10))
-                        .foregroundColor(.accentColor)
+                    if !subTitle.isEmpty {
+                        Text(subTitle)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+
+                    if showDate {
+                        Text(formatDate(dashboardItem.date))
+                            .font(.system(size: 10))
+                            .foregroundColor(.accentColor)
+                    }
                 }
+                Spacer()
             }
-            Spacer()
+            .padding(12)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .cornerRadius(12)
         }
-        .padding(12)
-        .background(Color(UIColor.tertiarySystemBackground))
-        .cornerRadius(12)
+        .buttonStyle(.plain)
     }
 
     private var title: String {
@@ -797,8 +993,12 @@ struct CalendarItemRow: View {
         if let episode = item as? Episode {
             return "\(episode.seasonEpLabel): \(episode.title ?? "")"
         } else if let group = item as? EpisodeGroup {
-            let episodes = [group.first] + group.additional
-            return episodes.map { "\($0.seasonEpLabel): \($0.title ?? "")" }.joined(separator: ", ")
+            let first = group.first
+            let base = "\(first.seasonEpLabel): \(first.title ?? "")"
+            if !group.additional.isEmpty {
+                return "\(base) (\(MR.strings().additional_items_count.formatted(args: [group.additional.count])))"
+            }
+            return base
         } else if let album = item as? ArrAlbum {
             return album.title ?? ""
         } else if let movie = item as? ArrMovie {
@@ -958,6 +1158,333 @@ struct AddDashboardCardSheet: View {
                     Button(MR.strings().close.localized()) {
                         dismiss()
                     }
+                }
+            }
+        }
+    }
+}
+
+struct DashboardPendingRequestsSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
+    @EnvironmentObject private var navigationManager: NavigationManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "tray")
+                Text(MR.strings().requests.localized())
+                    .font(.headline)
+                    .bold()
+            }
+
+            let pendingRequests = state.pendingRequests
+            if pendingRequests.isEmpty {
+                Text(MR.strings().no_requests_found.localized())
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(pendingRequests, id: \.request.id) { mediaPackage in
+                            CompactRequestCard(mediaPackage: mediaPackage) {
+                                if let onRequestClick = onRequestClick {
+                                    onRequestClick(mediaPackage)
+                                } else {
+                                    navigationManager.goToSeerrDetails(
+                                        tmdbId: mediaPackage.request.media.tmdbId,
+                                        requestType: mediaPackage.request.type
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct CompactRequestCard: View {
+    let mediaPackage: MediaRequestPackage
+    let onClick: () -> Void
+
+    private var request: MediaRequest { mediaPackage.request }
+    private var details: RequestMediaDetails? { mediaPackage.details }
+
+    var body: some View {
+        Button(action: onClick) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top, spacing: 8) {
+                    if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
+                        AsyncImage(url: url) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Color(.systemGray4)
+                        }
+                        .frame(width: 48, height: 72)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } else {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemGray4))
+                            .frame(width: 48, height: 72)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            if let year = details?.displayDate?.year {
+                                Text(String(year))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            RequestTypeChip(type: request.type)
+                        }
+
+                        Text(details?.displayTitle ?? MR.strings().unknown.localized())
+                            .font(.subheadline.bold())
+                            .lineLimit(2)
+
+                        SeerrStatusChip(request: request)
+                    }
+                }
+
+                HStack(spacing: 6) {
+                    if let avatarUrl = URL(string: request.requestedBy.avatar) {
+                        AsyncImage(url: avatarUrl) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Image(systemName: "person.circle.fill")
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(width: 20, height: 20)
+                        .clipShape(Circle())
+                    }
+
+                    Text(request.requestedBy.displayName)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .lineLimit(1)
+                }
+            }
+            .padding(12)
+            .frame(width: 260, alignment: .leading)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct DashboardPendingIssuesSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
+    @EnvironmentObject private var navigationManager: NavigationManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "ladybug")
+                Text(MR.strings().issues.localized())
+                    .font(.headline)
+                    .bold()
+            }
+
+            let openIssues = state.openIssues
+            if openIssues.isEmpty {
+                Text(MR.strings().no_issues_found.localized())
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(openIssues, id: \.issue.id) { issuePackage in
+                            CompactIssueCard(issuePackage: issuePackage) {
+                                if let onIssueClick = onIssueClick {
+                                    onIssueClick(issuePackage)
+                                } else if let media = issuePackage.issue.media {
+                                    navigationManager.goToSeerrDetails(
+                                        tmdbId: media.tmdbId,
+                                        requestType: media.mediaType
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct CompactIssueCard: View {
+    let issuePackage: MediaIssuePackage
+    let onClick: () -> Void
+
+    private var issue: Issue { issuePackage.issue }
+    private var details: RequestMediaDetails? { issuePackage.details }
+
+    var body: some View {
+        Button(action: onClick) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top, spacing: 8) {
+                    if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
+                        AsyncImage(url: url) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Color(.systemGray4)
+                        }
+                        .frame(width: 48, height: 72)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } else {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemGray4))
+                            .frame(width: 48, height: 72)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            if let year = details?.displayDate?.year {
+                                Text(String(year))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            if let mediaType = issue.media?.mediaType {
+                                RequestTypeChip(type: mediaType)
+                            }
+                        }
+
+                        Text(details?.displayTitle ?? MR.strings().unknown.localized())
+                            .font(.subheadline.bold())
+                            .lineLimit(2)
+
+                        SeerrIssueStatusChip(issue: issue)
+                    }
+                }
+
+                if issue.media?.mediaType == .tv {
+                    let seasonLabel = issue.problemSeason == 0 ? MR.strings().all.localized() : "\(issue.problemSeason)"
+                    let episodeLabel = issue.problemEpisode == 0 ? MR.strings().all.localized() : "\(issue.problemEpisode)"
+                    Text("S\(seasonLabel) E\(episodeLabel)")
+                        .font(.caption2.bold())
+                        .foregroundColor(.accentColor)
+                }
+
+                if let createdBy = issue.createdBy {
+                    HStack(spacing: 6) {
+                        if let avatarUrl = URL(string: createdBy.avatar) {
+                            AsyncImage(url: avatarUrl) { image in
+                                image.resizable().aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Image(systemName: "person.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(width: 20, height: 20)
+                            .clipShape(Circle())
+                        }
+
+                        Text(createdBy.displayName)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .lineLimit(1)
+                    }
+                }
+            }
+            .padding(12)
+            .frame(width: 260, alignment: .leading)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private func navigateCalendarItemOnDashboard(item: CalendarItem, navigationManager: NavigationManager) {
+    if let episode = item as? Episode {
+        if let seriesId = episode.series?.id {
+            navigationManager.goToDetailsOnDashboard(arrId: seriesId.int64Value, instanceType: .sonarr)
+        }
+    } else if let group = item as? EpisodeGroup {
+        if let seriesId = group.first.series?.id {
+            navigationManager.goToDetailsOnDashboard(arrId: seriesId.int64Value, instanceType: .sonarr)
+        }
+    } else if let album = item as? ArrAlbum {
+        navigationManager.goToDetailsOnDashboard(arrId: album.artistId, instanceType: .lidarr)
+    } else if let movie = item as? ArrMovie {
+        if let movieId = movie.id?.int64Value {
+            navigationManager.goToDetailsOnDashboard(arrId: movieId, instanceType: .radarr)
+        }
+    } else if let audiobook = item as? Audiobook {
+        if let audiobookId = audiobook.id?.int64Value {
+            navigationManager.goToDetailsOnDashboard(arrId: audiobookId, instanceType: .listenarr)
+        }
+    } else if let book = item as? Book {
+        if let authorId = book.authorId?.int64Value {
+            navigationManager.goToDetailsOnDashboard(arrId: authorId, instanceType: .bookshelf)
+        }
+    }
+}
+
+struct HealthNoticesSheet: View {
+    let instances: [ArrInstanceDashboardState]
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    let healthInstances = instances.filter { !$0.healthItems.isEmpty }
+                    if healthInstances.isEmpty {
+                        Text(MR.strings().no_issues.localized())
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical)
+                    } else {
+                        ForEach(healthInstances, id: \.instance.id) { instanceState in
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 8) {
+                                    Image(resource: instanceState.instance.type.icon)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 20, height: 20)
+                                    Text(instanceState.instance.label)
+                                        .font(.headline)
+                                        .bold()
+                                }
+
+                                ForEach(instanceState.healthItems.indices, id: \.self) { index in
+                                    let health = instanceState.healthItems[index]
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        if let message = health.message {
+                                            Text(message)
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                        }
+                                        if let source = health.source {
+                                            Text(source)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .padding(12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(health.type == .error ? Color.red.opacity(0.15) : Color(UIColor.secondarySystemBackground))
+                                    .cornerRadius(10)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(16)
+            }
+            .navigationTitle(MR.strings().health.localized())
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(MR.strings().close.localized()) { dismiss() }
                 }
             }
         }

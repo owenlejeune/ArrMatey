@@ -28,6 +28,8 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
+import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import dev.icerock.moko.resources.ImageResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -53,7 +55,13 @@ sealed interface CombinedDashboardState {
         val bazarrStats: List<BazarrDashboardState> = emptyList(),
         val networkStatus: NetworkStatusState? = null,
         val isRefreshing: Boolean = false,
-    ) : CombinedDashboardState
+    ) : CombinedDashboardState {
+        val pendingRequests: List<MediaRequestPackage>
+            get() = seerrInstances.flatMap { it.pendingRequests }
+
+        val openIssues: List<MediaIssuePackage>
+            get() = seerrInstances.flatMap { it.openIssues }
+    }
 
     companion object {
         val Mock: Success by lazy {
@@ -279,6 +287,8 @@ data class SeerrDashboardState(
     val instance: Instance,
     val pendingRequestsCount: Int = 0,
     val openIssuesCount: Int = 0,
+    val pendingRequests: List<MediaRequestPackage> = emptyList(),
+    val openIssues: List<MediaIssuePackage> = emptyList(),
 )
 
 data class DownloadClientDashboardState(

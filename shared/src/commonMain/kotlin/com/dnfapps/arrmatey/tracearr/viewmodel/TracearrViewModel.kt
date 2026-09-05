@@ -46,7 +46,7 @@ class TracearrViewModel(
     private suspend fun fetchStreams() {
         val repos = instanceManager.getAllTracearrRepositories()
         if (repos.isEmpty()) {
-            _state.value = TracearrStreamsState.Success(emptyList())
+            _state.value = TracearrStreamsState.NoInstance
             return
         }
 

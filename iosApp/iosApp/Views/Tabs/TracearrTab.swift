@@ -23,28 +23,36 @@ struct TracearrTabContent: View {
 
     var body: some View {
         Group {
-            if let success = viewModel.state as? TracearrStreamsStateSuccess {
-                if success.streams.isEmpty {
-                    VStack(spacing: 12) {
-                        Image(systemName: "tv")
-                            .font(.system(size: 48))
-                            .foregroundColor(.secondary)
-                        Text(MR.strings().no_active_streams.localized())
-                            .foregroundColor(.secondary)
-                    }
+            if viewModel.state is TracearrStreamsStateNoInstance {
+                NoInstanceView(type: .tracearr)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(success.streams, id: \.id) { session in
-                                TracearrStreamCardView(session: session)
+            } else if let success = viewModel.state as? TracearrStreamsStateSuccess {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        nowPlayingHeader(count: success.streams.count)
+
+                        if success.streams.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "tv")
+                                    .font(.system(size: 48))
+                                    .foregroundColor(.secondary)
+                                Text(MR.strings().no_active_streams.localized())
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 40)
+                        } else {
+                            LazyVStack(spacing: 16) {
+                                ForEach(success.streams, id: \.id) { session in
+                                    TracearrStreamCardView(session: session)
+                                }
                             }
                         }
-                        .padding(16)
                     }
-                    .refreshable {
-                        viewModel.refresh()
-                    }
+                    .padding(16)
+                }
+                .refreshable {
+                    viewModel.refresh()
                 }
             } else if viewModel.state is TracearrStreamsStateLoading || viewModel.state is TracearrStreamsStateInitial {
                 ProgressView()
@@ -64,7 +72,7 @@ struct TracearrTabContent: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .navigationTitle(MR.strings().now_playing.localized())
+        .navigationTitle(MR.strings().tracearr.localized())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -74,17 +82,24 @@ struct TracearrTabContent: View {
                     Image(systemName: "line.3.horizontal")
                 }
             }
+        }
+    }
 
-            if let success = viewModel.state as? TracearrStreamsStateSuccess {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Text(MR.plurals().streams.localized(Int32(success.streams.count)))
-                        .font(.caption.bold())
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .clipShape(Capsule())
-                }
-            }
+    @ViewBuilder
+    private func nowPlayingHeader(count: Int) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "tv")
+                .font(.title3)
+                .foregroundColor(.accentColor)
+            Text(MR.strings().now_playing.localized())
+                .font(.title3.bold())
+            Text(MR.plurals().streams.localized(Int32(count)))
+                .font(.caption.bold())
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Color(UIColor.secondarySystemBackground))
+                .clipShape(Capsule())
+            Spacer()
         }
     }
 }
@@ -107,9 +122,9 @@ struct TracearrStreamCardView: View {
     }
 
     private var stateText: String {
-        if isPaused { return "Paused" }
-        if isPlaying { return "Playing" }
-        return session.state?.capitalized ?? "Active"
+        if isPaused { return MR.strings().paused.localized() }
+        if isPlaying { return MR.strings().playing.localized() }
+        return session.state?.capitalized ?? MR.strings().active.localized()
     }
 
     private var totalMs: Int64 {
@@ -166,8 +181,8 @@ struct TracearrStreamCardView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         // User & Device Row
                         HStack(spacing: 6) {
-                            let username = session.user?.username ?? "User"
-                            let avatarUrl = session.user?.avatarUrl ?? session.user?.thumbUrl
+                            let username = session.effectiveUsername.isEmpty ? MR.strings().user.localized() : session.effectiveUsername
+                            let avatarUrl = session.effectiveUserAvatar
 
                             if let avatarStr = avatarUrl, let url = URL(string: avatarStr) {
                                 AsyncImage(url: url) { image in
@@ -222,7 +237,7 @@ struct TracearrStreamCardView: View {
                         }
 
                         // Title
-                        let displayTitle = session.grandparentTitle ?? session.showTitle ?? session.mediaTitle ?? "Unknown Title"
+                        let displayTitle = session.grandparentTitle ?? session.showTitle ?? session.mediaTitle ?? MR.strings().unknown.localized()
                         Text(displayTitle)
                             .font(.headline)
                             .bold()
@@ -260,8 +275,8 @@ struct TracearrStreamCardView: View {
 
                 // Footer Row
                 HStack {
-                    let serverName = session.server?.name ?? "Server"
-                    let location = session.geoCountry ?? session.ipAddress ?? "Local Network"
+                    let serverName = session.effectiveServerName.isEmpty ? MR.strings().server.localized() : session.effectiveServerName
+                    let location = session.geoCountry ?? session.ipAddress ?? MR.strings().local_network.localized()
                     Text("\(serverName) · \(location)")
                         .font(.caption)
                         .foregroundColor(.secondary)

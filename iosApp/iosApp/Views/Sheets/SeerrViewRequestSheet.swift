@@ -13,6 +13,7 @@ struct SeerrViewRequestSheet: View {
     let onDismissRequest: () -> Void
     let onApproveRequest: (Int64, Int64?, String?, Int64?, [Int32]?) -> Void
     let onDeclineRequest: (Int64) -> Void
+    let onViewMedia: ((Int64, RequestType) -> Void)?
 
     @State private var selectedProfileId: Int64? = nil
     @State private var selectedRootFolder: String? = nil
@@ -28,7 +29,8 @@ struct SeerrViewRequestSheet: View {
         serviceDetails: ServiceDetails? = nil,
         onDismissRequest: @escaping () -> Void,
         onApproveRequest: @escaping (Int64, Int64?, String?, Int64?, [Int32]?) -> Void,
-        onDeclineRequest: @escaping (Int64) -> Void
+        onDeclineRequest: @escaping (Int64) -> Void,
+        onViewMedia: ((Int64, RequestType) -> Void)? = nil
     ) {
         self.details = details
         self.requestOverride = request
@@ -36,6 +38,7 @@ struct SeerrViewRequestSheet: View {
         self.onDismissRequest = onDismissRequest
         self.onApproveRequest = onApproveRequest
         self.onDeclineRequest = onDeclineRequest
+        self.onViewMedia = onViewMedia
 
         let targetRequest = request ?? details.mediaInfo?.requests.first(where: { $0.status == 1 })
         if let targetRequest = targetRequest {
@@ -163,6 +166,19 @@ struct SeerrViewRequestSheet: View {
                     }
 
                     Section {
+                        if let onViewMedia = onViewMedia {
+                            Button(action: {
+                                onViewMedia(request.media.tmdbId, request.type)
+                                onDismissRequest()
+                            }) {
+                                HStack {
+                                    Image(systemName: "film")
+                                    Text(MR.strings().show_full_details.localized())
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+
                         Button(action: {
                             let seasonsArray = details is TvDetails ? Array(selectedSeasons) : nil
                             onApproveRequest(

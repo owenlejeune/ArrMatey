@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -26,7 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.model.QueueDownloadState
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -34,6 +38,8 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun DashboardActivityQueueSection(
     state: CombinedDashboardState.Success,
     isEditing: Boolean,
+    enabled: Boolean = true,
+    onItemClick: (QueueItem) -> Unit = {},
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -50,7 +56,7 @@ fun DashboardActivityQueueSection(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Default.History,
+                    Icons.Default.Download,
                     null,
                     modifier = Modifier.size(20.dp),
                 )
@@ -78,6 +84,7 @@ fun DashboardActivityQueueSection(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.clickable(enabled = !isEditing && enabled) { onItemClick(item) },
                 ) {
                     Box(
                         Modifier
@@ -92,23 +99,44 @@ fun DashboardActivityQueueSection(
                             ),
                     )
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            item.titleLabel,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(
+                                item.titleLabel,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false),
+                            )
+                        }
+
+                        val statusRow =
+                            buildString {
+                                append(item.statusLabel)
+                                if (item.trackedDownloadState == QueueDownloadState.Downloading) {
+                                    bullet()
+                                    append(item.progressLabel)
+                                    item.remainingTimeLabel?.let { remainingTimeLabel ->
+                                        bullet()
+                                        append(remainingTimeLabel)
+                                        append(" left")
+                                    }
+                                }
+                            }
+
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             item.instanceName?.let {
                                 Text(
-                                    it,
+                                    "$it • ",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
                                 )
                             }
                             Text(
-                                item.statusLabel,
+                                statusRow,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (item.hasIssue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
