@@ -23,4 +23,8 @@
         <item quantity="one">%d book</item>
         <item quantity="other">%d books</item>
     </plurals>
+    <plurals name="streams">
+        <item quantity="one">%d stream</item>
+        <item quantity="other">%d streams</item>
+    </plurals>
 </resources>

@@ -65,6 +65,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.backup.AesTransportEncryptor
 import com.dnfapps.arrmatey.backup.TransportEncryptor
 import com.dnfapps.arrmatey.backup.usecase.ExportDataUseCase
@@ -517,6 +518,7 @@ val viewModelModule =
             BazarrDetailsViewModel(id, type, get(), get(), get(), get(), get())
         }
         viewModelOf(::CombinedDashboardViewModel)
+        viewModelOf(::TracearrViewModel)
         viewModelOf(::BackupViewModel)
         viewModelOf(::UnifiedLibraryViewModel)
     }

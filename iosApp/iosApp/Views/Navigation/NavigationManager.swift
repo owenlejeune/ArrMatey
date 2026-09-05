@@ -22,6 +22,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     @Published var launcherPath = NavigationPath()
     @Published var dashboardPath = NavigationPath()
     @Published var bazarrPath = NavigationPath()
+    @Published var tracearrPath = NavigationPath()
     @Published var libraryPath = NavigationPath()
     @Published var calendarPath = NavigationPath()
 
@@ -311,6 +312,10 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func openBazarrTab() {
         navigateToTab(TabItemStandard.bazarr as TabItem)
+    }
+
+    func openTracearrTab() {
+        navigateToTab(TabItemStandard.tracearr as TabItem)
     }
 
     func openDownloadsTab() {

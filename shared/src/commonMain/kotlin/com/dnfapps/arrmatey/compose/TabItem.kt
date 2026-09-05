@@ -46,7 +46,7 @@ sealed interface TabItem {
         PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr),
         BAZARR("captions.bubble", MR.strings.bazarr, associatedType = InstanceType.Bazarr),
         DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard),
-        ;
+        TRACEARR("tv.badge.wifi", MR.strings.tracearr, associatedType = InstanceType.Tracearr);
 
         override val key: String get() = "standard_$name"
     }

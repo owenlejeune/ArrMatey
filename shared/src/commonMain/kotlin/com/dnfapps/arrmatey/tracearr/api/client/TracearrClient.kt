@@ -1,13 +1,14 @@
 package com.dnfapps.arrmatey.tracearr.api.client
 
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
 import io.ktor.client.HttpClient
 
 class TracearrClient(
     val instance: Instance,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
 ) {
 
     private val baseUrl: String
@@ -18,4 +19,8 @@ class TracearrClient(
         return httpClient.safeGet(url)
     }
 
+    suspend fun getPublicStreams(): NetworkResult<TracearrStreamsResponse> {
+        val url = "$baseUrl/public/streams"
+        return httpClient.safeGet(url)
+    }
 }

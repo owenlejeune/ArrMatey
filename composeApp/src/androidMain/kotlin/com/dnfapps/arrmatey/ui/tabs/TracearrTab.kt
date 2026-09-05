@@ -1,0 +1,166 @@
+package com.dnfapps.arrmatey.ui.tabs
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.tracearr.state.TracearrStreamsState
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
+import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamCard
+import com.dnfapps.arrmatey.ui.theme.TracearrBlue
+import com.dnfapps.arrmatey.utils.mokoPlural
+import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.arrmatey.utils.navigationBarBottomInset
+import org.koin.compose.viewmodel.koinViewModel
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun TracearrTab(
+    wideRailIsVisible: Boolean,
+    viewModel: TracearrViewModel = koinViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Tv,
+                            contentDescription = null,
+                            tint = TracearrBlue,
+                            modifier = Modifier.size(24.dp),
+                        )
+                        Text(
+                            text = mokoString(MR.strings.now_playing),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        if (state is TracearrStreamsState.Success) {
+                            val count = (state as TracearrStreamsState.Success).streams.size
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                modifier = Modifier.padding(start = 4.dp),
+                            ) {
+                                Text(
+                                    text = mokoPlural(MR.plurals.streams, count),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                )
+                            }
+                        }
+                    }
+                },
+                navigationIcon = {
+                    if (!wideRailIsVisible) {
+                        NavigationDrawerButton()
+                    }
+                },
+            )
+        },
+        contentWindowInsets = WindowInsets.statusBars,
+    ) { paddingValues ->
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { viewModel.refresh() },
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+        ) {
+            when (val currentState = state) {
+                is TracearrStreamsState.Initial,
+                is TracearrStreamsState.Loading,
+                -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        LoadingIndicator()
+                    }
+                }
+                is TracearrStreamsState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = currentState.message,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+                is TracearrStreamsState.Success -> {
+                    if (currentState.streams.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = mokoString(MR.strings.no_active_streams),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding =
+                                PaddingValues(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = 16.dp,
+                                    bottom = 16.dp + navigationBarBottomInset(),
+                                ),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            items(
+                                items = currentState.streams,
+                                key = { it.id },
+                            ) { session ->
+                                TracearrStreamCard(session = session)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

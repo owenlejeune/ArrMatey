@@ -30,6 +30,7 @@ struct TabItemContent: View {
                 case .prowlarr: ProwlarrTab().environment(\.navigationContext, .mainTab)
                 case .bazarr: BazarrTab().environment(\.navigationContext, .mainTab)
                 case .dashboard: DashboardTab().environment(\.navigationContext, .mainTab)
+                case .tracearr: TracearrTab().environment(\.navigationContext, .mainTab)
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {
                 CustomWebpageViewerScreen(webpageId: custom.id)

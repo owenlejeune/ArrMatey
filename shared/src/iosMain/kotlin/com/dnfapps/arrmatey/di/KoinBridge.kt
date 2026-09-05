@@ -45,6 +45,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
@@ -147,6 +148,8 @@ object KoinBridge : KoinComponent {
     fun getAudiobookFilesViewModel(audiobookId: Long): AudiobookFilesViewModel = getKoin().get { parametersOf(audiobookId) }
 
     fun getDashboardViewModel(): CombinedDashboardViewModel = getKoin().get()
+
+    fun getTracearrViewModel(): TracearrViewModel = getKoin().get()
 
     fun getBackupViewModel(): BackupViewModel = getKoin().get()
 
