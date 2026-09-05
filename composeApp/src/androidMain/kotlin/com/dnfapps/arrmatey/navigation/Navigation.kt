@@ -138,7 +138,8 @@ fun Navigator<*>.toDetails(
     requestType: RequestType? = null,
     type: InstanceType? = null,
     instanceId: Long? = null,
-) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type, instanceId))
+    episodeId: Long? = null,
+) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type, instanceId, episodeId))
 
 fun Navigator<*>.toMediaDetails(
     media: ArrMedia,
@@ -297,7 +298,7 @@ fun Navigator<SettingsScreen>.onInstanceTap(
     InstanceType.Sonarr,
     InstanceType.Radarr,
     InstanceType.Lidarr,
-    InstanceType.Booksehelf,
+    InstanceType.Bookshelf,
     InstanceType.Listenarr,
     -> toArrDashboard(id)
     InstanceType.Seerr,

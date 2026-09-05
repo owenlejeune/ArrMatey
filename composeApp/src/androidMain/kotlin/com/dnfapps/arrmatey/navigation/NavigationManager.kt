@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 
@@ -23,6 +24,7 @@ class NavigationManager(
     private val appState: AppState,
     private val tabManager: TabManager,
     private val instanceRepository: com.dnfapps.arrmatey.database.InstanceRepository,
+    private val shortcutManager: AppShortcutManager? = null,
 ) {
     // Reactive UI state properties
     val drawerExpandedState: StateFlow<Boolean> = appState.drawerExpanded
@@ -46,6 +48,22 @@ class NavigationManager(
         } else {
             openOverlay(tab)
         }
+        pushShortcutForTab(tab)
+    }
+
+    private fun pushShortcutForTab(tab: TabItem) {
+        when (tab) {
+            TabItem.Standard.DOWNLOADS -> shortcutManager?.pushDownloadsShortcut()
+            TabItem.Standard.ACTIVITY -> shortcutManager?.pushActivityShortcut()
+            TabItem.Standard.CALENDAR -> shortcutManager?.pushScheduleShortcut()
+            TabItem.Standard.REQUESTS -> shortcutManager?.pushRequestsShortcut()
+            TabItem.Standard.SHOWS -> shortcutManager?.pushLibraryShortcut(InstanceType.Sonarr)
+            TabItem.Standard.MOVIES -> shortcutManager?.pushLibraryShortcut(InstanceType.Radarr)
+            TabItem.Standard.MUSIC -> shortcutManager?.pushLibraryShortcut(InstanceType.Lidarr)
+            TabItem.Standard.BOOKS -> shortcutManager?.pushLibraryShortcut(InstanceType.Bookshelf)
+            TabItem.Standard.AUDIOBOOKS -> shortcutManager?.pushLibraryShortcut(InstanceType.Listenarr)
+            else -> {}
+        }
     }
 
     fun openOverlay(tab: TabItem?) = appState.openOverlay(tab)
@@ -62,7 +80,7 @@ class NavigationManager(
             InstanceType.Sonarr -> TabItem.Standard.SHOWS
             InstanceType.Radarr -> TabItem.Standard.MOVIES
             InstanceType.Lidarr -> TabItem.Standard.MUSIC
-            InstanceType.Booksehelf -> TabItem.Standard.BOOKS
+            InstanceType.Bookshelf -> TabItem.Standard.BOOKS
             InstanceType.Listenarr -> TabItem.Standard.AUDIOBOOKS
             else -> throw IllegalStateException("Invalid arr type $type")
         }
@@ -93,6 +111,7 @@ class NavigationManager(
     }
 
     fun openArrInstanceDashboard(id: Long) {
+        shortcutManager?.pushDashboardShortcut()
         openOverlay(TabItem.Settings)
         settings.toArrDashboard(id)
     }

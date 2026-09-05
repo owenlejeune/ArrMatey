@@ -18,13 +18,17 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlin.time.Instant
 
@@ -35,15 +39,21 @@ class GetLibraryUseCase(
     private val logger: Logger,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun byType(instanceType: InstanceType): Flow<ArrLibrary> =
+    fun byType(
+        instanceType: InstanceType,
+        searchQuery: Flow<String>? = null,
+    ): Flow<ArrLibrary> =
         instanceManager
             .getSelectedArrRepository(instanceType)
             .filterNotNull()
             .flatMapLatest {
-                invoke(it.instance.id)
+                invoke(it.instance.id, searchQuery)
             }
 
-    operator fun invoke(instanceId: Long): Flow<ArrLibrary> =
+    operator fun invoke(
+        instanceId: Long,
+        searchQuery: Flow<String>? = null,
+    ): Flow<ArrLibrary> =
         flow {
             val repository = instanceManager.getArrRepository(instanceId)
             if (repository == null) {
@@ -62,22 +72,42 @@ class GetLibraryUseCase(
                 }
             }
 
+            val preferencesFlow =
+                preferencesRepository
+                    .observePreferences()
+                    .distinctUntilChanged { old, new ->
+                        old.sortBy == new.sortBy &&
+                            old.sortOrder == new.sortOrder &&
+                            old.filterBy == new.filterBy &&
+                            old.customFilterId == new.customFilterId
+                    }
+
+            val queryFlow = searchQuery ?: flowOf("")
+
             combine(
                 repository.library,
-                preferencesRepository.observePreferences(),
+                preferencesFlow,
                 repository.customFilters,
-            ) { libraryResult, preferences, customFilters ->
+                queryFlow,
+            ) { libraryResult, preferences, customFilters, query ->
                 when (libraryResult) {
                     is NetworkResult.Loading -> ArrLibrary.Loading
                     is NetworkResult.Error -> ArrLibrary.Error(libraryResult.message ?: "")
                     is NetworkResult.Success<*> -> {
                         val sorted = applySorting(libraryResult.data as List<ArrMedia>, preferences)
                         val filtered = applyFiltering(sorted, preferences, customFilters)
-                        ArrLibrary.Success(filtered, preferences)
+                        val searched =
+                            if (query.isNotBlank()) {
+                                filtered.filter { it.title?.contains(query, ignoreCase = true) == true }
+                            } else {
+                                filtered
+                            }
+                        ArrLibrary.Success(searched, preferences)
                     }
                     null -> ArrLibrary.Initial
                 }
-            }.collect { emit(it) }
+            }.flowOn(Dispatchers.Default)
+                .collect { emit(it) }
         }
 
     private fun applySorting(

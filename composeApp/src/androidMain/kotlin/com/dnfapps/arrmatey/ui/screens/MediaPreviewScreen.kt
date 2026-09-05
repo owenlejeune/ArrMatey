@@ -52,8 +52,9 @@ import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAuthorSheet
 import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +65,7 @@ fun MediaPreviewScreen(
     onItemAdded: (Long) -> Unit,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
-    viewModel: MediaPreviewViewModel = koinInjectParams(item, type),
+    viewModel: MediaPreviewViewModel = koinViewModel(key = "${item.id}_$type", parameters = { parametersOf(item, type) }),
 ) {
     val context = LocalContext.current
     var showBottomSheet by remember { mutableStateOf(false) }

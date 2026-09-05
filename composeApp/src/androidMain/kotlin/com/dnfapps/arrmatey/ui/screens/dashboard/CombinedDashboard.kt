@@ -73,6 +73,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
 
@@ -80,7 +81,7 @@ import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
 @Composable
 fun CombinedDashboard(
     windowSizeClass: WindowSizeClass,
-    viewModel: CombinedDashboardViewModel = koinInject(),
+    viewModel: CombinedDashboardViewModel = koinViewModel(),
     moko: MokoStrings = koinInject(),
     onNavigateToArrDashboard: (Long) -> Unit = {},
 ) {

@@ -70,7 +70,7 @@ class BookDetailsViewModel(
     private fun observeSelectedInstance() {
         viewModelScope.launch {
             getArrInstanceRepositoryUseCase
-                .observeSelected(InstanceType.Booksehelf)
+                .observeSelected(InstanceType.Bookshelf)
                 .filterNotNull()
                 .collectLatest { repository ->
                     currentRepository = repository
@@ -125,7 +125,7 @@ class BookDetailsViewModel(
             currentRepository?.let {
                 performAutomaticSearchUseCase(
                     mediaId = authorId,
-                    type = InstanceType.Booksehelf,
+                    type = InstanceType.Bookshelf,
                     repository = it,
                     bookId = _book.value.id,
                 )

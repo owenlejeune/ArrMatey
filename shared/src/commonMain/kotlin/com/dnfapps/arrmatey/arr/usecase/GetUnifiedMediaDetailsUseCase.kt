@@ -267,7 +267,7 @@ class GetUnifiedMediaDetailsUseCase(
                         )
                     }
 
-                if (seasonEpisodes.isEmpty()) {
+                if (arrSeason == null && seerrSeason == null && seasonEpisodes.isEmpty()) {
                     null
                 } else {
                     SeasonWrapper(
@@ -290,7 +290,7 @@ class GetUnifiedMediaDetailsUseCase(
                         ?: (targetItem as? ArrMovie)?.let { InstanceType.Radarr }
                         ?: (targetItem as? ArrSeries)?.let { InstanceType.Sonarr }
                         ?: (targetItem as? Arrtist)?.let { InstanceType.Lidarr }
-                        ?: (targetItem as? Author)?.let { InstanceType.Booksehelf }
+                        ?: (targetItem as? Author)?.let { InstanceType.Bookshelf }
                         ?: (targetItem as? Audiobook)?.let { InstanceType.Listenarr }
                 activityTasks
                     .filter { task ->

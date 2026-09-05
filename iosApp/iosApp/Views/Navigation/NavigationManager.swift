@@ -49,7 +49,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .sonarr: seriesPath.append(route)
         case .radarr: moviePath.append(route)
         case .lidarr: musicPath.append(route)
-        case .booksehelf: bookPath.append(route)
+        case .bookshelf: bookPath.append(route)
         case .listenarr: audiobookPath.append(route)
         case .seerr: break
         case .prowlarr: break
@@ -82,7 +82,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .lidarr:
             if !musicPath.isEmpty { musicPath.removeLast() }
             musicPath.append(route)
-        case .booksehelf:
+        case .bookshelf:
             if !bookPath.isEmpty { bookPath.removeLast() }
             bookPath.append(route)
         case .listenarr:
@@ -345,6 +345,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
                 let tmdbId = (userInfo[NotificationConstants.shared.EXTRA_TMDB_ID] as? String).flatMap { Int64($0) }
                 let instanceId = (userInfo[NotificationConstants.shared.EXTRA_INSTANCE_ID] as? String).flatMap { Int64($0) }
+                let episodeId = (userInfo[NotificationConstants.shared.EXTRA_EPISODE_ID] as? String).flatMap { Int64($0) }
 
                 calendarPath = NavigationPath()
                 calendarPath.append(MediaRoute.details(
@@ -353,7 +354,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                     tvdbId: nil,
                     instanceType: type,
                     requestType: nil,
-                    instanceId: instanceId
+                    instanceId: instanceId,
+                    episodeId: episodeId
                 ))
             }
         case NotificationConstants.shared.ACTION_OPEN_DOWNLOADS:
@@ -386,7 +388,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .sonarr: return TabItemStandard.shows as TabItem
         case .radarr: return TabItemStandard.movies as TabItem
         case .lidarr: return TabItemStandard.music as TabItem
-        case .booksehelf: return TabItemStandard.books as TabItem
+        case .bookshelf: return TabItemStandard.books as TabItem
         case .listenarr: return TabItemStandard.audiobooks as TabItem
         case .seerr: return TabItemStandard.requests as TabItem
         case .prowlarr: return TabItemStandard.prowlarr as TabItem
@@ -402,7 +404,8 @@ enum MediaRoute: Hashable {
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
-        instanceId: Int64? = nil
+        instanceId: Int64? = nil,
+        episodeId: Int64? = nil
     )
     case search(query: String, type: InstanceType, instanceId: Int64? = nil)
     case preview(_ json : String, type: InstanceType)

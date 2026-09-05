@@ -55,13 +55,13 @@ import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IntegrationsSettingsScreen(
     onBack: () -> Unit,
-    viewModel: MoreScreenViewModel = koinInject(),
+    viewModel: MoreScreenViewModel = koinViewModel(),
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()

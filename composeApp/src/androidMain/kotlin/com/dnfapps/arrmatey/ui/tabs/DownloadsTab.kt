@@ -113,13 +113,14 @@ import com.skydoves.flexible.core.FlexibleSheetValue
 import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DownloadsTab(
     wideRailIsVisible: Boolean,
-    viewModel: DownloadQueueViewModel = koinInject(),
-    clientsViewModel: DownloadClientsViewModel = koinInject(),
+    viewModel: DownloadQueueViewModel = koinViewModel(),
+    clientsViewModel: DownloadClientsViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
 ) {
     val queueState by viewModel.downloadQueueState.collectAsStateWithLifecycle()

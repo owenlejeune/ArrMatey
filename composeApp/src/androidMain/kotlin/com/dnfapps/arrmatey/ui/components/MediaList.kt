@@ -92,7 +92,10 @@ fun <T : ArrMedia> MediaList(
         userScrollEnabled = userScrollEnabled,
         contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp),
     ) {
-        items(items) { item ->
+        items(
+            items = items,
+            key = { item -> item.guid },
+        ) { item ->
             val isActive = itemIsActive(item)
             MediaItem(
                 aspectRatio = aspectRatio,

@@ -67,7 +67,7 @@ enum class SortBy(
                 InstanceType.Sonarr -> sonarrOps
                 InstanceType.Radarr -> radarrOps
                 InstanceType.Lidarr -> lidarrOps
-                InstanceType.Booksehelf -> readarrOps
+                InstanceType.Bookshelf -> readarrOps
                 InstanceType.Prowlarr -> prowlarrOps
                 else -> emptyList()
             }

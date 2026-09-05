@@ -54,8 +54,12 @@ fun SeerrViewRequestSheet(
     onDismissRequest: () -> Unit,
     onApproveRequest: (Long, Long?, String?, Long?, List<Int>?) -> Unit,
     onDeclineRequest: (Long) -> Unit,
+    requestOverride: MediaRequest? = null,
 ) {
-    val request = details.mediaInfo?.requests?.firstOrNull { it.status == 1 } ?: return
+    val request =
+        requestOverride
+            ?: details.mediaInfo?.requests?.firstOrNull { it.status == 1 }
+            ?: return
 
     var selectedProfileId by remember { mutableStateOf<Long?>(null) }
     var selectedRootFolder by remember { mutableStateOf<String?>(null) }

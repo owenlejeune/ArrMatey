@@ -60,9 +60,10 @@ import com.dnfapps.arrmatey.ui.components.PersonDetailsHeader
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.utils.GridDensity
 import com.dnfapps.arrmatey.utils.format
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.StringResource
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -72,7 +73,8 @@ fun SeerrPersonDetailsScreen(
     onMediaClick: (Long, RequestType) -> Unit = { _, _ -> },
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
-    viewModel: SeerrMediaDetailsViewModel = koinInjectParams(personId, RequestType.Person),
+    viewModel: SeerrMediaDetailsViewModel =
+        koinViewModel(key = "${personId}_${RequestType.Person}", parameters = { parametersOf(personId, RequestType.Person) }),
 ) {
     val navManager = navigationManager
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

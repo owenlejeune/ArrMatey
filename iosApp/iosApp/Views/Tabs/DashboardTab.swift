@@ -11,7 +11,7 @@ import SwiftUI
 struct DashboardTab: View {
     @Environment(\.navigationContext) private var context
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     var body: some View {
         switch context {
         case .mainTab:
@@ -29,17 +29,17 @@ struct DashboardTabContent: View {
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var showAddCardSheet = false
     @State private var draggedCard: DashboardCards?
-    
+
     private let columns = [
         GridItem(.adaptive(minimum: 300, maximum: .infinity), spacing: 16)
     ]
-    
+
     private var availableCards: [DashboardCards] {
         DashboardCards.allCases.filter { card in
             !viewModel.cards.contains(where: { $0.name == card.name })
         }
     }
-    
+
     var body: some View {
         ZStack {
             if let success = viewModel.state as? CombinedDashboardStateSuccess {
@@ -71,13 +71,13 @@ struct DashboardTabContent: View {
                         viewModel.toggleEditing()
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
                         Button(action: { viewModel.resetCardsOrder() }) {
                             Image(systemName: "arrow.counterclockwise")
                         }
-                        
+
                         if !availableCards.isEmpty {
                             Button(action: { showAddCardSheet = true }) {
                                 Image(systemName: "plus")
@@ -97,7 +97,7 @@ struct DashboardTabContent: View {
             AddDashboardCardSheet(viewModel: viewModel)
         }
     }
-    
+
     @ViewBuilder
     private func dashboardGrid(_ state: CombinedDashboardStateSuccess) -> some View {
         ScrollView {
@@ -146,7 +146,7 @@ struct DashboardTabContent: View {
             MediaRouteDestination(route: route)
         }
     }
-    
+
     private func handleCardClick(_ card: DashboardCards) {
         switch card {
         case .arrOverview: navigationManager.openSettings()
@@ -159,7 +159,7 @@ struct DashboardTabContent: View {
         default: break
         }
     }
-    
+
     private var emptyView: some View {
         VStack(spacing: 16) {
             Text(MR.strings().empty_library.localized())
@@ -181,19 +181,19 @@ struct DashboardDropDelegate: DropDelegate {
     @Binding var items: [DashboardCards]
     @Binding var draggedItem: DashboardCards?
     let onOrderChanged: ([DashboardCards]) -> Void
-    
+
     func performDrop(info: DropInfo) -> Bool {
         onOrderChanged(items)
         draggedItem = nil
         return true
     }
-    
+
     func dropEntered(info: DropInfo) {
         guard let draggedItem = draggedItem else { return }
         if draggedItem != item {
             let from = items.firstIndex(of: draggedItem)!
             let to = items.firstIndex(of: item)!
-            
+
             if items[to] != draggedItem {
                 items.move(fromOffsets: IndexSet(integer: from), toOffset: to > from ? to + 1 : to)
             }
@@ -206,14 +206,14 @@ struct DashboardCardWrapper: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
     let onRemove: () -> Void
-    
+
     var body: some View {
         ZStack(alignment: .topTrailing) {
             DashboardCardView(card: card, state: state, isEditing: isEditing)
                 .padding(12)
                 .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
                 .cornerRadius(12)
-            
+
             if isEditing {
                 Button(action: onRemove) {
                     Image(systemName: "xmark.circle.fill")
@@ -232,7 +232,7 @@ struct DashboardCardView: View {
     let card: DashboardCards
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    
+
     var body: some View {
         Group {
             switch card {
@@ -257,7 +257,7 @@ struct StatCard: View {
     let label: String
     let value: String
     let color: Color
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -281,7 +281,7 @@ struct StatCard: View {
 struct DashboardOverviewSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if isEditing {
@@ -292,14 +292,14 @@ struct DashboardOverviewSection: View {
                         .bold()
                 }
             }
-            
+
             let totalSize = state.instances.reduce(0) { $0 + $1.sizeOnDisk }
             let totalIssues = state.instances.reduce(0) { $0 + $1.healthItems.count }
             let criticalIssues = state.instances
                 .flatMap { $0.healthItems }
                 .filter { $0.type == .error }
                 .count
-            
+
             HStack(spacing: 12) {
                 StatCard(
                     icon: "internaldrive",
@@ -307,7 +307,7 @@ struct DashboardOverviewSection: View {
                     value: totalSize.bytesAsFileSizeString(),
                     color: .blue
                 )
-                
+
                 let issueColor: Color = if criticalIssues > 0 {
                     .arrRed
                 } else if totalIssues > 0 {
@@ -329,7 +329,7 @@ struct DashboardOverviewSection: View {
 struct DashboardSeerrSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if isEditing {
@@ -340,10 +340,10 @@ struct DashboardSeerrSection: View {
                         .bold()
                 }
             }
-            
+
             let totalRequests = state.seerrInstances.reduce(0) { $0 + Int($1.pendingRequestsCount) }
             let totalIssues = state.seerrInstances.reduce(0) { $0 + Int($1.openIssuesCount) }
-            
+
             HStack(spacing: 12) {
                 StatCard(icon: "tray", label: MR.strings().requests.localized(), value: "\(totalRequests)", color: .purple)
                 StatCard(icon: "ladybug", label: MR.strings().issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary)
@@ -355,7 +355,7 @@ struct DashboardSeerrSection: View {
 struct DashboardProwlarrSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if isEditing {
@@ -366,10 +366,10 @@ struct DashboardProwlarrSection: View {
                         .bold()
                 }
             }
-            
+
             let healthy = state.prowlarrStats.reduce(0) { $0 + Int($1.healthyIndexers) }
             let failing = state.prowlarrStats.reduce(0) { $0 + Int($1.failingIndexers) }
-            
+
             HStack(spacing: 12) {
                 StatCard(icon: "heart", label: MR.strings().healthy_indexers.localized(), value: "\(healthy)", color: .green)
                 StatCard(icon: "exclamationmark.octagon", label: MR.strings().failing_indexers.localized(), value: "\(failing)", color: failing > 0 ? .red : .secondary)
@@ -381,7 +381,7 @@ struct DashboardProwlarrSection: View {
 struct DashboardBazarrSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if isEditing {
@@ -395,10 +395,10 @@ struct DashboardBazarrSection: View {
                         .bold()
                 }
             }
-            
+
             let totalEpisodes = state.bazarrStats.reduce(0) { $0 + Int($1.wantedEpisodesCount) }
             let totalMovies = state.bazarrStats.reduce(0) { $0 + Int($1.wantedMoviesCount) }
-            
+
             HStack(spacing: 12) {
                 StatCard(icon: "tv", label: MR.strings().bazarr_wanted_episodes.localized(), value: "\(totalEpisodes)", color: .blue)
                 StatCard(icon: "film", label: MR.strings().bazarr_wanted_movies.localized(), value: "\(totalMovies)", color: .secondary)
@@ -409,7 +409,7 @@ struct DashboardBazarrSection: View {
 
 struct DashboardNetworkSection: View {
     let state: CombinedDashboardStateSuccess
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
@@ -418,9 +418,9 @@ struct DashboardNetworkSection: View {
                 Text(MR.strings().network_status.localized())
                     .font(.headline)
                     .bold()
-                
+
                 Spacer()
-                
+
                 if let ssid = state.networkStatus?.ssid {
                     Text(ssid)
                         .font(.system(size: 10, weight: .bold))
@@ -430,10 +430,10 @@ struct DashboardNetworkSection: View {
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                 }
             }
-            
+
             Divider()
                 .opacity(0.5)
-            
+
             if let statuses = state.networkStatus?.instanceStatuses {
                 VStack(spacing: 12) {
                     ForEach(statuses, id: \.instanceName) { status in
@@ -442,7 +442,7 @@ struct DashboardNetworkSection: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 24, height: 24)
-                            
+
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(status.instanceName)
                                     .font(.subheadline)
@@ -452,9 +452,9 @@ struct DashboardNetworkSection: View {
                                     .foregroundColor(.secondary)
                                     .lineLimit(1)
                             }
-                            
+
                             Spacer()
-                            
+
                             HStack(spacing: 4) {
                                 Text(status.isOnline ? MR.strings().online.localized() : MR.strings().offline.localized())
                                     .font(.system(size: 10, weight: .bold))
@@ -463,7 +463,7 @@ struct DashboardNetworkSection: View {
                                     .background(status.isOnline ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
                                     .foregroundColor(status.isOnline ? .green : .red)
                                     .clipShape(RoundedRectangle(cornerRadius: 4))
-                                
+
                                 if (status.isLocalSwitchingEnabled) {
                                     Text(status.isLocal ? MR.strings().local_network.localized() : MR.strings().remote_vpn.localized())
                                         .font(.system(size: 10, weight: .bold))
@@ -485,7 +485,7 @@ struct DashboardNetworkSection: View {
 struct DashboardRecentlyAddedSection: View {
     let state: CombinedDashboardStateSuccess
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -494,7 +494,7 @@ struct DashboardRecentlyAddedSection: View {
                     .font(.headline)
                     .bold()
             }
-            
+
             if state.recentlyAdded.isEmpty {
                 Text(MR.strings().nothing_recently_added.localized())
                     .foregroundColor(.secondary)
@@ -506,10 +506,10 @@ struct DashboardRecentlyAddedSection: View {
                         ForEach(state.recentlyAdded, id: \.id) { item in
                             let identifiable = item as? InstanceTypeIdentifiable
                             let type = identifiable?.instanceType
-                            let isWide = (type == .lidarr || type == .booksehelf || type == .listenarr)
+                            let isWide = (type == .lidarr || type == .bookshelf || type == .listenarr)
                             let ratio: Shared.AspectRatio = isWide ? .cover : .poster
                             let width: CGFloat = isWide ? 150 : 100
-                            
+
                             PosterItem(item: item, instanceType: type, aspectRatio: ratio, elevation: .none, posterHeight: 150, showFooter: true) { clickedItem in
                                 if let type = type, let id = clickedItem.id {
                                     navigationManager.go(to: .details(id: id.int64Value, type: type), of: type)
@@ -527,7 +527,7 @@ struct DashboardRecentlyAddedSection: View {
 struct DashboardDownloadClientsSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -536,7 +536,7 @@ struct DashboardDownloadClientsSection: View {
                     .font(.headline)
                     .bold()
             }
-            
+
             ForEach(state.downloadClients, id: \.client.id) { clientState in
                 HStack {
                     VStack(alignment: .leading) {
@@ -571,7 +571,7 @@ struct DashboardDownloadClientsSection: View {
                         .font(.caption)
                         .bold()
                         .foregroundColor(.secondary)
-                    
+
                     ForEach(state.activeDownloads.prefix(5), id: \.id) { download in
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
@@ -584,11 +584,11 @@ struct DashboardDownloadClientsSection: View {
                                     .font(.system(size: 10))
                                     .bold()
                             }
-                            
+
                             ProgressView(value: download.progress)
                                 .progressViewStyle(.linear)
                                 .tint(.green)
-                            
+
                             HStack {
                                 Text("\(download.downloaded.bytesAsFileSizeString()) / \(download.size.bytesAsFileSizeString())")
                                     .font(.system(size: 8))
@@ -607,7 +607,7 @@ struct DashboardDownloadClientsSection: View {
                     }
                 }
                 .padding(.top, 4)
-                
+
                 if state.activeDownloads.count > 5 {
                     HStack {
                         Spacer()
@@ -624,7 +624,7 @@ struct DashboardDownloadClientsSection: View {
 struct DashboardActivityQueueSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -633,7 +633,7 @@ struct DashboardActivityQueueSection: View {
                     .font(.headline)
                     .bold()
             }
-            
+
             if state.activityQueue.isEmpty {
                 Text(MR.strings().no_activity.localized())
                     .foregroundColor(.secondary)
@@ -662,7 +662,7 @@ struct DashboardActivityQueueSection: View {
                     .background(Color(UIColor.tertiarySystemBackground))
                     .cornerRadius(12)
                 }
-                
+
                 if state.activityQueue.count > 5 {
                     HStack {
                         Spacer()
@@ -679,7 +679,7 @@ struct DashboardActivityQueueSection: View {
 struct DashboardTodaySection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -688,7 +688,7 @@ struct DashboardTodaySection: View {
                     .font(.headline)
                     .bold()
             }
-            
+
             if state.calendarItems.isEmpty {
                 Text(MR.strings().nothing_on_today.localized())
                     .foregroundColor(.secondary)
@@ -706,7 +706,7 @@ struct DashboardTodaySection: View {
 struct DashboardUpcomingSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -715,7 +715,7 @@ struct DashboardUpcomingSection: View {
                     .font(.headline)
                     .bold()
             }
-            
+
             if state.upcomingCalendarItems.isEmpty {
                 Text(MR.strings().nothing_upcoming.localized())
                     .foregroundColor(.secondary)
@@ -733,9 +733,9 @@ struct DashboardUpcomingSection: View {
 struct CalendarItemRow: View {
     let dashboardItem: DashboardCalendarItem
     var showDate: Bool = false
-    
+
     private var item: CalendarItem { dashboardItem.item }
-    
+
     var body: some View {
         HStack(spacing: 12) {
             let color: Color = {
@@ -745,24 +745,24 @@ struct CalendarItemRow: View {
                 }
                 return .accentColor
             }()
-            
+
             Circle()
                 .fill(color)
                 .frame(width: 4, height: 4)
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline)
                     .bold()
                     .lineLimit(1)
-                
+
                 if !subTitle.isEmpty {
                     Text(subTitle)
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
-                
+
                 if showDate {
                     Text(formatDate(dashboardItem.date))
                         .font(.system(size: 10))
@@ -775,7 +775,7 @@ struct CalendarItemRow: View {
         .background(Color(UIColor.tertiarySystemBackground))
         .cornerRadius(12)
     }
-    
+
     private var title: String {
         if let episode = item as? Episode {
             return episode.series?.title ?? ""
@@ -792,7 +792,7 @@ struct CalendarItemRow: View {
         }
         return ""
     }
-    
+
     private var subTitle: String {
         if let episode = item as? Episode {
             return "\(episode.seasonEpLabel): \(episode.title ?? "")"
@@ -815,7 +815,7 @@ struct CalendarItemRow: View {
         }
         return ""
     }
-    
+
     private func formatDate(_ date: Kotlinx_datetimeLocalDate) -> String {
         let components = date.toDateComponents()
         let date = Calendar.current.date(from: components)
@@ -829,7 +829,7 @@ struct DashboardInstanceDashboardSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -838,7 +838,7 @@ struct DashboardInstanceDashboardSection: View {
                     .font(.headline)
                     .bold()
             }
-            
+
             ForEach(state.instances, id: \.instance.id) { instanceState in
                 Button {
                     navigationManager.openArrDashboard(id: instanceState.instance.id)
@@ -849,21 +849,21 @@ struct DashboardInstanceDashboardSection: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 32, height: 32)
-                            
+
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(instanceState.instance.label)
                                     .font(.subheadline)
                                     .bold()
-                                
+
                                 let completion = instanceState.library.isEmpty ? 0 : instanceState.library.map { $0.statusProgress }.reduce(0, +) / Float(instanceState.library.count)
-                                
+
                                 Text("\(instanceState.totalItems) Items • \(instanceState.sizeOnDisk.bytesAsFileSizeString()) • \(Int(completion * 100))% Downloaded")
                                     .font(.system(size: 10))
                                     .foregroundColor(.secondary)
                             }
-                            
+
                             Spacer()
-                            
+
                             if instanceState.healthItems.contains(where: { $0.type == .error }) {
                                 Image(systemName: "exclamationmark.octagon.fill")
                                     .foregroundColor(.red)
@@ -874,7 +874,7 @@ struct DashboardInstanceDashboardSection: View {
                                     .font(.system(size: 14))
                             }
                         }
-                        
+
                         VStack(spacing: 4) {
                             ForEach(instanceState.disks, id: \.path) { disk in
                                 HStack(spacing: 8) {
@@ -882,14 +882,14 @@ struct DashboardInstanceDashboardSection: View {
                                         .font(.system(size: 10, weight: .medium))
                                         .foregroundColor(.secondary)
                                         .lineLimit(1)
-                                    
+
                                     let usedSpace = disk.totalSpace - disk.freeSpace
                                     Text("\(usedSpace.bytesAsFileSizeString()) / \(disk.totalSpace.bytesAsFileSizeString())")
                                         .font(.system(size: 8))
                                         .foregroundColor(.secondary.opacity(0.7))
-                                    
+
                                     Spacer()
-                                    
+
                                     Text("\(Int(disk.usedPercentage * 100))% full")
                                         .font(.system(size: 8))
                                         .foregroundColor(disk.usedPercentage > 0.9 ? .red : .secondary)
@@ -910,18 +910,18 @@ struct DashboardInstanceDashboardSection: View {
 struct AddDashboardCardSheet: View {
     @ObservedObject var viewModel: DashboardViewModelS
     @Environment(\.dismiss) var dismiss
-    
+
     private let columns = [
         GridItem(.adaptive(minimum: 300, maximum: .infinity), spacing: 16)
     ]
-    
+
     var body: some View {
         NavigationView {
             ScrollView {
                 let available = DashboardCards.allCases.filter { card in
                     !viewModel.cards.contains(where: { $0.name == card.name })
                 }
-                
+
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(available, id: \.self) { card in
                         VStack(alignment: .leading, spacing: 12) {
@@ -934,7 +934,7 @@ struct AddDashboardCardSheet: View {
                                     .font(.title2)
                                     .foregroundColor(.accentColor)
                             }
-                            
+
                             let mockSuccess = CombinedDashboardStateCompanion.shared.Mock
                             DashboardCardView(card: card, state: mockSuccess, isEditing: false)
                                 .disabled(true)

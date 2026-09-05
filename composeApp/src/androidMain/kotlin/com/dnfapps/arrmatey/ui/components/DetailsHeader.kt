@@ -197,7 +197,10 @@ fun DetailsHeader(item: RequestMediaDetails) {
                         listOfNotNull(
                             item.displayDate?.format("MMM d, yyyy"),
                             (item as? MovieDetails)?.runtime?.formatMinutesAsRuntime(),
-                            (item as? TvDetails)?.seasons?.let { mokoPlural(MR.plurals.seasons, it.size) },
+                            (item as? TvDetails)?.let { tv ->
+                                val count = if (tv.numberOfSeasons > 0) tv.numberOfSeasons else tv.seasons.count { it.seasonNumber != 0 }
+                                mokoPlural(MR.plurals.seasons, count)
+                            },
                             item.getCertification(LocalLocale.current.platformLocale.country),
                         ).joinToString(BULLET),
                     fontSize = 16.sp,

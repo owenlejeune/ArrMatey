@@ -44,15 +44,17 @@ import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.format
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudiobookFilesScreen(
     audiobook: Audiobook,
     onBack: () -> Unit = {},
-    viewModel: AudiobookFilesViewModel = koinInjectParams(audiobook.id ?: 0L),
+    viewModel: AudiobookFilesViewModel =
+        koinViewModel(key = (audiobook.id ?: 0L).toString(), parameters = { parametersOf(audiobook.id ?: 0L) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()

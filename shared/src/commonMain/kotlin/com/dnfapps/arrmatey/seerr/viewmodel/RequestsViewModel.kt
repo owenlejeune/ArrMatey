@@ -157,17 +157,30 @@ class RequestsViewModel(
         _requestActionStatus.value = OperationStatus.Idle
     }
 
-    fun approveRequest(requestId: Long) {
+    fun approveRequest(
+        requestId: Long,
+        profileId: Long? = null,
+        rootFolder: String? = null,
+        languageProfileId: Long? = null,
+        seasons: List<Int>? = null,
+    ) {
         val repository = selectedRepository.value ?: return
         viewModelScope.launch {
             _requestActionStatus.value = OperationStatus.InProgress
-            setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Approve, repository)
-                .onSuccess {
-                    _requestActionStatus.value = OperationStatus.Success("Request approved")
-                    refresh()
-                }.onError { code, message, cause ->
-                    _requestActionStatus.value = OperationStatus.Error(code, message, cause)
-                }
+            setRequestApprovalStatusUseCase(
+                requestId = requestId,
+                approvalStatus = ApprovalStatus.Approve,
+                repository = repository,
+                profileId = profileId,
+                rootFolder = rootFolder,
+                languageProfileId = languageProfileId,
+                seasons = seasons,
+            ).onSuccess {
+                _requestActionStatus.value = OperationStatus.Success("Request approved")
+                refresh()
+            }.onError { code, message, cause ->
+                _requestActionStatus.value = OperationStatus.Error(code, message, cause)
+            }
         }
     }
 

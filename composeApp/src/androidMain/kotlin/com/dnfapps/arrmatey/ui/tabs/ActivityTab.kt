@@ -75,14 +75,14 @@ import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
 import com.dnfapps.arrmatey.ui.theme.surfaceDark
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
 @Composable
 fun ActivityTab(
     wideRailIsVisible: Boolean,
-    viewModel: ActivityQueueViewModel = koinInject(),
+    viewModel: ActivityQueueViewModel = koinViewModel(),
 ) {
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()

@@ -45,9 +45,10 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /**
  * "Subtitles" section embedded in a Sonarr episode or Radarr movie detail screen, backed by
@@ -59,7 +60,7 @@ import dev.icerock.moko.resources.compose.painterResource
 fun BazarrSubtitlesSection(
     target: BazarrMediaTarget,
     modifier: Modifier = Modifier,
-    viewModel: BazarrMediaSubtitlesViewModel = koinInjectParams(target),
+    viewModel: BazarrMediaSubtitlesViewModel = koinViewModel(key = target.toString(), parameters = { parametersOf(target) }),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val operationState by viewModel.operationState.collectAsStateWithLifecycle()

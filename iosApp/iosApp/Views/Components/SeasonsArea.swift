@@ -21,7 +21,7 @@ struct SeasonsArea: View {
     var onDeleteEpisodeFile: (Int64) -> Void = { _ in }
     var seasonDeleteInProgress: Bool = false
     var onNavigateToEpisodeDetails: ((Episode) -> Void)? = nil
-    var onNavigateToSeriesRelease: ((Int64?, Int32) -> Void)? = nil
+    var onNavigateToSeriesRelease: ((Int64?, Int32?, Int64?) -> Void)? = nil
     var bazarrDetailsIntegration: Bool = true
 
     @ViewBuilder
@@ -69,7 +69,7 @@ struct SeasonAreaRow: View {
     let onDeleteEpisodeFile: (Int64) -> Void
     let seasonDeleteInProgress: Bool
     var onNavigateToEpisodeDetails: ((Episode) -> Void)? = nil
-    var onNavigateToSeriesRelease: ((Int64?, Int32) -> Void)? = nil
+    var onNavigateToSeriesRelease: ((Int64?, Int32?, Int64?) -> Void)? = nil
     var bazarrDetailsIntegration: Bool
 
     @State private var expanded: Bool = false
@@ -89,6 +89,30 @@ struct SeasonAreaRow: View {
         }
     }
 
+    private var activeCount: Int {
+        season.episodes.filter { $0.isActive }.count
+    }
+
+    @ViewBuilder
+    private var statsView: some View {
+        if activeCount > 0 {
+            let fileCount = season.episodeFileCount?.intValue ?? 0
+            HStack(spacing: 0) {
+                Text("\(fileCount)")
+                Text("+\(activeCount)")
+                    .fontWeight(.bold)
+                    .foregroundColor(.arrLightPurple)
+                Text("/\(season.totalEpisodeCount)")
+            }
+            .font(.system(size: 15))
+            .foregroundColor(.secondary)
+        } else {
+            Text(statsText)
+                .font(.system(size: 15))
+                .foregroundColor(.secondary)
+        }
+    }
+
     /// True when arr season data is present and series has been added to an arr instance.
     private var showArrControls: Bool {
         season.arrSeason != nil && (seriesId ?? 0) > 0
@@ -103,9 +127,7 @@ struct SeasonAreaRow: View {
                         Text(seasonTitle)
                             .font(.system(size: 20, weight: .medium))
 
-                        Text(statsText)
-                            .font(.system(size: 15))
-                            .foregroundColor(.secondary)
+                        statsView
                     }
 
                     if !season.infoString.isEmpty {
@@ -154,7 +176,7 @@ struct SeasonAreaRow: View {
                         ReleaseDownloadButtons(
                             onInteractiveClicked: {
                                 if let onNavigateToSeriesRelease = onNavigateToSeriesRelease {
-                                    onNavigateToSeriesRelease(sId, season.seasonNumber)
+                                    onNavigateToSeriesRelease(sId, season.seasonNumber, nil)
                                 } else {
                                     navigation.go(to: .seriesReleases(seriesId: sId, seasonNumber: season.seasonNumber, episodeId: nil), of: .sonarr)
                                 }
@@ -182,9 +204,9 @@ struct SeasonAreaRow: View {
                             onToggleMonitor: { onToggleEpisodeMonitor($0) },
                             onNavigateToSeriesRelease: { epId in
                                 if let onNavigateToSeriesRelease = onNavigateToSeriesRelease {
-                                    onNavigateToSeriesRelease(seriesId, season.seasonNumber)
+                                    onNavigateToSeriesRelease(seriesId, season.seasonNumber, epId)
                                 } else {
-                                    navigation.go(to: .seriesReleases(seriesId: seriesId, seasonNumber: nil, episodeId: epId), of: .sonarr)
+                                    navigation.go(to: .seriesReleases(seriesId: seriesId, seasonNumber: season.seasonNumber, episodeId: epId), of: .sonarr)
                                 }
                             },
                             onDeleteFile: { onDeleteEpisodeFile($0) },

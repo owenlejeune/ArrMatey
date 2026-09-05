@@ -63,10 +63,11 @@ import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.ProgressBox
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.menu.InteractiveSearchMenu
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -75,8 +76,9 @@ fun InteractiveSearchScreen(
     releaseParams: ReleaseParams,
     defaultFilter: ReleaseFilterBy = ReleaseFilterBy.Any,
     onBack: () -> Unit = {},
-    viewModel: InteractiveSearchViewModel = koinInjectParams(instanceType, defaultFilter),
-    instanceViewModel: InstancesViewModel = koinInjectParams(instanceType),
+    viewModel: InteractiveSearchViewModel =
+        koinViewModel(key = "${instanceType.name}_$defaultFilter", parameters = { parametersOf(instanceType, defaultFilter) }),
+    instanceViewModel: InstancesViewModel = koinViewModel(key = instanceType.name, parameters = { parametersOf(instanceType) }),
     navigationManager: NavigationManager = koinInject(),
 ) {
     val context = LocalContext.current

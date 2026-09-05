@@ -39,6 +39,7 @@ import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,6 +49,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -178,19 +180,10 @@ class ArrMediaViewModel(
                     repository.editItemStatus.collect { _editItemStatus.value = it }
                 }
 
-                getLibraryUseCase(repository.instance.id)
-                    .combine(_searchQuery) { state, query ->
-                        when (state) {
-                            is ArrLibrary.Success -> {
-                                filterSuccessState(state, query)
-                            }
-
-                            is ArrLibrary.Error -> {
-                                handleErrorState(state)
-                                state
-                            }
-
-                            else -> state
+                getLibraryUseCase(repository.instance.id, _searchQuery)
+                    .onEach { state ->
+                        if (state is ArrLibrary.Error) {
+                            handleErrorState(state)
                         }
                     }
             }.stateIn(
@@ -253,16 +246,6 @@ class ArrMediaViewModel(
             }
         }
     }
-
-    private fun filterSuccessState(
-        state: ArrLibrary.Success,
-        query: String,
-    ) = state.copy(
-        items =
-            state.items.filter {
-                it.title?.contains(query, ignoreCase = true) == true
-            },
-    )
 
     private fun handleErrorState(state: ArrLibrary.Error) {
         _errorMessage.value = state.message
@@ -509,8 +492,12 @@ class ArrMediaViewModel(
 
             val selectedIds = selectionState.selectedItems.value
 
-            selectedIds.forEach { id ->
-                repository.delete(id, deleteFiles, addExclusion)
+            coroutineScope {
+                selectedIds.forEach { id ->
+                    launch {
+                        repository.delete(id, deleteFiles, addExclusion)
+                    }
+                }
             }
 
             selectionState.exitSelectionMode()

@@ -19,6 +19,7 @@ sealed interface MediaScreen : NavKey {
         val requestType: RequestType? = null,
         val type: InstanceType? = null,
         val instanceId: Long? = null,
+        val episodeId: Long? = null,
     ) : MediaScreen
 
     data class Preview<T>(

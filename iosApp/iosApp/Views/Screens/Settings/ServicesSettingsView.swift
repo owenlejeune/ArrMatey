@@ -25,7 +25,7 @@ struct ServicesSettingsView: View {
 
     private func route(for instance: Instance) -> SettingsRoute {
         switch instance.type {
-        case .sonarr, .radarr, .lidarr, .booksehelf, .listenarr:
+        case .sonarr, .radarr, .lidarr, .bookshelf, .listenarr:
             return .arrDashboard(instance.id)
         default:
             return .editInstance(instance.id)

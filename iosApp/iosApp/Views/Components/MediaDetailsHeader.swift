@@ -21,10 +21,10 @@ struct ViewHeightKey: PreferenceKey {
 struct MediaDetailsHeader: View {
     let item: ArrMedia
     let type: InstanceType
-    
+
     @Environment(\.colorScheme) var colorScheme
     @State private var infoHeight: CGFloat = 0
-    
+
     private var infoString: String {
         var result = ""
         if let year = item.year {
@@ -38,7 +38,7 @@ struct MediaDetailsHeader: View {
         }
         return result
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             MediaHeaderBanner(
@@ -46,14 +46,14 @@ struct MediaDetailsHeader: View {
                 height: 350,
                 gradientHeight: infoHeight > 0 ? infoHeight + 24 : 150
             )
-            
+
             HStack(alignment: .bottom, spacing: 24) {
                 PosterItem(item: item, aspectRatio: type.aspectRatio)
                     .frame(width: 150)
-                
+
                 VStack(alignment: .leading, spacing: 8) {
                     ClearLogoView(item: item)
-                    
+
                     VStack(alignment: .leading, spacing: 4) {
                         let ratings = item.ratings?.toRatingItems() ?? []
                         if !ratings.isEmpty {
@@ -82,13 +82,13 @@ struct MediaDetailsHeader: View {
                                 Text(infoString)
                                     .font(.system(size: 16))
                             }
-                            
+
                             if let releasedBy = item.releasedBy {
                                 Text(releasedBy)
                                     .font(.system(size: 14))
                             }
                         }
-                        
+
                         Text(item.genres.joined(separator: " • "))
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
@@ -113,7 +113,7 @@ struct MediaDetailsHeader: View {
 struct RequestMediaDetailsHeader: View {
     let item: RequestMediaDetails
     @State private var infoHeight: CGFloat = 0
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             MediaHeaderBanner(
@@ -121,16 +121,16 @@ struct RequestMediaDetailsHeader: View {
                 height: 350,
                 gradientHeight: infoHeight > 0 ? infoHeight + 24 : 150
             )
-            
+
             HStack(alignment: .bottom, spacing: 24) {
                 GenericPosterItem(posterUrl: item.fullPosterPath)
                     .frame(width: 150)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(infoString)
                         .font(.system(size: 16))
                         .padding(.top, 6)
-                    
+
                     Text(item.genres.map { $0.name }.joined(separator: " • "))
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
@@ -149,7 +149,7 @@ struct RequestMediaDetailsHeader: View {
             self.infoHeight = height
         }
     }
-    
+
     private var infoString: String {
         var items: [String] = []
         if let displayDate = item.displayDate {
@@ -159,7 +159,8 @@ struct RequestMediaDetailsHeader: View {
             items.append(Int(truncating: runtime).formatAsRuntime())
         }
         if let tv = item as? TvDetails {
-            items.append(MR.plurals().seasons.localized(Int(tv.seasons.count)))
+            let count = tv.numberOfSeasons > 0 ? Int(tv.numberOfSeasons) : tv.seasons.filter { $0.seasonNumber != 0 }.count
+            items.append(MR.plurals().seasons.localized(Int32(count)))
         }
         if let certification = item.getCertification(localeCode: Locale.current.region?.identifier ?? "") {
             items.append(certification)

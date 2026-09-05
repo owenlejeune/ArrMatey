@@ -82,17 +82,18 @@ import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BazarrScreen(
     wideRailIsVisible: Boolean,
-    viewModel: BazarrViewModel = koinInject(),
-    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Bazarr),
+    viewModel: BazarrViewModel = koinViewModel(),
+    instancesViewModel: InstancesViewModel =
+        koinViewModel(key = InstanceType.Bazarr.name, parameters = { parametersOf(InstanceType.Bazarr) }),
     onNavigateToDetails: (Long, BazarrMediaType) -> Unit = { _, _ -> },
 ) {
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()

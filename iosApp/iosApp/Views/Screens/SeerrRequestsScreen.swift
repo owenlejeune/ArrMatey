@@ -10,9 +10,9 @@ struct SeerrTabContent: View {
     @StateObject private var viewModel = RequestsViewModelS()
     @StateObject private var instancesViewModel = InstancesViewModelS(type: .seerr)
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     @State private var toastMessage: String? = nil
-    
+
     var body: some View {
         ZStack {
             Group {
@@ -31,13 +31,16 @@ struct SeerrTabContent: View {
                         .pickerStyle(.segmented)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        
+
                         if viewModel.selectedTab == .requests {
                             RequestsContentView(
                                 pagedData: viewModel.requestsState,
                                 userState: viewModel.userState,
                                 operationsState: viewModel.operationsState,
                                 onApprove: { viewModel.approveRequest($0) },
+                                onApproveWithDetails: { id, profileId, rootFolder, lang, seasons in
+                                    viewModel.approveRequest(id, profileId: profileId, rootFolder: rootFolder, languageProfileId: lang, seasons: seasons)
+                                },
                                 onDecline: { viewModel.declineRequest($0) },
                                 onEdit: { _ in },
                                 onDelete: { viewModel.cancelRequest($0) },
@@ -101,7 +104,7 @@ struct SeerrTabContent: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var toastOverlay: some View {
         if let message = toastMessage {
@@ -126,7 +129,7 @@ struct SeerrTabContent: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var requestsTabLabel: some View {
         let count = viewModel.requestsState.totalItemCount
@@ -136,7 +139,7 @@ struct SeerrTabContent: View {
             Text(MR.strings().requests.localized())
         }
     }
-    
+
     @ViewBuilder
     private var issuesTabLabel: some View {
         let count = viewModel.issuesState.totalItemCount
@@ -155,6 +158,7 @@ private struct RequestsContentView: View {
     let userState: SeerrUser?
     let operationsState: RequestOperationsState
     let onApprove: (Int64) -> Void
+    var onApproveWithDetails: ((Int64, Int64?, String?, Int64?, [Int32]?) -> Void)? = nil
     let onDecline: (Int64) -> Void
     let onEdit: (Int64) -> Void
     let onDelete: (Int64) -> Void
@@ -163,7 +167,9 @@ private struct RequestsContentView: View {
     let onLoadMore: () -> Void
     let onRetry: () -> Void
     let onClearError: () -> Void
-    
+
+    @State private var selectedPackageForSheet: MediaRequestPackage? = nil
+
     var body: some View {
         ZStack {
             if pagedData.isLoading && pagedData.items.isEmpty {
@@ -191,10 +197,11 @@ private struct RequestsContentView: View {
                     onDelete: onDelete,
                     onRemoveFromService: onRemoveFromService,
                     onNavigateToDetails: onNavigateToDetails,
-                    onLoadMore: onLoadMore
+                    onLoadMore: onLoadMore,
+                    onViewRequest: { selectedPackageForSheet = $0 }
                 )
             }
-            
+
             if let error = pagedData.error {
                 VStack {
                     Spacer()
@@ -205,6 +212,31 @@ private struct RequestsContentView: View {
                     )
                     .padding(16)
                 }
+            }
+        }
+        .sheet(item: Binding(
+            get: { selectedPackageForSheet.map { IdentifiableRequestPackage(package: $0) } },
+            set: { selectedPackageForSheet = $0?.package }
+        )) { wrapper in
+            if let details = wrapper.package.details {
+                SeerrViewRequestSheet(
+                    details: details,
+                    request: wrapper.package.request,
+                    serviceDetails: wrapper.package.serviceDetails,
+                    onDismissRequest: { selectedPackageForSheet = nil },
+                    onApproveRequest: { requestId, profileId, rootFolder, languageProfileId, seasons in
+                        if let onApproveWithDetails {
+                            onApproveWithDetails(requestId, profileId, rootFolder, languageProfileId, seasons)
+                        } else {
+                            onApprove(requestId)
+                        }
+                        selectedPackageForSheet = nil
+                    },
+                    onDeclineRequest: { requestId in
+                        onDecline(requestId)
+                        selectedPackageForSheet = nil
+                    }
+                )
             }
         }
     }
@@ -218,9 +250,9 @@ private struct IssuesContentView: View {
     let onRetry: () -> Void
     let onClearError: () -> Void
     let onRefresh: () -> Void
-    
+
     @State private var selectedIssue: MediaIssuePackage? = nil
-    
+
     var body: some View {
         ZStack {
             if pagedData.isLoading && pagedData.items.isEmpty {
@@ -244,7 +276,7 @@ private struct IssuesContentView: View {
                     onSelectIssue: { selectedIssue = $0 }
                 )
             }
-            
+
             if let error = pagedData.error {
                 VStack {
                     Spacer()
@@ -288,7 +320,8 @@ private struct RequestsListView: View {
     let onRemoveFromService: (MediaRequest) -> Void
     let onNavigateToDetails: (Int64, RequestType) -> Void
     let onLoadMore: () -> Void
-    
+    var onViewRequest: ((MediaRequestPackage) -> Void)? = nil
+
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
@@ -307,7 +340,8 @@ private struct RequestsListView: View {
                                 rPackage.request.media.tmdbId,
                                 rPackage.request.type
                             )
-                        }
+                        },
+                        onViewRequest: { onViewRequest?(rPackage) }
                     )
                     .onAppear {
                         if rPackage.request.id == items.last?.request.id && hasMore && !isLoadingMore {
@@ -315,7 +349,7 @@ private struct RequestsListView: View {
                         }
                     }
                 }
-                
+
                 if isLoadingMore {
                     ProgressView()
                         .padding(16)
@@ -334,7 +368,7 @@ private struct IssuesListView: View {
     let isLoadingMore: Bool
     let onLoadMore: () -> Void
     let onSelectIssue: (MediaIssuePackage) -> Void
-    
+
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
@@ -349,7 +383,7 @@ private struct IssuesListView: View {
                         }
                     }
                 }
-                
+
                 if isLoadingMore {
                     ProgressView()
                         .padding(16)
@@ -366,7 +400,7 @@ private struct ErrorBannerView: View {
     let error: String
     let onRetry: () -> Void
     let onDismiss: () -> Void
-    
+
     var body: some View {
         HStack {
             Image(systemName: "exclamationmark.triangle.fill")
@@ -391,6 +425,11 @@ private struct ErrorBannerView: View {
 }
 
 // MARK: - Helpers
+
+private struct IdentifiableRequestPackage: Identifiable {
+    let package: MediaRequestPackage
+    var id: Int64 { package.request.id }
+}
 
 private struct IdentifiableIssue: Identifiable {
     let package: MediaIssuePackage

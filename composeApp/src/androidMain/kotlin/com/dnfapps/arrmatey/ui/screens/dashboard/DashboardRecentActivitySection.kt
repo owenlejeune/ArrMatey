@@ -93,7 +93,7 @@ fun DashboardActivityQueueSection(
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            item.title ?: item.titleLabel,
+                            item.titleLabel,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,

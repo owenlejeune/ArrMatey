@@ -14,12 +14,12 @@ fun SeasonHeader(
     searchInProgress: (Int) -> Boolean = { false },
     onDeleteSeason: () -> Unit = {},
     deleteInProgress: Boolean = false,
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> },
+    onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?) -> Unit = { _, _, _ -> },
 ) {
     if (seriesId != null && season.arrSeason != null) {
         ReleaseDownloadButtons(
             onInteractiveClicked = {
-                onNavigateToSeriesRelease(seriesId, season.seasonNumber)
+                onNavigateToSeriesRelease(seriesId, season.seasonNumber, null)
             },
             onAutomaticClicked = {
                 onPerformAutomaticSearch(season.seasonNumber)

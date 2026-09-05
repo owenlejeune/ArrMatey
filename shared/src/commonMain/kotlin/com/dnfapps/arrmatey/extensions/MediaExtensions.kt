@@ -79,17 +79,27 @@ fun List<ArrMedia>.mergeWithLibrary(library: List<ArrMedia>): List<ArrMedia> =
             when (item) {
                 is ArrSeries ->
                     library.filterIsInstance<ArrSeries>().firstOrNull {
-                        it.tvdbId == item.tvdbId || (it.tmdbId == item.tmdbId && it.tmdbId != null)
+                        (it.tvdbId != 0L && item.tvdbId != 0L && it.tvdbId == item.tvdbId) ||
+                            (it.tmdbId != null && it.tmdbId != 0L && item.tmdbId != null && item.tmdbId != 0L && it.tmdbId == item.tmdbId)
                     }
-                is ArrMovie -> library.filterIsInstance<ArrMovie>().firstOrNull { it.tmdbId == item.tmdbId }
+                is ArrMovie ->
+                    library.filterIsInstance<ArrMovie>().firstOrNull {
+                        it.tmdbId != 0L && item.tmdbId != 0L && it.tmdbId == item.tmdbId
+                    }
                 is Arrtist ->
                     library.filterIsInstance<Arrtist>().firstOrNull {
-                        (it.mbId != null && it.mbId == item.mbId) ||
-                            (it.tadbId != 0L && it.tadbId == item.tadbId)
+                        (!it.mbId.isNullOrBlank() && !item.mbId.isNullOrBlank() && it.mbId == item.mbId) ||
+                            (it.tadbId != 0L && item.tadbId != 0L && it.tadbId == item.tadbId)
                     }
 
-                is Audiobook -> library.filterIsInstance<Audiobook>().firstOrNull { it.asin == item.asin }
-                is Author -> library.filterIsInstance<Author>().firstOrNull { it.title == item.title }
+                is Audiobook ->
+                    library.filterIsInstance<Audiobook>().firstOrNull {
+                        !it.asin.isNullOrBlank() && !item.asin.isNullOrBlank() && it.asin == item.asin
+                    }
+                is Author ->
+                    library.filterIsInstance<Author>().firstOrNull {
+                        !it.title.isNullOrBlank() && !item.title.isNullOrBlank() && it.title == item.title
+                    }
                 else -> null
             }
         match ?: item

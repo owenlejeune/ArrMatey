@@ -21,14 +21,14 @@ import com.dnfapps.arrmatey.ui.menu.IndexersSortMenu
 import com.dnfapps.arrmatey.ui.screens.ProwlarrIndexersContent
 import com.dnfapps.arrmatey.ui.screens.ProwlarrSearchContent
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProwlarrTab(
     wideRailIsVisible: Boolean,
-    indexersViewModel: ProwlarrIndexersViewModel = koinInject(),
-    searchViewModel: ProwlarrSearchViewModel = koinInject(),
+    indexersViewModel: ProwlarrIndexersViewModel = koinViewModel(),
+    searchViewModel: ProwlarrSearchViewModel = koinViewModel(),
 ) {
     val textFieldState = rememberTextFieldState()
 

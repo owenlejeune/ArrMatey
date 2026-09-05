@@ -52,14 +52,16 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             requestType = details.requestType,
             instanceType = resolvedInstanceType,
             instanceId = details.instanceId,
+            initialEpisodeId = details.episodeId,
             isExpanded = isExpanded,
             wideRailIsVisible = wideRailIsVisible,
             onBack = { navigation.popBackStack() },
             onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },
-            onNavigateToSeriesRelease = { seriesId, seasonNumber ->
+            onNavigateToSeriesRelease = { seriesId, seasonNumber, episodeId ->
                 navigation.toSeriesRelease(
                     seriesId,
                     seasonNumber,
+                    episodeId,
                 )
             },
             onNavigateToMovieFiles = { navigation.toMovieFiles(it) },
@@ -139,7 +141,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                 mediaId = params.bookId,
             )
         InteractiveSearchScreen(
-            instanceType = InstanceType.Booksehelf,
+            instanceType = InstanceType.Bookshelf,
             releaseParams = releaseParams,
             onBack = { navigation.popBackStack() },
         )

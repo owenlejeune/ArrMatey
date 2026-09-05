@@ -143,7 +143,15 @@ sealed interface UnifiedMediaDetailsUiState {
             }
 
         val seasonCount: Int?
-            get() = (seerrMedia as? TvDetails)?.seasons?.size ?: (arrMedia as? ArrSeries)?.seasons?.size
+            get() =
+                if (seasons.isNotEmpty()) {
+                    seasons.count { it.seasonNumber != 0 }.takeIf { it > 0 } ?: seasons.size
+                } else {
+                    (seerrMedia as? TvDetails)?.numberOfSeasons
+                        ?: (arrMedia as? ArrSeries)?.statistics?.seasonCount
+                        ?: (seerrMedia as? TvDetails)?.seasons?.count { it.seasonNumber != 0 }
+                        ?: (arrMedia as? ArrSeries)?.seasons?.count { it.seasonNumber != 0 }
+                }
 
         val genres: List<String>
             get() = seerrMedia?.genres?.map { it.name } ?: arrMedia?.genres ?: emptyList()

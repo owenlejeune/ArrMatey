@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class AppShortcutManager(
     private val context: Context,
@@ -41,6 +42,7 @@ class AppShortcutManager(
         const val ACTION_OPEN_DASHBOARD = NotificationConstants.ACTION_OPEN_DASHBOARD
 
         const val EXTRA_INSTANCE_TYPE = NotificationConstants.EXTRA_INSTANCE_TYPE
+        const val EXTRA_SHORTCUT_ID = "extra_shortcut_id"
     }
 
     data class ShortcutItem(
@@ -190,6 +192,71 @@ class AppShortcutManager(
         ShortcutManagerCompat.setDynamicShortcuts(context, shortcutInfos)
     }
 
+    fun pushShortcut(shortcutId: String) {
+        scope.launch {
+            val disabled = preferenceStore.disabledShortcuts.first()
+            if (shortcutId in disabled) return@launch
+
+            val available = getAllAvailableShortcuts()
+            val item = available.find { it.id == shortcutId } ?: return@launch
+            val shortcutInfo =
+                createShortcut(
+                    id = item.id,
+                    label = item.label,
+                    action = item.action,
+                    iconRes = item.iconRes,
+                    extras = item.extras,
+                )
+            ShortcutManagerCompat.pushDynamicShortcut(context, shortcutInfo)
+        }
+    }
+
+    fun pushShortcutForAction(
+        action: String,
+        instanceType: String? = null,
+    ) {
+        val id =
+            when (action) {
+                ACTION_OPEN_DOWNLOADS -> "downloads"
+                ACTION_OPEN_REQUESTS -> "requests"
+                ACTION_OPEN_SCHEDULE -> "calendar"
+                ACTION_OPEN_ACTIVITY -> "activity"
+                ACTION_OPEN_DASHBOARD -> "dashboard"
+                ACTION_OPEN_SEARCH -> instanceType?.lowercase()?.let { "search_$it" }
+                ACTION_OPEN_LIBRARY -> instanceType?.lowercase()?.let { "library_$it" }
+                else -> null
+            }
+        id?.let { pushShortcut(it) }
+    }
+
+    fun pushLibraryShortcut(type: InstanceType) {
+        pushShortcut("library_${type.name.lowercase()}")
+    }
+
+    fun pushSearchShortcut(type: InstanceType) {
+        pushShortcut("search_${type.name.lowercase()}")
+    }
+
+    fun pushDownloadsShortcut() {
+        pushShortcut("downloads")
+    }
+
+    fun pushRequestsShortcut() {
+        pushShortcut("requests")
+    }
+
+    fun pushScheduleShortcut() {
+        pushShortcut("calendar")
+    }
+
+    fun pushActivityShortcut() {
+        pushShortcut("activity")
+    }
+
+    fun pushDashboardShortcut() {
+        pushShortcut("dashboard")
+    }
+
     private fun createShortcut(
         id: String,
         label: String,
@@ -201,6 +268,7 @@ class AppShortcutManager(
             Intent(context, MainActivity::class.java).apply {
                 this.action = action
                 extras.forEach { (key, value) -> putExtra(key, value) }
+                putExtra(EXTRA_SHORTCUT_ID, id)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
 

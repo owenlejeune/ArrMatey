@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -24,6 +25,7 @@ import com.dnfapps.arrmatey.ui.theme.onPrimaryDark
 import com.dnfapps.arrmatey.ui.theme.primaryDark
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun RequestButtons(
@@ -35,6 +37,7 @@ fun RequestButtons(
     onEditClicked: () -> Unit,
     onDeleteClicked: () -> Unit,
     onRemoveFromServiceClicked: () -> Unit,
+    onViewRequestClicked: (() -> Unit)? = null,
 ) {
     var showDeclineConfirm by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -42,21 +45,21 @@ fun RequestButtons(
 
     LaunchedEffect(showDeclineConfirm) {
         if (showDeclineConfirm) {
-            delay(3000)
+            delay(3000.milliseconds)
             showDeclineConfirm = false
         }
     }
 
     LaunchedEffect(showDeleteConfirm) {
         if (showDeleteConfirm) {
-            delay(3000)
+            delay(3000.milliseconds)
             showDeleteConfirm = false
         }
     }
 
     LaunchedEffect(showRemoveConfirm) {
         if (showRemoveConfirm) {
-            delay(3000)
+            delay(3000.milliseconds)
             showRemoveConfirm = false
         }
     }
@@ -88,6 +91,7 @@ fun RequestButtons(
                     }
                 },
                 onEdit = onEditClicked,
+                onViewRequest = onViewRequestClicked,
             )
         }
 
@@ -128,6 +132,7 @@ private fun PendingApprovalButtons(
     onApprove: () -> Unit,
     onDecline: () -> Unit,
     onEdit: () -> Unit,
+    onViewRequest: (() -> Unit)? = null,
 ) {
     val approveColors =
         ButtonDefaults.buttonColors(
@@ -145,7 +150,10 @@ private fun PendingApprovalButtons(
             contentColor = MaterialTheme.colorScheme.onTertiary,
         )
 
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+    ) {
         if (isAdmin) {
             Button(
                 onClick = onApprove,
@@ -188,6 +196,17 @@ private fun PendingApprovalButtons(
                 }
             },
         )
+
+        onViewRequest?.let { onView ->
+            FilledTonalIconButton(
+                onClick = onView,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Visibility,
+                    contentDescription = mokoString(MR.strings.view_request),
+                )
+            }
+        }
     }
 
     if (isDebug()) {

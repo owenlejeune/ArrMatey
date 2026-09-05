@@ -4,23 +4,19 @@ import com.dnfapps.arrmatey.arr.api.client.ArrClient
 import com.dnfapps.arrmatey.arr.api.client.BookshelfClient
 import com.dnfapps.arrmatey.arr.api.client.LidarrClient
 import com.dnfapps.arrmatey.arr.api.client.ListenarrClient
-import com.dnfapps.arrmatey.arr.api.client.LookupParams
 import com.dnfapps.arrmatey.arr.api.client.RadarrClient
 import com.dnfapps.arrmatey.arr.api.client.SonarrClient
-import com.dnfapps.arrmatey.arr.api.model.AddAudiobookBody
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrRelease
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
-import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.AudiobookFile
 import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataBody
-import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
+import com.dnfapps.arrmatey.arr.api.model.AudiobookPreviewPaths
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookEdition
 import com.dnfapps.arrmatey.arr.api.model.BookFile
@@ -34,7 +30,6 @@ import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
 import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
-import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
@@ -42,1101 +37,341 @@ import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.DownloadState
-import com.dnfapps.arrmatey.extensions.mergeWithLibrary
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.asSuccess
-import com.dnfapps.networking.mapValues
-import com.dnfapps.networking.onError
-import com.dnfapps.networking.onSuccess
 import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.flow.flowOf
 
-class ArrInstanceRepository(
+open class ArrInstanceRepository(
     override val instance: Instance,
-    private val httpClient: HttpClient,
-    private val logger: Logger,
+    protected val httpClient: HttpClient,
+    protected val logger: Logger,
 ) : InstanceScopedRepository {
     val client: ArrClient = createClient()
 
-    val sonarrClient: SonarrClient
-        get() = client as? SonarrClient ?: throw IllegalStateException("Client is not a SonarrClient instance")
+    protected val libraryRepository = LibraryRepository(client, logger)
+    protected val metadataRepository = MetadataRepository(client, logger)
 
-    val radarrClient: RadarrClient
-        get() = client as? RadarrClient ?: throw IllegalStateException("Client is not a RadarrClient instance")
+    val library: StateFlow<NetworkResult<List<ArrMedia>>?> = libraryRepository.library
+    val lookupResults: StateFlow<NetworkResult<List<ArrMedia>>?> = libraryRepository.lookupResults
+    val lastAddedItemId: StateFlow<Long?> = libraryRepository.lastAddedItemId
+    val releases: StateFlow<NetworkResult<List<ArrRelease>>?> = libraryRepository.releases
+    val historyCache: StateFlow<Map<Long, List<HistoryItem>>> = libraryRepository.historyCache
+    val mediaDetailsCache: StateFlow<Map<Long, ArrMedia>> = libraryRepository.mediaDetailsCache
+    val activityTasks: StateFlow<List<QueueItem>> = libraryRepository.activityTasks
+    val addItemStatus: StateFlow<OperationStatus> = libraryRepository.addItemStatus
+    val editItemStatus: StateFlow<OperationStatus> = libraryRepository.editItemStatus
+    val searchStatus: StateFlow<OperationStatus> = libraryRepository.searchStatus
+    val downloadStatus: StateFlow<DownloadState> = libraryRepository.downloadStatus
+    val monitorStatus: StateFlow<OperationStatus> = libraryRepository.monitorStatus
+    val historyStatus: StateFlow<OperationStatus> = libraryRepository.historyStatus
 
-    val lidarrClient: LidarrClient
-        get() = client as? LidarrClient ?: throw IllegalStateException("Client is not a LidarrClient instance")
+    val qualityProfiles: StateFlow<List<QualityProfile>> = metadataRepository.qualityProfiles
+    val rootFolders: StateFlow<List<RootFolder>> = metadataRepository.rootFolders
+    val tags: StateFlow<List<Tag>> = metadataRepository.tags
+    val customFilters: StateFlow<List<CustomFilter>> = metadataRepository.customFilters
+    val softwareStatus: StateFlow<ArrSoftwareStatus?> = metadataRepository.softwareStatus
+    val diskSpace: StateFlow<List<ArrDiskSpace>> = metadataRepository.diskSpace
+    val health: StateFlow<List<ArrHealth>> = metadataRepository.health
 
-    val bookshelfClient: BookshelfClient
-        get() = client as? BookshelfClient ?: throw IllegalStateException("Client is not a BookshelfClient instance")
-
-    val listenarrClient: ListenarrClient
-        get() = client as? ListenarrClient ?: throw IllegalStateException("Client is not a ListenarrClient instance")
+    // Type-specific state forwarding
+    open val episodes: StateFlow<Map<Long, List<Episode>>> get() = (this as? SonarrRepository)?.episodes ?: MutableStateFlow(emptyMap())
+    open val movieExtraFiles: StateFlow<Map<Long, List<ExtraFile>>> get() =
+        (this as? RadarrRepository)?.movieExtraFiles
+            ?: MutableStateFlow(emptyMap())
+    open val artistAlbums: StateFlow<Map<Long, List<ArrAlbum>>> get() =
+        (this as? LidarrRepository)?.artistAlbums
+            ?: MutableStateFlow(emptyMap())
+    open val artistTracks: StateFlow<Map<Long, Map<Long, List<LidarrTrack>>>> get() =
+        (this as? LidarrRepository)?.artistTracks
+            ?: MutableStateFlow(emptyMap())
+    open val artistTrackFiles: StateFlow<Map<Long, Map<Long, List<LidarrTrackFile>>>> get() =
+        (this as? LidarrRepository)?.artistTrackFiles
+            ?: MutableStateFlow(emptyMap())
+    open val authorSeries: StateFlow<Map<Long, List<BookSeries>>> get() =
+        (this as? ReadarrRepository)?.authorSeries
+            ?: MutableStateFlow(emptyMap())
+    open val authorBookFiles: StateFlow<Map<Long, List<BookFile>>> get() =
+        (this as? ReadarrRepository)?.authorBookFiles
+            ?: MutableStateFlow(emptyMap())
+    open val booksLibrary: StateFlow<List<Book>> get() = (this as? ReadarrRepository)?.booksLibrary ?: MutableStateFlow(emptyList())
+    open val authorBooks: Flow<Map<Long, List<Book>>> get() = (this as? ReadarrRepository)?.authorBooks ?: flowOf(emptyMap())
+    open val audiobookFiles: StateFlow<Map<Long, List<AudiobookFile>>> get() =
+        (this as? ListenarrRepository)?.audiobookFiles
+            ?: MutableStateFlow(emptyMap())
+    open val listenarrConfiguration: StateFlow<ListenarrConfiguration> get() =
+        (this as? ListenarrRepository)?.listenarrConfiguration
+            ?: MutableStateFlow(ListenarrConfiguration())
 
     private fun createClient(): ArrClient =
         when (instance.type) {
             InstanceType.Sonarr -> SonarrClient(instance, httpClient)
             InstanceType.Radarr -> RadarrClient(instance, httpClient)
             InstanceType.Lidarr -> LidarrClient(instance, httpClient)
-            InstanceType.Booksehelf -> BookshelfClient(instance, httpClient)
+            InstanceType.Bookshelf -> BookshelfClient(instance, httpClient)
             InstanceType.Listenarr -> ListenarrClient(instance, httpClient)
             else -> TODO()
         }
 
-    private val _library = MutableStateFlow<NetworkResult<List<ArrMedia>>?>(null)
-    val library: StateFlow<NetworkResult<List<ArrMedia>>?> = _library.asStateFlow()
-
-    private val _lookupResults = MutableStateFlow<NetworkResult<List<ArrMedia>>?>(null)
-    val lookupResults: StateFlow<NetworkResult<List<ArrMedia>>?> = _lookupResults.asStateFlow()
-
-    private val _lastAddedItemId = MutableStateFlow<Long?>(null)
-    val lastAddedItemId: StateFlow<Long?> = _lastAddedItemId.asStateFlow()
-
-    private val _releases = MutableStateFlow<NetworkResult<List<ArrRelease>>?>(null)
-    val releases: StateFlow<NetworkResult<List<ArrRelease>>?> = _releases.asStateFlow()
-
-    private val _historyCache = MutableStateFlow<Map<Long, List<HistoryItem>>>(emptyMap())
-    val historyCache: StateFlow<Map<Long, List<HistoryItem>>> = _historyCache.asStateFlow()
-
-    private val _mediaDetailsCache = MutableStateFlow<Map<Long, ArrMedia>>(emptyMap())
-
-    private val _qualityProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
-    val qualityProfiles: StateFlow<List<QualityProfile>> = _qualityProfiles.asStateFlow()
-
-    private val _rootFolders = MutableStateFlow<List<RootFolder>>(emptyList())
-    val rootFolders: StateFlow<List<RootFolder>> = _rootFolders.asStateFlow()
-
-    private val _tags = MutableStateFlow<List<Tag>>(emptyList())
-    val tags: StateFlow<List<Tag>> = _tags.asStateFlow()
-
-    private val _customFilters = MutableStateFlow<List<CustomFilter>>(emptyList())
-    val customFilters: StateFlow<List<CustomFilter>> = _customFilters.asStateFlow()
-
-    private val _softwareStatus = MutableStateFlow<ArrSoftwareStatus?>(null)
-    val softwareStatus: StateFlow<ArrSoftwareStatus?> = _softwareStatus.asStateFlow()
-
-    private val _diskSpace = MutableStateFlow<List<ArrDiskSpace>>(emptyList())
-    val diskSpace: StateFlow<List<ArrDiskSpace>> = _diskSpace.asStateFlow()
-
-    private val _health = MutableStateFlow<List<ArrHealth>>(emptyList())
-    val health: StateFlow<List<ArrHealth>> = _health.asStateFlow()
-
-    private val _activityTasks = MutableStateFlow<List<QueueItem>>(emptyList())
-    val activityTasks: StateFlow<List<QueueItem>> = _activityTasks.asStateFlow()
-
-    private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
-    val addItemStatus: StateFlow<OperationStatus> = _addItemStatus.asStateFlow()
-
-    private val _editItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
-    val editItemStatus: StateFlow<OperationStatus> = _editItemStatus.asStateFlow()
-
-    private val _searchStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
-    val searchStatus: StateFlow<OperationStatus> = _searchStatus.asStateFlow()
-
-    private val _downloadStatus = MutableStateFlow<DownloadState>(DownloadState.Initial)
-    val downloadStatus: StateFlow<DownloadState> = _downloadStatus.asStateFlow()
-
-    private val _monitorStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
-    val monitorStatus: StateFlow<OperationStatus> = _monitorStatus.asStateFlow()
-
-    private val _historyStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
-    val historyStatus: StateFlow<OperationStatus> = _historyStatus.asStateFlow()
-
-    // Sonarr-specific
-    private val _episodes = MutableStateFlow<Map<Long, List<Episode>>>(emptyMap())
-    val episodes: StateFlow<Map<Long, List<Episode>>> = _episodes.asStateFlow()
-
-    // Radarr-specific
-    private val _movieExtraFiles = MutableStateFlow<Map<Long, List<ExtraFile>>>(emptyMap())
-    val movieExtraFiles: StateFlow<Map<Long, List<ExtraFile>>> = _movieExtraFiles.asStateFlow()
-
-    // Lidarr-specific
-    private val _artistAlbums = MutableStateFlow<Map<Long, List<ArrAlbum>>>(emptyMap())
-    val artistAlbums: StateFlow<Map<Long, List<ArrAlbum>>> = _artistAlbums.asStateFlow()
-
-    private val _artistTracks = MutableStateFlow<Map<Long, Map<Long, List<LidarrTrack>>>>(emptyMap())
-    val artistTracks: StateFlow<Map<Long, Map<Long, List<LidarrTrack>>>> = _artistTracks.asStateFlow()
-
-    private val _artistTrackFiles = MutableStateFlow<Map<Long, Map<Long, List<LidarrTrackFile>>>>(emptyMap())
-    val artistTrackFiles: StateFlow<Map<Long, Map<Long, List<LidarrTrackFile>>>> = _artistTrackFiles.asStateFlow()
-
-    // Readarr-specific
-    private val _authorSeries = MutableStateFlow<Map<Long, List<BookSeries>>>(emptyMap())
-    val authorSeries: StateFlow<Map<Long, List<BookSeries>>> = _authorSeries.asStateFlow()
-
-    private val _authorBookFiles = MutableStateFlow<Map<Long, List<BookFile>>>(emptyMap())
-    val authorBookFiles: StateFlow<Map<Long, List<BookFile>>> = _authorBookFiles.asStateFlow()
-
-    private val _booksLibrary = MutableStateFlow<List<Book>>(emptyList())
-    val booksLibrary: StateFlow<List<Book>> = _booksLibrary.asStateFlow()
-
-    val authorBooks: Flow<Map<Long, List<Book>>> =
-        booksLibrary
-            .map { books ->
-                books
-                    .filter { it.authorId != null }
-                    .groupBy { it.authorId!! }
-            }
-
-    // Listenarr-specific
-    private val _audiobookFiles = MutableStateFlow<Map<Long, List<AudiobookFile>>>(emptyMap())
-    val audiobookFiles: StateFlow<Map<Long, List<AudiobookFile>>> = _audiobookFiles.asStateFlow()
-
-    private val _listenarrConfiguration = MutableStateFlow(ListenarrConfiguration())
-    val listenarrConfiguration: StateFlow<ListenarrConfiguration> = _listenarrConfiguration.asStateFlow()
-
     override suspend fun testConnection(): NetworkResult<Unit> = client.testConnection()
 
-    suspend fun refreshLibrary() {
-        _library.value = NetworkResult.Loading
-        _library.value = client.getLibrary()
-        safePerformReadarr { client ->
-            client
-                .getBooks()
-                .onSuccess {
-                    _booksLibrary.value = it
-                }
-        }
-        safePerformListenarr { client ->
-            client
-                .getConfigurationSettings()
-                .onSuccess {
-                    _listenarrConfiguration.value = it
-                }
-        }
+    open suspend fun refreshLibrary() {
+        libraryRepository.refreshLibrary()
     }
 
-    suspend fun getMediaDetails(id: Long): NetworkResult<ArrMedia> =
-        client
-            .getDetail(id)
-            .onSuccess { media ->
-                logger.info { "Media details for $id: $media" }
-                val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache[id] = media
-                _mediaDetailsCache.value = currentCache
-            }.onError { code, message, cause ->
-                logger.error(cause) { "Error getting media details for $id: $message" }
-            }
+    open suspend fun getMediaDetails(id: Long): NetworkResult<ArrMedia> = libraryRepository.getMediaDetails(id)
 
-    suspend fun refreshQualityProfiles() {
-        client
-            .getQualityProfiles()
-            .onSuccess { _qualityProfiles.value = it }
+    open suspend fun refreshQualityProfiles() {
+        metadataRepository.refreshQualityProfiles()
     }
 
-    suspend fun refreshRootFolders() {
-        client
-            .getRootFolders()
-            .onSuccess { _rootFolders.value = it }
-            .onError { code, message, cause ->
-                logger.error(cause) { "Error refreshing root folders: $message (code=$code)" }
-            }
+    open suspend fun refreshRootFolders() {
+        metadataRepository.refreshRootFolders()
     }
 
-    suspend fun refreshTags() {
-        client
-            .getTags()
-            .onSuccess { _tags.value = it }
+    open suspend fun refreshTags() {
+        metadataRepository.refreshTags()
     }
 
-    suspend fun refreshCustomFilters() {
-        client
-            .getCustomFilters()
-            .onSuccess { _customFilters.value = it }
-            .onError { code, message, cause ->
-                logger.error(cause) { "Error refreshing custom filters: $message (code=$code)" }
-            }
+    open suspend fun refreshCustomFilters() {
+        metadataRepository.refreshCustomFilters()
     }
 
-    suspend fun refreshStatus() {
-        client
-            .getStatus()
-            .onSuccess { _softwareStatus.value = it }
+    open suspend fun refreshStatus() {
+        metadataRepository.refreshStatus()
     }
 
-    suspend fun refreshDiskSpace() {
-        client
-            .getDiskSpace()
-            .onSuccess { _diskSpace.value = it }
+    open suspend fun refreshDiskSpace() {
+        metadataRepository.refreshDiskSpace()
     }
 
-    suspend fun refreshHealth() {
-        client
-            .getHealth()
-            .onSuccess { _health.value = it }
+    open suspend fun refreshHealth() {
+        metadataRepository.refreshHealth()
     }
 
-    suspend fun refreshAllMetadata() {
-        coroutineScope {
-            launch { refreshQualityProfiles() }
-            launch { refreshRootFolders() }
-            launch { refreshTags() }
-            launch { refreshCustomFilters() }
-        }
+    open suspend fun refreshAllMetadata(force: Boolean = false) {
+        metadataRepository.refreshAllMetadata(force)
     }
 
-    suspend fun refreshInstanceStatuses() {
-        coroutineScope {
-            launch { refreshStatus() }
-            launch { refreshDiskSpace() }
-            launch { refreshHealth() }
-        }
+    open suspend fun refreshInstanceStatuses() {
+        metadataRepository.refreshInstanceStatuses()
     }
 
-    suspend fun refreshActivityTasks(
+    open suspend fun refreshActivityTasks(
         page: Int = 1,
         pageSize: Int = 100,
     ) {
-        client
-            .fetchActivityTasks(page, pageSize)
-            .onSuccess { queue ->
-                _activityTasks.value = queue.records
-            }
+        libraryRepository.refreshActivityTasks(page, pageSize)
     }
 
-    suspend fun performLookup(query: String) {
-        if (query.isBlank()) {
-            _lookupResults.value = null
-            return
-        }
-
-        _lookupResults.value = NetworkResult.Loading
-
-        val language = _listenarrConfiguration.value.defaultSearchLanguage
-        val region = _listenarrConfiguration.value.defaultSearchRegion
-        val queryParams = LookupParams(query, language, region)
-        client
-            .lookup(queryParams)
-            .onSuccess { results ->
-                logger.info { "Lookup results: $results" }
-                val libraryItems = library.value?.asSuccess()?.data ?: emptyList()
-                _lookupResults.value = NetworkResult.Success(results.mergeWithLibrary(libraryItems))
-            }.onError { code, message, cause ->
-                logger.error(cause) { "Error performing lookup: $message" }
-                _lookupResults.value = NetworkResult.Error(code, message, cause)
-            }
+    open suspend fun performLookup(query: String) {
+        libraryRepository.performLookup(query)
     }
 
-    fun clearLookup() {
-        _lookupResults.value = null
+    open fun clearLookup() {
+        libraryRepository.clearLookup()
     }
 
-    suspend fun directLookup(query: String): NetworkResult<List<ArrMedia>> {
-        if (query.isBlank()) return NetworkResult.Success(emptyList())
-        val language = _listenarrConfiguration.value.defaultSearchLanguage
-        val region = _listenarrConfiguration.value.defaultSearchRegion
-        val queryParams = LookupParams(query, language, region)
-        val result = client.lookup(queryParams)
-        return if (result is NetworkResult.Success) {
-            val libraryItems = library.value?.asSuccess()?.data ?: emptyList()
-            NetworkResult.Success(result.data.mergeWithLibrary(libraryItems))
-        } else {
-            result
-        }
-    }
+    open suspend fun directLookup(query: String): NetworkResult<List<ArrMedia>> = libraryRepository.directLookup(query)
 
-    suspend fun addItem(
+    open suspend fun addItem(
         item: ArrMedia,
         searchOnAdd: Boolean,
     ) {
-        _addItemStatus.value = OperationStatus.InProgress
-        delay(100.milliseconds)
-
-        val result = client.addItemToLibrary(item)
-        processAddResult(result, searchOnAdd)
+        libraryRepository.addItem(item, searchOnAdd)
     }
 
-    private suspend fun processAddResult(
-        result: NetworkResult<ArrMedia>,
-        searchOnAdd: Boolean,
-    ) {
-        result
-            .onSuccess { addedItem ->
-                _addItemStatus.value = OperationStatus.Success("Item added successfully")
-                addedItem.id?.let {
-                    val newMap = _mediaDetailsCache.value.toMutableMap()
-                    newMap[it] = addedItem
-                    _mediaDetailsCache.value = newMap
-
-                    if (searchOnAdd) {
-                        executeAutomaticSearch(it)
-                    }
-                }
-                _lastAddedItemId.value = addedItem.id
-                refreshLibrary()
-                delay(1500.milliseconds)
-                _addItemStatus.value = OperationStatus.Idle
-                _lastAddedItemId.value = null
-            }.onError { code, error, cause ->
-                _addItemStatus.value = OperationStatus.Error(code, error, cause)
-                delay(1500.milliseconds)
-                _addItemStatus.value = OperationStatus.Idle
-                _lastAddedItemId.value = null
-            }
+    open suspend fun getReleases(params: ReleaseParams) {
+        libraryRepository.getReleases(params)
     }
 
-    suspend fun getReleases(params: ReleaseParams) {
-        _releases.value = NetworkResult.Loading
+    open suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> = libraryRepository.downloadRelease(payload)
 
-        client
-            .getReleases(params)
-            .mapValues { it.apply { mediaId = params.mediaId } }
-            .onSuccess { releases ->
-                logger.info { "Got releases: $releases" }
-                _releases.value = NetworkResult.Success(releases)
-            }.onError { code, message, cause ->
-                logger.error(cause) { "Error getting releases: $message" }
-                _releases.value = NetworkResult.Error(code, message, cause)
-            }
+    open fun resetDownloadStatus() {
+        libraryRepository.resetDownloadStatus()
     }
 
-    suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> {
-        _downloadStatus.value = DownloadState.Loading(payload.guid)
-
-        return client
-            .downloadRelease(payload)
-            .onSuccess {
-                logger.info { "Download release success: $it" }
-                _downloadStatus.value = DownloadState.Success
-            }.onError { code, error, cause ->
-                logger.error(cause) { "Download release error: $error" }
-                _downloadStatus.value = DownloadState.Error
-            }
+    open fun resetEditItemStatus() {
+        libraryRepository.setEditItemStatus(OperationStatus.Idle)
     }
 
-    fun resetDownloadStatus() {
-        _downloadStatus.value = DownloadState.Initial
-    }
-
-    suspend fun deleteActivityTask(
+    open suspend fun deleteActivityTask(
         releaseId: Int,
         removeFromClient: Boolean,
         addToBlocklist: Boolean,
         skipRedownload: Boolean,
-    ): NetworkResult<Unit> = client.deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
+    ): NetworkResult<Unit> = libraryRepository.deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
 
-    suspend fun executeAutomaticSearch(itemId: Long) {
-        _searchStatus.value = OperationStatus.InProgress
-
-        client
-            .performAutomaticSearch(itemId)
-            .onSuccess {
-                logger.info { "Search initiated: $it" }
-                _searchStatus.value = OperationStatus.Success("Search initiated")
-            }.onError { code, error, cause ->
-                logger.error(cause) { "Search error: $error" }
-                _searchStatus.value = OperationStatus.Error(code, error, cause)
-            }.also {
-                _searchStatus.value = OperationStatus.Idle
-            }
+    open suspend fun executeAutomaticSearch(itemId: Long) {
+        libraryRepository.executeAutomaticSearch(itemId)
     }
 
-    suspend fun executeCommand(payload: CommandPayload): NetworkResult<Any> = client.command(payload)
+    open suspend fun executeCommand(payload: CommandPayload): NetworkResult<Any> = libraryRepository.executeCommand(payload)
 
-    suspend fun getItemHistory(
+    open suspend fun getItemHistory(
         itemId: Long,
         altIt: Long? = null,
         page: Int = 1,
         pageSize: Int = 100,
-    ): NetworkResult<List<HistoryItem>> {
-        _historyStatus.value = OperationStatus.InProgress
+    ): NetworkResult<List<HistoryItem>> = libraryRepository.getItemHistory(itemId, altIt, page, pageSize)
 
-        return client
-            .getItemHistory(itemId, page, pageSize, altIt)
-            .onSuccess { history ->
-                val currentCache = _historyCache.value.toMutableMap()
-                currentCache[itemId] = history
-                _historyCache.value = currentCache
-                _historyStatus.value = OperationStatus.Success()
-            }.onError { code, message, cause ->
-                _historyStatus.value = OperationStatus.Error(code, message, cause)
-            }.also {
-                _historyStatus.value = OperationStatus.Idle
-            }
-    }
-
-    suspend fun editMediaItem(
+    open suspend fun editMediaItem(
         item: ArrMedia,
         moveFiles: Boolean,
-    ): NetworkResult<Unit> {
-        _editItemStatus.value = OperationStatus.InProgress
-        return client
-            .edit(item, moveFiles)
-            .onSuccess {
-                val id = item.id ?: return@onSuccess
-                val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache[id] = item
-                _mediaDetailsCache.value = currentCache
+    ): NetworkResult<Unit> = libraryRepository.editMediaItem(item, moveFiles)
 
-                updateItemInLibraryCache(item)
-                _editItemStatus.value = OperationStatus.Success("Item edited successfully")
-            }.onError { code, message, cause ->
-                _editItemStatus.value = OperationStatus.Error(code, message, cause)
-            }
-    }
+    open suspend fun updateMediaItem(item: ArrMedia): NetworkResult<ArrMedia> = libraryRepository.updateMediaItem(item)
 
-    suspend fun updateMediaItem(item: ArrMedia): NetworkResult<ArrMedia> {
-        _monitorStatus.value = OperationStatus.InProgress
-
-        return client
-            .update(item)
-            .onSuccess { updateItem ->
-                _monitorStatus.value = OperationStatus.Success("Item updated successfully")
-
-                val id = updateItem.id ?: return@onSuccess
-                val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache[id] = updateItem
-                _mediaDetailsCache.value = currentCache
-
-                updateItemInLibraryCache(updateItem)
-            }.onError { code, message, cause ->
-                _monitorStatus.value = OperationStatus.Error(code, message, cause)
-            }.also {
-                _monitorStatus.value = OperationStatus.Idle
-            }
-    }
-
-    suspend fun delete(
+    open suspend fun delete(
         id: Long,
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
-    ): NetworkResult<Unit> =
-        client
-            .delete(id, deleteFiles, addImportExclusion)
-            .onSuccess {
-                val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache.remove(id)
-                _mediaDetailsCache.value = currentCache
+    ): NetworkResult<Unit> = libraryRepository.delete(id, deleteFiles, addImportExclusion)
 
-                removeItemFromLibraryCache(id)
-            }
-
-    private fun removeItemFromLibraryCache(id: Long) {
-        val currentLibrary = _library.value
-        if (currentLibrary is NetworkResult.Success) {
-            _library.value =
-                NetworkResult.Success(
-                    currentLibrary.data.filterNot { it.id == id },
-                )
-        }
-    }
-
-    private fun updateItemInLibraryCache(updatedItem: ArrMedia) {
-        val currentLibrary = _library.value
-        if (currentLibrary is NetworkResult.Success) {
-            val updatedItems =
-                currentLibrary.data.map { item ->
-                    if (item.id == updatedItem.id) updatedItem else item
-                }
-            _library.value =
-                NetworkResult.Success(
-                    updatedItems,
-                )
-        }
-    }
-
-    suspend fun updateMonitoring(
+    open suspend fun updateMonitoring(
         ids: List<Long>,
         monitor: Any,
-    ): NetworkResult<Unit> {
-        _monitorStatus.value = OperationStatus.InProgress
+    ): NetworkResult<Unit> = libraryRepository.updateMonitoring(ids, monitor)
 
-        return client
-            .updateMonitoring(ids, monitor)
-            .onSuccess {
-                _monitorStatus.value = OperationStatus.Success("Monitoring updated successfully")
-            }.onError { code, message, cause ->
-                _monitorStatus.value = OperationStatus.Error(code, message, cause)
-            }.also {
-                _monitorStatus.value = OperationStatus.Idle
-            }
-    }
-
-    suspend fun toggleSeasonMonitor(
-        id: Long,
-        seasonNumber: Int,
-    ): NetworkResult<ArrMedia> {
-        _monitorStatus.value = OperationStatus.InProgress
-
-        val currentSeries = _mediaDetailsCache.value[id] as? ArrSeries
-        if (currentSeries == null) {
-            _monitorStatus.value = OperationStatus.Error(message = "Series not found in cache")
-            return NetworkResult.Error(message = "Series not found in cache")
-        }
-
-        val updatedSeason =
-            currentSeries.seasons.map { season ->
-                if (season.seasonNumber == seasonNumber) {
-                    season.copy(monitored = !season.monitored)
-                } else {
-                    season
-                }
-            }
-
-        val updatedSeries = currentSeries.copy(seasons = updatedSeason)
-
-        return client
-            .update(updatedSeries)
-            .onSuccess { resultSeries ->
-                _monitorStatus.value = OperationStatus.Success("Season monitor toggled")
-
-                val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache[id] = resultSeries
-                _mediaDetailsCache.value = currentCache
-
-                updateSeriesInLibraryCache(resultSeries)
-            }.also {
-                _monitorStatus.value = OperationStatus.Idle
-            }
-    }
-
-    suspend fun toggleEpisodeMonitor(episode: Episode): NetworkResult<Episode> {
-        _monitorStatus.value = OperationStatus.InProgress
-
-        val updatedEpisode = episode.copy(monitored = !episode.monitored)
-
-        if (instance.type != InstanceType.Sonarr) {
-            _monitorStatus.value = OperationStatus.Error(message = "Not a Sonarr instance")
-            return NetworkResult.Error(message = "Not a Sonarr instance")
-        }
-
-        return (client as SonarrClient)
-            .updateEpisode(updatedEpisode)
-            .onSuccess { resultEpisode ->
-                _monitorStatus.value =
-                    OperationStatus.Success(
-                        if (resultEpisode.monitored) "Episode monitored" else "Episode unmonitored",
-                    )
-                updateEpisodeInCache(
-                    resultEpisode.copy(
-                        images = episode.images,
-                        episodeFile = episode.episodeFile,
-                    ),
-                )
-            }.onError { code, message, cause ->
-                _monitorStatus.value = OperationStatus.Error(code, message, cause)
-            }.also {
-                _monitorStatus.value = OperationStatus.Idle
-            }
-    }
-
-    private fun updateSeriesInLibraryCache(series: ArrMedia) {
-        val currentLibrary = _library.value
-        if (currentLibrary is NetworkResult.Success) {
-            val updatedItems =
-                currentLibrary.data.map { item ->
-                    if (item.id == series.id) series else item
-                }
-            _library.value =
-                NetworkResult.Success(
-                    updatedItems,
-                )
-        }
-    }
-
-    private fun updateEpisodeInCache(episode: Episode) {
-        val currentEpisodes = _episodes.value.toMutableMap()
-        currentEpisodes.forEach { (seriesId, episodeList) ->
-            val index = episodeList.indexOfFirst { it.id == episode.id }
-            if (index != -1) {
-                val updatedList = episodeList.toMutableList()
-                updatedList[index] = episode
-                currentEpisodes[seriesId] = updatedList
-            }
-        }
-        _episodes.value = currentEpisodes
-    }
-
-    suspend fun toggleAlbumMonitor(album: ArrAlbum): NetworkResult<ArrAlbum> {
-        _monitorStatus.value = OperationStatus.InProgress
-
-        if (instance.type != InstanceType.Lidarr) {
-            _monitorStatus.value = OperationStatus.Error(message = "Not a Lidarr instance")
-            return NetworkResult.Error(message = "Not a Lidarr instance")
-        }
-
-        return (client as LidarrClient)
-            .toggleMonitored(album)
-            .onSuccess { resultAlbum ->
-                _monitorStatus.value =
-                    OperationStatus.Success(
-                        if (resultAlbum.monitored) "Album monitored" else "Album unmonitored",
-                    )
-                updateAlbumInCache(resultAlbum.copy(images = album.images))
-                _monitorStatus.value = OperationStatus.Idle
-            }.onError { code, message, cause ->
-                _monitorStatus.value = OperationStatus.Error(code, message, cause)
-                _monitorStatus.value = OperationStatus.Idle
-            }
-    }
-
-    suspend fun updateAlbum(album: ArrAlbum): NetworkResult<ArrAlbum> {
-        _editItemStatus.value = OperationStatus.InProgress
-
-        if (instance.type != InstanceType.Lidarr) {
-            _editItemStatus.value = OperationStatus.Error(message = "Not a Lidarr instance")
-            return NetworkResult.Error(message = "Not a Lidarr instance")
-        }
-
-        return (client as LidarrClient)
-            .updateAlbum(album)
-            .onSuccess { resultAlbum ->
-                _editItemStatus.value = OperationStatus.Success("Album updated successfully")
-                updateAlbumInCache(resultAlbum.copy(images = album.images))
-            }.onError { code, message, cause ->
-                _editItemStatus.value = OperationStatus.Error(code, message, cause)
-            }
-    }
-
-    fun resetEditItemStatus() {
-        _editItemStatus.value = OperationStatus.Idle
-    }
-
-    private fun updateAlbumInCache(album: ArrAlbum) {
-        _artistAlbums.update { currentMap ->
-            val updatedMap = currentMap.toMutableMap()
-            updatedMap.forEach { (artistId, albumList) ->
-                val index = albumList.indexOfFirst { it.id == album.id }
-                if (index != -1) {
-                    val updatedList = albumList.toMutableList()
-                    updatedList[index] = album
-                    updatedMap[artistId] = updatedList
-                }
-            }
-            updatedMap
-        }
-    }
-
-    private fun updateMonitoredInCache(
+    open fun updateMonitoredInCache(
         id: Long,
         status: Boolean,
     ) {
-        val libraryState = _library.value
-        if (libraryState is NetworkResult.Success) {
-            val updatedItems =
-                libraryState.data.map { item ->
-                    if (item.id == id) {
-                        when (item) {
-                            is ArrSeries -> item.copy(monitored = status)
-                            is ArrMovie -> item.copy(monitored = status)
-                            is Arrtist -> item.copy(monitored = status)
-                            is Author -> item.copy(monitored = status)
-                            is Audiobook -> item.copy(monitored = status)
-                            is SearchAudiobook -> item
-                            is MockMedia -> item
-                        }
-                    } else {
-                        item
-                    }
-                }
-            _library.value =
-                NetworkResult.Success(
-                    updatedItems,
-                )
-        }
-
-        val currentDetailsCache = _mediaDetailsCache.value
-        currentDetailsCache[id]?.let { item ->
-            val updatedMedia =
-                when (item) {
-                    is ArrSeries -> item.copy(monitored = status)
-                    is ArrMovie -> item.copy(monitored = status)
-                    is Arrtist -> item.copy(monitored = status)
-                    is Author -> item.copy(monitored = status)
-                    is Audiobook -> item.copy(monitored = status)
-                    is SearchAudiobook -> item
-                    is MockMedia -> item
-                }
-            val updatedCache = currentDetailsCache.toMutableMap()
-            updatedCache[id] = updatedMedia
-            _mediaDetailsCache.value = updatedCache
-        }
+        libraryRepository.updateMonitoredInCache(id, status)
     }
 
-    fun clearReleases() {
-        _releases.value = null
+    open fun clearReleases() {
+        libraryRepository.clearReleases()
     }
 
-    fun observeCacheMediaDetails(id: Long): Flow<ArrMedia?> =
-        _mediaDetailsCache.map {
-            it[id]
-        }
+    open fun observeCacheMediaDetails(id: Long): Flow<ArrMedia?> = libraryRepository.observeCacheMediaDetails(id)
 
-    fun getCacheMediaDetails(id: Long): ArrMedia? = _mediaDetailsCache.value[id]
+    open fun getCacheMediaDetails(id: Long): ArrMedia? = libraryRepository.getCacheMediaDetails(id)
 
-    fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> =
-        flow {
-            emit(NetworkResult.Loading)
+    open fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> = libraryRepository.observeMediaDetails(id)
 
-            val result = client.getDetail(id)
-            when (result) {
-                is NetworkResult.Success -> {
-                    val currentCache = _mediaDetailsCache.value.toMutableMap()
-                    currentCache[id] = result.data
-                    _mediaDetailsCache.value = currentCache
-                }
+    open fun observeItemHistory(itemId: Long): Flow<List<HistoryItem>> = libraryRepository.observeItemHistory(itemId)
 
-                is NetworkResult.Error -> {
-                    emit(result)
-                    return@flow
-                }
-
-                is NetworkResult.Loading -> {}
-            }
-
-            _mediaDetailsCache
-                .map { cache ->
-                    cache[id]?.let { NetworkResult.Success(it) }
-                        ?: NetworkResult.Error(message = "Media not found in cache")
-                }.collect { emit(it) }
-        }
-
-    suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> {
-        _monitorStatus.value = OperationStatus.InProgress
-
-        if (instance.type != InstanceType.Listenarr) {
-            _monitorStatus.value = OperationStatus.Error(message = "Not a Listenarr instance")
-            return NetworkResult.Error(message = "Not a Listenarr instance")
-        }
-
-        val updatedAudiobook = audiobook.copy(monitored = !audiobook.monitored)
-
-        return updateMediaItem(updatedAudiobook)
-            .map { it as Audiobook }
-    }
-
-    fun observeItemHistory(itemId: Long): Flow<List<HistoryItem>> =
-        historyCache.map { cache ->
-            cache[itemId] ?: emptyList()
-        }
-
-    // Sonarr-specific
-    suspend fun getEpisodes(
+    // Sonarr forwarded methods
+    open suspend fun getEpisodes(
         seriesId: Long,
         seasonNumber: Int? = null,
     ): NetworkResult<List<Episode>> =
-        safePerformSonarr { client ->
-            client
-                .getEpisodes(seriesId, seasonNumber)
-                .onSuccess { episodes ->
-                    val currentMap = _episodes.value.toMutableMap()
-                    currentMap[seriesId] = episodes
-                    _episodes.value = currentMap
-                }
-        }
+        (this as? SonarrRepository)?.getEpisodes(seriesId, seasonNumber) ?: NetworkResult.Error(message = "Not a Sonarr instance")
 
-    suspend fun deleteSeasonFiles(
+    open suspend fun toggleSeasonMonitor(
+        id: Long,
+        seasonNumber: Int,
+    ): NetworkResult<ArrMedia> =
+        (this as? SonarrRepository)?.toggleSeasonMonitor(id, seasonNumber) ?: NetworkResult.Error(message = "Not a Sonarr instance")
+
+    open suspend fun toggleEpisodeMonitor(episode: Episode): NetworkResult<Episode> =
+        (this as? SonarrRepository)?.toggleEpisodeMonitor(episode) ?: NetworkResult.Error(message = "Not a Sonarr instance")
+
+    open suspend fun deleteSeasonFiles(
         seriesId: Long,
         seasonNumber: Int,
     ): NetworkResult<Unit> =
-        safePerformSonarr {
-            var episodes = _episodes.value[seriesId]?.filter { it.seasonNumber == seasonNumber } ?: emptyList()
-            if (episodes.isEmpty()) {
-                val fetchResult = getEpisodes(seriesId)
-                if (fetchResult is NetworkResult.Success) {
-                    episodes = fetchResult.data.filter { it.seasonNumber == seasonNumber }
-                }
-            }
-            val fileIds =
-                episodes
-                    .filter { it.hasFile || it.episodeFile != null || (it.episodeFileId != null && it.episodeFileId != 0L) }
-                    .mapNotNull { it.episodeFileId?.takeIf { id -> id != 0L } ?: it.episodeFile?.id }
-            if (fileIds.isEmpty()) {
-                return@safePerformSonarr NetworkResult.Success(Unit)
-            }
-            deleteEpisodes(seriesId, episodes)
-                .onSuccess {
-                    getEpisodes(seriesId)
-                    getMediaDetails(seriesId)
-                }
-        }
+        (this as? SonarrRepository)?.deleteSeasonFiles(seriesId, seasonNumber) ?: NetworkResult.Error(message = "Not a Sonarr instance")
 
-    suspend fun deleteEpisodes(
+    open suspend fun deleteEpisodes(
         seriesId: Long,
         episodes: List<Episode>,
     ): NetworkResult<Unit> =
-        safePerformSonarr { client ->
-            val fileIds =
-                episodes
-                    .filter { it.hasFile || it.episodeFile != null || (it.episodeFileId != null && it.episodeFileId != 0L) }
-                    .mapNotNull { it.episodeFileId?.takeIf { id -> id != 0L } ?: it.episodeFile?.id }
-            if (fileIds.isEmpty()) {
-                return@safePerformSonarr NetworkResult.Success(Unit)
-            }
-            client
-                .deleteEpisodes(fileIds)
-                .onSuccess {
-                    getEpisodes(seriesId)
-                }
-        }
+        (this as? SonarrRepository)?.deleteEpisodes(seriesId, episodes) ?: NetworkResult.Error(message = "Not a Sonarr instance")
 
-    suspend fun deleteEpisodeFile(
+    open suspend fun deleteEpisodeFile(
         seriesId: Long,
         fileId: Long,
     ): NetworkResult<Unit> =
-        safePerformSonarr { client ->
-            client
-                .deleteEpisode(fileId)
-                .onSuccess {
-                    getEpisodes(seriesId)
-                }
-        }
+        (this as? SonarrRepository)?.deleteEpisodeFile(seriesId, fileId) ?: NetworkResult.Error(message = "Not a Sonarr instance")
 
-    // Radarr-specific
-    suspend fun getMovieExtraFiles(movieId: Long): NetworkResult<List<ExtraFile>> =
-        safePerformRadarr { client ->
-            client
-                .getMovieExtraFile(movieId)
-                .onSuccess { files ->
-                    val currentMap = _movieExtraFiles.value.toMutableMap()
-                    currentMap[movieId] = files
-                    _movieExtraFiles.value = currentMap
-                }
-        }
+    // Radarr forwarded methods
+    open suspend fun getMovieExtraFiles(movieId: Long): NetworkResult<List<ExtraFile>> =
+        (this as? RadarrRepository)?.getMovieExtraFiles(movieId) ?: NetworkResult.Error(message = "Not a Radarr instance")
 
-    suspend fun deleteMovieFile(movieId: Long): NetworkResult<Unit> =
-        safePerformRadarr { client ->
-            client.deleteMovieFile(movieId)
-        }
+    open suspend fun deleteMovieFile(movieId: Long): NetworkResult<Unit> =
+        (this as? RadarrRepository)?.deleteMovieFile(movieId) ?: NetworkResult.Error(message = "Not a Radarr instance")
 
-    // Lidarr-specific
-    suspend fun getArtistAlbums(artistId: Long): NetworkResult<List<ArrAlbum>> =
-        safePerformLidarr { client ->
-            client
-                .getAlbums(artistId)
-                .onSuccess { albums ->
-                    val currentMap = _artistAlbums.value.toMutableMap()
-                    currentMap[artistId] = albums.sortedByDescending { it.releaseDate }
-                    _artistAlbums.value = currentMap
-                }
-        }
+    // Lidarr forwarded methods
+    open suspend fun getArtistAlbums(artistId: Long): NetworkResult<List<ArrAlbum>> =
+        (this as? LidarrRepository)?.getArtistAlbums(artistId) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    suspend fun getArtistTracks(artistId: Long): NetworkResult<List<LidarrTrack>> =
-        safePerformLidarr { client ->
-            client
-                .getTracks(artistId = artistId)
-                .onSuccess { tracks ->
-                    val currentMap = _artistTracks.value.toMutableMap()
-                    currentMap[artistId] = tracks.groupBy { it.albumId }
-                    _artistTracks.value = currentMap
-                }
-        }
+    open suspend fun getArtistTracks(artistId: Long): NetworkResult<List<LidarrTrack>> =
+        (this as? LidarrRepository)?.getArtistTracks(artistId) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    suspend fun getArtistTrackFiles(artistId: Long): NetworkResult<List<LidarrTrackFile>> =
-        safePerformLidarr { client ->
-            client
-                .getTrackFiles(artistId = artistId)
-                .onSuccess { trackFiles ->
-                    val currentMap = _artistTrackFiles.value.toMutableMap()
-                    currentMap[artistId] = trackFiles.groupBy { it.albumId }
-                    _artistTrackFiles.value = currentMap
-                }
-        }
+    open suspend fun getArtistTrackFiles(artistId: Long): NetworkResult<List<LidarrTrackFile>> =
+        (this as? LidarrRepository)?.getArtistTrackFiles(artistId) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    suspend fun deleteAlbumFiles(
+    open suspend fun deleteAlbumFiles(
         artistId: Long,
         albumId: Long,
     ): NetworkResult<Unit> =
-        safePerformLidarr { client ->
-            val files = (_artistTrackFiles.value[artistId] ?: emptyMap())[albumId] ?: emptyList()
-            deleteTrackFiles(files)
-                .onSuccess {
-                    getArtistAlbums(artistId)
-                }
-        }
+        (this as? LidarrRepository)?.deleteAlbumFiles(artistId, albumId) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    suspend fun deleteTrackFiles(tracks: List<LidarrTrackFile>): NetworkResult<Unit> =
-        safePerformLidarr { client ->
-            val fileIds = tracks.map { it.id }
-            client
-                .deleteTracks(fileIds)
-                .onSuccess {
-                    _artistTrackFiles.update { currentMap ->
-                        currentMap
-                            .mapValues { (_, albumMap) ->
-                                albumMap
-                                    .mapValues { (_, tracks) ->
-                                        tracks.filterNot { trackFile ->
-                                            fileIds.contains(trackFile.id)
-                                        }
-                                    }.filterValues { it.isNotEmpty() }
-                            }.filterValues { it.isNotEmpty() }
-                    }
-                }
-        }
+    open suspend fun deleteTrackFiles(tracks: List<LidarrTrackFile>): NetworkResult<Unit> =
+        (this as? LidarrRepository)?.deleteTrackFiles(tracks) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    // Readarr-specific
-    suspend fun getAuthorSeries(authorId: Long): NetworkResult<List<BookSeries>> =
-        safePerformReadarr { client ->
-            client
-                .getAuthorSeries(authorId)
-                .onSuccess { result ->
-                    val currentMap = _authorSeries.value.toMutableMap()
-                    currentMap[authorId] = result
-                    _authorSeries.value = currentMap
-                }
-        }
+    open suspend fun toggleAlbumMonitor(album: ArrAlbum): NetworkResult<ArrAlbum> =
+        (this as? LidarrRepository)?.toggleAlbumMonitor(album) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    suspend fun getAuthorBookFiles(authorId: Long): NetworkResult<List<BookFile>> =
-        safePerformReadarr { client ->
-            client
-                .getAuthorBookFiles(authorId)
-                .onSuccess { result ->
-                    val currentMap = _authorBookFiles.value.toMutableMap()
-                    currentMap[authorId] = result
-                    _authorBookFiles.value = currentMap
-                }
-        }
+    open suspend fun updateAlbum(album: ArrAlbum): NetworkResult<ArrAlbum> =
+        (this as? LidarrRepository)?.updateAlbum(album) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
-        safePerformReadarr { client ->
-            client
-                .deleteBookFiles(bookFilesIds)
-                .onSuccess { result ->
-                }
-        }
+    // Readarr forwarded methods
+    open suspend fun getAuthorSeries(authorId: Long): NetworkResult<List<BookSeries>> =
+        (this as? ReadarrRepository)?.getAuthorSeries(authorId) ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-    suspend fun toggleBookMonitor(book: Book): NetworkResult<Book> {
-        _monitorStatus.value = OperationStatus.InProgress
+    open suspend fun getAuthorBookFiles(authorId: Long): NetworkResult<List<BookFile>> =
+        (this as? ReadarrRepository)?.getAuthorBookFiles(authorId) ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-        if (instance.type != InstanceType.Booksehelf) {
-            _monitorStatus.value = OperationStatus.Error(message = "Not a Readarr instance")
-            return NetworkResult.Error(message = "Not a Readarr instance")
-        }
+    open suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
+        (this as? ReadarrRepository)?.deleteBookFiles(bookFilesIds) ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-        val bookId = book.id
-        val updatedMonitored = !book.monitored
+    open suspend fun toggleBookMonitor(book: Book): NetworkResult<Book> =
+        (this as? ReadarrRepository)?.toggleBookMonitor(book) ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-        return (client as BookshelfClient)
-            .setBookMonitorStatus(listOf(bookId), updatedMonitored)
-            .onSuccess { responses ->
-                val response = responses.firstOrNull()
-                val isMonitored = response?.monitored ?: updatedMonitored
-                _monitorStatus.value =
-                    OperationStatus.Success(
-                        if (isMonitored) "Book monitored" else "Book unmonitored",
-                    )
-                val updatedBook = book.copy(monitored = isMonitored)
-                updateBookInCache(updatedBook)
-            }.onError { code, message, cause ->
-                _monitorStatus.value = OperationStatus.Error(code, message, cause)
-            }.map { responses ->
-                val response = responses.firstOrNull()
-                book.copy(monitored = response?.monitored ?: updatedMonitored)
-            }.also {
-                _monitorStatus.value = OperationStatus.Idle
-            }
-    }
+    open suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =
+        (this as? ReadarrRepository)?.getBookEditions(bookId) ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-    private fun updateBookInCache(book: Book) {
-        _booksLibrary.update { currentList ->
-            currentList.map { if (it.id == book.id) book else it }
-        }
-    }
+    // Listenarr forwarded methods
+    open suspend fun getAudiobookFiles(audiobookId: Long): NetworkResult<List<AudiobookFile>> =
+        (this as? ListenarrRepository)?.getAudiobookFiles(audiobookId) ?: NetworkResult.Error(message = "Not a Listenarr instance")
 
-    suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =
-        safePerformReadarr { client ->
-            client.getBookEditions(bookId)
-        }
-
-    // Listenarr
-
-    suspend fun getAudiobookFiles(audiobookId: Long): NetworkResult<List<AudiobookFile>> =
-        safePerformListenarr { client ->
-            client
-                .getDetail(audiobookId)
-                .onSuccess { result ->
-                    val currentMap = _audiobookFiles.value.toMutableMap()
-                    currentMap[audiobookId] = result.files
-                    _audiobookFiles.value = currentMap
-                }
-        }.map { it.files }
-
-    suspend fun getMetadata(
+    open suspend fun getMetadata(
         asin: String,
         region: String,
-    ) = safePerformListenarr { client ->
-        client.getMetadata(asin, region)
-    }
+    ): NetworkResult<AudiobookMetadataResponse> =
+        (this as? ListenarrRepository)?.getMetadata(asin, region) ?: NetworkResult.Error(message = "Not a Listenarr instance")
 
-    suspend fun getPreviewPath(
+    open suspend fun getPreviewPath(
         rootPath: String,
         body: AudiobookMetadataBody,
-    ) = safePerformListenarr { client ->
-        client.getPreviewPath(rootPath, body)
-    }
+    ): NetworkResult<AudiobookPreviewPaths> =
+        (this as? ListenarrRepository)?.getPreviewPath(rootPath, body) ?: NetworkResult.Error(message = "Not a Listenarr instance")
 
-    suspend fun addNewAudiobook(
+    open suspend fun addNewAudiobook(
         item: SearchAudiobook,
         metadata: AudiobookMetadataBody,
         searchOnAdd: Boolean,
     ) {
-        _addItemStatus.value = OperationStatus.InProgress
-        delay(100)
-
-        val result =
-            safePerformListenarr { client ->
-                val path =
-                    item.rootFolderPath
-                        ?.trimEnd('/')
-                        ?.plus("/")
-                        ?.plus(item.path?.trimStart('/')) ?: ""
-                val body =
-                    AddAudiobookBody(
-                        autoSearch = searchOnAdd,
-                        destinationPath = path,
-                        monitored = item.monitored,
-                        metadata = metadata,
-                    )
-                client
-                    .addNewAudiobook(body)
-                    .map { it.audiobook }
-            }
-        processAddResult(result, false)
+        (this as? ListenarrRepository)?.addNewAudiobook(item, metadata, searchOnAdd)
     }
 
-    suspend fun moveAudiobookFiles(item: Audiobook) {
-    }
+    open suspend fun moveAudiobookFiles(
+        id: Long,
+        sourcePath: String,
+        destinationPath: String,
+    ): NetworkResult<Unit> =
+        (this as? ListenarrRepository)?.moveAudiobookFiles(id, sourcePath, destinationPath)
+            ?: NetworkResult.Error(message = "Not a Listenarr instance")
 
-    // Helpers
-    private suspend inline fun <reified T> safePerformSonarr(operation: suspend (SonarrClient) -> NetworkResult<T>): NetworkResult<T> {
-        val client = client as? SonarrClient ?: return NetworkResult.Error(message = "Not a Sonarr instance")
-        return operation(client)
-    }
-
-    private suspend inline fun <reified T> safePerformRadarr(operation: suspend (RadarrClient) -> NetworkResult<T>): NetworkResult<T> {
-        val client = client as? RadarrClient ?: return NetworkResult.Error(message = "Not a Radarr instance")
-        return operation(client)
-    }
-
-    private suspend inline fun <reified T> safePerformLidarr(operation: suspend (LidarrClient) -> NetworkResult<T>): NetworkResult<T> {
-        val client = client as? LidarrClient ?: return NetworkResult.Error(message = "Not a Lidarr instance")
-        return operation(client)
-    }
-
-    private suspend inline fun <reified T> safePerformReadarr(operation: suspend (BookshelfClient) -> NetworkResult<T>): NetworkResult<T> {
-        val client = client as? BookshelfClient ?: return NetworkResult.Error(message = "Not a Readarr instance")
-        return operation(client)
-    }
-
-    private suspend inline fun <reified T> safePerformListenarr(
-        operation: suspend (ListenarrClient) -> NetworkResult<T>,
-    ): NetworkResult<T> {
-        val client = client as? ListenarrClient ?: return NetworkResult.Error(message = "Not a Listenarr instance")
-        return operation(client)
-    }
+    open suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> =
+        (this as? ListenarrRepository)?.toggleAudiobookMonitor(audiobook) ?: NetworkResult.Error(message = "Not a Listenarr instance")
 }

@@ -18,7 +18,7 @@ class GetAuthorFilesUseCase(
     operator fun invoke(authorId: Long): Flow<AuthorFilesState> =
         channelFlow {
             instanceManager
-                .getSelectedArrRepository(InstanceType.Booksehelf)
+                .getSelectedArrRepository(InstanceType.Bookshelf)
                 .filterNotNull()
                 .collectLatest { repository ->
                     repository.getAuthorBookFiles(authorId)
@@ -38,7 +38,7 @@ class GetAuthorFilesUseCase(
 
     suspend fun refreshHistory(authorId: Long) {
         instanceManager
-            .getSelectedArrRepository(InstanceType.Booksehelf)
+            .getSelectedArrRepository(InstanceType.Bookshelf)
             .firstOrNull()
             ?.getItemHistory(authorId)
     }

@@ -39,11 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.model.EpisodeWrapper
 import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.arr.api.model.Episode as ArrEpisode
@@ -63,7 +66,7 @@ fun SeasonsArea(
     deleteEpisodeFile: (Long) -> Unit = {},
     seasonDeleteInProgress: Boolean = false,
     onNavigateToEpisodeDetails: (ArrEpisode) -> Unit = {},
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> },
+    onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?) -> Unit = { _, _, _ -> },
     bazarrDetailsIntegration: Boolean = true,
 ) {
     if (seasons.isEmpty()) return
@@ -112,13 +115,27 @@ fun SeasonsArea(
                                         },
                                     style = MaterialTheme.typography.titleLarge,
                                 )
-                                val statsText =
-                                    season.episodeFileCount?.let {
-                                        "$it/${season.totalEpisodeCount}"
-                                    } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
+                                val activeCount = season.activeEpisodeCount
+                                val statsAnnotatedString =
+                                    if (activeCount > 0) {
+                                        val fileCount = season.episodeFileCount ?: 0
+                                        buildAnnotatedString {
+                                            append(fileCount.toString())
+                                            withStyle(SpanStyle(color = ArrLightPurple, fontWeight = FontWeight.Bold)) {
+                                                append("+$activeCount")
+                                            }
+                                            append("/${season.totalEpisodeCount}")
+                                        }
+                                    } else {
+                                        val statsText =
+                                            season.episodeFileCount?.let {
+                                                "$it/${season.totalEpisodeCount}"
+                                            } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
+                                        buildAnnotatedString { append(statsText) }
+                                    }
 
                                 AnimatedContent(
-                                    targetState = statsText,
+                                    targetState = statsAnnotatedString,
                                     transitionSpec = {
                                         (fadeIn() + slideInVertically { it }).togetherWith(fadeOut() + slideOutVertically { -it })
                                     },
@@ -204,7 +221,9 @@ fun SeasonsArea(
                                 onLongClick = arrEp?.episodeFileId?.let { { deleteEpisodeFile(it) } },
                                 onAutomaticSearch = onEpisodeAutomaticSearch,
                                 onToggleMonitor = onToggleEpisodeMonitor,
-                                onNavigateToSeriesRelease = { onNavigateToSeriesRelease(seriesId, episode.episodeNumber) },
+                                onNavigateToSeriesRelease = { episodeId ->
+                                    onNavigateToSeriesRelease(seriesId, season.seasonNumber, episodeId)
+                                },
                                 searchInProgress = { searchIds.contains(it) },
                                 bazarrDetailsIntegration = bazarrDetailsIntegration,
                             )
@@ -218,53 +237,4 @@ fun SeasonsArea(
             }
         }
     }
-}
-
-@Composable
-fun SeasonsArea(
-    series: ArrSeries,
-    episodes: List<ArrEpisode>,
-    searchIds: Set<Long>,
-    onToggleSeasonMonitor: (Int) -> Unit,
-    onToggleEpisodeMonitor: (ArrEpisode) -> Unit,
-    onEpisodeAutomaticSearch: (Long) -> Unit,
-    onSeasonAutomaticSearch: (Int) -> Unit,
-    deleteSeasonFiles: (Int) -> Unit,
-    deleteEpisodeFile: (Long) -> Unit,
-    seasonDeleteInProgress: Boolean,
-    onNavigateToEpisodeDetails: (ArrSeries, ArrEpisode) -> Unit,
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit,
-    modifier: Modifier = Modifier,
-    bazarrDetailsIntegration: Boolean = true,
-) {
-    val arrEpMap = episodes.groupBy { it.seasonNumber }
-    val wrappedSeasons =
-        series.seasons.sortedByDescending { it.seasonNumber }.map { season ->
-            val seasonEpisodes =
-                (arrEpMap[season.seasonNumber] ?: emptyList())
-                    .sortedByDescending { it.episodeNumber }
-                    .map { EpisodeWrapper(arrEpisode = it) }
-            SeasonWrapper(
-                seasonNumber = season.seasonNumber,
-                arrSeason = season,
-                episodes = seasonEpisodes,
-            )
-        }
-
-    SeasonsArea(
-        seasons = wrappedSeasons,
-        seriesId = series.id,
-        searchIds = searchIds,
-        onToggleSeasonMonitor = onToggleSeasonMonitor,
-        onToggleEpisodeMonitor = onToggleEpisodeMonitor,
-        onEpisodeAutomaticSearch = onEpisodeAutomaticSearch,
-        onSeasonAutomaticSearch = onSeasonAutomaticSearch,
-        deleteSeasonFiles = deleteSeasonFiles,
-        deleteEpisodeFile = deleteEpisodeFile,
-        seasonDeleteInProgress = seasonDeleteInProgress,
-        onNavigateToEpisodeDetails = { onNavigateToEpisodeDetails(series, it) },
-        onNavigateToSeriesRelease = onNavigateToSeriesRelease,
-        modifier = modifier,
-        bazarrDetailsIntegration = bazarrDetailsIntegration,
-    )
 }

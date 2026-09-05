@@ -36,6 +36,7 @@ fun RequestsList(
     onRemoveFromService: (MediaRequest) -> Unit,
     onNavigateToDetails: (Long, RequestType) -> Unit,
     onLoadMore: () -> Unit,
+    onViewRequest: ((MediaRequestPackage) -> Unit)? = null,
 ) {
     val listState = rememberLazyListState()
 
@@ -74,6 +75,7 @@ fun RequestsList(
                 onEditClicked = { onEdit(rPackage.request.id) },
                 onDeleteClicked = { onDelete(rPackage.request.id) },
                 onRemoveFromServiceClicked = { onRemoveFromService(rPackage.request) },
+                onViewRequestClicked = onViewRequest?.let { onView -> { onView(rPackage) } },
                 onClick = {
                     onNavigateToDetails(
                         rPackage.request.media.tmdbId,

@@ -153,7 +153,7 @@ enum class InstanceType(
         mockMedia = MockMedia.Lidarr,
         associatedColor = ArrGreen,
     ),
-    Booksehelf(
+    Bookshelf(
         resource = MR.strings.bookshelf_description,
         github = "https://github.com/pennydreadful/bookshelf",
         website = "https://github.com/pennydreadful/bookshelf",
@@ -255,6 +255,6 @@ enum class InstanceType(
     );
 
     companion object {
-        fun arrs() = listOf(Sonarr, Radarr, Lidarr, Booksehelf, Listenarr)
+        fun arrs() = listOf(Sonarr, Radarr, Lidarr, Bookshelf, Listenarr)
     }
 }

@@ -39,7 +39,7 @@ class NavigationManagerTest {
         assertEquals(TabItem.Standard.SHOWS, navigationManager.tabFor(InstanceType.Sonarr))
         assertEquals(TabItem.Standard.MOVIES, navigationManager.tabFor(InstanceType.Radarr))
         assertEquals(TabItem.Standard.MUSIC, navigationManager.tabFor(InstanceType.Lidarr))
-        assertEquals(TabItem.Standard.BOOKS, navigationManager.tabFor(InstanceType.Booksehelf))
+        assertEquals(TabItem.Standard.BOOKS, navigationManager.tabFor(InstanceType.Bookshelf))
         assertEquals(TabItem.Standard.AUDIOBOOKS, navigationManager.tabFor(InstanceType.Listenarr))
     }
 }

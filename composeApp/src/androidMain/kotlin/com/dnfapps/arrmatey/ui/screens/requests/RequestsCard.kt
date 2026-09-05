@@ -44,6 +44,7 @@ fun RequestCard(
     onDeleteClicked: () -> Unit,
     onRemoveFromServiceClicked: () -> Unit,
     onClick: () -> Unit,
+    onViewRequestClicked: (() -> Unit)? = null,
 ) {
     val request = mediaPackage.request
     val details = mediaPackage.details
@@ -93,6 +94,7 @@ fun RequestCard(
                     onEditClicked = onEditClicked,
                     onDeleteClicked = onDeleteClicked,
                     onRemoveFromServiceClicked = onRemoveFromServiceClicked,
+                    onViewRequestClicked = onViewRequestClicked,
                 )
             }
         }

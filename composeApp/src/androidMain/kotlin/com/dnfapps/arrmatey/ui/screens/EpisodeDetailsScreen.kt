@@ -61,8 +61,9 @@ import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun EpisodeDetailsScreen(
@@ -72,7 +73,8 @@ fun EpisodeDetailsScreen(
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToSeriesRelease: (Long) -> Unit = {},
-    viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode),
+    viewModel: EpisodeDetailsViewModel =
+        koinViewModel(key = "${series.id}_${episode.id}", parameters = { parametersOf(series.id, episode) }),
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()

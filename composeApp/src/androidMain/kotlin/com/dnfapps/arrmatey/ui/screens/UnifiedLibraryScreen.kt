@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.WifiOff
@@ -77,7 +78,7 @@ import com.skydoves.flexible.core.FlexibleSheetSize
 import com.skydoves.flexible.core.FlexibleSheetValue
 import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import dev.icerock.moko.resources.compose.painterResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -87,7 +88,7 @@ fun UnifiedLibraryScreen(
     wideRailIsVisible: Boolean = false,
     onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
     onNavigateToDetails: (ArrMedia, InstanceType, Long?) -> Unit,
-    unifiedLibraryViewModel: UnifiedLibraryViewModel = koinInject(),
+    unifiedLibraryViewModel: UnifiedLibraryViewModel = koinViewModel(),
 ) {
     val context = LocalContext.current
     val navigationManager = navigationManager
@@ -310,7 +311,10 @@ fun UnifiedLibraryScreen(
                             val isOffline = tabInstance.id in offlineInstanceIds
                             Tab(
                                 selected = tabInstance.id == currentInstance.id,
-                                onClick = { unifiedLibraryViewModel.selectInstance(tabInstance) },
+                                onClick = {
+                                    textFieldState.setTextAndPlaceCursorAtEnd("")
+                                    unifiedLibraryViewModel.selectInstance(tabInstance)
+                                },
                                 text = {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,

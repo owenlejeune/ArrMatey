@@ -86,8 +86,9 @@ import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitleSearchSheet
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun BazarrDetailsScreen(
@@ -95,7 +96,7 @@ fun BazarrDetailsScreen(
     type: BazarrMediaType,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
-    viewModel: BazarrDetailsViewModel = koinInjectParams(id, type),
+    viewModel: BazarrDetailsViewModel = koinViewModel(key = "${id}_$type", parameters = { parametersOf(id, type) }),
     onBack: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

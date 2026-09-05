@@ -30,15 +30,18 @@ import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.MediaList
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.menu.SearchSortMenu
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(
@@ -53,7 +56,8 @@ fun ArrSearchScreen(
     onBack: () -> Unit,
     onItemClick: (ArrMedia) -> Unit,
     instanceId: Long? = null,
-    viewModel: ArrSearchViewModel = koinInjectParams(type, instanceId),
+    shortcutManager: AppShortcutManager = koinInject(),
+    viewModel: ArrSearchViewModel = koinViewModel(key = "${type.name}_$instanceId", parameters = { parametersOf(type, instanceId) }),
 ) {
     val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()
     val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
@@ -65,6 +69,10 @@ fun ArrSearchScreen(
     val textFieldState = rememberTextFieldState(initialQuery)
     val searchBarState = rememberSearchBarState()
     val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(type) {
+        shortcutManager.pushSearchShortcut(type)
+    }
 
     LaunchedEffect(Unit) {
         if (initialQuery.isEmpty()) {

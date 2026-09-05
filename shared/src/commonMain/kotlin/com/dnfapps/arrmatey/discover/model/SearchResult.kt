@@ -44,7 +44,7 @@ sealed interface SearchResult {
                         -> InstanceType.Lidarr
                         is Author,
                         is MockMedia.Readarr,
-                        -> InstanceType.Booksehelf
+                        -> InstanceType.Bookshelf
                         is Audiobook,
                         is SearchAudiobook,
                         is MockMedia.Listenarr,

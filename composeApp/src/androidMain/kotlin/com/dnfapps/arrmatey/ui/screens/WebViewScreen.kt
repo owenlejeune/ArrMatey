@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.annotation.SuppressLint
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -257,7 +258,9 @@ fun WebViewScreen(
                                         }
                                     }
 
+                                @SuppressLint("SetJavaScriptEnabled")
                                 settings.apply {
+                                    // JavaScript is required to render external web pages (e.g., TMDB)
                                     javaScriptEnabled = true
                                     domStorageEnabled = true
                                     loadWithOverviewMode = true

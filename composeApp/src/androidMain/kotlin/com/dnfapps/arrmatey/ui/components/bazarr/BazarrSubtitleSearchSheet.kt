@@ -35,8 +35,9 @@ import com.dnfapps.arrmatey.bazarr.state.SubtitleSearchState
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /**
  * Modal sheet listing manual provider subtitle results for a single episode or movie,
@@ -47,7 +48,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun BazarrSubtitleSearchSheet(
     target: BazarrMediaTarget,
     onDismiss: () -> Unit,
-    viewModel: BazarrSubtitleSearchViewModel = koinInjectParams(target),
+    viewModel: BazarrSubtitleSearchViewModel = koinViewModel(key = target.toString(), parameters = { parametersOf(target) }),
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()

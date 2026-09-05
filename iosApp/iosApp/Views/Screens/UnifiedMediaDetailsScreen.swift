@@ -26,6 +26,9 @@ struct UnifiedMediaDetailsScreen: View {
     @State private var confirmClearData = false
     @State private var selectedQueueItem: QueueItem? = nil
 
+    private let initialEpisodeId: Int64?
+    @State private var hasNavigatedToInitialEpisode = false
+
     @State private var toastMessage: String? = nil
 
     private var removeServiceName: String {
@@ -38,8 +41,10 @@ struct UnifiedMediaDetailsScreen: View {
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
-        instanceId: Int64? = nil
+        instanceId: Int64? = nil,
+        initialEpisodeId: Int64? = nil
     ) {
+        self.initialEpisodeId = initialEpisodeId
         _viewModel = StateObject(wrappedValue: UnifiedMediaDetailsViewModelS(
             arrId: arrId,
             tmdbId: tmdbId,
@@ -58,7 +63,13 @@ struct UnifiedMediaDetailsScreen: View {
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
-        .task { viewModel.refresh() }
+        .task {
+            viewModel.refresh()
+            checkInitialEpisode()
+        }
+        .onReceive(viewModel.$uiState) { _ in
+            checkInitialEpisode()
+        }
         .modifier(UnifiedMediaDetailsSheetsModifier(
             viewModel: viewModel,
             showEditSheet: $showEditSheet,
@@ -97,6 +108,18 @@ struct UnifiedMediaDetailsScreen: View {
 
 // MARK: - State Rendering
 extension UnifiedMediaDetailsScreen {
+    private func checkInitialEpisode() {
+        guard let episodeId = initialEpisodeId, !hasNavigatedToInitialEpisode else { return }
+        if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess,
+           let series = (success.arrMedia as? ArrSeries) ?? success.episodes.compactMap({ $0.arrEpisode?.series }).first {
+            let episodes = success.episodes.compactMap { $0.arrEpisode }
+            if let episode = episodes.first(where: { $0.id == episodeId }) {
+                hasNavigatedToInitialEpisode = true
+                navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
+            }
+        }
+    }
+
     @ViewBuilder
     private func contentForState() -> some View {
         switch viewModel.uiState {
@@ -213,9 +236,9 @@ extension UnifiedMediaDetailsScreen {
                     navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
                 }
             },
-            onNavigateToSeriesRelease: { sId, seasonNum in
+            onNavigateToSeriesRelease: { sId, seasonNum, epId in
                 if let sId = sId {
-                    let route: MediaRoute = .seriesReleases(seriesId: sId, seasonNumber: seasonNum, episodeId: nil)
+                    let route: MediaRoute = .seriesReleases(seriesId: sId, seasonNumber: seasonNum, episodeId: epId)
                     navigationManager.go(to: route, of: .sonarr)
                 }
             },
@@ -1519,19 +1542,19 @@ fileprivate struct UnifiedMediaDetailsEventsModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .onChange(of: viewModel.lastSearchResult) { _, newVal in
+            .onReceive(viewModel.$lastSearchResult) { newVal in
                 screen.onLastSearchResultChanged(newVal)
             }
-            .onChange(of: viewModel.editSuccessTrigger) { _, _ in
+            .onReceive(viewModel.$editSuccessTrigger) { _ in
                 screen.onEditSuccess()
             }
-            .onChange(of: viewModel.editErrorTrigger) { _, _ in
+            .onReceive(viewModel.$editErrorTrigger) { _ in
                 screen.onEditError()
             }
-            .onChange(of: viewModel.deleteSuccessTrigger) { _, _ in
+            .onReceive(viewModel.$deleteSuccessTrigger) { _ in
                 screen.onDeleteSuccess()
             }
-            .onChange(of: viewModel.deleteErrorTrigger) { _, _ in
+            .onReceive(viewModel.$deleteErrorTrigger) { _ in
                 screen.onDeleteError()
             }
     }

@@ -140,13 +140,14 @@ import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.handleWatchClick
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -156,11 +157,12 @@ fun UnifiedMediaDetailsScreen(
     tvdbId: Long? = null,
     instanceType: InstanceType? = null,
     requestType: RequestType? = null,
+    initialEpisodeId: Long? = null,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit,
     onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit,
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit,
+    onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?) -> Unit,
     onNavigateToMovieFiles: (ArrMovie) -> Unit,
     onNavigateToMovieReleases: (Long) -> Unit,
     onNavigateToAuthorFiles: (Author) -> Unit,
@@ -171,14 +173,35 @@ fun UnifiedMediaDetailsScreen(
     onNavigateToAlbumRelease: (Long, Long) -> Unit,
     onPersonClick: (Long) -> Unit,
     instanceId: Long? = null,
-    viewModel: UnifiedMediaDetailsViewModel = koinInjectParams(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId),
+    viewModel: UnifiedMediaDetailsViewModel =
+        koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_$instanceId", parameters = {
+            parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId)
+        }),
     moko: MokoStrings = koinInject(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var lastSuccessState by remember { mutableStateOf<UnifiedMediaDetailsUiState.Success?>(null) }
+    var hasNavigatedToInitialEpisode by remember(initialEpisodeId) { mutableStateOf(false) }
+
+    val successState = (uiState as? UnifiedMediaDetailsUiState.Success) ?: lastSuccessState
+
     LaunchedEffect(uiState) {
         if (uiState is UnifiedMediaDetailsUiState.Success) {
             lastSuccessState = uiState as UnifiedMediaDetailsUiState.Success
+        }
+    }
+
+    LaunchedEffect(successState, initialEpisodeId, hasNavigatedToInitialEpisode) {
+        if (initialEpisodeId != null && !hasNavigatedToInitialEpisode && successState != null) {
+            val series =
+                (successState.arrMedia as? ArrSeries)
+                    ?: successState.episodes.firstNotNullOfOrNull { it.arrEpisode?.series }
+            val episode = successState.episodes.mapNotNull { it.arrEpisode }.find { it.id == initialEpisodeId }
+
+            if (series != null && episode != null) {
+                hasNavigatedToInitialEpisode = true
+                onNavigateToEpisodeDetails(series, episode)
+            }
         }
     }
 
@@ -421,23 +444,9 @@ fun UnifiedMediaDetailsScreen(
                     .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
                     .fillMaxSize(),
         ) {
-            when (val state = uiState) {
-                is UnifiedMediaDetailsUiState.Initial,
-                is UnifiedMediaDetailsUiState.Loading,
-                -> {
-                    LoadingIndicator(
-                        modifier =
-                            Modifier
-                                .size(96.dp)
-                                .align(Alignment.Center),
-                    )
-                }
-
-                is UnifiedMediaDetailsUiState.Error -> {
-                    Text(text = state.message ?: "")
-                }
-
-                is UnifiedMediaDetailsUiState.Success -> {
+            when {
+                successState != null -> {
+                    val state = successState
                     PullToRefreshBox(
                         isRefreshing = false,
                         onRefresh = { viewModel.refresh() },
@@ -688,6 +697,20 @@ fun UnifiedMediaDetailsScreen(
                             }
                         }
                     }
+                }
+                uiState is UnifiedMediaDetailsUiState.Error -> {
+                    Text(
+                        text = (uiState as UnifiedMediaDetailsUiState.Error).message ?: "",
+                        modifier = Modifier.align(Alignment.Center).padding(24.dp),
+                    )
+                }
+                else -> {
+                    LoadingIndicator(
+                        modifier =
+                            Modifier
+                                .size(96.dp)
+                                .align(Alignment.Center),
+                    )
                 }
             }
             lastSuccessState?.let { state ->

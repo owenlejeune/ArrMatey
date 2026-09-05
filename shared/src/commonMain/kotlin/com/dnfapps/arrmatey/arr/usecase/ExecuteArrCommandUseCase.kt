@@ -24,7 +24,7 @@ class ExecuteArrCommandUseCase(
                 InstanceType.Sonarr -> CommandPayload.MissingEpisodeSearch
                 InstanceType.Radarr -> CommandPayload.MissingMoviesSearch
                 InstanceType.Lidarr -> CommandPayload.MissingAlbumSearch
-                InstanceType.Booksehelf -> CommandPayload.MissingBookSearch
+                InstanceType.Bookshelf -> CommandPayload.MissingBookSearch
                 else -> return NetworkResult.Error(message = "Unsupported instance type")
             }
         return repository.executeCommand(payload)
@@ -39,7 +39,7 @@ class ExecuteArrCommandUseCase(
                 InstanceType.Sonarr -> CommandPayload.RefreshSeries()
                 InstanceType.Radarr -> CommandPayload.RefreshMovie()
                 InstanceType.Lidarr -> CommandPayload.RefreshArtist()
-                InstanceType.Booksehelf -> CommandPayload.RefreshAuthor()
+                InstanceType.Bookshelf -> CommandPayload.RefreshAuthor()
                 else -> return NetworkResult.Error(message = "Unsupported instance type")
             }
         return repository.executeCommand(payload)

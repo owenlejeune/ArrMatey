@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.arr.usecase
 
-import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload.RefreshAlbum
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload.RefreshAuthor
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload.RefreshMovie
@@ -20,10 +19,10 @@ class PerformRefreshUseCase {
         }
         val payload =
             when (type) {
-                InstanceType.Sonarr -> CommandPayload.RefreshSeries(listOf(mediaId))
-                InstanceType.Radarr -> CommandPayload.RefreshMovie(listOf(mediaId))
-                InstanceType.Lidarr -> CommandPayload.RefreshAlbum(listOf(mediaId))
-                InstanceType.Booksehelf -> CommandPayload.RefreshAuthor(listOf(mediaId))
+                InstanceType.Sonarr -> RefreshSeries(listOf(mediaId))
+                InstanceType.Radarr -> RefreshMovie(listOf(mediaId))
+                InstanceType.Lidarr -> RefreshAlbum(listOf(mediaId))
+                InstanceType.Bookshelf -> RefreshAuthor(listOf(mediaId))
                 else -> throw UnsupportedOperationException("Cannot perform refresh on an instance of type $type")
             }
         return repository.executeCommand(payload)
@@ -39,7 +38,7 @@ class PerformRefreshUseCase {
                 InstanceType.Sonarr -> RefreshSeries(ids)
                 InstanceType.Radarr -> RefreshMovie(ids)
                 InstanceType.Lidarr -> RefreshAlbum(ids)
-                InstanceType.Booksehelf -> RefreshAuthor(ids)
+                InstanceType.Bookshelf -> RefreshAuthor(ids)
                 else -> throw UnsupportedOperationException("Cannot perform refresh on an instance of type $type")
             }
         return repository.executeCommand(payload)

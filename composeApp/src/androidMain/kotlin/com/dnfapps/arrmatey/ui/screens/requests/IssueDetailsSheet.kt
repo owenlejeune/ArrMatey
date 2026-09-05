@@ -45,8 +45,9 @@ import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.format
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +55,7 @@ fun IssueDetailsSheet(
     ip: MediaIssuePackage,
     onDismiss: () -> Unit,
     onIssueClosed: () -> Unit = onDismiss,
-    viewModel: IssueDetailsViewModel = koinInjectParams(ip),
+    viewModel: IssueDetailsViewModel = koinViewModel(key = ip.toString(), parameters = { parametersOf(ip) }),
 ) {
     val context = LocalContext.current
 

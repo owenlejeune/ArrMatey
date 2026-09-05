@@ -9,7 +9,6 @@ import com.dnfapps.arrmatey.ui.theme.ArrRed
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.random.Random
 import kotlin.time.Instant
 
 @Serializable
@@ -52,7 +51,7 @@ data class Author(
         fun fromJson(value: String): Author = ArrMedia.json.decodeFromString(value)
     }
 
-    override val guid: Long get() = id ?: (Random.nextLong() + 200_000)
+    override val guid: Long get() = id ?: ((foreignAuthorId?.hashCode()?.toLong() ?: title?.hashCode()?.toLong() ?: 0L) + 200_000)
 
     override val isMissing: Boolean
         get() = statistics?.let { it.bookFileCount < it.totalBookCount } ?: false

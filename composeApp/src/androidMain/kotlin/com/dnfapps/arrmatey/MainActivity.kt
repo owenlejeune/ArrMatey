@@ -57,7 +57,16 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        intent?.action?.let { action ->
+        val shortcutId = intent?.getStringExtra(AppShortcutManager.EXTRA_SHORTCUT_ID)
+        val action = intent?.action
+        if (shortcutId != null) {
+            shortcutManager.pushShortcut(shortcutId)
+        } else if (action != null) {
+            val instanceType = intent.getStringExtra(AppShortcutManager.EXTRA_INSTANCE_TYPE)
+            shortcutManager.pushShortcutForAction(action, instanceType)
+        }
+
+        action?.let {
             when (action) {
                 AppShortcutManager.ACTION_OPEN_DOWNLOADS -> {
                     navigationManager.navigateToTab(TabItem.Standard.DOWNLOADS)
@@ -74,6 +83,7 @@ class MainActivity : ComponentActivity() {
 
                     if (itemId != -1L && type != null) {
                         val tmdbId = intent.getStringExtra(NotificationConstants.EXTRA_TMDB_ID)?.toLongOrNull()
+                        val episodeId = intent.getStringExtra(NotificationConstants.EXTRA_EPISODE_ID)?.toLongOrNull()
 
                         navigationManager.calendar.popToRoot()
                         navigationManager.calendar.toDetails(
@@ -81,6 +91,7 @@ class MainActivity : ComponentActivity() {
                             tmdbId = tmdbId,
                             type = type,
                             instanceId = instanceId.takeIf { it != -1L },
+                            episodeId = episodeId,
                         )
                     }
                 }

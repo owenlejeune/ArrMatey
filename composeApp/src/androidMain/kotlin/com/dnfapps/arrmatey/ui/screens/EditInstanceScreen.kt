@@ -37,16 +37,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditInstanceScreen(
     id: Long,
-    viewModel: EditInstanceViewModel = koinInjectParams(id),
+    viewModel: EditInstanceViewModel = koinViewModel(key = id.toString(), parameters = { parametersOf(id) }),
     onBack: () -> Unit = {},
     onDelete: () -> Unit = onBack,
 ) {

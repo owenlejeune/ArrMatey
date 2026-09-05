@@ -60,8 +60,9 @@ import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.utils.dp
 import com.dnfapps.arrmatey.utils.format
-import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun BookDetailsScreen(
@@ -71,7 +72,7 @@ fun BookDetailsScreen(
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToBookRelease: (Long) -> Unit = {},
-    viewModel: BookDetailsViewModel = koinInjectParams(author.id, book),
+    viewModel: BookDetailsViewModel = koinViewModel(key = "${author.id}_${book.id}", parameters = { parametersOf(author.id, book) }),
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()

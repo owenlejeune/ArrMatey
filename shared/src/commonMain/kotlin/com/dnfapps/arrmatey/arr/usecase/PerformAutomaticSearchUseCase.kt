@@ -32,7 +32,7 @@ class PerformAutomaticSearchUseCase {
                         else -> CommandPayload.Artist(mediaId)
                     }
                 }
-                InstanceType.Booksehelf -> {
+                InstanceType.Bookshelf -> {
                     when {
                         bookId != null -> CommandPayload.Book(listOf(bookId))
                         else -> CommandPayload.Author(mediaId)
