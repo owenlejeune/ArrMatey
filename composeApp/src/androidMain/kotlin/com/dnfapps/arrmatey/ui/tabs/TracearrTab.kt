@@ -28,6 +28,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -35,11 +38,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.tracearr.state.TracearrStreamsState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamCard
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
@@ -54,6 +59,8 @@ fun TracearrTab(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+
+    var selectedSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -113,6 +120,8 @@ fun TracearrTab(
                     }
                 }
                 is TracearrStreamsState.Success -> {
+                    val activeSession = currentState.streams.firstOrNull { it.id == selectedSession?.id } ?: selectedSession
+
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding =
@@ -134,7 +143,6 @@ fun TracearrTab(
                                 Icon(
                                     imageVector = Icons.Default.Tv,
                                     contentDescription = null,
-                                    tint = TracearrBlue,
                                     modifier = Modifier.size(24.dp),
                                 )
                                 Text(
@@ -160,7 +168,7 @@ fun TracearrTab(
                         if (currentState.streams.isEmpty()) {
                             item {
                                 Box(
-                                    modifier = Modifier.fillMaxWidth().padding(top = 40.dp),
+                                    modifier = Modifier.fillMaxWidth(),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
@@ -175,9 +183,19 @@ fun TracearrTab(
                                 items = currentState.streams,
                                 key = { it.id },
                             ) { session ->
-                                TracearrStreamCard(session = session)
+                                TracearrStreamCard(
+                                    session = session,
+                                    onClick = { selectedSession = session },
+                                )
                             }
                         }
+                    }
+
+                    activeSession?.let { session ->
+                        TracearrStreamDetailsSheet(
+                            session = session,
+                            onDismissRequest = { selectedSession = null },
+                        )
                     }
                 }
             }

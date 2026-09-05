@@ -7,9 +7,12 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.tracearr.state.TracearrStreamsState
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class TracearrViewModel(
@@ -22,8 +25,11 @@ class TracearrViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private var pollingJob: Job? = null
+
     init {
         loadStreams()
+        startPolling()
     }
 
     fun loadStreams() {
@@ -41,6 +47,17 @@ class TracearrViewModel(
             fetchStreams()
             _isRefreshing.value = false
         }
+    }
+
+    private fun startPolling() {
+        pollingJob?.cancel()
+        pollingJob =
+            viewModelScope.launch {
+                while (isActive) {
+                    delay(30_000L)
+                    fetchStreams()
+                }
+            }
     }
 
     private suspend fun fetchStreams() {

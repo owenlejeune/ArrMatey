@@ -30,8 +30,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,11 +58,14 @@ import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 @Composable
 fun TracearrStreamCard(
     session: TracearrStreamSession,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
 ) {
     val isPaused = session.state?.equals("paused", ignoreCase = true) == true
     val isPlaying = session.state?.equals("playing", ignoreCase = true) == true
@@ -96,11 +101,25 @@ fun TracearrStreamCard(
         }
 
     val totalMs = session.totalDurationMs ?: session.durationMs ?: 0L
-    val progressMs = session.progressMs ?: 0L
-    val remainingMs = totalMs - progressMs
+    val initialProgressMs = session.progressMs ?: 0L
+    var currentProgressMs by remember(session.id, session.progressMs) { mutableLongStateOf(initialProgressMs) }
+
+    LaunchedEffect(session.id, session.progressMs, isPlaying) {
+        currentProgressMs = session.progressMs ?: 0L
+        if (isPlaying) {
+            while (isActive) {
+                delay(1000L)
+                if (currentProgressMs < totalMs) {
+                    currentProgressMs += 1000L
+                }
+            }
+        }
+    }
+
+    val remainingMs = (totalMs - currentProgressMs).coerceAtLeast(0L)
     val progressFraction =
         if (totalMs > 0) {
-            (progressMs.toFloat() / totalMs.toFloat()).coerceIn(0f, 1f)
+            (currentProgressMs.toFloat() / totalMs.toFloat()).coerceIn(0f, 1f)
         } else {
             0f
         }
@@ -108,6 +127,7 @@ fun TracearrStreamCard(
     var cardHeight by remember { mutableIntStateOf(0) }
 
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth().onGloballyPositioned {
             cardHeight = it.size.height
         },
@@ -164,106 +184,121 @@ fun TracearrStreamCard(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        // User & Action Badges Row
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            val username = session.effectiveUsername.ifEmpty { mokoString(MR.strings.user) }
-                            val avatarUrl = session.effectiveUserAvatar
+                            // User & Action Badges Row
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                val username =
+                                    session.effectiveUsername.ifEmpty { mokoString(MR.strings.user) }
+                                val avatarUrl = session.effectiveUserAvatar
 
-                            if (!avatarUrl.isNullOrEmpty()) {
-                                AsyncImage(
-                                    model = rememberRemoteImageData(avatarUrl, trim = false),
-                                    contentDescription = null,
-                                    modifier =
-                                        Modifier
-                                            .size(22.dp)
-                                            .clip(CircleShape),
-                                    contentScale = ContentScale.Crop,
-                                )
-                            } else {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = ArrOrange,
-                                    modifier = Modifier.size(22.dp),
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(
-                                            text = username.take(1).uppercase(),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = Color.White,
-                                            fontWeight = FontWeight.Bold,
-                                        )
+                                if (!avatarUrl.isNullOrEmpty()) {
+                                    AsyncImage(
+                                        model = rememberRemoteImageData(avatarUrl, trim = false),
+                                        contentDescription = null,
+                                        modifier =
+                                            Modifier
+                                                .size(22.dp)
+                                                .clip(CircleShape),
+                                        contentScale = ContentScale.Crop,
+                                    )
+                                } else {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = ArrOrange,
+                                        modifier = Modifier.size(22.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(
+                                                text = username.take(1).uppercase(),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold,
+                                            )
+                                        }
                                     }
                                 }
+
+                                Text(
+                                    text = username,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                )
                             }
 
-                            Text(
-                                text = username,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f, fill = false),
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                // Transcode indicator
+                                val isTranscoding =
+                                    session.isTranscode == true ||
+                                        session.videoDecision == TracearrStreamDecision.Transcode ||
+                                        session.audioDecision == TracearrStreamDecision.Transcode
 
-                            Spacer(Modifier.weight(1f))
+                                if (isTranscoding) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = ArrYellow.copy(alpha = 0.2f),
+                                        modifier = Modifier.size(24.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.Default.ElectricBolt,
+                                                contentDescription = mokoString(MR.strings.transcoding),
+                                                tint = ArrYellow,
+                                                modifier = Modifier.size(14.dp),
+                                            )
+                                        }
+                                    }
+                                }
 
-                            // Transcode indicator
-                            val isTranscoding =
-                                session.isTranscode == true ||
-                                    session.videoDecision == TracearrStreamDecision.Transcode ||
-                                    session.audioDecision == TracearrStreamDecision.Transcode
-
-                            if (isTranscoding) {
+                                // Device / Platform icon
                                 Surface(
-                                    shape = CircleShape,
-                                    color = ArrYellow.copy(alpha = 0.2f),
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
                                     modifier = Modifier.size(24.dp),
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
-                                            imageVector = Icons.Default.ElectricBolt,
-                                            contentDescription = mokoString(MR.strings.transcoding),
-                                            tint = ArrYellow,
+                                            imageVector =
+                                                if (session.platform?.contains(
+                                                        "TV",
+                                                        ignoreCase = true
+                                                    ) == true ||
+                                                    session.device?.contains(
+                                                        "TV",
+                                                        ignoreCase = true
+                                                    ) == true
+                                                ) {
+                                                    Icons.Default.Tv
+                                                } else {
+                                                    Icons.Default.Smartphone
+                                                },
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.size(14.dp),
                                         )
                                     }
                                 }
-                            }
 
-                            // Device / Platform icon
-                            Surface(
-                                shape = RoundedCornerShape(4.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                modifier = Modifier.size(24.dp),
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
+                                if (session.canTerminate == true) {
                                     Icon(
-                                        imageVector =
-                                            if (session.platform?.contains("TV", ignoreCase = true) == true ||
-                                                session.device?.contains("TV", ignoreCase = true) == true
-                                            ) {
-                                                Icons.Default.Tv
-                                            } else {
-                                                Icons.Default.Smartphone
-                                            },
-                                        contentDescription = null,
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = mokoString(MR.strings.terminate),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(14.dp),
+                                        modifier = Modifier.size(18.dp),
                                     )
                                 }
-                            }
-
-                            if (session.canTerminate == true) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = mokoString(MR.strings.terminate),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp),
-                                )
                             }
                         }
 
@@ -337,7 +372,7 @@ fun TracearrStreamCard(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = formatTimeMs(progressMs),
+                                text = formatTimeMs(currentProgressMs),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

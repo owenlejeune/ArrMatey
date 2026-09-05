@@ -855,4 +855,34 @@
     <string name="update_library">Update Library</string>
     <string name="backup_database">Backup Database</string>
     <string name="command_queued">Command queued</string>
+
+    <!-- Tracearr Details -->
+    <string name="session_details">Session Details</string>
+    <string name="stream_details">Stream Details</string>
+    <string name="playback">Playback</string>
+    <string name="watch_time">Watch time</string>
+    <string name="media_length">Media length</string>
+    <string name="started">Started</string>
+    <string name="ip_address">IP Address</string>
+    <string name="platform">Platform</string>
+    <string name="product">Product</string>
+    <string name="device">Device</string>
+    <string name="player">Player</string>
+    <string name="device_id">Device ID</string>
+    <string name="container">Container</string>
+    <string name="bitrate">Bitrate</string>
+    <string name="codec">Codec</string>
+    <string name="resolution">Resolution</string>
+    <string name="framerate">Framerate</string>
+    <string name="channels">Channels</string>
+    <string name="sample_rate">Sample Rate</string>
+    <string name="source_header">SOURCE</string>
+    <string name="stream_header">STREAM</string>
+    <string name="direct_play">Direct Play</string>
+    <string name="direct_stream">Direct Stream</string>
+    <string name="transcode">Transcode</string>
+    <string name="view_profile">View profile</string>
+    <string name="hdr">HDR</string>
+    <string name="profile">Profile</string>
+    <string name="color">Color</string>
 </resources>

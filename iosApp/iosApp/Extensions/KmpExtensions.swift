@@ -122,6 +122,8 @@ extension ArrAlbum: @retroactive Identifiable {}
 
 extension CustomFilter: @retroactive Identifiable {}
 
+extension TracearrStreamSession: @retroactive Identifiable {}
+
 extension Shared.ImageResource {
     func toImage(renderingMode: Image.TemplateRenderingMode = .template) -> Image {
         if let uiImage = self.toUIImage() {

@@ -20,6 +20,7 @@ struct TracearrTab: View {
 struct TracearrTabContent: View {
     @StateObject private var viewModel = TracearrViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
+    @State private var selectedSession: TracearrStreamSession? = nil
 
     var body: some View {
         Group {
@@ -45,6 +46,10 @@ struct TracearrTabContent: View {
                             LazyVStack(spacing: 16) {
                                 ForEach(success.streams, id: \.id) { session in
                                     TracearrStreamCardView(session: session)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            selectedSession = session
+                                        }
                                 }
                             }
                         }
@@ -71,6 +76,17 @@ struct TracearrTabContent: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+        }
+        .sheet(item: Binding(
+            get: {
+                if let sel = selectedSession, let success = viewModel.state as? TracearrStreamsStateSuccess {
+                    return success.streams.first(where: { $0.id == sel.id }) ?? sel
+                }
+                return selectedSession
+            },
+            set: { selectedSession = $0 }
+        )) { session in
+            TracearrStreamDetailsSheet(session: session)
         }
         .navigationTitle(MR.strings().tracearr.localized())
         .navigationBarTitleDisplayMode(.inline)
@@ -107,6 +123,8 @@ struct TracearrTabContent: View {
 struct TracearrStreamCardView: View {
     let session: TracearrStreamSession
 
+    @State private var currentProgressMs: Int64 = 0
+
     private var isPaused: Bool {
         session.state?.caseInsensitiveCompare("paused") == .orderedSame
     }
@@ -131,13 +149,13 @@ struct TracearrStreamCardView: View {
         session.totalDurationMs?.int64Value ?? session.durationMs?.int64Value ?? 0
     }
 
-    private var progressMs: Int64 {
-        session.progressMs?.int64Value ?? 0
+    private var remainingMs: Int64 {
+        max(totalMs - currentProgressMs, 0)
     }
 
     private var progressFraction: Double {
         if totalMs > 0 {
-            return min(max(Double(progressMs) / Double(totalMs), 0.0), 1.0)
+            return min(max(Double(currentProgressMs) / Double(totalMs), 0.0), 1.0)
         }
         return 0.0
     }
@@ -264,24 +282,27 @@ struct TracearrStreamCardView: View {
                             .foregroundColor(.secondary)
                             .lineLimit(1)
 
-                        Spacer()
+                        Text(stateText)
+                            .font(.caption2.bold())
+                            .foregroundColor(stateColor)
+                            .padding(.vertical, 2)
 
                         // Progress Bar
                         ProgressView(value: progressFraction)
                             .progressViewStyle(.linear)
                             .tint(Color.accentColor)
 
-                        // Time & State Row
+                        // Progress Time Row
                         HStack {
-                            Text(formatTimeMs(progressMs))
+                            Text(formatTimeMs(currentProgressMs))
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
 
                             Spacer()
 
-                            Text(stateText)
-                                .font(.caption2.bold())
-                                .foregroundColor(stateColor)
+                            Text("-\(formatTimeMs(remainingMs))")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -309,6 +330,17 @@ struct TracearrStreamCardView: View {
         }
         .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(12)
+        .task(id: "\(session.id)-\(session.progressMs?.int64Value ?? 0)-\(isPlaying)") {
+            currentProgressMs = session.progressMs?.int64Value ?? 0
+            guard isPlaying else { return }
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                guard !Task.isCancelled else { break }
+                if currentProgressMs < totalMs {
+                    currentProgressMs += 1000
+                }
+            }
+        }
     }
 
     private var isTvDevice: Bool {
