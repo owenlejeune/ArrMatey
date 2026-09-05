@@ -352,7 +352,6 @@
     <string name="audiobook_info_authors">Author(s)</string>
     <string name="audiobook_info_narrators">Narrator(s)</string>
     <string name="narrated_by">Narrated by: %1$s</string>
-    <string name="selected_count">%1$d selected</string>
     <string name="done">Done</string>
     <string name="born_on"> Born: %1$s  |  %2$s</string>
     <string name="add_to_arr">Add to %1$s</string>
@@ -681,7 +680,6 @@
     <string name="failed">Failed</string>
     <string name="seeding">Seeding</string>
     <string name="stalled">Stalled</string>
-    <string name="search_downloads">Search %1$d downloads</string>
     <string name="size">Size</string>
     <string name="progress">Progress</string>
     <string name="download_speed">Download Speed</string>
@@ -827,11 +825,7 @@
     <string name="invalid_backup_file">Invalid or corrupted backup file</string>
 
     <!-- Subtitles -->
-    <string name="bazarr_series_subtitle_count">%1$d / %2$d episodes</string>
-    <string name="bazarr_movie_subtitle_count">%1$d Subtitles, %2$d Missing</string>
-    <string name="bazarr_files_count">%1$d files</string>
-    <string name="bazarr_missing_count">%1$d missing subtitles</string>
-    <string name="bazarr_embedded_count">%1$d Embedded Subtitles</string>
+    <string name="bazarr_movie_subtitle_summary">%1$s, %2$s</string>
 
     <!-- Downloads -->
     <string name="downloading_file">Downloading %1$s</string>

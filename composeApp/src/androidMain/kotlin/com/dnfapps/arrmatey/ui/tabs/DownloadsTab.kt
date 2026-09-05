@@ -106,6 +106,7 @@ import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.ArrRed
+import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
 import com.skydoves.flexible.core.FlexibleSheetSize
@@ -197,7 +198,7 @@ fun DownloadsTab(
                 )
             } else {
                 val count = queueState.queueItems.size
-                val placeholderLabel = mokoString(MR.strings.search_downloads, count)
+                val placeholderLabel = mokoPlural(MR.plurals.search_downloads, count)
 
                 ArrAppBarWithSearch(
                     textFieldState = textFieldState,
@@ -418,7 +419,7 @@ private fun SelectionTopBar(
     TopAppBar(
         title = {
             Text(
-                text = mokoString(MR.strings.selected_count, count),
+                text = mokoPlural(MR.plurals.selected_count, count),
             )
         },
         navigationIcon = {

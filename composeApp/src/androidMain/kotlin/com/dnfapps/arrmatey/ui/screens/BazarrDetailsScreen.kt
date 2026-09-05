@@ -86,6 +86,7 @@ import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitleSearchSheet
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -254,10 +255,10 @@ fun BazarrDetailsScreen(
                         is BazarrSeries ->
                             buildMap {
                                 put(mokoString(MR.strings.path), details.path)
-                                put(mokoString(MR.strings.files), mokoString(MR.strings.bazarr_files_count, details.episodeFileCount))
+                                put(mokoString(MR.strings.files), mokoPlural(MR.plurals.bazarr_files_count, details.episodeFileCount))
                                 put(
                                     mokoString(MR.strings.missing),
-                                    mokoString(MR.strings.bazarr_missing_count, details.episodeMissingCount),
+                                    mokoPlural(MR.plurals.bazarr_missing_count, details.episodeMissingCount),
                                 )
                                 put(
                                     mokoString(MR.strings.status),
