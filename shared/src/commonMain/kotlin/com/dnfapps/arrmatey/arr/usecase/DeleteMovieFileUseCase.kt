@@ -10,12 +10,13 @@ import kotlinx.coroutines.flow.flow
 class DeleteMovieFileUseCase {
     operator fun invoke(
         movieId: Long,
+        movieFileId: Long,
         repository: ArrInstanceRepository,
     ): Flow<OperationStatus> =
         flow {
             emit(OperationStatus.InProgress)
             repository
-                .deleteMovieFile(movieId)
+                .deleteMovieFile(movieFileId)
                 .onSuccess {
                     repository.getMediaDetails(movieId)
                     repository.getMovieExtraFiles(movieId)

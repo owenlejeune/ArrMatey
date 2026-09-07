@@ -1236,8 +1236,16 @@ class UnifiedMediaDetailsViewModel(
     fun deleteMovieFile() {
         viewModelScope.launch {
             val repository = getActiveArrRepository() ?: return@launch
-            val effectiveId = getEffectiveArrId() ?: return@launch
-            deleteMovieFileUseCase(effectiveId, repository)
+            val movie = getEffectiveArrMedia() as? ArrMovie ?: return@launch
+            val movieId = movie.id?.takeIf { it != 0L } ?: return@launch
+            val movieFileId = movie.movieFile?.id ?: movie.movieFileId?.toLong()
+            if (movieFileId == null) {
+                _deleteMovieFileStatus.value = OperationStatus.Error(message = "No movie file to delete")
+                delay(2000.milliseconds)
+                _deleteMovieFileStatus.value = OperationStatus.Idle
+                return@launch
+            }
+            deleteMovieFileUseCase(movieId, movieFileId, repository)
                 .collect { status ->
                     _deleteMovieFileStatus.value = status
                     if (status is OperationStatus.Success) {

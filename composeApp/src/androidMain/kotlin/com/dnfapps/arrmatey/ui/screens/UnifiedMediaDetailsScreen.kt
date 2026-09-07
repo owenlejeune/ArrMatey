@@ -319,6 +319,18 @@ fun UnifiedMediaDetailsScreen(
         }
     }
 
+    LaunchedEffect(deleteMovieFileStatus) {
+        when (deleteMovieFileStatus) {
+            is OperationStatus.Success ->
+                Toast.makeText(context, itemDeletedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
+
+            is OperationStatus.Error ->
+                Toast.makeText(context, errorDeletingItemMessage, Toast.LENGTH_SHORT).show()
+
+            else -> {}
+        }
+    }
+
     LaunchedEffect(removeQueueItemStatus) {
         when (removeQueueItemStatus) {
             is OperationStatus.Success -> {
