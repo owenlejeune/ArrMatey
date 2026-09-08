@@ -47,18 +47,12 @@ fun MovieFileView(
                 text = mokoString(MR.strings.files),
                 style = MaterialTheme.typography.titleLarge,
             )
-//            Image(
-//                painter = painterResource(MR.images.radarr),
-//                contentDescription = null,
-//                modifier = Modifier.size(24.dp)
-//            )
             Spacer(modifier = Modifier.weight(1f))
             if (movie.movieFile != null || movieExtraFiles.isNotEmpty()) {
                 Text(
                     text = mokoString(MR.strings.history),
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium,
                     modifier =
                         Modifier.clickable {
                             onNavigateToMovieFiles(movie)

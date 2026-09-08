@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.ui.tabs
 
-import android.os.Trace
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -17,6 +16,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
+import com.dnfapps.arrmatey.ui.screens.TracearrHistoryScreen
 import com.dnfapps.arrmatey.ui.screens.TracearrHomeScreen
 import org.koin.compose.koinInject
 
@@ -41,7 +41,18 @@ fun TracearrTab(
                     wideRailIsVisible = wideRailIsVisible,
                     onNavigateToDetails = { type, tmdbId ->
                         navigation.toDetails(tmdbId = tmdbId, requestType = type?.requestType)
-                    }
+                    },
+                    onNavigateToHistory = {
+                        navigation.navigateTo(TracearrScreen.History)
+                    },
+                )
+            }
+            entry<TracearrScreen.History> {
+                TracearrHistoryScreen(
+                    onNavigateBack = { navigation.popBackStack() },
+                    onNavigateToDetails = { type, tmdbId ->
+                        navigation.toDetails(tmdbId = tmdbId, requestType = type?.requestType)
+                    },
                 )
             }
             mediaNavEntries(

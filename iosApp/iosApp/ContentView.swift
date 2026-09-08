@@ -121,6 +121,9 @@ struct AppLauncherGrid: View {
             .navigationDestination(for: BazarrRoute.self) { route in
                 BazarrRouteDestination(route: route)
             }
+            .navigationDestination(for: TracearrRoute.self) { route in
+                TracearrRouteDestination(route: route)
+            }
         }
     }
 

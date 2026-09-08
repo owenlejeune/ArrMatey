@@ -221,13 +221,6 @@ fun TracearrStreamDetailsSheet(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     )
                 }
-                IconButton(onClick = onDismissRequest, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = mokoString(MR.strings.close),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
             }
 
             ContainerCard(

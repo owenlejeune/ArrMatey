@@ -65,6 +65,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrHistoryViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.backup.AesTransportEncryptor
 import com.dnfapps.arrmatey.backup.TransportEncryptor
@@ -527,6 +528,7 @@ val viewModelModule =
         }
         viewModelOf(::CombinedDashboardViewModel)
         viewModelOf(::TracearrViewModel)
+        viewModelOf(::TracearrHistoryViewModel)
         viewModelOf(::BackupViewModel)
         viewModelOf(::UnifiedLibraryViewModel)
     }

@@ -13,11 +13,17 @@ struct TracearrTab: View {
                     .navigationDestination(for: MediaRoute.self) { route in
                         MediaRouteDestination(route: route)
                     }
+                    .navigationDestination(for: TracearrRoute.self) { route in
+                        TracearrRouteDestination(route: route)
+                    }
             }
         case .launcher:
             TracearrTabContent()
                 .navigationDestination(for: MediaRoute.self) { route in
                     MediaRouteDestination(route: route)
+                }
+                .navigationDestination(for: TracearrRoute.self) { route in
+                    TracearrRouteDestination(route: route)
                 }
         }
     }
@@ -38,7 +44,12 @@ struct TracearrTabContent: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         if let stats = success.stats {
-                            TracearrDashboardStatsView(stats: stats)
+                            TracearrDashboardStatsView(
+                                stats: stats,
+                                onNavigateToHistory: {
+                                    navigationManager.go(to: TracearrRoute.history)
+                                }
+                            )
                         }
 
                         nowPlayingHeader(count: success.streams.count)
@@ -179,6 +190,10 @@ struct TracearrTabContent: View {
             Text(MR.strings().history.localized())
                 .font(.title3.bold())
             Spacer()
+            Button(MR.strings().all.localized()) {
+                navigationManager.go(to: TracearrRoute.history)
+            }
+            .font(.subheadline)
         }
     }
 }
@@ -536,6 +551,7 @@ struct TracearrImage<Placeholder: View>: View {
 
 struct TracearrDashboardStatsView: View {
     let stats: TracearrTodayStats
+    var onNavigateToHistory: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -559,13 +575,15 @@ struct TracearrDashboardStatsView: View {
                     TracearrStatCardView(
                         iconName: "play.fill",
                         value: "\(stats.todayPlays)",
-                        label: MR.strings().plays.localized()
+                        label: MR.strings().plays.localized(),
+                        onClick: onNavigateToHistory
                     )
 
                     TracearrStatCardView(
                         iconName: "play.circle.fill",
                         value: "\(stats.todaySessions)",
-                        label: MR.strings().sessions.localized()
+                        label: MR.strings().sessions.localized(),
+                        onClick: onNavigateToHistory
                     )
 
                     TracearrStatCardView(
@@ -589,6 +607,7 @@ struct TracearrStatCardView: View {
     let iconName: String
     let value: String
     let label: String
+    var onClick: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
@@ -615,6 +634,10 @@ struct TracearrStatCardView: View {
         .padding(.vertical, 12)
         .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(12)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onClick?()
+        }
     }
 }
 
@@ -760,9 +783,13 @@ struct TracearrHistoryCardView: View {
                     Spacer()
 
                     let resolution = item.resolution ?? "1080p"
-                    Text(resolution)
+                    let dateText = item.startedAt?.format(pattern: "MMM d, yyyy, HH:mm")
+                    let rightText = dateText != nil ? "\(dateText!) · \(resolution)" : resolution
+
+                    Text(rightText)
                         .font(.caption.bold())
                         .foregroundColor(.secondary)
+                        .lineLimit(1)
                 }
             }
             .padding(12)

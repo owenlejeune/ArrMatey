@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,15 +24,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.extensions.pxToDp
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
@@ -43,6 +50,7 @@ import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
@@ -80,9 +88,13 @@ fun TracearrHistoryCard(
     val isAbandoned = !isWatched && percent < 10f
     val isSampled = !isWatched && !isAbandoned
 
+    var cardHeight by remember { mutableIntStateOf(0) }
+
     Card(
         onClick = { onClick?.invoke() },
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().onGloballyPositioned {
+            cardHeight = it.size.height
+        },
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -92,7 +104,7 @@ fun TracearrHistoryCard(
             Box(
                 modifier = Modifier
                     .width(6.dp)
-                    .height(140.dp)
+                    .height(cardHeight.pxToDp())
                     .background(edgeColor),
             )
 
@@ -131,47 +143,52 @@ fun TracearrHistoryCard(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            val username = item.effectiveUsername.ifEmpty { mokoString(MR.strings.user) }
-                            val avatarUrl = item.effectiveUserAvatar
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                val username =
+                                    item.effectiveUsername.ifEmpty { mokoString(MR.strings.user) }
+                                val avatarUrl = item.effectiveUserAvatar
 
-                            if (!avatarUrl.isNullOrEmpty()) {
-                                AsyncImage(
-                                    model = rememberRemoteImageData(avatarUrl, trim = false),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(18.dp)
-                                        .clip(CircleShape),
-                                    contentScale = ContentScale.Crop,
-                                )
-                            } else {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = ArrOrange,
-                                    modifier = Modifier.size(18.dp),
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(
-                                            text = username.take(1).uppercase(),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = Color.White,
-                                            fontWeight = FontWeight.Bold,
-                                        )
+                                if (!avatarUrl.isNullOrEmpty()) {
+                                    AsyncImage(
+                                        model = rememberRemoteImageData(avatarUrl, trim = false),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(18.dp)
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop,
+                                    )
+                                } else {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = ArrOrange,
+                                        modifier = Modifier.size(18.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(
+                                                text = username.take(1).uppercase(),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold,
+                                            )
+                                        }
                                     }
                                 }
+
+                                Text(
+                                    text = username,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                )
                             }
-
-                            Text(
-                                text = username,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f, fill = false),
-                            )
-
-                            Spacer(Modifier.weight(1f))
 
                             StatusChip(
                                 isWatched = isWatched,
@@ -252,14 +269,22 @@ fun TracearrHistoryCard(
                         text = "$serverName · $decisionText",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
                     )
 
                     val resolution = item.resolution ?: "1080p"
+                    val dateText = item.startedAt?.format("MMM d, yyyy, HH:mm")
+                    val rightText = if (dateText != null) "$dateText · $resolution" else resolution
+
                     Text(
-                        text = resolution,
+                        text = rightText,
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }

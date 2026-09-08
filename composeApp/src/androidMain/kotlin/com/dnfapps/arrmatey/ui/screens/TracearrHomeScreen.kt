@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -60,6 +61,7 @@ import org.koin.core.parameter.parametersOf
 fun TracearrHomeScreen(
     wideRailIsVisible: Boolean,
     onNavigateToDetails: (type: TracearrMediaType?, tmdbId: Long?) -> Unit,
+    onNavigateToHistory: () -> Unit = {},
     viewModel: TracearrViewModel = koinViewModel(),
     instancesViewModel: InstancesViewModel = koinViewModel(
         key = InstanceType.Tracearr.name,
@@ -155,7 +157,10 @@ fun TracearrHomeScreen(
                     ) {
                         currentState.stats?.let { stats ->
                             item {
-                                TracearrDashboardStatsSection(stats = stats)
+                                TracearrDashboardStatsSection(
+                                    stats = stats,
+                                    onNavigateToHistory = onNavigateToHistory
+                                )
                             }
                         }
 
@@ -223,18 +228,30 @@ fun TracearrHomeScreen(
                                     .fillMaxWidth()
                                     .padding(top = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.History,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                                Text(
-                                    text = mokoString(MR.strings.history),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.History,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp),
+                                    )
+                                    Text(
+                                        text = mokoString(MR.strings.history),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                }
+                                TextButton(onClick = onNavigateToHistory) {
+                                    Text(
+                                        text = mokoString(MR.strings.all),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
                         }
 

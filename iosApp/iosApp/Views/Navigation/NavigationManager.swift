@@ -111,6 +111,14 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         }
     }
 
+    func go(to route: TracearrRoute) {
+        if showLauncher {
+            launcherPath.append(route)
+        } else {
+            tracearrPath.append(route)
+        }
+    }
+
     func setSelectedDrawerTab(_ tab: AnyTabItem?) {
         selectedDrawerTab = tab
     }
@@ -524,6 +532,10 @@ enum SettingsRoute : Hashable {
 enum BazarrRoute: Hashable {
     case library
     case details(Int64, BazarrMediaType)
+}
+
+enum TracearrRoute: Hashable {
+    case history
 }
 
 extension MediaRoute {

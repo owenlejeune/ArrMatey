@@ -34,6 +34,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun TracearrDashboardStatsSection(
     stats: TracearrTodayStats,
+    onNavigateToHistory: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -71,11 +72,13 @@ fun TracearrDashboardStatsSection(
                 icon = Icons.Default.PlayArrow,
                 value = stats.todayPlays.toString(),
                 label = mokoString(MR.strings.plays),
+                onClick = onNavigateToHistory
             )
             TracearrStatCard(
                 icon = Icons.Default.PlayCircle,
                 value = stats.todaySessions.toString(),
-                label = mokoString(MR.strings.sessions)
+                label = mokoString(MR.strings.sessions),
+                onClick = onNavigateToHistory
             )
             TracearrStatCard(
                 icon = Icons.Default.Schedule,
@@ -97,11 +100,13 @@ private fun TracearrStatCard(
     value: String,
     label: String,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),

@@ -165,4 +165,5 @@ sealed interface BazarrScreen : NavKey {
 
 sealed interface TracearrScreen : NavKey {
     data object Main : TracearrScreen
+    data object History: TracearrScreen
 }
