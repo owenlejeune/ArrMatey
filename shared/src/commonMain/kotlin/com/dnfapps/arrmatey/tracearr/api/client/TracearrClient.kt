@@ -1,11 +1,13 @@
 package com.dnfapps.arrmatey.tracearr.api.client
 
 import com.dnfapps.arrmatey.instances.model.Instance
-import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
 import io.ktor.client.HttpClient
+import io.ktor.client.request.parameter
 
 class TracearrClient(
     val instance: Instance,
@@ -14,7 +16,6 @@ class TracearrClient(
 
     private val v2BaseUrl: String
         get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}/v2"
-
 
     private val v1BaseUrl: String
         get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}/v1"
@@ -32,5 +33,16 @@ class TracearrClient(
     suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> {
         val url = "$v1BaseUrl/public/stats/today"
         return httpClient.safeGet(url)
+    }
+
+    suspend fun getHistory(
+        cursor: String? = null,
+        pageSize: Int? = null,
+    ): NetworkResult<TracearrHistoryResponse> {
+        val url = "$v2BaseUrl/public/history"
+        return httpClient.safeGet(url) {
+            cursor?.let { parameter("cursor", it) }
+            pageSize?.let { parameter("pageSize", it) }
+        }
     }
 }

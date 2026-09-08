@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.instances.repository.TracearrRepository
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
-import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
-import com.dnfapps.arrmatey.tracearr.state.TracearrStreamsState
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
+import com.dnfapps.arrmatey.tracearr.state.TracearrState
+import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrHistoryUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStatsTodayUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStreamsUseCase
 import com.dnfapps.networking.onError
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -27,6 +30,7 @@ class TracearrViewModel(
     private val getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
     private val getTracearrStreamsUseCase: GetTracearrStreamsUseCase,
     private val getTracearrStatsUseCase: GetTracearrStatsTodayUseCase,
+    private val getTracearrHistoryUseCase: GetTracearrHistoryUseCase,
 ) : ViewModel() {
 
     val currentRepository: StateFlow<TracearrRepository?> =
@@ -39,11 +43,14 @@ class TracearrViewModel(
                 initialValue = null,
             )
 
-    private val _state = MutableStateFlow<TracearrStreamsState>(TracearrStreamsState.Initial)
-    val state: StateFlow<TracearrStreamsState> = _state.asStateFlow()
+    private val _state = MutableStateFlow<TracearrState>(TracearrState.Initial)
+    val state: StateFlow<TracearrState> = _state.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    private val _selectedSession = MutableStateFlow<TracearrStreamSession?>(null)
+    val selectedSession: StateFlow<TracearrStreamSession?> = _selectedSession.asStateFlow()
 
     private var pollingJob: Job? = null
 
@@ -51,9 +58,9 @@ class TracearrViewModel(
         viewModelScope.launch {
             currentRepository.collect { repo ->
                 if (repo == null) {
-                    _state.value = TracearrStreamsState.NoInstance
+                    _state.value = TracearrState.NoInstance
                 } else {
-                    refreshData(repo, showLoading = _state.value !is TracearrStreamsState.Success)
+                    refreshData(repo, showLoading = _state.value !is TracearrState.Success)
                 }
             }
         }
@@ -64,7 +71,7 @@ class TracearrViewModel(
     fun loadStreams() {
         val repo = currentRepository.value ?: return
         viewModelScope.launch {
-            refreshData(repo, showLoading = _state.value !is TracearrStreamsState.Success)
+            refreshData(repo, showLoading = _state.value !is TracearrState.Success)
         }
     }
 
@@ -91,11 +98,12 @@ class TracearrViewModel(
 
     private suspend fun refreshData(repo: TracearrRepository, showLoading: Boolean) {
         if (showLoading) {
-            _state.value = TracearrStreamsState.Loading
+            _state.value = TracearrState.Loading
         }
 
         var streams: List<TracearrStreamSession>? = null
         var stats: TracearrTodayStats? = null
+        var history: List<TracearrHistoryItem> = emptyList()
         var errorMessage: String? = null
 
         getTracearrStreamsUseCase(repo).onSuccess { response ->
@@ -108,13 +116,38 @@ class TracearrViewModel(
             stats = it
         }
 
+        getTracearrHistoryUseCase(repo, pageSize = 10).onSuccess { response ->
+            history = response.data
+        }
+
         if (streams != null) {
-            _state.value = TracearrStreamsState.Success(
+            _state.value = TracearrState.Success(
                 streams = streams,
                 stats = stats,
+                history = history,
             )
-        } else if (showLoading || _state.value !is TracearrStreamsState.Success) {
-            _state.value = TracearrStreamsState.Error(errorMessage ?: "Failed to load Tracearr data")
+        } else if (showLoading || _state.value !is TracearrState.Success) {
+            _state.value = TracearrState.Error(errorMessage ?: "Failed to load Tracearr data")
         }
+    }
+
+    fun setSelectedStream(streamSession: TracearrStreamSession) {
+        _selectedSession.update {
+            (_state.value as? TracearrState.Success)?.streams?.firstOrNull { s ->
+                s.id == streamSession.id
+            }
+        }
+    }
+
+    fun setSelectedHistoryStream(historyItem: TracearrHistoryItem) {
+        _selectedSession.update {
+            (_state.value as? TracearrState.Success)?.history?.firstOrNull { h ->
+                h.id == historyItem.id
+            }?.toStreamSession()
+        }
+    }
+
+    fun clearSelected() {
+        _selectedSession.value = null
     }
 }

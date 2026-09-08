@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,10 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ElectricBolt
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -60,6 +55,7 @@ import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun TracearrStreamCard(
@@ -108,7 +104,7 @@ fun TracearrStreamCard(
         currentProgressMs = session.progressMs ?: 0L
         if (isPlaying) {
             while (isActive) {
-                delay(1000L)
+                delay(1.seconds)
                 if (currentProgressMs < totalMs) {
                     currentProgressMs += 1000L
                 }
@@ -138,7 +134,6 @@ fun TracearrStreamCard(
             ),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            // Left Accent Strip
             Box(
                 modifier =
                     Modifier
@@ -158,7 +153,6 @@ fun TracearrStreamCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    // Poster Thumbnail
                     Box(
                         modifier =
                             Modifier
@@ -179,7 +173,6 @@ fun TracearrStreamCard(
                         }
                     }
 
-                    // Content Column
                     Column(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -189,7 +182,6 @@ fun TracearrStreamCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            // User & Action Badges Row
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -274,7 +266,6 @@ fun TracearrStreamCard(
                             }
                         }
 
-                        // Title
                         val displayTitle =
                             session.grandparentTitle
                                 ?: session.showTitle
@@ -289,7 +280,6 @@ fun TracearrStreamCard(
                             overflow = TextOverflow.Ellipsis,
                         )
 
-                        // Subtitle
                         val subtitle =
                             when {
                                 session.mediaType == TracearrMediaType.Episode || (session.seasonNumber != null && session.episodeNumber != null) -> {
@@ -316,7 +306,6 @@ fun TracearrStreamCard(
                             )
                         }
 
-//                        Spacer(Modifier.height(4.dp))
                         Text(
                             text = stateText,
                             style = MaterialTheme.typography.labelSmall,
@@ -325,7 +314,6 @@ fun TracearrStreamCard(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-                        // Progress Bar
                         LinearProgressIndicator(
                             progress = { progressFraction },
                             modifier =
@@ -334,10 +322,9 @@ fun TracearrStreamCard(
                                     .height(6.dp)
                                     .clip(RoundedCornerShape(3.dp)),
                             color = TracearrBlue,
-                            trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            trackColor = MaterialTheme.colorScheme.surface,
                         )
 
-                        // Progress Time & Status Row
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -360,7 +347,6 @@ fun TracearrStreamCard(
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
-                // Footer Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

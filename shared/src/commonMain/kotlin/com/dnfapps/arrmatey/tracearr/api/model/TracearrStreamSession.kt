@@ -1,7 +1,9 @@
 package com.dnfapps.arrmatey.tracearr.api.model
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Serializable
 data class TracearrStreamSession(
@@ -35,12 +37,12 @@ data class TracearrStreamSession(
     @SerialName("tmdb_id") val tmdbId: Long? = null,
     @SerialName("tvdb_id") val tvdbId: Long? = null,
     @SerialName("external_session_id") val externalSessionId: String? = null,
-    @SerialName("started_at") val startedAt: String? = null,
-    @SerialName("stopped_at") val stoppedAt: String? = null,
+    @SerialName("started_at") @Contextual val startedAt: Instant? = null,
+    @SerialName("stopped_at") @Contextual val stoppedAt: Instant? = null,
     @SerialName("duration_ms") val durationMs: Long? = null,
     @SerialName("total_duration_ms") val totalDurationMs: Long? = null,
     @SerialName("progress_ms") val progressMs: Long? = null,
-    @SerialName("last_paused_at") val lastPausedAt: String? = null,
+    @SerialName("last_paused_at") @Contextual val lastPausedAt: Instant? = null,
     @SerialName("paused_duration_ms") val pausedDurationMs: Long? = null,
     @SerialName("reference_id") val referenceId: String? = null,
     val watched: Boolean? = null,

@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -41,12 +42,13 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
-import com.dnfapps.arrmatey.tracearr.state.TracearrStreamsState
+import com.dnfapps.arrmatey.tracearr.state.TracearrState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.ui.components.InstancePicker
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrDashboardStatsSection
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -72,7 +74,7 @@ fun TracearrTab(
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val hideInstancePicker by globalPreferencesStore.hideInstanceSwitcher.collectAsStateWithLifecycle(false)
 
-    var selectedSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
+    val selectedSession by viewModel.selectedSession.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -113,8 +115,8 @@ fun TracearrTab(
                     .fillMaxSize(),
         ) {
             when (val currentState = state) {
-                is TracearrStreamsState.Initial,
-                is TracearrStreamsState.Loading,
+                is TracearrState.Initial,
+                is TracearrState.Loading,
                 -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -123,13 +125,13 @@ fun TracearrTab(
                         LoadingIndicator(modifier = Modifier.size(96.dp))
                     }
                 }
-                is TracearrStreamsState.NoInstance -> {
+                is TracearrState.NoInstance -> {
                     NoInstanceView(
                         type = InstanceType.Tracearr,
                         modifier = Modifier.fillMaxSize().wrapContentSize(),
                     )
                 }
-                is TracearrStreamsState.Error -> {
+                is TracearrState.Error -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
@@ -141,9 +143,7 @@ fun TracearrTab(
                         )
                     }
                 }
-                is TracearrStreamsState.Success -> {
-                    val activeSession = currentState.streams.firstOrNull { it.id == selectedSession?.id } ?: selectedSession
-
+                is TracearrState.Success -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding =
@@ -212,16 +212,61 @@ fun TracearrTab(
                             ) { session ->
                                 TracearrStreamCard(
                                     session = session,
-                                    onClick = { selectedSession = session },
+                                    onClick = { viewModel.setSelectedStream(session) },
+                                )
+                            }
+                        }
+
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.History,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                                Text(
+                                    text = mokoString(MR.strings.history),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+                        }
+
+                        val historyItems = currentState.history.take(5)
+                        if (historyItems.isEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = mokoString(MR.strings.no_history),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        } else {
+                            items(
+                                items = historyItems,
+                                key = { "history_${it.id}" },
+                            ) { historyItem ->
+                                TracearrHistoryCard(
+                                    item = historyItem,
+                                    onClick = { viewModel.setSelectedHistoryStream(historyItem) },
                                 )
                             }
                         }
                     }
 
-                    activeSession?.let { session ->
+                    selectedSession?.let { session ->
                         TracearrStreamDetailsSheet(
                             session = session,
-                            onDismissRequest = { selectedSession = null },
+                            onDismissRequest = { viewModel.clearSelected() },
                         )
                     }
                 }

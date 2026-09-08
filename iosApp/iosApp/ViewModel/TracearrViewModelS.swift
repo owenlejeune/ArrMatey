@@ -5,7 +5,8 @@ import SwiftUI
 class TracearrViewModelS: ObservableObject {
     private let viewModel: TracearrViewModel
 
-    @Published private(set) var state: TracearrStreamsState = TracearrStreamsStateInitial()
+    @Published private(set) var state: TracearrState = TracearrStateInitial()
+    @Published private(set) var selectedSession: TracearrStreamSession? = nil
     @Published private(set) var isRefreshing: Bool = false
 
     init() {
@@ -15,6 +16,7 @@ class TracearrViewModelS: ObservableObject {
 
     private func startObserving() {
         viewModel.state.observeAsync(on: self, to: \.state)
+        viewModel.selectedSession.observeAsync(on: self, to: \.selectedSession)
         viewModel.isRefreshing.observeAsync(on: self) { owner, refreshing in
             owner.isRefreshing = refreshing.boolValue
         }
@@ -26,5 +28,17 @@ class TracearrViewModelS: ObservableObject {
 
     func refresh() {
         viewModel.refresh()
+    }
+
+    func setSelectedStream(_ stream: TracearrStreamSession) {
+        viewModel.setSelectedStream(streamSession: stream)
+    }
+
+    func setSelectedHistoryStream(_ historyItem: TracearrHistoryItem) {
+        viewModel.setSelectedHistoryStream(historyItem: historyItem)
+    }
+
+    func clearSelected() {
+        viewModel.clearSelected()
     }
 }

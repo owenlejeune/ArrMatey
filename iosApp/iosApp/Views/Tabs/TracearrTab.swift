@@ -22,14 +22,13 @@ struct TracearrTabContent: View {
     @StateObject private var instancesViewModel = InstancesViewModelS(type: .tracearr)
     @ObservedObject private var globalPreferences = PreferencesViewModel()
     @EnvironmentObject private var navigationManager: NavigationManager
-    @State private var selectedSession: TracearrStreamSession? = nil
 
     var body: some View {
         Group {
-            if viewModel.state is TracearrStreamsStateNoInstance {
+            if viewModel.state is TracearrStateNoInstance {
                 NoInstanceView(type: .tracearr)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let success = viewModel.state as? TracearrStreamsStateSuccess {
+            } else if let success = viewModel.state as? TracearrStateSuccess {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         if let stats = success.stats {
@@ -54,7 +53,31 @@ struct TracearrTabContent: View {
                                     TracearrStreamCardView(session: session)
                                         .contentShape(Rectangle())
                                         .onTapGesture {
-                                            selectedSession = session
+                                            viewModel.setSelectedStream(session)
+                                        }
+                                }
+                            }
+                        }
+
+                        // History Section Header
+                        historyHeader
+
+                        let historyItems = Array(success.history.prefix(5))
+                        if historyItems.isEmpty {
+                            VStack(spacing: 8) {
+                                Text(MR.strings().no_history.localized())
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 20)
+                        } else {
+                            LazyVStack(spacing: 16) {
+                                ForEach(historyItems, id: \.id) { historyItem in
+                                    TracearrHistoryCardView(item: historyItem)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            viewModel.setSelectedHistoryStream(historyItem)
                                         }
                                 }
                             }
@@ -65,10 +88,10 @@ struct TracearrTabContent: View {
                 .refreshable {
                     viewModel.refresh()
                 }
-            } else if viewModel.state is TracearrStreamsStateLoading || viewModel.state is TracearrStreamsStateInitial {
+            } else if viewModel.state is TracearrStateLoading || viewModel.state is TracearrStateInitial {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let error = viewModel.state as? TracearrStreamsStateError {
+            } else if let error = viewModel.state as? TracearrStateError {
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 48))
@@ -84,13 +107,8 @@ struct TracearrTabContent: View {
             }
         }
         .sheet(item: Binding(
-            get: {
-                if let sel = selectedSession, let success = viewModel.state as? TracearrStreamsStateSuccess {
-                    return success.streams.first(where: { $0.id == sel.id }) ?? sel
-                }
-                return selectedSession
-            },
-            set: { selectedSession = $0 }
+            get: { viewModel.selectedSession },
+            set: { if $0 == nil { viewModel.clearSelected() } }
         )) { session in
             TracearrStreamDetailsSheet(session: session)
         }
@@ -132,6 +150,18 @@ struct TracearrTabContent: View {
                 .padding(.vertical, 4)
                 .background(Color(UIColor.secondarySystemBackground))
                 .clipShape(Capsule())
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private var historyHeader: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "clock.arrow.circlepath")
+                .font(.title3)
+                .foregroundColor(.accentColor)
+            Text(MR.strings().history.localized())
+                .font(.title3.bold())
             Spacer()
         }
     }
@@ -272,12 +302,7 @@ struct TracearrStreamCardView: View {
                                     .clipShape(Circle())
                             }
 
-                            Image(systemName: isTvDevice ? "tv" : "iphone")
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
-                                .padding(4)
-                                .background(Color(UIColor.tertiarySystemBackground))
-                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                            TracearrDeviceIconView(session: session)
 
                             if session.canTerminate?.boolValue == true {
                                 Image(systemName: "xmark")
@@ -397,6 +422,38 @@ struct TracearrStreamCardView: View {
         } else {
             return "\(minutes):\(secondsStr)"
         }
+    }
+}
+
+struct TracearrDeviceIconView: View {
+    let session: TracearrStreamSession
+
+    private var platformEnum: TracearrDevicePlatform {
+        TracearrDevicePlatformCompanion.shared.fromSession(
+            platform: session.platform,
+            product: session.product,
+            device: session.device
+        )
+    }
+
+    private var systemImageName: String {
+        switch platformEnum {
+        case .phone: return "iphone"
+        case .tablet: return "ipad"
+        case .tv: return "tv"
+        case .desktop: return "desktopcomputer"
+        case .console: return "gamecontroller"
+        default: return "display"
+        }
+    }
+
+    var body: some View {
+        Image(systemName: systemImageName)
+            .font(.system(size: 12))
+            .foregroundColor(.secondary)
+            .padding(4)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }
 
@@ -545,3 +602,206 @@ struct TracearrStatCardView: View {
     }
 }
 
+struct TracearrHistoryCardView: View {
+    let item: TracearrHistoryItem
+
+    private var percent: Double {
+        if let pc = item.percentComplete?.doubleValue {
+            return pc
+        }
+        let total = Double(item.totalDurationMs?.int64Value ?? item.durationMs?.int64Value ?? 0)
+        let prog = Double(item.progressMs?.int64Value ?? 0)
+        return total > 0 ? (prog / total * 100.0) : 0.0
+    }
+
+    private var progressFraction: Double {
+        min(max(percent / 100.0, 0.0), 1.0)
+    }
+
+    private var isWatched: Bool {
+        item.watched?.boolValue == true || percent >= 90.0
+    }
+
+    private var isAbandoned: Bool {
+        !isWatched && percent < 10.0
+    }
+
+    private var isSampled: Bool {
+        !isWatched && !isAbandoned
+    }
+
+    private var edgeColor: Color {
+        let serverType = item.serverType
+        if serverType == .plex {
+            return Color(hex: 0xE5A00D)
+        } else if serverType == .jellyfin {
+            return Color(hex: 0xAA5CC3)
+        } else if serverType == .emby {
+            return Color(hex: 0x52B54B)
+        } else {
+            let name = (item.serverName ?? "").lowercased()
+            if name.contains("plex") {
+                return Color(hex: 0xE5A00D)
+            } else if name.contains("jellyfin") {
+                return Color(hex: 0xAA5CC3)
+            } else if name.contains("emby") {
+                return Color(hex: 0x52B54B)
+            }
+            return .accentColor
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Rectangle()
+                .fill(edgeColor)
+                .frame(width: 4)
+
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top, spacing: 12) {
+                    ZStack {
+                        let imageUrl = item.posterUrl ?? item.thumbPath
+                        TracearrImage(urlString: imageUrl) {
+                            Color(UIColor.secondarySystemBackground)
+                        }
+                        .aspectRatio(contentMode: .fill)
+                    }
+                    .frame(width: 60, height: 90)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            let username = item.effectiveUsername.isEmpty ? MR.strings().user.localized() : item.effectiveUsername
+                            let avatarUrl = item.effectiveUserAvatar
+
+                            if let avatarStr = avatarUrl, !avatarStr.isEmpty {
+                                TracearrImage(urlString: avatarStr) {
+                                    Circle().fill(Color.orange)
+                                }
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 18, height: 18)
+                                .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color.orange)
+                                    .frame(width: 18, height: 18)
+                                    .overlay(
+                                        Text(String(username.prefix(1)).uppercased())
+                                            .font(.caption2.bold())
+                                            .foregroundColor(.white)
+                                    )
+                            }
+
+                            Text(username)
+                                .font(.caption.bold())
+                                .lineLimit(1)
+
+                            Spacer()
+
+                            TracearrDeviceIconView(session: item.toStreamSession())
+
+                            statusChip
+                        }
+
+                        let displayTitle = item.grandparentTitle ?? item.showTitle ?? item.mediaTitle ?? MR.strings().unknown.localized()
+                        Text(displayTitle)
+                            .font(.headline)
+                            .bold()
+                            .lineLimit(1)
+
+                        Text(subtitleText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+
+                        HStack(spacing: 8) {
+                            ProgressView(value: progressFraction)
+                                .progressViewStyle(.linear)
+                                .tint(Color.accentColor)
+
+                            if let dur = item.durationMs?.int64Value {
+                                Text(formatDurationMs(dur))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.top, 4)
+                    }
+                }
+
+                Divider()
+
+                HStack {
+                    let serverName = item.effectiveServerName.isEmpty ? MR.strings().server.localized() : item.effectiveServerName
+                    let isTranscoding = item.isTranscode?.boolValue == true || item.videoDecision == .transcode || item.audioDecision == .transcode
+                    let decisionText = isTranscoding ? MR.strings().transcode.localized() : MR.strings().direct_play.localized()
+
+                    Text("\(serverName) · \(decisionText)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+
+                    Spacer()
+
+                    let resolution = item.resolution ?? "1080p"
+                    Text(resolution)
+                        .font(.caption.bold())
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(12)
+        }
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+
+    @ViewBuilder
+    private var statusChip: some View {
+        let (label, bgColor, fgColor): (String, Color, Color) = {
+            if isWatched {
+                return (MR.strings().watched.localized(), Color.green.opacity(0.2), .green)
+            } else if isSampled {
+                return (MR.strings().sampled.localized(), Color.orange.opacity(0.2), .orange)
+            } else {
+                return (MR.strings().abandoned.localized(), Color.red.opacity(0.2), .red)
+            }
+        }()
+
+        Text(label)
+            .font(.caption2.bold())
+            .foregroundColor(fgColor)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(bgColor)
+            .cornerRadius(4)
+    }
+
+    private var subtitleText: String {
+        if item.mediaType == .episode || (item.seasonNumber != nil && item.episodeNumber != nil) {
+            let s = item.seasonNumber?.intValue ?? 0
+            let e = item.episodeNumber?.intValue ?? 0
+            let sStr = String(format: "%02d", s)
+            let eStr = String(format: "%02d", e)
+            let epTitle = item.mediaTitle ?? ""
+            return "S\(sStr) E\(eStr) · \(epTitle)"
+        } else if item.mediaType == .movie {
+            let yearStr = item.year?.stringValue ?? ""
+            let movieTitle = item.mediaTitle ?? ""
+            return "\(yearStr) · \(movieTitle)"
+        } else {
+            let parts = [item.artistName, item.albumName, item.mediaTitle].compactMap { $0 }
+            return parts.joined(separator: " · ")
+        }
+    }
+
+    private func formatDurationMs(_ ms: Int64) -> String {
+        let totalSeconds = ms / 1000
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        if minutes > 0 {
+            return "\(minutes)m \(seconds)s"
+        } else {
+            return "\(seconds)s"
+        }
+    }
+}

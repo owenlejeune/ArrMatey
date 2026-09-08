@@ -146,15 +146,15 @@ struct TracearrStreamDetailsSheet: View {
         }
         .task(id: "\(session.id)-\(session.progressMs?.int64Value ?? 0)-\(isPlaying)-\(isPaused)") {
             currentProgressMs = session.progressMs?.int64Value ?? 0
-            
+
             let basePaused = session.pausedDurationMs?.int64Value ?? 0
             var activePauseMs: Int64 = 0
-            if isPaused, let lastPausedAt = session.lastPausedAt, let lastPausedDate = parseIsoDate(lastPausedAt) {
+            if isPaused, let lastPausedDate = instantToDate(session.lastPausedAt) {
                 activePauseMs = max(Int64(Date().timeIntervalSince(lastPausedDate) * 1000), 0)
             }
             currentPausedMs = basePaused + activePauseMs
 
-            if let startedAt = session.startedAt, let startedDate = parseIsoDate(startedAt) {
+            if let startedDate = instantToDate(session.startedAt) {
                 let totalElapsedMs = max(Int64(Date().timeIntervalSince(startedDate) * 1000), 0)
                 currentWatchTimeMs = max(totalElapsedMs - currentPausedMs, 0)
             } else {
@@ -189,10 +189,10 @@ struct TracearrStreamDetailsSheet: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 let typeLabel: String = {
-                    if session.mediaType == .episode { return "Episode" }
-                    if session.mediaType == .movie { return "Movie" }
-                    if session.mediaType == .track { return "Track" }
-                    return session.mediaType?.name ?? "Media"
+                    if session.mediaType == .episode { return MR.strings().episode.localized() }
+                    if session.mediaType == .movie { return MR.strings().movie_singular.localized() }
+                    if session.mediaType == .track { return MR.strings().track.localized() }
+                    return session.mediaType?.name ?? MR.strings().media.localized()
                 }()
                 let yearText = session.year != nil ? " · \(session.year!.stringValue)" : ""
 
@@ -346,8 +346,23 @@ struct TracearrStreamDetailsSheet: View {
 
     // MARK: - Device Card
     private var deviceCard: some View {
-        let isTv = session.platform?.localizedCaseInsensitiveContains("TV") == true || session.device?.localizedCaseInsensitiveContains("TV") == true
-        return cardSection(icon: isTv ? "tv" : "iphone", title: MR.strings().device.localized()) {
+        let platformEnum = TracearrDevicePlatformCompanion.shared.fromSession(
+            platform: session.platform,
+            product: session.product,
+            device: session.device
+        )
+        let deviceIcon: String = {
+            switch platformEnum {
+            case .phone: return "iphone"
+            case .tablet: return "ipad"
+            case .tv: return "tv"
+            case .desktop: return "desktopcomputer"
+            case .console: return "gamecontroller"
+            default: return "display"
+            }
+        }()
+
+        return cardSection(icon: deviceIcon, title: MR.strings().device.localized()) {
             VStack(spacing: 8) {
                 if let platform = session.platform, !platform.isEmpty {
                     detailRow(label: MR.strings().platform.localized(), value: platform)
@@ -498,7 +513,7 @@ struct TracearrStreamDetailsSheet: View {
                 let srcLang = session.sourceAudioDetails?.language ?? ""
                 let dstLang = session.streamAudioDetails?.language ?? srcLang
                 if !srcLang.isEmpty {
-                    detailComparisonRow(label: "Language", source: srcLang, stream: dstLang)
+                    detailComparisonRow(label: MR.strings().language.localized(), source: srcLang, stream: dstLang)
                 }
 
                 if let sampleRate = session.sourceAudioDetails?.sampleRate?.doubleValue {
@@ -512,7 +527,7 @@ struct TracearrStreamDetailsSheet: View {
     private func subtitlesCard(_ subtitleInfo: TracearrSubtitleInfo) -> some View {
         cardSection(icon: "captions.bubble", title: MR.strings().subtitle.localized()) {
             let formatStr = [subtitleInfo.codec, subtitleInfo.language].compactMap { $0 }.joined(separator: " · ")
-            detailRow(label: "Format", value: formatStr)
+            detailRow(label: MR.strings().subtitle_format.localized(), value: formatStr)
         }
     }
 
@@ -629,20 +644,13 @@ struct TracearrStreamDetailsSheet: View {
         }
     }
 
-    private func parseIsoDate(_ isoString: String) -> Date? {
-        if isoString.isEmpty { return nil }
-        let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = isoFormatter.date(from: isoString) {
-            return date
-        }
-        isoFormatter.formatOptions = [.withInternetDateTime]
-        return isoFormatter.date(from: isoString)
+    private func instantToDate(_ instant: KotlinTimeInstant?) -> Date? {
+        guard let instant = instant else { return nil }
+        return Date(timeIntervalSince1970: TimeInterval(instant.toEpochMilliseconds()) / 1000.0)
     }
 
-    private func formatStartedAt(_ isoString: String?) -> String {
-        guard let isoString = isoString, !isoString.isEmpty else { return "" }
-        guard let date = parseIsoDate(isoString) else { return isoString }
+    private func formatStartedAt(_ instant: KotlinTimeInstant?) -> String {
+        guard let instant = instant, let date = instantToDate(instant) else { return "" }
 
         let displayFormatter = DateFormatter()
         displayFormatter.dateFormat = "MMM d, h:mm a"

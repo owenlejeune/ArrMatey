@@ -127,6 +127,7 @@ import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrHistoryUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStatsTodayUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStreamsUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
@@ -327,6 +328,7 @@ val useCaseModule =
         factory { GetTracearrInstanceRepositoryUseCase(get()) }
         factory { GetTracearrStreamsUseCase() }
         factory { GetTracearrStatsTodayUseCase() }
+        factory { GetTracearrHistoryUseCase() }
         factory { GetCurrentSeerrUserUseCase() }
         factory { GetRequestsUseCase() }
         factory { GetTrendingUseCase() }

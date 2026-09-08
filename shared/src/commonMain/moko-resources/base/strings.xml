@@ -881,6 +881,9 @@
     <string name="direct_play">Direct Play</string>
     <string name="direct_stream">Direct Stream</string>
     <string name="transcode">Transcode</string>
+    <string name="watched">Watched</string>
+    <string name="sampled">Sampled</string>
+    <string name="abandoned">Abandoned</string>
     <string name="view_profile">View profile</string>
     <string name="hdr">HDR</string>
     <string name="profile">Profile</string>
@@ -889,4 +892,13 @@
     <string name="plays">Plays</string>
     <string name="active_users">Active Users</string>
     <string name="sessions">Sessions</string>
+    <string name="movie_singular">Movie</string>
+    <string name="track">Track</string>
+    <string name="media">Media</string>
+    <string name="subtitle_format">Format</string>
+    <string name="just_now">just now</string>
+    <string name="minute_ago">1 minute ago</string>
+    <string name="minutes_ago">%1$d minutes ago</string>
+    <string name="hour_ago">1 hour ago</string>
+    <string name="hours_ago">%1$d hours ago</string>
 </resources>

@@ -19,17 +19,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DesktopWindows
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PhoneIphone
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.SmartDisplay
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Subtitles
+import androidx.compose.material.icons.filled.Tablet
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,12 +59,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrDevicePlatform
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamDecision
@@ -73,11 +80,12 @@ import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import java.time.Duration
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,27 +115,23 @@ fun TracearrStreamDetailsSheet(
     val initialProgressMs = session.progressMs ?: 0L
     var currentProgressMs by remember(session.id, session.progressMs) { mutableLongStateOf(initialProgressMs) }
 
-    val startedInstant = remember(session.startedAt) {
-        session.startedAt?.let {
-            try { Instant.parse(it) } catch (e: Exception) { null }
-        }
-    }
     val initialPausedMs = remember(session.pausedDurationMs, session.lastPausedAt, isPaused) {
         val base = session.pausedDurationMs ?: 0L
-        if (isPaused && session.lastPausedAt != null) {
-            val lastPaused = try { Instant.parse(session.lastPausedAt) } catch (e: Exception) { null }
-            if (lastPaused != null) {
-                base + Duration.between(lastPaused, Instant.now()).toMillis().coerceAtLeast(0L)
-            } else base
+        val lastPaused = session.lastPausedAt?.toEpochMilliseconds()
+        if (isPaused && lastPaused != null) {
+            val now = System.currentTimeMillis()
+            base + (now - lastPaused).coerceAtLeast(0L)
         } else {
             base
         }
     }
     var currentPausedMs by remember(session.id, initialPausedMs) { mutableLongStateOf(initialPausedMs) }
 
-    val initialWatchTimeMs = remember(startedInstant, initialPausedMs) {
-        if (startedInstant != null) {
-            val totalElapsed = Duration.between(startedInstant, Instant.now()).toMillis().coerceAtLeast(0L)
+    val initialWatchTimeMs = remember(session.startedAt, initialPausedMs) {
+        val startedMs = session.startedAt?.toEpochMilliseconds()
+        if (startedMs != null) {
+            val now = System.currentTimeMillis()
+            val totalElapsed = (now - startedMs).coerceAtLeast(0L)
             (totalElapsed - initialPausedMs).coerceAtLeast(0L)
         } else {
             session.progressMs ?: 0L
@@ -138,7 +142,7 @@ fun TracearrStreamDetailsSheet(
     LaunchedEffect(session.id, session.progressMs, isPlaying, isPaused) {
         currentProgressMs = session.progressMs ?: 0L
         while (isActive) {
-            delay(1000L)
+            delay(1.seconds)
             if (isPlaying) {
                 if (currentProgressMs < totalMs) {
                     currentProgressMs += 1000L
@@ -188,7 +192,6 @@ fun TracearrStreamDetailsSheet(
                     .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Header Row: Status Icon, Title, Status Badge, Close Button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -227,7 +230,6 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // Media Header Card
             ContainerCard(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(12.dp),
@@ -236,7 +238,6 @@ fun TracearrStreamDetailsSheet(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    // Poster Thumbnail
                     Box(
                         modifier =
                             Modifier
@@ -261,13 +262,12 @@ fun TracearrStreamDetailsSheet(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        // Media type + Year
                         val typeLabel =
                             when (session.mediaType) {
-                                TracearrMediaType.Episode -> "Episode"
-                                TracearrMediaType.Movie -> "Movie"
-                                TracearrMediaType.Track -> "Track"
-                                else -> session.mediaType?.name ?: "Media"
+                                TracearrMediaType.Episode -> mokoString(MR.strings.episode)
+                                TracearrMediaType.Movie -> mokoString(MR.strings.movie_singular)
+                                TracearrMediaType.Track -> mokoString(MR.strings.track)
+                                else -> session.mediaType?.name ?: mokoString(MR.strings.media)
                             }
                         val yearText = session.year?.let { " · $it" } ?: ""
                         Row(
@@ -287,7 +287,6 @@ fun TracearrStreamDetailsSheet(
                             )
                         }
 
-                        // Main Title
                         val displayTitle =
                             session.grandparentTitle
                                 ?: session.showTitle
@@ -301,7 +300,6 @@ fun TracearrStreamDetailsSheet(
                             overflow = TextOverflow.Ellipsis,
                         )
 
-                        // Subtitle
                         val subtitle =
                             when {
                                 session.mediaType == TracearrMediaType.Episode || (session.seasonNumber != null && session.episodeNumber != null) -> {
@@ -324,7 +322,6 @@ fun TracearrStreamDetailsSheet(
 
                         Spacer(Modifier.height(4.dp))
 
-                        // Progress Bar + Percentage
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -338,7 +335,7 @@ fun TracearrStreamDetailsSheet(
                                         .height(4.dp)
                                         .clip(RoundedCornerShape(2.dp)),
                                 color = TracearrBlue,
-                                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                trackColor = MaterialTheme.colorScheme.surface,
                             )
                             Text(
                                 text = "$progressPercent%",
@@ -350,7 +347,6 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // User Card
             val username = session.effectiveUsername.ifEmpty { mokoString(MR.strings.user) }
             ContainerCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -401,7 +397,6 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // Server Card
             SectionCard(
                 icon = Icons.Default.Dns,
                 title = mokoString(MR.strings.server),
@@ -439,7 +434,6 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // Playback Card
             SectionCard(
                 icon = Icons.Default.Schedule,
                 title = mokoString(MR.strings.playback),
@@ -469,7 +463,6 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // Location Card
             SectionCard(
                 icon = Icons.Default.LocationOn,
                 title = mokoString(MR.strings.location),
@@ -504,9 +497,24 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // Device Card
+            val devicePlatform = remember(session) {
+                TracearrDevicePlatform.fromSession(
+                    session.platform,
+                    session.product,
+                    session.device,
+                )
+            }
+            val deviceCardIcon = when (devicePlatform) {
+                TracearrDevicePlatform.PHONE -> Icons.Default.PhoneIphone
+                TracearrDevicePlatform.TABLET -> Icons.Default.Tablet
+                TracearrDevicePlatform.TV -> Icons.Default.Tv
+                TracearrDevicePlatform.DESKTOP -> Icons.Default.DesktopWindows
+                TracearrDevicePlatform.CONSOLE -> Icons.Default.SportsEsports
+                TracearrDevicePlatform.UNKNOWN -> Icons.Default.SmartDisplay
+            }
+
             SectionCard(
-                icon = if (session.platform?.contains("TV", ignoreCase = true) == true || session.device?.contains("TV", ignoreCase = true) == true) Icons.Default.Tv else Icons.Default.Smartphone,
+                icon = deviceCardIcon,
                 title = mokoString(MR.strings.device),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -519,7 +527,6 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // Stream Details Card
             val isStreamTranscode = session.isTranscode == true ||
                 session.videoDecision == TracearrStreamDecision.Transcode ||
                 session.audioDecision == TracearrStreamDecision.Transcode
@@ -549,7 +556,6 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // Video Details Card
             val isVideoTranscode = session.videoDecision == TracearrStreamDecision.Transcode
             val videoBadge = if (isVideoTranscode) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
             val videoBadgeColor = if (isVideoTranscode) ArrYellow else Color(0xFF4CAF50)
@@ -613,7 +619,6 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // Audio Details Card
             val isAudioTranscode = session.audioDecision == TracearrStreamDecision.Transcode
             val audioBadge = if (isAudioTranscode) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
             val audioBadgeColor = if (isAudioTranscode) ArrYellow else Color(0xFF4CAF50)
@@ -651,7 +656,7 @@ fun TracearrStreamDetailsSheet(
                     val srcLang = session.sourceAudioDetails?.language ?: ""
                     val dstLang = streamAudioDetails?.language ?: srcLang
                     if (srcLang.isNotBlank()) {
-                        DetailComparisonRow(label = "Language", source = srcLang, stream = dstLang)
+                        DetailComparisonRow(label = mokoString(MR.strings.language), source = srcLang, stream = dstLang)
                     }
 
                     session.sourceAudioDetails?.sampleRate?.let {
@@ -660,14 +665,13 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            // Subtitles Card (if any)
             session.subtitleInfo?.let { sub ->
                 SectionCard(
                     icon = Icons.Default.Subtitles,
                     title = mokoString(MR.strings.subtitle),
                 ) {
                     val subFormat = listOfNotNull(sub.codec, sub.language).joinToString(" · ")
-                    DetailRow(label = "Format", value = subFormat)
+                    DetailRow(label = mokoString(MR.strings.subtitle_format), value = subFormat)
                 }
             }
         }
@@ -837,27 +841,36 @@ private fun String?.isNullOrRelative(): Boolean {
     return !this.startsWith("http://") && !this.startsWith("https://")
 }
 
-private fun formatStartedAt(isoString: String?): String {
-    if (isoString.isNullOrEmpty()) return ""
-    return try {
-        val instant = Instant.parse(isoString)
-        val zonedDateTime = instant.atZone(ZoneId.systemDefault())
-        val dateFormatter = DateTimeFormatter.ofPattern("MMM d, h:mm a")
-        val formattedDate = zonedDateTime.format(dateFormatter)
-        val now = Instant.now()
-        val duration = Duration.between(instant, now)
-        val minutesAgo = duration.toMinutes()
-        val relative = when {
-            minutesAgo < 1 -> "just now"
-            minutesAgo == 1L -> "1 minute ago"
-            minutesAgo < 60 -> "$minutesAgo minutes ago"
-            minutesAgo < 120 -> "1 hour ago"
-            else -> "${minutesAgo / 60} hours ago"
-        }
-        "$formattedDate ($relative)"
-    } catch (e: Exception) {
-        isoString
+@Composable
+private fun formatStartedAt(instant: Instant?): String {
+    if (instant == null) return ""
+
+    val locale = LocalConfiguration.current.locales[0]
+    val justNow = mokoString(MR.strings.just_now)
+    val minuteAgo = mokoString(MR.strings.minute_ago)
+    val hourAgo = mokoString(MR.strings.hour_ago)
+
+    val ms = instant.toEpochMilliseconds()
+    val nowMs = System.currentTimeMillis()
+    val minutesAgo = (nowMs - ms) / 60000L
+
+    val relative = when {
+        minutesAgo < 1 -> justNow
+        minutesAgo == 1L -> minuteAgo
+        minutesAgo < 60 -> mokoString(MR.strings.minutes_ago, minutesAgo)
+        minutesAgo < 120 -> hourAgo
+        else -> mokoString(MR.strings.hours_ago, minutesAgo / 60)
     }
+
+    val formattedDate = try {
+        val date = Date(ms)
+        val dateFormatter = SimpleDateFormat("MMM d, h:mm a", locale)
+        dateFormatter.format(date)
+    } catch (e: Exception) {
+        ""
+    }
+
+    return if (formattedDate.isNotEmpty()) "$formattedDate ($relative)" else relative
 }
 
 private fun formatDetailedDuration(ms: Long, hideSecondsIfHours: Boolean = false): String {
