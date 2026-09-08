@@ -895,6 +895,18 @@ extension UnifiedMediaDetailsScreen {
             toastMessage = MR.strings().error_deleting_item.localized()
         }
     }
+
+    fileprivate func onDeleteMovieFileSuccess() {
+        withAnimation {
+            toastMessage = MR.strings().item_deleted_successfully.localized()
+        }
+    }
+
+    fileprivate func onDeleteMovieFileError() {
+        withAnimation {
+            toastMessage = MR.strings().error_deleting_item.localized()
+        }
+    }
 }
 
 // MARK: - Toolbar Content
@@ -1556,6 +1568,12 @@ fileprivate struct UnifiedMediaDetailsEventsModifier: ViewModifier {
             }
             .onReceive(viewModel.$deleteErrorTrigger) { _ in
                 screen.onDeleteError()
+            }
+            .onReceive(viewModel.$deleteMovieFileSuccessTrigger) { _ in
+                screen.onDeleteMovieFileSuccess()
+            }
+            .onReceive(viewModel.$deleteMovieFileErrorTrigger) { _ in
+                screen.onDeleteMovieFileError()
             }
     }
 }
