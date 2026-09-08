@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.tracearr
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +31,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.SmartDisplay
-import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Subtitles
@@ -82,7 +82,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
@@ -92,6 +91,7 @@ import kotlin.time.Instant
 fun TracearrStreamDetailsSheet(
     session: TracearrStreamSession,
     onDismissRequest: () -> Unit,
+    onNavigateToDetails: (type: TracearrMediaType?, tmdbId: Long?) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -235,7 +235,9 @@ fun TracearrStreamDetailsSheet(
                 contentPadding = PaddingValues(12.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().clickable {
+                        onNavigateToDetails(session.mediaType, session.mediaDetails?.tmdbId)
+                    },
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Box(

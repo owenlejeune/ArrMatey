@@ -102,6 +102,8 @@ class DashboardTabNavigator : BaseNavigator<NavKey>(DashboardScreen.Main)
 
 class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
 
+class TracearrTabNavigator : BaseNavigator<NavKey>(TracearrScreen.Main)
+
 /**
  * Shared media navigation extensions.
  */

@@ -162,3 +162,7 @@ sealed interface BazarrScreen : NavKey {
         val type: BazarrMediaType,
     ) : BazarrScreen
 }
+
+sealed interface TracearrScreen : NavKey {
+    data object Main : TracearrScreen
+}

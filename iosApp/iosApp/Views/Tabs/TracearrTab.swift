@@ -10,9 +10,15 @@ struct TracearrTab: View {
         case .mainTab:
             NavigationStack(path: $navigationManager.tracearrPath) {
                 TracearrTabContent()
+                    .navigationDestination(for: MediaRoute.self) { route in
+                        MediaRouteDestination(route: route)
+                    }
             }
         case .launcher:
             TracearrTabContent()
+                .navigationDestination(for: MediaRoute.self) { route in
+                    MediaRouteDestination(route: route)
+                }
         }
     }
 }
@@ -110,7 +116,17 @@ struct TracearrTabContent: View {
             get: { viewModel.selectedSession },
             set: { if $0 == nil { viewModel.clearSelected() } }
         )) { session in
-            TracearrStreamDetailsSheet(session: session)
+            TracearrStreamDetailsSheet(
+                session: session,
+                onNavigateToDetails: { mediaType, tmdbId in
+                    if let tmdbId = tmdbId {
+                        navigationManager.goToDetails(
+                            tmdbId: tmdbId,
+                            requestType: mediaType?.requestType
+                        )
+                    }
+                }
+            )
         }
         .navigationTitle(MR.strings().tracearr.localized())
         .navigationBarTitleDisplayMode(.inline)

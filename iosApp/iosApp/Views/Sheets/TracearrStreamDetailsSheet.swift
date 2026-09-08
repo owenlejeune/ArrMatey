@@ -10,6 +10,7 @@ import SwiftUI
 
 struct TracearrStreamDetailsSheet: View {
     let session: TracearrStreamSession
+    var onNavigateToDetails: ((TracearrMediaType?, Int64?) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
 
     @State private var currentProgressMs: Int64 = 0
@@ -235,6 +236,13 @@ struct TracearrStreamDetailsSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(12)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if let tmdbId = session.mediaDetails?.tmdbId?.int64Value {
+                dismiss()
+                onNavigateToDetails?(session.mediaType, tmdbId)
+            }
+        }
     }
 
     // MARK: - User Card

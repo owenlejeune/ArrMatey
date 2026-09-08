@@ -97,6 +97,7 @@ data class TracearrStreamSession(
     @SerialName("source_video_codec_display") val sourceVideoCodecDisplay: String? = null,
     @SerialName("stream_audio_codec_display") val streamAudioCodecDisplay: String? = null,
     @SerialName("stream_video_codec_display") val streamVideoCodecDisplay: String? = null,
+    @SerialName("media_details") val mediaDetails: TracearrMediaDetails? = null,
 ) {
     val effectiveUsername: String
         get() = user?.username ?: username ?: ""

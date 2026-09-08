@@ -156,6 +156,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         seerrPath = NavigationPath()
         launcherPath = NavigationPath()
         bazarrPath = NavigationPath()
+        tracearrPath = NavigationPath()
         libraryPath = NavigationPath()
     }
 
@@ -187,6 +188,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         self.libraryPath = NavigationPath()
 
         self.seerrPath = NavigationPath()
+        self.tracearrPath = NavigationPath()
     }
 
     func goInLauncher(to route: SettingsRoute) {
@@ -249,6 +251,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             launcherPath.append(route)
         } else if let type = instanceType {
             go(to: route, of: type)
+        } else if selectedTab.key == TabItemStandard.tracearr.key {
+            tracearrPath.append(route)
         } else {
             seerrPath.append(route)
         }

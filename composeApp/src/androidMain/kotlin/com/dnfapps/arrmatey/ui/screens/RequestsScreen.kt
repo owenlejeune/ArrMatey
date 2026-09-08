@@ -45,10 +45,10 @@ import org.koin.core.parameter.parametersOf
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RequestsScreen(
-    viewModel: RequestsViewModel,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onNavigateToDetails: (Long, RequestType) -> Unit,
+    viewModel: RequestsViewModel = koinViewModel(),
     instancesViewModel: InstancesViewModel =
         koinViewModel(key = InstanceType.Seerr.name, parameters = { parametersOf(InstanceType.Seerr) }),
 ) {

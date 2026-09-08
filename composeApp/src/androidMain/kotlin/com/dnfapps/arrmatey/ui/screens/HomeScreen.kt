@@ -617,6 +617,6 @@ private fun StandardTabContent(
         TabItem.Standard.DASHBOARD -> DashboardTab(windowSizeClass)
         TabItem.Standard.BAZARR -> BazarrTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.DISCOVER -> DiscoverTab(windowSizeClass, wideRailIsVisible)
-        TabItem.Standard.TRACEARR -> TracearrTab(wideRailIsVisible)
+        TabItem.Standard.TRACEARR -> TracearrTab(windowSizeClass, wideRailIsVisible)
     }
 }

@@ -75,6 +75,7 @@ data class TracearrHistoryItem(
     val username: String? = null,
     @SerialName("user_thumb") val userThumb: String? = null,
     @SerialName("user_avatar_url") val userAvatarUrl: String? = null,
+    @SerialName("media_details") val mediaDetails: TracearrMediaDetails? = null,
 ) {
     val effectiveUsername: String
         get() = user?.username ?: username ?: ""
@@ -187,5 +188,6 @@ data class TracearrHistoryItem(
             sourceVideoCodecDisplay = sourceVideoCodecDisplay,
             streamAudioCodecDisplay = streamAudioCodecDisplay,
             streamVideoCodecDisplay = streamVideoCodecDisplay,
+            mediaDetails = mediaDetails,
         )
 }

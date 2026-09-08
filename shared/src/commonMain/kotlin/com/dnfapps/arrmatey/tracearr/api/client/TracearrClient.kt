@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.tracearr.api.client
 
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryResponse
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaDetails
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.networking.NetworkResult
@@ -44,5 +45,10 @@ class TracearrClient(
             cursor?.let { parameter("cursor", it) }
             pageSize?.let { parameter("pageSize", it) }
         }
+    }
+
+    suspend fun getMedia(ref: String): NetworkResult<TracearrMediaDetails> {
+        val url = "$v2BaseUrl/public/media/$ref"
+        return httpClient.safeGet(url)
     }
 }

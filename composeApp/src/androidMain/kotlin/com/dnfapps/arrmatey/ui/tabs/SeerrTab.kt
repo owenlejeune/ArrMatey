@@ -27,7 +27,6 @@ import org.koin.compose.viewmodel.koinViewModel
 fun SeerrTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
-    viewModel: RequestsViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.requests,
 ) {
@@ -42,7 +41,6 @@ fun SeerrTab(
             entryProvider {
                 entry<SeerrScreen.Home> {
                     RequestsScreen(
-                        viewModel = viewModel,
                         isExpanded = isExpanded,
                         wideRailIsVisible = wideRailIsVisible,
                         onNavigateToDetails = { tmdbId, type ->

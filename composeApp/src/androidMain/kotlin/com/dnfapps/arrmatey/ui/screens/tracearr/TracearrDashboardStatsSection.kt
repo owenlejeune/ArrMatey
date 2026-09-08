@@ -48,11 +48,11 @@ fun TracearrDashboardStatsSection(
             Icon(
                 imageVector = Icons.Default.Today,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(20.dp),
             )
             Text(
                 text = mokoString(MR.strings.today),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
         }

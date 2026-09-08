@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.navigation
 import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
+import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
@@ -21,9 +22,10 @@ class NavigationManager(
     val calendar: CalendarTabNavigator,
     val dashboard: DashboardTabNavigator,
     val bazarr: BazarrTabNavigator,
+    val tracearr: TracearrTabNavigator,
     private val appState: AppState,
     private val tabManager: TabManager,
-    private val instanceRepository: com.dnfapps.arrmatey.database.InstanceRepository,
+    private val instanceRepository: InstanceRepository,
     private val shortcutManager: AppShortcutManager? = null,
 ) {
     // Reactive UI state properties
