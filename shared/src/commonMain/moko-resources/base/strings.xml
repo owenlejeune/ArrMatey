@@ -885,4 +885,8 @@
     <string name="hdr">HDR</string>
     <string name="profile">Profile</string>
     <string name="color">Color</string>
+    <string name="alerts">Alerts</string>
+    <string name="plays">Plays</string>
+    <string name="active_users">Active Users</string>
+    <string name="sessions">Sessions</string>
 </resources>

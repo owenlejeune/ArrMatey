@@ -142,7 +142,7 @@ fun TracearrStreamCard(
             Box(
                 modifier =
                     Modifier
-                        .width(4.dp)
+                        .width(6.dp)
                         .height(cardHeight.pxToDp())
                         .background(edgeColor),
             )
@@ -239,7 +239,6 @@ fun TracearrStreamCard(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
-                                // Transcode indicator
                                 val isTranscoding =
                                     session.isTranscode == true ||
                                         session.videoDecision == TracearrStreamDecision.Transcode ||
@@ -262,34 +261,7 @@ fun TracearrStreamCard(
                                     }
                                 }
 
-                                // Device / Platform icon
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                    modifier = Modifier.size(24.dp),
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector =
-                                                if (session.platform?.contains(
-                                                        "TV",
-                                                        ignoreCase = true
-                                                    ) == true ||
-                                                    session.device?.contains(
-                                                        "TV",
-                                                        ignoreCase = true
-                                                    ) == true
-                                                ) {
-                                                    Icons.Default.Tv
-                                                } else {
-                                                    Icons.Default.Smartphone
-                                                },
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(14.dp),
-                                        )
-                                    }
-                                }
+                                TracearrDeviceIcon(session)
 
                                 if (session.canTerminate == true) {
                                     Icon(

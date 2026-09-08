@@ -245,7 +245,7 @@ enum class InstanceType(
         tabIcon = MR.images.tracearr_tab,
         defaultPort = 3000,
         supportsActivityQueue = false,
-        apiBase = "api/v2",
+        apiBase = "api",
         testEndpoint = "public/docs",
         getApiKeyEndpoint = "settings",
         includeTopLevelAutomaticSearchOption = false,

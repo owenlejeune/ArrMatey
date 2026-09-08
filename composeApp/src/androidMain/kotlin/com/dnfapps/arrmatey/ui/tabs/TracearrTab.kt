@@ -36,29 +36,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.tracearr.state.TracearrStreamsState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
+import com.dnfapps.arrmatey.ui.components.InstancePicker
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrDashboardStatsSection
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
-import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TracearrTab(
     wideRailIsVisible: Boolean,
     viewModel: TracearrViewModel = koinViewModel(),
+    instancesViewModel: InstancesViewModel = koinViewModel(
+        key = InstanceType.Tracearr.name,
+        parameters = { parametersOf(InstanceType.Tracearr) },
+    ),
+    globalPreferencesStore: PreferencesStore = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
+    val hideInstancePicker by globalPreferencesStore.hideInstanceSwitcher.collectAsStateWithLifecycle(false)
 
     var selectedSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
 
@@ -76,6 +88,16 @@ fun TracearrTab(
                 navigationIcon = {
                     if (!wideRailIsVisible) {
                         NavigationDrawerButton()
+                    }
+                },
+                actions = {
+                    if (!hideInstancePicker || instancesState.instances.size > 1) {
+                        InstancePicker(
+                            type = InstanceType.Tracearr,
+                            currentInstance = instancesState.selectedInstance,
+                            typeInstances = instancesState.instances,
+                            onInstanceSelected = { instancesViewModel.setInstanceActive(it) },
+                        )
                     }
                 },
             )
@@ -98,7 +120,7 @@ fun TracearrTab(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        LoadingIndicator()
+                        LoadingIndicator(modifier = Modifier.size(96.dp))
                     }
                 }
                 is TracearrStreamsState.NoInstance -> {
@@ -131,10 +153,15 @@ fun TracearrTab(
                                 top = 16.dp,
                                 bottom = 16.dp + navigationBarBottomInset(),
                             ),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
+                        currentState.stats?.let { stats ->
+                            item {
+                                TracearrDashboardStatsSection(stats = stats)
+                            }
+                        }
+
                         item {
-                            // Header Row: Now Playing (X streams)
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,

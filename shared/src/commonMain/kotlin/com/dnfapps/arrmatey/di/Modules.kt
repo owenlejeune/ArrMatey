@@ -126,6 +126,9 @@ import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStatsTodayUseCase
+import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStreamsUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
@@ -321,6 +324,9 @@ val useCaseModule =
         factory { SmartAddMediaUseCase(get()) }
         factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get(), get()) }
         factory { GetBazarrInstanceRepositoryUseCase(get()) }
+        factory { GetTracearrInstanceRepositoryUseCase(get()) }
+        factory { GetTracearrStreamsUseCase() }
+        factory { GetTracearrStatsTodayUseCase() }
         factory { GetCurrentSeerrUserUseCase() }
         factory { GetRequestsUseCase() }
         factory { GetTrendingUseCase() }

@@ -19,6 +19,8 @@ struct TracearrTab: View {
 
 struct TracearrTabContent: View {
     @StateObject private var viewModel = TracearrViewModelS()
+    @StateObject private var instancesViewModel = InstancesViewModelS(type: .tracearr)
+    @ObservedObject private var globalPreferences = PreferencesViewModel()
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var selectedSession: TracearrStreamSession? = nil
 
@@ -30,6 +32,10 @@ struct TracearrTabContent: View {
             } else if let success = viewModel.state as? TracearrStreamsStateSuccess {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
+                        if let stats = success.stats {
+                            TracearrDashboardStatsView(stats: stats)
+                        }
+
                         nowPlayingHeader(count: success.streams.count)
 
                         if success.streams.isEmpty {
@@ -91,11 +97,22 @@ struct TracearrTabContent: View {
         .navigationTitle(MR.strings().tracearr.localized())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    navigationManager.showLauncher = true
-                } label: {
-                    Image(systemName: "line.3.horizontal")
+            if !globalPreferences.hideInstanceSwitcher || instancesViewModel.instancesState.instances.count > 1 {
+                ToolbarItem(placement: .topBarLeading) {
+                    InstancePickerMenu(
+                        instances: instancesViewModel.instancesState.instances,
+                        onChangeInstance: { instancesViewModel.setInstanceActive($0) },
+                        onAddNewInstance: { navigationManager.goToNewInstance(of: .tracearr) }
+                    )
+                    .menuIndicator(.hidden)
+                }
+            } else {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigationManager.showLauncher = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
                 }
             }
         }
@@ -443,3 +460,88 @@ struct TracearrImage<Placeholder: View>: View {
         }
     }
 }
+
+struct TracearrDashboardStatsView: View {
+    let stats: TracearrTodayStats
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "calendar")
+                    .font(.title3)
+                    .foregroundColor(Color(hex: 0x19D2E7))
+                Text(MR.strings().today.localized())
+                    .font(.title3.bold())
+                Spacer()
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    TracearrStatCardView(
+                        iconName: "exclamationmark.triangle",
+                        value: "\(stats.alertsLast24h)",
+                        label: MR.strings().alerts.localized()
+                    )
+
+                    TracearrStatCardView(
+                        iconName: "play.fill",
+                        value: "\(stats.todayPlays)",
+                        label: MR.strings().plays.localized()
+                    )
+
+                    TracearrStatCardView(
+                        iconName: "play.circle.fill",
+                        value: "\(stats.todaySessions)",
+                        label: MR.strings().sessions.localized()
+                    )
+
+                    TracearrStatCardView(
+                        iconName: "clock",
+                        value: stats.formattedWatchTime,
+                        label: MR.strings().watch_time.localized()
+                    )
+
+                    TracearrStatCardView(
+                        iconName: "person.2",
+                        value: "\(stats.activeUsersToday)",
+                        label: MR.strings().active_users.localized()
+                    )
+                }
+            }
+        }
+    }
+}
+
+struct TracearrStatCardView: View {
+    let iconName: String
+    let value: String
+    let label: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(hex: 0x19D2E7).opacity(0.12))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: iconName)
+                        .font(.system(size: 18))
+                        .foregroundColor(Color(hex: 0x19D2E7))
+                )
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.title3.bold())
+                    .lineLimit(1)
+                Text(label)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+}
+
