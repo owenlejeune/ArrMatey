@@ -1545,17 +1545,17 @@ fileprivate struct UnifiedMediaDetailsEventsModifier: ViewModifier {
             .onReceive(viewModel.$lastSearchResult) { newVal in
                 screen.onLastSearchResultChanged(newVal)
             }
-            .onReceive(viewModel.$editSuccessTrigger) { _ in
-                screen.onEditSuccess()
+            .onReceive(viewModel.$editSuccessTrigger.dropFirst()) { val in
+                if val { screen.onEditSuccess() }
             }
-            .onReceive(viewModel.$editErrorTrigger) { _ in
-                screen.onEditError()
+            .onReceive(viewModel.$editErrorTrigger.dropFirst()) { val in
+                if val { screen.onEditError() }
             }
-            .onReceive(viewModel.$deleteSuccessTrigger) { _ in
-                screen.onDeleteSuccess()
+            .onReceive(viewModel.$deleteSuccessTrigger.dropFirst()) { val in
+                if val { screen.onDeleteSuccess() }
             }
-            .onReceive(viewModel.$deleteErrorTrigger) { _ in
-                screen.onDeleteError()
+            .onReceive(viewModel.$deleteErrorTrigger.dropFirst()) { val in
+                if val { screen.onDeleteError() }
             }
     }
 }

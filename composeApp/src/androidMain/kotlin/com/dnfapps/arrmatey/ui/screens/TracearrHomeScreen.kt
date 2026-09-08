@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -47,6 +48,7 @@ import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrDashboardStatsSection
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -62,6 +64,7 @@ fun TracearrHomeScreen(
     wideRailIsVisible: Boolean,
     onNavigateToDetails: (type: TracearrMediaType?, tmdbId: Long?) -> Unit,
     onNavigateToHistory: () -> Unit = {},
+    isLargeScreen: Boolean = false,
     viewModel: TracearrViewModel = koinViewModel(),
     instancesViewModel: InstancesViewModel = koinViewModel(
         key = InstanceType.Tracearr.name,
@@ -199,10 +202,17 @@ fun TracearrHomeScreen(
 
                         if (currentState.streams.isEmpty()) {
                             item {
-                                Box(
+                                Column(
                                     modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Tv,
+                                        modifier = Modifier.size(72.dp).padding(top = 24.dp),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                     Text(
                                         text = mokoString(MR.strings.no_active_streams),
                                         style = MaterialTheme.typography.titleMedium,
@@ -268,6 +278,13 @@ fun TracearrHomeScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
+                            }
+                        } else if (isLargeScreen) {
+                            item {
+                                TracearrHistoryTable(
+                                    items = historyItems,
+                                    onClickItem = { viewModel.setSelectedHistoryStream(it) },
+                                )
                             }
                         } else {
                             items(

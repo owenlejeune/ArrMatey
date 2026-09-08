@@ -55,6 +55,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .seerr: break
         case .prowlarr: break
         case .bazarr: break
+        case .tracearr: break
         }
     }
 
@@ -92,6 +93,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .seerr: break
         case .prowlarr: break // Prowlarr doesn't use media routes
         case .bazarr: break // Bazarr doesn't use media routes
+        case .tracearr: break
         }
     }
 
@@ -474,6 +476,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .seerr: return TabItemStandard.requests as TabItem
         case .prowlarr: return TabItemStandard.prowlarr as TabItem
         case .bazarr: return TabItemStandard.bazarr as TabItem
+        case .tracearr: return TabItemStandard.tracearr as TabItem
         }
     }
 }

@@ -41,6 +41,7 @@ import com.dnfapps.arrmatey.tracearr.state.TracearrHistoryState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrHistoryViewModel
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
@@ -51,6 +52,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun TracearrHistoryScreen(
     onNavigateBack: () -> Unit = {},
     onNavigateToDetails: (type: TracearrMediaType?, tmdbId: Long?) -> Unit = { _, _ -> },
+    isLargeScreen: Boolean = false,
     viewModel: TracearrHistoryViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -155,14 +157,23 @@ fun TracearrHistoryScreen(
                             ),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            items(
-                                items = currentState.items,
-                                key = { "history_${it.id}" },
-                            ) { historyItem ->
-                                TracearrHistoryCard(
-                                    item = historyItem,
-                                    onClick = { viewModel.setSelectedHistoryStream(historyItem) },
-                                )
+                            if (isLargeScreen) {
+                                item {
+                                    TracearrHistoryTable(
+                                        items = currentState.items,
+                                        onClickItem = { viewModel.setSelectedHistoryStream(it) },
+                                    )
+                                }
+                            } else {
+                                items(
+                                    items = currentState.items,
+                                    key = { "history_${it.id}" },
+                                ) { historyItem ->
+                                    TracearrHistoryCard(
+                                        item = historyItem,
+                                        onClick = { viewModel.setSelectedHistoryStream(historyItem) },
+                                    )
+                                }
                             }
 
                             if (currentState.isLoadingMore) {

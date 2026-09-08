@@ -4,6 +4,9 @@ import SwiftUI
 struct TracearrHistoryScreen: View {
     @StateObject private var viewModel = TracearrHistoryViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var isLargeScreen: Bool { horizontalSizeClass == .regular }
 
     var body: some View {
         Group {
@@ -18,6 +21,24 @@ struct TracearrHistoryScreen: View {
                             .foregroundColor(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if isLargeScreen {
+                    ScrollView {
+                        TracearrHistoryTableView(
+                            items: success.items,
+                            hasMore: success.hasMore,
+                            isLoadingMore: success.isLoadingMore,
+                            onLoadMore: {
+                                viewModel.loadMore()
+                            },
+                            onClickItem: { historyItem in
+                                viewModel.setSelectedHistoryStream(historyItem)
+                            }
+                        )
+                        .padding(16)
+                    }
+                    .refreshable {
+                        viewModel.refresh()
+                    }
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {

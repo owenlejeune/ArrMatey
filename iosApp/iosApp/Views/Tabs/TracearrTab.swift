@@ -34,6 +34,9 @@ struct TracearrTabContent: View {
     @StateObject private var instancesViewModel = InstancesViewModelS(type: .tracearr)
     @ObservedObject private var globalPreferences = PreferencesViewModel()
     @EnvironmentObject private var navigationManager: NavigationManager
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var isLargeScreen: Bool { horizontalSizeClass == .regular }
 
     var body: some View {
         Group {
@@ -88,6 +91,13 @@ struct TracearrTabContent: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 20)
+                        } else if isLargeScreen {
+                            TracearrHistoryTableView(
+                                items: historyItems,
+                                onClickItem: { historyItem in
+                                    viewModel.setSelectedHistoryStream(historyItem)
+                                }
+                            )
                         } else {
                             LazyVStack(spacing: 16) {
                                 ForEach(historyItems, id: \.id) { historyItem in
@@ -460,7 +470,7 @@ struct TracearrDeviceIconView: View {
     let session: TracearrStreamSession
 
     private var platformEnum: TracearrDevicePlatform {
-        TracearrDevicePlatformCompanion.shared.fromSession(
+        TracearrDevicePlatform.companion.fromSession(
             platform: session.platform,
             product: session.product,
             device: session.device
@@ -525,14 +535,11 @@ struct TracearrImage<Placeholder: View>: View {
         var request = URLRequest(url: url)
         request.setValue("image/*", forHTTPHeaderField: "Accept")
 
-        if let instance = KoinBridge.shared.getInstanceRepository().getAllInstances().first(where: {
-            urlStr.hasPrefix($0.getEffectiveBaseUrl()) || urlStr.hasPrefix($0.url)
+        let instances = KoinBridge.shared.getInstanceRepository().allInstancesFlow.value
+        if let instance = instances.first(where: {
+            (urlStr.hasPrefix($0.getEffectiveBaseUrl()) || urlStr.hasPrefix($0.url)) && $0.type == .tracearr
         }) {
-            if instance.type == .tracearr {
-                request.setValue("Bearer \(instance.apiKey.value)", forHTTPHeaderField: "Authorization")
-            } else {
-                request.setValue(instance.apiKey.value, forHTTPHeaderField: "X-Api-Key")
-            }
+            request.setValue("Bearer \(instance.apiKey)", forHTTPHeaderField: "Authorization")
         }
 
         do {
@@ -564,40 +571,38 @@ struct TracearrDashboardStatsView: View {
                 Spacer()
             }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    TracearrStatCardView(
-                        iconName: "exclamationmark.triangle",
-                        value: "\(stats.alertsLast24h)",
-                        label: MR.strings().alerts.localized()
-                    )
+            FlowLayout(spacing: 8) {
+                TracearrStatCardView(
+                    iconName: "exclamationmark.triangle",
+                    value: "\(stats.alertsLast24h)",
+                    label: MR.strings().alerts.localized()
+                )
 
-                    TracearrStatCardView(
-                        iconName: "play.fill",
-                        value: "\(stats.todayPlays)",
-                        label: MR.strings().plays.localized(),
-                        onClick: onNavigateToHistory
-                    )
+                TracearrStatCardView(
+                    iconName: "play.fill",
+                    value: "\(stats.todayPlays)",
+                    label: MR.strings().plays.localized(),
+                    onClick: onNavigateToHistory
+                )
 
-                    TracearrStatCardView(
-                        iconName: "play.circle.fill",
-                        value: "\(stats.todaySessions)",
-                        label: MR.strings().sessions.localized(),
-                        onClick: onNavigateToHistory
-                    )
+                TracearrStatCardView(
+                    iconName: "play.circle.fill",
+                    value: "\(stats.todaySessions)",
+                    label: MR.strings().sessions.localized(),
+                    onClick: onNavigateToHistory
+                )
 
-                    TracearrStatCardView(
-                        iconName: "clock",
-                        value: stats.formattedWatchTime,
-                        label: MR.strings().watch_time.localized()
-                    )
+                TracearrStatCardView(
+                    iconName: "clock",
+                    value: stats.formattedWatchTime,
+                    label: MR.strings().watch_time.localized()
+                )
 
-                    TracearrStatCardView(
-                        iconName: "person.2",
-                        value: "\(stats.activeUsersToday)",
-                        label: MR.strings().active_users.localized()
-                    )
-                }
+                TracearrStatCardView(
+                    iconName: "person.2",
+                    value: "\(stats.activeUsersToday)",
+                    label: MR.strings().active_users.localized()
+                )
             }
         }
     }
@@ -842,6 +847,294 @@ struct TracearrHistoryCardView: View {
         let minutes = totalSeconds / 60
         let seconds = totalSeconds % 60
         if minutes > 0 {
+            return "\(minutes)m \(seconds)s"
+        } else {
+            return "\(seconds)s"
+        }
+    }
+}
+
+struct TracearrHistoryTableView: View {
+    let items: [TracearrHistoryItem]
+    var hasMore: Bool = false
+    var isLoadingMore: Bool = false
+    var onLoadMore: (() -> Void)? = nil
+    var onClickItem: ((TracearrHistoryItem) -> Void)? = nil
+
+    var body: some View {
+        LazyVStack(alignment: .leading, spacing: 8) {
+            ForEach(items, id: \.id) { historyItem in
+                TracearrHistoryTableRowView(item: historyItem)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        onClickItem?(historyItem)
+                    }
+                    .onAppear {
+                        if historyItem.id == items.last?.id && hasMore && !isLoadingMore {
+                            onLoadMore?()
+                        }
+                    }
+            }
+
+            if isLoadingMore {
+                ProgressView()
+                    .padding(16)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct TracearrHistoryTableRowView: View {
+    let item: TracearrHistoryItem
+
+    private var percent: Double {
+        if let pc = item.percentComplete?.doubleValue {
+            return pc
+        }
+        let total = Double(item.totalDurationMs?.int64Value ?? item.durationMs?.int64Value ?? 0)
+        let prog = Double(item.progressMs?.int64Value ?? 0)
+        return total > 0 ? (prog / total * 100.0) : 0.0
+    }
+
+    private var progressFraction: Double {
+        min(max(percent / 100.0, 0.0), 1.0)
+    }
+
+    private var isWatched: Bool {
+        item.watched?.boolValue == true || percent >= 90.0
+    }
+
+    private var isAbandoned: Bool {
+        !isWatched && percent < 10.0
+    }
+
+    private var isSampled: Bool {
+        !isWatched && !isAbandoned
+    }
+
+    private var edgeColor: Color {
+        let serverType = item.serverType
+        if serverType == .plex {
+            return Color(hex: 0xE5A00D)
+        } else if serverType == .jellyfin {
+            return Color(hex: 0xAA5CC3)
+        } else if serverType == .emby {
+            return Color(hex: 0x52B54B)
+        } else {
+            let name = (item.serverName ?? "").lowercased()
+            if name.contains("plex") {
+                return Color(hex: 0xE5A00D)
+            } else if name.contains("jellyfin") {
+                return Color(hex: 0xAA5CC3)
+            } else if name.contains("emby") {
+                return Color(hex: 0x52B54B)
+            }
+            return .accentColor
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Rectangle()
+                .fill(edgeColor)
+                .frame(width: 4)
+
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 6) {
+                        let username = item.effectiveUsername.isEmpty ? MR.strings().user.localized() : item.effectiveUsername
+                        let avatarUrl = item.effectiveUserAvatar
+
+                        if let avatarStr = avatarUrl, !avatarStr.isEmpty {
+                            TracearrImage(urlString: avatarStr) {
+                                Circle().fill(Color.orange)
+                            }
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 20, height: 20)
+                            .clipShape(Circle())
+                        } else {
+                            Circle()
+                                .fill(Color.orange)
+                                .frame(width: 20, height: 20)
+                                .overlay(
+                                    Text(String(username.prefix(1)).uppercased())
+                                        .font(.caption2.bold())
+                                        .foregroundColor(.white)
+                                )
+                        }
+
+                        Text(username)
+                            .font(.subheadline.bold())
+                            .lineLimit(1)
+                    }
+
+                    Text(item.startedAt?.format(pattern: "MMM d, yyyy, HH:mm") ?? "-")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+                .frame(minWidth: 100, maxWidth: 140, alignment: .leading)
+
+                HStack(spacing: 8) {
+                    let mediaIcon = item.mediaType == .episode ? "tv" : (item.mediaType == .movie ? "film" : "music.note")
+                    Image(systemName: mediaIcon)
+                        .font(.system(size: 14))
+                        .foregroundColor(.accentColor)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        tableStatusChip
+
+                        let displayTitle = item.grandparentTitle ?? item.showTitle ?? item.mediaTitle ?? MR.strings().unknown.localized()
+                        Text(displayTitle)
+                            .font(.subheadline.bold())
+                            .lineLimit(1)
+
+                        Text(subtitleText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+
+                        HStack(spacing: 6) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.secondary)
+                                let dur = item.durationMs?.int64Value ?? item.totalDurationMs?.int64Value ?? 0
+                                Text(formatTableDurationMs(dur))
+                                    .font(.caption.bold())
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
+
+                            ProgressView(value: progressFraction)
+                                .progressViewStyle(.linear)
+                                .tint(Color.accentColor)
+
+                            Text("\(Int(percent))%")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.top, 2)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(edgeColor)
+                            .frame(width: 6, height: 6)
+                        let serverName = item.effectiveServerName.isEmpty ? MR.strings().server.localized() : item.effectiveServerName
+                        Text(serverName)
+                            .font(.caption.bold())
+                            .lineLimit(1)
+                    }
+
+                    HStack(spacing: 3) {
+                        Image(systemName: "globe")
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                        Text(MR.strings().local_network.localized())
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+                .frame(minWidth: 100, maxWidth: 130, alignment: .leading)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    qualityChip
+
+                    let platformName = item.platform ?? item.device ?? MR.strings().unknown.localized()
+                    Text(platformName)
+                        .font(.subheadline.bold())
+                        .lineLimit(1)
+
+                    let productText = item.product ?? item.player ?? ""
+                    if !productText.isEmpty {
+                        Text(productText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+                .frame(minWidth: 110, maxWidth: 140, alignment: .leading)
+            }
+            .padding(12)
+        }
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(8)
+    }
+
+    @ViewBuilder
+    private var tableStatusChip: some View {
+        let (label, bgColor, fgColor): (String, Color, Color) = {
+            if isWatched {
+                return (MR.strings().watched.localized(), Color.green.opacity(0.2), .green)
+            } else if isSampled {
+                return (MR.strings().sampled.localized(), Color.orange.opacity(0.2), .orange)
+            } else {
+                return (MR.strings().abandoned.localized(), Color.red.opacity(0.2), .red)
+            }
+        }()
+
+        Text(label)
+            .font(.caption2.bold())
+            .foregroundColor(fgColor)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 1)
+            .background(bgColor)
+            .cornerRadius(4)
+    }
+
+    @ViewBuilder
+    private var qualityChip: some View {
+        let isTranscoding = item.isTranscode?.boolValue == true || item.videoDecision == .transcode || item.audioDecision == .transcode
+        let (iconName, label, bgColor, fgColor) = isTranscoding ?
+            ("bolt.fill", MR.strings().transcode.localized(), Color.yellow.opacity(0.2), Color.yellow) :
+            ("play.fill", MR.strings().direct_play.localized(), Color.green.opacity(0.2), Color.green)
+
+        HStack(spacing: 2) {
+            Image(systemName: iconName)
+                .font(.system(size: 8))
+            Text(label)
+                .font(.caption2.bold())
+        }
+        .foregroundColor(fgColor)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 1)
+        .background(bgColor)
+        .cornerRadius(4)
+    }
+
+    private var subtitleText: String {
+        if item.mediaType == .episode || (item.seasonNumber != nil && item.episodeNumber != nil) {
+            let s = item.seasonNumber?.intValue ?? 0
+            let e = item.episodeNumber?.intValue ?? 0
+            let sStr = String(format: "%02d", s)
+            let eStr = String(format: "%02d", e)
+            let epTitle = item.mediaTitle ?? ""
+            return "S\(sStr) E\(eStr) · \(epTitle)"
+        } else if item.mediaType == .movie {
+            let yearStr = item.year?.stringValue ?? ""
+            let movieTitle = item.mediaTitle ?? ""
+            return "\(yearStr) · \(movieTitle)"
+        } else {
+            let parts = [item.artistName, item.albumName, item.mediaTitle].compactMap { $0 }
+            return parts.joined(separator: " · ")
+        }
+    }
+
+    private func formatTableDurationMs(_ ms: Int64) -> String {
+        if ms <= 0 { return "-" }
+        let totalSeconds = ms / 1000
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        let seconds = totalSeconds % 60
+        if hours > 0 {
+            return "\(hours)h \(minutes)m"
+        } else if minutes > 0 {
             return "\(minutes)m \(seconds)s"
         } else {
             return "\(seconds)s"

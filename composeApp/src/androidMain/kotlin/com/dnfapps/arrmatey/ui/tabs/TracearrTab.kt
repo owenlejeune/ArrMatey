@@ -29,6 +29,7 @@ fun TracearrTab(
     navigation: Navigator<NavKey> = navigationManager.tracearr,
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    val isLargeScreen = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
     NavDisplay(
         backStack = navigation.backStack,
         onBack = { navigation.popBackStack() },
@@ -39,6 +40,7 @@ fun TracearrTab(
             entry<TracearrScreen.Main> {
                 TracearrHomeScreen(
                     wideRailIsVisible = wideRailIsVisible,
+                    isLargeScreen = isLargeScreen,
                     onNavigateToDetails = { type, tmdbId ->
                         navigation.toDetails(tmdbId = tmdbId, requestType = type?.requestType)
                     },
@@ -49,6 +51,7 @@ fun TracearrTab(
             }
             entry<TracearrScreen.History> {
                 TracearrHistoryScreen(
+                    isLargeScreen = isLargeScreen,
                     onNavigateBack = { navigation.popBackStack() },
                     onNavigateToDetails = { type, tmdbId ->
                         navigation.toDetails(tmdbId = tmdbId, requestType = type?.requestType)

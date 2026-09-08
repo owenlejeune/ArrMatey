@@ -354,7 +354,7 @@ struct TracearrStreamDetailsSheet: View {
 
     // MARK: - Device Card
     private var deviceCard: some View {
-        let platformEnum = TracearrDevicePlatformCompanion.shared.fromSession(
+        let platformEnum = TracearrDevicePlatform.companion.fromSession(
             platform: session.platform,
             product: session.product,
             device: session.device
@@ -652,12 +652,12 @@ struct TracearrStreamDetailsSheet: View {
         }
     }
 
-    private func instantToDate(_ instant: KotlinTimeInstant?) -> Date? {
+    private func instantToDate(_ instant: KotlinInstant?) -> Date? {
         guard let instant = instant else { return nil }
         return Date(timeIntervalSince1970: TimeInterval(instant.toEpochMilliseconds()) / 1000.0)
     }
 
-    private func formatStartedAt(_ instant: KotlinTimeInstant?) -> String {
+    private func formatStartedAt(_ instant: KotlinInstant?) -> String {
         guard let instant = instant, let date = instantToDate(instant) else { return "" }
 
         let displayFormatter = DateFormatter()
