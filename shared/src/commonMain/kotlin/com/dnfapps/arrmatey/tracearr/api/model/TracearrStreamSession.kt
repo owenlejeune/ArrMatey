@@ -83,6 +83,7 @@ data class TracearrStreamSession(
     @SerialName("channel_identifier") val channelIdentifier: String? = null,
     @SerialName("channel_thumb") val channelThumb: String? = null,
     val username: String? = null,
+    @SerialName("user_id") val userId: String? = null,
     @SerialName("user_thumb") val userThumb: String? = null,
     @SerialName("user_avatar_url") val userAvatarUrl: String? = null,
     val user: TracearrUser? = null,
@@ -101,6 +102,9 @@ data class TracearrStreamSession(
 ) {
     val effectiveUsername: String
         get() = user?.username ?: username ?: ""
+
+    val effectiveUserRef: String?
+        get() = userId ?: user?.id ?: user?.userId ?: serverUserId ?: username?.takeIf { it.isNotBlank() } ?: user?.username?.takeIf { it.isNotBlank() }
 
     val effectiveUserAvatar: String?
         get() = user?.avatarUrl ?: user?.thumbUrl ?: userAvatarUrl ?: userThumb

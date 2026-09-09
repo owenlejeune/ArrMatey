@@ -116,7 +116,7 @@ class TracearrViewModel(
             stats = it
         }
 
-        getTracearrHistoryUseCase(repo, pageSize = 10).onSuccess { response ->
+        getTracearrHistoryUseCase(repo, pageSize = 5).onSuccess { response ->
             history = response.data
         }
 

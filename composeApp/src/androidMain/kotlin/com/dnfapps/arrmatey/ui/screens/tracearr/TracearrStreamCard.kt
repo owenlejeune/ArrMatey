@@ -44,13 +44,13 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.extensions.pxToDp
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
-import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamDecision
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
+import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
@@ -72,22 +72,7 @@ fun TracearrStreamCard(
             else -> Color(0xFF2196F3)
         }
 
-    val serverType = session.server?.type ?: session.serverType
-    val edgeColor =
-        when (serverType) {
-            TracearrServerType.Plex -> Color(0xFFE5A00D)
-            TracearrServerType.Jellyfin -> Color(0xFFAA5CC3)
-            TracearrServerType.Emby -> Color(0xFF52B54B)
-            null -> {
-                val name = (session.server?.name ?: session.serverName ?: "").lowercase()
-                when {
-                    name.contains("plex") -> Color(0xFFE5A00D)
-                    name.contains("jellyfin") -> Color(0xFFAA5CC3)
-                    name.contains("emby") -> Color(0xFF52B54B)
-                    else -> TracearrBlue
-                }
-            }
-        }
+    val edgeColor = getTracearrServerColor(session.server?.type ?: session.serverType, session.server?.name ?: session.serverName)
 
     val stateText =
         when {

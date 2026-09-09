@@ -901,4 +901,13 @@
     <string name="minutes_ago">%1$d minutes ago</string>
     <string name="hour_ago">1 hour ago</string>
     <string name="hours_ago">%1$d hours ago</string>
+    <string name="user_info">User Info</string>
+    <string name="user_details">User Details</string>
+    <string name="statistics">Statistics</string>
+    <string name="recent_sessions">Recent Sessions</string>
+    <string name="trust_score">Trust Score</string>
+    <string name="accounts">Accounts</string>
+    <string name="joined">Joined</string>
+    <string name="last_activity">Last Activity</string>
+    <string name="top_genres">Top Genres</string>
 </resources>

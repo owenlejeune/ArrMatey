@@ -5,6 +5,9 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaDetails
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrUsersResponse
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
 import io.ktor.client.HttpClient
@@ -43,12 +46,45 @@ class TracearrClient(
         val url = "$v2BaseUrl/public/history"
         return httpClient.safeGet(url) {
             cursor?.let { parameter("cursor", it) }
-            pageSize?.let { parameter("pageSize", it) }
+            parameter("pageSize", pageSize ?: 100)
         }
     }
 
     suspend fun getMedia(ref: String): NetworkResult<TracearrMediaDetails> {
         val url = "$v2BaseUrl/public/media/$ref"
         return httpClient.safeGet(url)
+    }
+
+    suspend fun getUsers(
+        cursor: String? = null,
+        pageSize: Int? = null
+    ): NetworkResult<TracearrUsersResponse> {
+        val url = "$v2BaseUrl/public/users"
+        return httpClient.safeGet(url) {
+            cursor?.let { parameter("cursor", it) }
+            parameter("pageSize", pageSize ?: 100)
+        }
+    }
+
+    suspend fun getUserDetails(ref: String): NetworkResult<TracearrUserDetail> {
+        val url = "$v2BaseUrl/public/users/$ref"
+        return httpClient.safeGet(url)
+    }
+
+    suspend fun getUserStats(ref: String): NetworkResult<TracearrUserStats> {
+        val url = "$v2BaseUrl/public/users/$ref/stats"
+        return httpClient.safeGet(url)
+    }
+
+    suspend fun getUserHistory(
+        ref: String,
+        cursor: String? = null,
+        pageSize: Int? = null
+    ): NetworkResult<TracearrHistoryResponse> {
+        val url = "$v2BaseUrl/public/users/$ref/history"
+        return httpClient.safeGet(url) {
+            cursor?.let { parameter("cursor", it) }
+            parameter("pageSize", pageSize ?: 100)
+        }
     }
 }

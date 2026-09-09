@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DesktopWindows
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.GraphicEq
@@ -40,7 +39,6 @@ import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -68,7 +66,6 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrDevicePlatform
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
-import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamDecision
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.ContainerCard
@@ -76,6 +73,7 @@ import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
+import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
@@ -92,6 +90,7 @@ fun TracearrStreamDetailsSheet(
     session: TracearrStreamSession,
     onDismissRequest: () -> Unit,
     onNavigateToDetails: (type: TracearrMediaType?, tmdbId: Long?) -> Unit,
+    onNavigateToUser: (userRef: String) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -163,21 +162,7 @@ fun TracearrStreamDetailsSheet(
     val progressPercent = (progressFraction * 100).roundToInt()
 
     val serverType = session.server?.type ?: session.serverType
-    val serverColor =
-        when (serverType) {
-            TracearrServerType.Plex -> Color(0xFFE5A00D)
-            TracearrServerType.Jellyfin -> Color(0xFFAA5CC3)
-            TracearrServerType.Emby -> Color(0xFF52B54B)
-            null -> {
-                val name = (session.server?.name ?: session.serverName ?: "").lowercase()
-                when {
-                    name.contains("plex") -> Color(0xFFE5A00D)
-                    name.contains("jellyfin") -> Color(0xFFAA5CC3)
-                    name.contains("emby") -> Color(0xFF52B54B)
-                    else -> TracearrBlue
-                }
-            }
-        }
+    val serverColor = getTracearrServerColor(serverType, session.server?.name ?: session.serverName)
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -348,7 +333,13 @@ fun TracearrStreamDetailsSheet(
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().clickable {
+                        session.effectiveUserRef?.let { ref ->
+                            if (ref.isNotBlank()) {
+                                onNavigateToUser(ref)
+                            }
+                        }
+                    },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {

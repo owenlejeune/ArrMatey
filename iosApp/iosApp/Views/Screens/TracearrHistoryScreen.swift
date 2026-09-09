@@ -97,6 +97,9 @@ struct TracearrHistoryScreen: View {
                             requestType: mediaType?.requestType
                         )
                     }
+                },
+                onNavigateToUser: { userRef in
+                    navigationManager.go(to: TracearrRoute.user(userRef))
                 }
             )
         }

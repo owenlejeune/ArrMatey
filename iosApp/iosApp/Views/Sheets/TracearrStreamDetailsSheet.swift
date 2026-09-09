@@ -11,6 +11,7 @@ import SwiftUI
 struct TracearrStreamDetailsSheet: View {
     let session: TracearrStreamSession
     var onNavigateToDetails: ((TracearrMediaType?, Int64?) -> Void)? = nil
+    var onNavigateToUser: ((String) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
 
     @State private var currentProgressMs: Int64 = 0
@@ -53,24 +54,7 @@ struct TracearrStreamDetailsSheet: View {
     }
 
     private var serverColor: Color {
-        let serverType = session.server?.type ?? session.serverType
-        if serverType == .plex {
-            return Color(hex: 0xE5A00D)
-        } else if serverType == .jellyfin {
-            return Color(hex: 0xAA5CC3)
-        } else if serverType == .emby {
-            return Color(hex: 0x52B54B)
-        } else {
-            let name = (session.server?.name ?? session.serverName ?? "").lowercased()
-            if name.contains("plex") {
-                return Color(hex: 0xE5A00D)
-            } else if name.contains("jellyfin") {
-                return Color(hex: 0xAA5CC3)
-            } else if name.contains("emby") {
-                return Color(hex: 0x52B54B)
-            }
-            return .accentColor
-        }
+        Color.serverColor(type: session.server?.type ?? session.serverType, name: session.server?.name ?? session.serverName)
     }
 
     var body: some View {
@@ -288,6 +272,13 @@ struct TracearrStreamDetailsSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(12)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if let ref = session.effectiveUserRef, !ref.isEmpty {
+                dismiss()
+                onNavigateToUser?(ref)
+            }
+        }
     }
 
     // MARK: - Server Card

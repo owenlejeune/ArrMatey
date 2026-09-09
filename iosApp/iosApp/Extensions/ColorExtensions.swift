@@ -33,7 +33,7 @@ extension Color {
             opacity: Double(a) / 255
         )
     }
-    
+
     init(hex: UInt64) {
         if hex > 0xFFFFFF {
             let r = Double((hex >> 24) & 0xFF) / 255.0
@@ -48,16 +48,16 @@ extension Color {
             self.init(.sRGB, red: r, green: g, blue: b, opacity: 1.0)
         }
     }
-    
+
     init(argb: UInt64) {
         let a = Double((argb >> 56) & 0xFF) / 255.0
         let r = Double((argb >> 48) & 0xFF) / 255.0
         let g = Double((argb >> 40) & 0xFF) / 255.0
         let b = Double((argb >> 32) & 0xFF) / 255.0
-        
+
         self.init(.sRGB, red: r, green: g, blue: b, opacity: a)
     }
-    
+
     func midpoint(with other: Color) -> Color {
         // Use SwiftUI's native UIColor/NSColor bridge to extract color components safely
 #if os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
@@ -67,20 +67,44 @@ extension Color {
         let uiColor1 = NSColor(self)
         let uiColor2 = NSColor(other)
 #endif
-        
+
         var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
         var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
-        
+
         uiColor1.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
         uiColor2.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
-        
+
         // Calculate the mathematical midpoint for each channel
         let midRed = (r1 + r2) / 2.0
         let midGreen = (g1 + g2) / 2.0
         let midBlue = (b1 + b2) / 2.0
         let midAlpha = (a1 + a2) / 2.0
-        
+
         return Color(.sRGB, red: midRed, green: midGreen, blue: midBlue, opacity: midAlpha)
+    }
+
+    static let plexColor = Color(hex: 0xE5A00D)
+    static let jellyfinColor = Color(hex: 0xAA5CC3)
+    static let embyColor = Color(hex: 0x52B54B)
+
+    static func serverColor(type: TracearrServerType?, name: String? = nil) -> Color {
+        if type == .plex {
+            return .plexColor
+        } else if type == .jellyfin {
+            return .jellyfinColor
+        } else if type == .emby {
+            return .embyColor
+        } else {
+            let lower = (name ?? "").lowercased()
+            if lower.contains("plex") {
+                return .plexColor
+            } else if lower.contains("jellyfin") {
+                return .jellyfinColor
+            } else if lower.contains("emby") {
+                return .embyColor
+            }
+            return .accentColor
+        }
     }
 }
 

@@ -131,6 +131,10 @@ import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCa
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrHistoryUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStatsTodayUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStreamsUseCase
+import com.dnfapps.arrmatey.tracearr.usecase.GetUserDetailUseCase
+import com.dnfapps.arrmatey.tracearr.usecase.GetUserHistoryUseCase
+import com.dnfapps.arrmatey.tracearr.usecase.GetUserStatsUseCase
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUserViewModel
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
@@ -330,6 +334,9 @@ val useCaseModule =
         factory { GetTracearrStreamsUseCase() }
         factory { GetTracearrStatsTodayUseCase() }
         factory { GetTracearrHistoryUseCase() }
+        factory { GetUserDetailUseCase() }
+        factory { GetUserStatsUseCase() }
+        factory { GetUserHistoryUseCase() }
         factory { GetCurrentSeerrUserUseCase() }
         factory { GetRequestsUseCase() }
         factory { GetTrendingUseCase() }
@@ -529,6 +536,9 @@ val viewModelModule =
         viewModelOf(::CombinedDashboardViewModel)
         viewModelOf(::TracearrViewModel)
         viewModelOf(::TracearrHistoryViewModel)
+        viewModel { (userRef: String) ->
+            TracearrUserViewModel(userRef, get(), get(), get(), get())
+        }
         viewModelOf(::BackupViewModel)
         viewModelOf(::UnifiedLibraryViewModel)
     }

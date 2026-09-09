@@ -73,12 +73,16 @@ data class TracearrHistoryItem(
     @SerialName("reference_id") val referenceId: String? = null,
     val user: TracearrUser? = null,
     val username: String? = null,
+    @SerialName("user_id") val userId: String? = null,
     @SerialName("user_thumb") val userThumb: String? = null,
     @SerialName("user_avatar_url") val userAvatarUrl: String? = null,
     @SerialName("media_details") val mediaDetails: TracearrMediaDetails? = null,
 ) {
     val effectiveUsername: String
         get() = user?.username ?: username ?: ""
+
+    val effectiveUserRef: String?
+        get() = userId ?: user?.id ?: user?.userId ?: username?.takeIf { it.isNotBlank() } ?: user?.username?.takeIf { it.isNotBlank() }
 
     val effectiveUserAvatar: String?
         get() = user?.avatarUrl ?: user?.thumbUrl ?: userAvatarUrl ?: userThumb
@@ -174,6 +178,7 @@ data class TracearrHistoryItem(
             channelIdentifier = null,
             channelThumb = null,
             username = username,
+            userId = userId ?: user?.id ?: user?.userId,
             userThumb = userThumb,
             userAvatarUrl = userAvatarUrl,
             user = user,

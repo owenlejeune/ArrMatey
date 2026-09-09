@@ -539,6 +539,7 @@ enum BazarrRoute: Hashable {
 
 enum TracearrRoute: Hashable {
     case history
+    case user(String)
 }
 
 extension MediaRoute {

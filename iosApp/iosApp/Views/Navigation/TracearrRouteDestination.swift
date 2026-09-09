@@ -8,6 +8,8 @@ struct TracearrRouteDestination: View {
         switch route {
         case .history:
             TracearrHistoryScreen()
+        case .user(let userRef):
+            TracearrUserScreen(userRef: userRef)
         }
     }
 }

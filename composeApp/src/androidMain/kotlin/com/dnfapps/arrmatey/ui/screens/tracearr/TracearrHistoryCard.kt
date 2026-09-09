@@ -1,14 +1,11 @@
 package com.dnfapps.arrmatey.ui.screens.tracearr
 
-import android.os.Trace
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -42,13 +39,13 @@ import com.dnfapps.arrmatey.extensions.pxToDp
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
-import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamDecision
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
+import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -59,22 +56,7 @@ fun TracearrHistoryCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
-    val serverType = item.serverType
-    val edgeColor =
-        when (serverType) {
-            TracearrServerType.Plex -> Color(0xFFE5A00D)
-            TracearrServerType.Jellyfin -> Color(0xFFAA5CC3)
-            TracearrServerType.Emby -> Color(0xFF52B54B)
-            null -> {
-                val name = (item.serverName ?: "").lowercase()
-                when {
-                    name.contains("plex") -> Color(0xFFE5A00D)
-                    name.contains("jellyfin") -> Color(0xFFAA5CC3)
-                    name.contains("emby") -> Color(0xFF52B54B)
-                    else -> TracearrBlue
-                }
-            }
-        }
+    val edgeColor = getTracearrServerColor(item.serverType, item.serverName)
 
     val percent = item.percentComplete?.toFloat() ?: run {
         val total = item.totalDurationMs ?: item.durationMs ?: 0L

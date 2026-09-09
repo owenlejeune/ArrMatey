@@ -63,6 +63,7 @@ import org.koin.core.parameter.parametersOf
 fun TracearrHomeScreen(
     wideRailIsVisible: Boolean,
     onNavigateToDetails: (type: TracearrMediaType?, tmdbId: Long?) -> Unit,
+    onNavigateToUser: (ref: String) -> Unit,
     onNavigateToHistory: () -> Unit = {},
     isLargeScreen: Boolean = false,
     viewModel: TracearrViewModel = koinViewModel(),
@@ -265,7 +266,7 @@ fun TracearrHomeScreen(
                             }
                         }
 
-                        val historyItems = currentState.history.take(5)
+                        val historyItems = currentState.history
                         if (historyItems.isEmpty()) {
                             item {
                                 Box(
@@ -306,6 +307,10 @@ fun TracearrHomeScreen(
                             onNavigateToDetails = { type, tmdbId ->
                                 viewModel.clearSelected()
                                 onNavigateToDetails(type, tmdbId)
+                            },
+                            onNavigateToUser = { userRef ->
+                                viewModel.clearSelected()
+                                onNavigateToUser(userRef)
                             }
                         )
                     }

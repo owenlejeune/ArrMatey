@@ -146,6 +146,9 @@ struct TracearrTabContent: View {
                             requestType: mediaType?.requestType
                         )
                     }
+                },
+                onNavigateToUser: { userRef in
+                    navigationManager.go(to: TracearrRoute.user(userRef))
                 }
             )
         }
@@ -249,24 +252,7 @@ struct TracearrStreamCardView: View {
     }
 
     private var edgeColor: Color {
-        let serverType = session.server?.type ?? session.serverType
-        if serverType == .plex {
-            return Color(hex: 0xE5A00D)
-        } else if serverType == .jellyfin {
-            return Color(hex: 0xAA5CC3)
-        } else if serverType == .emby {
-            return Color(hex: 0x52B54B)
-        } else {
-            let name = (session.server?.name ?? session.serverName ?? "").lowercased()
-            if name.contains("plex") {
-                return Color(hex: 0xE5A00D)
-            } else if name.contains("jellyfin") {
-                return Color(hex: 0xAA5CC3)
-            } else if name.contains("emby") {
-                return Color(hex: 0x52B54B)
-            }
-            return .accentColor
-        }
+        Color.serverColor(type: session.server?.type ?? session.serverType, name: session.server?.name ?? session.serverName)
     }
 
     var body: some View {
@@ -675,24 +661,7 @@ struct TracearrHistoryCardView: View {
     }
 
     private var edgeColor: Color {
-        let serverType = item.serverType
-        if serverType == .plex {
-            return Color(hex: 0xE5A00D)
-        } else if serverType == .jellyfin {
-            return Color(hex: 0xAA5CC3)
-        } else if serverType == .emby {
-            return Color(hex: 0x52B54B)
-        } else {
-            let name = (item.serverName ?? "").lowercased()
-            if name.contains("plex") {
-                return Color(hex: 0xE5A00D)
-            } else if name.contains("jellyfin") {
-                return Color(hex: 0xAA5CC3)
-            } else if name.contains("emby") {
-                return Color(hex: 0x52B54B)
-            }
-            return .accentColor
-        }
+        Color.serverColor(type: item.serverType, name: item.serverName)
     }
 
     var body: some View {
@@ -914,24 +883,7 @@ struct TracearrHistoryTableRowView: View {
     }
 
     private var edgeColor: Color {
-        let serverType = item.serverType
-        if serverType == .plex {
-            return Color(hex: 0xE5A00D)
-        } else if serverType == .jellyfin {
-            return Color(hex: 0xAA5CC3)
-        } else if serverType == .emby {
-            return Color(hex: 0x52B54B)
-        } else {
-            let name = (item.serverName ?? "").lowercased()
-            if name.contains("plex") {
-                return Color(hex: 0xE5A00D)
-            } else if name.contains("jellyfin") {
-                return Color(hex: 0xAA5CC3)
-            } else if name.contains("emby") {
-                return Color(hex: 0x52B54B)
-            }
-            return .accentColor
-        }
+        Color.serverColor(type: item.serverType, name: item.serverName)
     }
 
     var body: some View {

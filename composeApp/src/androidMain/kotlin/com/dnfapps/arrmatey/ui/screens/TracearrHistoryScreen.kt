@@ -52,6 +52,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun TracearrHistoryScreen(
     onNavigateBack: () -> Unit = {},
     onNavigateToDetails: (type: TracearrMediaType?, tmdbId: Long?) -> Unit = { _, _ -> },
+    onNavigateToUser: (ref: String) -> Unit = { _ -> },
     isLargeScreen: Boolean = false,
     viewModel: TracearrHistoryViewModel = koinViewModel(),
 ) {
@@ -201,6 +202,10 @@ fun TracearrHistoryScreen(
                         viewModel.clearSelected()
                         onNavigateToDetails(type, tmdbId)
                     },
+                    onNavigateToUser = { userRef ->
+                        viewModel.clearSelected()
+                        onNavigateToUser(userRef)
+                    }
                 )
             }
         }
