@@ -66,6 +66,8 @@ import com.dnfapps.arrmatey.tracearr.state.TracearrUserState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUserViewModel
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
+import com.dnfapps.arrmatey.ui.screens.dashboard.CompactStatCard
+import com.dnfapps.arrmatey.ui.screens.dashboard.CountStatItem
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
@@ -196,7 +198,7 @@ fun TracearrUserScreen(
 
                         currentState.userStats?.let { stats ->
                             item {
-                                UserStatsCard(stats = stats)
+                                UserStatsCard(stats, isExpanded = isLargeScreen)
                             }
                         }
 
@@ -498,6 +500,7 @@ private fun AccountChip(
 @Composable
 private fun UserStatsCard(
     stats: TracearrUserStats,
+    isExpanded: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -525,33 +528,42 @@ private fun UserStatsCard(
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                maxItemsInEachRow = if (isExpanded) 4 else 2
             ) {
-                StatItem(
+                CountStatItem(
                     icon = Icons.Default.PlayArrow,
-                    value = (allTime?.plays ?: 0).toString(),
+                    count = allTime?.plays?.toInt() ?: 0,
                     label = mokoString(MR.strings.plays),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    modifier = Modifier.weight(1f)
                 )
 
-                StatItem(
+                CompactStatCard(
                     icon = Icons.Default.Schedule,
                     value = formatWatchTimeMs(allTime?.watchTimeMs ?: 0),
                     label = mokoString(MR.strings.watch_time),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    modifier = Modifier.weight(1f)
                 )
 
-                if (last30 != null) {
-                    StatItem(
+                last30?.let { last30 ->
+                    CompactStatCard(
                         icon = Icons.Default.PlayArrow,
-                        value = "${last30.plays}",
-                        label = "Last 30 Days",
+                        value = last30.plays.toString(),
+                        label = mokoString(MR.strings.last_30_days),
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        modifier = Modifier.weight(1f)
                     )
                 }
 
-                if (last7 != null) {
-                    StatItem(
+                last7?.let { last7 ->
+                    CompactStatCard(
                         icon = Icons.Default.PlayArrow,
-                        value = "${last7.plays}",
-                        label = "Last 7 Days",
+                        value = last7.plays.toString(),
+                        label = mokoString(MR.strings.last_7_days),
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }

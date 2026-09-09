@@ -17,10 +17,10 @@ struct TracearrUserScreen: View {
 
     var body: some View {
         Group {
-            if viewModel.state is TracearrUserStateNoInstance {
+            if viewModel.state is TracearrUserState.NoInstance {
                 NoInstanceView(type: .tracearr)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let success = viewModel.state as? TracearrUserStateSuccess {
+            } else if let success = viewModel.state as? TracearrUserState.Success {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         if let detail = success.userDetail {
@@ -80,10 +80,10 @@ struct TracearrUserScreen: View {
                 .refreshable {
                     viewModel.refresh()
                 }
-            } else if viewModel.state is TracearrUserStateLoading || viewModel.state is TracearrUserStateInitial {
+            } else if viewModel.state is TracearrUserState.Loading || viewModel.state is TracearrUserState.Initial {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let error = viewModel.state as? TracearrUserStateError {
+            } else if let error = viewModel.state as? TracearrUserState.Error {
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 48))
@@ -119,7 +119,7 @@ struct TracearrUserScreen: View {
     }
 
     private var navigationTitleText: String {
-        if let success = viewModel.state as? TracearrUserStateSuccess,
+        if let success = viewModel.state as? TracearrUserState.Success,
            let name = success.userDetail?.effectiveUsername,
            !name.isEmpty {
             return name
@@ -267,32 +267,38 @@ struct TracearrUserScreen: View {
             let last30 = windows?.last30
             let last7 = windows?.last7
 
-            FlowLayout(spacing: 8) {
-                userStatCard(
+            let columns = isLargeScreen ? Array(repeating: GridItem(.flexible(), spacing: 12), count: 4) : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+
+            LazyVGrid(columns: columns, spacing: 12) {
+                CountStatItem(
                     iconName: "play.fill",
-                    value: "\(allTime?.plays.int64Value ?? 0)",
-                    label: MR.strings().plays.localized()
+                    label: MR.strings().plays.localized(),
+                    count: Int(allTime?.plays ?? 0),
+                    containerColor: Color(UIColor.tertiarySystemBackground)
                 )
 
-                userStatCard(
+                CompactStatCard(
                     iconName: "clock",
-                    value: formatWatchTime(ms: allTime?.watchTimeMs.int64Value ?? 0),
-                    label: MR.strings().watch_time.localized()
+                    label: MR.strings().watch_time.localized(),
+                    value: formatWatchTime(ms: allTime?.watchTimeMs ?? 0),
+                    containerColor: Color(UIColor.tertiarySystemBackground)
                 )
 
                 if let l30 = last30 {
-                    userStatCard(
+                    CompactStatCard(
                         iconName: "play.fill",
-                        value: "\(l30.plays.int64Value)",
-                        label: "Last 30 Days"
+                        label: "Last 30 Days",
+                        value: "\(l30.plays)",
+                        containerColor: Color(UIColor.tertiarySystemBackground)
                     )
                 }
 
                 if let l7 = last7 {
-                    userStatCard(
+                    CompactStatCard(
                         iconName: "play.fill",
-                        value: "\(l7.plays.int64Value)",
-                        label: "Last 7 Days"
+                        label: "Last 7 Days",
+                        value: "\(l7.plays)",
+                        containerColor: Color(UIColor.tertiarySystemBackground)
                     )
                 }
             }
@@ -304,9 +310,9 @@ struct TracearrUserScreen: View {
                         .foregroundColor(.secondary)
 
                     FlowLayout(spacing: 8) {
-                        ForEach(stats.topGenres, id: \.genre) { genreStat in
+                        ForEach(Array(stats.topGenres.enumerated()), id: \.offset) { _, genreStat in
                             if let genre = genreStat.genre {
-                                Text("\(genre) (\(genreStat.plays.int64Value))")
+                                Text("\(genre) (\(genreStat.plays))")
                                     .font(.caption)
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 4)
@@ -321,34 +327,6 @@ struct TracearrUserScreen: View {
         .padding(16)
         .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(12)
-    }
-
-    @ViewBuilder
-    private func userStatCard(iconName: String, value: String, label: String) -> some View {
-        HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(hex: 0x19D2E7).opacity(0.12))
-                .frame(width: 36, height: 36)
-                .overlay(
-                    Image(systemName: iconName)
-                        .font(.system(size: 16))
-                        .foregroundColor(Color(hex: 0x19D2E7))
-                )
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(value)
-                    .font(.headline.bold())
-                    .lineLimit(1)
-                Text(label)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color(UIColor.tertiarySystemBackground))
-        .cornerRadius(10)
     }
 
     @ViewBuilder

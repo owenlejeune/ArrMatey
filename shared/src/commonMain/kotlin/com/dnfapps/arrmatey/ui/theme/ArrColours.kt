@@ -12,7 +12,11 @@ val ArrPurple = Color(0xFF7A43b6)
 val ArrLightPurple = Color(0xffae71ff)
 val ArrBlue = Color(0xFF5D9CEC)
 val ArrBazarr = Color(0xFF0FA3B1)
-val TracearrBlue = Color(0xFF19D2E7)
+
+val TracearrBlue = Color(0xFF00b4d8)
+val TracearrDarkBlue = Color(0xFF00507a)
+val TracearrNavy = Color(0xFF061019)
+val TracearrLightBlue = Color(0xFF48cae4)
 
 val PlexColor = Color(0xFFE5A00D)
 val JellyfinColor = Color(0xFFAA5CC3)

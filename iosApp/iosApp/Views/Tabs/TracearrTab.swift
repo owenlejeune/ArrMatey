@@ -49,6 +49,7 @@ struct TracearrTabContent: View {
                         if let stats = success.stats {
                             TracearrDashboardStatsView(
                                 stats: stats,
+                                isExpanded: isLargeScreen,
                                 onNavigateToHistory: {
                                     navigationManager.go(to: TracearrRoute.history)
                                 }
@@ -542,92 +543,163 @@ struct TracearrImage<Placeholder: View>: View {
     }
 }
 
+struct CompactStatCard: View {
+    let iconName: String
+    let label: String
+    let value: String
+    var containerColor: Color = Color(UIColor.secondarySystemBackground)
+    var contentColor: Color = .primary
+    var onClick: (() -> Void)? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 4) {
+                Image(systemName: iconName)
+                    .font(.system(size: 20))
+                Text(value)
+                    .font(.title3.bold())
+            }
+            .foregroundColor(contentColor)
+
+            Text(label)
+                .font(.caption)
+                .foregroundColor(contentColor.opacity(0.8))
+                .lineLimit(1)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(containerColor)
+        .cornerRadius(16)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onClick?()
+        }
+    }
+}
+
+struct CountStatItem: View {
+    let iconName: String
+    let label: String
+    let count: Int
+    var containerColor: Color = Color(UIColor.secondarySystemBackground)
+    var contentColor: Color = .primary
+    var onClick: (() -> Void)? = nil
+
+    var body: some View {
+        CompactStatCard(
+            iconName: iconName,
+            label: label,
+            value: "\(count)",
+            containerColor: containerColor,
+            contentColor: contentColor,
+            onClick: onClick
+        )
+    }
+}
+
+struct SplitStatCard: View {
+    let iconName: String
+    let firstLabel: String
+    let firstValue: String
+    let secondLabel: String
+    let secondValue: String
+    var containerColor: Color
+    var contentColor: Color = .primary
+    var onClick: (() -> Void)? = nil
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: iconName)
+                .font(.system(size: 28))
+                .foregroundColor(contentColor)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(firstValue)
+                        .font(.title3.bold())
+                    Text(firstLabel)
+                        .font(.caption)
+                }
+                .foregroundColor(contentColor)
+
+                HStack(spacing: 4) {
+                    Text(secondValue)
+                        .font(.title3.bold())
+                    Text(secondLabel)
+                        .font(.caption)
+                }
+                .foregroundColor(contentColor)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(containerColor)
+        .cornerRadius(16)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onClick?()
+        }
+    }
+}
+
 struct TracearrDashboardStatsView: View {
     let stats: TracearrTodayStats
+    var isExpanded: Bool = false
     var onNavigateToHistory: (() -> Void)? = nil
+
+    private static let tracearrBlue = Color(hex: 0x00b4d8)
+    private static let tracearrDarkBlue = Color(hex: 0x00507a)
+    private static let tracearrNavy = Color(hex: 0x061019)
+    private static let tracearrLightBlue = Color(hex: 0x48cae4)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "calendar")
                     .font(.title3)
-                    .foregroundColor(Color(hex: 0x19D2E7))
                 Text(MR.strings().today.localized())
                     .font(.title3.bold())
                 Spacer()
             }
 
-            FlowLayout(spacing: 8) {
-                TracearrStatCardView(
+            let columns = isExpanded ? Array(repeating: GridItem(.flexible(), spacing: 12), count: 4) : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+
+            LazyVGrid(columns: columns, spacing: 12) {
+                CountStatItem(
                     iconName: "exclamationmark.triangle",
-                    value: "\(stats.alertsLast24h)",
-                    label: MR.strings().alerts.localized()
+                    label: MR.strings().alerts.localized(),
+                    count: Int(stats.alertsLast24h),
+                    containerColor: stats.alertsLast24h > 0 ? Color.red.opacity(0.8) : Self.tracearrDarkBlue,
+                    contentColor: .white
                 )
 
-                TracearrStatCardView(
+                SplitStatCard(
                     iconName: "play.fill",
-                    value: "\(stats.todayPlays)",
-                    label: MR.strings().plays.localized(),
+                    firstLabel: MR.strings().plays.localized(),
+                    firstValue: "\(stats.todayPlays)",
+                    secondLabel: MR.strings().sessions.localized(),
+                    secondValue: "\(stats.todaySessions)",
+                    containerColor: Self.tracearrBlue,
+                    contentColor: Self.tracearrNavy,
                     onClick: onNavigateToHistory
                 )
 
-                TracearrStatCardView(
-                    iconName: "play.circle.fill",
-                    value: "\(stats.todaySessions)",
-                    label: MR.strings().sessions.localized(),
-                    onClick: onNavigateToHistory
-                )
-
-                TracearrStatCardView(
+                CompactStatCard(
                     iconName: "clock",
+                    label: MR.strings().watch_time.localized(),
                     value: stats.formattedWatchTime,
-                    label: MR.strings().watch_time.localized()
+                    containerColor: Self.tracearrLightBlue,
+                    contentColor: Self.tracearrDarkBlue
                 )
 
-                TracearrStatCardView(
+                CountStatItem(
                     iconName: "person.2",
-                    value: "\(stats.activeUsersToday)",
-                    label: MR.strings().active_users.localized()
+                    label: MR.strings().active_users.localized(),
+                    count: Int(stats.activeUsersToday),
+                    containerColor: Self.tracearrNavy,
+                    contentColor: .white
                 )
             }
-        }
-    }
-}
-
-struct TracearrStatCardView: View {
-    let iconName: String
-    let value: String
-    let label: String
-    var onClick: (() -> Void)? = nil
-
-    var body: some View {
-        HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(hex: 0x19D2E7).opacity(0.12))
-                .frame(width: 40, height: 40)
-                .overlay(
-                    Image(systemName: iconName)
-                        .font(.system(size: 18))
-                        .foregroundColor(Color(hex: 0x19D2E7))
-                )
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(value)
-                    .font(.title3.bold())
-                    .lineLimit(1)
-                Text(label)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(UIColor.secondarySystemBackground))
-        .cornerRadius(12)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onClick?()
         }
     }
 }

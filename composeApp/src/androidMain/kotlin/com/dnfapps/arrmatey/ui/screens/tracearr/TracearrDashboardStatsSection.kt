@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.Warning
@@ -28,12 +28,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
+import com.dnfapps.arrmatey.ui.screens.dashboard.CompactStatCard
+import com.dnfapps.arrmatey.ui.screens.dashboard.CountStatItem
+import com.dnfapps.arrmatey.ui.screens.dashboard.SplitStatCard
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
+import com.dnfapps.arrmatey.ui.theme.TracearrDarkBlue
+import com.dnfapps.arrmatey.ui.theme.TracearrLightBlue
+import com.dnfapps.arrmatey.ui.theme.TracearrNavy
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun TracearrDashboardStatsSection(
     stats: TracearrTodayStats,
+    isExpanded: Boolean,
     onNavigateToHistory: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -61,34 +68,41 @@ fun TracearrDashboardStatsSection(
         FlowRow (
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            maxItemsInEachRow = if (isExpanded) 4 else 2
         ) {
-            TracearrStatCard(
+            CountStatItem(
                 icon = Icons.Default.Warning,
-                value = stats.alertsLast24h.toString(),
+                count = stats.alertsLast24h,
                 label = mokoString(MR.strings.alerts),
+                containerColor = if (stats.alertsLast24h > 0) MaterialTheme.colorScheme.errorContainer else TracearrDarkBlue,
+                modifier = Modifier.weight(1f)
             )
-            TracearrStatCard(
+            SplitStatCard(
                 icon = Icons.Default.PlayArrow,
-                value = stats.todayPlays.toString(),
-                label = mokoString(MR.strings.plays),
+                firstValue = stats.todayPlays.toString(),
+                firstLabel = mokoString(MR.strings.plays),
+                secondValue = stats.todaySessions.toString(),
+                secondLabel = mokoString(MR.strings.sessions),
+                color = TracearrBlue,
+                contentColor = TracearrNavy,
+                modifier = Modifier.weight(1f),
                 onClick = onNavigateToHistory
             )
-            TracearrStatCard(
-                icon = Icons.Default.PlayCircle,
-                value = stats.todaySessions.toString(),
-                label = mokoString(MR.strings.sessions),
-                onClick = onNavigateToHistory
-            )
-            TracearrStatCard(
+            CompactStatCard(
                 icon = Icons.Default.Schedule,
                 value = stats.formattedWatchTime,
                 label = mokoString(MR.strings.watch_time),
+                containerColor = TracearrLightBlue,
+                contentColor = TracearrDarkBlue,
+                modifier = Modifier.weight(1f)
             )
-            TracearrStatCard(
+            CountStatItem(
                 icon = Icons.Default.Group,
-                value = stats.activeUsersToday.toString(),
+                count = stats.activeUsersToday,
                 label = mokoString(MR.strings.active_users),
+                containerColor = TracearrNavy,
+                modifier = Modifier.weight(1f)
             )
         }
     }

@@ -163,6 +163,7 @@ fun TracearrHomeScreen(
                             item {
                                 TracearrDashboardStatsSection(
                                     stats = stats,
+                                    isExpanded = isLargeScreen,
                                     onNavigateToHistory = onNavigateToHistory
                                 )
                             }

@@ -5,7 +5,7 @@ import SwiftUI
 class TracearrUserViewModelS: ObservableObject {
     private let viewModel: TracearrUserViewModel
 
-    @Published private(set) var state: TracearrUserState = TracearrUserStateInitial()
+    @Published private(set) var state: TracearrUserState = TracearrUserState.Initial()
     @Published private(set) var selectedSession: TracearrStreamSession? = nil
     @Published private(set) var isRefreshing: Bool = false
 
