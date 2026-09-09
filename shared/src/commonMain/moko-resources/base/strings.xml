@@ -886,6 +886,7 @@
     <string name="alerts">Alerts</string>
     <string name="plays">Plays</string>
     <string name="active_users">Active Users</string>
+    <string name="users">Users</string>
     <string name="sessions">Sessions</string>
     <string name="movie_singular">Movie</string>
     <string name="track">Track</string>

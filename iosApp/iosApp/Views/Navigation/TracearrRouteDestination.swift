@@ -10,6 +10,8 @@ struct TracearrRouteDestination: View {
             TracearrHistoryScreen()
         case .user(let userRef):
             TracearrUserScreen(userRef: userRef)
+        case .users:
+            TracearrUsersScreen()
         }
     }
 }

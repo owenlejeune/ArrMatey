@@ -19,6 +19,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.TracearrHistoryScreen
 import com.dnfapps.arrmatey.ui.screens.TracearrHomeScreen
 import com.dnfapps.arrmatey.ui.screens.TracearrUserScreen
+import com.dnfapps.arrmatey.ui.screens.TracearrUsersScreen
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -50,6 +51,9 @@ fun TracearrTab(
                     },
                     onNavigateToUser = { userRef ->
                         navigation.navigateTo(TracearrScreen.User(userRef))
+                    },
+                    onNavigateToAllUsers = {
+                        navigation.navigateTo(TracearrScreen.Users)
                     }
                 )
             }
@@ -69,6 +73,14 @@ fun TracearrTab(
                 TracearrUserScreen(
                     userRef = user.ref,
                     onNavigateBack = { navigation.popBackStack() }
+                )
+            }
+            entry<TracearrScreen.Users> {
+                TracearrUsersScreen(
+                    onNavigateBack = { navigation.popBackStack() },
+                    onNavigateToUser = { userRef ->
+                        navigation.navigateTo(TracearrScreen.User(userRef))
+                    }
                 )
             }
             mediaNavEntries(

@@ -42,6 +42,7 @@ fun TracearrDashboardStatsSection(
     stats: TracearrTodayStats,
     isExpanded: Boolean,
     onNavigateToHistory: () -> Unit,
+    onNavigateToAllUsers: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -102,7 +103,8 @@ fun TracearrDashboardStatsSection(
                 count = stats.activeUsersToday,
                 label = mokoString(MR.strings.active_users),
                 containerColor = TracearrNavy,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                onClick = onNavigateToAllUsers
             )
         }
     }

@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import com.dnfapps.arrmatey.utils.formatWatchTimeMs
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,11 +23,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -49,13 +49,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
@@ -65,7 +62,6 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
 import com.dnfapps.arrmatey.tracearr.state.TracearrUserState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUserViewModel
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
-import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.screens.dashboard.CompactStatCard
 import com.dnfapps.arrmatey.ui.screens.dashboard.CountStatItem
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
@@ -92,7 +88,7 @@ fun TracearrUserScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val selectedSession by viewModel.selectedSession.collectAsStateWithLifecycle()
 
-    val titleText = (state as? TracearrUserState.Success)?.userDetail?.effectiveUsername
+    val titleText = (state as? TracearrUserState.Success)?.userDetail?.username
         ?.takeIf { it.isNotBlank() } ?: mokoString(MR.strings.user_details)
 
     Scaffold(
@@ -284,9 +280,6 @@ private fun UserInfoCard(
     detail: TracearrUserDetail,
     modifier: Modifier = Modifier,
 ) {
-    val username = detail.effectiveUsername.ifBlank { mokoString(MR.strings.user) }
-    val avatarUrl = detail.effectiveAvatarUrl
-
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -308,7 +301,6 @@ private fun UserInfoCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Avatar
                 Box(
                     modifier = Modifier
                         .size(64.dp)
@@ -316,32 +308,20 @@ private fun UserInfoCard(
                         .background(MaterialTheme.colorScheme.secondaryContainer),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (avatarUrl != null) {
-                        AsyncImage(
-                            model = rememberRemoteImageData(avatarUrl, trim = false),
-                            contentDescription = username,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape),
-                        )
-                    } else {
-                        Text(
-                            text = username.take(1).uppercase(),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        )
-                    }
+                    Text(
+                        text = detail.username?.take(1)?.uppercase() ?: "",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
                 }
 
-                // Details Column
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = username,
+                        text = detail.username ?: mokoString(MR.strings.unknown),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                     )
@@ -353,86 +333,9 @@ private fun UserInfoCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-
-                    detail.effectiveTrustScore?.let { score ->
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0xFF19D2E7).copy(alpha = 0.15f),
-                            modifier = Modifier.padding(top = 4.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Security,
-                                    contentDescription = null,
-                                    tint = Color(0xFF19D2E7),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = "$score · Trusted",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF19D2E7),
-                                )
-                            }
-                        }
-                    }
                 }
             }
 
-            // Timestamps row
-            val createdAt = detail.effectiveCreatedAt
-            val lastActive = detail.effectiveLastActivityAt
-
-            if (createdAt != null || lastActive != null) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    createdAt?.let {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CalendarToday,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Text(
-                                text = "${mokoString(MR.strings.joined)}: $it",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-
-                    lastActive?.let {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Schedule,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Text(
-                                text = "${mokoString(MR.strings.last_activity)}: $it",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Accounts chips
             if (detail.accounts.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
@@ -599,68 +502,5 @@ private fun UserStatsCard(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun StatItem(
-    icon: ImageVector,
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(TracearrBlue.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = TracearrBlue,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-
-            Column {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
-private fun formatWatchTimeMs(ms: Long): String {
-    if (ms <= 0) return "0m"
-    val totalSeconds = ms / 1000
-    val totalMinutes = totalSeconds / 60
-    val days = totalMinutes / (24 * 60)
-    val hours = (totalMinutes % (24 * 60)) / 60
-    val minutes = totalMinutes % 60
-
-    return when {
-        days > 0 -> "${days}d ${hours}h"
-        hours > 0 -> "${hours}h ${minutes}m"
-        else -> "${minutes}m"
     }
 }

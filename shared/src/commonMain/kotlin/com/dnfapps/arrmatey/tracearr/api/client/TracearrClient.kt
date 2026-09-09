@@ -63,6 +63,7 @@ class TracearrClient(
         return httpClient.safeGet(url) {
             cursor?.let { parameter("cursor", it) }
             parameter("pageSize", pageSize ?: 100)
+            parameter("includeRemoved", false)
         }
     }
 

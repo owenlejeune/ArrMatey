@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrUsersResponse
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
@@ -82,6 +83,12 @@ class TracearrRepository(
     private val uuidRegex = Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
     private fun isUuid(ref: String): Boolean = uuidRegex.matches(ref)
+
+    suspend fun getUsers(
+        cursor: String? = null,
+        pageSize: Int? = null,
+    ): NetworkResult<TracearrUsersResponse> =
+        tracearrClient.getUsers(cursor = cursor, pageSize = pageSize)
 
     suspend fun getUserDetails(ref: String): NetworkResult<TracearrUserDetail> =
         resolveUserDetail(ref)

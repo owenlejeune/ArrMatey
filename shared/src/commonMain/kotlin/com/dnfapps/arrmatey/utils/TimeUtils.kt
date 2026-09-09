@@ -18,3 +18,5 @@ expect fun formatLocalDateTime(
 expect fun Instant.format(pattern: String = "HH:mm MMMM d, yyyy"): String
 
 expect fun LocalDate.format(pattern: String = "MMM d, yyyy"): String
+
+expect fun formatWatchTimeMs(ms: Long): String

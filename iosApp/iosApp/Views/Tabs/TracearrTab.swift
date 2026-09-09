@@ -52,6 +52,9 @@ struct TracearrTabContent: View {
                                 isExpanded: isLargeScreen,
                                 onNavigateToHistory: {
                                     navigationManager.go(to: TracearrRoute.history)
+                                },
+                                onNavigateToAllUsers: {
+                                    navigationManager.go(to: TracearrRoute.users)
                                 }
                             )
                         }
@@ -646,6 +649,7 @@ struct TracearrDashboardStatsView: View {
     let stats: TracearrTodayStats
     var isExpanded: Bool = false
     var onNavigateToHistory: (() -> Void)? = nil
+    var onNavigateToAllUsers: (() -> Void)? = nil
 
     private static let tracearrBlue = Color(hex: 0x00b4d8)
     private static let tracearrDarkBlue = Color(hex: 0x00507a)
@@ -697,7 +701,8 @@ struct TracearrDashboardStatsView: View {
                     label: MR.strings().active_users.localized(),
                     count: Int(stats.activeUsersToday),
                     containerColor: Self.tracearrNavy,
-                    contentColor: .white
+                    contentColor: .white,
+                    onClick: onNavigateToAllUsers
                 )
             }
         }

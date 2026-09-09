@@ -64,7 +64,8 @@ fun TracearrHomeScreen(
     wideRailIsVisible: Boolean,
     onNavigateToDetails: (type: TracearrMediaType?, tmdbId: Long?) -> Unit,
     onNavigateToUser: (ref: String) -> Unit,
-    onNavigateToHistory: () -> Unit = {},
+    onNavigateToAllUsers: () -> Unit,
+    onNavigateToHistory: () -> Unit,
     isLargeScreen: Boolean = false,
     viewModel: TracearrViewModel = koinViewModel(),
     instancesViewModel: InstancesViewModel = koinViewModel(
@@ -164,7 +165,8 @@ fun TracearrHomeScreen(
                                 TracearrDashboardStatsSection(
                                     stats = stats,
                                     isExpanded = isLargeScreen,
-                                    onNavigateToHistory = onNavigateToHistory
+                                    onNavigateToHistory = onNavigateToHistory,
+                                    onNavigateToAllUsers = onNavigateToAllUsers
                                 )
                             }
                         }

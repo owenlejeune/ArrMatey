@@ -120,7 +120,7 @@ struct TracearrUserScreen: View {
 
     private var navigationTitleText: String {
         if let success = viewModel.state as? TracearrUserState.Success,
-           let name = success.userDetail?.effectiveUsername,
+           let name = success.userDetail?.username,
            !name.isEmpty {
             return name
         }
@@ -130,8 +130,7 @@ struct TracearrUserScreen: View {
     // MARK: - User Info Card
     @ViewBuilder
     private func userInfoCard(detail: TracearrUserDetail) -> some View {
-        let username = detail.effectiveUsername.isEmpty ? MR.strings().user.localized() : detail.effectiveUsername
-        let avatarUrl = detail.effectiveAvatarUrl
+        let username = (detail.username?.isEmpty == false) ? detail.username! : MR.strings().unknown.localized()
 
         VStack(alignment: .leading, spacing: 12) {
             Text(MR.strings().user_info.localized())
@@ -139,23 +138,14 @@ struct TracearrUserScreen: View {
                 .bold()
 
             HStack(spacing: 16) {
-                if let avatarStr = avatarUrl, !avatarStr.isEmpty {
-                    TracearrImage(urlString: avatarStr) {
-                        Circle().fill(Color.orange)
-                    }
-                    .aspectRatio(contentMode: .fill)
+                Circle()
+                    .fill(Color(UIColor.tertiarySystemBackground))
                     .frame(width: 60, height: 60)
-                    .clipShape(Circle())
-                } else {
-                    Circle()
-                        .fill(Color.orange)
-                        .frame(width: 60, height: 60)
-                        .overlay(
-                            Text(String(username.prefix(1)).uppercased())
-                                .font(.title2.bold())
-                                .foregroundColor(.white)
-                        )
-                }
+                    .overlay(
+                        Text(String(username.prefix(1)).uppercased())
+                            .font(.title2.bold())
+                            .foregroundColor(.primary)
+                    )
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(username)
@@ -166,53 +156,7 @@ struct TracearrUserScreen: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
-
-                    if let trustScore = detail.effectiveTrustScore {
-                        HStack(spacing: 4) {
-                            Image(systemName: "checkmark.shield.fill")
-                                .font(.caption)
-                            Text("\(trustScore.intValue) · Trusted")
-                                .font(.caption.bold())
-                        }
-                        .foregroundColor(Color(hex: 0x19D2E7))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color(hex: 0x19D2E7).opacity(0.15))
-                        .clipShape(Capsule())
-                    }
                 }
-            }
-
-            let createdAt = detail.effectiveCreatedAt
-            let lastActive = detail.effectiveLastActivityAt
-
-            if createdAt != nil || lastActive != nil {
-                HStack {
-                    if let created = createdAt {
-                        HStack(spacing: 4) {
-                            Image(systemName: "calendar")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("\(MR.strings().joined.localized()): \(created)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-
-                    Spacer()
-
-                    if let active = lastActive {
-                        HStack(spacing: 4) {
-                            Image(systemName: "clock")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("\(MR.strings().last_activity.localized()): \(active)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-                .padding(.top, 4)
             }
 
             if !detail.accounts.isEmpty {
@@ -338,23 +282,6 @@ struct TracearrUserScreen: View {
             Text(MR.strings().recent_sessions.localized())
                 .font(.title3.bold())
             Spacer()
-        }
-    }
-
-    private func formatWatchTime(ms: Int64) -> String {
-        if ms <= 0 { return "0m" }
-        let totalSeconds = ms / 1000
-        let totalMinutes = totalSeconds / 60
-        let days = totalMinutes / (24 * 60)
-        let hours = (totalMinutes % (24 * 60)) / 60
-        let minutes = totalMinutes % 60
-
-        if days > 0 {
-            return "\(days)d \(hours)h"
-        } else if hours > 0 {
-            return "\(hours)h \(minutes)m"
-        } else {
-            return "\(minutes)m"
         }
     }
 }

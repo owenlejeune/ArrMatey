@@ -27,6 +27,10 @@
         <item quantity="one">%d stream</item>
         <item quantity="other">%d streams</item>
     </plurals>
+    <plurals name="plays_count">
+        <item quantity="one">%1$d play</item>
+        <item quantity="other">%1$d plays</item>
+    </plurals>
     <plurals name="selected_count">
         <item quantity="one">%d selected</item>
         <item quantity="other">%d selected</item>
