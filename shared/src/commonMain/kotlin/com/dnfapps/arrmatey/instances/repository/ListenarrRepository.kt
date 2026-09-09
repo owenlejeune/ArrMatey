@@ -118,4 +118,14 @@ class ListenarrRepository(
         return updateMediaItem(updatedAudiobook)
             .map { it as Audiobook }
     }
+
+    override suspend fun deleteAudiobookFile(
+        audiobookId: Long,
+        fileId: Long,
+    ): NetworkResult<Unit> = listenarrClient.deleteAudiobookFile(audiobookId, fileId)
+
+    override suspend fun deleteAudiobookFiles(
+        audiobookId: Long,
+        fileIds: List<Long>,
+    ): NetworkResult<Unit> = listenarrClient.deleteAudiobookFiles(audiobookId, fileIds)
 }

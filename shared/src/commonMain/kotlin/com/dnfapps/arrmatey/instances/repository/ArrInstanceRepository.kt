@@ -296,8 +296,8 @@ open class ArrInstanceRepository(
     open suspend fun getMovieExtraFiles(movieId: Long): NetworkResult<List<ExtraFile>> =
         (this as? RadarrRepository)?.getMovieExtraFiles(movieId) ?: NetworkResult.Error(message = "Not a Radarr instance")
 
-    open suspend fun deleteMovieFile(movieId: Long): NetworkResult<Unit> =
-        (this as? RadarrRepository)?.deleteMovieFile(movieId) ?: NetworkResult.Error(message = "Not a Radarr instance")
+    open suspend fun deleteMovieFile(movieFileId: Long): NetworkResult<Unit> =
+        (this as? RadarrRepository)?.deleteMovieFile(movieFileId) ?: NetworkResult.Error(message = "Not a Radarr instance")
 
     // Lidarr forwarded methods
     open suspend fun getArtistAlbums(artistId: Long): NetworkResult<List<ArrAlbum>> =
@@ -374,4 +374,18 @@ open class ArrInstanceRepository(
 
     open suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> =
         (this as? ListenarrRepository)?.toggleAudiobookMonitor(audiobook) ?: NetworkResult.Error(message = "Not a Listenarr instance")
+
+    open suspend fun deleteAudiobookFile(
+        audiobookId: Long,
+        fileId: Long,
+    ): NetworkResult<Unit> =
+        (this as? ListenarrRepository)?.deleteAudiobookFile(audiobookId, fileId)
+            ?: NetworkResult.Error(message = "Not a Listenarr instance")
+
+    open suspend fun deleteAudiobookFiles(
+        audiobookId: Long,
+        fileIds: List<Long>,
+    ): NetworkResult<Unit> =
+        (this as? ListenarrRepository)?.deleteAudiobookFiles(audiobookId, fileIds)
+            ?: NetworkResult.Error(message = "Not a Listenarr instance")
 }

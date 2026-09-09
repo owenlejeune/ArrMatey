@@ -44,6 +44,8 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published var editErrorTrigger = false
     @Published var deleteSuccessTrigger = false
     @Published var deleteErrorTrigger = false
+    @Published var deleteMovieFileSuccessTrigger = false
+    @Published var deleteMovieFileErrorTrigger = false
 
     @Published private(set) var automaticSearchIds: Set<Int64> = []
     @Published private(set) var lastSearchResult: Bool? = nil
@@ -130,7 +132,14 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         }
         viewModel.deleteSeasonStatus.observeAsync(on: self, to: \.deleteSeasonStatus)
         viewModel.deleteAlbumStatus.observeAsync(on: self, to: \.deleteAlbumStatus)
-        viewModel.deleteMovieFileStatus.observeAsync(on: self, to: \.deleteMovieFileStatus)
+        viewModel.deleteMovieFileStatus.observeAsync(on: self) { owner, status in
+            owner.deleteMovieFileStatus = status
+            if status is OperationStatusSuccess {
+                owner.deleteMovieFileSuccessTrigger.toggle()
+            } else if status is OperationStatusError {
+                owner.deleteMovieFileErrorTrigger.toggle()
+            }
+        }
         viewModel.removeQueueItemStatus.observeAsync(on: self, to: \.removeQueueItemStatus)
         viewModel.pendingSeerrRequest.observeAsync(on: self, to: \.pendingSeerrRequest)
 

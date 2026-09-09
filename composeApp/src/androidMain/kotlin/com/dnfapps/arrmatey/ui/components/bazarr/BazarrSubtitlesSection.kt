@@ -45,6 +45,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
+import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -203,7 +204,7 @@ private fun EmbeddedSubtitlesCard(embedded: List<BazarrSubtitle>) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            text = mokoString(MR.strings.bazarr_embedded_count, embedded.count()),
+            text = mokoPlural(MR.plurals.bazarr_embedded_count, embedded.count()),
             fontWeight = FontWeight.SemiBold,
         )
         FlowRow(

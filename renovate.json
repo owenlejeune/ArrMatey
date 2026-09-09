@@ -15,59 +15,71 @@
   "packageRules": [
     {
       "description": "Kotlin + Compose group (lockstep)",
-      "matchPackagePatterns": [
-        "^org\\.jetbrains\\.kotlin",
-        "^org\\.jetbrains\\.compose",
-        "^androidx\\.compose",
-        "^com\\.google\\.devtools\\.ksp"
-      ],
       "groupName": "kotlin + compose",
-      "schedule": ["before 6am on the first day of the month"]
+      "schedule": ["before 6am on the first day of the month"],
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.kotlin/",
+        "/^org\\.jetbrains\\.compose/",
+        "/^androidx\\.compose/",
+        "/^com\\.google\\.devtools\\.ksp/"
+      ]
     },
     {
       "description": "AGP + Gradle wrapper (lockstep)",
-      "matchPackagePatterns": ["^com\\.android"],
       "matchManagers": ["gradle", "gradle-wrapper"],
-      "groupName": "AGP + Gradle"
+      "groupName": "AGP + Gradle",
+      "matchPackageNames": [
+        "/^com\\.android/"
+      ]
     },
     {
       "description": "Ktor group",
-      "matchPackagePatterns": ["^io\\.ktor"],
-      "groupName": "ktor"
+      "groupName": "ktor",
+      "matchPackageNames": [
+        "/^io\\.ktor/"
+      ]
     },
     {
       "description": "Coil group",
-      "matchPackagePatterns": ["^io\\.coil-kt"],
-      "groupName": "coil"
+      "groupName": "coil",
+      "matchPackageNames": [
+        "/^io\\.coil-kt/"
+      ]
     },
     {
       "description": "Koin group",
-      "matchPackagePatterns": ["^io\\.insert-koin"],
-      "groupName": "koin"
+      "groupName": "koin",
+      "matchPackageNames": [
+        "/^io\\.insert-koin/"
+      ]
     },
     {
       "description": "Skie → Kotlin group",
-      "matchPackagePatterns": ["^co\\.touchlab\\.skie"],
-      "groupName": "kotlin + compose"
+      "groupName": "kotlin + compose",
+      "matchPackageNames": [
+        "/^co\\.touchlab\\.skie/"
+      ]
     },
     {
       "description": "moko-resources → Kotlin group",
-      "matchPackagePatterns": ["^dev\\.icerock"],
-      "groupName": "kotlin + compose"
+      "groupName": "kotlin + compose",
+      "matchPackageNames": [
+        "/^dev\\.icerock/"
+      ]
     },
     {
       "description": "Test/build tooling: automerge patch+minor",
-      "matchPackagePatterns": [
-        "^io\\.mockk",
-        "^app\\.cash\\.turbine",
-        "^org\\.robolectric",
-        "^com\\.diffplug\\.spotless",
-        "^androidx\\.test"
-      ],
       "matchUpdateTypes": ["patch", "minor"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true,
-      "platformAutomerge": true
+      "platformAutomerge": true,
+      "matchPackageNames": [
+        "/^io\\.mockk/",
+        "/^app\\.cash\\.turbine/",
+        "/^org\\.robolectric/",
+        "/^com\\.diffplug\\.spotless/",
+        "/^androidx\\.test/"
+      ]
     },
     {
       "description": "Runtime libs: automerge patch only (add per-family minor rules as integration tests land)",

@@ -28,6 +28,7 @@
 ### Combined Dashboard
 - Centralized overview of all instances, download clients, and requests
 - Customizable layout: add, remove, and reorder cards to fit your workflow
+- Dashboard cards for Universal Search, Seerr Requests, and Seerr Issues
 - Real-time network status and detailed disk space monitoring
 - Quick-access shortcuts to your recently added media and upcoming schedule
 
@@ -83,6 +84,7 @@
 ### Advanced Features
 - **Android App Shortcuts**: Jump to services or search directly from your home screen
 - **Local Network Switching**: Automatically use local URLs when connected to home Wi-Fi
+- **Large Screen & Adaptive Layouts**: Responsive dual-panel layouts for tablets and large screens
 - **Custom Webpages**: Pin your favorite status pages or secondary dashboards (like Tautulli) directly in the app
 - **Custom Headers**: Add custom HTTP headers per instance
 - **Slow Instance Mode**: Configurable timeout for remote or slower instances
@@ -93,15 +95,6 @@
 
 ### Download Client
 - **Multiple Integrations**: Support for Transmission, Deluge, qBittorrent, and SABnzbd
-
-### Planned Features
-- [ ] Tablet/Large screen support
-- [ ] Home screen widgets
-- [ ] Schedule notifications
-- [ ] Bulk library actions
-- [x] Bazarr subtitle management (Sonarr + Radarr)
-- [ ] Additional instance types (eg. Tracearr, nzbget)
-- and more to come
 
 ## Screenshots
 
@@ -208,7 +201,7 @@ iosApp → Signing & Capabilities → Targets → iosApp -> Signing -> Team
 
 ### Adding Localized String
 
-ArrMatey uses [moko-resources](https://github.com/icerockdev/moko-resources) for string resources across platforms. 
+ArrMatey uses [moko-resources](https://github.com/icerockdev/moko-resources) for string resources across platforms.
 Any new strings should be added to strings.xml, or plurals.xml for plural strings. Build your targets, and new strings will be accessible using MR.strings
 
 ## Configuration

@@ -119,6 +119,7 @@ import com.dnfapps.arrmatey.ui.sheets.EditAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
 import com.dnfapps.arrmatey.ui.sheets.EditMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
+import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
 import com.skydoves.flexible.core.FlexibleSheetSize
@@ -538,7 +539,7 @@ internal fun SelectionTopBar(
     TopAppBar(
         title = {
             Text(
-                text = mokoString(MR.strings.selected_count, count),
+                text = mokoPlural(MR.plurals.selected_count, count),
             )
         },
         navigationIcon = {

@@ -20,7 +20,7 @@ struct DownloadsTab: View {
     
     private var searchPrompt: String {
         let count = viewModel.downloadQueueState.queueItems.count
-        return MR.strings().search_downloads.format(args: [count]).localized()
+        return MR.plurals().search_downloads.localized(count)
     }
 
     var body: some View {
@@ -99,7 +99,7 @@ struct DownloadsTab: View {
             }
         } message: {
             if viewModel.isInSelectionMode {
-                Text(MR.strings().selected_count.format(args: [viewModel.selectionCount]).localized())
+                Text(MR.plurals().selected_count.localized(viewModel.selectionCount))
             } else {
                 Text(deleteTarget?.name ?? "")
             }
@@ -116,7 +116,7 @@ struct DownloadsTab: View {
             }
             
             ToolbarItem(placement: .principal) {
-                Text(MR.strings().selected_count.format(args: [viewModel.selectionCount]).localized())
+                Text(MR.plurals().selected_count.localized(viewModel.selectionCount))
                     .font(.headline)
             }
             

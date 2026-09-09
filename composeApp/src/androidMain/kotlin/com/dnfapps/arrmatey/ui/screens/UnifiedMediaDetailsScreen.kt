@@ -218,6 +218,7 @@ fun UnifiedMediaDetailsScreen(
     var confirmDeleteAlbum by remember { mutableStateOf<Long?>(null) }
     var confirmDeleteEpisodeId by remember { mutableStateOf<Long?>(null) }
     var confirmDeleteMovie by remember { mutableStateOf(false) }
+    var confirmDeleteAudiobookFile by remember { mutableStateOf(false) }
     var editAlbum by remember { mutableStateOf<ArrAlbum?>(null) }
     var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
     var showConfirmRemoveQueueItem by remember { mutableStateOf(false) }
@@ -233,6 +234,7 @@ fun UnifiedMediaDetailsScreen(
     val deleteSeasonStatus by viewModel.deleteSeasonStatus.collectAsStateWithLifecycle()
     val deleteAlbumStatus by viewModel.deleteAlbumStatus.collectAsStateWithLifecycle()
     val deleteMovieFileStatus by viewModel.deleteMovieFileStatus.collectAsStateWithLifecycle()
+    val deleteAudiobookFileStatus by viewModel.deleteAudiobookFileStatus.collectAsStateWithLifecycle()
     val deleteEpisodeStatus by viewModel.deleteEpisodeStatus.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
     val requestStatus by viewModel.requestStatus.collectAsStateWithLifecycle()
@@ -314,6 +316,30 @@ fun UnifiedMediaDetailsScreen(
             is OperationStatus.Error -> {
                 Toast.makeText(context, errorDeletingItemMessage, Toast.LENGTH_SHORT).show()
             }
+
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(deleteMovieFileStatus) {
+        when (deleteMovieFileStatus) {
+            is OperationStatus.Success ->
+                Toast.makeText(context, itemDeletedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
+
+            is OperationStatus.Error ->
+                Toast.makeText(context, errorDeletingItemMessage, Toast.LENGTH_SHORT).show()
+
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(deleteAudiobookFileStatus) {
+        when (deleteAudiobookFileStatus) {
+            is OperationStatus.Success ->
+                Toast.makeText(context, itemDeletedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
+
+            is OperationStatus.Error ->
+                Toast.makeText(context, errorDeletingItemMessage, Toast.LENGTH_SHORT).show()
 
             else -> {}
         }
@@ -413,6 +439,21 @@ fun UnifiedMediaDetailsScreen(
                             )
                         }
 
+                        val canDeleteFile =
+                            when (resolvedType) {
+                                InstanceType.Radarr ->
+                                    (success.arrMedia as? ArrMovie)?.let { it.movieFile != null || it.movieFileId != null } ==
+                                        true
+                                InstanceType.Listenarr ->
+                                    (success.arrMedia as? Audiobook)?.let {
+                                        it.files.isNotEmpty() ||
+                                            it.fileCount > 0 ||
+                                            !it.filePath.isNullOrBlank()
+                                    } ==
+                                        true
+                                else -> false
+                            }
+
                         UnifiedMediaDetailsToolbarMenu(
                             success = success,
                             buttonState = buttonState,
@@ -429,6 +470,18 @@ fun UnifiedMediaDetailsScreen(
                             },
                             onEdit = { showEditSheet = true },
                             onDelete = { confirmDelete = true },
+                            onDeleteFile =
+                                if (canDeleteFile) {
+                                    {
+                                        if (resolvedType == InstanceType.Radarr) {
+                                            confirmDeleteMovie = true
+                                        } else {
+                                            confirmDeleteAudiobookFile = true
+                                        }
+                                    }
+                                } else {
+                                    null
+                                },
                             onMarkAsAvailable = { viewModel.markSeerrMediaAsAvailable() },
                             onRemoveFromService = { confirmRemoveFromService = true },
                             onClearData = { confirmClearData = true },
@@ -1090,6 +1143,26 @@ fun UnifiedMediaDetailsScreen(
                         },
                     )
                 }
+                if (confirmDeleteAudiobookFile) {
+                    AlertDialog(
+                        onDismissRequest = { confirmDeleteAudiobookFile = false },
+                        title = { Text(mokoString(MR.strings.confirm_delete)) },
+                        text = { Text(text = mokoString(MR.strings.confirm_delete_file)) },
+                        dismissButton = {
+                            TextButton(onClick = { confirmDeleteAudiobookFile = false }) {
+                                Text(mokoString(MR.strings.cancel))
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                confirmDeleteAudiobookFile = false
+                                viewModel.deleteAudiobookFile()
+                            }) {
+                                Text(mokoString(MR.strings.confirm))
+                            }
+                        },
+                    )
+                }
                 selectedQueueItem?.let { item ->
                     QueueItemInfoSheet(
                         item = item,
@@ -1445,6 +1518,7 @@ private fun UnifiedMediaDetailsToolbarMenu(
     onAddMissingInstance: (Instance) -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onDeleteFile: (() -> Unit)? = null,
     onMarkAsAvailable: () -> Unit,
     onRemoveFromService: () -> Unit,
     onClearData: () -> Unit,
@@ -1557,6 +1631,28 @@ private fun UnifiedMediaDetailsToolbarMenu(
                             onDelete()
                         },
                     )
+
+                    if (onDeleteFile != null && (instanceType == InstanceType.Radarr || instanceType == InstanceType.Listenarr)) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = mokoString(MR.strings.delete_files),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.DeleteOutline,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                )
+                            },
+                            onClick = {
+                                showMenu = false
+                                onDeleteFile()
+                            },
+                        )
+                    }
 
                     for (missingInstance in success.missingInstances) {
                         DropdownMenuItem(

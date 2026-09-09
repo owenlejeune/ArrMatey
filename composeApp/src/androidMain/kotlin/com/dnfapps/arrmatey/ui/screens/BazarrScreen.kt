@@ -82,6 +82,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -437,12 +438,14 @@ private fun BazarrSeriesList(
                 monitored = item.monitored,
                 onClick = { onClick(item) },
             ) {
+                val totalEpisodes = item.episodeFileCount + item.episodeMissingCount
                 Text(
                     text =
-                        mokoString(
-                            MR.strings.bazarr_series_subtitle_count,
+                        mokoPlural(
+                            MR.plurals.bazarr_series_subtitle_count,
+                            totalEpisodes,
                             item.episodeFileCount,
-                            item.episodeFileCount + item.episodeMissingCount,
+                            totalEpisodes,
                         ),
                     color = Color.White,
                     fontSize = 14.sp,
@@ -474,8 +477,10 @@ private fun BazarrMoviesList(
             ) {
                 val subtitleCount = item.subtitles.size
                 val missingCount = item.missingSubtitles.size
+                val subtitlesText = mokoPlural(MR.plurals.bazarr_movie_subtitles_count, subtitleCount)
+                val missingText = mokoPlural(MR.plurals.bazarr_movie_missing_count, missingCount)
                 Text(
-                    text = mokoString(MR.strings.bazarr_movie_subtitle_count, subtitleCount, missingCount),
+                    text = mokoString(MR.strings.bazarr_movie_subtitle_summary, subtitlesText, missingText),
                     color = Color.White,
                     fontSize = 14.sp,
                 )

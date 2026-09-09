@@ -52,6 +52,7 @@ class UnifiedMediaDetailsViewModelTest {
                 deleteSeasonFilesUseCase = mockk(),
                 deleteAlbumFilesUseCase = mockk(),
                 deleteMovieFileUseCase = mockk(),
+                deleteAudiobookFileUseCase = mockk(),
                 submitIssueUseCase = mockk(),
                 observeInstancePreferencesUseCase = observeInstancePreferencesUseCase,
                 updateInstancePreferencesUseCase = mockk(),

@@ -106,8 +106,8 @@ android {
             libs.versions.android.targetSdk
                 .get()
                 .toInt()
-        versionCode = 29
-        versionName = "0.9.1"
+        versionCode = 30
+        versionName = "0.9.2"
     }
     packaging {
         resources {
@@ -125,7 +125,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
-            isShrinkResources = false
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

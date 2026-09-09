@@ -202,6 +202,7 @@ fun DashboardDownloadClientsSection(
                         LinearProgressIndicator(
                             progress = { download.progress.toFloat() },
                             modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+                            trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                         )
                     }
                 }

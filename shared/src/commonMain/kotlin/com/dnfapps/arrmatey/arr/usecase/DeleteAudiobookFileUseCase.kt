@@ -7,20 +7,19 @@ import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class DeleteMovieFileUseCase {
+class DeleteAudiobookFileUseCase {
     operator fun invoke(
-        movieId: Long,
-        movieFileId: Long,
+        audiobookId: Long,
+        fileIds: List<Long>,
         repository: ArrInstanceRepository,
     ): Flow<OperationStatus> =
         flow {
             emit(OperationStatus.InProgress)
             repository
-                .deleteMovieFile(movieFileId)
+                .deleteAudiobookFiles(audiobookId, fileIds)
                 .onSuccess {
-                    repository.getMediaDetails(movieId)
-                    repository.getMovieExtraFiles(movieId)
-                    emit(OperationStatus.Success("Movie file deleted successfully"))
+                    repository.getMediaDetails(audiobookId)
+                    emit(OperationStatus.Success("Audiobook file deleted successfully"))
                 }.onError { code, message, cause ->
                     emit(OperationStatus.Error(code, message, cause))
                 }
