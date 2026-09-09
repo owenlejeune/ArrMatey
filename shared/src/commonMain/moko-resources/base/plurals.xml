@@ -23,4 +23,36 @@
         <item quantity="one">%d book</item>
         <item quantity="other">%d books</item>
     </plurals>
+    <plurals name="selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="search_downloads">
+        <item quantity="one">Search %d download</item>
+        <item quantity="other">Search %d downloads</item>
+    </plurals>
+    <plurals name="bazarr_files_count">
+        <item quantity="one">%d file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
+    <plurals name="bazarr_missing_count">
+        <item quantity="one">%d missing subtitle</item>
+        <item quantity="other">%d missing subtitles</item>
+    </plurals>
+    <plurals name="bazarr_embedded_count">
+        <item quantity="one">%d Embedded Subtitle</item>
+        <item quantity="other">%d Embedded Subtitles</item>
+    </plurals>
+    <plurals name="bazarr_series_subtitle_count">
+        <item quantity="one">%1$d / %2$d episode</item>
+        <item quantity="other">%1$d / %2$d episodes</item>
+    </plurals>
+    <plurals name="bazarr_movie_subtitles_count">
+        <item quantity="one">%d Subtitle</item>
+        <item quantity="other">%d Subtitles</item>
+    </plurals>
+    <plurals name="bazarr_movie_missing_count">
+        <item quantity="one">%d Missing</item>
+        <item quantity="other">%d Missing</item>
+    </plurals>
 </resources>

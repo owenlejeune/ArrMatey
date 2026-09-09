@@ -165,6 +165,7 @@ private struct BazarrSeriesList: View {
     var body: some View {
         List {
             ForEach(series, id: \.serviceId) { item in
+                let totalEpisodes = item.episodeFileCount + item.episodeMissingCount
                 BazarrItemRow(
                     title: item.title,
                     year: item.year,
@@ -172,7 +173,7 @@ private struct BazarrSeriesList: View {
                     poster: item.poster,
                     fanart: item.fanart,
                     monitored: item.monitored,
-                    details: MR.strings().bazarr_series_subtitle_count.formatted(args: [item.episodeFileCount, item.episodeFileCount + item.episodeMissingCount])
+                    details: MR.plurals().bazarr_series_subtitle_count.formatted(Int(totalEpisodes), [item.episodeFileCount, totalEpisodes])
                 )
                 .onTapGesture { onClick(item) }
             }
@@ -187,6 +188,8 @@ private struct BazarrMoviesList: View {
     var body: some View {
         List {
             ForEach(movies, id: \.serviceId) { item in
+                let subtitlesText = MR.plurals().bazarr_movie_subtitles_count.localized(item.subtitles.count)
+                let missingText = MR.plurals().bazarr_movie_missing_count.localized(item.missingSubtitles.count)
                 BazarrItemRow(
                     title: item.title,
                     year: item.year,
@@ -194,7 +197,7 @@ private struct BazarrMoviesList: View {
                     poster: item.poster,
                     fanart: item.fanart,
                     monitored: item.monitored,
-                    details: MR.strings().bazarr_movie_subtitle_count.formatted(args: [item.subtitles.count, item.missingSubtitles.count])
+                    details: MR.strings().bazarr_movie_subtitle_summary.formatted(args: [subtitlesText, missingText])
                 )
                 .onTapGesture { onClick(item) }
             }

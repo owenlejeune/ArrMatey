@@ -18,8 +18,8 @@ struct BazarrInfoArea: View {
         } else if let series = details as? BazarrSeries {
             var items = [
                 InfoItem(label: MR.strings().path.localized(), value: series.path),
-                InfoItem(label: MR.strings().files.localized(), value: MR.strings().bazarr_files_count.formatted(args: [series.episodeFileCount])),
-                InfoItem(label: MR.strings().missing.localized(), value: MR.strings().bazarr_missing_count.formatted(args: [series.episodeMissingCount])),
+                InfoItem(label: MR.strings().files.localized(), value: MR.plurals().bazarr_files_count.localized(Int(series.episodeFileCount))),
+                InfoItem(label: MR.strings().missing.localized(), value: MR.plurals().bazarr_missing_count.localized(Int(series.episodeMissingCount))),
                 InfoItem(label: MR.strings().status.localized(), value: (series.ended ? MR.strings().ended : MR.strings().continuing).localized())
             ]
             

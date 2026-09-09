@@ -546,7 +546,7 @@ struct LibraryTabContent: View {
             }
             
             ToolbarItem(placement: .principal) {
-                Text(MR.strings().selected_count.format(args: [libraryViewModel.selectionCount]).localized())
+                Text(MR.plurals().selected_count.localized(libraryViewModel.selectionCount))
                     .font(.headline)
             }
             

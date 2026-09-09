@@ -120,7 +120,7 @@ struct ArrLibraryView: View {
             }
             
             ToolbarItem(placement: .principal) {
-                Text(MR.strings().selected_count.format(args: [viewModel.selectionCount]).localized())
+                Text(MR.plurals().selected_count.localized(viewModel.selectionCount))
                     .font(.headline)
             }
             
