@@ -103,41 +103,41 @@ struct TracearrUserCardView: View {
                 }
 
                 Spacer()
+            }
 
-                if let stats = stats, let allTime = stats.windows?.allTime {
-                    HStack(spacing: 8) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "play.fill")
-                                .font(.caption2)
-                            Text(MR.plurals().plays_count.localized(Int32(allTime.plays)))
-                                .font(.caption2.bold())
-                        }
-                        .foregroundColor(Color(hex: 0x00b4d8))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color(hex: 0x00b4d8).opacity(0.12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color(hex: 0x00b4d8).opacity(0.5), lineWidth: 1)
-                        )
-                        .cornerRadius(6)
-
-                        HStack(spacing: 4) {
-                            Image(systemName: "clock")
-                                .font(.caption2)
-                            Text(formatWatchTime(ms: allTime.watchTimeMs))
-                                .font(.caption2.bold())
-                        }
-                        .foregroundColor(Color(hex: 0x00b4d8))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color(hex: 0x00b4d8).opacity(0.12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color(hex: 0x00b4d8).opacity(0.5), lineWidth: 1)
-                        )
-                        .cornerRadius(6)
+            if let stats = stats, let allTime = stats.windows?.allTime {
+                HStack(spacing: 12) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "play.fill")
+                            .font(.caption2)
+                        Text(MR.plurals().plays_count.localized(Int32(allTime.plays)))
+                            .font(.caption2.bold())
                     }
+                    .foregroundColor(Color(hex: 0x00b4d8))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color(hex: 0x00b4d8).opacity(0.12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color(hex: 0x00b4d8).opacity(0.5), lineWidth: 1)
+                    )
+                    .cornerRadius(6)
+
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.caption2)
+                        Text(formatWatchTime(ms: allTime.watchTimeMs))
+                            .font(.caption2.bold())
+                    }
+                    .foregroundColor(Color(hex: 0x00b4d8))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color(hex: 0x00b4d8).opacity(0.12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color(hex: 0x00b4d8).opacity(0.5), lineWidth: 1)
+                    )
+                    .cornerRadius(6)
                 }
             }
 

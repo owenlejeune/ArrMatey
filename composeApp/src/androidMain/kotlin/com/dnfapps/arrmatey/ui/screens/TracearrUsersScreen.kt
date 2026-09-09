@@ -278,67 +278,67 @@ private fun TracearrUserCard(
                         )
                     }
                 }
+            }
 
-                stats?.windows?.allTime?.let { allTime ->
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        AssistChip(
-                            onClick = onClick,
-                            label = {
-                                Text(
-                                    text = mokoPlural(MR.plurals.plays_count, allTime.plays),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TracearrBlue,
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = null,
-                                    tint = TracearrBlue,
-                                    modifier = Modifier.size(12.dp),
-                                )
-                            },
-                            border = AssistChipDefaults.assistChipBorder(
-                                enabled = true,
-                                borderColor = TracearrBlue.copy(alpha = 0.5f),
-                            ),
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = TracearrBlue.copy(alpha = 0.12f),
-                                labelColor = TracearrBlue,
-                            ),
-                        )
-                        AssistChip(
-                            onClick = onClick,
-                            label = {
-                                Text(
-                                    text = formatWatchTimeMs(allTime.watchTimeMs),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TracearrBlue,
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Schedule,
-                                    contentDescription = null,
-                                    tint = TracearrBlue,
-                                    modifier = Modifier.size(12.dp),
-                                )
-                            },
-                            border = AssistChipDefaults.assistChipBorder(
-                                enabled = true,
-                                borderColor = TracearrBlue.copy(alpha = 0.5f),
-                            ),
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = TracearrBlue.copy(alpha = 0.12f),
-                                labelColor = TracearrBlue,
-                            ),
-                        )
-                    }
+            stats?.windows?.allTime?.let { allTime ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AssistChip(
+                        onClick = onClick,
+                        label = {
+                            Text(
+                                text = mokoPlural(MR.plurals.plays_count, allTime.plays),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = TracearrBlue,
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                tint = TracearrBlue,
+                                modifier = Modifier.size(12.dp),
+                            )
+                        },
+                        border = AssistChipDefaults.assistChipBorder(
+                            enabled = true,
+                            borderColor = TracearrBlue.copy(alpha = 0.5f),
+                        ),
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = TracearrBlue.copy(alpha = 0.12f),
+                            labelColor = TracearrBlue,
+                        ),
+                    )
+                    AssistChip(
+                        onClick = onClick,
+                        label = {
+                            Text(
+                                text = formatWatchTimeMs(allTime.watchTimeMs),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = TracearrBlue,
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = null,
+                                tint = TracearrBlue,
+                                modifier = Modifier.size(12.dp),
+                            )
+                        },
+                        border = AssistChipDefaults.assistChipBorder(
+                            enabled = true,
+                            borderColor = TracearrBlue.copy(alpha = 0.5f),
+                        ),
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = TracearrBlue.copy(alpha = 0.12f),
+                            labelColor = TracearrBlue,
+                        ),
+                    )
                 }
             }
 
