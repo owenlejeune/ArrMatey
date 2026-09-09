@@ -439,11 +439,20 @@ fun UnifiedMediaDetailsScreen(
                             )
                         }
 
-                        val canDeleteFile = when (resolvedType) {
-                            InstanceType.Radarr -> (success.arrMedia as? ArrMovie)?.let { it.movieFile != null || it.movieFileId != null } == true
-                            InstanceType.Listenarr -> (success.arrMedia as? Audiobook)?.let { it.files.isNotEmpty() || it.fileCount > 0 || !it.filePath.isNullOrBlank() } == true
-                            else -> false
-                        }
+                        val canDeleteFile =
+                            when (resolvedType) {
+                                InstanceType.Radarr ->
+                                    (success.arrMedia as? ArrMovie)?.let { it.movieFile != null || it.movieFileId != null } ==
+                                        true
+                                InstanceType.Listenarr ->
+                                    (success.arrMedia as? Audiobook)?.let {
+                                        it.files.isNotEmpty() ||
+                                            it.fileCount > 0 ||
+                                            !it.filePath.isNullOrBlank()
+                                    } ==
+                                        true
+                                else -> false
+                            }
 
                         UnifiedMediaDetailsToolbarMenu(
                             success = success,
@@ -461,15 +470,18 @@ fun UnifiedMediaDetailsScreen(
                             },
                             onEdit = { showEditSheet = true },
                             onDelete = { confirmDelete = true },
-                            onDeleteFile = if (canDeleteFile) {
-                                {
-                                    if (resolvedType == InstanceType.Radarr) {
-                                        confirmDeleteMovie = true
-                                    } else {
-                                        confirmDeleteAudiobookFile = true
+                            onDeleteFile =
+                                if (canDeleteFile) {
+                                    {
+                                        if (resolvedType == InstanceType.Radarr) {
+                                            confirmDeleteMovie = true
+                                        } else {
+                                            confirmDeleteAudiobookFile = true
+                                        }
                                     }
-                                }
-                            } else null,
+                                } else {
+                                    null
+                                },
                             onMarkAsAvailable = { viewModel.markSeerrMediaAsAvailable() },
                             onRemoveFromService = { confirmRemoveFromService = true },
                             onClearData = { confirmClearData = true },
