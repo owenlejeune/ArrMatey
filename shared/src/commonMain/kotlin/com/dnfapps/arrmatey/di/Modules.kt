@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.usecase.AddMediaItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.ApplyCustomFilterItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
+import com.dnfapps.arrmatey.arr.usecase.DeleteAudiobookFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteBookFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteEpisodeFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
@@ -367,6 +368,7 @@ val useCaseModule =
         factory { ScheduleNotificationUseCase(get(), get()) }
         factory { DeleteBookFilesUseCase() }
         factory { DeleteMovieFileUseCase() }
+        factory { DeleteAudiobookFileUseCase() }
         factory { GetAuthorFilesUseCase(get()) }
         factory { GetBookEditionUseCase() }
         factory { GetBookHistoryUseCase() }
@@ -435,6 +437,7 @@ val viewModelModule =
                 deleteSeasonFilesUseCase = get(),
                 deleteAlbumFilesUseCase = get(),
                 deleteMovieFileUseCase = get(),
+                deleteAudiobookFileUseCase = get(),
                 deleteEpisodeFileUseCase = get(),
                 submitIssueUseCase = get(),
                 observeInstancePreferencesUseCase = get(),

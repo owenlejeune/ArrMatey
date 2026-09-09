@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
+import com.dnfapps.arrmatey.arr.usecase.DeleteAudiobookFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteEpisodeFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
@@ -116,6 +117,7 @@ class UnifiedMediaDetailsViewModel(
     private val deleteSeasonFilesUseCase: DeleteSeasonFilesUseCase,
     private val deleteAlbumFilesUseCase: DeleteAlbumFilesUseCase,
     private val deleteMovieFileUseCase: DeleteMovieFileUseCase,
+    private val deleteAudiobookFileUseCase: DeleteAudiobookFileUseCase,
     private val deleteEpisodeFileUseCase: DeleteEpisodeFileUseCase,
     private val submitIssueUseCase: SubmitIssueUseCase,
     observeInstancePreferencesUseCase: ObserveInstancePreferencesUseCase,
@@ -171,6 +173,9 @@ class UnifiedMediaDetailsViewModel(
 
     private val _deleteMovieFileStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val deleteMovieFileStatus: StateFlow<OperationStatus> = _deleteMovieFileStatus.asStateFlow()
+
+    private val _deleteAudiobookFileStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val deleteAudiobookFileStatus: StateFlow<OperationStatus> = _deleteAudiobookFileStatus.asStateFlow()
 
     private val _deleteEpisodeStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val deleteEpisodeStatus: StateFlow<OperationStatus> = _deleteEpisodeStatus.asStateFlow()
@@ -1255,6 +1260,33 @@ class UnifiedMediaDetailsViewModel(
                     } else if (status is OperationStatus.Error) {
                         delay(2000.milliseconds)
                         _deleteMovieFileStatus.value = OperationStatus.Idle
+                    }
+                }
+        }
+    }
+
+    fun deleteAudiobookFile() {
+        viewModelScope.launch {
+            val repository = getActiveArrRepository() ?: return@launch
+            val audiobook = getEffectiveArrMedia() as? Audiobook ?: return@launch
+            val audiobookId = audiobook.id?.takeIf { it != 0L } ?: return@launch
+            val fileIds = audiobook.files.map { it.id }
+            if (fileIds.isEmpty()) {
+                _deleteAudiobookFileStatus.value = OperationStatus.Error(message = "No audiobook file to delete")
+                delay(2000.milliseconds)
+                _deleteAudiobookFileStatus.value = OperationStatus.Idle
+                return@launch
+            }
+            deleteAudiobookFileUseCase(audiobookId, fileIds, repository)
+                .collect { status ->
+                    _deleteAudiobookFileStatus.value = status
+                    if (status is OperationStatus.Success) {
+                        delay(500.milliseconds)
+                        _deleteAudiobookFileStatus.value = OperationStatus.Idle
+                        refresh()
+                    } else if (status is OperationStatus.Error) {
+                        delay(2000.milliseconds)
+                        _deleteAudiobookFileStatus.value = OperationStatus.Idle
                     }
                 }
         }

@@ -374,4 +374,18 @@ open class ArrInstanceRepository(
 
     open suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> =
         (this as? ListenarrRepository)?.toggleAudiobookMonitor(audiobook) ?: NetworkResult.Error(message = "Not a Listenarr instance")
+
+    open suspend fun deleteAudiobookFile(
+        audiobookId: Long,
+        fileId: Long,
+    ): NetworkResult<Unit> =
+        (this as? ListenarrRepository)?.deleteAudiobookFile(audiobookId, fileId)
+            ?: NetworkResult.Error(message = "Not a Listenarr instance")
+
+    open suspend fun deleteAudiobookFiles(
+        audiobookId: Long,
+        fileIds: List<Long>,
+    ): NetworkResult<Unit> =
+        (this as? ListenarrRepository)?.deleteAudiobookFiles(audiobookId, fileIds)
+            ?: NetworkResult.Error(message = "Not a Listenarr instance")
 }

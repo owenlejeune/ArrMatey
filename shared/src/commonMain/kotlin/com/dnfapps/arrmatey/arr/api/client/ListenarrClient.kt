@@ -34,6 +34,7 @@ import com.dnfapps.arrmatey.extensions.isBetween
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.filterValues
+import com.dnfapps.networking.onError
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.buildJsonObject
@@ -201,4 +202,28 @@ class ListenarrClient(
                 put("destinationPath", destinationPath)
             },
         )
+
+    suspend fun deleteAudiobookFile(
+        audiobookId: Long,
+        fileId: Long,
+    ): NetworkResult<Unit> =
+        delete<Unit>("library/$audiobookId/file/$fileId")
+            .onError { _, _, _ ->
+                delete<Unit>("audiobookfile/$fileId")
+            }
+
+    suspend fun deleteAudiobookFiles(
+        audiobookId: Long,
+        fileIds: List<Long>,
+    ): NetworkResult<Unit> {
+        if (fileIds.isEmpty()) return NetworkResult.Success(Unit)
+        var lastResult: NetworkResult<Unit> = NetworkResult.Success(Unit)
+        for (fileId in fileIds) {
+            val result = deleteAudiobookFile(audiobookId, fileId)
+            if (result is NetworkResult.Error) {
+                lastResult = result
+            }
+        }
+        return lastResult
+    }
 }
