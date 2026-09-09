@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -39,8 +40,35 @@ class TracearrUsersViewModel(
                 initialValue = null,
             )
 
-    private val _state = MutableStateFlow<TracearrUsersState>(TracearrUsersState.Initial)
-    val state: StateFlow<TracearrUsersState> = _state.asStateFlow()
+    private val _rawState = MutableStateFlow<TracearrUsersState>(TracearrUsersState.Initial)
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    val state: StateFlow<TracearrUsersState> =
+        combine(_rawState, _searchQuery) { rawState, query ->
+            val trimmedQuery = query.trim()
+            if (rawState is TracearrUsersState.Success) {
+                val filtered = if (trimmedQuery.isBlank()) {
+                    rawState.users
+                } else {
+                    rawState.users.filter { user ->
+                        user.username?.contains(trimmedQuery, ignoreCase = true) == true ||
+                        user.email?.contains(trimmedQuery, ignoreCase = true) == true ||
+                        user.accounts.any { acc ->
+                            acc.username?.contains(trimmedQuery, ignoreCase = true) == true
+                        }
+                    }
+                }
+                rawState.copy(filteredUsers = filtered, searchQuery = trimmedQuery)
+            } else {
+                rawState
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = TracearrUsersState.Initial,
+        )
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -52,12 +80,16 @@ class TracearrUsersViewModel(
         viewModelScope.launch {
             currentRepository.collect { repo ->
                 if (repo == null) {
-                    _state.value = TracearrUsersState.NoInstance
+                    _rawState.value = TracearrUsersState.NoInstance
                 } else {
                     loadUsers(repo, isRefresh = true)
                 }
             }
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
     }
 
     fun refresh() {
@@ -71,12 +103,12 @@ class TracearrUsersViewModel(
 
     fun loadMore() {
         val repo = currentRepository.value ?: return
-        val currentState = _state.value as? TracearrUsersState.Success ?: return
+        val currentState = _rawState.value as? TracearrUsersState.Success ?: return
         if (!currentState.hasMore || isLoadingPage || nextCursor.isNullOrBlank()) return
 
         viewModelScope.launch {
             isLoadingPage = true
-            _state.update {
+            _rawState.update {
                 if (it is TracearrUsersState.Success) {
                     it.copy(isLoadingMore = true)
                 } else it
@@ -89,11 +121,13 @@ class TracearrUsersViewModel(
                     val hasMore = !nextCursor.isNullOrBlank()
                     val newStatsMap = fetchStatsForUsers(repo, newItems)
 
-                    _state.update { old ->
+                    _rawState.update { old ->
                         if (old is TracearrUsersState.Success) {
+                            val allUsers = old.users + newItems
+                            val allStatsMap = old.userStatsMap + newStatsMap
                             old.copy(
-                                users = old.users + newItems,
-                                userStatsMap = old.userStatsMap + newStatsMap,
+                                users = allUsers,
+                                userStatsMap = allStatsMap,
                                 isLoadingMore = false,
                                 hasMore = hasMore,
                                 nextCursor = nextCursor,
@@ -102,7 +136,7 @@ class TracearrUsersViewModel(
                     }
                 }
                 .onError { _, _, _ ->
-                    _state.update { old ->
+                    _rawState.update { old ->
                         if (old is TracearrUsersState.Success) {
                             old.copy(isLoadingMore = false)
                         } else old
@@ -115,7 +149,7 @@ class TracearrUsersViewModel(
 
     private suspend fun loadUsers(repo: TracearrRepository, isRefresh: Boolean) {
         if (isRefresh) {
-            _state.value = TracearrUsersState.Loading
+            _rawState.value = TracearrUsersState.Loading
             nextCursor = null
         }
 
@@ -126,7 +160,7 @@ class TracearrUsersViewModel(
                 nextCursor = response.meta?.nextCursor
                 val hasMore = !nextCursor.isNullOrBlank()
                 val statsMap = fetchStatsForUsers(repo, response.data)
-                _state.value = TracearrUsersState.Success(
+                _rawState.value = TracearrUsersState.Success(
                     users = response.data,
                     userStatsMap = statsMap,
                     isLoadingMore = false,
@@ -135,7 +169,7 @@ class TracearrUsersViewModel(
                 )
             }
             .onError { _, msg, _ ->
-                _state.value = TracearrUsersState.Error(msg ?: "Failed to load users")
+                _rawState.value = TracearrUsersState.Error(msg ?: "Failed to load users")
             }
 
         isLoadingPage = false

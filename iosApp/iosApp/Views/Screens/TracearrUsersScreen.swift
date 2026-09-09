@@ -11,9 +11,9 @@ struct TracearrUsersScreen: View {
                 NoInstanceView(type: .tracearr)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let success = viewModel.state as? TracearrUsersState.Success {
-                if success.users.isEmpty {
+                if success.filteredUsers.isEmpty {
                     VStack(spacing: 8) {
-                        Text(MR.strings().no_history.localized())
+                        Text(success.searchQuery.isEmpty ? MR.strings().no_history.localized() : MR.strings().no_results_found.localized())
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -21,7 +21,7 @@ struct TracearrUsersScreen: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {
-                            ForEach(success.users, id: \.id) { userDetail in
+                            ForEach(success.filteredUsers, id: \.id) { userDetail in
                                 TracearrUserCardView(
                                     detail: userDetail,
                                     stats: success.userStatsMap[userDetail.id]
@@ -66,6 +66,7 @@ struct TracearrUsersScreen: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .searchable(text: $viewModel.searchQuery, prompt: MR.strings().search.localized())
         .navigationTitle(MR.strings().users.localized())
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -165,7 +166,6 @@ struct TracearrUserCardView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "server.rack")
                                 .font(.caption2)
-                                .foregroundColor(serverColor)
                             Text(label)
                                 .font(.caption.bold())
                                 .foregroundColor(serverColor)

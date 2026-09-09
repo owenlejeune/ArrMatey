@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Dns
@@ -39,7 +40,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +57,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
 import com.dnfapps.arrmatey.tracearr.state.TracearrUsersState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUsersViewModel
+import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
@@ -75,17 +76,17 @@ fun TracearrUsersScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val textFieldState = rememberTextFieldState()
+
+    LaunchedEffect(textFieldState.text) {
+        viewModel.updateSearchQuery(textFieldState.text.toString())
+    }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = mokoString(MR.strings.users),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
+            ArrAppBarWithSearch(
+                textFieldState = textFieldState,
+                searchPlaceholder = mokoString(MR.strings.search),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -171,7 +172,7 @@ fun TracearrUsersScreen(
                         ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        if (currentState.users.isEmpty()) {
+                        if (currentState.filteredUsers.isEmpty()) {
                             item {
                                 Box(
                                     modifier = Modifier
@@ -180,7 +181,7 @@ fun TracearrUsersScreen(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
-                                        text = mokoString(MR.strings.no_history),
+                                        text = if (currentState.searchQuery.isBlank()) mokoString(MR.strings.no_history) else mokoString(MR.strings.no_results_found),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -188,7 +189,7 @@ fun TracearrUsersScreen(
                             }
                         } else {
                             items(
-                                items = currentState.users,
+                                items = currentState.filteredUsers,
                                 key = { "user_${it.id}" },
                             ) { userDetail ->
                                 TracearrUserCard(

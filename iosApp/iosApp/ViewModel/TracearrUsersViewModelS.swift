@@ -7,6 +7,11 @@ class TracearrUsersViewModelS: ObservableObject {
 
     @Published private(set) var state: TracearrUsersState = TracearrUsersState.Initial()
     @Published private(set) var isRefreshing: Bool = false
+    @Published var searchQuery: String = "" {
+        didSet {
+            viewModel.updateSearchQuery(query: searchQuery)
+        }
+    }
 
     init() {
         self.viewModel = KoinBridge.shared.getTracearrUsersViewModel()
@@ -15,6 +20,11 @@ class TracearrUsersViewModelS: ObservableObject {
 
     private func startObserving() {
         viewModel.state.observeAsync(on: self, to: \.state)
+        viewModel.searchQuery.observeAsync(on: self) { owner, query in
+            if owner.searchQuery != query {
+                owner.searchQuery = query
+            }
+        }
         viewModel.isRefreshing.observeAsync(on: self) { owner, refreshing in
             owner.isRefreshing = refreshing.boolValue
         }
@@ -26,5 +36,9 @@ class TracearrUsersViewModelS: ObservableObject {
 
     func loadMore() {
         viewModel.loadMore()
+    }
+
+    func updateSearchQuery(_ query: String) {
+        viewModel.updateSearchQuery(query: query)
     }
 }
