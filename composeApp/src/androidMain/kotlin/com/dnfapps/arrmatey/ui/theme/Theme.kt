@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.Surface
@@ -13,9 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -28,6 +26,24 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ArrMateyTheme(content: @Composable () -> Unit) {
+    val isPreview = LocalInspectionMode.current
+    val isSystemDark = isSystemInDarkTheme()
+
+    if (isPreview) {
+        val colorScheme = if (isSystemDark) DarkColorPalette else LightColorPalette
+        MaterialExpressiveTheme(
+            colorScheme = colorScheme,
+            typography = typography(),
+            content = {
+                Surface(
+                    color = colorScheme.background,
+                    content = content,
+                )
+            },
+        )
+        return
+    }
+
     val preferences = koinInject<PreferencesStore>()
 
     val themeSettings by remember(preferences) {
@@ -36,23 +52,7 @@ fun ArrMateyTheme(content: @Composable () -> Unit) {
         }
     }.collectAsStateWithLifecycle(null)
 
-    val isSystemDark = isSystemInDarkTheme()
-
-    if (themeSettings == null) {
-        MaterialExpressiveTheme(
-            colorScheme = if (isSystemDark) DarkColorPalette else LightColorPalette,
-            content = {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = if (isSystemDark) Color.Black else Color.White,
-                ) {}
-            },
-            typography = typography(),
-        )
-        return
-    }
-
-    val (appTheme, appColor) = themeSettings!!
+    val (appTheme, appColor) = themeSettings ?: (AppTheme.System to AppColor.ArrMatey)
 
     val isDarkTheme =
         when (appTheme) {
@@ -89,7 +89,12 @@ fun ArrMateyTheme(content: @Composable () -> Unit) {
 
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
-        content = content,
         typography = typography(),
+        content = {
+            Surface(
+                color = colorScheme.background,
+                content = content,
+            )
+        },
     )
 }

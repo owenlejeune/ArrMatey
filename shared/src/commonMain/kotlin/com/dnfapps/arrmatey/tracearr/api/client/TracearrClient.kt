@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUsersResponse
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrViolationsResponse
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
 import io.ktor.client.HttpClient
@@ -37,6 +38,17 @@ class TracearrClient(
     suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> {
         val url = "$v1BaseUrl/public/stats/today"
         return httpClient.safeGet(url)
+    }
+
+    suspend fun getViolations(
+        page: Int? = null,
+        pageSize: Int? = null,
+    ): NetworkResult<TracearrViolationsResponse> {
+        val url = "$v1BaseUrl/public/violations"
+        return httpClient.safeGet(url) {
+            page?.let { parameter("page", it) }
+            pageSize?.let { parameter("pageSize", it) }
+        }
     }
 
     suspend fun getHistory(

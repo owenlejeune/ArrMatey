@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUsersResponse
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrViolationsResponse
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
@@ -89,6 +90,12 @@ class TracearrRepository(
         pageSize: Int? = null,
     ): NetworkResult<TracearrUsersResponse> =
         tracearrClient.getUsers(cursor = cursor, pageSize = pageSize)
+
+    suspend fun getViolations(
+        page: Int? = null,
+        pageSize: Int? = null,
+    ): NetworkResult<TracearrViolationsResponse> =
+        tracearrClient.getViolations(page = page, pageSize = pageSize)
 
     suspend fun getUserDetails(ref: String): NetworkResult<TracearrUserDetail> =
         resolveUserDetail(ref)

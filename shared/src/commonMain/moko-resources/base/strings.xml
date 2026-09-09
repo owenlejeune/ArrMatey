@@ -887,6 +887,9 @@
     <string name="plays">Plays</string>
     <string name="active_users">Active Users</string>
     <string name="users">Users</string>
+    <string name="acknowledged">Acknowledged</string>
+    <string name="no_violations_found">No violations found</string>
+    <string name="violations">Violations</string>
     <string name="sessions">Sessions</string>
     <string name="movie_singular">Movie</string>
     <string name="track">Track</string>

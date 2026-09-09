@@ -68,6 +68,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrHistoryViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUsersViewModel
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViolationsViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.backup.AesTransportEncryptor
 import com.dnfapps.arrmatey.backup.TransportEncryptor
@@ -134,6 +135,7 @@ import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrHistoryUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStatsTodayUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStreamsUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrUsersUseCase
+import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrViolationsUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetUserDetailUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetUserHistoryUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetUserStatsUseCase
@@ -338,6 +340,7 @@ val useCaseModule =
         factory { GetTracearrStatsTodayUseCase() }
         factory { GetTracearrHistoryUseCase() }
         factory { GetTracearrUsersUseCase() }
+        factory { GetTracearrViolationsUseCase() }
         factory { GetUserDetailUseCase() }
         factory { GetUserStatsUseCase() }
         factory { GetUserHistoryUseCase() }
@@ -543,6 +546,7 @@ val viewModelModule =
         viewModelOf(::TracearrViewModel)
         viewModelOf(::TracearrHistoryViewModel)
         viewModelOf(::TracearrUsersViewModel)
+        viewModelOf(::TracearrViolationsViewModel)
         viewModel { (userRef: String) ->
             TracearrUserViewModel(userRef, get(), get(), get(), get())
         }

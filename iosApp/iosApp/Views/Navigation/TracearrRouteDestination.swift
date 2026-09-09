@@ -12,6 +12,8 @@ struct TracearrRouteDestination: View {
             TracearrUserScreen(userRef: userRef)
         case .users:
             TracearrUsersScreen()
+        case .violations:
+            TracearrViolationsScreen()
         }
     }
 }

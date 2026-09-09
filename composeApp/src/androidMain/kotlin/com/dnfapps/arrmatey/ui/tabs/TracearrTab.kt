@@ -20,6 +20,7 @@ import com.dnfapps.arrmatey.ui.screens.TracearrHistoryScreen
 import com.dnfapps.arrmatey.ui.screens.TracearrHomeScreen
 import com.dnfapps.arrmatey.ui.screens.TracearrUserScreen
 import com.dnfapps.arrmatey.ui.screens.TracearrUsersScreen
+import com.dnfapps.arrmatey.ui.screens.TracearrViolationsScreen
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -54,6 +55,9 @@ fun TracearrTab(
                     },
                     onNavigateToAllUsers = {
                         navigation.navigateTo(TracearrScreen.Users)
+                    },
+                    onNavigateToViolations = {
+                        navigation.navigateTo(TracearrScreen.Violations)
                     }
                 )
             }
@@ -81,6 +85,11 @@ fun TracearrTab(
                     onNavigateToUser = { userRef ->
                         navigation.navigateTo(TracearrScreen.User(userRef))
                     }
+                )
+            }
+            entry<TracearrScreen.Violations> {
+                TracearrViolationsScreen(
+                    onNavigateBack = { navigation.popBackStack() }
                 )
             }
             mediaNavEntries(

@@ -55,6 +55,9 @@ struct TracearrTabContent: View {
                                 },
                                 onNavigateToAllUsers: {
                                     navigationManager.go(to: TracearrRoute.users)
+                                },
+                                onNavigateToViolations: {
+                                    navigationManager.go(to: TracearrRoute.violations)
                                 }
                             )
                         }
@@ -650,6 +653,7 @@ struct TracearrDashboardStatsView: View {
     var isExpanded: Bool = false
     var onNavigateToHistory: (() -> Void)? = nil
     var onNavigateToAllUsers: (() -> Void)? = nil
+    var onNavigateToViolations: (() -> Void)? = nil
 
     private static let tracearrBlue = Color(hex: 0x00b4d8)
     private static let tracearrDarkBlue = Color(hex: 0x00507a)
@@ -674,7 +678,8 @@ struct TracearrDashboardStatsView: View {
                     label: MR.strings().alerts.localized(),
                     count: Int(stats.alertsLast24h),
                     containerColor: stats.alertsLast24h > 0 ? Color.red.opacity(0.8) : Self.tracearrDarkBlue,
-                    contentColor: .white
+                    contentColor: .white,
+                    onClick: onNavigateToViolations
                 )
 
                 SplitStatCard(

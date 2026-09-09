@@ -43,6 +43,7 @@ fun TracearrDashboardStatsSection(
     isExpanded: Boolean,
     onNavigateToHistory: () -> Unit,
     onNavigateToAllUsers: () -> Unit,
+    onNavigateToViolations: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -77,7 +78,8 @@ fun TracearrDashboardStatsSection(
                 count = stats.alertsLast24h,
                 label = mokoString(MR.strings.alerts),
                 containerColor = if (stats.alertsLast24h > 0) MaterialTheme.colorScheme.errorContainer else TracearrDarkBlue,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                onClick = onNavigateToViolations
             )
             SplitStatCard(
                 icon = Icons.Default.PlayArrow,
