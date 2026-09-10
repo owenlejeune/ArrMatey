@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -98,6 +100,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import sh.calvin.reorderable.rememberScroller
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -437,93 +440,105 @@ private fun DrawerContent(
         )
         HorizontalDivider()
 
-        drawerTabs.forEach { item ->
-            NavigationDrawerItem(
-                label = {
-                    when (item) {
-                        is TabItem.Standard -> Text(mokoString(item.resource))
-                        is TabItem.CustomWebpage -> Text(item.name)
-                        else -> {}
-                    }
-                },
-                selected = overlayTab == item && !isEditMode,
-                icon = {
-                    when (item) {
-                        is TabItem.Standard -> {
-                            TabItemIconView(item, useServiceNavIcons, activityQueueIssuesCount)
+        Column(
+            modifier = Modifier.weight(1f)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            drawerTabs.forEach { item ->
+                NavigationDrawerItem(
+                    label = {
+                        when (item) {
+                            is TabItem.Standard -> Text(mokoString(item.resource))
+                            is TabItem.CustomWebpage -> Text(item.name)
+                            else -> {}
                         }
+                    },
+                    selected = overlayTab == item && !isEditMode,
+                    icon = {
+                        when (item) {
+                            is TabItem.Standard -> {
+                                TabItemIconView(item, useServiceNavIcons, activityQueueIssuesCount)
+                            }
 
-                        is TabItem.CustomWebpage -> {
-                            Icon(Icons.Default.Language, contentDescription = null)
+                            is TabItem.CustomWebpage -> {
+                                Icon(Icons.Default.Language, contentDescription = null)
+                            }
+
+                            else -> {}
                         }
+                    },
+                    badge = {
+                        AnimatedVisibility(
+                            visible = isEditMode,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.VisibilityOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                    },
+                    onClick = {
+                        if (isEditMode) {
+                            tabToHide = item
+                        } else {
+                            onDrawerTabClick(item)
+                        }
+                    },
+                )
+            }
 
-                        else -> {}
-                    }
-                },
-                badge = {
-                    AnimatedVisibility(
-                        visible = isEditMode,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.VisibilityOff,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
+            Spacer(Modifier.weight(1f))
+
+            AnimatedVisibility(
+                visible = showHiddenSection && tabConfig.hiddenTabs.isNotEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    Text(
+                        text = mokoString(MR.strings.navigation_items_hidden),
+                        modifier = Modifier.padding(start = 12.dp, bottom = 4.dp),
+                    )
+                    tabConfig.hiddenTabs.forEach { item ->
+                        NavigationDrawerItem(
+                            label = {
+                                when (item) {
+                                    is TabItem.Standard -> Text(mokoString(item.resource))
+                                    is TabItem.CustomWebpage -> Text(item.name)
+                                    else -> {}
+                                }
+                            },
+                            selected = false,
+                            icon = {
+                                when (item) {
+                                    is TabItem.Standard -> {
+                                        TabItemIconView(
+                                            item,
+                                            useServiceNavIcons,
+                                            activityQueueIssuesCount
+                                        )
+                                    }
+
+                                    is TabItem.CustomWebpage -> {
+                                        Icon(Icons.Default.Language, contentDescription = null)
+                                    }
+
+                                    else -> {}
+                                }
+                            },
+                            onClick = {
+                                if (isEditMode) {
+                                    tabManager.restoreTab(item)
+                                } else {
+                                    onDrawerTabClick(item)
+                                }
+                                showHiddenSection = false
+                            },
                         )
                     }
-                },
-                onClick = {
-                    if (isEditMode) {
-                        tabToHide = item
-                    } else {
-                        onDrawerTabClick(item)
-                    }
-                },
-            )
-        }
-
-        Spacer(Modifier.weight(1f))
-
-        AnimatedVisibility(
-            visible = showHiddenSection && tabConfig.hiddenTabs.isNotEmpty(),
-            enter = fadeIn(),
-            exit = fadeOut(),
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                Text(
-                    text = mokoString(MR.strings.navigation_items_hidden),
-                    modifier = Modifier.padding(start = 12.dp, bottom = 4.dp),
-                )
-                tabConfig.hiddenTabs.forEach { item ->
-                    NavigationDrawerItem(
-                        label = {
-                            when (item) {
-                                is TabItem.Standard -> Text(mokoString(item.resource))
-                                is TabItem.CustomWebpage -> Text(item.name)
-                                else -> {}
-                            }
-                        },
-                        selected = false,
-                        icon = {
-                            when (item) {
-                                is TabItem.Standard -> {
-                                    TabItemIconView(item, useServiceNavIcons, activityQueueIssuesCount)
-                                }
-                                is TabItem.CustomWebpage -> {
-                                    Icon(Icons.Default.Language, contentDescription = null)
-                                }
-                                else -> {}
-                            }
-                        },
-                        onClick = {
-                            if (isEditMode) {
-                                tabManager.restoreTab(item)
-                            } else {
-                                onDrawerTabClick(item)
-                            }
-                            showHiddenSection = false
-                        },
-                    )
                 }
             }
         }
