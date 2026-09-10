@@ -911,4 +911,12 @@
     <string name="top_genres">Top Genres</string>
     <string name="last_30_days">Last 30 Days</string>
     <string name="last_7_days">Last 7 Days</string>
+    <string name="plays_over_time">Plays Over Time</string>
+    <string name="concurrent_streams">Concurrent Streams</string>
+    <string name="activity_by_day_of_week">Activity by Day of Week</string>
+    <string name="activity_by_hour_of_day">Activity by Hour of Day</string>
+    <string name="platforms">Platforms</string>
+    <string name="stream_quality">Stream Quality</string>
+    <string name="week">Week</string>
+    <string name="month">Month</string>
 </resources>

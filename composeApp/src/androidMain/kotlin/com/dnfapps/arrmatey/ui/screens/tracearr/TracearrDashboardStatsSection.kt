@@ -44,6 +44,7 @@ fun TracearrDashboardStatsSection(
     onNavigateToHistory: () -> Unit,
     onNavigateToAllUsers: () -> Unit,
     onNavigateToViolations: () -> Unit,
+    onNavigateToActivity: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -98,7 +99,8 @@ fun TracearrDashboardStatsSection(
                 label = mokoString(MR.strings.watch_time),
                 containerColor = TracearrLightBlue,
                 contentColor = TracearrDarkBlue,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                onClick = onNavigateToActivity
             )
             CountStatItem(
                 icon = Icons.Default.Group,

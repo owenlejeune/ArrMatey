@@ -45,6 +45,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrActivityViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrHistoryViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUserViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUsersViewModel
@@ -160,6 +161,8 @@ object KoinBridge : KoinComponent {
     fun getTracearrUsersViewModel(): TracearrUsersViewModel = getKoin().get()
 
     fun getTracearrViolationsViewModel(): TracearrViolationsViewModel = getKoin().get()
+
+    fun getTracearrActivityViewModel(): TracearrActivityViewModel = getKoin().get()
 
     fun getTracearrUserViewModel(userRef: String): TracearrUserViewModel = getKoin().get { parametersOf(userRef) }
 

@@ -169,4 +169,5 @@ sealed interface TracearrScreen : NavKey {
     data class User(val ref: String): TracearrScreen
     data object Users: TracearrScreen
     data object Violations: TracearrScreen
+    data object Activity: TracearrScreen
 }

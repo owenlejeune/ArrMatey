@@ -1,8 +1,10 @@
 package com.dnfapps.arrmatey.tracearr.api.client
 
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaDetails
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrPeriod
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
@@ -48,6 +50,13 @@ class TracearrClient(
         return httpClient.safeGet(url) {
             page?.let { parameter("page", it) }
             pageSize?.let { parameter("pageSize", it) }
+        }
+    }
+
+    suspend fun getActivity(period: TracearrPeriod): NetworkResult<TracearrActivityResponse> {
+        val url = "$v1BaseUrl/public/activity"
+        return httpClient.safeGet(url) {
+            parameter("period", period.value)
         }
     }
 

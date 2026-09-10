@@ -131,6 +131,7 @@ import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrActivityUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrHistoryUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStatsTodayUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStreamsUseCase
@@ -139,6 +140,7 @@ import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrViolationsUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetUserDetailUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetUserHistoryUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetUserStatsUseCase
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrActivityViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUserViewModel
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesUseCase
@@ -341,6 +343,7 @@ val useCaseModule =
         factory { GetTracearrHistoryUseCase() }
         factory { GetTracearrUsersUseCase() }
         factory { GetTracearrViolationsUseCase() }
+        factory { GetTracearrActivityUseCase() }
         factory { GetUserDetailUseCase() }
         factory { GetUserStatsUseCase() }
         factory { GetUserHistoryUseCase() }
@@ -547,6 +550,7 @@ val viewModelModule =
         viewModelOf(::TracearrHistoryViewModel)
         viewModelOf(::TracearrUsersViewModel)
         viewModelOf(::TracearrViolationsViewModel)
+        viewModelOf(::TracearrActivityViewModel)
         viewModel { (userRef: String) ->
             TracearrUserViewModel(userRef, get(), get(), get(), get())
         }

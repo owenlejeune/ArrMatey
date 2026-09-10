@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
+import com.dnfapps.arrmatey.ui.screens.TracearrActivityScreen
 import com.dnfapps.arrmatey.ui.screens.TracearrHistoryScreen
 import com.dnfapps.arrmatey.ui.screens.TracearrHomeScreen
 import com.dnfapps.arrmatey.ui.screens.TracearrUserScreen
@@ -58,6 +59,9 @@ fun TracearrTab(
                     },
                     onNavigateToViolations = {
                         navigation.navigateTo(TracearrScreen.Violations)
+                    },
+                    onNavigateToActivity = {
+                        navigation.navigateTo(TracearrScreen.Activity)
                     }
                 )
             }
@@ -89,6 +93,12 @@ fun TracearrTab(
             }
             entry<TracearrScreen.Violations> {
                 TracearrViolationsScreen(
+                    onNavigateBack = { navigation.popBackStack() }
+                )
+            }
+            entry<TracearrScreen.Activity> {
+                TracearrActivityScreen(
+                    isLargeScreen = isExpanded,
                     onNavigateBack = { navigation.popBackStack() }
                 )
             }

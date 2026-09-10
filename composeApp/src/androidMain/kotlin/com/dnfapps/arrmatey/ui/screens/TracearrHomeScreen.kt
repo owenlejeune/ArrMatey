@@ -67,6 +67,7 @@ fun TracearrHomeScreen(
     onNavigateToAllUsers: () -> Unit,
     onNavigateToViolations: () -> Unit,
     onNavigateToHistory: () -> Unit,
+    onNavigateToActivity: () -> Unit,
     isLargeScreen: Boolean = false,
     viewModel: TracearrViewModel = koinViewModel(),
     instancesViewModel: InstancesViewModel = koinViewModel(
@@ -168,7 +169,8 @@ fun TracearrHomeScreen(
                                     isExpanded = isLargeScreen,
                                     onNavigateToHistory = onNavigateToHistory,
                                     onNavigateToAllUsers = onNavigateToAllUsers,
-                                    onNavigateToViolations = onNavigateToViolations
+                                    onNavigateToViolations = onNavigateToViolations,
+                                    onNavigateToActivity = onNavigateToActivity
                                 )
                             }
                         }

@@ -41,6 +41,8 @@ kotlin {
             implementation(libs.flexible.bottomsheet)
 
             implementation(libs.kmp.logger)
+
+            implementation(libs.vico.compose.m3)
         }
         commonMain.dependencies {
             implementation(project.dependencies.platform(libs.koin.bom))

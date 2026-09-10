@@ -2,8 +2,10 @@ package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.tracearr.api.client.TracearrClient
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaDetails
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrPeriod
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
@@ -96,6 +98,9 @@ class TracearrRepository(
         pageSize: Int? = null,
     ): NetworkResult<TracearrViolationsResponse> =
         tracearrClient.getViolations(page = page, pageSize = pageSize)
+
+    suspend fun getActivity(period: TracearrPeriod = TracearrPeriod.Month): NetworkResult<TracearrActivityResponse> =
+        tracearrClient.getActivity(period)
 
     suspend fun getUserDetails(ref: String): NetworkResult<TracearrUserDetail> =
         resolveUserDetail(ref)
