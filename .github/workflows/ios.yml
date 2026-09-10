@@ -33,7 +33,7 @@ jobs:
           xcode-version: '26.x'
 
       - name: Cache Xcode DerivedData
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: derived_data
           key: ${{ runner.os }}-deriveddata-${{ hashFiles('iosApp/**/*.swift', 'shared/**/*.kt') }}
