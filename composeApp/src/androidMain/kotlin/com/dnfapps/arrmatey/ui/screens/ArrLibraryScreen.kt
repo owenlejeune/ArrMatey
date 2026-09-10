@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -316,7 +315,7 @@ fun ArrLibraryScreen(
                 }
             }
         },
-        contentWindowInsets = WindowInsets.statusBars,
+        contentWindowInsets = WindowInsets(0.dp),
     ) { paddingValues ->
         Box(
             modifier =
