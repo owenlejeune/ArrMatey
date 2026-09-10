@@ -206,7 +206,9 @@ fun HomeScreen(
         }
 
         ModalNavigationDrawer(
-            gesturesEnabled = overlayTab !is TabItem.CustomWebpage,
+            gesturesEnabled =
+                overlayTab !is TabItem.CustomWebpage &&
+                    !drawerState.isAnimationRunning,
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet(drawerState = drawerState) {
