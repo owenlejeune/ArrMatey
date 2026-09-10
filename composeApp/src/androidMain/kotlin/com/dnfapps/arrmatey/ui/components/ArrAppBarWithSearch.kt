@@ -7,7 +7,10 @@ import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
@@ -31,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.entensions.isCollapsed
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.shared.MR
@@ -127,6 +131,8 @@ fun ArrAppBarWithSearch(
         colors = colors,
         inputField = inputField,
         modifier = modifier.fillMaxWidth(),
+        contentPadding = WindowInsets.statusBars.asPaddingValues(),
+        windowInsets = WindowInsets(0.dp),
         navigationIcon = {
             AnimatedVisibility(
                 visible = searchBarState.isCollapsed(),
