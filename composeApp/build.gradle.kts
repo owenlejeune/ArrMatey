@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
@@ -9,79 +8,9 @@ plugins {
 }
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-            freeCompilerArgs.add("-Xno-param-names")
-        }
-    }
-
-    sourceSets {
-        androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.core.splashscreen)
-            implementation(libs.kotlinx.coroutines.android)
-            implementation(libs.koin.android)
-            implementation(libs.koin.core)
-            implementation(libs.androidx.navigation3.runtime)
-            implementation(libs.androidx.navigation3.ui)
-            implementation(libs.coil)
-            implementation(libs.coil.compose)
-            implementation(libs.coil.network)
-            implementation(libs.androidx.compose.adaptive.navigation.suite)
-            implementation(libs.androidx.adaptive)
-            implementation(libs.androidx.adaptive.layout)
-            implementation(libs.androidx.compose.window.size)
-            implementation(libs.androidx.browser)
-            implementation(libs.aboutlibraries.compose)
-            implementation(libs.reorderable)
-            implementation(libs.compose.markdown)
-            implementation(libs.google.fonts)
-            implementation(libs.flexible.bottomsheet)
-
-            implementation(libs.kmp.logger)
-        }
-        commonMain.dependencies {
-            implementation(project.dependencies.platform(libs.koin.bom))
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(projects.shared)
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.koin.compose.viewmodel)
-            implementation(libs.koin.compose.viewmodel.navigation)
-            implementation(libs.androidx.compose.material3.alpha)
-            implementation(libs.kotlinx.datetime)
-            implementation(libs.cloudy)
-
-            implementation(libs.moko.resources)
-            implementation(libs.moko.resources.compose)
-
-            implementation(libs.aboutlibraries)
-
-            implementation(libs.kmp.logger)
-        }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.turbine)
-            implementation(libs.koin.test)
-        }
-
-        androidUnitTest.dependencies {
-            implementation(libs.mockk)
-            implementation(libs.robolectric)
-            implementation(libs.androidx.compose.ui.test.junit4)
-            implementation(libs.androidx.test.monitor)
-        }
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
+        freeCompilerArgs.addAll("-Xno-param-names", "-Xexpect-actual-classes")
     }
 }
 
@@ -91,6 +20,19 @@ android {
         libs.versions.android.compileSdk
             .get()
             .toInt()
+
+    sourceSets {
+        getByName("main") {
+            manifest.srcFile("src/androidMain/AndroidManifest.xml")
+            java.srcDirs("src/androidMain/kotlin")
+            kotlin.srcDirs("src/androidMain/kotlin")
+            res.srcDirs("src/androidMain/res")
+        }
+        getByName("test") {
+            java.srcDirs("src/androidUnitTest/kotlin")
+            kotlin.srcDirs("src/androidUnitTest/kotlin")
+        }
+    }
 
     buildFeatures {
         buildConfig = true
@@ -142,7 +84,68 @@ android {
 }
 
 dependencies {
+    implementation(projects.shared)
+
+    implementation(compose.runtime)
+    implementation(compose.foundation)
+    implementation(compose.material3)
+    implementation(compose.materialIconsExtended)
+    implementation(compose.ui)
+    implementation(compose.components.resources)
+    implementation(compose.components.uiToolingPreview)
+    implementation(compose.preview)
+
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.kotlinx.coroutines.android)
+
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.android)
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.viewmodel)
+    implementation(libs.koin.compose.viewmodel.navigation)
+
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network)
+
+    implementation(libs.androidx.compose.adaptive.navigation.suite)
+    implementation(libs.androidx.adaptive)
+    implementation(libs.androidx.adaptive.layout)
+    implementation(libs.androidx.compose.window.size)
+    implementation(libs.androidx.browser)
+    implementation(libs.aboutlibraries.compose)
+    implementation(libs.reorderable)
+    implementation(libs.compose.markdown)
+    implementation(libs.google.fonts)
+    implementation(libs.flexible.bottomsheet)
+
+    implementation(libs.kmp.logger)
+    implementation(libs.androidx.lifecycle.viewmodelCompose)
+    implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.androidx.compose.material3.alpha)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.cloudy)
+
+    implementation(libs.moko.resources)
+    implementation(libs.moko.resources.compose)
+
+    implementation(libs.aboutlibraries)
+
     debugImplementation(compose.uiTooling)
+
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.koin.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.test.monitor)
 }
 
 aboutLibraries {

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey
 
-import com.dnfapps.arrmatey.shared.BuildConfig
-
-actual fun isDebug() = BuildConfig.DEBUG
+actual fun isDebug(): Boolean =
+    runCatching {
+        Class.forName("com.dnfapps.arrmatey.BuildConfig").getField("DEBUG").getBoolean(null)
+    }.getOrDefault(false)

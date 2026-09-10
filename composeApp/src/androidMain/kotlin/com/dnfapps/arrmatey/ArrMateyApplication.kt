@@ -8,19 +8,20 @@ import com.dnfapps.arrmatey.di.appModules
 import com.dnfapps.arrmatey.logging.LogFileManager
 import com.dnfapps.arrmatey.utils.CrashManager
 import com.dnfapps.arrmatey.utils.initializeNetworkUtils
-import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 
 class ArrMateyApplication :
     Application(),
+    KoinComponent,
     SingletonImageLoader.Factory {
-    private val imageLoader: ImageLoader by inject()
-    private val crashManager: CrashManager by inject()
-
     override fun onCreate() {
         super.onCreate()
 
+        LogFileManager.initialize(this)
         initializeNetworkUtils(this)
 
         startKoin {
@@ -28,9 +29,9 @@ class ArrMateyApplication :
             modules(appModules() + listOf(androidModule))
         }
 
-        LogFileManager.initialize(this)
+        val crashManager: CrashManager by inject()
         crashManager.initialize()
     }
 
-    override fun newImageLoader(context: PlatformContext): ImageLoader = imageLoader
+    override fun newImageLoader(context: PlatformContext): ImageLoader = get()
 }
