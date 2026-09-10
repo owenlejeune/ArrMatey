@@ -5,11 +5,11 @@ struct ContentView: View {
     @EnvironmentObject var navigationManager: NavigationManager
     @ObservedObject private var queueViewModel = ActivityQueueViewModelS()
     @ObservedObject private var preferences = PreferencesViewModel()
-    
+
     init() {
         let appearance = UITabBarAppearance()
         appearance.configureWithDefaultBackground()
-        
+
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
@@ -37,6 +37,7 @@ struct ContentView: View {
                         .tag(tabItem.key)
                     }
                 }
+                .toolbar(preferences.bottomTabItems.count <= 1 ? .hidden : .automatic, for: .tabBar)
             }
         }
         .onAppear {
@@ -50,10 +51,10 @@ struct ContentView: View {
                 .environmentObject(navigationManager)
         }
     }
-    
+
     private func validateSelection(items: [AnyTabItem]) {
         guard !items.isEmpty else { return }
-        
+
         if !items.contains(where: { $0.key == navigationManager.selectedTab.key }) {
             navigationManager.selectedTab = items.first!
         }
@@ -65,7 +66,7 @@ struct ContentView: View {
         }
         return 0
     }
-    
+
     private var toolbarItem: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
             Button {
@@ -123,7 +124,7 @@ struct AppLauncherGrid: View {
             }
         }
     }
-    
+
     private var launcherContent: some View {
         LazyVGrid(columns: columns, spacing: 25) {
             ForEach(preferences.drawerTabs, id: \.key) { item in
@@ -132,7 +133,7 @@ struct AppLauncherGrid: View {
                 } label: {
                     VStack(spacing: 12) {
                         launcherIcon(for: item.item)
-                        
+
                         Text(tabName(for: item.item))
                             .font(.caption)
                             .lineLimit(1)
@@ -171,7 +172,7 @@ struct AppLauncherGrid: View {
 struct LauncherTabView: View {
     let tabItem: TabItem
     @EnvironmentObject var navigationManager: NavigationManager
-    
+
     var body: some View {
         Group {
             if let standard = tabItem as? TabItemStandard {
