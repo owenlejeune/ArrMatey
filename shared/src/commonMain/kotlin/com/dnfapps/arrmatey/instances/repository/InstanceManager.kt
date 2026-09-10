@@ -65,8 +65,12 @@ class InstanceManager(
 
         instances.forEach { instance ->
             if (!currentRepos.containsKey(instance.id)) {
-                val httpClient = httpClientFactory.create(instance)
-                currentRepos[instance.id] = createScopedRepository(instance, httpClient, logger)
+                try {
+                    val httpClient = httpClientFactory.create(instance)
+                    currentRepos[instance.id] = createScopedRepository(instance, httpClient, logger)
+                } catch (e: Exception) {
+                    logger.error(e) { "Failed to create repository for instance ${instance.id} (${instance.type}): ${instance.label}" }
+                }
             }
         }
 
