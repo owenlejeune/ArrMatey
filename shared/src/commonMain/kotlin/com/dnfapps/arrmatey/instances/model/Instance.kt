@@ -19,7 +19,9 @@ import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.StringResource
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
 @Entity(
     tableName = "instances",
@@ -152,6 +154,9 @@ enum class InstanceType(
         mockMedia = MockMedia.Lidarr,
         associatedColor = ArrGreen,
     ),
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @JsonNames("Booksehlf", "Booksehelf", "Bookshelf")
     Bookshelf(
         resource = MR.strings.bookshelf_description,
         github = "https://github.com/pennydreadful/bookshelf",
