@@ -22,8 +22,10 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -43,15 +45,20 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.androidModule
 import com.dnfapps.arrmatey.di.appModules
@@ -80,6 +87,7 @@ import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
@@ -89,9 +97,15 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.Insets
+import com.patrykandpatrick.vico.compose.common.MarkerCornerBasedShape
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.pie.PieChart
 import com.patrykandpatrick.vico.compose.pie.PieChartHost
 import com.patrykandpatrick.vico.compose.pie.PieSize
@@ -137,6 +151,8 @@ fun TracearrActivityContent(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var isDualColumn by remember(isLargeScreen) { mutableStateOf(isLargeScreen) }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -148,6 +164,20 @@ fun TracearrActivityContent(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = mokoString(MR.strings.back),
                         )
+                    }
+                },
+                actions = {
+                    if (isLargeScreen) {
+                        IconButton(onClick = { isDualColumn = !isDualColumn }) {
+                            Icon(
+                                imageVector = if (isDualColumn) {
+                                    Icons.AutoMirrored.Filled.List
+                                } else Icons.Default.GridView,
+                                contentDescription = if (isDualColumn) {
+                                    "Single column"
+                                } else "Dual column",
+                            )
+                        }
                     }
                 },
             )
@@ -207,7 +237,7 @@ fun TracearrActivityContent(
                             modifier = Modifier.fillMaxWidth(),
                         )
 
-                        if (isLargeScreen) {
+                        if (isDualColumn) {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = PaddingValues(
@@ -342,6 +372,41 @@ private fun PeriodSelector(
 }
 
 @Composable
+private fun rememberMarker(): CartesianMarker {
+    val labelBackground = rememberShapeComponent(
+        fill = Fill(MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = MarkerCornerBasedShape(base = RoundedCornerShape(8.dp)),
+    )
+    val label = rememberTextComponent(
+        style = TextStyle(
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+        ),
+        padding = Insets(8.dp, 4.dp),
+        background = labelBackground,
+    )
+    return rememberDefaultCartesianMarker(
+        label = label,
+        guideline = rememberAxisGuidelineComponent(),
+    )
+}
+
+private fun formatChartDateLabel(dateStr: String?): String {
+    if (dateStr.isNullOrBlank()) return ""
+    val cleanDate = dateStr.split(" ").firstOrNull() ?: dateStr
+    val parts = cleanDate.split("-")
+    if (parts.size >= 3) {
+        val monthNum = parts[1].toIntOrNull() ?: return cleanDate
+        val dayNum = parts[2].toIntOrNull() ?: return cleanDate
+        val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+        val monthName = monthNames.getOrNull(monthNum - 1) ?: monthNum.toString()
+        return "$monthName $dayNum"
+    }
+    return dateStr
+}
+
+@Composable
 private fun PlaysOverTimeCard(
     plays: List<TracearrActivityPlay>,
     modifier: Modifier = Modifier,
@@ -355,11 +420,16 @@ private fun PlaysOverTimeCard(
         }
     }
 
-    val serverSeriesData = remember(plays, serverNames, unknownString) {
+    val dates = remember(plays) {
+        plays.mapNotNull { it.date }.distinct()
+    }
+    val dateLabels = remember(dates) {
+        dates.map { formatChartDateLabel(it) }
+    }
+
+    val serverSeriesData = remember(plays, serverNames, dates, unknownString) {
         if (plays.isEmpty()) return@remember emptyList()
-        val hasDates = plays.any { !it.date.isNullOrBlank() }
-        if (hasDates) {
-            val dates = plays.mapNotNull { it.date }.distinct()
+        if (dates.isNotEmpty()) {
             serverNames.map { server ->
                 dates.map { d ->
                     plays.firstOrNull { (it.serverId ?: unknownString) == server && it.date == d }?.count?.toDouble() ?: 0.0
@@ -431,7 +501,23 @@ private fun PlaysOverTimeCard(
                     chart = rememberCartesianChart(
                         rememberLineCartesianLayer(lineProvider = lineProvider),
                         startAxis = VerticalAxis.rememberStart(),
-                        bottomAxis = HorizontalAxis.rememberBottom(),
+                        bottomAxis = HorizontalAxis.rememberBottom(
+                            itemPlacer = remember(dateLabels.size) {
+                                HorizontalAxis.ItemPlacer.aligned(
+                                    spacing = { if (dateLabels.size > 20) 3 else if (dateLabels.size > 10) 2 else 1 }
+                                )
+                            },
+                            labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
+                            valueFormatter = CartesianValueFormatter { _, x, _ ->
+                                if (dateLabels.isNotEmpty()) {
+                                    val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
+                                    dateLabels[index]
+                                } else {
+                                    (x.toInt() + 1).toString()
+                                }
+                            },
+                        ),
+                        marker = rememberMarker(),
                     ),
                     modelProducer = modelProducer,
                     modifier = Modifier
@@ -453,6 +539,13 @@ private fun ConcurrentStreamsCard(
     modifier: Modifier = Modifier,
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
+
+    val dates = remember(concurrent) {
+        concurrent.mapNotNull { it.date }.distinct()
+    }
+    val dateLabels = remember(dates) {
+        dates.map { formatChartDateLabel(it) }
+    }
 
     LaunchedEffect(concurrent) {
         modelProducer.runTransaction {
@@ -493,7 +586,23 @@ private fun ConcurrentStreamsCard(
                     chart = rememberCartesianChart(
                         rememberLineCartesianLayer(lineProvider = lineProvider),
                         startAxis = VerticalAxis.rememberStart(),
-                        bottomAxis = HorizontalAxis.rememberBottom(),
+                        bottomAxis = HorizontalAxis.rememberBottom(
+                            itemPlacer = remember(dateLabels.size) {
+                                HorizontalAxis.ItemPlacer.aligned(
+                                    spacing = { if (dateLabels.size > 20) 3 else if (dateLabels.size > 10) 2 else 1 }
+                                )
+                            },
+                            labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
+                            valueFormatter = CartesianValueFormatter { _, x, _ ->
+                                if (dateLabels.isNotEmpty()) {
+                                    val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
+                                    dateLabels[index]
+                                } else {
+                                    (x.toInt() + 1).toString()
+                                }
+                            },
+                        ),
+                        marker = rememberMarker(),
                     ),
                     modelProducer = modelProducer,
                     modifier = Modifier
@@ -550,6 +659,7 @@ private fun ActivityByDayOfWeekCard(
                         daysOrder[index]
                     }
                 ),
+                marker = rememberMarker(),
             ),
             modelProducer = modelProducer,
             modifier = Modifier
@@ -590,7 +700,8 @@ private fun ActivityByHourOfDayCard(
                 ),
                 startAxis = VerticalAxis.rememberStart(),
                 bottomAxis = HorizontalAxis.rememberBottom(
-                    itemPlacer = remember { HorizontalAxis.ItemPlacer.aligned(spacing = { 3 }) },
+                    itemPlacer = remember { HorizontalAxis.ItemPlacer.aligned(spacing = { 2 }) },
+                    labelRotationDegrees = 45f,
                     valueFormatter = CartesianValueFormatter { _, x, _ ->
                         val hr = (x.toInt() % 24 + 24) % 24
                         when (hr) {
@@ -601,6 +712,7 @@ private fun ActivityByHourOfDayCard(
                         }
                     }
                 ),
+                marker = rememberMarker(),
             ),
             modelProducer = modelProducer,
             modifier = Modifier
