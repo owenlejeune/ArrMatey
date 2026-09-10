@@ -139,8 +139,8 @@ fun ArrLibraryScreen(
     wideRailIsVisible: Boolean = false,
     onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
     onNavigateToDetails: (ArrMedia, Long?) -> Unit,
-    arrMediaViewModel: ArrMediaViewModel = koinViewModel(key = type.name, parameters = { parametersOf(type) }),
-    instancesViewModel: InstancesViewModel = koinViewModel(key = type.name, parameters = { parametersOf(type) }),
+    arrMediaViewModel: ArrMediaViewModel = koinViewModel(key = "arrMedia_${type.name}", parameters = { parametersOf(type) }),
+    instancesViewModel: InstancesViewModel = koinViewModel(key = "instances_${type.name}", parameters = { parametersOf(type) }),
     globalPreferencesStore: PreferencesStore = koinInject(),
 ) {
     val context = LocalContext.current
@@ -325,12 +325,18 @@ fun ArrLibraryScreen(
                     .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            if (instancesState.selectedInstance == null) {
+            if (instancesState.instances.isEmpty()) {
                 NoInstanceView(type)
+            } else if (instancesState.selectedInstance == null) {
+                LoadingIndicator(
+                    modifier = Modifier.size(96.dp),
+                )
             } else {
                 when (val state = uiState) {
                     is ArrLibrary.Initial -> {
-                        NoInstanceView(type)
+                        LoadingIndicator(
+                            modifier = Modifier.size(96.dp),
+                        )
                     }
 
                     is ArrLibrary.Loading -> {
