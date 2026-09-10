@@ -58,6 +58,9 @@ struct TracearrTabContent: View {
                                 },
                                 onNavigateToViolations: {
                                     navigationManager.go(to: TracearrRoute.violations)
+                                },
+                                onNavigateToActivity: {
+                                    navigationManager.go(to: TracearrRoute.activity)
                                 }
                             )
                         }
@@ -654,6 +657,7 @@ struct TracearrDashboardStatsView: View {
     var onNavigateToHistory: (() -> Void)? = nil
     var onNavigateToAllUsers: (() -> Void)? = nil
     var onNavigateToViolations: (() -> Void)? = nil
+    var onNavigateToActivity: (() -> Void)? = nil
 
     private static let tracearrBlue = Color(hex: 0x00b4d8)
     private static let tracearrDarkBlue = Color(hex: 0x00507a)
@@ -698,7 +702,8 @@ struct TracearrDashboardStatsView: View {
                     label: MR.strings().watch_time.localized(),
                     value: stats.formattedWatchTime,
                     containerColor: Self.tracearrLightBlue,
-                    contentColor: Self.tracearrDarkBlue
+                    contentColor: Self.tracearrDarkBlue,
+                    onClick: onNavigateToActivity
                 )
 
                 CountStatItem(

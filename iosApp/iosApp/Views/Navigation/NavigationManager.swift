@@ -542,6 +542,7 @@ enum TracearrRoute: Hashable {
     case user(String)
     case users
     case violations
+    case activity
 }
 
 extension MediaRoute {

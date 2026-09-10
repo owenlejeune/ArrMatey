@@ -14,6 +14,8 @@ struct TracearrRouteDestination: View {
             TracearrUsersScreen()
         case .violations:
             TracearrViolationsScreen()
+        case .activity:
+            TracearrActivityScreen()
         }
     }
 }
