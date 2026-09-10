@@ -1,8 +1,0 @@
-interface:
-  display_name: "Swift Format Style"
-  short_description: "Reviews and writes modern Swift FormatStyle code."
-  brand_color: "#F05138"
-  default_prompt: "Use $swift-format-style to review my project's formatting code."
-
-policy:
-  allow_implicit_invocation: true

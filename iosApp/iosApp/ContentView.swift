@@ -37,6 +37,7 @@ struct ContentView: View {
                         .tag(tabItem.key)
                     }
                 }
+                .toolbar(preferences.bottomTabItems.count <= 1 ? .hidden : .automatic, for: .tabBar)
             }
         }
         .onAppear {

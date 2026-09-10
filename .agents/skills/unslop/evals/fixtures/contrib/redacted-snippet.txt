@@ -1,1 +1,0 @@
-The rollout guide keeps saying the migration path gives teams a durable bridge between the old queue and the new worker pool, but it never explains the retry contract.

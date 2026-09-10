@@ -29,7 +29,8 @@
       "matchManagers": ["gradle", "gradle-wrapper"],
       "groupName": "AGP + Gradle",
       "matchPackageNames": [
-        "/^com\\.android/"
+        "/^com\\.android/",
+        "gradle"
       ]
     },
     {
@@ -66,6 +67,11 @@
       "matchPackageNames": [
         "/^dev\\.icerock/"
       ]
+    },
+    {
+      "description": "Moko plugin registry lookup",
+      "matchPackageNames": ["dev.icerock.moko.multiplatform-resources.gradle.plugin"],
+      "registryUrls": ["https://plugins.gradle.org/m2/"]
     },
     {
       "description": "Test/build tooling: automerge patch+minor",

@@ -1,8 +1,0 @@
-interface:
-  display_name: "App Intents"
-  short_description: "Reviews and writes Swift App Intents code."
-  brand_color: "#F05138"
-  default_prompt: "Use $app-intents to review my project's App Intents code."
-
-policy:
-  allow_implicit_invocation: true

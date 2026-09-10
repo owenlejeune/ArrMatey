@@ -1,1 +1,0 @@
-Clients should call the users endpoint before syncing.

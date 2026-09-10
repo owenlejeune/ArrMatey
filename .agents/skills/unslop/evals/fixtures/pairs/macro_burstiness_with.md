@@ -1,3 +1,0 @@
-The field test began on Monday morning. Crews checked the east gate before sunrise. Radios worked across the lower road. The tablet map loaded without delay. Drivers logged each stop in the trial route. Dispatch watched the markers from the office. No one reported a missed scan that day. The only issue was a loose charger in truck seven.
-
-Tuesday followed the same pattern. Crews checked the west gate before sunrise. Radios worked across the upper road. The tablet map loaded without delay. Drivers logged each stop in the trial route. Dispatch watched the markers from the office. No one reported a missed scan that day. The only issue was a cracked mount in truck three.

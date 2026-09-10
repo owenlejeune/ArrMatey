@@ -1,8 +1,0 @@
-interface:
-  display_name: "Widgets"
-  short_description: "Reviews and writes Swift WidgetKit code."
-  brand_color: "#F05138"
-  default_prompt: "Use $widgets to review my project's WidgetKit code."
-
-policy:
-  allow_implicit_invocation: true

@@ -1,1 +1,0 @@
-The patch may resolve the login failures.

@@ -1,5 +1,0 @@
-The account request pilot opened with a familiar support pattern. Customers filed account requests through chat, agents copied details into the queue, and managers checked the next morning whether the tags were right, although one coordinator still kept a private spreadsheet because the old queue hid deadlines.
-
-The new intake page keeps the work in one place: customers choose the account, attach the invoice, pick the reason for the request, and send agents a record that already includes priority, deadline, owner, and the last customer reply. Managers get weekly counts without rebuilding a spreadsheet, and the first pilot team cut repeated copying by half even though vendor names still need cleanup.
-
-The next release should fix vendor aliases before the rollout expands. Support leads also asked for a daily export so they can compare old and new queues during the overlap week, which matters more than another dashboard because it removes the last reason agents still keep side notes beside the queue.

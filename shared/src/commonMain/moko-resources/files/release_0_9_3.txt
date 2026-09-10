@@ -1,0 +1,6 @@
+* Tab Customization: Prevented configuring zero navigation items in tab customization settings.
+* Library Loading: Fixed empty state flash while loading library instances and resolved ViewModel key collisions.
+* Instance Initialization: Added graceful exception handling when creating instance repositories to prevent crashes on invalid instance configurations.
+* Navigation Drawer: Navigation drawer content is now scrollable to ensure all items are accessible on smaller screens.
+* Navigation Bar: Automatically hide the navigation bar when only a single navigation tab is configured.
+* Search Bar Insets: Fixed search top app bar insets to properly account for the Android status bar.

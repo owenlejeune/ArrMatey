@@ -1,1 +1,0 @@
-The backup job moved 5 TB in about 3 hr on Friday.

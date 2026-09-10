@@ -1,1 +1,0 @@
-Clients should call /api/v2/users before syncing.

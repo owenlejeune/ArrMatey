@@ -1,9 +1,0 @@
-We shipped the migration Friday at 2am and it broke in a way none of us predicted.
-
-The short version: our "zero downtime" cutover had eleven minutes of downtime because a Terraform apply reordered the security group rules and locked the read replicas out of the primary. Classic. I'd tested the failover twice in staging. Staging doesn't have the same VPC peering setup, so the test proved nothing.
-
-Anyway. What actually saved us was that Priya had, on her own initiative back in March, written a runbook nobody asked for. It had the exact rollback command. We ran it, waited, watched the dashboards go green. Total incident: 34 minutes.
-
-I keep thinking about how the thing that mattered wasn't the fancy migration plan with the Gantt chart. It was one engineer writing a doc during a slow week. We don't reward that. Our promo packets ask for "impact" and "scope" and there is no line item for "wrote the boring document that later prevented a Sev1."
-
-I don't have a tidy lesson here. Maybe just: hire people who write things down, and then actually read the things.

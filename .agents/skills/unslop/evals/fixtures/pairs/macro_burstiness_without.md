@@ -1,3 +1,0 @@
-The field test began on Monday before sunrise, when the east gate crew checked radios and loaded the tablet map. Drivers logged each stop on the trial route while dispatch watched the markers from the office. No one reported a missed scan that day, although truck seven needed a replacement charger after lunch.
-
-Tuesday covered the west gate and the upper road. The radio check took longer because one spare battery was dead, but the route still started on time. Drivers found the new stop order easier to follow than the paper sheet, and dispatch used the live map to answer two customer calls without interrupting the crew.

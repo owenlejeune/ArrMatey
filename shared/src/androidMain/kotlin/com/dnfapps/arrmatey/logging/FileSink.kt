@@ -154,7 +154,12 @@ actual object LogFileManager {
         appContext = context.applicationContext
     }
 
-    actual fun getLogDirectory(): String = File(appContext.filesDir, "logs").apply { mkdirs() }.absolutePath
+    actual fun getLogDirectory(): String =
+        if (::appContext.isInitialized) {
+            File(appContext.filesDir, "logs").apply { mkdirs() }.absolutePath
+        } else {
+            File(System.getProperty("java.io.tmpdir") ?: ".", "logs").apply { mkdirs() }.absolutePath
+        }
 
     actual fun getLogFilePath(filename: String): String = File(getLogDirectory(), filename).absolutePath
 

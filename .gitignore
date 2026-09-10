@@ -121,3 +121,7 @@ composeApp/release/*
 
 .artifacts
 .artifacts/*
+
+.agents
+.agents/*
+skills-lock.json

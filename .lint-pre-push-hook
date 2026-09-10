@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Prevent infinite recursion when the script triggers git push
+if [ "$LINTING_PRE_PUSH" = "1" ]; then
+    exit 0
+fi
+
+echo "Running Spotless formatting check..."
+
+# Run Spotless Apply
+./gradlew spotlessApply
+GRADLE_STATUS=$?
+
+if [ $GRADLE_STATUS -ne 0 ]; then
+    echo "Spotless failed to execute. Push aborted."
+    exit 1
+fi
+
+# Check if Spotless modified any tracked files or staged changes
+if ! git diff --quiet || ! git diff --cached --quiet; then
+    echo "Spotless made formatting changes. Committing changes..."
+    
+    # Stage all modifications made by Spotless
+    git add -u
+    git commit -m "auto-lint"
+
+    echo "Auto-lint commit created. Re-triggering push to include formatting commit..."
+    
+    # Re-run push with an environment guard to prevent looping
+    LINTING_PRE_PUSH=1 git push "$@"
+    
+    # Abort the original push attempt since the branch ref changed
+    exit 1
+fi
+
+echo "Code formatting clean. Proceeding with push."
+exit 0

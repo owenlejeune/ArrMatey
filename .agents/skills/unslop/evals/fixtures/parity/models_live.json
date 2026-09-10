@@ -1,7 +1,0 @@
-{
-  "_note": "A live-looking matrix used ONLY by PARITY-03 with --no-network to prove graceful degradation. Never run live from the suite.",
-  "models": [
-    {"name": "gpt-4o-mini", "kind": "openrouter", "model_id": "openai/gpt-4o-mini"},
-    {"name": "claude-haiku", "kind": "claude-cli", "model_id": "claude-3-5-haiku-latest"}
-  ]
-}

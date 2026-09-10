@@ -1,8 +1,0 @@
-{
-  "_note": "Open-weights spot check (China SOTA flagships) run manually against evals/run_model_parity.py live mode. Not wired into the eval suite (network + cost); see references/pipeline.md Recorded results for the dated table this produced.",
-  "models": [
-    {"name": "deepseek-v4-pro", "kind": "openrouter", "model_id": "deepseek/deepseek-v4-pro"},
-    {"name": "kimi-k2.6", "kind": "openrouter", "model_id": "moonshotai/kimi-k2.6"},
-    {"name": "glm-5.2", "kind": "openrouter", "model_id": "z-ai/glm-5.2"}
-  ]
-}

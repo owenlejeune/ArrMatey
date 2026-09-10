@@ -1,5 +1,0 @@
-blank_issues_enabled: true
-contact_links:
-  - name: Read the contribution guide
-    url: https://github.com/theclaymethod/unslop/blob/main/CONTRIBUTING.md
-    about: Full pipeline for turning a specimen into an eval row and a PR.

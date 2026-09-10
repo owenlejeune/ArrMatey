@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.navigation
 
 import com.dnfapps.arrmatey.compose.TabItem
-import kotlin.test.Test
+import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull

@@ -130,7 +130,13 @@ fun TabCustomizationContent(
                     newList.add(toIndex, movedItem)
 
                     val divider1Index = newList.indexOfFirst { it is TabRow.Divider && it.text == MR.strings.navigation_items_drawer }
+                    if (divider1Index == -1) return@rememberReorderableLazyListState
+
                     val tabsAbove = newList.subList(0, divider1Index).filterIsInstance<TabRow.Tab>()
+                    if (tabsAbove.isEmpty()) {
+                        return@rememberReorderableLazyListState
+                    }
+
                     if (tabsAbove.size > MAX_TABS) {
                         val overflowItem = newList.removeAt(divider1Index - 1)
                         newList.add(divider1Index, overflowItem)
@@ -226,18 +232,27 @@ fun TabCustomizationContent(
                                     it.text == MR.strings.navigation_items_drawer
                             }
 
-                        val currentIndex = index
-                        val isBelowDivider = currentIndex > divider1Index
+                        val isBelowDivider = divider1Index != -1 && index > divider1Index
+                        val visibleTabsCount =
+                            if (divider1Index != -1) {
+                                combinedList.subList(0, divider1Index).count { it is TabRow.Tab }
+                            } else {
+                                0
+                            }
+
+                        val isVisibleTab = !isBelowDivider
+                        val isDragEnabled = !isVisibleTab || visibleTabsCount > 1
 
                         val ghostAlpha by animateFloatAsState(if (isBelowDivider) 0.6f else 1f)
 
                         Box(modifier = Modifier.graphicsLayer { alpha = ghostAlpha }) {
                             TabItemCard(
-                                modifier = Modifier.draggableHandle(enabled = true),
+                                modifier = Modifier.draggableHandle(enabled = isDragEnabled),
                                 tab = row.item,
                                 useServiceNavLogos = useServiceNavLogos,
                                 isDragging = isDragging,
                                 elevation = elevation,
+                                isDragEnabled = isDragEnabled,
                             )
                         }
                     }
@@ -255,6 +270,7 @@ fun TabItemCard(
     isDragging: Boolean,
     elevation: Dp,
     modifier: Modifier = Modifier,
+    isDragEnabled: Boolean = true,
 ) {
     Card(
         modifier =
@@ -280,7 +296,12 @@ fun TabItemCard(
                 Icon(
                     imageVector = Icons.Default.DragHandle,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint =
+                        if (isDragEnabled) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                        },
                 )
 
                 when (tab) {
