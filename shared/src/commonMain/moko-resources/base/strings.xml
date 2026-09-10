@@ -806,6 +806,7 @@
     <string name="v10_title">A Unified Experience</string>
     <string name="v11_title">0.9.1</string>
     <string name="v12_title">Labour Day Bug Squashing</string>
+    <string name="v13_title">Hotfix</string>
 
     <!-- Backup & Restore -->
     <string name="backup_restore">Backup &amp; Restore</string>
