@@ -100,7 +100,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import sh.calvin.reorderable.rememberScroller
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -442,9 +441,11 @@ private fun DrawerContent(
         HorizontalDivider()
 
         Column(
-            modifier = Modifier.weight(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             drawerTabs.forEach { item ->
                 NavigationDrawerItem(
@@ -519,7 +520,7 @@ private fun DrawerContent(
                                         TabItemIconView(
                                             item,
                                             useServiceNavIcons,
-                                            activityQueueIssuesCount
+                                            activityQueueIssuesCount,
                                         )
                                     }
 
