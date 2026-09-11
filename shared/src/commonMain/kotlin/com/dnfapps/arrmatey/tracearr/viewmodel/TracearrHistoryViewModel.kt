@@ -8,8 +8,12 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.tracearr.state.TracearrHistoryState
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrHistoryUseCase
+import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStreamsUseCase
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +26,7 @@ import kotlinx.coroutines.launch
 class TracearrHistoryViewModel(
     getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
     private val getTracearrHistoryUseCase: GetTracearrHistoryUseCase,
+    private val getTracearrStreamsUseCase: GetTracearrStreamsUseCase,
 ) : ViewModel() {
 
     val currentRepository: StateFlow<TracearrRepository?> =
@@ -117,22 +122,37 @@ class TracearrHistoryViewModel(
 
         isLoadingPage = true
 
-        getTracearrHistoryUseCase(repo, cursor = null, pageSize = 25)
-            .onSuccess { response ->
-                nextCursor = response.meta?.nextCursor
-                val hasMore = !nextCursor.isNullOrBlank()
-                _state.value = TracearrHistoryState.Success(
-                    items = response.data,
-                    isLoadingMore = false,
-                    hasMore = hasMore,
-                    nextCursor = nextCursor,
-                )
-            }
-            .onError { _, msg, _ ->
-                _state.value = TracearrHistoryState.Error(msg ?: "Failed to load history")
-            }
+        coroutineScope {
+            val streamsDeferred = async { getTracearrStreamsUseCase(repo) }
+            val historyDeferred = async { getTracearrHistoryUseCase(repo, cursor = null, pageSize = 25) }
+
+            val streamsResult = streamsDeferred.await()
+            val historyResult = historyDeferred.await()
+
+            val activeStreams = (streamsResult as? NetworkResult.Success)?.data?.data ?: emptyList()
+
+            historyResult
+                .onSuccess { response ->
+                    nextCursor = response.meta?.nextCursor
+                    val hasMore = !nextCursor.isNullOrBlank()
+                    _state.value = TracearrHistoryState.Success(
+                        activeStreams = activeStreams,
+                        items = response.data,
+                        isLoadingMore = false,
+                        hasMore = hasMore,
+                        nextCursor = nextCursor,
+                    )
+                }
+                .onError { _, msg, _ ->
+                    _state.value = TracearrHistoryState.Error(msg ?: "Failed to load history")
+                }
+        }
 
         isLoadingPage = false
+    }
+
+    fun setSelectedStreamSession(session: TracearrStreamSession) {
+        _selectedSession.value = session
     }
 
     fun setSelectedHistoryStream(historyItem: TracearrHistoryItem) {

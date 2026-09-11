@@ -42,6 +42,7 @@ import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrHistoryViewModel
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
@@ -66,7 +67,7 @@ fun TracearrHistoryScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = mokoString(MR.strings.history),
+                        text = mokoString(MR.strings.sessions),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
@@ -119,74 +120,103 @@ fun TracearrHistoryScreen(
                     }
                 }
                 is TracearrHistoryState.Success -> {
-                    if (currentState.items.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
+                    val listState = rememberLazyListState()
+
+                    LaunchedEffect(listState) {
+                        snapshotFlow {
+                            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                        }.collect { lastVisibleIndex ->
+                            if (lastVisibleIndex != null &&
+                                lastVisibleIndex >= currentState.items.size - 3 &&
+                                currentState.hasMore &&
+                                !currentState.isLoadingMore
+                            ) {
+                                viewModel.loadMore()
+                            }
+                        }
+                    }
+
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom = 16.dp + navigationBarBottomInset(),
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        if (currentState.activeStreams.isNotEmpty()) {
+                            item(key = "active_header") {
+                                Text(
+                                    text = mokoString(MR.strings.now_playing),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+                            items(
+                                items = currentState.activeStreams,
+                                key = { "active_${it.id}" },
+                            ) { session ->
+                                TracearrStreamCard(
+                                    session = session,
+                                    onClick = { viewModel.setSelectedStreamSession(session) },
+                                )
+                            }
+                        }
+
+                        item(key = "history_header") {
                             Text(
-                                text = mokoString(MR.strings.no_history),
+                                text = mokoString(MR.strings.history),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.Bold,
                             )
                         }
-                    } else {
-                        val listState = rememberLazyListState()
 
-                        LaunchedEffect(listState) {
-                            snapshotFlow {
-                                listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                            }.collect { lastVisibleIndex ->
-                                if (lastVisibleIndex != null &&
-                                    lastVisibleIndex >= currentState.items.size - 3 &&
-                                    currentState.hasMore &&
-                                    !currentState.isLoadingMore
+                        if (currentState.items.isEmpty()) {
+                            item(key = "empty_history") {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 24.dp),
+                                    contentAlignment = Alignment.Center,
                                 ) {
-                                    viewModel.loadMore()
+                                    Text(
+                                        text = mokoString(MR.strings.no_history),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
                                 }
+                            }
+                        } else if (isLargeScreen) {
+                            item(key = "history_table") {
+                                TracearrHistoryTable(
+                                    items = currentState.items,
+                                    onClickItem = { viewModel.setSelectedHistoryStream(it) },
+                                )
+                            }
+                        } else {
+                            items(
+                                items = currentState.items,
+                                key = { "history_${it.id}" },
+                            ) { historyItem ->
+                                TracearrHistoryCard(
+                                    item = historyItem,
+                                    onClick = { viewModel.setSelectedHistoryStream(historyItem) },
+                                )
                             }
                         }
 
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 16.dp,
-                                bottom = 16.dp + navigationBarBottomInset(),
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            if (isLargeScreen) {
-                                item {
-                                    TracearrHistoryTable(
-                                        items = currentState.items,
-                                        onClickItem = { viewModel.setSelectedHistoryStream(it) },
-                                    )
-                                }
-                            } else {
-                                items(
-                                    items = currentState.items,
-                                    key = { "history_${it.id}" },
-                                ) { historyItem ->
-                                    TracearrHistoryCard(
-                                        item = historyItem,
-                                        onClick = { viewModel.setSelectedHistoryStream(historyItem) },
-                                    )
-                                }
-                            }
-
-                            if (currentState.isLoadingMore) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        LoadingIndicator()
-                                    }
+                        if (currentState.isLoadingMore) {
+                            item(key = "loading_more") {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    LoadingIndicator()
                                 }
                             }
                         }

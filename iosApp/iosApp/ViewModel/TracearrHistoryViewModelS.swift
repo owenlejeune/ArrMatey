@@ -30,6 +30,10 @@ class TracearrHistoryViewModelS: ObservableObject {
         viewModel.loadMore()
     }
 
+    func setSelectedStreamSession(_ session: TracearrStreamSession) {
+        viewModel.setSelectedStreamSession(session: session)
+    }
+
     func setSelectedHistoryStream(_ historyItem: TracearrHistoryItem) {
         viewModel.setSelectedHistoryStream(historyItem: historyItem)
     }

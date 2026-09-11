@@ -14,57 +14,72 @@ struct TracearrHistoryScreen: View {
                 NoInstanceView(type: .tracearr)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let success = viewModel.state as? TracearrHistoryStateSuccess {
-                if success.items.isEmpty {
-                    VStack(spacing: 8) {
-                        Text(MR.strings().no_history.localized())
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if isLargeScreen {
-                    ScrollView {
-                        TracearrHistoryTableView(
-                            items: success.items,
-                            hasMore: success.hasMore,
-                            isLoadingMore: success.isLoadingMore,
-                            onLoadMore: {
-                                viewModel.loadMore()
-                            },
-                            onClickItem: { historyItem in
-                                viewModel.setSelectedHistoryStream(historyItem)
-                            }
-                        )
-                        .padding(16)
-                    }
-                    .refreshable {
-                        viewModel.refresh()
-                    }
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(success.items, id: \.id) { historyItem in
-                                TracearrHistoryCardView(item: historyItem)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        viewModel.setSelectedHistoryStream(historyItem)
-                                    }
-                                    .onAppear {
-                                        if historyItem.id == success.items.last?.id && success.hasMore && !success.isLoadingMore {
-                                            viewModel.loadMore()
-                                        }
-                                    }
-                            }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        if !success.activeStreams.isEmpty {
+                            Text(MR.strings().now_playing.localized())
+                                .font(.title2.bold())
 
-                            if success.isLoadingMore {
-                                ProgressView()
-                                    .padding(16)
+                            LazyVStack(spacing: 16) {
+                                ForEach(success.activeStreams, id: \.id) { session in
+                                    TracearrStreamCardView(session: session)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            viewModel.setSelectedStreamSession(session)
+                                        }
+                                }
                             }
                         }
-                        .padding(16)
+
+                        Text(MR.strings().history.localized())
+                            .font(.title2.bold())
+
+                        if success.items.isEmpty {
+                            VStack(spacing: 8) {
+                                Text(MR.strings().no_history.localized())
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 24)
+                        } else if isLargeScreen {
+                            TracearrHistoryTableView(
+                                items: success.items,
+                                hasMore: success.hasMore,
+                                isLoadingMore: success.isLoadingMore,
+                                onLoadMore: {
+                                    viewModel.loadMore()
+                                },
+                                onClickItem: { historyItem in
+                                    viewModel.setSelectedHistoryStream(historyItem)
+                                }
+                            )
+                        } else {
+                            LazyVStack(spacing: 12) {
+                                ForEach(success.items, id: \.id) { historyItem in
+                                    TracearrHistoryCardView(item: historyItem)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            viewModel.setSelectedHistoryStream(historyItem)
+                                        }
+                                        .onAppear {
+                                            if historyItem.id == success.items.last?.id && success.hasMore && !success.isLoadingMore {
+                                                viewModel.loadMore()
+                                            }
+                                        }
+                                }
+
+                                if success.isLoadingMore {
+                                    ProgressView()
+                                        .padding(16)
+                                }
+                            }
+                        }
                     }
-                    .refreshable {
-                        viewModel.refresh()
-                    }
+                    .padding(16)
+                }
+                .refreshable {
+                    viewModel.refresh()
                 }
             } else if viewModel.state is TracearrHistoryStateLoading || viewModel.state is TracearrHistoryStateInitial {
                 ProgressView()
@@ -103,7 +118,7 @@ struct TracearrHistoryScreen: View {
                 }
             )
         }
-        .navigationTitle(MR.strings().history.localized())
+        .navigationTitle(MR.strings().sessions.localized())
         .navigationBarTitleDisplayMode(.inline)
     }
 }
