@@ -2253,9 +2253,9 @@
         },
         {
             "uniqueId": "io.github.shivathapaa:logger",
-            "artifactVersion": "1.0.0",
+            "artifactVersion": "1.4.0",
             "name": "KMP Logger",
-            "description": "Kotlin Multiplatform logger",
+            "description": "Kotlin Multiplatform logger - A lightweight, structured logging library for Kotlin Multiplatform. Supports Android, iOS, macOS,\nwatchOS, tvOS, JVM, JS (Node.js & Browser), Wasm/JS, Linux, and MinGW.",
             "website": "https://github.com/shivathapaa/KMP-Logger",
             "developers": [
                 {
@@ -2263,6 +2263,8 @@
                 }
             ],
             "scm": {
+                "connection": "scm:git:git://github.com/shivathapaa/KMP-Logger.git",
+                "developerConnection": "scm:git:ssh://github.com/shivathapaa/KMP-Logger.git",
                 "url": "https://github.com/shivathapaa/KMP-Logger"
             },
             "licenses": [
