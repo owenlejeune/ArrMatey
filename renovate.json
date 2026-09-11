@@ -2,15 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    ":semanticCommits",
-    ":dependencyDashboard"
+    ":semanticCommits"
   ],
   "schedule": ["before 6am on monday"],
   "timezone": "America/New_York",
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
   "labels": ["dependencies"],
-  "rangeStrategy": "bump",
   "minimumReleaseAge": "3 days",
   "packageRules": [
     {
@@ -18,7 +16,7 @@
       "groupName": "kotlin + compose",
       "schedule": ["before 6am on the first day of the month"],
       "matchPackageNames": [
-        "/^org\\.jetbrains\\.kotlin/",
+        "/^org\\.jetbrains\\.kotlin[:.]/",
         "/^org\\.jetbrains\\.compose/",
         "/^androidx\\.compose/",
         "/^com\\.google\\.devtools\\.ksp/"
@@ -69,9 +67,15 @@
       ]
     },
     {
-      "description": "Moko plugin registry lookup",
-      "matchPackageNames": ["dev.icerock.moko.multiplatform-resources.gradle.plugin"],
+      "description": "Moko plugin marker resolves from the Gradle Plugin Portal, not Maven Central",
+      "matchDatasources": ["maven"],
+      "matchPackageNames": ["/^dev\\.icerock\\.moko\\.multiplatform-resources/"],
       "registryUrls": ["https://plugins.gradle.org/m2/"]
+    },
+    {
+      "description": "kotlinx-datetime ships -0.6.x-compat builds that sort above the real release",
+      "matchPackageNames": ["org.jetbrains.kotlinx:kotlinx-datetime"],
+      "allowedVersions": "!/-compat$/"
     },
     {
       "description": "Test/build tooling: automerge patch+minor",
@@ -89,7 +93,7 @@
     },
     {
       "description": "Runtime libs: automerge patch only (add per-family minor rules as integration tests land)",
-      "matchDepTypes": ["dependencies", "implementation", "api"],
+      "matchManagers": ["gradle"],
       "matchUpdateTypes": ["patch"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true,
@@ -114,13 +118,10 @@
       "platformAutomerge": true
     }
   ],
+  "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
     "labels": ["security"],
-    "schedule": ["at any time"],
-    "automerge": false
-  },
-  "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": ["before 6am on the first day of the month"]
+    "automerge": false,
+    "prConcurrentLimit": 5
   }
 }
