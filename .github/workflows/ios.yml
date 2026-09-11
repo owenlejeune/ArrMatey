@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '17'
           distribution: 'zulu'
@@ -37,7 +37,7 @@ jobs:
           xcode-version: '26.x'
 
       - name: Cache Xcode DerivedData
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: derived_data
           key: ${{ runner.os }}-deriveddata-${{ hashFiles('iosApp/**/*.swift', 'shared/**/*.kt') }}
