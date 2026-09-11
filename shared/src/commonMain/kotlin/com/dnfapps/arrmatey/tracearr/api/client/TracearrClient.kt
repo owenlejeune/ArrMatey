@@ -4,6 +4,8 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaDetails
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaStats
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaWatchers
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrPeriod
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
@@ -74,6 +76,28 @@ class TracearrClient(
     suspend fun getMedia(ref: String): NetworkResult<TracearrMediaDetails> {
         val url = "$v2BaseUrl/public/media/$ref"
         return httpClient.safeGet(url)
+    }
+
+    suspend fun getMediaWatchers(ref: String): NetworkResult<TracearrMediaWatchers> {
+        val url = "$v2BaseUrl/public/media/$ref/watchers"
+        return httpClient.safeGet(url)
+    }
+
+    suspend fun getMediaStats(ref: String): NetworkResult<TracearrMediaStats> {
+        val url = "$v2BaseUrl/public/media/$ref/stats"
+        return httpClient.safeGet(url)
+    }
+
+    suspend fun getMediaHistory(
+        ref: String,
+        cursor: String? = null,
+        pageSize: Int? = null,
+    ): NetworkResult<TracearrHistoryResponse> {
+        val url = "$v2BaseUrl/public/media/$ref/history"
+        return httpClient.safeGet(url) {
+            cursor?.let { parameter("cursor", it) }
+            parameter("pageSize", pageSize ?: 100)
+        }
     }
 
     suspend fun getUsers(
