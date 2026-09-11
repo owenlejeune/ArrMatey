@@ -12,11 +12,14 @@ import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeCall
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.basicAuth
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -187,27 +190,19 @@ class TransmissionClient(
             )
 
         return httpClient.safeCall {
+            // A missing or stale session id returns 409 with the id to echo back, thrown when expectSuccess is enabled.
             val firstResponse =
-                post("transmission/rpc") {
-                    contentType(ContentType.Application.Json)
-                    basicAuth(downloadClient.username.value, downloadClient.password.value)
-                    if (sessionId.isNotEmpty()) {
-                        header(HEADER_SESSION_ID, sessionId)
-                    }
-                    setBody(request)
+                try {
+                    postRpc(request)
+                } catch (e: ClientRequestException) {
+                    if (e.response.status != HttpStatusCode.Conflict) throw e
+                    e.response
                 }
 
             val response =
-                if (firstResponse.status.value == 409) {
+                if (firstResponse.status == HttpStatusCode.Conflict) {
                     sessionId = firstResponse.headers[HEADER_SESSION_ID].orEmpty()
-                    post("transmission/rpc") {
-                        contentType(ContentType.Application.Json)
-                        basicAuth(downloadClient.username.value, downloadClient.password.value)
-                        if (sessionId.isNotEmpty()) {
-                            header(HEADER_SESSION_ID, sessionId)
-                        }
-                        setBody(request)
-                    }
+                    postRpc(request)
                 } else {
                     firstResponse
                 }
@@ -215,6 +210,16 @@ class TransmissionClient(
             response.body<TransmissionRpcResponse<T>>()
         }
     }
+
+    private suspend fun HttpClient.postRpc(request: TransmissionRpcRequest): HttpResponse =
+        post("transmission/rpc") {
+            contentType(ContentType.Application.Json)
+            basicAuth(downloadClient.username.value, downloadClient.password.value)
+            if (sessionId.isNotEmpty()) {
+                header(HEADER_SESSION_ID, sessionId)
+            }
+            setBody(request)
+        }
 
     private fun String.toTransmissionId(): JsonPrimitive {
         val intId = toIntOrNull()
