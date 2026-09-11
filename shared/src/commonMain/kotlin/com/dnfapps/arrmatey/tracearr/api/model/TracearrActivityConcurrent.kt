@@ -8,5 +8,5 @@ data class TracearrActivityConcurrent(
     val total: Int = 0,
     val direct: Int = 0,
     val directStream: Int = 0,
-    val transcode: Int = 0
+    val transcode: Int = 0,
 )

@@ -8,6 +8,5 @@ class GetUserDetailUseCase {
     suspend operator fun invoke(
         repository: TracearrRepository,
         ref: String,
-    ): NetworkResult<TracearrUserDetail> =
-        repository.getUserDetails(ref)
+    ): NetworkResult<TracearrUserDetail> = repository.getUserDetails(ref)
 }

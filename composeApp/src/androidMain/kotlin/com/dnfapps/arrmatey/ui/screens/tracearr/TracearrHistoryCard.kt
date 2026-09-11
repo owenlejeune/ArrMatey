@@ -58,11 +58,12 @@ fun TracearrHistoryCard(
 ) {
     val edgeColor = getTracearrServerColor(item.serverType, item.serverName)
 
-    val percent = item.percentComplete?.toFloat() ?: run {
-        val total = item.totalDurationMs ?: item.durationMs ?: 0L
-        val prog = item.progressMs ?: 0L
-        if (total > 0) (prog.toFloat() / total.toFloat() * 100f) else 0f
-    }
+    val percent =
+        item.percentComplete?.toFloat() ?: run {
+            val total = item.totalDurationMs ?: item.durationMs ?: 0L
+            val prog = item.progressMs ?: 0L
+            if (total > 0) (prog.toFloat() / total.toFloat() * 100f) else 0f
+        }
 
     val progressFraction = (percent / 100f).coerceIn(0f, 1f)
 
@@ -74,26 +75,30 @@ fun TracearrHistoryCard(
 
     Card(
         onClick = { onClick?.invoke() },
-        modifier = modifier.fillMaxWidth().onGloballyPositioned {
-            cardHeight = it.size.height
-        },
+        modifier =
+            modifier.fillMaxWidth().onGloballyPositioned {
+                cardHeight = it.size.height
+            },
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(
-                modifier = Modifier
-                    .width(6.dp)
-                    .height(cardHeight.pxToDp())
-                    .background(edgeColor),
+                modifier =
+                    Modifier
+                        .width(6.dp)
+                        .height(cardHeight.pxToDp())
+                        .background(edgeColor),
             )
 
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Row(
@@ -101,11 +106,12 @@ fun TracearrHistoryCard(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Box(
-                        modifier = Modifier
-                            .width(60.dp)
-                            .aspectRatio(AspectRatio.Poster.ratio)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        modifier =
+                            Modifier
+                                .width(60.dp)
+                                .aspectRatio(AspectRatio.Poster.ratio)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,
                     ) {
                         val imageUrl = item.posterUrl ?: item.thumbPath
@@ -126,11 +132,11 @@ fun TracearrHistoryCard(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
                                 val username =
                                     item.effectiveUsername.ifEmpty { mokoString(MR.strings.user) }
@@ -140,9 +146,10 @@ fun TracearrHistoryCard(
                                     AsyncImage(
                                         model = rememberRemoteImageData(avatarUrl, trim = false),
                                         contentDescription = null,
-                                        modifier = Modifier
-                                            .size(18.dp)
-                                            .clip(CircleShape),
+                                        modifier =
+                                            Modifier
+                                                .size(18.dp)
+                                                .clip(CircleShape),
                                         contentScale = ContentScale.Crop,
                                     )
                                 } else {
@@ -179,7 +186,9 @@ fun TracearrHistoryCard(
                             )
                         }
 
-                        val displayTitle = item.grandparentTitle ?: item.showTitle ?: item.mediaTitle ?: mokoString(MR.strings.unknown)
+                        val displayTitle =
+                            item.grandparentTitle ?: item.showTitle
+                                ?: item.mediaTitle ?: mokoString(MR.strings.unknown)
                         Text(
                             text = displayTitle,
                             style = MaterialTheme.typography.titleMedium,
@@ -188,17 +197,21 @@ fun TracearrHistoryCard(
                             overflow = TextOverflow.Ellipsis,
                         )
 
-                        val subtitle = when {
-                            item.mediaType == TracearrMediaType.Episode || (item.seasonNumber != null && item.episodeNumber != null) -> {
-                                val s = item.seasonNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
-                                val e = item.episodeNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
-                                "S$s E$e · ${item.mediaTitle ?: ""}"
+                        val subtitle =
+                            when {
+                                item.mediaType == TracearrMediaType.Episode ||
+                                    (item.seasonNumber != null && item.episodeNumber != null) -> {
+                                    val s = item.seasonNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
+                                    val e = item.episodeNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
+                                    "S$s E$e · ${item.mediaTitle ?: ""}"
+                                }
+                                item.mediaType == TracearrMediaType.Movie -> {
+                                    "${item.year ?: ""} · ${item.mediaTitle ?: ""}"
+                                }
+                                else ->
+                                    listOfNotNull(item.artistName, item.albumName, item.mediaTitle)
+                                        .joinToString(" · ")
                             }
-                            item.mediaType == TracearrMediaType.Movie -> {
-                                "${item.year ?: ""} · ${item.mediaTitle ?: ""}"
-                            }
-                            else -> listOfNotNull(item.artistName, item.albumName, item.mediaTitle).joinToString(" · ")
-                        }
 
                         if (subtitle.isNotBlank()) {
                             Text(
@@ -217,10 +230,11 @@ fun TracearrHistoryCard(
                         ) {
                             LinearProgressIndicator(
                                 progress = { progressFraction },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(2.dp)),
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .height(4.dp)
+                                        .clip(RoundedCornerShape(2.dp)),
                                 color = TracearrBlue,
                                 trackColor = MaterialTheme.colorScheme.surface,
                             )
@@ -244,7 +258,10 @@ fun TracearrHistoryCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val serverName = item.effectiveServerName.ifEmpty { mokoString(MR.strings.server) }
-                    val isTranscoding = item.isTranscode == true || item.videoDecision == TracearrStreamDecision.Transcode || item.audioDecision == TracearrStreamDecision.Transcode
+                    val isTranscoding =
+                        item.isTranscode == true ||
+                            item.videoDecision == TracearrStreamDecision.Transcode ||
+                            item.audioDecision == TracearrStreamDecision.Transcode
                     val decisionText = if (isTranscoding) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
 
                     Text(
@@ -280,28 +297,33 @@ private fun StatusChip(
     isSampled: Boolean,
     isAbandoned: Boolean,
 ) {
-    val (label, containerColor, contentColor) = when {
-        isWatched -> Triple(
-            mokoString(MR.strings.watched),
-            Color(0xFF4CAF50).copy(alpha = 0.2f),
-            Color(0xFF4CAF50),
-        )
-        isSampled -> Triple(
-            mokoString(MR.strings.sampled),
-            ArrYellow.copy(alpha = 0.2f),
-            ArrYellow,
-        )
-        isAbandoned -> Triple(
-            mokoString(MR.strings.abandoned),
-            ArrRed.copy(alpha = 0.2f),
-            ArrRed,
-        )
-        else -> Triple(
-            mokoString(MR.strings.unknown),
-            TracearrBlue.copy(alpha = 0.2f),
-            TracearrBlue
-        )
-    }
+    val (label, containerColor, contentColor) =
+        when {
+            isWatched ->
+                Triple(
+                    mokoString(MR.strings.watched),
+                    Color(0xFF4CAF50).copy(alpha = 0.2f),
+                    Color(0xFF4CAF50),
+                )
+            isSampled ->
+                Triple(
+                    mokoString(MR.strings.sampled),
+                    ArrYellow.copy(alpha = 0.2f),
+                    ArrYellow,
+                )
+            isAbandoned ->
+                Triple(
+                    mokoString(MR.strings.abandoned),
+                    ArrRed.copy(alpha = 0.2f),
+                    ArrRed,
+                )
+            else ->
+                Triple(
+                    mokoString(MR.strings.unknown),
+                    TracearrBlue.copy(alpha = 0.2f),
+                    TracearrBlue,
+                )
+        }
 
     Surface(
         shape = RoundedCornerShape(4.dp),

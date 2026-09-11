@@ -11,5 +11,5 @@ data class TracearrActivityResponse(
     val byDayOfWeek: List<TracearrActivityByDoW> = emptyList(),
     val byHourOfDay: List<TracearrActivityByHoD> = emptyList(),
     val platforms: List<TracearrActivityPlatform> = emptyList(),
-    val quality: TracearrActivityQuality
+    val quality: TracearrActivityQuality,
 )

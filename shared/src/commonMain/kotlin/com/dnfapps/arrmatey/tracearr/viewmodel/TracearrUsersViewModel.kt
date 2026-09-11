@@ -29,7 +29,6 @@ class TracearrUsersViewModel(
     private val getTracearrUsersUseCase: GetTracearrUsersUseCase,
     private val getUserStatsUseCase: GetUserStatsUseCase,
 ) : ViewModel() {
-
     val currentRepository: StateFlow<TracearrRepository?> =
         getTracearrInstanceRepositoryUseCase
             .observeSelected()
@@ -49,17 +48,18 @@ class TracearrUsersViewModel(
         combine(_rawState, _searchQuery) { rawState, query ->
             val trimmedQuery = query.trim()
             if (rawState is TracearrUsersState.Success) {
-                val filtered = if (trimmedQuery.isBlank()) {
-                    rawState.users
-                } else {
-                    rawState.users.filter { user ->
-                        user.username?.contains(trimmedQuery, ignoreCase = true) == true ||
-                        user.email?.contains(trimmedQuery, ignoreCase = true) == true ||
-                        user.accounts.any { acc ->
-                            acc.username?.contains(trimmedQuery, ignoreCase = true) == true
+                val filtered =
+                    if (trimmedQuery.isBlank()) {
+                        rawState.users
+                    } else {
+                        rawState.users.filter { user ->
+                            user.username?.contains(trimmedQuery, ignoreCase = true) == true ||
+                                user.email?.contains(trimmedQuery, ignoreCase = true) == true ||
+                                user.accounts.any { acc ->
+                                    acc.username?.contains(trimmedQuery, ignoreCase = true) == true
+                                }
                         }
                     }
-                }
                 rawState.copy(filteredUsers = filtered, searchQuery = trimmedQuery)
             } else {
                 rawState
@@ -111,7 +111,9 @@ class TracearrUsersViewModel(
             _rawState.update {
                 if (it is TracearrUsersState.Success) {
                     it.copy(isLoadingMore = true)
-                } else it
+                } else {
+                    it
+                }
             }
 
             getTracearrUsersUseCase(repo, cursor = nextCursor, pageSize = 25)
@@ -132,14 +134,17 @@ class TracearrUsersViewModel(
                                 hasMore = hasMore,
                                 nextCursor = nextCursor,
                             )
-                        } else old
+                        } else {
+                            old
+                        }
                     }
-                }
-                .onError { _, _, _ ->
+                }.onError { _, _, _ ->
                     _rawState.update { old ->
                         if (old is TracearrUsersState.Success) {
                             old.copy(isLoadingMore = false)
-                        } else old
+                        } else {
+                            old
+                        }
                     }
                 }
 
@@ -147,7 +152,10 @@ class TracearrUsersViewModel(
         }
     }
 
-    private suspend fun loadUsers(repo: TracearrRepository, isRefresh: Boolean) {
+    private suspend fun loadUsers(
+        repo: TracearrRepository,
+        isRefresh: Boolean,
+    ) {
         if (isRefresh) {
             _rawState.value = TracearrUsersState.Loading
             nextCursor = null
@@ -160,15 +168,15 @@ class TracearrUsersViewModel(
                 nextCursor = response.meta?.nextCursor
                 val hasMore = !nextCursor.isNullOrBlank()
                 val statsMap = fetchStatsForUsers(repo, response.data)
-                _rawState.value = TracearrUsersState.Success(
-                    users = response.data,
-                    userStatsMap = statsMap,
-                    isLoadingMore = false,
-                    hasMore = hasMore,
-                    nextCursor = nextCursor,
-                )
-            }
-            .onError { _, msg, _ ->
+                _rawState.value =
+                    TracearrUsersState.Success(
+                        users = response.data,
+                        userStatsMap = statsMap,
+                        isLoadingMore = false,
+                        hasMore = hasMore,
+                        nextCursor = nextCursor,
+                    )
+            }.onError { _, msg, _ ->
                 _rawState.value = TracearrUsersState.Error(msg ?: "Failed to load users")
             }
 
@@ -178,15 +186,19 @@ class TracearrUsersViewModel(
     private suspend fun fetchStatsForUsers(
         repo: TracearrRepository,
         users: List<TracearrUserDetail>,
-    ): Map<String, TracearrUserStats> = coroutineScope {
-        users.map { user ->
-            async {
-                var stats: TracearrUserStats? = null
-                getUserStatsUseCase(repo, ref = user.id).onSuccess {
-                    stats = it
-                }
-                stats?.let { user.id to it }
-            }
-        }.awaitAll().filterNotNull().toMap()
-    }
+    ): Map<String, TracearrUserStats> =
+        coroutineScope {
+            users
+                .map { user ->
+                    async {
+                        var stats: TracearrUserStats? = null
+                        getUserStatsUseCase(repo, ref = user.id).onSuccess {
+                            stats = it
+                        }
+                        stats?.let { user.id to it }
+                    }
+                }.awaitAll()
+                .filterNotNull()
+                .toMap()
+        }
 }

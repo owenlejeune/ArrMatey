@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class TracearrActivityByDoW(
     val day: Int = 0,
     val name: String? = null,
-    val count: Int = 0
+    val count: Int = 0,
 )

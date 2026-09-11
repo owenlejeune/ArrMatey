@@ -39,12 +39,15 @@ import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.model.AddSheetUiState
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.SmartAddSeerrAction
+import com.dnfapps.arrmatey.model.TracearrMediaUiState
+import com.dnfapps.arrmatey.model.TracearrStatsWindowType
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
@@ -68,6 +71,7 @@ import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import dev.shivathapaa.logger.api.Logger
@@ -106,6 +110,7 @@ class UnifiedMediaDetailsViewModel(
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
     getSeerrInstanceRepositoryUseCase: GetSeerrInstanceRepositoryUseCase,
     getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
+    private val getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
     private val toggleMonitorUseCase: ToggleMonitorUseCase,
     private val updateMediaUseCase: UpdateMediaUseCase,
     private val deleteMediaUseCase: DeleteMediaUseCase,
@@ -233,6 +238,11 @@ class UnifiedMediaDetailsViewModel(
 
     private val _isViewRequestSheetVisible = MutableStateFlow(false)
     val isViewRequestSheetVisible: StateFlow<Boolean> = _isViewRequestSheetVisible.asStateFlow()
+
+    private val _tracearrState = MutableStateFlow(TracearrMediaUiState())
+    val tracearrState: StateFlow<TracearrMediaUiState> = _tracearrState.asStateFlow()
+
+    private var currentTracearrRef: String? = null
 
     private val _isRequest4k = MutableStateFlow(false)
     val isRequest4k: StateFlow<Boolean> = _isRequest4k.asStateFlow()
@@ -736,6 +746,66 @@ class UnifiedMediaDetailsViewModel(
                             _uiState.value = rawState
                         }
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            combine(
+                uiState,
+                getTracearrInstanceRepositoryUseCase.observeSelected(),
+            ) { state, tracearrRepo ->
+                state to tracearrRepo
+            }.collectLatest { (state, tracearrRepo) ->
+                if (tracearrRepo == null) {
+                    _tracearrState.value = TracearrMediaUiState(isTracearrConfigured = false)
+                    return@collectLatest
+                }
+
+                val success = state as? UnifiedMediaDetailsUiState.Success
+                val targetItem = success?.arrMedia
+
+                val resolvedTmdbId =
+                    tmdbId ?: when (targetItem) {
+                        is ArrMovie -> targetItem.tmdbId.takeIf { it > 0 }
+                        is ArrSeries -> targetItem.tmdbId?.takeIf { it > 0 }
+                        else -> null
+                    }
+
+                val resolvedReqType =
+                    requestType ?: when (targetItem) {
+                        is ArrMovie -> RequestType.Movie
+                        is ArrSeries -> RequestType.Tv
+                        else -> null
+                    }
+
+                if (resolvedTmdbId != null && resolvedTmdbId > 0 && resolvedReqType != null) {
+                    val ref =
+                        if (resolvedReqType == RequestType.Tv) {
+                            "show:tmdb:$resolvedTmdbId"
+                        } else {
+                            "movie:tmdb:$resolvedTmdbId"
+                        }
+                    currentTracearrRef = ref
+
+                    _tracearrState.update { it.copy(isTracearrConfigured = true, isLoading = true) }
+
+                    val statsResult = tracearrRepo.getMediaStats(ref)
+                    val watchersResult = tracearrRepo.getMediaWatchers(ref)
+                    val historyResult = tracearrRepo.getMediaHistory(ref, cursor = null, pageSize = 25)
+
+                    _tracearrState.update { currentState ->
+                        currentState.copy(
+                            isTracearrConfigured = true,
+                            stats = (statsResult as? NetworkResult.Success)?.data,
+                            watchers = (watchersResult as? NetworkResult.Success)?.data,
+                            historyItems = (historyResult as? NetworkResult.Success)?.data?.data ?: emptyList(),
+                            nextHistoryCursor = (historyResult as? NetworkResult.Success)?.data?.meta?.nextCursor,
+                            isLoading = false,
+                        )
+                    }
+                } else {
+                    _tracearrState.update { it.copy(isTracearrConfigured = true, isLoading = false) }
                 }
             }
         }
@@ -1415,6 +1485,38 @@ class UnifiedMediaDetailsViewModel(
                         )
                     }
                 }
+        }
+    }
+
+    // Tracearr Actions
+    fun selectTracearrStatsWindow(window: TracearrStatsWindowType) {
+        _tracearrState.update { it.copy(selectedStatsWindow = window) }
+    }
+
+    fun loadMoreTracearrHistory() {
+        val currentState = _tracearrState.value
+        val cursor = currentState.nextHistoryCursor ?: return
+        if (currentState.isLoadingHistoryMore) return
+
+        viewModelScope.launch {
+            val repo = getTracearrInstanceRepositoryUseCase.observeSelected().firstOrNull() ?: return@launch
+            val ref = currentTracearrRef ?: return@launch
+
+            _tracearrState.update { it.copy(isLoadingHistoryMore = true) }
+            when (val res = repo.getMediaHistory(ref, cursor = cursor, pageSize = 25)) {
+                is NetworkResult.Success -> {
+                    _tracearrState.update { state ->
+                        state.copy(
+                            historyItems = state.historyItems + res.data.data,
+                            nextHistoryCursor = res.data.meta?.nextCursor,
+                            isLoadingHistoryMore = false,
+                        )
+                    }
+                }
+                else -> {
+                    _tracearrState.update { it.copy(isLoadingHistoryMore = false) }
+                }
+            }
         }
     }
 }

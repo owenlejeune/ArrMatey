@@ -22,7 +22,6 @@ class TracearrViolationsViewModel(
     getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
     private val getTracearrViolationsUseCase: GetTracearrViolationsUseCase,
 ) : ViewModel() {
-
     val currentRepository: StateFlow<TracearrRepository?> =
         getTracearrInstanceRepositoryUseCase
             .observeSelected()
@@ -42,16 +41,17 @@ class TracearrViolationsViewModel(
         combine(_rawState, _searchQuery) { rawState, query ->
             val trimmedQuery = query.trim()
             if (rawState is TracearrViolationsState.Success) {
-                val filtered = if (trimmedQuery.isBlank()) {
-                    rawState.violations
-                } else {
-                    rawState.violations.filter { v ->
-                        v.rule?.name?.contains(trimmedQuery, ignoreCase = true) == true ||
-                        v.serverName?.contains(trimmedQuery, ignoreCase = true) == true ||
-                        v.user?.username?.contains(trimmedQuery, ignoreCase = true) == true ||
-                        v.severity.name.contains(trimmedQuery, ignoreCase = true)
+                val filtered =
+                    if (trimmedQuery.isBlank()) {
+                        rawState.violations
+                    } else {
+                        rawState.violations.filter { v ->
+                            v.rule?.name?.contains(trimmedQuery, ignoreCase = true) == true ||
+                                v.serverName?.contains(trimmedQuery, ignoreCase = true) == true ||
+                                v.user?.username?.contains(trimmedQuery, ignoreCase = true) == true ||
+                                v.severity.name.contains(trimmedQuery, ignoreCase = true)
+                        }
                     }
-                }
                 rawState.copy(filteredViolations = filtered, searchQuery = trimmedQuery)
             } else {
                 rawState
@@ -103,7 +103,9 @@ class TracearrViolationsViewModel(
             _rawState.update {
                 if (it is TracearrViolationsState.Success) {
                     it.copy(isLoadingMore = true)
-                } else it
+                } else {
+                    it
+                }
             }
 
             val nextPage = currentPage + 1
@@ -124,14 +126,17 @@ class TracearrViolationsViewModel(
                                 page = currentPage,
                                 total = total,
                             )
-                        } else old
+                        } else {
+                            old
+                        }
                     }
-                }
-                .onError { _, _, _ ->
+                }.onError { _, _, _ ->
                     _rawState.update { old ->
                         if (old is TracearrViolationsState.Success) {
                             old.copy(isLoadingMore = false)
-                        } else old
+                        } else {
+                            old
+                        }
                     }
                 }
 
@@ -139,7 +144,10 @@ class TracearrViolationsViewModel(
         }
     }
 
-    private suspend fun loadViolations(repo: TracearrRepository, isRefresh: Boolean) {
+    private suspend fun loadViolations(
+        repo: TracearrRepository,
+        isRefresh: Boolean,
+    ) {
         if (isRefresh) {
             _rawState.value = TracearrViolationsState.Loading
             currentPage = 1
@@ -152,15 +160,15 @@ class TracearrViolationsViewModel(
                 val total = response.meta?.total ?: response.data.size
                 val hasMore = response.data.size < total && response.data.isNotEmpty()
                 currentPage = 1
-                _rawState.value = TracearrViolationsState.Success(
-                    violations = response.data,
-                    isLoadingMore = false,
-                    hasMore = hasMore,
-                    page = 1,
-                    total = total,
-                )
-            }
-            .onError { _, msg, _ ->
+                _rawState.value =
+                    TracearrViolationsState.Success(
+                        violations = response.data,
+                        isLoadingMore = false,
+                        hasMore = hasMore,
+                        page = 1,
+                        total = total,
+                    )
+            }.onError { _, msg, _ ->
                 _rawState.value = TracearrViolationsState.Error(msg ?: "Failed to load violations")
             }
 

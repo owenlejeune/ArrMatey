@@ -14,5 +14,5 @@ enum class ViolationSeverity {
     @SerialName("high")
     High,
 
-    Unknown
+    Unknown,
 }

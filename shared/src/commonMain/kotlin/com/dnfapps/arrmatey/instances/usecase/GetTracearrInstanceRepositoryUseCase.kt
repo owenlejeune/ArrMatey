@@ -10,6 +10,5 @@ class GetTracearrInstanceRepositoryUseCase(
     operator fun invoke(instanceId: Long): TracearrRepository? =
         instanceManager.getAllTracearrRepositories().find { it.instance.id == instanceId }
 
-    fun observeSelected(): Flow<TracearrRepository?> =
-        instanceManager.getSelectedTracearrRepository()
+    fun observeSelected(): Flow<TracearrRepository?> = instanceManager.getSelectedTracearrRepository()
 }

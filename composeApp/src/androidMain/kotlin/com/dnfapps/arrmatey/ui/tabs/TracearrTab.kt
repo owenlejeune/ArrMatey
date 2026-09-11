@@ -33,18 +33,19 @@ fun TracearrTab(
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-        entryProvider = entryProvider {
-            tracearrNavEntries(
-                navigation = navigation,
-                isExpanded = isExpanded,
-                isLargeScreen = isLargeScreen,
-                wideRailIsVisible = wideRailIsVisible,
-            )
-            mediaNavEntries(
-                navigation = navigation,
-                isExpanded = isExpanded,
-                wideRailIsVisible = wideRailIsVisible,
-            )
-        },
+        entryProvider =
+            entryProvider {
+                tracearrNavEntries(
+                    navigation = navigation,
+                    isExpanded = isExpanded,
+                    isLargeScreen = isLargeScreen,
+                    wideRailIsVisible = wideRailIsVisible,
+                )
+                mediaNavEntries(
+                    navigation = navigation,
+                    isExpanded = isExpanded,
+                    wideRailIsVisible = wideRailIsVisible,
+                )
+            },
     )
 }

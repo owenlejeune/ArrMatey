@@ -256,8 +256,9 @@ enum class InstanceType(
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = false,
-        associatedColor = TracearrBlue
-    );
+        associatedColor = TracearrBlue,
+    ),
+    ;
 
     companion object {
         fun arrs() = listOf(Sonarr, Radarr, Lidarr, Bookshelf, Listenarr)

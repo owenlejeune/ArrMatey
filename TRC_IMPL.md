@@ -75,3 +75,8 @@ Below are 3 proposed strategies for integrating Tracearr data into [UnifiedMedia
 - **Who's Watching Carousel (`getMediaWatchers`):** Horizontal avatar carousel placed above `SeerrCreditsSection` (Cast & Crew).
 - **Activity Feed Footer (`getMediaHistory`):** Infinite scroll stream timeline appended at the bottom of the details page.
 - **Best For:** TV shows and episodic media where consumption context at the episode/season level is most valuable.
+
+
+### **Ignore this Section**
+4) refactor UnifiedMediaDetails separating components into their own files
+2) refactor UnifiedMediaDetailsViewModel to extract logic into use cases. 1500 lines is way too long for a single file

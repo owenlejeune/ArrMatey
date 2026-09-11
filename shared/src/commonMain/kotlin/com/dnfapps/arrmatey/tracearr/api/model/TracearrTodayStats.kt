@@ -12,9 +12,8 @@ data class TracearrTodayStats(
     val watchTimeHours: Float = 0f,
     val alertsLast24h: Int = 0,
     val activeUsersToday: Int = 0,
-    @Contextual val timestamp: Instant? = null
+    @Contextual val timestamp: Instant? = null,
 ) {
-
     val formattedWatchTime: String
         get() {
             val hours = watchTimeHours

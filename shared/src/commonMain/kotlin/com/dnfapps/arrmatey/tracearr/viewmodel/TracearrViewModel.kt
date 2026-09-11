@@ -32,7 +32,6 @@ class TracearrViewModel(
     private val getTracearrStatsUseCase: GetTracearrStatsTodayUseCase,
     private val getTracearrHistoryUseCase: GetTracearrHistoryUseCase,
 ) : ViewModel() {
-
     val currentRepository: StateFlow<TracearrRepository?> =
         getTracearrInstanceRepositoryUseCase
             .observeSelected()
@@ -96,7 +95,10 @@ class TracearrViewModel(
             }
     }
 
-    private suspend fun refreshData(repo: TracearrRepository, showLoading: Boolean) {
+    private suspend fun refreshData(
+        repo: TracearrRepository,
+        showLoading: Boolean,
+    ) {
         if (showLoading) {
             _state.value = TracearrState.Loading
         }
@@ -106,11 +108,12 @@ class TracearrViewModel(
         var history: List<TracearrHistoryItem> = emptyList()
         var errorMessage: String? = null
 
-        getTracearrStreamsUseCase(repo).onSuccess { response ->
-            streams = response.data
-        }.onError { _, msg, _ ->
-            errorMessage = msg ?: "Failed to fetch streams"
-        }
+        getTracearrStreamsUseCase(repo)
+            .onSuccess { response ->
+                streams = response.data
+            }.onError { _, msg, _ ->
+                errorMessage = msg ?: "Failed to fetch streams"
+            }
 
         getTracearrStatsUseCase(repo).onSuccess {
             stats = it
@@ -121,11 +124,12 @@ class TracearrViewModel(
         }
 
         if (streams != null) {
-            _state.value = TracearrState.Success(
-                streams = streams,
-                stats = stats,
-                history = history,
-            )
+            _state.value =
+                TracearrState.Success(
+                    streams = streams,
+                    stats = stats,
+                    history = history,
+                )
         } else if (showLoading || _state.value !is TracearrState.Success) {
             _state.value = TracearrState.Error(errorMessage ?: "Failed to load Tracearr data")
         }
@@ -141,9 +145,11 @@ class TracearrViewModel(
 
     fun setSelectedHistoryStream(historyItem: TracearrHistoryItem) {
         _selectedSession.update {
-            (_state.value as? TracearrState.Success)?.history?.firstOrNull { h ->
-                h.id == historyItem.id
-            }?.toStreamSession()
+            (_state.value as? TracearrState.Success)
+                ?.history
+                ?.firstOrNull { h ->
+                    h.id == historyItem.id
+                }?.toStreamSession()
         }
     }
 

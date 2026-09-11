@@ -59,8 +59,10 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -123,6 +125,11 @@ import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.components.buildArrInfoItems
 import com.dnfapps.arrmatey.ui.components.buildSeerrInfoItems
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
+import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
+import com.dnfapps.arrmatey.ui.components.tracearr.TracearrHistorySection
+import com.dnfapps.arrmatey.ui.components.tracearr.TracearrSummaryChipRow
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
@@ -148,6 +155,13 @@ import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+private enum class DetailsTab {
+    SeasonsFiles,
+    Overview,
+    Analytics,
+    History,
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -224,6 +238,9 @@ fun UnifiedMediaDetailsScreen(
     var showConfirmRemoveQueueItem by remember { mutableStateOf(false) }
     var confirmRemoveFromService by remember { mutableStateOf(false) }
     var confirmClearData by remember { mutableStateOf(false) }
+    var selectedTracearrStreamSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
+    var selectedTab by remember { mutableStateOf(DetailsTab.Overview) }
+    var previousHasSeasonsOrFiles by remember { mutableStateOf<Boolean?>(null) }
 
     val qualityProfiles by viewModel.qualityProfiles.collectAsStateWithLifecycle()
     val rootFolders by viewModel.rootFolders.collectAsStateWithLifecycle()
@@ -249,6 +266,7 @@ fun UnifiedMediaDetailsScreen(
     val serviceDetails by viewModel.serviceDetails.collectAsStateWithLifecycle()
     val isArrConfigured by viewModel.isArrConfigured.collectAsStateWithLifecycle()
     val isSeerrConfigured by viewModel.isSeerrConfigured.collectAsStateWithLifecycle()
+    val tracearrState by viewModel.tracearrState.collectAsStateWithLifecycle()
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
     val isMonitored by viewModel.isMonitored.collectAsStateWithLifecycle()
@@ -258,6 +276,7 @@ fun UnifiedMediaDetailsScreen(
     val addSheetUiState by viewModel.addSheetUiState.collectAsStateWithLifecycle()
     val activeInstance by viewModel.activeInstance.collectAsStateWithLifecycle()
     val activeSeerrInstance by viewModel.activeSeerrInstance.collectAsStateWithLifecycle()
+
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
     val itemAddedSuccessfullyMessage = mokoString(MR.strings.item_added_successfully)
@@ -532,13 +551,12 @@ fun UnifiedMediaDetailsScreen(
                                         .padding(top = 12.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp),
                             ) {
-                                Column(
-                                    modifier = Modifier.padding(horizontal = 24.dp),
-                                ) {
+                                Column {
                                     val title = state.displayTitle ?: mokoString(MR.strings.unknown)
                                     Text(
                                         text = title,
                                         style = MaterialTheme.typography.headlineMedium,
+                                        modifier = Modifier.padding(horizontal = 24.dp),
                                     )
 
                                     state.tagline?.unlessEmpty {
@@ -547,6 +565,7 @@ fun UnifiedMediaDetailsScreen(
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontStyle = FontStyle.Italic,
                                             color = MaterialTheme.colorScheme.tertiary,
+                                            modifier = Modifier.padding(horizontal = 24.dp),
                                         )
                                     }
 
@@ -555,196 +574,287 @@ fun UnifiedMediaDetailsScreen(
                                             text = airingString,
                                             style = MaterialTheme.typography.bodyLarge,
                                             color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(horizontal = 24.dp),
                                         )
+                                    }
+
+                                    TracearrSummaryChipRow(
+                                        uiState = tracearrState,
+                                        modifier = Modifier.padding(top = 8.dp),
+                                    )
+
+                                    val hasSeasonsOrFiles = state.seasons.isNotEmpty() || (state.hasArrId && state.arrMedia !is ArrSeries)
+                                    val hasTracearr = tracearrState.isTracearrConfigured
+
+                                    LaunchedEffect(hasSeasonsOrFiles) {
+                                        val prev = previousHasSeasonsOrFiles
+                                        if (prev == null) {
+                                            if (hasSeasonsOrFiles) {
+                                                selectedTab = DetailsTab.SeasonsFiles
+                                            }
+                                        } else if (!prev && hasSeasonsOrFiles) {
+                                            selectedTab = DetailsTab.SeasonsFiles
+                                        } else if (prev && !hasSeasonsOrFiles) {
+                                            if (selectedTab == DetailsTab.SeasonsFiles) {
+                                                selectedTab = DetailsTab.Overview
+                                            }
+                                        }
+                                        previousHasSeasonsOrFiles = hasSeasonsOrFiles
+                                    }
+
+                                    val availableTabs =
+                                        buildList {
+                                            if (hasSeasonsOrFiles) add(DetailsTab.SeasonsFiles)
+                                            add(DetailsTab.Overview)
+                                            if (hasTracearr) add(DetailsTab.Analytics)
+                                            if (hasTracearr) add(DetailsTab.History)
+                                        }
+
+                                    if (availableTabs.size > 1) {
+                                        PrimaryScrollableTabRow(
+                                            selectedTabIndex = availableTabs.indexOf(selectedTab).coerceAtLeast(0),
+                                            modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
+                                            edgePadding = 0.dp,
+                                        ) {
+                                            availableTabs.forEach { tab ->
+                                                Tab(
+                                                    selected = selectedTab == tab,
+                                                    onClick = { selectedTab = tab },
+                                                    text = {
+                                                        Text(
+                                                            when (tab) {
+                                                                DetailsTab.SeasonsFiles ->
+                                                                    if (state.seasons.isNotEmpty()) {
+                                                                        mokoString(
+                                                                            MR.strings.seasons_header,
+                                                                        )
+                                                                    } else {
+                                                                        mokoString(MR.strings.media)
+                                                                    }
+                                                                DetailsTab.Overview -> mokoString(MR.strings.overview)
+                                                                DetailsTab.Analytics -> mokoString(MR.strings.statistics)
+                                                                DetailsTab.History -> mokoString(MR.strings.history)
+                                                            },
+                                                        )
+                                                    },
+                                                )
+                                            }
+                                        }
                                     }
                                 }
 
-                                state.overview?.unlessEmpty {
-                                    ItemDescriptionCard(
-                                        overview = it,
-                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                    )
-                                }
+                                when (selectedTab) {
+                                    DetailsTab.SeasonsFiles -> {
+                                        if (state.seasons.isNotEmpty()) {
+                                            val arrSeries = state.arrMedia as? ArrSeries
+                                            SeasonsArea(
+                                                seasons = state.seasons,
+                                                seriesId = arrSeries?.id,
+                                                modifier = Modifier.padding(horizontal = 24.dp),
+                                                searchIds = automaticSearchIds,
+                                                onToggleSeasonMonitor = { viewModel.toggleSeasonMonitored(it) },
+                                                onToggleEpisodeMonitor = { viewModel.toggleEpisodeMonitored(it) },
+                                                onEpisodeAutomaticSearch = { viewModel.performEpisodeAutomaticLookup(it) },
+                                                onSeasonAutomaticSearch = { viewModel.performSeasonAutomaticLookup(it) },
+                                                deleteSeasonFiles = { confirmDeleteSeasonNumber = it },
+                                                seasonDeleteInProgress = deleteSeasonStatus is OperationStatus.InProgress,
+                                                onNavigateToEpisodeDetails = { episode ->
+                                                    arrSeries?.let { series -> onNavigateToEpisodeDetails(series, episode) }
+                                                },
+                                                deleteEpisodeFile = { confirmDeleteEpisodeId = it },
+                                                onNavigateToSeriesRelease = onNavigateToSeriesRelease,
+                                                bazarrDetailsIntegration = state.bazarrDetailsIntegration,
+                                            )
+                                        }
 
-                                AnimatedVisibility(
-                                    visible = state.queueItems.isNotEmpty(),
-                                    enter = expandVertically() + fadeIn(),
-                                    exit = shrinkVertically() + fadeOut(),
-                                ) {
-                                    MediaActivitySection(
-                                        queueItems = state.queueItems,
-                                        onQueueItemClicked = { item ->
-                                            selectedQueueItem = item
-                                        },
-                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                    )
-                                }
-
-                                if (state.seasons.isNotEmpty()) {
-                                    val arrSeries = state.arrMedia as? ArrSeries
-                                    SeasonsArea(
-                                        seasons = state.seasons,
-                                        seriesId = arrSeries?.id,
-                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                        searchIds = automaticSearchIds,
-                                        onToggleSeasonMonitor = { viewModel.toggleSeasonMonitored(it) },
-                                        onToggleEpisodeMonitor = { viewModel.toggleEpisodeMonitored(it) },
-                                        onEpisodeAutomaticSearch = { viewModel.performEpisodeAutomaticLookup(it) },
-                                        onSeasonAutomaticSearch = { viewModel.performSeasonAutomaticLookup(it) },
-                                        deleteSeasonFiles = { confirmDeleteSeasonNumber = it },
-                                        seasonDeleteInProgress = deleteSeasonStatus is OperationStatus.InProgress,
-                                        onNavigateToEpisodeDetails = { episode ->
-                                            arrSeries?.let { series -> onNavigateToEpisodeDetails(series, episode) }
-                                        },
-                                        deleteEpisodeFile = { confirmDeleteEpisodeId = it },
-                                        onNavigateToSeriesRelease = onNavigateToSeriesRelease,
-                                        bazarrDetailsIntegration = state.bazarrDetailsIntegration,
-                                    )
-                                }
-
-                                AnimatedVisibility(
-                                    visible = state.hasArrId && state.arrMedia !is ArrSeries,
-                                    enter = expandVertically() + fadeIn(),
-                                    exit = shrinkVertically() + fadeOut(),
-                                ) {
-                                    when (val item = state.arrMedia) {
-                                        is ArrMovie -> {
-                                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                                MovieFileView(
-                                                    modifier = Modifier.padding(horizontal = 24.dp),
-                                                    movie = item,
-                                                    movieExtraFiles = state.extraFiles,
-                                                    searchIds = automaticSearchIds,
-                                                    onAutomaticSearch = { viewModel.performAutomaticLookup() },
-                                                    onDeleteFile = { confirmDeleteMovie = true },
-                                                    onNavigateToMovieFiles = onNavigateToMovieFiles,
-                                                    onNavigateToMovieReleases = onNavigateToMovieReleases,
-                                                )
-                                                item.id?.let { movieId ->
-                                                    if (state.bazarrDetailsIntegration) {
-                                                        BazarrSubtitlesSection(
-                                                            target = BazarrMediaTarget.Movie(movieId),
+                                        AnimatedVisibility(
+                                            visible = state.hasArrId && state.arrMedia !is ArrSeries,
+                                            enter = expandVertically() + fadeIn(),
+                                            exit = shrinkVertically() + fadeOut(),
+                                        ) {
+                                            when (val item = state.arrMedia) {
+                                                is ArrMovie -> {
+                                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                                        MovieFileView(
                                                             modifier = Modifier.padding(horizontal = 24.dp),
+                                                            movie = item,
+                                                            movieExtraFiles = state.extraFiles,
+                                                            searchIds = automaticSearchIds,
+                                                            onAutomaticSearch = { viewModel.performAutomaticLookup() },
+                                                            onDeleteFile = { confirmDeleteMovie = true },
+                                                            onNavigateToMovieFiles = onNavigateToMovieFiles,
+                                                            onNavigateToMovieReleases = onNavigateToMovieReleases,
                                                         )
+                                                        item.id?.let { movieId ->
+                                                            if (state.bazarrDetailsIntegration) {
+                                                                BazarrSubtitlesSection(
+                                                                    target = BazarrMediaTarget.Movie(movieId),
+                                                                    modifier = Modifier.padding(horizontal = 24.dp),
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                is Arrtist ->
+                                                    AlbumsArea(
+                                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                                        artist = item,
+                                                        albums = state.albums,
+                                                        tracks = state.tracks,
+                                                        trackFiles = state.trackFiles,
+                                                        searchIds = automaticSearchIds,
+                                                        onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
+                                                        onEditAlbum = { editAlbum = it },
+                                                        onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
+                                                        deleteAlbumFiles = { confirmDeleteAlbum = it },
+                                                        albumDeleteInProgress = deleteAlbumStatus is OperationStatus.InProgress,
+                                                        onNavigateToAlbumRelease = onNavigateToAlbumRelease,
+                                                    )
+
+                                                is Author ->
+                                                    BooksArea(
+                                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                                        author = item,
+                                                        series = state.bookSeries,
+                                                        files = state.bookFiles,
+                                                        books = state.books,
+                                                        searchIds = automaticSearchIds,
+                                                        onToggleMonitor = { viewModel.toggleBookMonitored(it) },
+                                                        onToggleSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
+                                                        onAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
+                                                        onNavigateToAuthorFiles = onNavigateToAuthorFiles,
+                                                        onNavigateToBookDetails = onNavigateToBookDetails,
+                                                        onNavigateToBookRelease = onNavigateToBookRelease,
+                                                    )
+
+                                                is Audiobook ->
+                                                    AudiobookFileView(
+                                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                                        audiobook = item,
+                                                        searchIds = automaticSearchIds,
+                                                        onAutomaticSearch = { item.id?.let { viewModel.performBookAutomaticLookup(it) } },
+                                                        onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
+                                                        onNavigateToAudiobookRelease = onNavigateToAudiobookRelease,
+                                                    )
+
+                                                is ArrSeries, is SearchAudiobook, is MockMedia, null -> {}
+                                            }
+                                        }
+                                    }
+
+                                    DetailsTab.Overview -> {
+                                        state.overview?.unlessEmpty {
+                                            ItemDescriptionCard(
+                                                overview = it,
+                                                modifier = Modifier.padding(horizontal = 24.dp),
+                                            )
+                                        }
+
+                                        AnimatedVisibility(
+                                            visible = state.queueItems.isNotEmpty(),
+                                            enter = expandVertically() + fadeIn(),
+                                            exit = shrinkVertically() + fadeOut(),
+                                        ) {
+                                            MediaActivitySection(
+                                                queueItems = state.queueItems,
+                                                onQueueItemClicked = { item ->
+                                                    selectedQueueItem = item
+                                                },
+                                                modifier = Modifier.padding(horizontal = 24.dp),
+                                            )
+                                        }
+
+                                        state.seerrMedia?.credits?.let { credits ->
+                                            SeerrCreditsSection(credits) { onPersonClick(it) }
+                                        }
+
+                                        val arrInfoItems =
+                                            buildArrInfoItems(state, qualityProfiles, tags, onEditPath = {
+                                                showEditPathSheet =
+                                                    true
+                                            })
+                                        val seerrInfoItems = buildSeerrInfoItems(state)
+                                        val showBothCards = arrInfoItems.isNotEmpty() && seerrInfoItems.isNotEmpty()
+
+                                        val selectedArrInstance =
+                                            state.availableInstances.firstOrNull { it.id == state.selectedInstanceId } ?: activeInstance
+                                        val selectedSeerrInstance = activeSeerrInstance
+
+                                        if (arrInfoItems.isNotEmpty() || seerrInfoItems.isNotEmpty()) {
+                                            InfoArea(
+                                                cards =
+                                                    listOf(
+                                                        InfoCardData(
+                                                            items = arrInfoItems,
+                                                            footer =
+                                                                if (showBothCards && selectedArrInstance != null) {
+                                                                    { InfoCardInstanceFooter(selectedArrInstance) }
+                                                                } else {
+                                                                    null
+                                                                },
+                                                        ),
+                                                        InfoCardData(
+                                                            items = seerrInfoItems,
+                                                            footer =
+                                                                if (showBothCards && selectedSeerrInstance != null) {
+                                                                    { InfoCardInstanceFooter(selectedSeerrInstance) }
+                                                                } else {
+                                                                    null
+                                                                },
+                                                        ),
+                                                    ),
+                                                modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
+                                                useDualColumn = isExpanded && !isDualPanel,
+                                            )
+                                        }
+
+                                        state.keywords.unlessEmpty { keywords ->
+                                            val rowCount = minOf(3, maxOf(1, keywords.size))
+                                            val rows =
+                                                (0 until rowCount).map { rowIndex ->
+                                                    keywords.filterIndexed { index, _ -> index % rowCount == rowIndex }
+                                                }
+
+                                            Column(
+                                                verticalArrangement = Arrangement.spacedBy(0.dp),
+                                                modifier =
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .horizontalScroll(rememberScrollState())
+                                                        .padding(horizontal = 24.dp),
+                                            ) {
+                                                rows.forEach { rowKeywords ->
+                                                    Row(
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    ) {
+                                                        rowKeywords.forEach { keyword ->
+                                                            SuggestionChip(
+                                                                onClick = {},
+                                                                label = { Text(keyword.name) },
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
-
-                                        is Arrtist ->
-                                            AlbumsArea(
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                                artist = item,
-                                                albums = state.albums,
-                                                tracks = state.tracks,
-                                                trackFiles = state.trackFiles,
-                                                searchIds = automaticSearchIds,
-                                                onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
-                                                onEditAlbum = { editAlbum = it },
-                                                onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
-                                                deleteAlbumFiles = { confirmDeleteAlbum = it },
-                                                albumDeleteInProgress = deleteAlbumStatus is OperationStatus.InProgress,
-                                                onNavigateToAlbumRelease = onNavigateToAlbumRelease,
-                                            )
-
-                                        is Author ->
-                                            BooksArea(
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                                author = item,
-                                                series = state.bookSeries,
-                                                files = state.bookFiles,
-                                                books = state.books,
-                                                searchIds = automaticSearchIds,
-                                                onToggleMonitor = { viewModel.toggleBookMonitored(it) },
-                                                onToggleSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
-                                                onAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
-                                                onNavigateToAuthorFiles = onNavigateToAuthorFiles,
-                                                onNavigateToBookDetails = onNavigateToBookDetails,
-                                                onNavigateToBookRelease = onNavigateToBookRelease,
-                                            )
-
-                                        is Audiobook ->
-                                            AudiobookFileView(
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                                audiobook = item,
-                                                searchIds = automaticSearchIds,
-                                                onAutomaticSearch = { item.id?.let { viewModel.performBookAutomaticLookup(it) } },
-                                                onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
-                                                onNavigateToAudiobookRelease = onNavigateToAudiobookRelease,
-                                            )
-
-                                        is ArrSeries, is SearchAudiobook, is MockMedia, null -> {}
                                     }
-                                }
 
-                                state.seerrMedia?.credits?.let { credits ->
-                                    SeerrCreditsSection(credits) { onPersonClick(it) }
-                                }
+                                    DetailsTab.Analytics -> {
+                                        TracearrAnalyticsSection(
+                                            uiState = tracearrState,
+                                            onWindowSelected = { viewModel.selectTracearrStatsWindow(it) },
+                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                        )
+                                    }
 
-                                val arrInfoItems =
-                                    buildArrInfoItems(state, qualityProfiles, tags, onEditPath = { showEditPathSheet = true })
-                                val seerrInfoItems = buildSeerrInfoItems(state)
-                                val showBothCards = arrInfoItems.isNotEmpty() && seerrInfoItems.isNotEmpty()
-
-                                val selectedArrInstance =
-                                    state.availableInstances.firstOrNull { it.id == state.selectedInstanceId } ?: activeInstance
-                                val selectedSeerrInstance = activeSeerrInstance
-
-                                if (arrInfoItems.isNotEmpty() || seerrInfoItems.isNotEmpty()) {
-                                    InfoArea(
-                                        cards =
-                                            listOf(
-                                                InfoCardData(
-                                                    items = arrInfoItems,
-                                                    footer =
-                                                        if (showBothCards && selectedArrInstance != null) {
-                                                            { InfoCardInstanceFooter(selectedArrInstance) }
-                                                        } else {
-                                                            null
-                                                        },
-                                                ),
-                                                InfoCardData(
-                                                    items = seerrInfoItems,
-                                                    footer =
-                                                        if (showBothCards && selectedSeerrInstance != null) {
-                                                            { InfoCardInstanceFooter(selectedSeerrInstance) }
-                                                        } else {
-                                                            null
-                                                        },
-                                                ),
-                                            ),
-                                        modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
-                                        useDualColumn = isExpanded && !isDualPanel,
-                                    )
-                                }
-
-                                state.keywords.unlessEmpty { keywords ->
-                                    val rowCount = minOf(3, maxOf(1, keywords.size))
-                                    val rows =
-                                        (0 until rowCount).map { rowIndex ->
-                                            keywords.filterIndexed { index, _ -> index % rowCount == rowIndex }
-                                        }
-
-                                    Column(
-                                        verticalArrangement = Arrangement.spacedBy(0.dp),
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .horizontalScroll(rememberScrollState())
-                                                .padding(horizontal = 24.dp),
-                                    ) {
-                                        rows.forEach { rowKeywords ->
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            ) {
-                                                rowKeywords.forEach { keyword ->
-                                                    SuggestionChip(
-                                                        onClick = {},
-                                                        label = { Text(keyword.name) },
-                                                    )
-                                                }
-                                            }
-                                        }
+                                    DetailsTab.History -> {
+                                        TracearrHistorySection(
+                                            uiState = tracearrState,
+                                            onLoadMore = { viewModel.loadMoreTracearrHistory() },
+                                            onClickItem = { selectedTracearrStreamSession = it.toStreamSession() },
+                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                        )
                                     }
                                 }
                             }
@@ -1280,6 +1390,15 @@ fun UnifiedMediaDetailsScreen(
                                 Text(mokoString(MR.strings.decline))
                             }
                         },
+                    )
+                }
+
+                selectedTracearrStreamSession?.let { session ->
+                    TracearrStreamDetailsSheet(
+                        session = session,
+                        onDismissRequest = { selectedTracearrStreamSession = null },
+                        onNavigateToDetails = { _, _ -> },
+                        onNavigateToUser = { /* user profile */ },
                     )
                 }
             }

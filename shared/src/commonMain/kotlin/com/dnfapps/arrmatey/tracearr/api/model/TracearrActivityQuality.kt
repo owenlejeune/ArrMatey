@@ -10,5 +10,5 @@ data class TracearrActivityQuality(
     val total: Int = 0,
     val directPlayPercent: Int = 0,
     val directStreamPercent: Int = 0,
-    val transcodePercent: Int = 0
+    val transcodePercent: Int = 0,
 )

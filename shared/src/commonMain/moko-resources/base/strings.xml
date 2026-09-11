@@ -921,4 +921,18 @@
     <string name="stream_quality">Stream Quality</string>
     <string name="week">Week</string>
     <string name="month">Month</string>
+    <string name="all_time">All Time</string>
+    <string name="thirty_days">30 Days</string>
+    <string name="seven_days">7 Days</string>
+    <string name="total_plays">Total Plays</string>
+    <string name="viewers">Viewers</string>
+    <string name="server">Server</string>
+    <string name="servers">Servers</string>
+    <string name="per_server_breakdown">Per-Server Breakdown</string>
+    <string name="top_watchers">Top Watchers</string>
+    <string name="last_watched">Last watched: %1$s</string>
+    <string name="no_stream_history">No stream history recorded yet.</string>
+    <string name="load_more_history">Load More History</string>
+    <string name="analytics">Analytics</string>
+    <string name="media_files">Media Files</string>
 </resources>

@@ -5,9 +5,15 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
 
 sealed class TracearrUsersState {
     data object Initial : TracearrUsersState()
+
     data object NoInstance : TracearrUsersState()
+
     data object Loading : TracearrUsersState()
-    data class Error(val message: String) : TracearrUsersState()
+
+    data class Error(
+        val message: String,
+    ) : TracearrUsersState()
+
     data class Success(
         val users: List<TracearrUserDetail>,
         val filteredUsers: List<TracearrUserDetail> = users,

@@ -46,14 +46,16 @@ fun TracearrViolationCard(
         onClick = { onClick?.invoke() },
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(
@@ -84,9 +86,10 @@ fun TracearrViolationCard(
                             AsyncImage(
                                 model = rememberRemoteImageData(avatarUrl, trim = false),
                                 contentDescription = null,
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .clip(CircleShape),
+                                modifier =
+                                    Modifier
+                                        .size(18.dp)
+                                        .clip(CircleShape),
                                 contentScale = ContentScale.Crop,
                             )
                         } else {
@@ -166,11 +169,12 @@ fun SeverityBadge(
     severity: ViolationSeverity,
     modifier: Modifier = Modifier,
 ) {
-    val (severityBg, severityFg) = when (severity) {
-        ViolationSeverity.High -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.error
-        ViolationSeverity.Warning -> ArrOrange.copy(alpha = 0.2f) to ArrOrange
-        else -> TracearrBlue.copy(alpha = 0.15f) to TracearrBlue
-    }
+    val (severityBg, severityFg) =
+        when (severity) {
+            ViolationSeverity.High -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.error
+            ViolationSeverity.Warning -> ArrOrange.copy(alpha = 0.2f) to ArrOrange
+            else -> TracearrBlue.copy(alpha = 0.15f) to TracearrBlue
+        }
 
     Surface(
         modifier = modifier,
@@ -188,9 +192,7 @@ fun SeverityBadge(
 }
 
 @Composable
-fun AcknowledgedBadge(
-    modifier: Modifier = Modifier,
-) {
+fun AcknowledgedBadge(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = CircleShape,

@@ -25,11 +25,21 @@ struct UnifiedMediaDetailsScreen: View {
     @State private var confirmRemoveFromService = false
     @State private var confirmClearData = false
     @State private var selectedQueueItem: QueueItem? = nil
+    @State private var selectedTracearrSession: TracearrStreamSession? = nil
 
     private let initialEpisodeId: Int64?
     @State private var hasNavigatedToInitialEpisode = false
 
     @State private var toastMessage: String? = nil
+    @State private var selectedTab: DetailsTab = .overview
+    @State private var previousHasSeasonsOrFiles: Bool? = nil
+
+    private enum DetailsTab: Int, Hashable, CaseIterable {
+        case seasonsFiles = 0
+        case overview = 1
+        case analytics = 2
+        case history = 3
+    }
 
     private var removeServiceName: String {
         viewModel.buttonState.serviceName ?? (viewModel.resolvedRequestType == RequestType.movie ? "Radarr" : "Sonarr")
@@ -78,6 +88,7 @@ struct UnifiedMediaDetailsScreen: View {
             showConfirmSheet: $showConfirmSheet,
             editAlbum: $editAlbum,
             selectedQueueItem: $selectedQueueItem,
+            selectedTracearrSession: $selectedTracearrSession,
             screen: self
         ))
         .modifier(UnifiedMediaDetailsArrAlertsModifier(
@@ -144,6 +155,10 @@ extension UnifiedMediaDetailsScreen {
 
     @ViewBuilder
     private func successView(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
+        let tracearrState = viewModel.tracearrState
+        let hasSeasonsOrFiles = !success.seasons.isEmpty || (success.hasArrId && !(success.arrMedia is ArrSeries))
+        let hasTracearr = tracearrState.isTracearrConfigured
+
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 UnifiedMediaDetailsHeader(success: success, type: viewModel.resolvedInstanceType)
@@ -166,38 +181,45 @@ extension UnifiedMediaDetailsScreen {
                                 .font(.system(size: 16, weight: .medium))
                                 .foregroundColor(.themePrimary)
                         }
+
+                        TracearrSummaryChipRowView(uiState: tracearrState)
+                            .padding(.top, 4)
                     }
 
-                    if let overview = success.overview {
-                        ItemDescriptionCard(overview: overview)
-                    }
-
-                    if !success.queueItems.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(MR.strings().activity.localized())
-                                .font(.title3.bold())
-                            ForEach(success.queueItems, id: \.id) { item in
-                                ActivityQueueItem(item: item, onClick: { selectedQueueItem = item })
+                    if hasSeasonsOrFiles || hasTracearr {
+                        Picker("View Mode", selection: $selectedTab) {
+                            if hasSeasonsOrFiles {
+                                Text(!success.seasons.isEmpty ? MR.plurals().seasons.localized(formatArgs: [2]) : MR.strings().media.localized())
+                                    .tag(DetailsTab.seasonsFiles)
+                            }
+                            Text(MR.strings().overview.localized())
+                                .tag(DetailsTab.overview)
+                            if hasTracearr {
+                                Text(MR.strings().statistics.localized())
+                                    .tag(DetailsTab.analytics)
+                                Text(MR.strings().history.localized())
+                                    .tag(DetailsTab.history)
                             }
                         }
-                        .transition(.opacity.combined(with: .move(edge: .top)))
+                        .pickerStyle(.segmented)
                     }
 
-                    seasonsArea(success)
-
-                    if success.hasArrId {
-                        arrLibraryFilesArea(success)
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                    }
-
-                    if let credits = success.seerrMedia?.credits {
-                        creditsSection(credits)
-                    }
-
-                    unifiedInfoArea(success)
-
-                    if !success.keywords.isEmpty {
-                        keywordsSection(success.keywords)
+                    switch selectedTab {
+                    case .seasonsFiles:
+                        seasonsAndFilesTabContent(success)
+                    case .overview:
+                        overviewTabContent(success)
+                    case .analytics:
+                        TracearrAnalyticsSectionView(
+                            uiState: tracearrState,
+                            onWindowSelected: { viewModel.selectTracearrStatsWindow(window: $0) }
+                        )
+                    case .history:
+                        TracearrHistorySectionView(
+                            uiState: tracearrState,
+                            onLoadMore: { viewModel.loadMoreTracearrHistory() },
+                            onClickItem: { selectedTracearrSession = $0.toStreamSession() }
+                        )
                     }
                 }
                 .padding(.top, 12)
@@ -206,10 +228,70 @@ extension UnifiedMediaDetailsScreen {
                 .animation(.easeInOut(duration: 0.3), value: success.selectedInstanceId?.int64Value)
             }
         }
+        .onChange(of: hasSeasonsOrFiles, initial: true) { _, newValue in
+            if previousHasSeasonsOrFiles == nil {
+                if newValue {
+                    selectedTab = .seasonsFiles
+                }
+            } else if previousHasSeasonsOrFiles == false && newValue == true {
+                withAnimation {
+                    selectedTab = .seasonsFiles
+                }
+            } else if previousHasSeasonsOrFiles == true && newValue == false {
+                if selectedTab == .seasonsFiles {
+                    withAnimation {
+                        selectedTab = .overview
+                    }
+                }
+            }
+            previousHasSeasonsOrFiles = newValue
+        }
         .refreshable {
             viewModel.refresh()
         }
         .ignoresSafeArea(edges: .top)
+    }
+
+    @ViewBuilder
+    private func overviewTabContent(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
+        VStack(alignment: .leading, spacing: 24) {
+            if let overview = success.overview {
+                ItemDescriptionCard(overview: overview)
+            }
+
+            if !success.queueItems.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(MR.strings().activity.localized())
+                        .font(.title3.bold())
+                    ForEach(success.queueItems, id: \.id) { item in
+                        ActivityQueueItem(item: item, onClick: { selectedQueueItem = item })
+                    }
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            if let credits = success.seerrMedia?.credits {
+                creditsSection(credits)
+            }
+
+            unifiedInfoArea(success)
+
+            if !success.keywords.isEmpty {
+                keywordsSection(success.keywords)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func seasonsAndFilesTabContent(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
+        VStack(alignment: .leading, spacing: 24) {
+            seasonsArea(success)
+
+            if success.hasArrId {
+                arrLibraryFilesArea(success)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
     }
 }
 
@@ -1426,6 +1508,7 @@ fileprivate struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
     @Binding var showConfirmSheet: Bool
     @Binding var editAlbum: ArrAlbum?
     @Binding var selectedQueueItem: QueueItem?
+    @Binding var selectedTracearrSession: TracearrStreamSession?
     let screen: UnifiedMediaDetailsScreen
 
     func body(content: Content) -> some View {
@@ -1457,6 +1540,13 @@ fileprivate struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
             .sheet(isPresented: viewRequestSheetBinding) { screen.viewRequestSheetContent }
             .sheet(item: queueItemBinding) {
                 screen.queueItemSheetContent($0)
+            }
+            .sheet(item: $selectedTracearrSession) { session in
+                TracearrStreamDetailsSheet(
+                    session: session,
+                    onNavigateToDetails: { _, _ in },
+                    onNavigateToUser: { _ in }
+                )
             }
     }
 }

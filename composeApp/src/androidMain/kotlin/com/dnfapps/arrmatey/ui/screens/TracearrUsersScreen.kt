@@ -102,13 +102,15 @@ fun TracearrUsersScreen(
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             when (val currentState = state) {
                 is TracearrUsersState.Initial,
-                is TracearrUsersState.Loading -> {
+                is TracearrUsersState.Loading,
+                -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
@@ -129,7 +131,7 @@ fun TracearrUsersScreen(
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             Text(
                                 text = currentState.message,
@@ -147,7 +149,9 @@ fun TracearrUsersScreen(
 
                     LaunchedEffect(listState) {
                         snapshotFlow {
-                            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                            listState.layoutInfo.visibleItemsInfo
+                                .lastOrNull()
+                                ?.index
                         }.collect { lastVisibleIndex ->
                             val userCount = currentState.users.size
                             if (lastVisibleIndex != null &&
@@ -164,24 +168,33 @@ fun TracearrUsersScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 16.dp + navigationBarBottomInset(),
-                        ),
+                        contentPadding =
+                            PaddingValues(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = 16.dp,
+                                bottom = 16.dp + navigationBarBottomInset(),
+                            ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         if (currentState.filteredUsers.isEmpty()) {
                             item {
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 32.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 32.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
-                                        text = if (currentState.searchQuery.isBlank()) mokoString(MR.strings.no_history) else mokoString(MR.strings.no_results_found),
+                                        text =
+                                            if (currentState.searchQuery.isBlank()) {
+                                                mokoString(
+                                                    MR.strings.no_history,
+                                                )
+                                            } else {
+                                                mokoString(MR.strings.no_results_found)
+                                            },
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -203,9 +216,10 @@ fun TracearrUsersScreen(
                         if (currentState.isLoadingMore) {
                             item {
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     LoadingIndicator()
@@ -228,28 +242,31 @@ private fun TracearrUserCard(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                    modifier =
+                        Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.secondaryContainer),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -262,7 +279,7 @@ private fun TracearrUserCard(
 
                 Column(
                     verticalArrangement = Arrangement.spacedBy(2.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     Text(
                         text = detail.username ?: mokoString(MR.strings.unknown),
@@ -283,7 +300,7 @@ private fun TracearrUserCard(
             stats?.windows?.allTime?.let { allTime ->
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AssistChip(
                         onClick = onClick,
@@ -303,14 +320,16 @@ private fun TracearrUserCard(
                                 modifier = Modifier.size(12.dp),
                             )
                         },
-                        border = AssistChipDefaults.assistChipBorder(
-                            enabled = true,
-                            borderColor = TracearrBlue.copy(alpha = 0.5f),
-                        ),
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = TracearrBlue.copy(alpha = 0.12f),
-                            labelColor = TracearrBlue,
-                        ),
+                        border =
+                            AssistChipDefaults.assistChipBorder(
+                                enabled = true,
+                                borderColor = TracearrBlue.copy(alpha = 0.5f),
+                            ),
+                        colors =
+                            AssistChipDefaults.assistChipColors(
+                                containerColor = TracearrBlue.copy(alpha = 0.12f),
+                                labelColor = TracearrBlue,
+                            ),
                     )
                     AssistChip(
                         onClick = onClick,
@@ -330,14 +349,16 @@ private fun TracearrUserCard(
                                 modifier = Modifier.size(12.dp),
                             )
                         },
-                        border = AssistChipDefaults.assistChipBorder(
-                            enabled = true,
-                            borderColor = TracearrBlue.copy(alpha = 0.5f),
-                        ),
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = TracearrBlue.copy(alpha = 0.12f),
-                            labelColor = TracearrBlue,
-                        ),
+                        border =
+                            AssistChipDefaults.assistChipBorder(
+                                enabled = true,
+                                borderColor = TracearrBlue.copy(alpha = 0.5f),
+                            ),
+                        colors =
+                            AssistChipDefaults.assistChipColors(
+                                containerColor = TracearrBlue.copy(alpha = 0.12f),
+                                labelColor = TracearrBlue,
+                            ),
                     )
                 }
             }
@@ -345,7 +366,7 @@ private fun TracearrUserCard(
             if (stats?.topGenres?.isNotEmpty() == true) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     stats.topGenres.forEach { genre ->
                         val genreText = genre.genre ?: mokoString(MR.strings.unknown)
@@ -356,7 +377,7 @@ private fun TracearrUserCard(
                             Text(
                                 text = "$genreText (${genre.plays})",
                                 style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             )
                         }
                     }
@@ -366,7 +387,7 @@ private fun TracearrUserCard(
             if (detail.accounts.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     detail.accounts.forEach { acc ->
                         val serverColor = getTracearrServerColor(acc.serverType, acc.username)
@@ -392,14 +413,16 @@ private fun TracearrUserCard(
                                     modifier = Modifier.size(12.dp),
                                 )
                             },
-                            border = AssistChipDefaults.assistChipBorder(
-                                enabled = true,
-                                borderColor = serverColor.copy(alpha = 0.5f),
-                            ),
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = serverColor.copy(alpha = 0.12f),
-                                labelColor = serverColor,
-                            ),
+                            border =
+                                AssistChipDefaults.assistChipBorder(
+                                    enabled = true,
+                                    borderColor = serverColor.copy(alpha = 0.5f),
+                                ),
+                            colors =
+                                AssistChipDefaults.assistChipColors(
+                                    containerColor = serverColor.copy(alpha = 0.12f),
+                                    labelColor = serverColor,
+                                ),
                         )
                     }
                 }

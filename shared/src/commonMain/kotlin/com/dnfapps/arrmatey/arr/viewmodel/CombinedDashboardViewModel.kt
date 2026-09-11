@@ -248,13 +248,14 @@ class CombinedDashboardViewModel(
                     flowOf(emptyList())
                 } else {
                     flow {
-                        val states = tracearrRepos.map { repo ->
-                            val stats = (repo.getTodayStats() as? NetworkResult.Success)?.data
-                            TracearrDashboardState(
-                                instance = repo.instance,
-                                stats = stats,
-                            )
-                        }
+                        val states =
+                            tracearrRepos.map { repo ->
+                                val stats = (repo.getTodayStats() as? NetworkResult.Success)?.data
+                                TracearrDashboardState(
+                                    instance = repo.instance,
+                                    stats = stats,
+                                )
+                            }
                         emit(states)
                     }
                 }

@@ -109,9 +109,10 @@ fun TracearrStreamCard(
 
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().onGloballyPositioned {
-            cardHeight = it.size.height
-        },
+        modifier =
+            modifier.fillMaxWidth().onGloballyPositioned {
+                cardHeight = it.size.height
+            },
         shape = MaterialTheme.shapes.large,
         colors =
             CardDefaults.cardColors(
@@ -165,7 +166,7 @@ fun TracearrStreamCard(
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -267,7 +268,8 @@ fun TracearrStreamCard(
 
                         val subtitle =
                             when {
-                                session.mediaType == TracearrMediaType.Episode || (session.seasonNumber != null && session.episodeNumber != null) -> {
+                                session.mediaType == TracearrMediaType.Episode ||
+                                    (session.seasonNumber != null && session.episodeNumber != null) -> {
                                     val seasonStr = session.seasonNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
                                     val episodeStr = session.episodeNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
                                     "S$seasonStr E$episodeStr · ${session.mediaTitle ?: ""}"
@@ -296,7 +298,7 @@ fun TracearrStreamCard(
                             style = MaterialTheme.typography.labelSmall,
                             color = stateColor,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            modifier = Modifier.padding(vertical = 4.dp),
                         )
 
                         LinearProgressIndicator(

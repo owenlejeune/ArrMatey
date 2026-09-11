@@ -4,7 +4,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class TracearrPeriod(val value: String) {
+enum class TracearrPeriod(
+    val value: String,
+) {
     @SerialName("week")
     Week("week"),
 
@@ -12,7 +14,8 @@ enum class TracearrPeriod(val value: String) {
     Month("month"),
 
     @SerialName("year")
-    Year("year");
+    Year("year"),
+    ;
 
     override fun toString(): String = value
 }

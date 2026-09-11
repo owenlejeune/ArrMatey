@@ -28,7 +28,6 @@ class TracearrHistoryViewModel(
     private val getTracearrHistoryUseCase: GetTracearrHistoryUseCase,
     private val getTracearrStreamsUseCase: GetTracearrStreamsUseCase,
 ) : ViewModel() {
-
     val currentRepository: StateFlow<TracearrRepository?> =
         getTracearrInstanceRepositoryUseCase
             .observeSelected()
@@ -82,7 +81,9 @@ class TracearrHistoryViewModel(
             _state.update {
                 if (it is TracearrHistoryState.Success) {
                     it.copy(isLoadingMore = true)
-                } else it
+                } else {
+                    it
+                }
             }
 
             getTracearrHistoryUseCase(repo, cursor = nextCursor, pageSize = 25)
@@ -99,14 +100,17 @@ class TracearrHistoryViewModel(
                                 hasMore = hasMore,
                                 nextCursor = nextCursor,
                             )
-                        } else old
+                        } else {
+                            old
+                        }
                     }
-                }
-                .onError { _, _, _ ->
+                }.onError { _, _, _ ->
                     _state.update { old ->
                         if (old is TracearrHistoryState.Success) {
                             old.copy(isLoadingMore = false)
-                        } else old
+                        } else {
+                            old
+                        }
                     }
                 }
 
@@ -114,7 +118,10 @@ class TracearrHistoryViewModel(
         }
     }
 
-    private suspend fun loadHistory(repo: TracearrRepository, isRefresh: Boolean) {
+    private suspend fun loadHistory(
+        repo: TracearrRepository,
+        isRefresh: Boolean,
+    ) {
         if (isRefresh) {
             _state.value = TracearrHistoryState.Loading
             nextCursor = null
@@ -135,15 +142,15 @@ class TracearrHistoryViewModel(
                 .onSuccess { response ->
                     nextCursor = response.meta?.nextCursor
                     val hasMore = !nextCursor.isNullOrBlank()
-                    _state.value = TracearrHistoryState.Success(
-                        activeStreams = activeStreams,
-                        items = response.data,
-                        isLoadingMore = false,
-                        hasMore = hasMore,
-                        nextCursor = nextCursor,
-                    )
-                }
-                .onError { _, msg, _ ->
+                    _state.value =
+                        TracearrHistoryState.Success(
+                            activeStreams = activeStreams,
+                            items = response.data,
+                            isLoadingMore = false,
+                            hasMore = hasMore,
+                            nextCursor = nextCursor,
+                        )
+                }.onError { _, msg, _ ->
                     _state.value = TracearrHistoryState.Error(msg ?: "Failed to load history")
                 }
         }

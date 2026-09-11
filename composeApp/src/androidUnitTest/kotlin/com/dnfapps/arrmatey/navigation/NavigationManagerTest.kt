@@ -29,6 +29,7 @@ class NavigationManagerTest {
             calendar = mockk(),
             dashboard = mockk(),
             bazarr = mockk(),
+            tracearr = mockk(),
             appState = appState,
             tabManager = tabManager,
             instanceRepository = instanceRepository,

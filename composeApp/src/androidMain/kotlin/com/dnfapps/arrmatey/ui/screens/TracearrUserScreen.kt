@@ -1,7 +1,5 @@
 package com.dnfapps.arrmatey.ui.screens
 
-import com.dnfapps.arrmatey.utils.formatWatchTimeMs
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,7 +47,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -67,8 +64,8 @@ import com.dnfapps.arrmatey.ui.screens.dashboard.CountStatItem
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
-import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
+import com.dnfapps.arrmatey.utils.formatWatchTimeMs
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import org.koin.compose.viewmodel.koinViewModel
@@ -88,8 +85,11 @@ fun TracearrUserScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val selectedSession by viewModel.selectedSession.collectAsStateWithLifecycle()
 
-    val titleText = (state as? TracearrUserState.Success)?.userDetail?.username
-        ?.takeIf { it.isNotBlank() } ?: mokoString(MR.strings.user_details)
+    val titleText =
+        (state as? TracearrUserState.Success)
+            ?.userDetail
+            ?.username
+            ?.takeIf { it.isNotBlank() } ?: mokoString(MR.strings.user_details)
 
     Scaffold(
         topBar = {
@@ -116,13 +116,15 @@ fun TracearrUserScreen(
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             when (val currentState = state) {
                 is TracearrUserState.Initial,
-                is TracearrUserState.Loading -> {
+                is TracearrUserState.Loading,
+                -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
@@ -143,7 +145,7 @@ fun TracearrUserScreen(
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             Text(
                                 text = currentState.message,
@@ -161,7 +163,9 @@ fun TracearrUserScreen(
 
                     LaunchedEffect(listState) {
                         snapshotFlow {
-                            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                            listState.layoutInfo.visibleItemsInfo
+                                .lastOrNull()
+                                ?.index
                         }.collect { lastVisibleIndex ->
                             val historyCount = currentState.history.size
                             if (lastVisibleIndex != null &&
@@ -178,12 +182,13 @@ fun TracearrUserScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 16.dp + navigationBarBottomInset(),
-                        ),
+                        contentPadding =
+                            PaddingValues(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = 16.dp,
+                                bottom = 16.dp + navigationBarBottomInset(),
+                            ),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         currentState.userDetail?.let { detail ->
@@ -209,9 +214,10 @@ fun TracearrUserScreen(
                         if (currentState.history.isEmpty()) {
                             item {
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 24.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 24.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
@@ -243,9 +249,10 @@ fun TracearrUserScreen(
                         if (currentState.isLoadingMoreHistory) {
                             item {
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     LoadingIndicator()
@@ -267,7 +274,7 @@ fun TracearrUserScreen(
                     onNavigateToUser = { ref ->
                         viewModel.clearSelected()
                         onNavigateToUser(ref)
-                    }
+                    },
                 )
             }
         }
@@ -283,13 +290,14 @@ private fun UserInfoCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
                 text = mokoString(MR.strings.user_info),
@@ -299,13 +307,14 @@ private fun UserInfoCard(
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                    modifier =
+                        Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.secondaryContainer),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -318,7 +327,7 @@ private fun UserInfoCard(
 
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     Text(
                         text = detail.username ?: mokoString(MR.strings.unknown),
@@ -347,7 +356,7 @@ private fun UserInfoCard(
 
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         detail.accounts.forEach { acc ->
                             AccountChip(account = acc)
@@ -387,14 +396,16 @@ private fun AccountChip(
                 modifier = Modifier.size(14.dp),
             )
         },
-        border = AssistChipDefaults.assistChipBorder(
-            enabled = true,
-            borderColor = serverColor.copy(alpha = 0.5f),
-        ),
-        colors = AssistChipDefaults.assistChipColors(
-            containerColor = serverColor.copy(alpha = 0.12f),
-            labelColor = serverColor,
-        ),
+        border =
+            AssistChipDefaults.assistChipBorder(
+                enabled = true,
+                borderColor = serverColor.copy(alpha = 0.5f),
+            ),
+        colors =
+            AssistChipDefaults.assistChipColors(
+                containerColor = serverColor.copy(alpha = 0.12f),
+                labelColor = serverColor,
+            ),
         modifier = modifier,
     )
 }
@@ -409,13 +420,14 @@ private fun UserStatsCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
                 text = mokoString(MR.strings.statistics),
@@ -432,14 +444,14 @@ private fun UserStatsCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                maxItemsInEachRow = if (isExpanded) 4 else 2
+                maxItemsInEachRow = if (isExpanded) 4 else 2,
             ) {
                 CountStatItem(
                     icon = Icons.Default.PlayArrow,
                     count = allTime?.plays?.toInt() ?: 0,
                     label = mokoString(MR.strings.plays),
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
 
                 CompactStatCard(
@@ -447,7 +459,7 @@ private fun UserStatsCard(
                     value = formatWatchTimeMs(allTime?.watchTimeMs ?: 0),
                     label = mokoString(MR.strings.watch_time),
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
 
                 last30?.let { last30 ->
@@ -456,7 +468,7 @@ private fun UserStatsCard(
                         value = last30.plays.toString(),
                         label = mokoString(MR.strings.last_30_days),
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                 }
 
@@ -466,7 +478,7 @@ private fun UserStatsCard(
                         value = last7.plays.toString(),
                         label = mokoString(MR.strings.last_7_days),
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
@@ -482,7 +494,7 @@ private fun UserStatsCard(
 
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         stats.topGenres.forEach { genreStat ->
                             genreStat.genre?.let { g ->
@@ -493,7 +505,7 @@ private fun UserStatsCard(
                                     Text(
                                         text = "$g (${genreStat.plays})",
                                         style = MaterialTheme.typography.labelSmall,
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                                     )
                                 }
                             }

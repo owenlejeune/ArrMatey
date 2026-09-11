@@ -5,7 +5,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class TracearrStreamDecision {
-    @SerialName("directplay") DirectPlay,
-    @SerialName("copy") Copy,
-    @SerialName("transcode") Transcode,
+    @SerialName("directplay")
+    DirectPlay,
+
+    @SerialName("copy")
+    Copy,
+
+    @SerialName("transcode")
+    Transcode,
 }
