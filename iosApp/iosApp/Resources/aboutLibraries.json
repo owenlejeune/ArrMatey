@@ -1796,10 +1796,10 @@
         },
         {
             "uniqueId": "androidx.sqlite:sqlite",
-            "artifactVersion": "2.7.0",
+            "artifactVersion": "2.7.1",
             "name": "SQLite",
             "description": "SQLite API",
-            "website": "https://developer.android.com/jetpack/androidx/releases/sqlite#2.7.0",
+            "website": "https://developer.android.com/jetpack/androidx/releases/sqlite#2.7.1",
             "developers": [
                 {
                     "name": "The Android Open Source Project"
@@ -1818,10 +1818,10 @@
         },
         {
             "uniqueId": "androidx.sqlite:sqlite-bundled",
-            "artifactVersion": "2.7.0",
+            "artifactVersion": "2.7.1",
             "name": "SQLite Bundled Integration",
             "description": "The implementation of SQLite library using the bundled SQLite.",
-            "website": "https://developer.android.com/jetpack/androidx/releases/sqlite#2.7.0",
+            "website": "https://developer.android.com/jetpack/androidx/releases/sqlite#2.7.1",
             "developers": [
                 {
                     "name": "The Android Open Source Project"
@@ -1840,10 +1840,10 @@
         },
         {
             "uniqueId": "androidx.sqlite:sqlite-framework",
-            "artifactVersion": "2.7.0",
+            "artifactVersion": "2.7.1",
             "name": "SQLite Framework Integration",
             "description": "The implementation of SQLite library using the framework code.",
-            "website": "https://developer.android.com/jetpack/androidx/releases/sqlite#2.7.0",
+            "website": "https://developer.android.com/jetpack/androidx/releases/sqlite#2.7.1",
             "developers": [
                 {
                     "name": "The Android Open Source Project"
@@ -2098,26 +2098,6 @@
                 "connection": "scm:git:git://github.com/touchlab/Stately.git",
                 "developerConnection": "scm:git:git://github.com/touchlab/Stately.git",
                 "url": "https://github.com/touchlab/Stately"
-            },
-            "licenses": [
-                "Apache-2.0"
-            ]
-        },
-        {
-            "uniqueId": "com.github.skydoves:cloudy",
-            "artifactVersion": "0.3.0",
-            "name": "cloudy",
-            "description": "Jetpack Compose blur effect library, which falls back onto a CPU-based implementation to support older API levels.",
-            "website": "https://github.com/skydoves/cloudy/",
-            "developers": [
-                {
-                    "name": "Jaewoong Eum"
-                }
-            ],
-            "scm": {
-                "connection": "scm:git:git://github.com/skydoves/cloudy.git",
-                "developerConnection": "scm:git:git://github.com/skydoves/cloudy.git",
-                "url": "https://github.com/skydoves/cloudy/"
             },
             "licenses": [
                 "Apache-2.0"
@@ -3063,27 +3043,6 @@
             "artifactVersion": "1.10.2",
             "name": "collections",
             "description": "Standalone efficient collections.",
-            "website": "https://github.com/JetBrains/compose-jb",
-            "developers": [
-                {
-                    "name": "Compose Multiplatform Team",
-                    "organisationUrl": "https://www.jetbrains.com"
-                }
-            ],
-            "scm": {
-                "connection": "scm:git:https://github.com/JetBrains/compose-jb.git",
-                "developerConnection": "scm:git:https://github.com/JetBrains/compose-jb.git",
-                "url": "https://github.com/JetBrains/compose-jb"
-            },
-            "licenses": [
-                "Apache-2.0"
-            ]
-        },
-        {
-            "uniqueId": "org.jetbrains.compose.components:components-ui-tooling-preview",
-            "artifactVersion": "1.10.0-rc01",
-            "name": "Experimental Compose Multiplatform tooling library API. This library provides the API required to declare @Preview composables in user apps.",
-            "description": "Experimental Compose Multiplatform tooling library API. This library provides the API required to declare @Preview composables in user apps.",
             "website": "https://github.com/JetBrains/compose-jb",
             "developers": [
                 {
