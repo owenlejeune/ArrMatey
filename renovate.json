@@ -67,12 +67,6 @@
       ]
     },
     {
-      "description": "Moko plugin marker resolves from the Gradle Plugin Portal, not Maven Central",
-      "matchDatasources": ["maven"],
-      "matchPackageNames": ["/^dev\\.icerock\\.moko\\.multiplatform-resources/"],
-      "registryUrls": ["https://plugins.gradle.org/m2/"]
-    },
-    {
       "description": "kotlinx-datetime ships -0.6.x-compat builds that sort above the real release",
       "matchPackageNames": ["org.jetbrains.kotlinx:kotlinx-datetime"],
       "allowedVersions": "!/-compat$/"
