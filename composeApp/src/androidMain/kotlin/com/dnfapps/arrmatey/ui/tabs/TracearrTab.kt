@@ -10,18 +10,11 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
-import com.dnfapps.arrmatey.navigation.TracearrScreen
-import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
-import com.dnfapps.arrmatey.ui.screens.TracearrActivityScreen
-import com.dnfapps.arrmatey.ui.screens.TracearrHistoryScreen
-import com.dnfapps.arrmatey.ui.screens.TracearrHomeScreen
-import com.dnfapps.arrmatey.ui.screens.TracearrUserScreen
-import com.dnfapps.arrmatey.ui.screens.TracearrUsersScreen
-import com.dnfapps.arrmatey.ui.screens.TracearrViolationsScreen
+import com.dnfapps.arrmatey.ui.components.navigation.tracearrNavEntries
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -41,72 +34,17 @@ fun TracearrTab(
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
         entryProvider = entryProvider {
-            entry<TracearrScreen.Main> {
-                TracearrHomeScreen(
-                    wideRailIsVisible = wideRailIsVisible,
-                    isLargeScreen = isLargeScreen,
-                    onNavigateToDetails = { type, tmdbId ->
-                        navigation.toDetails(tmdbId = tmdbId, requestType = type?.requestType)
-                    },
-                    onNavigateToHistory = {
-                        navigation.navigateTo(TracearrScreen.History)
-                    },
-                    onNavigateToUser = { userRef ->
-                        navigation.navigateTo(TracearrScreen.User(userRef))
-                    },
-                    onNavigateToAllUsers = {
-                        navigation.navigateTo(TracearrScreen.Users)
-                    },
-                    onNavigateToViolations = {
-                        navigation.navigateTo(TracearrScreen.Violations)
-                    },
-                    onNavigateToActivity = {
-                        navigation.navigateTo(TracearrScreen.Activity)
-                    }
-                )
-            }
-            entry<TracearrScreen.History> {
-                TracearrHistoryScreen(
-                    isLargeScreen = isLargeScreen,
-                    onNavigateBack = { navigation.popBackStack() },
-                    onNavigateToDetails = { type, tmdbId ->
-                        navigation.toDetails(tmdbId = tmdbId, requestType = type?.requestType)
-                    },
-                    onNavigateToUser = { userRef ->
-                        navigation.navigateTo(TracearrScreen.User(userRef))
-                    }
-                )
-            }
-            entry<TracearrScreen.User> { user ->
-                TracearrUserScreen(
-                    userRef = user.ref,
-                    onNavigateBack = { navigation.popBackStack() }
-                )
-            }
-            entry<TracearrScreen.Users> {
-                TracearrUsersScreen(
-                    onNavigateBack = { navigation.popBackStack() },
-                    onNavigateToUser = { userRef ->
-                        navigation.navigateTo(TracearrScreen.User(userRef))
-                    }
-                )
-            }
-            entry<TracearrScreen.Violations> {
-                TracearrViolationsScreen(
-                    onNavigateBack = { navigation.popBackStack() }
-                )
-            }
-            entry<TracearrScreen.Activity> {
-                TracearrActivityScreen(
-                    isLargeScreen = isExpanded,
-                    onNavigateBack = { navigation.popBackStack() }
-                )
-            }
+            tracearrNavEntries(
+                navigation = navigation,
+                isExpanded = isExpanded,
+                isLargeScreen = isLargeScreen,
+                wideRailIsVisible = wideRailIsVisible,
+            )
             mediaNavEntries(
                 navigation = navigation,
                 isExpanded = isExpanded,
-                wideRailIsVisible = wideRailIsVisible
+                wideRailIsVisible = wideRailIsVisible,
             )
-        }
+        },
     )
 }

@@ -7,12 +7,14 @@ import androidx.navigation3.runtime.entryProvider
 import com.dnfapps.arrmatey.navigation.DashboardScreen
 import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.TracearrScreen
 import com.dnfapps.arrmatey.navigation.openArrDashboard
 import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
+import com.dnfapps.arrmatey.ui.components.navigation.tracearrNavEntries
 import com.dnfapps.arrmatey.ui.screens.ArrInstanceDashboard
 import com.dnfapps.arrmatey.ui.screens.dashboard.CombinedDashboard
 import org.koin.compose.koinInject
@@ -25,6 +27,7 @@ fun DashboardTab(
     navigation: DashboardTabNavigator = navigationManager.dashboard,
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    val isLargeScreen = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
     TwoPaneMasterDetailNavDisplay(
         navigation = navigation,
         isExpanded = isExpanded,
@@ -47,6 +50,11 @@ fun DashboardTab(
                         onNavigateToActivityTab = { navigationManager.openActivityTab() },
                         onNavigateToScheduleTab = { navigationManager.openScheduleTab() },
                         onNavigateToBazarrTab = { navigationManager.openBazarrTab() },
+                        onNavigateToTracearrTab = { navigation.navigateTo(TracearrScreen.Main) },
+                        onNavigateToTracearrHistory = { navigation.navigateTo(TracearrScreen.History) },
+                        onNavigateToTracearrUsers = { navigation.navigateTo(TracearrScreen.Users) },
+                        onNavigateToTracearrViolations = { navigation.navigateTo(TracearrScreen.Violations) },
+                        onNavigateToTracearrActivity = { navigation.navigateTo(TracearrScreen.Activity) },
                     )
                 }
                 entry<DashboardScreen.ArrDashboard> {
@@ -59,6 +67,12 @@ fun DashboardTab(
                         },
                     )
                 }
+                tracearrNavEntries(
+                    navigation = navigation,
+                    isExpanded = isExpanded,
+                    isLargeScreen = isLargeScreen,
+                    wideRailIsVisible = wideRailIsVisible,
+                )
                 mediaNavEntries(
                     navigation = navigation,
                     isExpanded = isExpanded,

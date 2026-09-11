@@ -90,6 +90,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.screens.requests.IssueDetailsSheet
 import com.dnfapps.arrmatey.ui.screens.requests.IssuesList
 import com.dnfapps.arrmatey.ui.screens.requests.RequestsList
+import com.dnfapps.arrmatey.ui.screens.tracearr.DashboardTracearrSection
 import com.dnfapps.arrmatey.ui.sheets.HealthNoticesSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
@@ -133,6 +134,10 @@ fun DashboardCardContent(
     onHealthClick: () -> Unit = {},
     onSeerrRequestsStatClick: () -> Unit = {},
     onSeerrIssuesStatClick: () -> Unit = {},
+    onNavigateToTracearrHistory: () -> Unit = {},
+    onNavigateToTracearrUsers: () -> Unit = {},
+    onNavigateToTracearrViolations: () -> Unit = {},
+    onNavigateToTracearrActivity: () -> Unit = {},
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
@@ -242,6 +247,25 @@ fun DashboardCardContent(
                     onNavigateToArrDashboard(id)
                 },
             )
+
+        DashboardCards.TracearrOverview ->
+            DashboardTracearrSection(
+                state = currentState,
+                isExpanded = false,
+                isEditing = isEditing,
+                onNavigateToHistory = {
+                    if (!isEditing && enabled) onNavigateToTracearrHistory()
+                },
+                onNavigateToAllUsers = {
+                    if (!isEditing && enabled) onNavigateToTracearrUsers()
+                },
+                onNavigateToViolations = {
+                    if (!isEditing && enabled) onNavigateToTracearrViolations()
+                },
+                onNavigateToActivity = {
+                    if (!isEditing && enabled) onNavigateToTracearrActivity()
+                },
+            )
     }
 }
 
@@ -265,6 +289,11 @@ fun CombinedDashboard(
     onNavigateToActivityTab: () -> Unit = {},
     onNavigateToScheduleTab: () -> Unit = {},
     onNavigateToBazarrTab: () -> Unit = {},
+    onNavigateToTracearrTab: () -> Unit = {},
+    onNavigateToTracearrHistory: () -> Unit = {},
+    onNavigateToTracearrUsers: () -> Unit = {},
+    onNavigateToTracearrViolations: () -> Unit = {},
+    onNavigateToTracearrActivity: () -> Unit = {},
 ) {
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
     val hapticFeedback = LocalHapticFeedback.current
@@ -537,6 +566,9 @@ fun CombinedDashboard(
                                                         DashboardCards.BazarrOverview -> {
                                                             { onNavigateToBazarrTab() }
                                                         }
+                                                        DashboardCards.TracearrOverview -> {
+                                                            { onNavigateToTracearrTab() }
+                                                        }
                                                         else -> null
                                                     }
 
@@ -582,6 +614,10 @@ fun CombinedDashboard(
                                                         onSeerrIssuesStatClick = {
                                                             showSeerrIssuesSheet = true
                                                         },
+                                                        onNavigateToTracearrHistory = onNavigateToTracearrHistory,
+                                                        onNavigateToTracearrUsers = onNavigateToTracearrUsers,
+                                                        onNavigateToTracearrViolations = onNavigateToTracearrViolations,
+                                                        onNavigateToTracearrActivity = onNavigateToTracearrActivity,
                                                     )
                                                 }
                                                 if (isEditing) {

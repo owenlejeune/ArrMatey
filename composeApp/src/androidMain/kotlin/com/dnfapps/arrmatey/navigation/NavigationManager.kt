@@ -144,6 +144,10 @@ class NavigationManager(
         navigateToTab(TabItem.Standard.BAZARR)
     }
 
+    fun openTracearrTab() {
+        navigateToTab(TabItem.Standard.TRACEARR)
+    }
+
     fun openDownloadClientsTab() {
         navigateToTab(TabItem.Standard.DOWNLOADS)
     }

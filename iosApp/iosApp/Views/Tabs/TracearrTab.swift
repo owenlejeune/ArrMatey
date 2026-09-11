@@ -654,6 +654,7 @@ struct SplitStatCard: View {
 struct TracearrDashboardStatsView: View {
     let stats: TracearrTodayStats
     var isExpanded: Bool = false
+    var showTodayHeader: Bool = true
     var onNavigateToHistory: (() -> Void)? = nil
     var onNavigateToAllUsers: (() -> Void)? = nil
     var onNavigateToViolations: (() -> Void)? = nil
@@ -666,12 +667,14 @@ struct TracearrDashboardStatsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "calendar")
-                    .font(.title3)
-                Text(MR.strings().today.localized())
-                    .font(.title3.bold())
-                Spacer()
+            if showTodayHeader {
+                HStack(spacing: 8) {
+                    Image(systemName: "calendar")
+                        .font(.title3)
+                    Text(MR.strings().today.localized())
+                        .font(.title3.bold())
+                    Spacer()
+                }
             }
 
             let columns = isExpanded ? Array(repeating: GridItem(.flexible(), spacing: 12), count: 4) : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]

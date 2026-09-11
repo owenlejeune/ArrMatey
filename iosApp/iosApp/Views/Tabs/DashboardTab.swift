@@ -259,6 +259,9 @@ struct DashboardTabContent: View {
         .navigationDestination(for: SeerrRoute.self) { route in
             SeerrRouteDestination(route: route)
         }
+        .navigationDestination(for: TracearrRoute.self) { route in
+            TracearrRouteDestination(route: route)
+        }
     }
 
     private func handleCardClick(_ card: DashboardCards) {
@@ -267,6 +270,7 @@ struct DashboardTabContent: View {
         case .seerrOverview, .pendingRequests, .pendingIssues: navigationManager.openRequestsTab()
         case .prowlarrOverview: navigationManager.openProwlarrTab()
         case .bazarrOverview: navigationManager.openBazarrTab()
+        case .tracearrOverview: navigationManager.openTracearrTab()
         case .downloadClients: navigationManager.openDownloadsTab()
         case .activityQueue: navigationManager.openActivityTab()
         case .onToday, .upcomingReleases: navigationManager.openScheduleTab()
@@ -394,6 +398,7 @@ struct DashboardCardView: View {
             case .onToday: DashboardTodaySection(state: state, isEditing: isEditing)
             case .upcomingReleases: DashboardUpcomingSection(state: state, isEditing: isEditing)
             case .bazarrOverview: DashboardBazarrSection(state: state, isEditing: isEditing)
+            case .tracearrOverview: DashboardTracearrSection(state: state, isEditing: isEditing)
             case .instanceDashboard: DashboardInstanceDashboardSection(state: state, isEditing: isEditing)
             }
         }
@@ -559,6 +564,49 @@ struct DashboardBazarrSection: View {
             HStack(spacing: 12) {
                 StatCard(icon: "tv", label: MR.strings().bazarr_wanted_episodes.localized(), value: "\(totalEpisodes)", color: .blue)
                 StatCard(icon: "film", label: MR.strings().bazarr_wanted_movies.localized(), value: "\(totalMovies)", color: .secondary)
+            }
+        }
+    }
+}
+
+struct DashboardTracearrSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    @EnvironmentObject private var navigationManager: NavigationManager
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var isLargeScreen: Bool { horizontalSizeClass == .regular }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if isEditing {
+                HStack(spacing: 8) {
+                    Image(resource: InstanceType.tracearr.icon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                    Text(MR.strings().dashboard_tracearr_overview.localized())
+                        .font(.headline)
+                        .bold()
+                }
+            }
+
+            let rawStats = state.tracearrStats.compactMap { $0.stats }
+            let statsList = rawStats.isEmpty ? [
+                TracearrTodayStats(activeStreams: 0, todayPlays: 0, todaySessions: 0, watchTimeHours: 0, alertsLast24h: 0, activeUsersToday: 0, timestamp: nil)
+            ] : rawStats
+
+            ForEach(statsList.indices, id: \.self) { index in
+                let stats = statsList[index]
+                TracearrDashboardStatsView(
+                    stats: stats,
+                    isExpanded: isLargeScreen,
+                    showTodayHeader: !isEditing,
+                    onNavigateToHistory: { navigationManager.go(to: TracearrRoute.history) },
+                    onNavigateToAllUsers: { navigationManager.go(to: TracearrRoute.users) },
+                    onNavigateToViolations: { navigationManager.go(to: TracearrRoute.violations) },
+                    onNavigateToActivity: { navigationManager.go(to: TracearrRoute.activity) }
+                )
             }
         }
     }

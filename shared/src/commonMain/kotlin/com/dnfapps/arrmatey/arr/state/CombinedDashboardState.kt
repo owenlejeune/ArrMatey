@@ -30,6 +30,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import dev.icerock.moko.resources.ImageResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -53,6 +54,7 @@ sealed interface CombinedDashboardState {
         val upcomingCalendarItems: List<DashboardCalendarItem> = emptyList(),
         val prowlarrStats: List<ProwlarrDashboardState> = emptyList(),
         val bazarrStats: List<BazarrDashboardState> = emptyList(),
+        val tracearrStats: List<TracearrDashboardState> = emptyList(),
         val networkStatus: NetworkStatusState? = null,
         val isRefreshing: Boolean = false,
     ) : CombinedDashboardState {
@@ -122,6 +124,21 @@ sealed interface CombinedDashboardState {
                         instance = it,
                         wantedEpisodesCount = 12,
                         wantedMoviesCount = 3,
+                    )
+                }
+
+            val tracearrStats =
+                instances.filter { it.type == InstanceType.Tracearr }.map {
+                    TracearrDashboardState(
+                        instance = it,
+                        stats = TracearrTodayStats(
+                            activeStreams = 2,
+                            todayPlays = 15,
+                            todaySessions = 18,
+                            watchTimeHours = 4.5f,
+                            alertsLast24h = 0,
+                            activeUsersToday = 3,
+                        ),
                     )
                 }
 
@@ -205,6 +222,7 @@ sealed interface CombinedDashboardState {
                 seerrInstances = seerrInstances,
                 prowlarrStats = prowlarrStats,
                 bazarrStats = bazarrStats,
+                tracearrStats = tracearrStats,
                 downloadClients = downloadClients,
                 activityQueue = listOf(mockQueueItem),
                 recentlyAdded = recentlyAdded,
@@ -310,6 +328,11 @@ data class BazarrDashboardState(
     val instance: Instance,
     val wantedEpisodesCount: Int,
     val wantedMoviesCount: Int,
+)
+
+data class TracearrDashboardState(
+    val instance: Instance,
+    val stats: TracearrTodayStats? = null,
 )
 
 data class DashboardCalendarItem(

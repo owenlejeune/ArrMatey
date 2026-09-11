@@ -801,6 +801,7 @@
     <string name="dashboard_todays_releases">Today's Releases</string>
     <string name="dashboard_upcoming_releases">Upcoming Releases</string>
     <string name="dashboard_instance_dashboards">Instance Dashboards</string>
+    <string name="dashboard_tracearr_overview">Tracearr Overview</string>
     <string name="dashboard_first_launch">Long press to edit and reorder</string>
 
     <!-- Release Notes -->

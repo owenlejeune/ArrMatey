@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.arr.state.InstanceNetworkStatus
 import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
+import com.dnfapps.arrmatey.arr.state.TracearrDashboardState
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
@@ -31,6 +32,7 @@ import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
+import com.dnfapps.arrmatey.instances.repository.TracearrRepository
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.utils.getNetworkUtils
@@ -48,6 +50,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -237,6 +240,30 @@ class CombinedDashboardViewModel(
                 initialValue = emptyList(),
             )
 
+    private val tracearrInstancesFlow =
+        instanceManager.instanceRepositories
+            .flatMapLatest { repoMap ->
+                val tracearrRepos = repoMap.values.filterIsInstance<TracearrRepository>()
+                if (tracearrRepos.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    flow {
+                        val states = tracearrRepos.map { repo ->
+                            val stats = (repo.getTodayStats() as? NetworkResult.Success)?.data
+                            TracearrDashboardState(
+                                instance = repo.instance,
+                                stats = stats,
+                            )
+                        }
+                        emit(states)
+                    }
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
+
     private val downloadsFlow =
         downloadQueueService.allTransfers
             .debounce(500.milliseconds)
@@ -364,6 +391,7 @@ class CombinedDashboardViewModel(
                 seerrInstancesFlow,
                 prowlarrInstancesFlow,
                 bazarrInstancesFlow,
+                tracearrInstancesFlow,
                 downloadClientsFlow,
                 recentActivityFlow,
                 recentlyAddedFlow,
@@ -385,26 +413,29 @@ class CombinedDashboardViewModel(
                 val bazarrStats = args[3] as List<BazarrDashboardState>
 
                 @Suppress("UNCHECKED_CAST")
-                val downloadClients = args[4] as List<DownloadClientDashboardState>
+                val tracearrStats = args[4] as List<TracearrDashboardState>
 
                 @Suppress("UNCHECKED_CAST")
-                val activityQueue = args[5] as List<QueueItem>
+                val downloadClients = args[5] as List<DownloadClientDashboardState>
 
                 @Suppress("UNCHECKED_CAST")
-                val recentlyAdded = args[6] as List<ArrMedia>
+                val activityQueue = args[6] as List<QueueItem>
 
                 @Suppress("UNCHECKED_CAST")
-                val downloadTransfers = args[7] as List<DownloadTransferInfo>
+                val recentlyAdded = args[7] as List<ArrMedia>
 
                 @Suppress("UNCHECKED_CAST")
-                val activeDownloads = args[8] as List<DownloadItem>
+                val downloadTransfers = args[8] as List<DownloadTransferInfo>
 
                 @Suppress("UNCHECKED_CAST")
-                val calendarPair = args[9] as Pair<List<DashboardCalendarItem>, List<DashboardCalendarItem>>
+                val activeDownloads = args[9] as List<DownloadItem>
+
+                @Suppress("UNCHECKED_CAST")
+                val calendarPair = args[10] as Pair<List<DashboardCalendarItem>, List<DashboardCalendarItem>>
                 val todayCalendar = calendarPair.first
                 val upcomingCalendar = calendarPair.second
 
-                val refreshing = args[10] as Boolean
+                val refreshing = args[11] as Boolean
 
                 CombinedDashboardState.Success(
                     instances = instances,
@@ -418,6 +449,7 @@ class CombinedDashboardViewModel(
                     upcomingCalendarItems = upcomingCalendar,
                     prowlarrStats = prowlarrStats,
                     bazarrStats = bazarrStats,
+                    tracearrStats = tracearrStats,
                     networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats, bazarrStats, downloadClients),
                     isRefreshing = refreshing,
                 )

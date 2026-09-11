@@ -116,6 +116,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     func go(to route: TracearrRoute) {
         if showLauncher {
             launcherPath.append(route)
+        } else if selectedTab.key == TabItemStandard.dashboard.key {
+            dashboardPath.append(route)
         } else {
             tracearrPath.append(route)
         }
