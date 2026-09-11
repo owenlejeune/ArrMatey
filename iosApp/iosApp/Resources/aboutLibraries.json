@@ -2253,9 +2253,9 @@
         },
         {
             "uniqueId": "io.github.shivathapaa:logger",
-            "artifactVersion": "1.4.0",
+            "artifactVersion": "2.0.0",
             "name": "KMP Logger",
-            "description": "Kotlin Multiplatform logger - A lightweight, structured logging library for Kotlin Multiplatform. Supports Android, iOS, macOS,\nwatchOS, tvOS, JVM, JS (Node.js & Browser), Wasm/JS, Linux, and MinGW.",
+            "description": "Kotlin Multiplatform logger - A lightweight, structured logging library for Kotlin Multiplatform. Supports Android, iOS, macOS,\nJVM, JS (Node.js & Browser), Wasm/JS, Linux, and MinGW.",
             "website": "https://github.com/shivathapaa/KMP-Logger",
             "developers": [
                 {
@@ -2268,7 +2268,7 @@
                 "url": "https://github.com/shivathapaa/KMP-Logger"
             },
             "licenses": [
-                "MIT"
+                "Apache-2.0"
             ]
         },
         {
@@ -3378,7 +3378,7 @@
         },
         {
             "uniqueId": "org.jetbrains.kotlin:kotlin-stdlib",
-            "artifactVersion": "2.3.21",
+            "artifactVersion": "2.4.10",
             "name": "Kotlin Stdlib",
             "description": "Kotlin Standard Library",
             "website": "https://kotlinlang.org/",
@@ -3399,7 +3399,7 @@
         },
         {
             "uniqueId": "org.jetbrains.kotlin:kotlin-stdlib-common",
-            "artifactVersion": "2.3.21",
+            "artifactVersion": "2.4.10",
             "name": "Kotlin Stdlib Common",
             "description": "Kotlin Common Standard Library (legacy, use kotlin-stdlib instead)",
             "website": "https://kotlinlang.org/",
