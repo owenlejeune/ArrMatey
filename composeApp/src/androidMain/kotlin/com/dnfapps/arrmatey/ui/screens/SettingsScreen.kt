@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.ReleaseNotesSheet
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
+import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.IconSource
@@ -300,10 +301,7 @@ fun SettingsScreen(
                         LibraryDefaults.libraryColors(
                             libraryBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
                         ),
-                    padding =
-                        LibraryDefaults.libraryPadding(
-                            licenseDialogContentPadding = 16.dp,
-                        ),
+                    contentPadding = PaddingValues(16.dp),
                     header = {
                         item {
                             Text(

@@ -101,7 +101,7 @@ actual class FileSink actual constructor(
     }
 
     actual override fun emit(event: LogEvent) {
-        val timestamp = dateFormat.format(Date(event.timestamp))
+        val timestamp = dateFormat.format(Date(event.timestamp ?: 0L))
         val line = "[$timestamp] [${event.level}] ${event.loggerName}: ${event.message}\n"
         logQueue.offer(line)
     }
