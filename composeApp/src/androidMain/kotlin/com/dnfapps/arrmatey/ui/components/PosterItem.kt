@@ -1,8 +1,5 @@
 package com.dnfapps.arrmatey.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -63,7 +60,6 @@ import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.mokoString
-import com.skydoves.cloudy.cloudy
 
 @Composable
 fun PosterItem(
@@ -89,6 +85,7 @@ fun PosterItem(
     val model =
         posterModel ?: rememberRemoteImageData(
             url = item.getPoster()?.remoteUrl,
+            trim = false,
             onError = { _, err ->
                 println(err.throwable.message)
                 imageLoadError = true
@@ -205,6 +202,7 @@ fun PosterItem(
         val model =
             rememberRemoteImageData(
                 url = item.fullPosterPath,
+                trim = false,
                 onError = { _, err ->
                     println(err.throwable.message)
                     imageLoadError = true
@@ -304,6 +302,7 @@ fun PosterItem(
     val model =
         rememberRemoteImageData(
             url = item.fullPosterPath,
+            trim = false,
             onError = { _, err ->
                 println(err.throwable.message)
                 imageLoadError = true
@@ -448,7 +447,6 @@ fun BasePosterItem(
                             contentDescription = null,
                             modifier =
                                 Modifier
-                                    .cloudy(20)
                                     .align(Alignment.Center)
                                     .fillMaxSize(),
                         )
@@ -460,30 +458,6 @@ fun BasePosterItem(
                             contentScale = ContentScale.Crop,
                             modifier =
                                 Modifier
-                                    .cloudy(20)
-                                    .align(Alignment.Center)
-                                    .fillMaxSize(),
-                        )
-                }
-                when (model) {
-                    is Painter ->
-                        Image(
-                            painter = model,
-                            contentDescription = null,
-                            contentScale = ContentScale.FillHeight,
-                            modifier =
-                                Modifier
-                                    .align(Alignment.Center)
-                                    .fillMaxSize(),
-                        )
-
-                    else ->
-                        AsyncImage(
-                            model = model,
-                            contentDescription = null,
-                            contentScale = ContentScale.FillHeight,
-                            modifier =
-                                Modifier
                                     .align(Alignment.Center)
                                     .fillMaxSize(),
                         )
@@ -492,18 +466,12 @@ fun BasePosterItem(
                 errorContent()
                 additionalContent()
             }
-            AnimatedVisibility(
-                visible = footerVisible,
-                enter = expandVertically(),
-                exit = shrinkVertically(),
-            ) {
+            if (footerVisible) {
                 Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .padding(bottom = 8.dp)
-                            .padding(top = 16.dp),
+                            .padding(8.dp),
                 ) {
                     footerContent()
                 }

@@ -83,8 +83,8 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-compose-material3-alpha = { module = "androidx.compose.material3:material3", version.ref = "m3Alpha" }
 androidx-compose-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite", version.ref = "m3Alpha" }
-androidx-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version = "adaptive" }
-androidx-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version = "adaptive" }
+androidx-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "adaptive" }
+androidx-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "adaptive" }
 androidx-compose-window-size = { module = "androidx.compose.material3:material3-window-size-class-android", version.ref = "windowSize" }
 coil = { module = "io.coil-kt.coil3:coil", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
@@ -124,6 +124,5 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
-moko-resources = { id = "dev.icerock.moko.multiplatform-resources", version.ref = "moko" }
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
