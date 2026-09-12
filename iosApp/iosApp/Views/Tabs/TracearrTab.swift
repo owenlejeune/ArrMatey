@@ -165,7 +165,7 @@ struct TracearrTabContent: View {
         .navigationTitle(MR.strings().tracearr.localized())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if !globalPreferences.hideInstanceSwitcher || instancesViewModel.instancesState.instances.count > 1 {
+            if !instancesViewModel.instancesState.instances.isEmpty && (!globalPreferences.hideInstanceSwitcher || instancesViewModel.instancesState.instances.count > 1) {
                 ToolbarItem(placement: .topBarLeading) {
                     InstancePickerMenu(
                         instances: instancesViewModel.instancesState.instances,

@@ -81,6 +81,7 @@ class PreferencesStore(
     private val smartAddSeerrActionKey = stringPreferencesKey("smartAddSeerrAction")
     private val combineSeerrArrMediaKey = booleanPreferencesKey("combineSeerrArrMedia")
     private val bazarrDetailsIntegrationKey = booleanPreferencesKey("bazarrDetailsIntegration")
+    private val tracearrDetailsIntegrationKey = booleanPreferencesKey("tracearrDetailsIntegration")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> =
         when (type) {
@@ -193,6 +194,12 @@ class PreferencesStore(
         dataStore.data
             .map { preferences ->
                 preferences[bazarrDetailsIntegrationKey] ?: true
+            }
+
+    val tracearrDetailsIntegration: Flow<Boolean> =
+        dataStore.data
+            .map { preferences ->
+                preferences[tracearrDetailsIntegrationKey] ?: true
             }
 
     private val calendarViewMode: Flow<CalendarViewMode> =
@@ -388,6 +395,21 @@ class PreferencesStore(
     fun setBazarrDetailsIntegration(value: Boolean) {
         scope.launch {
             dataStore.edit { it[bazarrDetailsIntegrationKey] = value }
+        }
+    }
+
+    fun toggleTracearrDetailsIntegration() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[tracearrDetailsIntegrationKey] ?: true
+                preferences[tracearrDetailsIntegrationKey] = !current
+            }
+        }
+    }
+
+    fun setTracearrDetailsIntegration(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[tracearrDetailsIntegrationKey] = value }
         }
     }
 

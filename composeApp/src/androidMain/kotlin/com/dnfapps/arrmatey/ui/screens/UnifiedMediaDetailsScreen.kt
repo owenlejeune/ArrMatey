@@ -103,10 +103,13 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.SmartAddSeerrAction
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
+import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
 import com.dnfapps.arrmatey.ui.components.AudiobookFileView
 import com.dnfapps.arrmatey.ui.components.BooksArea
@@ -125,12 +128,11 @@ import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.components.buildArrInfoItems
 import com.dnfapps.arrmatey.ui.components.buildSeerrInfoItems
-import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrHistorySection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrSummaryChipRow
-import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAuthorSheet
@@ -578,13 +580,19 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    TracearrSummaryChipRow(
-                                        uiState = tracearrState,
-                                        modifier = Modifier.padding(top = 8.dp),
-                                    )
+                                    val isMovieOrTv =
+                                        state.arrMedia is ArrMovie || state.arrMedia is ArrSeries || state.seerrMedia is MovieDetails ||
+                                            state.seerrMedia is TvDetails
+
+                                    if (isMovieOrTv) {
+                                        TracearrSummaryChipRow(
+                                            uiState = tracearrState,
+                                            modifier = Modifier.padding(top = 8.dp),
+                                        )
+                                    }
 
                                     val hasSeasonsOrFiles = state.seasons.isNotEmpty() || (state.hasArrId && state.arrMedia !is ArrSeries)
-                                    val hasTracearr = tracearrState.isTracearrConfigured
+                                    val hasTracearr = tracearrState.isTracearrConfigured && isMovieOrTv
 
                                     LaunchedEffect(hasSeasonsOrFiles) {
                                         val prev = previousHasSeasonsOrFiles
@@ -610,10 +618,16 @@ fun UnifiedMediaDetailsScreen(
                                             if (hasTracearr) add(DetailsTab.History)
                                         }
 
+                                    LaunchedEffect(availableTabs) {
+                                        if (selectedTab !in availableTabs) {
+                                            selectedTab = if (hasSeasonsOrFiles) DetailsTab.SeasonsFiles else DetailsTab.Overview
+                                        }
+                                    }
+
                                     if (availableTabs.size > 1) {
                                         PrimaryScrollableTabRow(
                                             selectedTabIndex = availableTabs.indexOf(selectedTab).coerceAtLeast(0),
-                                            modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
+                                            modifier = Modifier.fillMaxWidth(),
                                             edgePadding = 0.dp,
                                         ) {
                                             availableTabs.forEach { tab ->
@@ -625,9 +639,7 @@ fun UnifiedMediaDetailsScreen(
                                                             when (tab) {
                                                                 DetailsTab.SeasonsFiles ->
                                                                     if (state.seasons.isNotEmpty()) {
-                                                                        mokoString(
-                                                                            MR.strings.seasons_header,
-                                                                        )
+                                                                        mokoString(MR.strings.seasons_header)
                                                                     } else {
                                                                         mokoString(MR.strings.media)
                                                                     }

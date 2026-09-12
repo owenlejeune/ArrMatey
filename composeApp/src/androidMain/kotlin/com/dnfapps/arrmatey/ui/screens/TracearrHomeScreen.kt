@@ -101,7 +101,7 @@ fun TracearrHomeScreen(
                     }
                 },
                 actions = {
-                    if (!hideInstancePicker || instancesState.instances.size > 1) {
+                    if (instancesState.instances.isNotEmpty() && (!hideInstancePicker || instancesState.instances.size > 1)) {
                         InstancePicker(
                             type = InstanceType.Tracearr,
                             currentInstance = instancesState.selectedInstance,

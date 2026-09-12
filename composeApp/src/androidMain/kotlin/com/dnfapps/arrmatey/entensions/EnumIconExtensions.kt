@@ -4,11 +4,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AudioFile
-import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CloudDownload
@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.ManageSearch
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Schedule
@@ -72,7 +71,7 @@ val TabItem.androidIcon: ImageVector
                     TabItem.Standard.PROWLARR -> Icons.AutoMirrored.Filled.ManageSearch
                     TabItem.Standard.BAZARR -> Icons.Default.Subtitles
                     TabItem.Standard.DASHBOARD -> Icons.Default.Dashboard
-                    TabItem.Standard.TRACEARR -> Icons.Default.AutoGraph
+                    TabItem.Standard.TRACEARR -> Icons.Default.Analytics
                 }
             is TabItem.CustomWebpage -> Icons.Default.Language
             is TabItem.Settings -> Icons.Default.Settings

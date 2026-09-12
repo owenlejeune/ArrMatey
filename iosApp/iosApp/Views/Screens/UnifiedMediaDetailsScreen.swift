@@ -156,8 +156,9 @@ extension UnifiedMediaDetailsScreen {
     @ViewBuilder
     private func successView(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
         let tracearrState = viewModel.tracearrState
+        let isMovieOrTv = success.arrMedia is ArrMovie || success.arrMedia is ArrSeries || viewModel.resolvedRequestType == RequestType.movie || viewModel.resolvedRequestType == RequestType.tv
         let hasSeasonsOrFiles = !success.seasons.isEmpty || (success.hasArrId && !(success.arrMedia is ArrSeries))
-        let hasTracearr = tracearrState.isTracearrConfigured
+        let hasTracearr = tracearrState.isTracearrConfigured && isMovieOrTv
 
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -182,8 +183,10 @@ extension UnifiedMediaDetailsScreen {
                                 .foregroundColor(.themePrimary)
                         }
 
-                        TracearrSummaryChipRowView(uiState: tracearrState)
-                            .padding(.top, 4)
+                        if isMovieOrTv {
+                            TracearrSummaryChipRowView(uiState: tracearrState)
+                                .padding(.top, 4)
+                        }
                     }
 
                     if hasSeasonsOrFiles || hasTracearr {
@@ -245,6 +248,13 @@ extension UnifiedMediaDetailsScreen {
                 }
             }
             previousHasSeasonsOrFiles = newValue
+        }
+        .onChange(of: hasTracearr) { _, newValue in
+            if !newValue && (selectedTab == .analytics || selectedTab == .history) {
+                withAnimation {
+                    selectedTab = hasSeasonsOrFiles ? .seasonsFiles : .overview
+                }
+            }
         }
         .refreshable {
             viewModel.refresh()

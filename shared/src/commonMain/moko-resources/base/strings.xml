@@ -55,6 +55,8 @@
     <string name="deep_links">Deep Links</string>
     <string name="services">Services</string>
     <string name="integrations">Integrations</string>
+    <string name="unified_media">Unified Media</string>
+    <string name="unified_media_description">Control how media details screens integrate with your services to combine Arr library data with Seerr details, Bazarr subtitles, and Tracearr playback analytics.</string>
     <string name="setup_seerr_for_in_app_details">Setup Seerr (Overseerr/Jellyseerr) to view person and media details directly in the app.</string>
     <string name="services_description">Services, Download Clients, and Custom Webpages</string>
     <string name="integrations_description">Control how your services work together</string>
@@ -69,6 +71,8 @@
     <string name="combine_seerr_arr_media_description">When enabled, the media details screen will combine information from Seerr and your Arr instances. If disabled, details will only display data based on the context.</string>
     <string name="bazarr_details_integration_title">Bazarr Subtitles Integration</string>
     <string name="bazarr_details_integration_description">Display subtitle information and management options from Bazarr in media and episode details.</string>
+    <string name="tracearr_details_integration_title">Tracearr Integration</string>
+    <string name="tracearr_details_integration_description">Display playback statistics, viewer history, and active streams from Tracearr in media details.</string>
     <string name="always_ask">Always Ask</string>
     <string name="appearance">Appearance</string>
     <string name="navigation">Navigation</string>

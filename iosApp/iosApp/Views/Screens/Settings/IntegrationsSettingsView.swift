@@ -37,21 +37,27 @@ struct IntegrationsSettingsView: View {
                 )) {
                     Text(MR.strings().combine_seerr_arr_media_title.localized())
                 }
-            } footer: {
-                Text(MR.strings().combine_seerr_arr_media_description.localized())
-            }
+                .disabled(!viewModel.hasSeerrAndArr)
 
-            Section {
                 Toggle(isOn: Binding(
                     get: { viewModel.bazarrDetailsIntegration },
                     set: { _ in viewModel.toggleBazarrDetailsIntegration() }
                 )) {
                     Text(MR.strings().bazarr_details_integration_title.localized())
                 }
+                .disabled(!viewModel.hasBazarr)
+
+                Toggle(isOn: Binding(
+                    get: { viewModel.tracearrDetailsIntegration },
+                    set: { _ in viewModel.toggleTracearrDetailsIntegration() }
+                )) {
+                    Text(MR.strings().tracearr_details_integration_title.localized())
+                }
+                .disabled(!viewModel.hasTracearr)
             } header: {
-                Text(MR.strings().bazarr.localized())
+                Text(MR.strings().unified_media.localized())
             } footer: {
-                Text(MR.strings().bazarr_details_integration_description.localized())
+                Text(MR.strings().unified_media_description.localized())
             }
         }
         .navigationTitle(MR.strings().integrations.localized())

@@ -754,10 +754,11 @@ class UnifiedMediaDetailsViewModel(
             combine(
                 uiState,
                 getTracearrInstanceRepositoryUseCase.observeSelected(),
-            ) { state, tracearrRepo ->
-                state to tracearrRepo
-            }.collectLatest { (state, tracearrRepo) ->
-                if (tracearrRepo == null) {
+                preferencesStore.tracearrDetailsIntegration,
+            ) { state, tracearrRepo, tracearrIntegrationEnabled ->
+                Triple(state, tracearrRepo, tracearrIntegrationEnabled)
+            }.collectLatest { (state, tracearrRepo, tracearrIntegrationEnabled) ->
+                if (tracearrRepo == null || !tracearrIntegrationEnabled) {
                     _tracearrState.value = TracearrMediaUiState(isTracearrConfigured = false)
                     return@collectLatest
                 }
@@ -779,7 +780,9 @@ class UnifiedMediaDetailsViewModel(
                         else -> null
                     }
 
-                if (resolvedTmdbId != null && resolvedTmdbId > 0 && resolvedReqType != null) {
+                val isMovieOrTv = resolvedReqType == RequestType.Movie || resolvedReqType == RequestType.Tv
+
+                if (resolvedTmdbId != null && resolvedTmdbId > 0 && isMovieOrTv && resolvedReqType != null) {
                     val ref =
                         if (resolvedReqType == RequestType.Tv) {
                             "show:tmdb:$resolvedTmdbId"
@@ -805,7 +808,7 @@ class UnifiedMediaDetailsViewModel(
                         )
                     }
                 } else {
-                    _tracearrState.update { it.copy(isTracearrConfigured = true, isLoading = false) }
+                    _tracearrState.value = TracearrMediaUiState(isTracearrConfigured = false)
                 }
             }
         }
@@ -1499,6 +1502,8 @@ class UnifiedMediaDetailsViewModel(
         if (currentState.isLoadingHistoryMore) return
 
         viewModelScope.launch {
+            val enabled = preferencesStore.tracearrDetailsIntegration.first()
+            if (!enabled) return@launch
             val repo = getTracearrInstanceRepositoryUseCase.observeSelected().firstOrNull() ?: return@launch
             val ref = currentTracearrRef ?: return@launch
 
