@@ -21,7 +21,6 @@ class TracearrActivityViewModel(
     getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
     private val getTracearrActivityUseCase: GetTracearrActivityUseCase,
 ) : ViewModel() {
-
     val currentRepository: StateFlow<TracearrRepository?> =
         getTracearrInstanceRepositoryUseCase
             .observeSelected()
@@ -71,19 +70,23 @@ class TracearrActivityViewModel(
         }
     }
 
-    private suspend fun loadActivity(repo: TracearrRepository, period: TracearrPeriod, isRefresh: Boolean) {
+    private suspend fun loadActivity(
+        repo: TracearrRepository,
+        period: TracearrPeriod,
+        isRefresh: Boolean,
+    ) {
         if (isRefresh) {
             _state.value = TracearrActivityState.Loading
         }
 
         getTracearrActivityUseCase(repo, period = period)
             .onSuccess { response ->
-                _state.value = TracearrActivityState.Success(
-                    response = response,
-                    period = period,
-                )
-            }
-            .onError { _, msg, _ ->
+                _state.value =
+                    TracearrActivityState.Success(
+                        response = response,
+                        period = period,
+                    )
+            }.onError { _, msg, _ ->
                 _state.value = TracearrActivityState.Error(msg ?: "Failed to load activity")
             }
     }

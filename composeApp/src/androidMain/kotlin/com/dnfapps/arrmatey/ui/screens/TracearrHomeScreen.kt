@@ -70,10 +70,11 @@ fun TracearrHomeScreen(
     onNavigateToActivity: () -> Unit,
     isLargeScreen: Boolean = false,
     viewModel: TracearrViewModel = koinViewModel(),
-    instancesViewModel: InstancesViewModel = koinViewModel(
-        key = InstanceType.Tracearr.name,
-        parameters = { parametersOf(InstanceType.Tracearr) },
-    ),
+    instancesViewModel: InstancesViewModel =
+        koinViewModel(
+            key = InstanceType.Tracearr.name,
+            parameters = { parametersOf(InstanceType.Tracearr) },
+        ),
     globalPreferencesStore: PreferencesStore = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -100,7 +101,7 @@ fun TracearrHomeScreen(
                     }
                 },
                 actions = {
-                    if (!hideInstancePicker || instancesState.instances.size > 1) {
+                    if (instancesState.instances.isNotEmpty() && (!hideInstancePicker || instancesState.instances.size > 1)) {
                         InstancePicker(
                             type = InstanceType.Tracearr,
                             currentInstance = instancesState.selectedInstance,
@@ -124,7 +125,7 @@ fun TracearrHomeScreen(
             when (val currentState = state) {
                 is TracearrState.Initial,
                 is TracearrState.Loading,
-                    -> {
+                -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
@@ -170,16 +171,17 @@ fun TracearrHomeScreen(
                                     onNavigateToHistory = onNavigateToHistory,
                                     onNavigateToAllUsers = onNavigateToAllUsers,
                                     onNavigateToViolations = onNavigateToViolations,
-                                    onNavigateToActivity = onNavigateToActivity
+                                    onNavigateToActivity = onNavigateToActivity,
                                 )
                             }
                         }
 
                         item {
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = if (currentState.stats != null) 12.dp else 0.dp),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = if (currentState.stats != null) 12.dp else 0.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
@@ -213,13 +215,13 @@ fun TracearrHomeScreen(
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Tv,
                                         modifier = Modifier.size(72.dp).padding(top = 24.dp),
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                     Text(
                                         text = mokoString(MR.strings.no_active_streams),
@@ -242,9 +244,10 @@ fun TracearrHomeScreen(
 
                         item {
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 12.dp),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
@@ -267,7 +270,7 @@ fun TracearrHomeScreen(
                                     Text(
                                         text = mokoString(MR.strings.all),
                                         style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
                             }
@@ -318,7 +321,7 @@ fun TracearrHomeScreen(
                             onNavigateToUser = { userRef ->
                                 viewModel.clearSelected()
                                 onNavigateToUser(userRef)
-                            }
+                            },
                         )
                     }
                 }

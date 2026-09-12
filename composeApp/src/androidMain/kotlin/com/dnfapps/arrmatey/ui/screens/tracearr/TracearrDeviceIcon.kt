@@ -22,24 +22,24 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrDevicePlatform
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 
 @Composable
-fun TracearrDeviceIcon(
-    streamSession: TracearrStreamSession
-) {
-    val devicePlatform = remember(streamSession) {
-        TracearrDevicePlatform.fromSession(
-            streamSession.platform,
-            streamSession.product,
-            streamSession.device
-        )
-    }
-    val icon = when (devicePlatform) {
-        TracearrDevicePlatform.PHONE -> Icons.Default.PhoneIphone
-        TracearrDevicePlatform.TABLET -> Icons.Default.Tablet
-        TracearrDevicePlatform.TV -> Icons.Default.Tv
-        TracearrDevicePlatform.DESKTOP -> Icons.Default.DesktopWindows
-        TracearrDevicePlatform.CONSOLE -> Icons.Default.SportsEsports
-        TracearrDevicePlatform.UNKNOWN -> Icons.Default.SmartDisplay
-    }
+fun TracearrDeviceIcon(streamSession: TracearrStreamSession) {
+    val devicePlatform =
+        remember(streamSession) {
+            TracearrDevicePlatform.fromSession(
+                streamSession.platform,
+                streamSession.product,
+                streamSession.device,
+            )
+        }
+    val icon =
+        when (devicePlatform) {
+            TracearrDevicePlatform.PHONE -> Icons.Default.PhoneIphone
+            TracearrDevicePlatform.TABLET -> Icons.Default.Tablet
+            TracearrDevicePlatform.TV -> Icons.Default.Tv
+            TracearrDevicePlatform.DESKTOP -> Icons.Default.DesktopWindows
+            TracearrDevicePlatform.CONSOLE -> Icons.Default.SportsEsports
+            TracearrDevicePlatform.UNKNOWN -> Icons.Default.SmartDisplay
+        }
 
     Surface(
         shape = RoundedCornerShape(4.dp),
@@ -50,7 +50,7 @@ fun TracearrDeviceIcon(
             Icon(
                 imageVector = icon,
                 contentDescription = devicePlatform.name,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(14.dp),
             )
         }
     }

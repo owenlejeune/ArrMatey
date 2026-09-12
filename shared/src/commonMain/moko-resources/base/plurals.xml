@@ -31,6 +31,18 @@
         <item quantity="one">%1$d play</item>
         <item quantity="other">%1$d plays</item>
     </plurals>
+    <plurals name="viewers_count">
+        <item quantity="one">%1$d Viewer</item>
+        <item quantity="other">%1$d Viewers</item>
+    </plurals>
+    <plurals name="servers_count">
+        <item quantity="one">%1$d Server</item>
+        <item quantity="other">%1$d Servers</item>
+    </plurals>
+    <plurals name="days_count">
+        <item quantity="one">%1$d Day</item>
+        <item quantity="other">%1$d Days</item>
+    </plurals>
     <plurals name="selected_count">
         <item quantity="one">%d selected</item>
         <item quantity="other">%d selected</item>

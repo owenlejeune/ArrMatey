@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TracearrActivityPlatform(
     val platform: String? = null,
-    val count: Int = 0
+    val count: Int = 0,
 )

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,7 +49,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -170,12 +170,18 @@ fun TracearrActivityContent(
                     if (isLargeScreen) {
                         IconButton(onClick = { isDualColumn = !isDualColumn }) {
                             Icon(
-                                imageVector = if (isDualColumn) {
-                                    Icons.AutoMirrored.Filled.List
-                                } else Icons.Default.GridView,
-                                contentDescription = if (isDualColumn) {
-                                    "Single column"
-                                } else "Dual column",
+                                imageVector =
+                                    if (isDualColumn) {
+                                        Icons.AutoMirrored.Filled.List
+                                    } else {
+                                        Icons.Default.GridView
+                                    },
+                                contentDescription =
+                                    if (isDualColumn) {
+                                        "Single column"
+                                    } else {
+                                        "Dual column"
+                                    },
                             )
                         }
                     }
@@ -187,13 +193,15 @@ fun TracearrActivityContent(
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             when (state) {
                 is TracearrActivityState.Initial,
-                is TracearrActivityState.Loading -> {
+                is TracearrActivityState.Loading,
+                -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
@@ -204,9 +212,10 @@ fun TracearrActivityContent(
                 is TracearrActivityState.NoInstance -> {
                     NoInstanceView(
                         type = InstanceType.Tracearr,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .wrapContentSize(),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .wrapContentSize(),
                     )
                 }
                 is TracearrActivityState.Error -> {
@@ -240,74 +249,84 @@ fun TracearrActivityContent(
                         if (isDualColumn) {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(
-                                    start = 16.dp,
-                                    end = 16.dp,
-                                    top = 16.dp,
-                                    bottom = 16.dp + navigationBarBottomInset(),
-                                ),
+                                contentPadding =
+                                    PaddingValues(
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        top = 16.dp,
+                                        bottom = 16.dp + navigationBarBottomInset(),
+                                    ),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
                                 item {
                                     Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(IntrinsicSize.Max),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(IntrinsicSize.Max),
                                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                                     ) {
                                         PlaysOverTimeCard(
                                             plays = state.response.plays,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .fillMaxHeight(),
+                                            modifier =
+                                                Modifier
+                                                    .weight(1f)
+                                                    .fillMaxHeight(),
                                         )
                                         ConcurrentStreamsCard(
                                             concurrent = state.response.concurrent,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .fillMaxHeight(),
+                                            modifier =
+                                                Modifier
+                                                    .weight(1f)
+                                                    .fillMaxHeight(),
                                         )
                                     }
                                 }
                                 item {
                                     Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(IntrinsicSize.Max),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(IntrinsicSize.Max),
                                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                                     ) {
                                         ActivityByDayOfWeekCard(
                                             byDay = state.response.byDayOfWeek,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .fillMaxHeight(),
+                                            modifier =
+                                                Modifier
+                                                    .weight(1f)
+                                                    .fillMaxHeight(),
                                         )
                                         ActivityByHourOfDayCard(
                                             byHour = state.response.byHourOfDay,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .fillMaxHeight(),
+                                            modifier =
+                                                Modifier
+                                                    .weight(1f)
+                                                    .fillMaxHeight(),
                                         )
                                     }
                                 }
                                 item {
                                     Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(IntrinsicSize.Max),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(IntrinsicSize.Max),
                                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                                     ) {
                                         PlatformsCard(
                                             platforms = state.response.platforms,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .fillMaxHeight(),
+                                            modifier =
+                                                Modifier
+                                                    .weight(1f)
+                                                    .fillMaxHeight(),
                                         )
                                         StreamQualityCard(
                                             quality = state.response.quality,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .fillMaxHeight(),
+                                            modifier =
+                                                Modifier
+                                                    .weight(1f)
+                                                    .fillMaxHeight(),
                                         )
                                     }
                                 }
@@ -315,12 +334,13 @@ fun TracearrActivityContent(
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(
-                                    start = 16.dp,
-                                    end = 16.dp,
-                                    top = 16.dp,
-                                    bottom = 16.dp + navigationBarBottomInset(),
-                                ),
+                                contentPadding =
+                                    PaddingValues(
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        top = 16.dp,
+                                        bottom = 16.dp + navigationBarBottomInset(),
+                                    ),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
                                 item { PlaysOverTimeCard(plays = state.response.plays) }
@@ -352,11 +372,12 @@ private fun PeriodSelector(
         modifier = modifier,
     ) {
         periods.forEachIndexed { index, period ->
-            val label = when (period) {
-                TracearrPeriod.Week -> mokoString(MR.strings.week)
-                TracearrPeriod.Month -> mokoString(MR.strings.month)
-                TracearrPeriod.Year -> mokoString(MR.strings.year)
-            }
+            val label =
+                when (period) {
+                    TracearrPeriod.Week -> mokoString(MR.strings.week)
+                    TracearrPeriod.Month -> mokoString(MR.strings.month)
+                    TracearrPeriod.Year -> mokoString(MR.strings.year)
+                }
             Tab(
                 selected = index == selectedIndex,
                 onClick = { onPeriodSelected(period) },
@@ -373,19 +394,22 @@ private fun PeriodSelector(
 
 @Composable
 private fun rememberMarker(): CartesianMarker {
-    val labelBackground = rememberShapeComponent(
-        fill = Fill(MaterialTheme.colorScheme.surfaceContainerHigh),
-        shape = MarkerCornerBasedShape(base = RoundedCornerShape(8.dp)),
-    )
-    val label = rememberTextComponent(
-        style = TextStyle(
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-        ),
-        padding = Insets(8.dp, 4.dp),
-        background = labelBackground,
-    )
+    val labelBackground =
+        rememberShapeComponent(
+            fill = Fill(MaterialTheme.colorScheme.surfaceContainerHigh),
+            shape = MarkerCornerBasedShape(base = RoundedCornerShape(8.dp)),
+        )
+    val label =
+        rememberTextComponent(
+            style =
+                TextStyle(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                ),
+            padding = Insets(8.dp, 4.dp),
+            background = labelBackground,
+        )
     return rememberDefaultCartesianMarker(
         label = label,
         guideline = rememberAxisGuidelineComponent(),
@@ -414,49 +438,55 @@ private fun PlaysOverTimeCard(
     val modelProducer = remember { CartesianChartModelProducer() }
 
     val unknownString = mokoString(MR.strings.unknown)
-    val serverNames = remember(plays, unknownString) {
-        plays.mapNotNull { it.serverId }.distinct().ifEmpty {
-            if (plays.isNotEmpty()) listOf(unknownString) else emptyList()
+    val serverNames =
+        remember(plays, unknownString) {
+            plays.mapNotNull { it.serverId }.distinct().ifEmpty {
+                if (plays.isNotEmpty()) listOf(unknownString) else emptyList()
+            }
         }
-    }
 
-    val dates = remember(plays) {
-        plays.mapNotNull { it.date }.distinct()
-    }
-    val dateLabels = remember(dates) {
-        dates.map { formatChartDateLabel(it) }
-    }
+    val dates =
+        remember(plays) {
+            plays.mapNotNull { it.date }.distinct()
+        }
+    val dateLabels =
+        remember(dates) {
+            dates.map { formatChartDateLabel(it) }
+        }
 
-    val serverSeriesData = remember(plays, serverNames, dates, unknownString) {
-        if (plays.isEmpty()) return@remember emptyList()
-        if (dates.isNotEmpty()) {
-            serverNames.map { server ->
-                dates.map { d ->
-                    plays.firstOrNull { (it.serverId ?: unknownString) == server && it.date == d }?.count?.toDouble() ?: 0.0
+    val serverSeriesData =
+        remember(plays, serverNames, dates, unknownString) {
+            if (plays.isEmpty()) return@remember emptyList()
+            if (dates.isNotEmpty()) {
+                serverNames.map { server ->
+                    dates.map { d ->
+                        plays.firstOrNull { (it.serverId ?: unknownString) == server && it.date == d }?.count?.toDouble() ?: 0.0
+                    }
+                }
+            } else {
+                val grouped = plays.groupBy { it.serverId ?: unknownString }
+                serverNames.map { server ->
+                    grouped[server]?.map { it.count.toDouble() } ?: listOf(0.0)
                 }
             }
-        } else {
-            val grouped = plays.groupBy { it.serverId ?: unknownString }
-            serverNames.map { server ->
-                grouped[server]?.map { it.count.toDouble() } ?: listOf(0.0)
-            }
         }
-    }
 
-    val palette = listOf(
-        ArrOrange,
-        Color(0xFF00BCD4),
-        Color(0xFF4CAF50),
-        Color(0xFF9C27B0),
-        Color(0xFF2196F3),
-        Color(0xFFE91E63),
-        Color(0xFFFF5722),
-        Color(0xFF009688),
-    )
+    val palette =
+        listOf(
+            ArrOrange,
+            Color(0xFF00BCD4),
+            Color(0xFF4CAF50),
+            Color(0xFF9C27B0),
+            Color(0xFF2196F3),
+            Color(0xFFE91E63),
+            Color(0xFFFF5722),
+            Color(0xFF009688),
+        )
 
-    val serverColors = remember(serverNames) {
-        serverNames.mapIndexed { index, _ -> palette[index % palette.size] }
-    }
+    val serverColors =
+        remember(serverNames) {
+            serverNames.mapIndexed { index, _ -> palette[index % palette.size] }
+        }
 
     LaunchedEffect(serverSeriesData) {
         modelProducer.runTransaction {
@@ -472,22 +502,25 @@ private fun PlaysOverTimeCard(
         }
     }
 
-    val defaultLine = LineCartesianLayer.rememberLine(
-        fill = LineCartesianLayer.LineFill.single(Fill(ArrOrange))
-    )
-    val lineLines = serverColors.map { color ->
+    val defaultLine =
         LineCartesianLayer.rememberLine(
-            fill = LineCartesianLayer.LineFill.single(Fill(color)),
+            fill = LineCartesianLayer.LineFill.single(Fill(ArrOrange)),
         )
-    }
-
-    val lineProvider = remember(lineLines, defaultLine) {
-        if (lineLines.isNotEmpty()) {
-            LineCartesianLayer.LineProvider.series(lineLines)
-        } else {
-            LineCartesianLayer.LineProvider.series(defaultLine)
+    val lineLines =
+        serverColors.map { color ->
+            LineCartesianLayer.rememberLine(
+                fill = LineCartesianLayer.LineFill.single(Fill(color)),
+            )
         }
-    }
+
+    val lineProvider =
+        remember(lineLines, defaultLine) {
+            if (lineLines.isNotEmpty()) {
+                LineCartesianLayer.LineProvider.series(lineLines)
+            } else {
+                LineCartesianLayer.LineProvider.series(defaultLine)
+            }
+        }
 
     ChartCardContainer(
         title = mokoString(MR.strings.plays_over_time),
@@ -498,31 +531,44 @@ private fun PlaysOverTimeCard(
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 CartesianChartHost(
-                    chart = rememberCartesianChart(
-                        rememberLineCartesianLayer(lineProvider = lineProvider),
-                        startAxis = VerticalAxis.rememberStart(),
-                        bottomAxis = HorizontalAxis.rememberBottom(
-                            itemPlacer = remember(dateLabels.size) {
-                                HorizontalAxis.ItemPlacer.aligned(
-                                    spacing = { if (dateLabels.size > 20) 3 else if (dateLabels.size > 10) 2 else 1 }
-                                )
-                            },
-                            labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
-                            valueFormatter = CartesianValueFormatter { _, x, _ ->
-                                if (dateLabels.isNotEmpty()) {
-                                    val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
-                                    dateLabels[index]
-                                } else {
-                                    (x.toInt() + 1).toString()
-                                }
-                            },
+                    chart =
+                        rememberCartesianChart(
+                            rememberLineCartesianLayer(lineProvider = lineProvider),
+                            startAxis = VerticalAxis.rememberStart(),
+                            bottomAxis =
+                                HorizontalAxis.rememberBottom(
+                                    itemPlacer =
+                                        remember(dateLabels.size) {
+                                            HorizontalAxis.ItemPlacer.aligned(
+                                                spacing = {
+                                                    if (dateLabels.size > 20) {
+                                                        3
+                                                    } else if (dateLabels.size > 10) {
+                                                        2
+                                                    } else {
+                                                        1
+                                                    }
+                                                },
+                                            )
+                                        },
+                                    labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
+                                    valueFormatter =
+                                        CartesianValueFormatter { _, x, _ ->
+                                            if (dateLabels.isNotEmpty()) {
+                                                val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
+                                                dateLabels[index]
+                                            } else {
+                                                (x.toInt() + 1).toString()
+                                            }
+                                        },
+                                ),
+                            marker = rememberMarker(),
                         ),
-                        marker = rememberMarker(),
-                    ),
                     modelProducer = modelProducer,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
                 )
 
                 if (serverNames.isNotEmpty()) {
@@ -540,12 +586,14 @@ private fun ConcurrentStreamsCard(
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    val dates = remember(concurrent) {
-        concurrent.mapNotNull { it.date }.distinct()
-    }
-    val dateLabels = remember(dates) {
-        dates.map { formatChartDateLabel(it) }
-    }
+    val dates =
+        remember(concurrent) {
+            concurrent.mapNotNull { it.date }.distinct()
+        }
+    val dateLabels =
+        remember(dates) {
+            dates.map { formatChartDateLabel(it) }
+        }
 
     LaunchedEffect(concurrent) {
         modelProducer.runTransaction {
@@ -565,14 +613,16 @@ private fun ConcurrentStreamsCard(
         }
     }
 
-    val lineLines = listOf(
-        LineCartesianLayer.rememberLine(fill = LineCartesianLayer.LineFill.single(Fill(TracearrBlue))),
-        LineCartesianLayer.rememberLine(fill = LineCartesianLayer.LineFill.single(Fill(TracearrDarkBlue))),
-        LineCartesianLayer.rememberLine(fill = LineCartesianLayer.LineFill.single(Fill(ArrOrange))),
-    )
-    val lineProvider = remember(lineLines) {
-        LineCartesianLayer.LineProvider.series(lineLines)
-    }
+    val lineLines =
+        listOf(
+            LineCartesianLayer.rememberLine(fill = LineCartesianLayer.LineFill.single(Fill(TracearrBlue))),
+            LineCartesianLayer.rememberLine(fill = LineCartesianLayer.LineFill.single(Fill(TracearrDarkBlue))),
+            LineCartesianLayer.rememberLine(fill = LineCartesianLayer.LineFill.single(Fill(ArrOrange))),
+        )
+    val lineProvider =
+        remember(lineLines) {
+            LineCartesianLayer.LineProvider.series(lineLines)
+        }
 
     ChartCardContainer(
         title = mokoString(MR.strings.concurrent_streams),
@@ -583,39 +633,53 @@ private fun ConcurrentStreamsCard(
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 CartesianChartHost(
-                    chart = rememberCartesianChart(
-                        rememberLineCartesianLayer(lineProvider = lineProvider),
-                        startAxis = VerticalAxis.rememberStart(),
-                        bottomAxis = HorizontalAxis.rememberBottom(
-                            itemPlacer = remember(dateLabels.size) {
-                                HorizontalAxis.ItemPlacer.aligned(
-                                    spacing = { if (dateLabels.size > 20) 3 else if (dateLabels.size > 10) 2 else 1 }
-                                )
-                            },
-                            labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
-                            valueFormatter = CartesianValueFormatter { _, x, _ ->
-                                if (dateLabels.isNotEmpty()) {
-                                    val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
-                                    dateLabels[index]
-                                } else {
-                                    (x.toInt() + 1).toString()
-                                }
-                            },
+                    chart =
+                        rememberCartesianChart(
+                            rememberLineCartesianLayer(lineProvider = lineProvider),
+                            startAxis = VerticalAxis.rememberStart(),
+                            bottomAxis =
+                                HorizontalAxis.rememberBottom(
+                                    itemPlacer =
+                                        remember(dateLabels.size) {
+                                            HorizontalAxis.ItemPlacer.aligned(
+                                                spacing = {
+                                                    if (dateLabels.size > 20) {
+                                                        3
+                                                    } else if (dateLabels.size > 10) {
+                                                        2
+                                                    } else {
+                                                        1
+                                                    }
+                                                },
+                                            )
+                                        },
+                                    labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
+                                    valueFormatter =
+                                        CartesianValueFormatter { _, x, _ ->
+                                            if (dateLabels.isNotEmpty()) {
+                                                val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
+                                                dateLabels[index]
+                                            } else {
+                                                (x.toInt() + 1).toString()
+                                            }
+                                        },
+                                ),
+                            marker = rememberMarker(),
                         ),
-                        marker = rememberMarker(),
-                    ),
                     modelProducer = modelProducer,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
                 )
 
                 LegendRow(
-                    items = listOf(
-                        mokoString(MR.strings.direct_play) to TracearrBlue,
-                        mokoString(MR.strings.direct_stream) to TracearrDarkBlue,
-                        mokoString(MR.strings.transcode) to ArrOrange,
-                    )
+                    items =
+                        listOf(
+                            mokoString(MR.strings.direct_play) to TracearrBlue,
+                            mokoString(MR.strings.direct_stream) to TracearrDarkBlue,
+                            mokoString(MR.strings.transcode) to ArrOrange,
+                        ),
                 )
             }
         }
@@ -630,10 +694,11 @@ private fun ActivityByDayOfWeekCard(
     val modelProducer = remember { CartesianChartModelProducer() }
 
     val daysOrder = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-    val dayCounts = remember(byDay) {
-        val map = byDay.associate { (it.name ?: "") to it.count }
-        daysOrder.map { (map[it] ?: 0).toDouble() }
-    }
+    val dayCounts =
+        remember(byDay) {
+            val map = byDay.associate { (it.name ?: "") to it.count }
+            daysOrder.map { (map[it] ?: 0).toDouble() }
+        }
 
     LaunchedEffect(dayCounts) {
         modelProducer.runTransaction {
@@ -646,25 +711,30 @@ private fun ActivityByDayOfWeekCard(
         modifier = modifier,
     ) {
         CartesianChartHost(
-            chart = rememberCartesianChart(
-                rememberColumnCartesianLayer(
-                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                        rememberLineComponent(fill = Fill(ArrBlue), 16.dp)
-                    )
+            chart =
+                rememberCartesianChart(
+                    rememberColumnCartesianLayer(
+                        columnProvider =
+                            ColumnCartesianLayer.ColumnProvider.series(
+                                rememberLineComponent(fill = Fill(ArrBlue), 16.dp),
+                            ),
+                    ),
+                    startAxis = VerticalAxis.rememberStart(),
+                    bottomAxis =
+                        HorizontalAxis.rememberBottom(
+                            valueFormatter =
+                                CartesianValueFormatter { _, x, _ ->
+                                    val index = x.toInt().coerceIn(0, daysOrder.lastIndex)
+                                    daysOrder[index]
+                                },
+                        ),
+                    marker = rememberMarker(),
                 ),
-                startAxis = VerticalAxis.rememberStart(),
-                bottomAxis = HorizontalAxis.rememberBottom(
-                    valueFormatter = CartesianValueFormatter { _, x, _ ->
-                        val index = x.toInt().coerceIn(0, daysOrder.lastIndex)
-                        daysOrder[index]
-                    }
-                ),
-                marker = rememberMarker(),
-            ),
             modelProducer = modelProducer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
         )
     }
 }
@@ -676,10 +746,11 @@ private fun ActivityByHourOfDayCard(
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    val hourCounts = remember(byHour) {
-        val map = byHour.associate { it.hour to it.count }
-        (0..23).map { (map[it] ?: 0).toDouble() }
-    }
+    val hourCounts =
+        remember(byHour) {
+            val map = byHour.associate { it.hour to it.count }
+            (0..23).map { (map[it] ?: 0).toDouble() }
+        }
 
     LaunchedEffect(hourCounts) {
         modelProducer.runTransaction {
@@ -692,32 +763,37 @@ private fun ActivityByHourOfDayCard(
         modifier = modifier,
     ) {
         CartesianChartHost(
-            chart = rememberCartesianChart(
-                rememberColumnCartesianLayer(
-                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                        rememberLineComponent(fill = Fill(ArrBlue), 16.dp)
-                    )
+            chart =
+                rememberCartesianChart(
+                    rememberColumnCartesianLayer(
+                        columnProvider =
+                            ColumnCartesianLayer.ColumnProvider.series(
+                                rememberLineComponent(fill = Fill(ArrBlue), 16.dp),
+                            ),
+                    ),
+                    startAxis = VerticalAxis.rememberStart(),
+                    bottomAxis =
+                        HorizontalAxis.rememberBottom(
+                            itemPlacer = remember { HorizontalAxis.ItemPlacer.aligned(spacing = { 2 }) },
+                            labelRotationDegrees = 45f,
+                            valueFormatter =
+                                CartesianValueFormatter { _, x, _ ->
+                                    val hr = (x.toInt() % 24 + 24) % 24
+                                    when (hr) {
+                                        0 -> "12am"
+                                        12 -> "12pm"
+                                        in 1..11 -> "${hr}am"
+                                        else -> "${hr - 12}pm"
+                                    }
+                                },
+                        ),
+                    marker = rememberMarker(),
                 ),
-                startAxis = VerticalAxis.rememberStart(),
-                bottomAxis = HorizontalAxis.rememberBottom(
-                    itemPlacer = remember { HorizontalAxis.ItemPlacer.aligned(spacing = { 2 }) },
-                    labelRotationDegrees = 45f,
-                    valueFormatter = CartesianValueFormatter { _, x, _ ->
-                        val hr = (x.toInt() % 24 + 24) % 24
-                        when (hr) {
-                            0 -> "12am"
-                            12 -> "12pm"
-                            in 1..11 -> "${hr}am"
-                            else -> "${hr - 12}pm"
-                        }
-                    }
-                ),
-                marker = rememberMarker(),
-            ),
             modelProducer = modelProducer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
         )
     }
 }
@@ -727,18 +803,27 @@ private fun PlatformsCard(
     platforms: List<TracearrActivityPlatform>,
     modifier: Modifier = Modifier,
 ) {
-    val palette = listOf(
-        Color(0xFF00BCD4), Color(0xFF4CAF50), Color(0xFF9C27B0), Color(0xFFFF9800),
-        Color(0xFFE91E63), Color(0xFF2196F3), Color(0xFFFF5722), Color(0xFF009688),
-        Color(0xFF3F51B5), Color(0xFFFFC107),
-    )
+    val palette =
+        listOf(
+            Color(0xFF00BCD4),
+            Color(0xFF4CAF50),
+            Color(0xFF9C27B0),
+            Color(0xFFFF9800),
+            Color(0xFFE91E63),
+            Color(0xFF2196F3),
+            Color(0xFFFF5722),
+            Color(0xFF009688),
+            Color(0xFF3F51B5),
+            Color(0xFFFFC107),
+        )
 
     val unknownString = mokoString(MR.strings.unknown)
-    val items = remember(platforms, unknownString) {
-        platforms.filter { it.count > 0 }.mapIndexed { index, p ->
-            (p.platform ?: unknownString) to (p.count.toFloat() to palette[index % palette.size])
+    val items =
+        remember(platforms, unknownString) {
+            platforms.filter { it.count > 0 }.mapIndexed { index, p ->
+                (p.platform ?: unknownString) to (p.count.toFloat() to palette[index % palette.size])
+            }
         }
-    }
 
     val modelProducer = remember { PieChartModelProducer() }
 
@@ -752,18 +837,21 @@ private fun PlatformsCard(
         }
     }
 
-    val sliceProvider = remember(items) {
-        val slices = items.map { PieChart.Slice(fill = Fill(it.second.second)) }.ifEmpty {
-            listOf(PieChart.Slice(fill = Fill(Color.Transparent)))
+    val sliceProvider =
+        remember(items) {
+            val slices =
+                items.map { PieChart.Slice(fill = Fill(it.second.second)) }.ifEmpty {
+                    listOf(PieChart.Slice(fill = Fill(Color.Transparent)))
+                }
+            PieChart.SliceProvider.series(slices)
         }
-        PieChart.SliceProvider.series(slices)
-    }
 
-    val chart = rememberPieChart(
-        sliceProvider = sliceProvider,
-        innerSize = PieSize.Inner.fixed(104.dp),
-        outerSize = PieSize.Outer.fixed(160.dp),
-    )
+    val chart =
+        rememberPieChart(
+            sliceProvider = sliceProvider,
+            innerSize = PieSize.Inner.fixed(104.dp),
+            outerSize = PieSize.Outer.fixed(160.dp),
+        )
 
     ChartCardContainer(
         title = mokoString(MR.strings.platforms),
@@ -777,9 +865,10 @@ private fun PlatformsCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
                     PieChartHost(
@@ -806,13 +895,14 @@ private fun StreamQualityCard(
     val directStreamLabel = mokoString(MR.strings.direct_stream)
     val transcodeLabel = mokoString(MR.strings.transcode)
 
-    val items = remember(quality, directPlayLabel, directStreamLabel, transcodeLabel) {
-        listOfNotNull(
-            if (quality.directPlay > 0) directPlayLabel to (quality.directPlay.toFloat() to Color(0xFF4CAF50)) else null,
-            if (quality.directStream > 0) directStreamLabel to (quality.directStream.toFloat() to Color(0xFF2196F3)) else null,
-            if (quality.transcode > 0) transcodeLabel to (quality.transcode.toFloat() to ArrYellow) else null,
-        )
-    }
+    val items =
+        remember(quality, directPlayLabel, directStreamLabel, transcodeLabel) {
+            listOfNotNull(
+                if (quality.directPlay > 0) directPlayLabel to (quality.directPlay.toFloat() to Color(0xFF4CAF50)) else null,
+                if (quality.directStream > 0) directStreamLabel to (quality.directStream.toFloat() to Color(0xFF2196F3)) else null,
+                if (quality.transcode > 0) transcodeLabel to (quality.transcode.toFloat() to ArrYellow) else null,
+            )
+        }
 
     val modelProducer = remember { PieChartModelProducer() }
 
@@ -826,18 +916,21 @@ private fun StreamQualityCard(
         }
     }
 
-    val sliceProvider = remember(items) {
-        val slices = items.map { PieChart.Slice(fill = Fill(it.second.second)) }.ifEmpty {
-            listOf(PieChart.Slice(fill = Fill(Color.Transparent)))
+    val sliceProvider =
+        remember(items) {
+            val slices =
+                items.map { PieChart.Slice(fill = Fill(it.second.second)) }.ifEmpty {
+                    listOf(PieChart.Slice(fill = Fill(Color.Transparent)))
+                }
+            PieChart.SliceProvider.series(slices)
         }
-        PieChart.SliceProvider.series(slices)
-    }
 
-    val chart = rememberPieChart(
-        sliceProvider = sliceProvider,
-        innerSize = PieSize.Inner.fixed(104.dp),
-        outerSize = PieSize.Outer.fixed(160.dp),
-    )
+    val chart =
+        rememberPieChart(
+            sliceProvider = sliceProvider,
+            innerSize = PieSize.Inner.fixed(104.dp),
+            outerSize = PieSize.Outer.fixed(160.dp),
+        )
 
     ChartCardContainer(
         title = mokoString(MR.strings.stream_quality),
@@ -851,9 +944,10 @@ private fun StreamQualityCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
                     PieChartHost(
@@ -880,14 +974,16 @@ private fun ChartCardContainer(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
@@ -903,9 +999,10 @@ private fun ChartCardContainer(
 @Composable
 private fun EmptyChartPlaceholder() {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(160.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(160.dp),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -944,10 +1041,11 @@ private fun LegendRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .clip(CircleShape)
-                        .background(color),
+                    modifier =
+                        Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(color),
                 )
                 Text(
                     text = label,
@@ -964,65 +1062,82 @@ private fun LegendRow(
 @PreviewLightDark
 @Composable
 fun TracearrActivityScreenPreview() {
-    val mockPlays = listOf(
-        TracearrActivityPlay(count = 5, serverId = "openmediavault", date = "2026-09-01"),
-        TracearrActivityPlay(count = 8, serverId = "openmediavault", date = "2026-09-02"),
-        TracearrActivityPlay(count = 12, serverId = "openmediavault", date = "2026-09-03"),
-        TracearrActivityPlay(count = 18, serverId = "openmediavault", date = "2026-09-04"),
-        TracearrActivityPlay(count = 10, serverId = "openmediavault", date = "2026-09-05"),
-        TracearrActivityPlay(count = 15, serverId = "openmediavault", date = "2026-09-06"),
-        TracearrActivityPlay(count = 3, serverId = "openmediavault", date = "2026-09-07"),
-        TracearrActivityPlay(count = 2, serverId = "synology", date = "2026-09-01"),
-        TracearrActivityPlay(count = 4, serverId = "synology", date = "2026-09-02"),
-        TracearrActivityPlay(count = 7, serverId = "synology", date = "2026-09-03"),
-        TracearrActivityPlay(count = 10, serverId = "synology", date = "2026-09-04"),
-        TracearrActivityPlay(count = 6, serverId = "synology", date = "2026-09-05"),
-        TracearrActivityPlay(count = 9, serverId = "synology", date = "2026-09-06"),
-        TracearrActivityPlay(count = 1, serverId = "synology", date = "2026-09-07"),
-    )
+    val mockPlays =
+        listOf(
+            TracearrActivityPlay(count = 5, serverId = "openmediavault", date = "2026-09-01"),
+            TracearrActivityPlay(count = 8, serverId = "openmediavault", date = "2026-09-02"),
+            TracearrActivityPlay(count = 12, serverId = "openmediavault", date = "2026-09-03"),
+            TracearrActivityPlay(count = 18, serverId = "openmediavault", date = "2026-09-04"),
+            TracearrActivityPlay(count = 10, serverId = "openmediavault", date = "2026-09-05"),
+            TracearrActivityPlay(count = 15, serverId = "openmediavault", date = "2026-09-06"),
+            TracearrActivityPlay(count = 3, serverId = "openmediavault", date = "2026-09-07"),
+            TracearrActivityPlay(count = 2, serverId = "synology", date = "2026-09-01"),
+            TracearrActivityPlay(count = 4, serverId = "synology", date = "2026-09-02"),
+            TracearrActivityPlay(count = 7, serverId = "synology", date = "2026-09-03"),
+            TracearrActivityPlay(count = 10, serverId = "synology", date = "2026-09-04"),
+            TracearrActivityPlay(count = 6, serverId = "synology", date = "2026-09-05"),
+            TracearrActivityPlay(count = 9, serverId = "synology", date = "2026-09-06"),
+            TracearrActivityPlay(count = 1, serverId = "synology", date = "2026-09-07"),
+        )
 
-    val mockConcurrent = listOf(
-        TracearrActivityConcurrent(direct = 1, directStream = 0, transcode = 1, total = 2),
-        TracearrActivityConcurrent(direct = 3, directStream = 0, transcode = 2, total = 5),
-        TracearrActivityConcurrent(direct = 2, directStream = 0, transcode = 0, total = 2),
-        TracearrActivityConcurrent(direct = 2, directStream = 1, transcode = 1, total = 4),
-        TracearrActivityConcurrent(direct = 1, directStream = 0, transcode = 0, total = 1),
-    )
+    val mockConcurrent =
+        listOf(
+            TracearrActivityConcurrent(direct = 1, directStream = 0, transcode = 1, total = 2),
+            TracearrActivityConcurrent(direct = 3, directStream = 0, transcode = 2, total = 5),
+            TracearrActivityConcurrent(direct = 2, directStream = 0, transcode = 0, total = 2),
+            TracearrActivityConcurrent(direct = 2, directStream = 1, transcode = 1, total = 4),
+            TracearrActivityConcurrent(direct = 1, directStream = 0, transcode = 0, total = 1),
+        )
 
-    val mockByDay = listOf(
-        TracearrActivityByDoW(day = 0, name = "Sun", count = 37),
-        TracearrActivityByDoW(day = 1, name = "Mon", count = 35),
-        TracearrActivityByDoW(day = 2, name = "Tue", count = 43),
-        TracearrActivityByDoW(day = 3, name = "Wed", count = 29),
-        TracearrActivityByDoW(day = 4, name = "Thu", count = 22),
-        TracearrActivityByDoW(day = 5, name = "Fri", count = 28),
-        TracearrActivityByDoW(day = 6, name = "Sat", count = 26),
-    )
+    val mockByDay =
+        listOf(
+            TracearrActivityByDoW(day = 0, name = "Sun", count = 37),
+            TracearrActivityByDoW(day = 1, name = "Mon", count = 35),
+            TracearrActivityByDoW(day = 2, name = "Tue", count = 43),
+            TracearrActivityByDoW(day = 3, name = "Wed", count = 29),
+            TracearrActivityByDoW(day = 4, name = "Thu", count = 22),
+            TracearrActivityByDoW(day = 5, name = "Fri", count = 28),
+            TracearrActivityByDoW(day = 6, name = "Sat", count = 26),
+        )
 
-    val mockByHour = (0..23).map { hr ->
-        TracearrActivityByHoD(hour = hr, count = when (hr) {
-            1 -> 33; 2 -> 15; 12 -> 13; 13 -> 15; 14 -> 14; 20 -> 18; 21 -> 25; 22 -> 21
-            else -> 3
-        })
-    }
+    val mockByHour =
+        (0..23).map { hr ->
+            TracearrActivityByHoD(
+                hour = hr,
+                count =
+                    when (hr) {
+                        1 -> 33
+                        2 -> 15
+                        12 -> 13
+                        13 -> 15
+                        14 -> 14
+                        20 -> 18
+                        21 -> 25
+                        22 -> 21
+                        else -> 3
+                    },
+            )
+        }
 
-    val mockPlatforms = listOf(
-        TracearrActivityPlatform(platform = "Android TV", count = 50),
-        TracearrActivityPlatform(platform = "Web", count = 15),
-        TracearrActivityPlatform(platform = "Fire TV", count = 12),
-        TracearrActivityPlatform(platform = "iOS", count = 8),
-        TracearrActivityPlatform(platform = "Roku", count = 5),
-    )
+    val mockPlatforms =
+        listOf(
+            TracearrActivityPlatform(platform = "Android TV", count = 50),
+            TracearrActivityPlatform(platform = "Web", count = 15),
+            TracearrActivityPlatform(platform = "Fire TV", count = 12),
+            TracearrActivityPlatform(platform = "iOS", count = 8),
+            TracearrActivityPlatform(platform = "Roku", count = 5),
+        )
 
-    val mockQuality = TracearrActivityQuality(
-        directPlay = 55,
-        directStream = 5,
-        transcode = 40,
-        total = 100,
-        directPlayPercent = 55,
-        directStreamPercent = 5,
-        transcodePercent = 40,
-    )
+    val mockQuality =
+        TracearrActivityQuality(
+            directPlay = 55,
+            directStream = 5,
+            transcode = 40,
+            total = 100,
+            directPlayPercent = 55,
+            directStreamPercent = 5,
+            transcodePercent = 40,
+        )
 
     val context = LocalContext.current
     if (GlobalContext.getOrNull() == null) {
@@ -1034,21 +1149,24 @@ fun TracearrActivityScreenPreview() {
 
     ArrMateyTheme {
         TracearrActivityContent(
-            state = TracearrActivityState.Success(
-                response = TracearrActivityResponse(
-                    period = TracearrPeriod.Month,
-                    range = TracearrActivityRange(
-                        start = "2026-08-10 00:00:00",
-                        end = "2026-09-09 00:00:00",
-                    ),
-                    plays = mockPlays,
-                    concurrent = mockConcurrent,
-                    byDayOfWeek = mockByDay,
-                    byHourOfDay = mockByHour,
-                    platforms = mockPlatforms,
-                    quality = mockQuality,
+            state =
+                TracearrActivityState.Success(
+                    response =
+                        TracearrActivityResponse(
+                            period = TracearrPeriod.Month,
+                            range =
+                                TracearrActivityRange(
+                                    start = "2026-08-10 00:00:00",
+                                    end = "2026-09-09 00:00:00",
+                                ),
+                            plays = mockPlays,
+                            concurrent = mockConcurrent,
+                            byDayOfWeek = mockByDay,
+                            byHourOfDay = mockByHour,
+                            platforms = mockPlatforms,
+                            quality = mockQuality,
+                        ),
                 ),
-            ),
             isRefreshing = false,
             selectedPeriod = TracearrPeriod.Month,
             isLargeScreen = false,

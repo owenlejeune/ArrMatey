@@ -87,13 +87,15 @@ fun TracearrHistoryScreen(
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             when (val currentState = state) {
                 is TracearrHistoryState.Initial,
-                is TracearrHistoryState.Loading -> {
+                is TracearrHistoryState.Loading,
+                -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
@@ -124,7 +126,9 @@ fun TracearrHistoryScreen(
 
                     LaunchedEffect(listState) {
                         snapshotFlow {
-                            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                            listState.layoutInfo.visibleItemsInfo
+                                .lastOrNull()
+                                ?.index
                         }.collect { lastVisibleIndex ->
                             if (lastVisibleIndex != null &&
                                 lastVisibleIndex >= currentState.items.size - 3 &&
@@ -139,12 +143,13 @@ fun TracearrHistoryScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 16.dp + navigationBarBottomInset(),
-                        ),
+                        contentPadding =
+                            PaddingValues(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = 16.dp,
+                                bottom = 16.dp + navigationBarBottomInset(),
+                            ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         if (currentState.activeStreams.isNotEmpty()) {
@@ -177,9 +182,10 @@ fun TracearrHistoryScreen(
                         if (currentState.items.isEmpty()) {
                             item(key = "empty_history") {
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 24.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 24.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
@@ -211,9 +217,10 @@ fun TracearrHistoryScreen(
                         if (currentState.isLoadingMore) {
                             item(key = "loading_more") {
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     LoadingIndicator()
@@ -235,7 +242,7 @@ fun TracearrHistoryScreen(
                     onNavigateToUser = { userRef ->
                         viewModel.clearSelected()
                         onNavigateToUser(userRef)
-                    }
+                    },
                 )
             }
         }

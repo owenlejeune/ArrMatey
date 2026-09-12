@@ -30,7 +30,6 @@ class TracearrUserViewModel(
     private val getUserStatsUseCase: GetUserStatsUseCase,
     private val getUserHistoryUseCase: GetUserHistoryUseCase,
 ) : ViewModel() {
-
     val currentRepository: StateFlow<TracearrRepository?> =
         getTracearrInstanceRepositoryUseCase
             .observeSelected()
@@ -84,7 +83,9 @@ class TracearrUserViewModel(
             _state.update {
                 if (it is TracearrUserState.Success) {
                     it.copy(isLoadingMoreHistory = true)
-                } else it
+                } else {
+                    it
+                }
             }
 
             val actualUserId = currentState.userDetail?.id ?: userRef
@@ -102,14 +103,17 @@ class TracearrUserViewModel(
                                 hasMoreHistory = hasMore,
                                 nextCursor = nextCursor,
                             )
-                        } else old
+                        } else {
+                            old
+                        }
                     }
-                }
-                .onError { _, _, _ ->
+                }.onError { _, _, _ ->
                     _state.update { old ->
                         if (old is TracearrUserState.Success) {
                             old.copy(isLoadingMoreHistory = false)
-                        } else old
+                        } else {
+                            old
+                        }
                     }
                 }
 
@@ -117,7 +121,10 @@ class TracearrUserViewModel(
         }
     }
 
-    private suspend fun loadUserData(repo: TracearrRepository, isRefresh: Boolean) {
+    private suspend fun loadUserData(
+        repo: TracearrRepository,
+        isRefresh: Boolean,
+    ) {
         if (isRefresh) {
             _state.value = TracearrUserState.Loading
             nextCursor = null
@@ -145,20 +152,20 @@ class TracearrUserViewModel(
                     nextCursor = response.meta?.nextCursor
                     hasMoreHistory = !nextCursor.isNullOrBlank()
                 }
-            }
-            .onError { _, msg, _ ->
+            }.onError { _, msg, _ ->
                 errorMessage = msg ?: "Failed to load user"
             }
 
         if (detail != null) {
-            _state.value = TracearrUserState.Success(
-                userDetail = detail,
-                userStats = stats,
-                history = history,
-                isLoadingMoreHistory = false,
-                hasMoreHistory = hasMoreHistory,
-                nextCursor = nextCursor,
-            )
+            _state.value =
+                TracearrUserState.Success(
+                    userDetail = detail,
+                    userStats = stats,
+                    history = history,
+                    isLoadingMoreHistory = false,
+                    hasMoreHistory = hasMoreHistory,
+                    nextCursor = nextCursor,
+                )
         } else {
             _state.value = TracearrUserState.Error(errorMessage ?: "User not found")
         }

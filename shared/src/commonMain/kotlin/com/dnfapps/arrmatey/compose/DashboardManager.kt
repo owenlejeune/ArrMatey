@@ -77,7 +77,8 @@ enum class DashboardCards(
     UpcomingReleases(MR.strings.dashboard_upcoming_releases),
     InstanceDashboard(MR.strings.dashboard_instance_dashboards),
     BazarrOverview(MR.strings.dashboard_bazarr_overview),
-    TracearrOverview(MR.strings.dashboard_tracearr_overview);
+    TracearrOverview(MR.strings.dashboard_tracearr_overview),
+    ;
 
     companion object {
         val defaultEntries: List<DashboardCards>

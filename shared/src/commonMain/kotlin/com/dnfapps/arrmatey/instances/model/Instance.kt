@@ -251,13 +251,14 @@ enum class InstanceType(
         defaultPort = 3000,
         supportsActivityQueue = false,
         apiBase = "api",
-        testEndpoint = "v2/public/docs",
+        testEndpoint = "public/docs",
         getApiKeyEndpoint = "settings",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = false,
-        associatedColor = TracearrBlue
-    );
+        associatedColor = TracearrBlue,
+    ),
+    ;
 
     companion object {
         fun arrs() = listOf(Sonarr, Radarr, Lidarr, Bookshelf, Listenarr)

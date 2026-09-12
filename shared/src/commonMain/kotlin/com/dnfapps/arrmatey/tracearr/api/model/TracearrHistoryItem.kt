@@ -92,6 +92,7 @@ data class TracearrHistoryItem(
 
     fun rebuildWithInstanceBaseUrl(instanceBaseUrl: String): TracearrHistoryItem {
         val cleanBaseUrl = instanceBaseUrl.trimEnd('/')
+
         fun fixUrl(path: String?): String? {
             if (path.isNullOrEmpty()) return null
             return if (path.startsWith("/")) "$cleanBaseUrl$path" else path
@@ -102,10 +103,11 @@ data class TracearrHistoryItem(
             posterUrl = fixUrl(posterUrl),
             userThumb = fixUrl(userThumb),
             userAvatarUrl = fixUrl(userAvatarUrl),
-            user = user?.copy(
-                thumbUrl = fixUrl(user.thumbUrl),
-                avatarUrl = fixUrl(user.avatarUrl),
-            ),
+            user =
+                user?.copy(
+                    thumbUrl = fixUrl(user.thumbUrl),
+                    avatarUrl = fixUrl(user.avatarUrl),
+                ),
         )
     }
 

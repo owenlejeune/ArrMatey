@@ -117,13 +117,15 @@ fun TracearrViolationsContent(
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             when (state) {
                 is TracearrViolationsState.Initial,
-                is TracearrViolationsState.Loading -> {
+                is TracearrViolationsState.Loading,
+                -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
@@ -144,7 +146,7 @@ fun TracearrViolationsContent(
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             Text(
                                 text = state.message,
@@ -162,7 +164,9 @@ fun TracearrViolationsContent(
 
                     LaunchedEffect(listState) {
                         snapshotFlow {
-                            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                            listState.layoutInfo.visibleItemsInfo
+                                .lastOrNull()
+                                ?.index
                         }.collect { lastVisibleIndex ->
                             val violationCount = state.violations.size
                             if (lastVisibleIndex != null &&
@@ -178,39 +182,42 @@ fun TracearrViolationsContent(
 
                     if (state.filteredViolations.isEmpty()) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(32.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(32.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.Center,
                         ) {
                             Icon(
                                 imageVector = if (state.searchQuery.isBlank()) Icons.Default.Shield else Icons.Default.Warning,
                                 contentDescription = null,
                                 modifier = Modifier.size(72.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                             )
                             Text(
-                                text = if (state.searchQuery.isBlank()) {
-                                    mokoString(MR.strings.no_violations_found)
-                                } else {
-                                    mokoString(MR.strings.no_results_found)
-                                },
+                                text =
+                                    if (state.searchQuery.isBlank()) {
+                                        mokoString(MR.strings.no_violations_found)
+                                    } else {
+                                        mokoString(MR.strings.no_results_found)
+                                    },
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 16.dp)
+                                modifier = Modifier.padding(top = 16.dp),
                             )
                         }
                     } else {
                         LazyColumn(
                             state = listState,
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 16.dp,
-                                bottom = 16.dp + navigationBarBottomInset(),
-                            ),
+                            contentPadding =
+                                PaddingValues(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = 16.dp,
+                                    bottom = 16.dp + navigationBarBottomInset(),
+                                ),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             items(
@@ -223,9 +230,10 @@ fun TracearrViolationsContent(
                             if (state.isLoadingMore) {
                                 item {
                                     Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         LoadingIndicator()
@@ -240,65 +248,70 @@ fun TracearrViolationsContent(
     }
 }
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @PreviewLightDark
 @Composable
 fun TracearrViolationsScreenPreview() {
-    val mockViolations = listOf(
-        TracearrViolation(
-            id = "1",
-            serverId = "server-1",
-            serverName = "Main Plex Server",
-            severity = ViolationSeverity.High,
-            acknowledged = false,
-            createdAt = "2026-09-09T10:00:00.000Z",
-            rule = TracearrViolationRule(
-                id = "rule-1",
-                type = "stream_limit",
-                name = "Max 2 concurrent streams exceeded"
+    val mockViolations =
+        listOf(
+            TracearrViolation(
+                id = "1",
+                serverId = "server-1",
+                serverName = "Main Plex Server",
+                severity = ViolationSeverity.High,
+                acknowledged = false,
+                createdAt = "2026-09-09T10:00:00.000Z",
+                rule =
+                    TracearrViolationRule(
+                        id = "rule-1",
+                        type = "stream_limit",
+                        name = "Max 2 concurrent streams exceeded",
+                    ),
+                user =
+                    TracearrUser(
+                        id = "user-1",
+                        username = "john_doe",
+                    ),
             ),
-            user = TracearrUser(
-                id = "user-1",
-                username = "john_doe"
-            )
-        ),
-        TracearrViolation(
-            id = "2",
-            serverId = "server-1",
-            serverName = "Main Plex Server",
-            severity = ViolationSeverity.Warning,
-            acknowledged = true,
-            createdAt = "2026-09-08T18:30:00.000Z",
-            rule = TracearrViolationRule(
-                id = "rule-2",
-                type = "location_mismatch",
-                name = "New login from unknown location"
+            TracearrViolation(
+                id = "2",
+                serverId = "server-1",
+                serverName = "Main Plex Server",
+                severity = ViolationSeverity.Warning,
+                acknowledged = true,
+                createdAt = "2026-09-08T18:30:00.000Z",
+                rule =
+                    TracearrViolationRule(
+                        id = "rule-2",
+                        type = "location_mismatch",
+                        name = "New login from unknown location",
+                    ),
+                user =
+                    TracearrUser(
+                        id = "user-2",
+                        username = "jane_smith",
+                    ),
             ),
-            user = TracearrUser(
-                id = "user-2",
-                username = "jane_smith"
-            )
-        ),
-        TracearrViolation(
-            id = "3",
-            serverId = "server-2",
-            serverName = "Jellyfin Server",
-            severity = ViolationSeverity.Low,
-            acknowledged = false,
-            createdAt = "2026-09-07T14:15:00.000Z",
-            rule = TracearrViolationRule(
-                id = "rule-3",
-                type = "bandwidth_limit",
-                name = "Bandwidth limit threshold reached"
+            TracearrViolation(
+                id = "3",
+                serverId = "server-2",
+                serverName = "Jellyfin Server",
+                severity = ViolationSeverity.Low,
+                acknowledged = false,
+                createdAt = "2026-09-07T14:15:00.000Z",
+                rule =
+                    TracearrViolationRule(
+                        id = "rule-3",
+                        type = "bandwidth_limit",
+                        name = "Bandwidth limit threshold reached",
+                    ),
+                user =
+                    TracearrUser(
+                        id = "user-3",
+                        username = "alex_v",
+                    ),
             ),
-            user = TracearrUser(
-                id = "user-3",
-                username = "alex_v"
-            )
         )
-    )
 
     val context = LocalContext.current
     if (GlobalContext.getOrNull() == null) {
@@ -310,16 +323,17 @@ fun TracearrViolationsScreenPreview() {
 
     ArrMateyTheme {
         TracearrViolationsContent(
-            state = TracearrViolationsState.Success(
-                violations = mockViolations,
-                filteredViolations = mockViolations,
-                total = mockViolations.size,
-            ),
+            state =
+                TracearrViolationsState.Success(
+                    violations = mockViolations,
+                    filteredViolations = mockViolations,
+                    total = mockViolations.size,
+                ),
             isRefreshing = false,
             textFieldState = rememberTextFieldState(),
             onRefresh = {},
             onLoadMore = {},
-            onNavigateBack = {}
+            onNavigateBack = {},
         )
     }
 }

@@ -9,6 +9,5 @@ class GetTracearrViolationsUseCase {
         repository: TracearrRepository,
         page: Int? = null,
         pageSize: Int? = null,
-    ): NetworkResult<TracearrViolationsResponse> =
-        repository.getViolations(page = page, pageSize = pageSize)
+    ): NetworkResult<TracearrViolationsResponse> = repository.getViolations(page = page, pageSize = pageSize)
 }

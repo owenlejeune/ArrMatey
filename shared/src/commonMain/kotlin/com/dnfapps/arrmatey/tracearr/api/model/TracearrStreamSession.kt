@@ -104,7 +104,9 @@ data class TracearrStreamSession(
         get() = user?.username ?: username ?: ""
 
     val effectiveUserRef: String?
-        get() = userId ?: user?.id ?: user?.userId ?: serverUserId ?: username?.takeIf { it.isNotBlank() } ?: user?.username?.takeIf { it.isNotBlank() }
+        get() =
+            userId ?: user?.id ?: user?.userId ?: serverUserId ?: username?.takeIf { it.isNotBlank() }
+                ?: user?.username?.takeIf { it.isNotBlank() }
 
     val effectiveUserAvatar: String?
         get() = user?.avatarUrl ?: user?.thumbUrl ?: userAvatarUrl ?: userThumb
@@ -114,6 +116,7 @@ data class TracearrStreamSession(
 
     fun rebuildWithInstanceBaseUrl(instanceBaseUrl: String): TracearrStreamSession {
         val cleanBaseUrl = instanceBaseUrl.trimEnd('/')
+
         fun fixUrl(path: String?): String? {
             if (path.isNullOrEmpty()) return null
             return if (path.startsWith("/")) "$cleanBaseUrl$path" else path
@@ -124,10 +127,11 @@ data class TracearrStreamSession(
             posterUrl = fixUrl(posterUrl),
             userThumb = fixUrl(userThumb),
             userAvatarUrl = fixUrl(userAvatarUrl),
-            user = user?.copy(
-                thumbUrl = fixUrl(user.thumbUrl),
-                avatarUrl = fixUrl(user.avatarUrl),
-            ),
+            user =
+                user?.copy(
+                    thumbUrl = fixUrl(user.thumbUrl),
+                    avatarUrl = fixUrl(user.avatarUrl),
+                ),
         )
     }
 }

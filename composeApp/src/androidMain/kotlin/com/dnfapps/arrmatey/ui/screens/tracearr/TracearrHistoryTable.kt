@@ -66,8 +66,6 @@ fun TracearrHistoryTable(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-//        TracearrHistoryTableHeader()
-
         items.forEach { item ->
             TracearrHistoryTableRow(
                 item = item,
@@ -77,49 +75,6 @@ fun TracearrHistoryTable(
     }
 }
 
-//@Composable
-//fun TracearrHistoryTableHeader(
-//    modifier: Modifier = Modifier,
-//) {
-//    Row(
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .padding(horizontal = 12.dp, vertical = 6.dp),
-//        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.spacedBy(8.dp),
-//    ) {
-//        Spacer(Modifier.width(4.dp))
-//        Text(
-//            text = mokoString(MR.strings.user).uppercase(),
-//            style = MaterialTheme.typography.labelSmall,
-//            fontWeight = FontWeight.Bold,
-//            color = MaterialTheme.colorScheme.onSurfaceVariant,
-//            modifier = Modifier.weight(1.3f),
-//        )
-//        Text(
-//            text = "CONTENT",
-//            style = MaterialTheme.typography.labelSmall,
-//            fontWeight = FontWeight.Bold,
-//            color = MaterialTheme.colorScheme.onSurfaceVariant,
-//            modifier = Modifier.weight(2.5f),
-//        )
-//        Text(
-//            text = mokoString(MR.strings.server).uppercase(),
-//            style = MaterialTheme.typography.labelSmall,
-//            fontWeight = FontWeight.Bold,
-//            color = MaterialTheme.colorScheme.onSurfaceVariant,
-//            modifier = Modifier.weight(1.2f),
-//        )
-//        Text(
-//            text = "PLATFORM",
-//            style = MaterialTheme.typography.labelSmall,
-//            fontWeight = FontWeight.Bold,
-//            color = MaterialTheme.colorScheme.onSurfaceVariant,
-//            modifier = Modifier.weight(1.4f),
-//        )
-//    }
-//}
-
 @Composable
 fun TracearrHistoryTableRow(
     item: TracearrHistoryItem,
@@ -128,11 +83,12 @@ fun TracearrHistoryTableRow(
 ) {
     val edgeColor = getTracearrServerColor(item.serverType, item.serverName)
 
-    val percent = item.percentComplete?.toFloat() ?: run {
-        val total = item.totalDurationMs ?: item.durationMs ?: 0L
-        val prog = item.progressMs ?: 0L
-        if (total > 0) (prog.toFloat() / total.toFloat() * 100f) else 0f
-    }
+    val percent =
+        item.percentComplete?.toFloat() ?: run {
+            val total = item.totalDurationMs ?: item.durationMs ?: 0L
+            val prog = item.progressMs ?: 0L
+            if (total > 0) (prog.toFloat() / total.toFloat() * 100f) else 0f
+        }
     val percentInt = percent.toInt().coerceIn(0, 100)
     val progressFraction = (percent / 100f).coerceIn(0f, 1f)
 
@@ -144,29 +100,33 @@ fun TracearrHistoryTableRow(
 
     Card(
         onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .onGloballyPositioned { rowHeight = it.size.height },
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { rowHeight = it.size.height },
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(rowHeight.pxToDp())
-                    .background(edgeColor),
+                modifier =
+                    Modifier
+                        .width(4.dp)
+                        .height(rowHeight.pxToDp())
+                        .background(edgeColor),
             )
 
             Row(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp, vertical = 12.dp)
-                    .fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .padding(horizontal = 12.dp, vertical = 12.dp)
+                        .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -185,9 +145,10 @@ fun TracearrHistoryTableRow(
                             AsyncImage(
                                 model = rememberRemoteImageData(avatarUrl, trim = false),
                                 contentDescription = null,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape),
+                                modifier =
+                                    Modifier
+                                        .size(20.dp)
+                                        .clip(CircleShape),
                                 contentScale = ContentScale.Crop,
                             )
                         } else {
@@ -231,11 +192,12 @@ fun TracearrHistoryTableRow(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    val mediaIcon = when (item.mediaType) {
-                        TracearrMediaType.Episode -> Icons.Default.Tv
-                        TracearrMediaType.Movie -> Icons.Default.Movie
-                        else -> Icons.Default.MusicNote
-                    }
+                    val mediaIcon =
+                        when (item.mediaType) {
+                            TracearrMediaType.Episode -> Icons.Default.Tv
+                            TracearrMediaType.Movie -> Icons.Default.Movie
+                            else -> Icons.Default.MusicNote
+                        }
                     Icon(
                         imageVector = mediaIcon,
                         contentDescription = null,
@@ -250,26 +212,32 @@ fun TracearrHistoryTableRow(
                             isAbandoned = isAbandoned,
                         )
 
-                        val displayTitle = item.grandparentTitle ?: item.showTitle ?: item.mediaTitle ?: mokoString(MR.strings.unknown)
+                        val displayTitle =
+                            item.grandparentTitle ?: item.showTitle
+                                ?: item.mediaTitle ?: mokoString(MR.strings.unknown)
                         Text(
                             text = displayTitle,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
 
-                        val subtitle = when {
-                            item.mediaType == TracearrMediaType.Episode || (item.seasonNumber != null && item.episodeNumber != null) -> {
-                                val s = item.seasonNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
-                                val e = item.episodeNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
-                                "S$s E$e · ${item.mediaTitle ?: ""}"
+                        val subtitle =
+                            when {
+                                item.mediaType == TracearrMediaType.Episode ||
+                                    (item.seasonNumber != null && item.episodeNumber != null) -> {
+                                    val s = item.seasonNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
+                                    val e = item.episodeNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
+                                    "S$s E$e · ${item.mediaTitle ?: ""}"
+                                }
+                                item.mediaType == TracearrMediaType.Movie -> {
+                                    "${item.year ?: ""} · ${item.mediaTitle ?: ""}"
+                                }
+                                else ->
+                                    listOfNotNull(item.artistName, item.albumName, item.mediaTitle)
+                                        .joinToString(" · ")
                             }
-                            item.mediaType == TracearrMediaType.Movie -> {
-                                "${item.year ?: ""} · ${item.mediaTitle ?: ""}"
-                            }
-                            else -> listOfNotNull(item.artistName, item.albumName, item.mediaTitle).joinToString(" · ")
-                        }
 
                         if (subtitle.isNotBlank()) {
                             Text(
@@ -306,10 +274,11 @@ fun TracearrHistoryTableRow(
                             }
                             LinearProgressIndicator(
                                 progress = { progressFraction },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(2.dp)),
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .height(4.dp)
+                                        .clip(RoundedCornerShape(2.dp)),
                                 color = TracearrBlue,
                                 trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                             )
@@ -331,10 +300,11 @@ fun TracearrHistoryTableRow(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(edgeColor)
+                            modifier =
+                                Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(edgeColor),
                         )
                         Text(
                             text = item.effectiveServerName.ifEmpty { mokoString(MR.strings.server) },
@@ -369,22 +339,26 @@ fun TracearrHistoryTableRow(
                     modifier = Modifier.weight(1.4f),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    val isTranscoding = item.isTranscode == true || item.videoDecision == TracearrStreamDecision.Transcode || item.audioDecision == TracearrStreamDecision.Transcode
-                    val (chipColor, textColor, icon, label) = if (isTranscoding) {
-                        Quadruple(
-                            ArrYellow.copy(alpha = 0.2f),
-                            ArrYellow,
-                            Icons.Default.Bolt,
-                            mokoString(MR.strings.transcode),
-                        )
-                    } else {
-                        Quadruple(
-                            Color(0xFF4CAF50).copy(alpha = 0.2f),
-                            Color(0xFF4CAF50),
-                            Icons.Default.PlayArrow,
-                            mokoString(MR.strings.direct_play),
-                        )
-                    }
+                    val isTranscoding =
+                        item.isTranscode == true ||
+                            item.videoDecision == TracearrStreamDecision.Transcode ||
+                            item.audioDecision == TracearrStreamDecision.Transcode
+                    val (chipColor, textColor, icon, label) =
+                        if (isTranscoding) {
+                            Quadruple(
+                                ArrYellow.copy(alpha = 0.2f),
+                                ArrYellow,
+                                Icons.Default.Bolt,
+                                mokoString(MR.strings.transcode),
+                            )
+                        } else {
+                            Quadruple(
+                                Color(0xFF4CAF50).copy(alpha = 0.2f),
+                                Color(0xFF4CAF50),
+                                Icons.Default.PlayArrow,
+                                mokoString(MR.strings.direct_play),
+                            )
+                        }
 
                     Surface(
                         shape = RoundedCornerShape(4.dp),
@@ -410,7 +384,6 @@ fun TracearrHistoryTableRow(
                             )
                         }
                     }
-
 
                     val platformName = item.platform ?: item.device ?: mokoString(MR.strings.unknown)
                     Text(
@@ -443,28 +416,33 @@ private fun TableStatusChip(
     isSampled: Boolean,
     isAbandoned: Boolean,
 ) {
-    val (label, containerColor, contentColor) = when {
-        isWatched -> Triple(
-            mokoString(MR.strings.watched),
-            Color(0xFF4CAF50).copy(alpha = 0.2f),
-            Color(0xFF4CAF50),
-        )
-        isSampled -> Triple(
-            mokoString(MR.strings.sampled),
-            ArrYellow.copy(alpha = 0.2f),
-            ArrYellow,
-        )
-        isAbandoned -> Triple(
-            mokoString(MR.strings.abandoned),
-            ArrRed.copy(alpha = 0.2f),
-            ArrRed,
-        )
-        else -> Triple(
-            mokoString(MR.strings.unknown),
-            TracearrBlue.copy(alpha = 0.2f),
-            TracearrBlue
-        )
-    }
+    val (label, containerColor, contentColor) =
+        when {
+            isWatched ->
+                Triple(
+                    mokoString(MR.strings.watched),
+                    Color(0xFF4CAF50).copy(alpha = 0.2f),
+                    Color(0xFF4CAF50),
+                )
+            isSampled ->
+                Triple(
+                    mokoString(MR.strings.sampled),
+                    ArrYellow.copy(alpha = 0.2f),
+                    ArrYellow,
+                )
+            isAbandoned ->
+                Triple(
+                    mokoString(MR.strings.abandoned),
+                    ArrRed.copy(alpha = 0.2f),
+                    ArrRed,
+                )
+            else ->
+                Triple(
+                    mokoString(MR.strings.unknown),
+                    TracearrBlue.copy(alpha = 0.2f),
+                    TracearrBlue,
+                )
+        }
 
     Surface(
         shape = RoundedCornerShape(4.dp),

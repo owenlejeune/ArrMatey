@@ -23,14 +23,18 @@ val JellyfinColor = Color(0xFFAA5CC3)
 val EmbyColor = Color(0xFF52B54B)
 
 val TracearrServerType?.brandColor: Color
-    get() = when (this) {
-        TracearrServerType.Plex -> PlexColor
-        TracearrServerType.Jellyfin -> JellyfinColor
-        TracearrServerType.Emby -> EmbyColor
-        null -> TracearrBlue
-    }
+    get() =
+        when (this) {
+            TracearrServerType.Plex -> PlexColor
+            TracearrServerType.Jellyfin -> JellyfinColor
+            TracearrServerType.Emby -> EmbyColor
+            null -> TracearrBlue
+        }
 
-fun getTracearrServerColor(type: TracearrServerType?, name: String? = null): Color {
+fun getTracearrServerColor(
+    type: TracearrServerType?,
+    name: String? = null,
+): Color {
     if (type != null) return type.brandColor
     val lower = name?.lowercase() ?: ""
     return when {

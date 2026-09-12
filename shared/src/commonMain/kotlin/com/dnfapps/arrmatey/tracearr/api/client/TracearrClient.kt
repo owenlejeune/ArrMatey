@@ -22,7 +22,6 @@ class TracearrClient(
     val instance: Instance,
     private val httpClient: HttpClient,
 ) {
-
     private val v2BaseUrl: String
         get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}/v2"
 
@@ -102,7 +101,7 @@ class TracearrClient(
 
     suspend fun getUsers(
         cursor: String? = null,
-        pageSize: Int? = null
+        pageSize: Int? = null,
     ): NetworkResult<TracearrUsersResponse> {
         val url = "$v2BaseUrl/public/users"
         return httpClient.safeGet(url) {
@@ -125,7 +124,7 @@ class TracearrClient(
     suspend fun getUserHistory(
         ref: String,
         cursor: String? = null,
-        pageSize: Int? = null
+        pageSize: Int? = null,
     ): NetworkResult<TracearrHistoryResponse> {
         val url = "$v2BaseUrl/public/users/$ref/history"
         return httpClient.safeGet(url) {

@@ -9,6 +9,5 @@ class GetTracearrUsersUseCase {
         repository: TracearrRepository,
         cursor: String? = null,
         pageSize: Int? = null,
-    ): NetworkResult<TracearrUsersResponse> =
-        repository.getUsers(cursor = cursor, pageSize = pageSize)
+    ): NetworkResult<TracearrUsersResponse> = repository.getUsers(cursor = cursor, pageSize = pageSize)
 }

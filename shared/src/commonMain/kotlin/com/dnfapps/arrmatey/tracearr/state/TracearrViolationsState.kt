@@ -4,9 +4,15 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrViolation
 
 sealed class TracearrViolationsState {
     data object Initial : TracearrViolationsState()
+
     data object NoInstance : TracearrViolationsState()
+
     data object Loading : TracearrViolationsState()
-    data class Error(val message: String) : TracearrViolationsState()
+
+    data class Error(
+        val message: String,
+    ) : TracearrViolationsState()
+
     data class Success(
         val violations: List<TracearrViolation>,
         val filteredViolations: List<TracearrViolation> = violations,

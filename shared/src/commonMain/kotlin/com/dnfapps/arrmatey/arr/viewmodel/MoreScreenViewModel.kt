@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
@@ -117,6 +118,14 @@ class MoreScreenViewModel(
                 initialValue = true,
             )
 
+    val tracearrDetailsIntegration =
+        preferencesStore.tracearrDetailsIntegration
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
     val testingStatus: StateFlow<Map<Long, OperationStatus>> = _testingStatus.asStateFlow()
 
@@ -129,6 +138,54 @@ class MoreScreenViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList(),
+            )
+
+    val hasSeerr =
+        instances
+            .map { list -> list.any { it.type == InstanceType.Seerr } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
+    val hasArr =
+        instances
+            .map { list -> list.any { it.type == InstanceType.Sonarr || it.type == InstanceType.Radarr } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
+    val hasSeerrAndArr =
+        instances
+            .map { list ->
+                val seerr = list.any { it.type == InstanceType.Seerr }
+                val arr = list.any { it.type == InstanceType.Sonarr || it.type == InstanceType.Radarr }
+                seerr && arr
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
+    val hasBazarr =
+        instances
+            .map { list -> list.any { it.type == InstanceType.Bazarr } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
+    val hasTracearr =
+        instances
+            .map { list -> list.any { it.type == InstanceType.Tracearr } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
             )
 
     val downloadClients =
@@ -251,5 +308,9 @@ class MoreScreenViewModel(
 
     fun toggleBazarrDetailsIntegration() {
         preferencesStore.toggleBazarrDetailsIntegration()
+    }
+
+    fun toggleTracearrDetailsIntegration() {
+        preferencesStore.toggleTracearrDetailsIntegration()
     }
 }

@@ -5,7 +5,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class TracearrServerType {
-    @SerialName("plex") Plex,
-    @SerialName("jellyfin") Jellyfin,
-    @SerialName("emby") Emby,
+    @SerialName("plex")
+    Plex,
+
+    @SerialName("jellyfin")
+    Jellyfin,
+
+    @SerialName("emby")
+    Emby,
 }

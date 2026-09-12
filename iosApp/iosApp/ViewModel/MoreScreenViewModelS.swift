@@ -23,6 +23,12 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var smartAddSeerrAction: SmartAddSeerrAction = .alwaysAsk
     @Published private(set) var combineSeerrArrMedia: Bool = true
     @Published private(set) var bazarrDetailsIntegration: Bool = true
+    @Published private(set) var tracearrDetailsIntegration: Bool = true
+    @Published private(set) var hasSeerr: Bool = false
+    @Published private(set) var hasArr: Bool = false
+    @Published private(set) var hasSeerrAndArr: Bool = false
+    @Published private(set) var hasBazarr: Bool = false
+    @Published private(set) var hasTracearr: Bool = false
 
     init() {
         self.viewModel = KoinBridge.shared.getMoreScreenViewModel()
@@ -49,6 +55,24 @@ class MoreScreenViewModelS: ObservableObject {
         viewModel.bazarrDetailsIntegration.observeAsync(on: self) { owner, enabled in
             owner.bazarrDetailsIntegration = enabled.boolValue
         }
+        viewModel.tracearrDetailsIntegration.observeAsync(on: self) { owner, enabled in
+            owner.tracearrDetailsIntegration = enabled.boolValue
+        }
+        viewModel.hasSeerr.observeAsync(on: self) { owner, has in
+            owner.hasSeerr = has.boolValue
+        }
+        viewModel.hasArr.observeAsync(on: self) { owner, has in
+            owner.hasArr = has.boolValue
+        }
+        viewModel.hasSeerrAndArr.observeAsync(on: self) { owner, has in
+            owner.hasSeerrAndArr = has.boolValue
+        }
+        viewModel.hasBazarr.observeAsync(on: self) { owner, has in
+            owner.hasBazarr = has.boolValue
+        }
+        viewModel.hasTracearr.observeAsync(on: self) { owner, has in
+            owner.hasTracearr = has.boolValue
+        }
         viewModel.smartAddSeerrAction.observeAsync(on: self, to: \.smartAddSeerrAction)
     }
 
@@ -74,6 +98,10 @@ class MoreScreenViewModelS: ObservableObject {
 
     func toggleBazarrDetailsIntegration() {
         viewModel.toggleBazarrDetailsIntegration()
+    }
+
+    func toggleTracearrDetailsIntegration() {
+        viewModel.toggleTracearrDetailsIntegration()
     }
 
     func setSmartAddSeerrAction(action: SmartAddSeerrAction) {

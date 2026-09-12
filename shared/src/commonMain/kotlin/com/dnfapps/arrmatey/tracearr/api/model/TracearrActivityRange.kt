@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TracearrActivityRange(
     val start: String? = null,
-    val end: String? = null
+    val end: String? = null,
 )

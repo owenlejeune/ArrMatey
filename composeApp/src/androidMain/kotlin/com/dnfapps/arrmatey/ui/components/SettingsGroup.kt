@@ -89,10 +89,12 @@ fun SettingsRow(
     item: SettingItem,
     shape: Shape,
 ) {
+    val contentAlpha = if (item.enabled) 1f else 0.38f
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = shape,
         color = item.backgroundColor ?: MaterialTheme.colorScheme.surfaceContainerHigh,
+        enabled = item.enabled,
         onClick = item.onClick,
     ) {
         Column {
@@ -113,17 +115,19 @@ fun SettingsRow(
                                 imageVector = source.imageVector,
                                 contentDescription = null,
                                 modifier = Modifier.size(36.dp).rotate(source.rotation),
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = contentAlpha),
                             )
                         is IconSource.Resource ->
                             Image(
                                 painter = painterResource(source.resource),
                                 contentDescription = null,
+                                alpha = contentAlpha,
                             )
                         is IconSource.Radio ->
                             RadioButton(
                                 selected = source.selected,
                                 onClick = item.onClick,
+                                enabled = item.enabled,
                             )
                     }
                 }
@@ -133,6 +137,7 @@ fun SettingsRow(
                         Text(
                             text = item.title,
                             style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
                         )
                         item.titleExtraContent?.let {
                             Spacer(modifier = Modifier.width(8.dp))
@@ -143,7 +148,7 @@ fun SettingsRow(
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha),
                         )
                     }
                 }

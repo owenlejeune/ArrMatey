@@ -90,7 +90,7 @@ fun TracearrStreamDetailsSheet(
     session: TracearrStreamSession,
     onDismissRequest: () -> Unit,
     onNavigateToDetails: (type: TracearrMediaType?, tmdbId: Long?) -> Unit,
-    onNavigateToUser: (userRef: String) -> Unit
+    onNavigateToUser: (userRef: String) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -114,28 +114,30 @@ fun TracearrStreamDetailsSheet(
     val initialProgressMs = session.progressMs ?: 0L
     var currentProgressMs by remember(session.id, session.progressMs) { mutableLongStateOf(initialProgressMs) }
 
-    val initialPausedMs = remember(session.pausedDurationMs, session.lastPausedAt, isPaused) {
-        val base = session.pausedDurationMs ?: 0L
-        val lastPaused = session.lastPausedAt?.toEpochMilliseconds()
-        if (isPaused && lastPaused != null) {
-            val now = System.currentTimeMillis()
-            base + (now - lastPaused).coerceAtLeast(0L)
-        } else {
-            base
+    val initialPausedMs =
+        remember(session.pausedDurationMs, session.lastPausedAt, isPaused) {
+            val base = session.pausedDurationMs ?: 0L
+            val lastPaused = session.lastPausedAt?.toEpochMilliseconds()
+            if (isPaused && lastPaused != null) {
+                val now = System.currentTimeMillis()
+                base + (now - lastPaused).coerceAtLeast(0L)
+            } else {
+                base
+            }
         }
-    }
     var currentPausedMs by remember(session.id, initialPausedMs) { mutableLongStateOf(initialPausedMs) }
 
-    val initialWatchTimeMs = remember(session.startedAt, initialPausedMs) {
-        val startedMs = session.startedAt?.toEpochMilliseconds()
-        if (startedMs != null) {
-            val now = System.currentTimeMillis()
-            val totalElapsed = (now - startedMs).coerceAtLeast(0L)
-            (totalElapsed - initialPausedMs).coerceAtLeast(0L)
-        } else {
-            session.progressMs ?: 0L
+    val initialWatchTimeMs =
+        remember(session.startedAt, initialPausedMs) {
+            val startedMs = session.startedAt?.toEpochMilliseconds()
+            if (startedMs != null) {
+                val now = System.currentTimeMillis()
+                val totalElapsed = (now - startedMs).coerceAtLeast(0L)
+                (totalElapsed - initialPausedMs).coerceAtLeast(0L)
+            } else {
+                session.progressMs ?: 0L
+            }
         }
-    }
     var currentWatchTimeMs by remember(session.id, initialWatchTimeMs) { mutableLongStateOf(initialWatchTimeMs) }
 
     LaunchedEffect(session.id, session.progressMs, isPlaying, isPaused) {
@@ -213,9 +215,10 @@ fun TracearrStreamDetailsSheet(
                 contentPadding = PaddingValues(12.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().clickable {
-                        onNavigateToDetails(session.mediaType, session.mediaDetails?.tmdbId)
-                    },
+                    modifier =
+                        Modifier.fillMaxWidth().clickable {
+                            onNavigateToDetails(session.mediaType, session.mediaDetails?.tmdbId)
+                        },
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Box(
@@ -282,7 +285,8 @@ fun TracearrStreamDetailsSheet(
 
                         val subtitle =
                             when {
-                                session.mediaType == TracearrMediaType.Episode || (session.seasonNumber != null && session.episodeNumber != null) -> {
+                                session.mediaType == TracearrMediaType.Episode ||
+                                    (session.seasonNumber != null && session.episodeNumber != null) -> {
                                     val seasonStr = session.seasonNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
                                     val episodeStr = session.episodeNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
                                     "S$seasonStr E$episodeStr · ${session.mediaTitle ?: ""}"
@@ -333,13 +337,14 @@ fun TracearrStreamDetailsSheet(
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().clickable {
-                        session.effectiveUserRef?.let { ref ->
-                            if (ref.isNotBlank()) {
-                                onNavigateToUser(ref)
+                    modifier =
+                        Modifier.fillMaxWidth().clickable {
+                            session.effectiveUserRef?.let { ref ->
+                                if (ref.isNotBlank()) {
+                                    onNavigateToUser(ref)
+                                }
                             }
-                        }
-                    },
+                        },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
@@ -459,10 +464,11 @@ fun TracearrStreamDetailsSheet(
                         label = mokoString(MR.strings.ip_address),
                         value = ip,
                     )
-                    val locationText = listOfNotNull(session.geoCity, session.geoRegion, session.geoCountry)
-                        .filter { it.isNotBlank() }
-                        .joinToString(", ")
-                        .ifEmpty { mokoString(MR.strings.local_network) }
+                    val locationText =
+                        listOfNotNull(session.geoCity, session.geoRegion, session.geoCountry)
+                            .filter { it.isNotBlank() }
+                            .joinToString(", ")
+                            .ifEmpty { mokoString(MR.strings.local_network) }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -483,21 +489,23 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            val devicePlatform = remember(session) {
-                TracearrDevicePlatform.fromSession(
-                    session.platform,
-                    session.product,
-                    session.device,
-                )
-            }
-            val deviceCardIcon = when (devicePlatform) {
-                TracearrDevicePlatform.PHONE -> Icons.Default.PhoneIphone
-                TracearrDevicePlatform.TABLET -> Icons.Default.Tablet
-                TracearrDevicePlatform.TV -> Icons.Default.Tv
-                TracearrDevicePlatform.DESKTOP -> Icons.Default.DesktopWindows
-                TracearrDevicePlatform.CONSOLE -> Icons.Default.SportsEsports
-                TracearrDevicePlatform.UNKNOWN -> Icons.Default.SmartDisplay
-            }
+            val devicePlatform =
+                remember(session) {
+                    TracearrDevicePlatform.fromSession(
+                        session.platform,
+                        session.product,
+                        session.device,
+                    )
+                }
+            val deviceCardIcon =
+                when (devicePlatform) {
+                    TracearrDevicePlatform.PHONE -> Icons.Default.PhoneIphone
+                    TracearrDevicePlatform.TABLET -> Icons.Default.Tablet
+                    TracearrDevicePlatform.TV -> Icons.Default.Tv
+                    TracearrDevicePlatform.DESKTOP -> Icons.Default.DesktopWindows
+                    TracearrDevicePlatform.CONSOLE -> Icons.Default.SportsEsports
+                    TracearrDevicePlatform.UNKNOWN -> Icons.Default.SmartDisplay
+                }
 
             SectionCard(
                 icon = deviceCardIcon,
@@ -513,9 +521,10 @@ fun TracearrStreamDetailsSheet(
                 }
             }
 
-            val isStreamTranscode = session.isTranscode == true ||
-                session.videoDecision == TracearrStreamDecision.Transcode ||
-                session.audioDecision == TracearrStreamDecision.Transcode
+            val isStreamTranscode =
+                session.isTranscode == true ||
+                    session.videoDecision == TracearrStreamDecision.Transcode ||
+                    session.audioDecision == TracearrStreamDecision.Transcode
             val streamBadge = if (isStreamTranscode) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
             val streamBadgeColor = if (isStreamTranscode) ArrYellow else Color(0xFF4CAF50)
 
@@ -560,19 +569,21 @@ fun TracearrStreamDetailsSheet(
                     val dstCodec = session.streamVideoCodecDisplay ?: session.streamVideoCodec ?: srcCodec
                     DetailComparisonRow(label = mokoString(MR.strings.codec), source = srcCodec, stream = dstCodec)
 
-                    val srcRes = if (session.sourceVideoWidth != null && session.sourceVideoHeight != null) {
-                        "${session.sourceVideoWidth}×${session.sourceVideoHeight} (${session.resolution ?: "1080p"})"
-                    } else {
-                        session.resolution ?: "1080p"
-                    }
+                    val srcRes =
+                        if (session.sourceVideoWidth != null && session.sourceVideoHeight != null) {
+                            "${session.sourceVideoWidth}×${session.sourceVideoHeight} (${session.resolution ?: "1080p"})"
+                        } else {
+                            session.resolution ?: "1080p"
+                        }
                     val streamVideoDetails = session.streamVideoDetails
                     val streamWidth = streamVideoDetails?.width?.toInt()
                     val streamHeight = streamVideoDetails?.height?.toInt()
-                    val dstRes = if (streamWidth != null && streamHeight != null) {
-                        "${streamWidth}×${streamHeight} (${session.resolution ?: "1080p"})"
-                    } else {
-                        srcRes
-                    }
+                    val dstRes =
+                        if (streamWidth != null && streamHeight != null) {
+                            "$streamWidth×$streamHeight (${session.resolution ?: "1080p"})"
+                        } else {
+                            srcRes
+                        }
                     DetailComparisonRow(label = mokoString(MR.strings.resolution), source = srcRes, stream = dstRes)
 
                     val srcBitrate = session.sourceVideoDetails?.bitrate?.let { formatBitrate(it) } ?: ""
@@ -595,10 +606,11 @@ fun TracearrStreamDetailsSheet(
                         DetailRow(label = mokoString(MR.strings.profile), value = it)
                     }
 
-                    val colorInfo = listOfNotNull(
-                        session.sourceVideoDetails?.colorSpace,
-                        session.sourceVideoDetails?.colorDepth?.let { "${it}bit" },
-                    ).joinToString(" ")
+                    val colorInfo =
+                        listOfNotNull(
+                            session.sourceVideoDetails?.colorSpace,
+                            session.sourceVideoDetails?.colorDepth?.let { "${it}bit" },
+                        ).joinToString(" ")
                     if (colorInfo.isNotBlank()) {
                         DetailRow(label = mokoString(MR.strings.color), value = colorInfo)
                     }
@@ -624,13 +636,16 @@ fun TracearrStreamDetailsSheet(
                     val dstAudioCodec = session.streamAudioCodecDisplay ?: session.streamAudioCodec ?: srcAudioCodec
                     DetailComparisonRow(label = mokoString(MR.strings.codec), source = srcAudioCodec, stream = dstAudioCodec)
 
-                    val srcChannels = session.audioChannelsDisplay ?: (session.sourceAudioChannels?.let { if (it == 2) "Stereo" else "$it Channels" } ?: "Stereo")
+                    val srcChannels =
+                        session.audioChannelsDisplay
+                            ?: (session.sourceAudioChannels?.let { if (it == 2) "Stereo" else "$it Channels" } ?: "Stereo")
                     val streamChannelsNum = streamAudioDetails?.channels?.toInt()
-                    val dstChannels = if (streamChannelsNum != null) {
-                        if (streamChannelsNum == 2) "Stereo" else "$streamChannelsNum Channels"
-                    } else {
-                        srcChannels
-                    }
+                    val dstChannels =
+                        if (streamChannelsNum != null) {
+                            if (streamChannelsNum == 2) "Stereo" else "$streamChannelsNum Channels"
+                        } else {
+                            srcChannels
+                        }
                     DetailComparisonRow(label = mokoString(MR.strings.channels), source = srcChannels, stream = dstChannels)
 
                     val srcAudioBitrate = session.sourceAudioDetails?.bitrate?.let { formatBitrate(it) } ?: ""
@@ -840,26 +855,31 @@ private fun formatStartedAt(instant: Instant?): String {
     val nowMs = System.currentTimeMillis()
     val minutesAgo = (nowMs - ms) / 60000L
 
-    val relative = when {
-        minutesAgo < 1 -> justNow
-        minutesAgo == 1L -> minuteAgo
-        minutesAgo < 60 -> mokoString(MR.strings.minutes_ago, minutesAgo)
-        minutesAgo < 120 -> hourAgo
-        else -> mokoString(MR.strings.hours_ago, minutesAgo / 60)
-    }
+    val relative =
+        when {
+            minutesAgo < 1 -> justNow
+            minutesAgo == 1L -> minuteAgo
+            minutesAgo < 60 -> mokoString(MR.strings.minutes_ago, minutesAgo)
+            minutesAgo < 120 -> hourAgo
+            else -> mokoString(MR.strings.hours_ago, minutesAgo / 60)
+        }
 
-    val formattedDate = try {
-        val date = Date(ms)
-        val dateFormatter = SimpleDateFormat("MMM d, h:mm a", locale)
-        dateFormatter.format(date)
-    } catch (e: Exception) {
-        ""
-    }
+    val formattedDate =
+        try {
+            val date = Date(ms)
+            val dateFormatter = SimpleDateFormat("MMM d, h:mm a", locale)
+            dateFormatter.format(date)
+        } catch (e: Exception) {
+            ""
+        }
 
     return if (formattedDate.isNotEmpty()) "$formattedDate ($relative)" else relative
 }
 
-private fun formatDetailedDuration(ms: Long, hideSecondsIfHours: Boolean = false): String {
+private fun formatDetailedDuration(
+    ms: Long,
+    hideSecondsIfHours: Boolean = false,
+): String {
     if (ms <= 0) return "0s"
     val totalSeconds = ms / 1000
     val seconds = totalSeconds % 60

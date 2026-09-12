@@ -9,7 +9,5 @@ class GetTracearrActivityUseCase {
     suspend operator fun invoke(
         repository: TracearrRepository,
         period: TracearrPeriod = TracearrPeriod.Month,
-    ): NetworkResult<TracearrActivityResponse> {
-        return repository.getActivity(period)
-    }
+    ): NetworkResult<TracearrActivityResponse> = repository.getActivity(period)
 }

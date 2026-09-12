@@ -10,6 +10,5 @@ class GetUserHistoryUseCase {
         ref: String,
         cursor: String? = null,
         pageSize: Int? = null,
-    ): NetworkResult<TracearrHistoryResponse> =
-        repository.getUserHistory(ref = ref, cursor = cursor, pageSize = pageSize)
+    ): NetworkResult<TracearrHistoryResponse> = repository.getUserHistory(ref = ref, cursor = cursor, pageSize = pageSize)
 }

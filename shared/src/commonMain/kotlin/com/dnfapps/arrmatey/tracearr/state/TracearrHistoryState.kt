@@ -5,8 +5,11 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 
 sealed interface TracearrHistoryState {
     data object Initial : TracearrHistoryState
+
     data object Loading : TracearrHistoryState
+
     data object NoInstance : TracearrHistoryState
+
     data class Success(
         val activeStreams: List<TracearrStreamSession> = emptyList(),
         val items: List<TracearrHistoryItem> = emptyList(),
@@ -14,6 +17,7 @@ sealed interface TracearrHistoryState {
         val hasMore: Boolean = false,
         val nextCursor: String? = null,
     ) : TracearrHistoryState
+
     data class Error(
         val message: String,
     ) : TracearrHistoryState

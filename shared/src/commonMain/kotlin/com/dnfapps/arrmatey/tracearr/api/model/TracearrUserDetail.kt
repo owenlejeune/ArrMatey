@@ -11,4 +11,3 @@ data class TracearrUserDetail(
     @SerialName("plex_account_id") val plexAccountId: String? = null,
     val accounts: List<TracearrUserAccount> = emptyList(),
 )
-

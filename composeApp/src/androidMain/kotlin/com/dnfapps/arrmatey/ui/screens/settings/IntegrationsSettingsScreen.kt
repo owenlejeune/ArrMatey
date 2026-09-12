@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Approval
+import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Layers
@@ -69,6 +70,11 @@ fun IntegrationsSettingsScreen(
     val smartAddAction by viewModel.smartAddSeerrAction.collectAsStateWithLifecycle()
     val combineSeerrArrMedia by viewModel.combineSeerrArrMedia.collectAsStateWithLifecycle()
     val bazarrDetailsIntegration by viewModel.bazarrDetailsIntegration.collectAsStateWithLifecycle()
+    val tracearrDetailsIntegration by viewModel.tracearrDetailsIntegration.collectAsStateWithLifecycle()
+
+    val hasSeerrAndArr by viewModel.hasSeerrAndArr.collectAsStateWithLifecycle()
+    val hasBazarr by viewModel.hasBazarr.collectAsStateWithLifecycle()
+    val hasTracearr by viewModel.hasTracearr.collectAsStateWithLifecycle()
 
     var showSmartAddActionDropdown by remember { mutableStateOf(false) }
 
@@ -93,76 +99,85 @@ fun IntegrationsSettingsScreen(
                     .padding(bottom = navigationBarBottomInset() + 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Column {
-                SettingsGroup(
-                    title = mokoString(MR.strings.seerr),
-                    items =
-                        listOf(
-                            SettingItem(
-                                icon = IconSource.Vector(Icons.Default.Approval),
-                                title = mokoString(MR.strings.smart_add_seerr_action_title),
-                                subtitle = mokoString(smartAddAction.resource),
-                                onClick = { showSmartAddActionDropdown = true },
-                                trailingContent = {
-                                    Box {
-                                        DropdownMenu(
-                                            expanded = showSmartAddActionDropdown,
-                                            onDismissRequest = {
-                                                showSmartAddActionDropdown = false
-                                            },
-                                        ) {
-                                            SmartAddSeerrAction.entries.forEach { action ->
-                                                DropdownMenuItem(
-                                                    text = { Text(mokoString(action.resource)) },
-                                                    onClick = {
-                                                        viewModel.setSmartAddSeerrAction(action)
-                                                        showSmartAddActionDropdown = false
-                                                    },
-                                                )
-                                            }
-                                        }
-                                    }
-                                },
-                            ),
-                        ),
-                    footer = mokoString(MR.strings.smart_add_seerr_action_description),
-                )
-                SettingsGroup(
-                    items =
-                        listOf(
-                            SettingItem(
-                                icon = IconSource.Vector(Icons.Default.Layers),
-                                title = mokoString(MR.strings.combine_seerr_arr_media_title),
-                                onClick = { viewModel.toggleCombineSeerrArrMedia() },
-                                trailingContent = {
-                                    Switch(
-                                        checked = combineSeerrArrMedia,
-                                        onCheckedChange = { viewModel.toggleCombineSeerrArrMedia() },
-                                    )
-                                },
-                            ),
-                        ),
-                    footer = mokoString(MR.strings.combine_seerr_arr_media_description),
-                )
-            }
-
             SettingsGroup(
-                title = mokoString(MR.strings.bazarr),
+                title = mokoString(MR.strings.seerr),
                 items =
                     listOf(
                         SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Approval),
+                            title = mokoString(MR.strings.smart_add_seerr_action_title),
+                            subtitle = mokoString(smartAddAction.resource),
+                            onClick = { showSmartAddActionDropdown = true },
+                            trailingContent = {
+                                Box {
+                                    DropdownMenu(
+                                        expanded = showSmartAddActionDropdown,
+                                        onDismissRequest = {
+                                            showSmartAddActionDropdown = false
+                                        },
+                                    ) {
+                                        SmartAddSeerrAction.entries.forEach { action ->
+                                            DropdownMenuItem(
+                                                text = { Text(mokoString(action.resource)) },
+                                                onClick = {
+                                                    viewModel.setSmartAddSeerrAction(action)
+                                                    showSmartAddActionDropdown = false
+                                                },
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                        ),
+                    ),
+                footer = mokoString(MR.strings.smart_add_seerr_action_description),
+            )
+
+            SettingsGroup(
+                title = mokoString(MR.strings.unified_media),
+                items =
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Layers),
+                            title = mokoString(MR.strings.combine_seerr_arr_media_title),
+                            enabled = hasSeerrAndArr,
+                            onClick = { viewModel.toggleCombineSeerrArrMedia() },
+                            trailingContent = {
+                                Switch(
+                                    checked = combineSeerrArrMedia,
+                                    onCheckedChange = { viewModel.toggleCombineSeerrArrMedia() },
+                                    enabled = hasSeerrAndArr,
+                                )
+                            },
+                        ),
+                        SettingItem(
                             icon = IconSource.Vector(Icons.Default.Subtitles),
                             title = mokoString(MR.strings.bazarr_details_integration_title),
+                            enabled = hasBazarr,
                             onClick = { viewModel.toggleBazarrDetailsIntegration() },
                             trailingContent = {
                                 Switch(
                                     checked = bazarrDetailsIntegration,
                                     onCheckedChange = { viewModel.toggleBazarrDetailsIntegration() },
+                                    enabled = hasBazarr,
+                                )
+                            },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.AutoGraph),
+                            title = mokoString(MR.strings.tracearr_details_integration_title),
+                            enabled = hasTracearr,
+                            onClick = { viewModel.toggleTracearrDetailsIntegration() },
+                            trailingContent = {
+                                Switch(
+                                    checked = tracearrDetailsIntegration,
+                                    onCheckedChange = { viewModel.toggleTracearrDetailsIntegration() },
+                                    enabled = hasTracearr,
                                 )
                             },
                         ),
                     ),
-                footer = mokoString(MR.strings.bazarr_details_integration_description),
+                footer = mokoString(MR.strings.unified_media_description),
             )
 
             SettingsGroup(

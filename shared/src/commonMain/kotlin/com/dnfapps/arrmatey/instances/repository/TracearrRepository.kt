@@ -5,6 +5,8 @@ import com.dnfapps.arrmatey.tracearr.api.client.TracearrClient
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaDetails
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaStats
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaWatchers
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrPeriod
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
@@ -25,30 +27,30 @@ class TracearrRepository(
     override val instance: Instance,
     httpClient: HttpClient,
 ) : InstanceScopedRepository {
-
     private val tracearrClient = TracearrClient(instance, httpClient)
 
     private val mediaDetailsCache = mutableMapOf<String, TracearrMediaDetails>()
     private val cacheMutex = Mutex()
 
-    override suspend fun testConnection(): NetworkResult<Unit> =
-        tracearrClient.testConnection()
+    override suspend fun testConnection(): NetworkResult<Unit> = tracearrClient.testConnection()
 
     suspend fun getPublicStreams(): NetworkResult<TracearrStreamsResponse> {
         val baseUrl = instance.getEffectiveBaseUrl()
         return when (val streamsResult = tracearrClient.getPublicStreams()) {
             is NetworkResult.Success -> {
-                val refs = streamsResult.data.data.mapNotNull { session ->
-                    (session.showMediaId ?: session.mediaId)?.takeIf { it.isNotBlank() }
-                }
+                val refs =
+                    streamsResult.data.data.mapNotNull { session ->
+                        (session.showMediaId ?: session.mediaId)?.takeIf { it.isNotBlank() }
+                    }
                 val detailsMap = fetchMediaDetailsForRefs(refs)
 
-                val updatedSessions = streamsResult.data.data.map { session ->
-                    val ref = (session.showMediaId ?: session.mediaId)?.takeIf { it.isNotBlank() }
-                    session.rebuildWithInstanceBaseUrl(baseUrl).copy(
-                        mediaDetails = ref?.let { detailsMap[it] },
-                    )
-                }
+                val updatedSessions =
+                    streamsResult.data.data.map { session ->
+                        val ref = (session.showMediaId ?: session.mediaId)?.takeIf { it.isNotBlank() }
+                        session.rebuildWithInstanceBaseUrl(baseUrl).copy(
+                            mediaDetails = ref?.let { detailsMap[it] },
+                        )
+                    }
 
                 NetworkResult.Success(streamsResult.data.copy(data = updatedSessions))
             }
@@ -57,24 +59,28 @@ class TracearrRepository(
         }
     }
 
-    suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> =
-        tracearrClient.getTodayStats()
+    suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> = tracearrClient.getTodayStats()
 
-    suspend fun getHistory(cursor: String? = null, pageSize: Int? = null): NetworkResult<TracearrHistoryResponse> {
+    suspend fun getHistory(
+        cursor: String? = null,
+        pageSize: Int? = null,
+    ): NetworkResult<TracearrHistoryResponse> {
         val baseUrl = instance.getEffectiveBaseUrl()
         return when (val historyResult = tracearrClient.getHistory(cursor = cursor, pageSize = pageSize)) {
             is NetworkResult.Success -> {
-                val refs = historyResult.data.data.mapNotNull { item ->
-                    (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
-                }
+                val refs =
+                    historyResult.data.data.mapNotNull { item ->
+                        (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
+                    }
                 val detailsMap = fetchMediaDetailsForRefs(refs)
 
-                val updatedItems = historyResult.data.data.map { item ->
-                    val ref = (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
-                    item.rebuildWithInstanceBaseUrl(baseUrl).copy(
-                        mediaDetails = ref?.let { detailsMap[it] },
-                    )
-                }
+                val updatedItems =
+                    historyResult.data.data.map { item ->
+                        val ref = (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
+                        item.rebuildWithInstanceBaseUrl(baseUrl).copy(
+                            mediaDetails = ref?.let { detailsMap[it] },
+                        )
+                    }
 
                 NetworkResult.Success(historyResult.data.copy(data = updatedItems))
             }
@@ -90,20 +96,17 @@ class TracearrRepository(
     suspend fun getUsers(
         cursor: String? = null,
         pageSize: Int? = null,
-    ): NetworkResult<TracearrUsersResponse> =
-        tracearrClient.getUsers(cursor = cursor, pageSize = pageSize)
+    ): NetworkResult<TracearrUsersResponse> = tracearrClient.getUsers(cursor = cursor, pageSize = pageSize)
 
     suspend fun getViolations(
         page: Int? = null,
         pageSize: Int? = null,
-    ): NetworkResult<TracearrViolationsResponse> =
-        tracearrClient.getViolations(page = page, pageSize = pageSize)
+    ): NetworkResult<TracearrViolationsResponse> = tracearrClient.getViolations(page = page, pageSize = pageSize)
 
     suspend fun getActivity(period: TracearrPeriod = TracearrPeriod.Month): NetworkResult<TracearrActivityResponse> =
         tracearrClient.getActivity(period)
 
-    suspend fun getUserDetails(ref: String): NetworkResult<TracearrUserDetail> =
-        resolveUserDetail(ref)
+    suspend fun getUserDetails(ref: String): NetworkResult<TracearrUserDetail> = resolveUserDetail(ref)
 
     suspend fun resolveUserDetail(ref: String): NetworkResult<TracearrUserDetail> {
         if (isUuid(ref)) {
@@ -115,15 +118,16 @@ class TracearrRepository(
 
         return when (val usersResult = tracearrClient.getUsers(pageSize = 100)) {
             is NetworkResult.Success -> {
-                val matchingUser = usersResult.data.data.firstOrNull { u ->
-                    u.id.equals(ref, ignoreCase = true) ||
-                    u.username?.equals(ref, ignoreCase = true) == true ||
-                    u.accounts.any { acc ->
-                        acc.username?.equals(ref, ignoreCase = true) == true ||
-                        acc.serverUserId == ref ||
-                        acc.externalUserId == ref
+                val matchingUser =
+                    usersResult.data.data.firstOrNull { u ->
+                        u.id.equals(ref, ignoreCase = true) ||
+                            u.username?.equals(ref, ignoreCase = true) == true ||
+                            u.accounts.any { acc ->
+                                acc.username?.equals(ref, ignoreCase = true) == true ||
+                                    acc.serverUserId == ref ||
+                                    acc.externalUserId == ref
+                            }
                     }
-                }
 
                 if (matchingUser != null) {
                     val detailsResult = tracearrClient.getUserDetails(matchingUser.id)
@@ -141,8 +145,7 @@ class TracearrRepository(
         }
     }
 
-    suspend fun getUserStats(ref: String): NetworkResult<TracearrUserStats> =
-        tracearrClient.getUserStats(ref)
+    suspend fun getUserStats(ref: String): NetworkResult<TracearrUserStats> = tracearrClient.getUserStats(ref)
 
     suspend fun getUserHistory(
         ref: String,
@@ -152,17 +155,52 @@ class TracearrRepository(
         val baseUrl = instance.getEffectiveBaseUrl()
         return when (val historyResult = tracearrClient.getUserHistory(ref = ref, cursor = cursor, pageSize = pageSize)) {
             is NetworkResult.Success -> {
-                val refs = historyResult.data.data.mapNotNull { item ->
-                    (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
-                }
+                val refs =
+                    historyResult.data.data.mapNotNull { item ->
+                        (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
+                    }
                 val detailsMap = fetchMediaDetailsForRefs(refs)
 
-                val updatedItems = historyResult.data.data.map { item ->
-                    val itemRef = (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
-                    item.rebuildWithInstanceBaseUrl(baseUrl).copy(
-                        mediaDetails = itemRef?.let { detailsMap[it] },
-                    )
-                }
+                val updatedItems =
+                    historyResult.data.data.map { item ->
+                        val itemRef = (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
+                        item.rebuildWithInstanceBaseUrl(baseUrl).copy(
+                            mediaDetails = itemRef?.let { detailsMap[it] },
+                        )
+                    }
+
+                NetworkResult.Success(historyResult.data.copy(data = updatedItems))
+            }
+            is NetworkResult.Error -> historyResult
+            is NetworkResult.Loading -> NetworkResult.Loading
+        }
+    }
+
+    suspend fun getMediaWatchers(ref: String): NetworkResult<TracearrMediaWatchers> = tracearrClient.getMediaWatchers(ref)
+
+    suspend fun getMediaStats(ref: String): NetworkResult<TracearrMediaStats> = tracearrClient.getMediaStats(ref)
+
+    suspend fun getMediaHistory(
+        ref: String,
+        cursor: String? = null,
+        pageSize: Int? = null,
+    ): NetworkResult<TracearrHistoryResponse> {
+        val baseUrl = instance.getEffectiveBaseUrl()
+        return when (val historyResult = tracearrClient.getMediaHistory(ref = ref, cursor = cursor, pageSize = pageSize)) {
+            is NetworkResult.Success -> {
+                val refs =
+                    historyResult.data.data.mapNotNull { item ->
+                        (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
+                    }
+                val detailsMap = fetchMediaDetailsForRefs(refs)
+
+                val updatedItems =
+                    historyResult.data.data.map { item ->
+                        val itemRef = (item.showMediaId ?: item.mediaId)?.takeIf { it.isNotBlank() }
+                        item.rebuildWithInstanceBaseUrl(baseUrl).copy(
+                            mediaDetails = itemRef?.let { detailsMap[it] },
+                        )
+                    }
 
                 NetworkResult.Success(historyResult.data.copy(data = updatedItems))
             }
@@ -172,22 +210,26 @@ class TracearrRepository(
     }
 
     private suspend fun fetchMediaDetailsForRefs(refs: List<String>): Map<String, TracearrMediaDetails> {
-        val missingRefs = cacheMutex.withLock {
-            refs.filter { it.isNotBlank() && !mediaDetailsCache.containsKey(it) }.distinct()
-        }
+        val missingRefs =
+            cacheMutex.withLock {
+                refs.filter { it.isNotBlank() && !mediaDetailsCache.containsKey(it) }.distinct()
+            }
 
         if (missingRefs.isNotEmpty()) {
-            val fetchedResults = coroutineScope {
-                missingRefs.map { ref ->
-                    async {
-                        var details: TracearrMediaDetails? = null
-                        tracearrClient.getMedia(ref).onSuccess {
-                            details = it
-                        }
-                        details?.let { ref to it }
-                    }
-                }.awaitAll().filterNotNull()
-            }
+            val fetchedResults =
+                coroutineScope {
+                    missingRefs
+                        .map { ref ->
+                            async {
+                                var details: TracearrMediaDetails? = null
+                                tracearrClient.getMedia(ref).onSuccess {
+                                    details = it
+                                }
+                                details?.let { ref to it }
+                            }
+                        }.awaitAll()
+                        .filterNotNull()
+                }
 
             if (fetchedResults.isNotEmpty()) {
                 cacheMutex.withLock {
@@ -199,9 +241,10 @@ class TracearrRepository(
         }
 
         return cacheMutex.withLock {
-            refs.mapNotNull { ref ->
-                mediaDetailsCache[ref]?.let { ref to it }
-            }.toMap()
+            refs
+                .mapNotNull { ref ->
+                    mediaDetailsCache[ref]?.let { ref to it }
+                }.toMap()
         }
     }
 }

@@ -32,7 +32,7 @@ fun mokoPlural(
 @Composable
 fun mokoPlural(
     resource: PluralsResource,
-    quantity: Long
+    quantity: Long,
 ): String {
     val moko: MokoStrings = koinInject()
     return moko.getPlural(resource, quantity.toInt(), listOf(quantity.toInt()))

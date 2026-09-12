@@ -131,14 +131,15 @@ sealed interface CombinedDashboardState {
                 instances.filter { it.type == InstanceType.Tracearr }.map {
                     TracearrDashboardState(
                         instance = it,
-                        stats = TracearrTodayStats(
-                            activeStreams = 2,
-                            todayPlays = 15,
-                            todaySessions = 18,
-                            watchTimeHours = 4.5f,
-                            alertsLast24h = 0,
-                            activeUsersToday = 3,
-                        ),
+                        stats =
+                            TracearrTodayStats(
+                                activeStreams = 2,
+                                todayPlays = 15,
+                                todaySessions = 18,
+                                watchTimeHours = 4.5f,
+                                alertsLast24h = 0,
+                                activeUsersToday = 3,
+                            ),
                     )
                 }
 
