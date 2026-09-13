@@ -105,14 +105,17 @@ fun List<ArrMedia>.mergeWithLibrary(library: List<ArrMedia>): List<ArrMedia> =
         match ?: item
     }
 
-internal fun formatAirTime(airTime: String?): String? {
+internal fun formatAirTime(
+    airTime: String?,
+    is24Hour: Boolean = is24Hour(),
+): String? {
     if (airTime.isNullOrBlank()) return null
     val parts = airTime.split(":")
     if (parts.size < 2) return null
     val hour = parts[0].toIntOrNull() ?: return null
     val minute = parts[1].toIntOrNull() ?: return null
 
-    return if (is24Hour()) {
+    return if (is24Hour) {
         val padHour = hour.toString().padStart(2, '0')
         val padMinute = minute.toString().padStart(2, '0')
         "$padHour:$padMinute"
