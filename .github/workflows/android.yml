@@ -32,7 +32,13 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Lint, Tests, and Build Debug APK
-        run: ./gradlew spotlessCheck lintDebug test :composeApp:assembleDebug --continue
+        # The `test` lifecycle task only reaches :composeApp.
+        run: >
+          ./gradlew spotlessCheck lintDebug
+          :shared:testAndroidHostTest
+          :networking:testAndroidHostTest
+          :composeApp:testDebugUnitTest
+          :composeApp:assembleDebug --continue
 
       - name: Upload Test Results
         if: always()
