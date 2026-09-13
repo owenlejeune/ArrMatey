@@ -27,6 +27,12 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
+        with:
+          # jdks isn't cached by default, so the pinned daemon JVM re-downloads every run.
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -35,6 +41,14 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '26.x'
+
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@v6
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
 
       - name: Cache Xcode DerivedData
         uses: actions/cache@v6
@@ -45,7 +59,15 @@ jobs:
             ${{ runner.os }}-deriveddata-
 
       - name: Build and Test Shared
-        run: ./gradlew :shared:allTests
+        # allTests would also re-run testAndroidHostTest, which the Linux job covers.
+        run: ./gradlew :shared:iosSimulatorArm64Test :networking:iosSimulatorArm64Test
+
+      - name: Upload Shared Test Results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: shared-test-results
+          path: "**/build/test-results/**/*.xml"
 
       - name: Build and Test iOS App
         run: |
