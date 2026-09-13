@@ -12,16 +12,16 @@ fun <T : Any> createPagingFlow(
 
         try {
             when (val result = pagingSource.load(1)) {
-                is LoadResult.Page<*> -> {
+                is LoadResult.Page -> {
                     emit(
                         PagingState.Success(
-                            items = result.data as List<T>,
+                            items = result.data,
                             currentPage = result.currentPage,
                             hasMore = result.hasNextPage,
                         ),
                     )
                 }
-                is LoadResult.Error<*> -> {
+                is LoadResult.Error -> {
                     emit(PagingState.Error(result.throwable.message ?: "Unknown error"))
                 }
             }

@@ -71,8 +71,11 @@ kotlin {
     sourceSets {
         all {
             languageSettings.optIn("kotlin.time.ExperimentalTime")
-            languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
-            languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
+            // cinterop/ObjC markers only exist on Kotlin/Native; opting in elsewhere warns.
+            if (name.contains("native", true) || name.contains("apple", true) || name.contains("ios", true)) {
+                languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
+                languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
+            }
         }
 
         androidMain.dependencies {

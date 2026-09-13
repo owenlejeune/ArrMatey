@@ -1518,11 +1518,11 @@ private fun UnifiedMediaDetailsToolbarMenu(
     onAddMissingInstance: (Instance) -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onDeleteFile: (() -> Unit)? = null,
     onMarkAsAvailable: () -> Unit,
     onRemoveFromService: () -> Unit,
     onClearData: () -> Unit,
     modifier: Modifier = Modifier,
+    onDeleteFile: (() -> Unit)? = null,
 ) {
     val showArrActions = success.hasArrId && isArrConfigured
     val showSeerrActions =

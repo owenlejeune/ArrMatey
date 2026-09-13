@@ -28,8 +28,8 @@ class PagingController<T : Any>(
             }
 
             when (val result = pagingSource?.load(1)) {
-                is LoadResult.Page<*> -> {
-                    val data = result.data as List<T>
+                is LoadResult.Page -> {
+                    val data = result.data
                     val items = if (keySelector != null) data.distinctBy(keySelector) else data
                     _state.update {
                         PagedData(
@@ -42,7 +42,7 @@ class PagingController<T : Any>(
                         )
                     }
                 }
-                is LoadResult.Error<*> -> {
+                is LoadResult.Error -> {
                     _state.update {
                         PagedData(
                             isLoading = false,
@@ -73,8 +73,8 @@ class PagingController<T : Any>(
             val nextPage = currentState.currentPage + 1
 
             when (val result = pagingSource?.load(nextPage)) {
-                is LoadResult.Page<*> -> {
-                    val data = result.data as List<T>
+                is LoadResult.Page -> {
+                    val data = result.data
                     _state.update {
                         val newItems = it.items + data
                         val items = if (keySelector != null) newItems.distinctBy(keySelector) else newItems
@@ -87,7 +87,7 @@ class PagingController<T : Any>(
                         )
                     }
                 }
-                is LoadResult.Error<*> -> {
+                is LoadResult.Error -> {
                     _state.update {
                         it.copy(
                             isLoadingMore = false,

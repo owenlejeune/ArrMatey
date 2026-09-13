@@ -93,8 +93,8 @@ class GetLibraryUseCase(
                 when (libraryResult) {
                     is NetworkResult.Loading -> ArrLibrary.Loading
                     is NetworkResult.Error -> ArrLibrary.Error(libraryResult.message ?: "")
-                    is NetworkResult.Success<*> -> {
-                        val sorted = applySorting(libraryResult.data as List<ArrMedia>, preferences)
+                    is NetworkResult.Success -> {
+                        val sorted = applySorting(libraryResult.data, preferences)
                         val filtered = applyFiltering(sorted, preferences, customFilters)
                         val searched =
                             if (query.isNotBlank()) {

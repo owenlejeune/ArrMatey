@@ -40,6 +40,7 @@ class AndroidNetworkUtils(
         return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
     }
 
+    @Suppress("DEPRECATION")
     private fun getWifiSsidModern(): String? {
         val wm = wifiManager ?: return null
         val wifiInfo = wm.connectionInfo ?: return null

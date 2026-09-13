@@ -1,7 +1,5 @@
 package com.dnfapps.arrmatey.downloadclient.usecase
 
-import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
-import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueState
 import com.dnfapps.networking.NetworkResult
@@ -44,12 +42,12 @@ class ObserveDownloadQueueUseCase(
 
                 val newState =
                     when (downloadsResult) {
-                        is NetworkResult.Success<*> -> {
+                        is NetworkResult.Success -> {
                             when (transferInfoResult) {
-                                is NetworkResult.Success<*> ->
+                                is NetworkResult.Success ->
                                     DownloadQueueState.Success(
-                                        items = downloadsResult.data as List<DownloadItem>,
-                                        transferInfo = transferInfoResult.data as DownloadTransferInfo,
+                                        items = downloadsResult.data,
+                                        transferInfo = transferInfoResult.data,
                                         isRefreshing = false,
                                     )
                                 is NetworkResult.Error -> {

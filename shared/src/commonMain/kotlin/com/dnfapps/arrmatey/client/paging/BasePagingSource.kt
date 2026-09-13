@@ -12,9 +12,9 @@ class BasePagingSource<T : Any, R : Any>(
             is NetworkResult.Loading -> {
                 LoadResult.Error(Exception("Unexpected loading state"))
             }
-            is NetworkResult.Success<*> -> {
+            is NetworkResult.Success -> {
                 try {
-                    val pageResult = processor(result.data as R)
+                    val pageResult = processor(result.data)
                     LoadResult.Page(
                         data = pageResult.items,
                         currentPage = page,

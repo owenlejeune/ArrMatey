@@ -28,7 +28,6 @@ class QBittorrentClient(
             is NetworkResult.Success -> {
                 httpClient.safeCall<Unit> {
                     get("api/v2/app/version")
-                    Unit
                 }
             }
             is NetworkResult.Error -> authResult
@@ -158,7 +157,6 @@ class QBittorrentClient(
                     ),
                 )
             }
-            Unit
         }
 
     private fun QBittorrentTorrent.toDownloadItem(): DownloadItem =
