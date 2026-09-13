@@ -849,8 +849,8 @@ private fun PlatformsCard(
     val chart =
         rememberPieChart(
             sliceProvider = sliceProvider,
-            innerSize = PieSize.Inner.fixed(104.dp),
-            outerSize = PieSize.Outer.fixed(160.dp),
+            innerSize = PieSize.Inner.fixed(65.dp),
+            outerSize = PieSize.Outer.fixed(115.dp),
         )
 
     ChartCardContainer(
@@ -861,24 +861,24 @@ private fun PlatformsCard(
             EmptyChartPlaceholder()
         } else {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
                     modifier =
                         Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .height(240.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     PieChartHost(
                         chart = chart,
                         modelProducer = modelProducer,
-                        modifier = Modifier.size(160.dp),
+                        modifier = Modifier.size(240.dp),
                     )
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 LegendRow(items = items.map { it.first to it.second.second })
             }
@@ -928,8 +928,8 @@ private fun StreamQualityCard(
     val chart =
         rememberPieChart(
             sliceProvider = sliceProvider,
-            innerSize = PieSize.Inner.fixed(104.dp),
-            outerSize = PieSize.Outer.fixed(160.dp),
+            innerSize = PieSize.Inner.fixed(65.dp),
+            outerSize = PieSize.Outer.fixed(115.dp),
         )
 
     ChartCardContainer(
@@ -940,24 +940,24 @@ private fun StreamQualityCard(
             EmptyChartPlaceholder()
         } else {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
                     modifier =
                         Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .height(240.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     PieChartHost(
                         chart = chart,
                         modelProducer = modelProducer,
-                        modifier = Modifier.size(160.dp),
+                        modifier = Modifier.size(240.dp),
                     )
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 LegendRow(items = items.map { it.first to it.second.second })
             }

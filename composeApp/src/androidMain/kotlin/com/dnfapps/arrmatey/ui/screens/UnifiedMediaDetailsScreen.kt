@@ -865,6 +865,7 @@ fun UnifiedMediaDetailsScreen(
                                             uiState = tracearrState,
                                             onLoadMore = { viewModel.loadMoreTracearrHistory() },
                                             onClickItem = { selectedTracearrStreamSession = it.toStreamSession() },
+                                            isLargeScreen = isExpanded,
                                             modifier = Modifier.padding(horizontal = 24.dp),
                                         )
                                     }

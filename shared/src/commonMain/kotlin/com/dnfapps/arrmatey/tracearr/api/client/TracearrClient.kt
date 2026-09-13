@@ -29,7 +29,7 @@ class TracearrClient(
         get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}/v1"
 
     suspend fun testConnection(): NetworkResult<Unit> {
-        val url = "$v2BaseUrl/${instance.type.testEndpoint}"
+        val url = "${instance.getEffectiveBaseUrl()}/${instance.type.testEndpoint}"
         return httpClient.safeGet(url)
     }
 

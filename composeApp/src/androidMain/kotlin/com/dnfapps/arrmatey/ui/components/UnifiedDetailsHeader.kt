@@ -54,7 +54,7 @@ fun UnifiedDetailsHeader(
     Box(modifier = Modifier.fillMaxWidth()) {
         DetailHeaderBanner(
             bannerUrl = bannerUrl,
-            gradientHeight = bannerGradientHeight ?: detailHeight.times(2).dp,
+            gradientHeight = bannerGradientHeight ?: detailHeight.dp,
             startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
         )
 

@@ -167,6 +167,7 @@ fun TracearrDashboardStatsSection(
                 count = stats.alertsLast24h,
                 label = mokoString(MR.strings.alerts),
                 containerColor = if (stats.alertsLast24h > 0) MaterialTheme.colorScheme.errorContainer else TracearrDarkBlue,
+                contentColor = if (stats.alertsLast24h > 0) MaterialTheme.colorScheme.onErrorContainer else Color.White,
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToViolations,
             )
@@ -195,6 +196,7 @@ fun TracearrDashboardStatsSection(
                 count = stats.activeUsersToday,
                 label = mokoString(MR.strings.active_users),
                 containerColor = TracearrNavy,
+                contentColor = Color.White,
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToAllUsers,
             )

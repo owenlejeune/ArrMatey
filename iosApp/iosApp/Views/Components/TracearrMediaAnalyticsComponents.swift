@@ -167,9 +167,15 @@ struct WatcherRowView: View {
 }
 
 struct TracearrHistorySectionView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let uiState: TracearrMediaUiState
     let onLoadMore: () -> Void
     var onClickItem: ((TracearrHistoryItem) -> Void)? = nil
+    var isLargeScreen: Bool? = nil
+
+    private var effectiveIsLargeScreen: Bool {
+        isLargeScreen ?? (horizontalSizeClass == .regular)
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -183,28 +189,40 @@ struct TracearrHistorySectionView: View {
                 .background(Color(UIColor.secondarySystemBackground))
                 .cornerRadius(12)
             } else {
-                ForEach(uiState.historyItems, id: \.id) { item in
-                    TracearrHistoryCardView(item: item)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
+                if effectiveIsLargeScreen {
+                    TracearrHistoryTableView(
+                        items: uiState.historyItems,
+                        hasMore: uiState.nextHistoryCursor != nil,
+                        isLoadingMore: uiState.isLoadingHistoryMore,
+                        onLoadMore: onLoadMore,
+                        onClickItem: { item in
                             onClickItem?(item)
                         }
-                }
-
-                if uiState.nextHistoryCursor != nil {
-                    HStack {
-                        Spacer()
-                        if uiState.isLoadingHistoryMore {
-                            ProgressView()
-                        } else {
-                            Button(MR.strings().load_more_history.localized()) {
-                                onLoadMore()
+                    )
+                } else {
+                    ForEach(uiState.historyItems, id: \.id) { item in
+                        TracearrHistoryCardView(item: item)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                onClickItem?(item)
                             }
-                            .buttonStyle(.bordered)
-                        }
-                        Spacer()
                     }
-                    .padding(.vertical, 8)
+
+                    if uiState.nextHistoryCursor != nil {
+                        HStack {
+                            Spacer()
+                            if uiState.isLoadingHistoryMore {
+                                ProgressView()
+                            } else {
+                                Button(MR.strings().load_more_history.localized()) {
+                                    onLoadMore()
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                            Spacer()
+                        }
+                        .padding(.vertical, 8)
+                    }
                 }
             }
         }

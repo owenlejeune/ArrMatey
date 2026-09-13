@@ -48,6 +48,7 @@ import com.dnfapps.arrmatey.model.TracearrMediaUiState
 import com.dnfapps.arrmatey.model.TracearrStatsWindowType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaWatcher
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -395,6 +396,7 @@ fun TracearrHistorySection(
     uiState: TracearrMediaUiState,
     onLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
+    isLargeScreen: Boolean = false,
     onClickItem: ((TracearrHistoryItem) -> Unit)? = null,
 ) {
     Column(
@@ -424,11 +426,18 @@ fun TracearrHistorySection(
                 }
             }
         } else {
-            uiState.historyItems.forEach { item ->
-                TracearrHistoryCard(
-                    item = item,
-                    onClick = onClickItem?.let { { it(item) } },
+            if (isLargeScreen) {
+                TracearrHistoryTable(
+                    items = uiState.historyItems,
+                    onClickItem = { item -> onClickItem?.invoke(item) },
                 )
+            } else {
+                uiState.historyItems.forEach { item ->
+                    TracearrHistoryCard(
+                        item = item,
+                        onClick = onClickItem?.let { { it(item) } },
+                    )
+                }
             }
 
             if (uiState.nextHistoryCursor != null) {

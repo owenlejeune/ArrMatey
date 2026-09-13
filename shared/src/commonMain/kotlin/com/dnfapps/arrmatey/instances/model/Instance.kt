@@ -251,7 +251,7 @@ enum class InstanceType(
         defaultPort = 3000,
         supportsActivityQueue = false,
         apiBase = "api",
-        testEndpoint = "public/docs",
+        testEndpoint = "v2/public/docs",
         getApiKeyEndpoint = "settings",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
