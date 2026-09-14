@@ -34,6 +34,7 @@ data class InfoCardData(
     val items: List<InfoItem>,
     val header: (@Composable () -> Unit)? = null,
     val footer: (@Composable () -> Unit)? = null,
+    val content: (@Composable () -> Unit)? = null,
 )
 
 @Composable
@@ -66,9 +67,10 @@ fun InfoAreaCard(
     modifier: Modifier = Modifier,
     header: (@Composable () -> Unit)? = null,
     footer: (@Composable () -> Unit)? = null,
+    content: (@Composable () -> Unit)? = null,
 ) {
     Card(
-        modifier = modifier, // .fillMaxWidth(),
+        modifier = modifier,
         shape = RoundedCornerShape(10.dp),
     ) {
         Column(
@@ -104,7 +106,13 @@ fun InfoAreaCard(
                         modifier = Modifier.widthIn(max = 200.dp),
                     )
                 }
-                if (index < infoItems.size - 1 || footer != null) {
+                if (index < infoItems.size - 1 || content != null || footer != null) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                }
+            }
+            if (content != null) {
+                content.invoke()
+                if (footer != null) {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 }
             }
@@ -147,7 +155,7 @@ fun InfoArea(
     title: StringResource? = MR.strings.information,
     useDualColumn: Boolean = false,
 ) {
-    val validCards = cards.filter { it.items.isNotEmpty() }
+    val validCards = cards.filter { it.items.isNotEmpty() || it.content != null }
     if (validCards.isEmpty()) return
     Column(modifier = modifier) {
         if (title != null) {
@@ -167,6 +175,7 @@ fun InfoArea(
                         infoItems = card.items,
                         header = card.header,
                         footer = card.footer,
+                        content = card.content,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -180,6 +189,7 @@ fun InfoArea(
                         infoItems = card.items,
                         header = card.header,
                         footer = card.footer,
+                        content = card.content,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

@@ -9,14 +9,14 @@ import SwiftUI
 
 struct ItemDescriptionCard: View {
     let overview: String?
-    
+
     @State private var expanded = false
     @State private var decodedOverview: String?
-    
+
     init(overview: String?) {
         self.overview = overview
     }
-    
+
     var body: some View {
         if let text = decodedOverview ?? overview {
             VStack {
@@ -44,7 +44,7 @@ struct ItemDescriptionCard: View {
             }
         }
     }
-    
+
     private func decode() {
         if let overview = overview {
             decodedOverview = overview.decodingHTMLEntities()

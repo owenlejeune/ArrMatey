@@ -11,11 +11,11 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -61,7 +62,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -78,7 +79,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -593,7 +596,7 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    val hasSeasonsOrFiles = state.seasons.isNotEmpty() || (state.hasArrId && state.arrMedia !is ArrSeries)
+                                    val hasSeasonsOrFiles = state.seasons.isNotEmpty() || (state.hasArrId && state.arrMedia !is ArrSeries) || state.queueItems.isNotEmpty()
                                     val hasTracearr = tracearrState.isTracearrConfigured && isMovieOrTv
 
                                     LaunchedEffect(hasSeasonsOrFiles) {
@@ -659,6 +662,20 @@ fun UnifiedMediaDetailsScreen(
 
                                 when (selectedTab) {
                                     DetailsTab.SeasonsFiles -> {
+                                        AnimatedVisibility(
+                                            visible = state.queueItems.isNotEmpty(),
+                                            enter = expandVertically() + fadeIn(),
+                                            exit = shrinkVertically() + fadeOut(),
+                                        ) {
+                                            MediaActivitySection(
+                                                queueItems = state.queueItems,
+                                                onQueueItemClicked = { item ->
+                                                    selectedQueueItem = item
+                                                },
+                                                modifier = Modifier.padding(horizontal = 24.dp),
+                                            )
+                                        }
+
                                         if (state.seasons.isNotEmpty()) {
                                             val arrSeries = state.arrMedia as? ArrSeries
                                             SeasonsArea(
@@ -765,20 +782,6 @@ fun UnifiedMediaDetailsScreen(
                                             )
                                         }
 
-                                        AnimatedVisibility(
-                                            visible = state.queueItems.isNotEmpty(),
-                                            enter = expandVertically() + fadeIn(),
-                                            exit = shrinkVertically() + fadeOut(),
-                                        ) {
-                                            MediaActivitySection(
-                                                queueItems = state.queueItems,
-                                                onQueueItemClicked = { item ->
-                                                    selectedQueueItem = item
-                                                },
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                            )
-                                        }
-
                                         state.seerrMedia?.credits?.let { credits ->
                                             SeerrCreditsSection(credits) { onPersonClick(it) }
                                         }
@@ -795,7 +798,7 @@ fun UnifiedMediaDetailsScreen(
                                             state.availableInstances.firstOrNull { it.id == state.selectedInstanceId } ?: activeInstance
                                         val selectedSeerrInstance = activeSeerrInstance
 
-                                        if (arrInfoItems.isNotEmpty() || seerrInfoItems.isNotEmpty()) {
+                                        if (arrInfoItems.isNotEmpty() || seerrInfoItems.isNotEmpty() || state.keywords.isNotEmpty()) {
                                             InfoArea(
                                                 cards =
                                                     listOf(
@@ -810,6 +813,41 @@ fun UnifiedMediaDetailsScreen(
                                                         ),
                                                         InfoCardData(
                                                             items = seerrInfoItems,
+                                                            content =
+                                                                if (state.keywords.isNotEmpty()) {
+                                                                    {
+                                                                        Column(
+                                                                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                                                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                                                        ) {
+                                                                            Text(
+                                                                                text = mokoString(MR.strings.tags),
+                                                                                fontSize = 14.sp,
+                                                                            )
+                                                                            FlowRow(
+                                                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                                                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                                                                            ) {
+                                                                                state.keywords.forEach { keyword ->
+                                                                                    Surface(
+                                                                                        shape = RoundedCornerShape(8.dp),
+                                                                                        color = MaterialTheme.colorScheme.secondaryContainer,
+                                                                                    ) {
+                                                                                        Text(
+                                                                                            text = keyword.name,
+                                                                                            style = MaterialTheme.typography.labelSmall,
+                                                                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                                                            fontWeight = FontWeight.SemiBold,
+                                                                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                                                                        )
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    null
+                                                                },
                                                             footer =
                                                                 if (showBothCards && selectedSeerrInstance != null) {
                                                                     { InfoCardInstanceFooter(selectedSeerrInstance) }
@@ -821,36 +859,6 @@ fun UnifiedMediaDetailsScreen(
                                                 modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
                                                 useDualColumn = isExpanded && !isDualPanel,
                                             )
-                                        }
-
-                                        state.keywords.unlessEmpty { keywords ->
-                                            val rowCount = minOf(3, maxOf(1, keywords.size))
-                                            val rows =
-                                                (0 until rowCount).map { rowIndex ->
-                                                    keywords.filterIndexed { index, _ -> index % rowCount == rowIndex }
-                                                }
-
-                                            Column(
-                                                verticalArrangement = Arrangement.spacedBy(0.dp),
-                                                modifier =
-                                                    Modifier
-                                                        .fillMaxWidth()
-                                                        .horizontalScroll(rememberScrollState())
-                                                        .padding(horizontal = 24.dp),
-                                            ) {
-                                                rows.forEach { rowKeywords ->
-                                                    Row(
-                                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                    ) {
-                                                        rowKeywords.forEach { keyword ->
-                                                            SuggestionChip(
-                                                                onClick = {},
-                                                                label = { Text(keyword.name) },
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
                                         }
                                     }
 

@@ -157,7 +157,7 @@ extension UnifiedMediaDetailsScreen {
     private func successView(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
         let tracearrState = viewModel.tracearrState
         let isMovieOrTv = success.arrMedia is ArrMovie || success.arrMedia is ArrSeries || viewModel.resolvedRequestType == RequestType.movie || viewModel.resolvedRequestType == RequestType.tv
-        let hasSeasonsOrFiles = !success.seasons.isEmpty || (success.hasArrId && !(success.arrMedia is ArrSeries))
+        let hasSeasonsOrFiles = !success.seasons.isEmpty || (success.hasArrId && !(success.arrMedia is ArrSeries)) || !success.queueItems.isEmpty
         let hasTracearr = tracearrState.isTracearrConfigured && isMovieOrTv
 
         ScrollView {
@@ -265,10 +265,21 @@ extension UnifiedMediaDetailsScreen {
     @ViewBuilder
     private func overviewTabContent(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
         VStack(alignment: .leading, spacing: 24) {
-            if let overview = success.overview {
-                ItemDescriptionCard(overview: overview)
+            if success.overview?.isEmpty == false || !success.keywords.isEmpty {
+                ItemDescriptionCard(overview: success.overview, keywords: success.keywords)
             }
 
+            if let credits = success.seerrMedia?.credits {
+                creditsSection(credits)
+            }
+
+            unifiedInfoArea(success)
+        }
+    }
+
+    @ViewBuilder
+    private func seasonsAndFilesTabContent(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
+        VStack(alignment: .leading, spacing: 24) {
             if !success.queueItems.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(MR.strings().activity.localized())
@@ -280,21 +291,6 @@ extension UnifiedMediaDetailsScreen {
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
-            if let credits = success.seerrMedia?.credits {
-                creditsSection(credits)
-            }
-
-            unifiedInfoArea(success)
-
-            if !success.keywords.isEmpty {
-                keywordsSection(success.keywords)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func seasonsAndFilesTabContent(_ success: UnifiedMediaDetailsUiStateSuccess) -> some View {
-        VStack(alignment: .leading, spacing: 24) {
             seasonsArea(success)
 
             if success.hasArrId {
@@ -436,40 +432,14 @@ extension UnifiedMediaDetailsScreen {
         let seerrItems = buildSeerrInfoItems(success: success)
         let arrInstance = success.availableInstances.first(where: { $0.id == success.selectedInstanceId?.int64Value }) ?? viewModel.activeInstance
         let seerrInstance = viewModel.activeSeerrInstance
-        if !arrItems.isEmpty || !seerrItems.isEmpty {
+        if !arrItems.isEmpty || !seerrItems.isEmpty || !success.keywords.isEmpty {
             MediaInfoArea(
                 arrItems: arrItems,
                 seerrItems: seerrItems,
+                keywords: success.keywords,
                 arrInstance: arrInstance,
                 seerrInstance: seerrInstance
             )
-        }
-    }
-
-    @ViewBuilder
-    private func keywordsSection(_ keywords: [Keyword]) -> some View {
-        let rowCount = min(3, max(1, keywords.count))
-        let rows = (0..<rowCount).map { rowIndex in
-            keywords.enumerated().filter { $0.offset % rowCount == rowIndex }.map { $0.element }
-        }
-
-        ScrollView(.horizontal, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(0..<rows.count, id: \.self) { rowIndex in
-                    HStack(spacing: 8) {
-                        ForEach(rows[rowIndex], id: \.id) { keyword in
-                            Text(keyword.name)
-                                .font(.system(size: 14))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(
-                                    Capsule()
-                                        .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-                                )
-                        }
-                    }
-                }
-            }
         }
     }
 
