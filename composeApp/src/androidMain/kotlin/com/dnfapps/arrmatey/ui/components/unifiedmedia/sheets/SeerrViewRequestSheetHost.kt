@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets
 
 import androidx.compose.runtime.Composable
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
-import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 

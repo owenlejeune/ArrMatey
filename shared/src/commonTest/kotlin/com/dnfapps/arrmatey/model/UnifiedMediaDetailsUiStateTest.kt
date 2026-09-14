@@ -84,20 +84,21 @@ class UnifiedMediaDetailsUiStateTest {
 
     @Test
     fun testGetAvailableTabsAndDefaultTab() {
-        val stateWithSeasons = UnifiedMediaDetailsUiState.Success(
-            seasons = listOf(SeasonWrapper(seasonNumber = 1))
-        )
+        val stateWithSeasons =
+            UnifiedMediaDetailsUiState.Success(
+                seasons = listOf(SeasonWrapper(seasonNumber = 1)),
+            )
         assertEquals(UnifiedMediaDetailsTab.SeasonsFiles, stateWithSeasons.defaultTab)
         assertEquals(
             listOf(UnifiedMediaDetailsTab.SeasonsFiles, UnifiedMediaDetailsTab.Overview),
-            stateWithSeasons.getAvailableTabs(isTracearrConfigured = false)
+            stateWithSeasons.getAvailableTabs(isTracearrConfigured = false),
         )
 
         val stateEmpty = UnifiedMediaDetailsUiState.Success()
         assertEquals(UnifiedMediaDetailsTab.Overview, stateEmpty.defaultTab)
         assertEquals(
             listOf(UnifiedMediaDetailsTab.Overview),
-            stateEmpty.getAvailableTabs(isTracearrConfigured = false)
+            stateEmpty.getAvailableTabs(isTracearrConfigured = false),
         )
     }
 }

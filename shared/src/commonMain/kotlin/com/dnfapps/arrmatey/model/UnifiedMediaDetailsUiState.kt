@@ -87,11 +87,12 @@ sealed interface UnifiedMediaDetailsUiState {
             get() = canDeleteFile()
 
         fun canDeleteFile(instanceType: InstanceType? = null): Boolean {
-            val type = instanceType ?: when (arrMedia) {
-                is ArrMovie -> InstanceType.Radarr
-                is Audiobook -> InstanceType.Listenarr
-                else -> null
-            }
+            val type =
+                instanceType ?: when (arrMedia) {
+                    is ArrMovie -> InstanceType.Radarr
+                    is Audiobook -> InstanceType.Listenarr
+                    else -> null
+                }
             return when (type) {
                 InstanceType.Radarr ->
                     (arrMedia as? ArrMovie)?.let { it.movieFile != null || it.movieFileId != null } == true
