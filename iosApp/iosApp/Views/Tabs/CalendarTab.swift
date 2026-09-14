@@ -43,14 +43,16 @@ struct CalendarTabContent: View {
                     .scaleEffect(2)
             } else {
                 ZStack {
-                    if viewModel.calendarState.filterState.viewMode == .list {
-                        CalendarListView(state: viewModel.calendarState, instances: viewModel.instances, onItemClick: { item, instanceId in
-                            handleItemClick(item, instanceId: instanceId)
-                        }, onLoadMore: { viewModel.loadMore() })
-                    } else {
-                        CalendarMonthView(state: viewModel.calendarState, instances: viewModel.instances, onItemClick: { item, instanceId in
-                            handleItemClick(item, instanceId: instanceId)
-                        }, onLoadMore: { viewModel.loadMore() })
+                    if viewModel.calendarState.hasLoaded || !viewModel.calendarState.items.isEmpty {
+                        if viewModel.calendarState.filterState.viewMode == .list {
+                            CalendarListView(state: viewModel.calendarState, instances: viewModel.instances, onItemClick: { item, instanceId in
+                                handleItemClick(item, instanceId: instanceId)
+                            }, onLoadMore: { viewModel.loadMore() })
+                        } else {
+                            CalendarMonthView(state: viewModel.calendarState, instances: viewModel.instances, onItemClick: { item, instanceId in
+                                handleItemClick(item, instanceId: instanceId)
+                            }, onLoadMore: { viewModel.loadMore() })
+                        }
                     }
                 }
             }
