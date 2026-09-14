@@ -214,44 +214,46 @@ private fun CalendarHomeScreen(
                     isRefreshing = calendarState.isLoading,
                     onRefresh = { viewModel.load() },
                 ) {
-                    if (isExpanded) {
-                        Row(modifier = Modifier.fillMaxSize()) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                CalendarMonthView(
-                                    state = calendarState,
-                                    instances = instances,
-                                    onItemClick = onItemClick,
-                                    onLoadMore = { viewModel.loadMore() },
-                                )
+                    if (calendarState.hasLoaded || calendarState.items.isNotEmpty()) {
+                        if (isExpanded) {
+                            Row(modifier = Modifier.fillMaxSize()) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    CalendarMonthView(
+                                        state = calendarState,
+                                        instances = instances,
+                                        onItemClick = onItemClick,
+                                        onLoadMore = { viewModel.loadMore() },
+                                    )
+                                }
+                                VerticalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+                                Box(modifier = Modifier.weight(if (wideRailIsVisible) 1.25f else 1f)) {
+                                    CalendarListView(
+                                        state = calendarState,
+                                        instances = instances,
+                                        onItemClick = onItemClick,
+                                        onLoadMore = { viewModel.loadMore() },
+                                    )
+                                }
                             }
-                            VerticalDivider(modifier = Modifier.padding(horizontal = 8.dp))
-                            Box(modifier = Modifier.weight(if (wideRailIsVisible) 1.25f else 1f)) {
-                                CalendarListView(
-                                    state = calendarState,
-                                    instances = instances,
-                                    onItemClick = onItemClick,
-                                    onLoadMore = { viewModel.loadMore() },
-                                )
-                            }
-                        }
-                    } else {
-                        when (calendarState.filterState.viewMode) {
-                            CalendarViewMode.List -> {
-                                CalendarListView(
-                                    state = calendarState,
-                                    instances = instances,
-                                    onItemClick = onItemClick,
-                                    onLoadMore = { viewModel.loadMore() },
-                                )
-                            }
+                        } else {
+                            when (calendarState.filterState.viewMode) {
+                                CalendarViewMode.List -> {
+                                    CalendarListView(
+                                        state = calendarState,
+                                        instances = instances,
+                                        onItemClick = onItemClick,
+                                        onLoadMore = { viewModel.loadMore() },
+                                    )
+                                }
 
-                            CalendarViewMode.Month -> {
-                                CalendarMonthView(
-                                    state = calendarState,
-                                    instances = instances,
-                                    onItemClick = onItemClick,
-                                    onLoadMore = { viewModel.loadMore() },
-                                )
+                                CalendarViewMode.Month -> {
+                                    CalendarMonthView(
+                                        state = calendarState,
+                                        instances = instances,
+                                        onItemClick = onItemClick,
+                                        onLoadMore = { viewModel.loadMore() },
+                                    )
+                                }
                             }
                         }
                     }
