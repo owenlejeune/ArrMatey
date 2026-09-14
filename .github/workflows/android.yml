@@ -27,12 +27,24 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
+        with:
+          # jdks isn't cached by default, so the pinned daemon JVM re-downloads every run.
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Run Lint, Tests, and Build Debug APK
-        run: ./gradlew spotlessCheck lintDebug test :composeApp:assembleDebug --continue
+        # The `test` lifecycle task only reaches :composeApp.
+        run: >
+          ./gradlew spotlessCheck lintDebug
+          :shared:testAndroidHostTest
+          :networking:testAndroidHostTest
+          :composeApp:testDebugUnitTest
+          :composeApp:assembleDebug --continue
 
       - name: Upload Test Results
         if: always()

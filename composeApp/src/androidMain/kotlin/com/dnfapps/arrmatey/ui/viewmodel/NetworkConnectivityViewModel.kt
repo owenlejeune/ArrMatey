@@ -26,7 +26,6 @@ class NetworkConnectivityViewModel :
     }
 
     override fun onCleared() {
-        super.onCleared()
         networkConnectivityRepository.stopObserving()
     }
 }

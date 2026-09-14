@@ -104,7 +104,6 @@ google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.re
 flexible-bottomsheet = { module = "com.github.skydoves:flexible-bottomsheet-material3", version.ref = "flexible-bottomsheet" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-mockk-common = { module = "io.mockk:mockk-common", version.ref = "mockk" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 koin-test = { module = "io.insert-koin:koin-test" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }

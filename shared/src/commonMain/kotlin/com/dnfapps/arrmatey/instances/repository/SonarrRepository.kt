@@ -62,8 +62,7 @@ class SonarrRepository(
 
         return sonarrClient
             .update(updatedSeries)
-            .onSuccess { resultSeries ->
-                val series = resultSeries as ArrSeries
+            .onSuccess { series ->
                 libraryRepository.setMonitorStatus(OperationStatus.Success("Season monitor toggled"))
                 libraryRepository.updateMediaDetailsCache(id, series)
                 libraryRepository.updateItemInLibraryCache(series)

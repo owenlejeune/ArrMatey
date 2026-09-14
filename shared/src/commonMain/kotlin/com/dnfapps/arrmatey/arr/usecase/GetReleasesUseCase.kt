@@ -37,8 +37,8 @@ class GetReleasesUseCase(
                                 type = result.errorType.toHttpError(),
                             )
 
-                        is NetworkResult.Success<*> -> {
-                            val data = result.data as List<ArrRelease>
+                        is NetworkResult.Success -> {
+                            val data = result.data
                             ReleaseLibrary.Success(
                                 items = data,
                                 filterLanguages = parseLanguages(data),

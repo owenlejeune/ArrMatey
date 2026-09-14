@@ -120,7 +120,6 @@ fun CustomWebpageViewerScreen(
                 clearHistory()
                 clearCache(true)
                 removeAllViews()
-                destroyDrawingCache()
                 destroy()
             }
             webView = null
@@ -319,7 +318,6 @@ fun CustomWebpageViewerScreen(
                         view.clearHistory()
                         view.clearCache(true)
                         view.removeAllViews()
-                        view.destroyDrawingCache()
                         view.destroy()
                     },
                 )

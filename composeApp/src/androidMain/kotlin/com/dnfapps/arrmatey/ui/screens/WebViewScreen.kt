@@ -106,7 +106,6 @@ fun WebViewScreen(
                 clearHistory()
                 clearCache(true)
                 removeAllViews()
-                destroyDrawingCache()
                 destroy()
             }
             webView = null

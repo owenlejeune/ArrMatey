@@ -58,7 +58,7 @@ class ScheduleNotificationUseCase(
                 when (item) {
                     is ArrMovie -> {
                         extras[NotificationConstants.EXTRA_ITEM_ID] = item.id.toString()
-                        item.tmdbId?.let { extras[NotificationConstants.EXTRA_TMDB_ID] = it.toString() }
+                        extras[NotificationConstants.EXTRA_TMDB_ID] = item.tmdbId.toString()
                     }
 
                     is Episode -> {
