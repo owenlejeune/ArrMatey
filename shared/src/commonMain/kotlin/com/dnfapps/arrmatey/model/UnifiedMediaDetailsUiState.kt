@@ -2,10 +2,13 @@ package com.dnfapps.arrmatey.model
 
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
+import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
@@ -16,6 +19,7 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrDetails
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.getUpcomingDateString
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.ImdbRating
 import com.dnfapps.arrmatey.seerr.api.model.Keyword
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
@@ -68,6 +72,59 @@ sealed interface UnifiedMediaDetailsUiState {
 
         val hasArrId: Boolean
             get() = arrMedia?.let { it.id != null && it.id != 0L } ?: false
+
+        val hasSeasonsOrFiles: Boolean
+            get() = seasons.isNotEmpty() || (hasArrId && arrMedia !is ArrSeries) || queueItems.isNotEmpty()
+
+        val isMovieOrTv: Boolean
+            get() =
+                arrMedia is ArrMovie ||
+                    arrMedia is ArrSeries ||
+                    seerrMedia is MovieDetails ||
+                    seerrMedia is TvDetails
+
+        val canDeleteFile: Boolean
+            get() = canDeleteFile()
+
+        fun canDeleteFile(instanceType: InstanceType? = null): Boolean {
+            val type = instanceType ?: when (arrMedia) {
+                is ArrMovie -> InstanceType.Radarr
+                is Audiobook -> InstanceType.Listenarr
+                else -> null
+            }
+            return when (type) {
+                InstanceType.Radarr ->
+                    (arrMedia as? ArrMovie)?.let { it.movieFile != null || it.movieFileId != null } == true
+                InstanceType.Listenarr ->
+                    (arrMedia as? Audiobook)?.let {
+                        it.files.isNotEmpty() ||
+                            it.fileCount > 0 ||
+                            !it.filePath.isNullOrBlank()
+                    } == true
+                else -> false
+            }
+        }
+
+        fun hasTracearr(isTracearrConfigured: Boolean): Boolean = isTracearrConfigured && isMovieOrTv
+
+        fun getAvailableTabs(isTracearrConfigured: Boolean): List<UnifiedMediaDetailsTab> =
+            buildList {
+                if (hasSeasonsOrFiles) add(UnifiedMediaDetailsTab.SeasonsFiles)
+                add(UnifiedMediaDetailsTab.Overview)
+                if (hasTracearr(isTracearrConfigured)) {
+                    add(UnifiedMediaDetailsTab.Analytics)
+                    add(UnifiedMediaDetailsTab.History)
+                }
+            }
+
+        val defaultTab: UnifiedMediaDetailsTab
+            get() = if (hasSeasonsOrFiles) UnifiedMediaDetailsTab.SeasonsFiles else UnifiedMediaDetailsTab.Overview
+
+        fun findSeriesAndEpisode(initialEpisodeId: Long): Pair<ArrSeries, Episode>? {
+            val series = (arrMedia as? ArrSeries) ?: episodes.firstNotNullOfOrNull { it.arrEpisode?.series }
+            val episode = episodes.mapNotNull { it.arrEpisode }.find { it.id == initialEpisodeId }
+            return if (series != null && episode != null) series to episode else null
+        }
 
         val displayTitle: String?
             get() = seerrMedia?.displayTitle ?: arrMedia?.title

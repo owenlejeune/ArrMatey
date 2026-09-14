@@ -43,6 +43,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var tags: [Tag] = []
     @Published private(set) var preferences: InstancePreferences = InstancePreferences()
 
+    @Published private(set) var addItemStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var editStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var deleteStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var deleteSeasonStatus: OperationStatus = OperationStatusIdle()
@@ -125,6 +126,8 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.rootFolders.observeAsync(on: self, to: \.rootFolders)
         viewModel.tags.observeAsync(on: self, to: \.tags)
         viewModel.preferences.observeAsync(on: self, to: \.preferences)
+
+        viewModel.addItemStatus.observeAsync(on: self, to: \.addItemStatus)
 
         viewModel.editStatus.observeAsync(on: self) { owner, status in
             owner.editStatus = status

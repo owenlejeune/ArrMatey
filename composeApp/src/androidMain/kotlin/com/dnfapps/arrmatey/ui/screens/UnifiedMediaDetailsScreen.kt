@@ -4,54 +4,24 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Approval
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.HighQuality
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -59,13 +29,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,78 +42,58 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
-import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
-import com.dnfapps.arrmatey.arr.api.model.SearchAuthor
-import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.entensions.unlessEmpty
-import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
-import com.dnfapps.arrmatey.model.SmartAddSeerrAction
+import com.dnfapps.arrmatey.model.UnifiedMediaDetailsTab
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
-import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
-import com.dnfapps.arrmatey.seerr.api.model.TvDetails
-import com.dnfapps.arrmatey.seerr.state.MediaButtonState
-import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
-import com.dnfapps.arrmatey.ui.components.AlbumsArea
-import com.dnfapps.arrmatey.ui.components.AudiobookFileView
-import com.dnfapps.arrmatey.ui.components.BooksArea
 import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
-import com.dnfapps.arrmatey.ui.components.InfoArea
-import com.dnfapps.arrmatey.ui.components.InfoCardData
-import com.dnfapps.arrmatey.ui.components.InfoCardInstanceFooter
 import com.dnfapps.arrmatey.ui.components.InstancePicker
-import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
-import com.dnfapps.arrmatey.ui.components.MediaActivitySection
-import com.dnfapps.arrmatey.ui.components.MovieFileView
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
-import com.dnfapps.arrmatey.ui.components.SeasonsArea
-import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
-import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
-import com.dnfapps.arrmatey.ui.components.buildArrInfoItems
-import com.dnfapps.arrmatey.ui.components.buildSeerrInfoItems
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrHistorySection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrSummaryChipRow
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmClearSeerrDataDialog
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmDeleteAlbumDialog
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmDeleteAudiobookDialog
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmDeleteEpisodeDialog
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmDeleteMovieDialog
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmDeleteSeasonDialog
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmDeleteSeerrFileDialog
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmMoveFilesDialog
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.PendingSeerrRequestDialog
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.menus.MediaActionsToolbarMenus
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.menus.UnifiedMediaDetailsToolbarMenu
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.AddMediaSheetsHost
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.EditMediaSheetsHost
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeerrReportIssueSheetHost
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeerrRequestSheetHost
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeerrViewRequestSheetHost
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.tabs.OverviewTabContent
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.tabs.SeasonsFilesTabContent
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
-import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
-import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
-import com.dnfapps.arrmatey.ui.sheets.AddAuthorSheet
-import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
-import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
-import com.dnfapps.arrmatey.ui.sheets.EditAlbumSheet
-import com.dnfapps.arrmatey.ui.sheets.EditMediaSheet
-import com.dnfapps.arrmatey.ui.sheets.EditPathSheet
-import com.dnfapps.arrmatey.ui.sheets.SeerrReportIssueSheet
-import com.dnfapps.arrmatey.ui.sheets.SeerrRequestSheet
-import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
@@ -155,18 +102,11 @@ import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
-import dev.icerock.moko.resources.ImageResource
-import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-private enum class DetailsTab {
-    SeasonsFiles,
-    Overview,
-    Analytics,
-    History,
-}
+private typealias DetailsTab = UnifiedMediaDetailsTab
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -463,20 +403,7 @@ fun UnifiedMediaDetailsScreen(
                             )
                         }
 
-                        val canDeleteFile =
-                            when (resolvedType) {
-                                InstanceType.Radarr ->
-                                    (success.arrMedia as? ArrMovie)?.let { it.movieFile != null || it.movieFileId != null } ==
-                                        true
-                                InstanceType.Listenarr ->
-                                    (success.arrMedia as? Audiobook)?.let {
-                                        it.files.isNotEmpty() ||
-                                            it.fileCount > 0 ||
-                                            !it.filePath.isNullOrBlank()
-                                    } ==
-                                        true
-                                else -> false
-                            }
+                        val canDeleteFile = success.canDeleteFile(resolvedType)
 
                         UnifiedMediaDetailsToolbarMenu(
                             success = success,
@@ -583,49 +510,34 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    val isMovieOrTv =
-                                        state.arrMedia is ArrMovie ||
-                                            state.arrMedia is ArrSeries ||
-                                            state.seerrMedia is MovieDetails ||
-                                            state.seerrMedia is TvDetails
-
-                                    if (isMovieOrTv) {
+                                    if (state.isMovieOrTv) {
                                         TracearrSummaryChipRow(
                                             uiState = tracearrState,
                                             modifier = Modifier.padding(top = 8.dp),
                                         )
                                     }
 
-                                    val hasSeasonsOrFiles = state.seasons.isNotEmpty() || (state.hasArrId && state.arrMedia !is ArrSeries) || state.queueItems.isNotEmpty()
-                                    val hasTracearr = tracearrState.isTracearrConfigured && isMovieOrTv
-
-                                    LaunchedEffect(hasSeasonsOrFiles) {
+                                    LaunchedEffect(state.hasSeasonsOrFiles) {
                                         val prev = previousHasSeasonsOrFiles
                                         if (prev == null) {
-                                            if (hasSeasonsOrFiles) {
+                                            if (state.hasSeasonsOrFiles) {
                                                 selectedTab = DetailsTab.SeasonsFiles
                                             }
-                                        } else if (!prev && hasSeasonsOrFiles) {
+                                        } else if (!prev && state.hasSeasonsOrFiles) {
                                             selectedTab = DetailsTab.SeasonsFiles
-                                        } else if (prev && !hasSeasonsOrFiles) {
+                                        } else if (prev && !state.hasSeasonsOrFiles) {
                                             if (selectedTab == DetailsTab.SeasonsFiles) {
                                                 selectedTab = DetailsTab.Overview
                                             }
                                         }
-                                        previousHasSeasonsOrFiles = hasSeasonsOrFiles
+                                        previousHasSeasonsOrFiles = state.hasSeasonsOrFiles
                                     }
 
-                                    val availableTabs =
-                                        buildList {
-                                            if (hasSeasonsOrFiles) add(DetailsTab.SeasonsFiles)
-                                            add(DetailsTab.Overview)
-                                            if (hasTracearr) add(DetailsTab.Analytics)
-                                            if (hasTracearr) add(DetailsTab.History)
-                                        }
+                                    val availableTabs = state.getAvailableTabs(tracearrState.isTracearrConfigured)
 
                                     LaunchedEffect(availableTabs) {
                                         if (selectedTab !in availableTabs) {
-                                            selectedTab = if (hasSeasonsOrFiles) DetailsTab.SeasonsFiles else DetailsTab.Overview
+                                            selectedTab = state.defaultTab
                                         }
                                     }
 
@@ -662,204 +574,52 @@ fun UnifiedMediaDetailsScreen(
 
                                 when (selectedTab) {
                                     DetailsTab.SeasonsFiles -> {
-                                        AnimatedVisibility(
-                                            visible = state.queueItems.isNotEmpty(),
-                                            enter = expandVertically() + fadeIn(),
-                                            exit = shrinkVertically() + fadeOut(),
-                                        ) {
-                                            MediaActivitySection(
-                                                queueItems = state.queueItems,
-                                                onQueueItemClicked = { item ->
-                                                    selectedQueueItem = item
-                                                },
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                            )
-                                        }
-
-                                        if (state.seasons.isNotEmpty()) {
-                                            val arrSeries = state.arrMedia as? ArrSeries
-                                            SeasonsArea(
-                                                seasons = state.seasons,
-                                                seriesId = arrSeries?.id,
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                                searchIds = automaticSearchIds,
-                                                onToggleSeasonMonitor = { viewModel.toggleSeasonMonitored(it) },
-                                                onToggleEpisodeMonitor = { viewModel.toggleEpisodeMonitored(it) },
-                                                onEpisodeAutomaticSearch = { viewModel.performEpisodeAutomaticLookup(it) },
-                                                onSeasonAutomaticSearch = { viewModel.performSeasonAutomaticLookup(it) },
-                                                deleteSeasonFiles = { confirmDeleteSeasonNumber = it },
-                                                seasonDeleteInProgress = deleteSeasonStatus is OperationStatus.InProgress,
-                                                onNavigateToEpisodeDetails = { episode ->
-                                                    arrSeries?.let { series -> onNavigateToEpisodeDetails(series, episode) }
-                                                },
-                                                deleteEpisodeFile = { confirmDeleteEpisodeId = it },
-                                                onNavigateToSeriesRelease = onNavigateToSeriesRelease,
-                                                bazarrDetailsIntegration = state.bazarrDetailsIntegration,
-                                            )
-                                        }
-
-                                        AnimatedVisibility(
-                                            visible = state.hasArrId && state.arrMedia !is ArrSeries,
-                                            enter = expandVertically() + fadeIn(),
-                                            exit = shrinkVertically() + fadeOut(),
-                                        ) {
-                                            when (val item = state.arrMedia) {
-                                                is ArrMovie -> {
-                                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                                        MovieFileView(
-                                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                                            movie = item,
-                                                            movieExtraFiles = state.extraFiles,
-                                                            searchIds = automaticSearchIds,
-                                                            onAutomaticSearch = { viewModel.performAutomaticLookup() },
-                                                            onDeleteFile = { confirmDeleteMovie = true },
-                                                            onNavigateToMovieFiles = onNavigateToMovieFiles,
-                                                            onNavigateToMovieReleases = onNavigateToMovieReleases,
-                                                        )
-                                                        item.id?.let { movieId ->
-                                                            if (state.bazarrDetailsIntegration) {
-                                                                BazarrSubtitlesSection(
-                                                                    target = BazarrMediaTarget.Movie(movieId),
-                                                                    modifier = Modifier.padding(horizontal = 24.dp),
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                                is Arrtist ->
-                                                    AlbumsArea(
-                                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                                        artist = item,
-                                                        albums = state.albums,
-                                                        tracks = state.tracks,
-                                                        trackFiles = state.trackFiles,
-                                                        searchIds = automaticSearchIds,
-                                                        onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
-                                                        onEditAlbum = { editAlbum = it },
-                                                        onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
-                                                        deleteAlbumFiles = { confirmDeleteAlbum = it },
-                                                        albumDeleteInProgress = deleteAlbumStatus is OperationStatus.InProgress,
-                                                        onNavigateToAlbumRelease = onNavigateToAlbumRelease,
-                                                    )
-
-                                                is Author ->
-                                                    BooksArea(
-                                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                                        author = item,
-                                                        series = state.bookSeries,
-                                                        files = state.bookFiles,
-                                                        books = state.books,
-                                                        searchIds = automaticSearchIds,
-                                                        onToggleMonitor = { viewModel.toggleBookMonitored(it) },
-                                                        onToggleSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
-                                                        onAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
-                                                        onNavigateToAuthorFiles = onNavigateToAuthorFiles,
-                                                        onNavigateToBookDetails = onNavigateToBookDetails,
-                                                        onNavigateToBookRelease = onNavigateToBookRelease,
-                                                    )
-
-                                                is Audiobook ->
-                                                    AudiobookFileView(
-                                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                                        audiobook = item,
-                                                        searchIds = automaticSearchIds,
-                                                        onAutomaticSearch = { item.id?.let { viewModel.performBookAutomaticLookup(it) } },
-                                                        onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
-                                                        onNavigateToAudiobookRelease = onNavigateToAudiobookRelease,
-                                                    )
-
-                                                is ArrSeries, is SearchAudiobook, is MockMedia, null -> {}
-                                            }
-                                        }
+                                        SeasonsFilesTabContent(
+                                            state = state,
+                                            automaticSearchIds = automaticSearchIds,
+                                            deleteSeasonStatus = deleteSeasonStatus,
+                                            deleteAlbumStatus = deleteAlbumStatus,
+                                            onQueueItemClicked = { item -> selectedQueueItem = item },
+                                            onToggleSeasonMonitor = { viewModel.toggleSeasonMonitored(it) },
+                                            onToggleEpisodeMonitor = { viewModel.toggleEpisodeMonitored(it) },
+                                            onEpisodeAutomaticSearch = { viewModel.performEpisodeAutomaticLookup(it) },
+                                            onSeasonAutomaticSearch = { viewModel.performSeasonAutomaticLookup(it) },
+                                            onDeleteSeasonFiles = { confirmDeleteSeasonNumber = it },
+                                            onNavigateToEpisodeDetails = onNavigateToEpisodeDetails,
+                                            onDeleteEpisodeFile = { confirmDeleteEpisodeId = it },
+                                            onNavigateToSeriesRelease = onNavigateToSeriesRelease,
+                                            onPerformAutomaticLookup = { viewModel.performAutomaticLookup() },
+                                            onDeleteMovieFile = { confirmDeleteMovie = true },
+                                            onNavigateToMovieFiles = onNavigateToMovieFiles,
+                                            onNavigateToMovieReleases = onNavigateToMovieReleases,
+                                            onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
+                                            onEditAlbum = { editAlbum = it },
+                                            onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
+                                            onDeleteAlbumFiles = { confirmDeleteAlbum = it },
+                                            onNavigateToAlbumRelease = onNavigateToAlbumRelease,
+                                            onToggleBookMonitor = { viewModel.toggleBookMonitored(it) },
+                                            onToggleBookSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
+                                            onBookAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
+                                            onNavigateToAuthorFiles = onNavigateToAuthorFiles,
+                                            onNavigateToBookDetails = onNavigateToBookDetails,
+                                            onNavigateToBookRelease = onNavigateToBookRelease,
+                                            onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
+                                            onNavigateToAudiobookRelease = onNavigateToAudiobookRelease,
+                                        )
                                     }
 
                                     DetailsTab.Overview -> {
-                                        state.overview?.unlessEmpty {
-                                            ItemDescriptionCard(
-                                                overview = it,
-                                                modifier = Modifier.padding(horizontal = 24.dp),
-                                            )
-                                        }
-
-                                        state.seerrMedia?.credits?.let { credits ->
-                                            SeerrCreditsSection(credits) { onPersonClick(it) }
-                                        }
-
-                                        val arrInfoItems =
-                                            buildArrInfoItems(state, qualityProfiles, tags, onEditPath = {
-                                                showEditPathSheet =
-                                                    true
-                                            })
-                                        val seerrInfoItems = buildSeerrInfoItems(state)
-                                        val showBothCards = arrInfoItems.isNotEmpty() && seerrInfoItems.isNotEmpty()
-
-                                        val selectedArrInstance =
-                                            state.availableInstances.firstOrNull { it.id == state.selectedInstanceId } ?: activeInstance
-                                        val selectedSeerrInstance = activeSeerrInstance
-
-                                        if (arrInfoItems.isNotEmpty() || seerrInfoItems.isNotEmpty() || state.keywords.isNotEmpty()) {
-                                            InfoArea(
-                                                cards =
-                                                    listOf(
-                                                        InfoCardData(
-                                                            items = arrInfoItems,
-                                                            footer =
-                                                                if (showBothCards && selectedArrInstance != null) {
-                                                                    { InfoCardInstanceFooter(selectedArrInstance) }
-                                                                } else {
-                                                                    null
-                                                                },
-                                                        ),
-                                                        InfoCardData(
-                                                            items = seerrInfoItems,
-                                                            content =
-                                                                if (state.keywords.isNotEmpty()) {
-                                                                    {
-                                                                        Column(
-                                                                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                                                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                                                                        ) {
-                                                                            Text(
-                                                                                text = mokoString(MR.strings.tags),
-                                                                                fontSize = 14.sp,
-                                                                            )
-                                                                            FlowRow(
-                                                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                                                                verticalArrangement = Arrangement.spacedBy(6.dp),
-                                                                            ) {
-                                                                                state.keywords.forEach { keyword ->
-                                                                                    Surface(
-                                                                                        shape = RoundedCornerShape(8.dp),
-                                                                                        color = MaterialTheme.colorScheme.secondaryContainer,
-                                                                                    ) {
-                                                                                        Text(
-                                                                                            text = keyword.name,
-                                                                                            style = MaterialTheme.typography.labelSmall,
-                                                                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                                                            fontWeight = FontWeight.SemiBold,
-                                                                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                                                                        )
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                } else {
-                                                                    null
-                                                                },
-                                                            footer =
-                                                                if (showBothCards && selectedSeerrInstance != null) {
-                                                                    { InfoCardInstanceFooter(selectedSeerrInstance) }
-                                                                } else {
-                                                                    null
-                                                                },
-                                                        ),
-                                                    ),
-                                                modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
-                                                useDualColumn = isExpanded && !isDualPanel,
-                                            )
-                                        }
+                                        OverviewTabContent(
+                                            state = state,
+                                            qualityProfiles = qualityProfiles,
+                                            tags = tags,
+                                            activeInstance = activeInstance,
+                                            activeSeerrInstance = activeSeerrInstance,
+                                            isExpanded = isExpanded,
+                                            isDualPanel = isDualPanel,
+                                            onEditPath = { showEditPathSheet = true },
+                                            onPersonClick = onPersonClick,
+                                        )
                                     }
 
                                     DetailsTab.Analytics -> {
@@ -900,248 +660,107 @@ fun UnifiedMediaDetailsScreen(
                 }
             }
             lastSuccessState?.let { state ->
-                if (isRequestSheetVisible) {
-                    state.seerrMedia?.let { seerrMedia ->
-                        val isRequest4k by viewModel.isRequest4k.collectAsStateWithLifecycle()
-                        SeerrRequestSheet(
-                            details = seerrMedia,
-                            serviceDetails = serviceDetails,
-                            currentUser = currentUser,
-                            users = users,
-                            requestInProgress = requestStatus is OperationStatus.InProgress,
-                            onDismissRequest = { viewModel.hideRequestSheet() },
-                            onSubmitRequest = { profileId, rootFolder, langId, seasons, userId ->
-                                viewModel.submitRequest(
-                                    profileId,
-                                    rootFolder,
-                                    langId,
-                                    seasons,
-                                    is4k = isRequest4k,
-                                    userId = userId,
-                                )
-                            },
+                val isRequest4k by viewModel.isRequest4k.collectAsStateWithLifecycle()
+                SeerrRequestSheetHost(
+                    visible = isRequestSheetVisible,
+                    details = state.seerrMedia,
+                    serviceDetails = serviceDetails,
+                    currentUser = currentUser,
+                    users = users,
+                    requestInProgress = requestStatus is OperationStatus.InProgress,
+                    onSubmitRequest = { profileId, rootFolder, langId, seasons, userId ->
+                        viewModel.submitRequest(
+                            profileId,
+                            rootFolder,
+                            langId,
+                            seasons,
+                            is4k = isRequest4k,
+                            userId = userId,
                         )
-                    }
-                }
-                if (isReportIssueSheetVisible) {
-                    SeerrReportIssueSheet(
-                        state = reportIssueState,
-                        updateIssueType = { viewModel.setIssueType(it) },
-                        updateMessage = { viewModel.setIssueMessage(it) },
-                        updateProblemSeason = { viewModel.setProblemSeason(it) },
-                        updateProblemEpisode = { viewModel.setProblemEpisode(it) },
-                        onReset = { viewModel.resetIssueState() },
-                        onSubmit = { viewModel.submitIssue() },
-                        onDismiss = { viewModel.hideReportIssueSheet() },
-                    )
-                }
-                if (showAddSheet) {
-                    state.arrMedia?.let { arrMedia ->
-                        when (arrMedia) {
-                            is ArrSeries ->
-                                AddSeriesSheet(
-                                    item = arrMedia,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false },
-                                )
+                    },
+                    onDismiss = { viewModel.hideRequestSheet() },
+                )
 
-                            is ArrMovie ->
-                                AddMovieSheet(
-                                    item = arrMedia,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false },
-                                )
+                SeerrReportIssueSheetHost(
+                    visible = isReportIssueSheetVisible,
+                    state = reportIssueState,
+                    onUpdateIssueType = { viewModel.setIssueType(it) },
+                    onUpdateMessage = { viewModel.setIssueMessage(it) },
+                    onUpdateProblemSeason = { viewModel.setProblemSeason(it) },
+                    onUpdateProblemEpisode = { viewModel.setProblemEpisode(it) },
+                    onReset = { viewModel.resetIssueState() },
+                    onSubmit = { viewModel.submitIssue() },
+                    onDismiss = { viewModel.hideReportIssueSheet() },
+                )
+                AddMediaSheetsHost(
+                    visible = showAddSheet,
+                    state = state,
+                    addSheetUiState = addSheetUiState,
+                    qualityProfiles = qualityProfiles,
+                    rootFolders = rootFolders,
+                    tags = tags,
+                    addItemStatus = addItemStatus,
+                    preferences = preferences,
+                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                    onSmartAdd = { newItem, searchOnAdd, targetInstId ->
+                        viewModel.smartAdd(newItem, searchOnAdd, targetInstId)
+                    },
+                    onUpdatePreferences = viewModel::updatePreferences,
+                    onDismiss = { showAddSheet = false },
+                )
 
-                            is Arrtist ->
-                                AddArtistSheet(
-                                    item = arrMedia,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false },
-                                )
-
-                            is Author ->
-                                AddAuthorSheet(
-                                    item = arrMedia,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false },
-                                )
-
-                            is SearchAudiobook ->
-                                AddAudiobookSheet(
-                                    item = arrMedia,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    relativePath = "",
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false },
-                                )
-
-                            is Audiobook -> {
-                                val searchAudiobook =
-                                    SearchAudiobook(
-                                        asin = arrMedia.asin ?: "",
-                                        title = arrMedia.title ?: "",
-                                        summary = arrMedia.overview,
-                                        authors = arrMedia.authors.map { SearchAuthor(name = it) },
-                                    )
-                                AddAudiobookSheet(
-                                    item = searchAudiobook,
-                                    qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
-                                    rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
-                                    relativePath = "",
-                                    addInProgress = addItemStatus is OperationStatus.InProgress,
-                                    preferences = preferences,
-                                    instances = addSheetUiState.availableInstances,
-                                    selectedInstance = addSheetUiState.targetInstance,
-                                    onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
-                                    onAddItem = { newItem, searchOnAdd ->
-                                        viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                    },
-                                    onUpdatePreferences = viewModel::updatePreferences,
-                                    onDismiss = { showAddSheet = false },
-                                )
-                            }
-
-                            else -> {}
-                        }
-                    }
-                }
-                if (isViewRequestSheetVisible) {
-                    state.seerrMedia?.let { seerrMedia ->
-                        SeerrViewRequestSheet(
-                            details = seerrMedia,
-                            serviceDetails = serviceDetails,
-                            requestInProgress = requestStatus is OperationStatus.InProgress,
-                            onDismissRequest = { viewModel.hideViewRequestSheet() },
-                            onApproveRequest = { requestId, profileId, rootFolder, languageProfileId, seasons ->
-                                viewModel.approveRequest(
-                                    requestId = requestId,
-                                    profileId = profileId,
-                                    rootFolder = rootFolder,
-                                    languageProfileId = languageProfileId,
-                                    seasons = seasons,
-                                )
-                            },
-                            onDeclineRequest = { requestId ->
-                                viewModel.declineRequest(requestId)
-                            },
+                SeerrViewRequestSheetHost(
+                    visible = isViewRequestSheetVisible,
+                    details = state.seerrMedia,
+                    serviceDetails = serviceDetails,
+                    requestInProgress = requestStatus is OperationStatus.InProgress,
+                    onApproveRequest = { requestId, profileId, rootFolder, languageProfileId, seasons ->
+                        viewModel.approveRequest(
+                            requestId = requestId,
+                            profileId = profileId,
+                            rootFolder = rootFolder,
+                            languageProfileId = languageProfileId,
+                            seasons = seasons,
                         )
-                    }
-                }
+                    },
+                    onDeclineRequest = { requestId ->
+                        viewModel.declineRequest(requestId)
+                    },
+                    onDismiss = { viewModel.hideViewRequestSheet() },
+                )
 
-                if (showEditPathSheet) {
-                    state.arrMedia?.let { arrMedia ->
-                        EditPathSheet(
-                            item = arrMedia,
-                            rootFolders = rootFolders,
-                            editInProgress = editStatus is OperationStatus.InProgress,
-                            onEditItem = { updatedItem, moveFiles ->
-                                viewModel.editItem(updatedItem, moveFiles = moveFiles)
-                                showEditPathSheet = false
-                            },
-                            onDismiss = { showEditPathSheet = false },
-                        )
-                    }
-                }
-
-                if (showEditSheet) {
-                    state.arrMedia?.let { arrMedia ->
-                        EditMediaSheet(
-                            item = arrMedia,
-                            qualityProfiles = qualityProfiles,
-                            rootFolders = rootFolders,
-                            tags = tags,
-                            editInProgress = editStatus is OperationStatus.InProgress,
-                            onEditItem = {
-                                if (arrMedia.rootFolderPath != it.rootFolderPath) {
-                                    moveFilesItem = it
-                                } else {
-                                    viewModel.editItem(it)
-                                }
-                            },
-                            onDismiss = { showEditSheet = false },
-                        )
-                    }
-                }
+                EditMediaSheetsHost(
+                    showEditPathSheet = showEditPathSheet,
+                    showEditSheet = showEditSheet,
+                    editAlbum = editAlbum,
+                    arrMedia = state.arrMedia,
+                    qualityProfiles = qualityProfiles,
+                    rootFolders = rootFolders,
+                    tags = tags,
+                    editStatus = editStatus,
+                    onEditItem = { updatedItem, moveFiles ->
+                        viewModel.editItem(updatedItem, moveFiles = moveFiles)
+                    },
+                    onEditMedia = { viewModel.editItem(it) },
+                    onUpdateAlbum = { viewModel.updateAlbum(it) },
+                    onRequestMoveFiles = { moveFilesItem = it },
+                    onDismissEditPath = { showEditPathSheet = false },
+                    onDismissEditMedia = { showEditSheet = false },
+                    onDismissEditAlbum = { editAlbum = null },
+                )
 
                 moveFilesItem?.let { item ->
-                    AlertDialog(
-                        onDismissRequest = { moveFilesItem = null },
-                        title = {
-                            Text(mokoString(MR.strings.move_files_confirm, item.rootFolderPath ?: ""))
+                    ConfirmMoveFilesDialog(
+                        rootFolderPath = item.rootFolderPath,
+                        onConfirmMove = {
+                            viewModel.editItem(item, moveFiles = true)
+                            moveFilesItem = null
                         },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.editItem(item, moveFiles = true)
-                                    moveFilesItem = null
-                                },
-                            ) {
-                                Text(mokoString(MR.strings.yes))
-                            }
+                        onConfirmKeep = {
+                            viewModel.editItem(item)
+                            moveFilesItem = null
                         },
-                        dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.editItem(item)
-                                    moveFilesItem = null
-                                },
-                            ) {
-                                Text(mokoString(MR.strings.no))
-                            }
-                        },
+                        onDismiss = { moveFilesItem = null },
                     )
                 }
 
@@ -1156,146 +775,56 @@ fun UnifiedMediaDetailsScreen(
                 }
 
                 confirmDeleteSeasonNumber?.let { seasonNumber ->
-                    AlertDialog(
-                        onDismissRequest = { confirmDeleteSeasonNumber = null },
-                        title = {
-                            Text(mokoString(MR.strings.delete_season, seasonNumber))
+                    ConfirmDeleteSeasonDialog(
+                        seasonNumber = seasonNumber,
+                        onConfirm = {
+                            viewModel.deleteSeasonFiles(seasonNumber)
+                            confirmDeleteSeasonNumber = null
                         },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.deleteSeasonFiles(seasonNumber)
-                                    confirmDeleteSeasonNumber = null
-                                },
-                            ) {
-                                Text(mokoString(MR.strings.yes))
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    confirmDeleteSeasonNumber = null
-                                },
-                            ) {
-                                Text(mokoString(MR.strings.no))
-                            }
-                        },
+                        onDismiss = { confirmDeleteSeasonNumber = null },
                     )
                 }
 
                 confirmDeleteAlbum?.let { albumId ->
-                    AlertDialog(
-                        onDismissRequest = { confirmDeleteAlbum = null },
-                        title = {
-                            Text(mokoString(MR.strings.delete_album))
+                    ConfirmDeleteAlbumDialog(
+                        onConfirm = {
+                            viewModel.deleteAlbumFiles(albumId)
+                            confirmDeleteAlbum = null
                         },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.deleteAlbumFiles(albumId)
-                                    confirmDeleteAlbum = null
-                                },
-                            ) {
-                                Text(mokoString(MR.strings.yes))
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    confirmDeleteAlbum = null
-                                },
-                            ) {
-                                Text(mokoString(MR.strings.no))
-                            }
-                        },
+                        onDismiss = { confirmDeleteAlbum = null },
                     )
                 }
 
                 confirmDeleteEpisodeId?.let { episodeFileId ->
-                    AlertDialog(
-                        onDismissRequest = { confirmDeleteEpisodeId = null },
-                        title = {
-                            Text(mokoString(MR.strings.confirm_delete))
+                    ConfirmDeleteEpisodeDialog(
+                        onConfirm = {
+                            viewModel.deleteEpisodeFile(episodeFileId)
+                            confirmDeleteEpisodeId = null
                         },
-                        text = {
-                            Text(mokoString(MR.strings.episode_delete_message))
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.deleteEpisodeFile(episodeFileId)
-                                    confirmDeleteEpisodeId = null
-                                },
-                            ) {
-                                Text(
-                                    text = mokoString(MR.strings.confirm),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    confirmDeleteEpisodeId = null
-                                },
-                            ) {
-                                Text(mokoString(MR.strings.cancel))
-                            }
-                        },
-                    )
-                }
-
-                editAlbum?.let { album ->
-                    EditAlbumSheet(
-                        album = album,
-                        editInProgress = editStatus is OperationStatus.InProgress,
-                        onEditAlbum = {
-                            viewModel.updateAlbum(it)
-                        },
-                        onDismiss = { editAlbum = null },
+                        onDismiss = { confirmDeleteEpisodeId = null },
                     )
                 }
 
                 if (confirmDeleteMovie) {
-                    AlertDialog(
-                        onDismissRequest = { confirmDeleteMovie = false },
-                        title = { Text(mokoString(MR.strings.confirm_delete)) },
-                        text = { Text(text = mokoString(MR.strings.confirm_delete_file)) },
-                        dismissButton = {
-                            TextButton(onClick = { confirmDeleteMovie = false }) {
-                                Text(mokoString(MR.strings.cancel))
-                            }
+                    ConfirmDeleteMovieDialog(
+                        onConfirm = {
+                            confirmDeleteMovie = false
+                            viewModel.deleteMovieFile()
                         },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                confirmDeleteMovie = false
-                                viewModel.deleteMovieFile()
-                            }) {
-                                Text(mokoString(MR.strings.confirm))
-                            }
-                        },
+                        onDismiss = { confirmDeleteMovie = false },
                     )
                 }
+
                 if (confirmDeleteAudiobookFile) {
-                    AlertDialog(
-                        onDismissRequest = { confirmDeleteAudiobookFile = false },
-                        title = { Text(mokoString(MR.strings.confirm_delete)) },
-                        text = { Text(text = mokoString(MR.strings.confirm_delete_file)) },
-                        dismissButton = {
-                            TextButton(onClick = { confirmDeleteAudiobookFile = false }) {
-                                Text(mokoString(MR.strings.cancel))
-                            }
+                    ConfirmDeleteAudiobookDialog(
+                        onConfirm = {
+                            confirmDeleteAudiobookFile = false
+                            viewModel.deleteAudiobookFile()
                         },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                confirmDeleteAudiobookFile = false
-                                viewModel.deleteAudiobookFile()
-                            }) {
-                                Text(mokoString(MR.strings.confirm))
-                            }
-                        },
+                        onDismiss = { confirmDeleteAudiobookFile = false },
                     )
                 }
+
                 selectedQueueItem?.let { item ->
                     QueueItemInfoSheet(
                         item = item,
@@ -1322,97 +851,32 @@ fun UnifiedMediaDetailsScreen(
                 if (confirmRemoveFromService) {
                     val serviceName =
                         buttonState.serviceName ?: if (requestType == RequestType.Movie) "Radarr" else "Sonarr"
-                    AlertDialog(
-                        onDismissRequest = { confirmRemoveFromService = false },
-                        title = {
-                            Text(mokoString(MR.strings.are_you_sure))
+                    ConfirmDeleteSeerrFileDialog(
+                        serviceName = serviceName,
+                        onConfirm = {
+                            viewModel.deleteSeerrMediaFile(is4k = false)
+                            confirmRemoveFromService = false
                         },
-                        text = {
-                            Text(mokoString(MR.strings.remove_from_service_confirm, serviceName))
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.deleteSeerrMediaFile(is4k = false)
-                                    confirmRemoveFromService = false
-                                },
-                            ) {
-                                Text(
-                                    text = mokoString(MR.strings.yes),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { confirmRemoveFromService = false }) {
-                                Text(mokoString(MR.strings.no))
-                            }
-                        },
+                        onDismiss = { confirmRemoveFromService = false },
                     )
                 }
 
                 if (confirmClearData) {
-                    AlertDialog(
-                        onDismissRequest = { confirmClearData = false },
-                        title = {
-                            Text(mokoString(MR.strings.are_you_sure))
+                    ConfirmClearSeerrDataDialog(
+                        onConfirm = {
+                            viewModel.clearSeerrMediaData()
+                            confirmClearData = false
                         },
-                        text = {
-                            Text(mokoString(MR.strings.clear_data_confirm))
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.clearSeerrMediaData()
-                                    confirmClearData = false
-                                },
-                            ) {
-                                Text(
-                                    text = mokoString(MR.strings.yes),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { confirmClearData = false }) {
-                                Text(mokoString(MR.strings.no))
-                            }
-                        },
+                        onDismiss = { confirmClearData = false },
                     )
                 }
 
                 pendingSeerrRequest?.let { request ->
-                    var rememberChoice by remember { mutableStateOf(false) }
-                    AlertDialog(
-                        onDismissRequest = { viewModel.dismissPendingRequestDialog() },
-                        title = { Text(mokoString(MR.strings.smart_add_seerr_title)) },
-                        text = {
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Text(mokoString(MR.strings.smart_add_seerr_message))
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.clickable { rememberChoice = !rememberChoice },
-                                ) {
-                                    Checkbox(checked = rememberChoice, onCheckedChange = { rememberChoice = it })
-                                    Text(mokoString(MR.strings.remember_choice))
-                                }
-                            }
+                    PendingSeerrRequestDialog(
+                        onAction = { action, rememberChoice ->
+                            viewModel.handlePendingRequestAction(request.id, action, rememberChoice)
                         },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                viewModel.handlePendingRequestAction(request.id, SmartAddSeerrAction.Approve, rememberChoice)
-                            }) {
-                                Text(mokoString(MR.strings.approve))
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = {
-                                viewModel.handlePendingRequestAction(request.id, SmartAddSeerrAction.Decline, rememberChoice)
-                            }) {
-                                Text(mokoString(MR.strings.decline))
-                            }
-                        },
+                        onDismiss = { viewModel.dismissPendingRequestDialog() },
                     )
                 }
 
@@ -1423,495 +887,6 @@ fun UnifiedMediaDetailsScreen(
                         onNavigateToDetails = { _, _ -> },
                         onNavigateToUser = { /* user profile */ },
                     )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
-@Composable
-private fun MediaActionsToolbarMenus(
-    buttonState: MediaButtonState,
-    canAddDirectly: Boolean,
-    onWatchClicked: (String, MediaProvider) -> Unit,
-    onWatchTrailerClicked: (String) -> Unit,
-    onViewRequestClicked: (Long) -> Unit,
-    onApproveRequestClicked: (Long) -> Unit,
-    onDeclineRequestClicked: (Long) -> Unit,
-    onRequestClicked: () -> Unit,
-    onRequest4kClicked: () -> Unit,
-    onAddDirectlyClicked: () -> Unit,
-) {
-    // Watch Menu
-    if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
-        var showWatchMenu by remember { mutableStateOf(false) }
-        val serviceIconRes: Any =
-            when (buttonState.mediaProvider) {
-                MediaProvider.Plex -> MR.images.plex
-                MediaProvider.Jellyfin -> MR.images.jellyfin
-                MediaProvider.None -> Icons.Default.PlayArrow
-            }
-
-        Box {
-            IconButton(
-                onClick = {
-                    if (buttonState.showWatchButton && !buttonState.showWatchTrailerOption) {
-                        buttonState.watchButtonUrl?.let { onWatchClicked(it, buttonState.mediaProvider) }
-                    } else {
-                        showWatchMenu = true
-                    }
-                },
-                colors = IconButtonDefaults.headerBarColors(),
-            ) {
-                if (serviceIconRes is ImageResource) {
-                    Image(
-                        painter = painterResource(serviceIconRes),
-                        contentDescription = mokoString(buttonState.watchButtonLabel),
-                        modifier = Modifier.size(24.dp),
-                    )
-                } else if (serviceIconRes is ImageVector) {
-                    Icon(serviceIconRes, mokoString(buttonState.watchButtonLabel))
-                }
-            }
-
-            DropdownMenuPopup(
-                expanded = showWatchMenu,
-                onDismissRequest = { showWatchMenu = false },
-            ) {
-                DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
-                    if (buttonState.showWatchButton) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(buttonState.watchButtonLabel)) },
-                            onClick = {
-                                buttonState.watchButtonUrl?.let { onWatchClicked(it, buttonState.mediaProvider) }
-                                showWatchMenu = false
-                            },
-                            leadingIcon = {
-                                if (serviceIconRes is ImageResource) {
-                                    Image(
-                                        painter = painterResource(serviceIconRes),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                } else if (serviceIconRes is ImageVector) {
-                                    Icon(serviceIconRes, null)
-                                }
-                            },
-                        )
-                    }
-                    if (buttonState.showWatchTrailerOption) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.watch_trailer)) },
-                            onClick = {
-                                buttonState.trailerUrl?.let(onWatchTrailerClicked)
-                                showWatchMenu = false
-                            },
-                            leadingIcon = { Icon(Icons.Default.PlayArrow, null) },
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    // Approval Menu
-    if (buttonState.showViewRequestButton) {
-        var showApprovalMenu by remember { mutableStateOf(false) }
-        Box {
-            IconButton(
-                onClick = {
-                    if (!buttonState.showApproveRequestButton && !buttonState.showDeclineRequestButton) {
-                        buttonState.pendingRequestId?.let(onViewRequestClicked)
-                    } else {
-                        showApprovalMenu = true
-                    }
-                },
-                colors = IconButtonDefaults.headerBarColors(),
-            ) {
-                Icon(Icons.Default.Approval, mokoString(MR.strings.view_request))
-            }
-
-            DropdownMenuPopup(
-                expanded = showApprovalMenu,
-                onDismissRequest = { showApprovalMenu = false },
-            ) {
-                DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
-                    DropdownMenuItem(
-                        text = { Text(mokoString(MR.strings.view_request)) },
-                        onClick = {
-                            buttonState.pendingRequestId?.let(onViewRequestClicked)
-                            showApprovalMenu = false
-                        },
-                        leadingIcon = { Icon(Icons.Default.Visibility, null) },
-                    )
-                    if (buttonState.showApproveRequestButton) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.approve_request)) },
-                            onClick = {
-                                buttonState.pendingRequestId?.let(onApproveRequestClicked)
-                                showApprovalMenu = false
-                            },
-                            leadingIcon = { Icon(Icons.Default.Check, null) },
-                        )
-                    }
-                    if (buttonState.showDeclineRequestButton) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = mokoString(MR.strings.decline_request),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            onClick = {
-                                buttonState.pendingRequestId?.let(onDeclineRequestClicked)
-                                showApprovalMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    // Add / Request Menu
-    val showAddMenu =
-        canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton
-    if (showAddMenu) {
-        var showAddMenuState by remember { mutableStateOf(false) }
-        Box {
-            IconButton(
-                onClick = {
-                    if (canAddDirectly && !buttonState.showRequestButton && !buttonState.showRequest4kButton) {
-                        onAddDirectlyClicked()
-                    } else {
-                        showAddMenuState = true
-                    }
-                },
-                colors = IconButtonDefaults.headerBarColors(),
-            ) {
-                Icon(Icons.Default.Add, mokoString(MR.strings.add))
-            }
-
-            DropdownMenuPopup(
-                expanded = showAddMenuState,
-                onDismissRequest = { showAddMenuState = false },
-            ) {
-                DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
-                    if (canAddDirectly) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.add)) },
-                            onClick = {
-                                onAddDirectlyClicked()
-                                showAddMenuState = false
-                            },
-                            leadingIcon = { Icon(Icons.Default.Add, null) },
-                        )
-                    }
-                    if (buttonState.showRequestButton || buttonState.showRequestMoreButton) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    mokoString(if (buttonState.showRequestMoreButton) MR.strings.request_more else MR.strings.request),
-                                )
-                            },
-                            onClick = {
-                                onRequestClicked()
-                                showAddMenuState = false
-                            },
-                            leadingIcon = { Icon(Icons.Default.FileDownload, null) },
-                        )
-                    }
-                    if (buttonState.showRequest4kButton) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.request_in_4k)) },
-                            onClick = {
-                                onRequest4kClicked()
-                                showAddMenuState = false
-                            },
-                            leadingIcon = { Icon(Icons.Default.HighQuality, null) },
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
-@Composable
-private fun UnifiedMediaDetailsToolbarMenu(
-    success: UnifiedMediaDetailsUiState.Success,
-    buttonState: MediaButtonState,
-    instanceType: InstanceType?,
-    requestType: RequestType?,
-    isArrConfigured: Boolean,
-    isSeerrConfigured: Boolean,
-    isMonitored: Boolean,
-    onRefresh: () -> Unit,
-    onAutomaticLookup: () -> Unit,
-    onAddMissingInstance: (Instance) -> Unit,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-    onMarkAsAvailable: () -> Unit,
-    onRemoveFromService: () -> Unit,
-    onClearData: () -> Unit,
-    modifier: Modifier = Modifier,
-    onDeleteFile: (() -> Unit)? = null,
-) {
-    val showArrActions = success.hasArrId && isArrConfigured
-    val showSeerrActions =
-        isSeerrConfigured &&
-            (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
-    val showMissingInstances = success.missingInstances.isNotEmpty()
-    val showMenuButton = showArrActions || showSeerrActions || showMissingInstances
-
-    if (!showMenuButton) return
-
-    var showMenu by remember { mutableStateOf(false) }
-    val menuInteractionSource = remember { MutableInteractionSource() }
-
-    Box(modifier = modifier) {
-        IconButton(
-            onClick = { showMenu = !showMenu },
-            colors = IconButtonDefaults.headerBarColors(),
-        ) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = null,
-            )
-        }
-
-        DropdownMenuPopup(
-            expanded = showMenu,
-            onDismissRequest = { showMenu = false },
-        ) {
-            val totalGroups =
-                (if (showArrActions) 2 else 0) +
-                    (if (showMissingInstances && !showArrActions) 1 else 0) +
-                    (if (showSeerrActions) 1 else 0)
-            var currentGroup = 0
-
-            if (showArrActions) {
-                DropdownMenuGroup(
-                    shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
-                    interactionSource = menuInteractionSource,
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(mokoString(MR.strings.refresh)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = {
-                            showMenu = false
-                            onRefresh()
-                        },
-                    )
-                    if (instanceType?.includeTopLevelAutomaticSearchOption == true) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.search_monitored)) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = null,
-                                )
-                            },
-                            enabled = isMonitored,
-                            onClick = {
-                                showMenu = false
-                                onAutomaticLookup()
-                            },
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
-
-                DropdownMenuGroup(
-                    shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
-                    interactionSource = menuInteractionSource,
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(mokoString(MR.strings.edit)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = {
-                            showMenu = false
-                            onEdit()
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = mokoString(MR.strings.delete),
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        onClick = {
-                            showMenu = false
-                            onDelete()
-                        },
-                    )
-
-                    if (onDeleteFile != null && (instanceType == InstanceType.Radarr || instanceType == InstanceType.Listenarr)) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = mokoString(MR.strings.delete_files),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.DeleteOutline,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onDeleteFile()
-                            },
-                        )
-                    }
-
-                    for (missingInstance in success.missingInstances) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onAddMissingInstance(missingInstance)
-                            },
-                        )
-                    }
-                }
-            } else if (showMissingInstances) {
-                DropdownMenuGroup(
-                    shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
-                    interactionSource = menuInteractionSource,
-                ) {
-                    for (missingInstance in success.missingInstances) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.add_to_arr, missingInstance.label)) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onAddMissingInstance(missingInstance)
-                            },
-                        )
-                    }
-                }
-            }
-
-            if (showSeerrActions) {
-                if (currentGroup > 0) {
-                    Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
-                }
-                DropdownMenuGroup(
-                    shapes = MenuDefaults.groupShape(currentGroup++, totalGroups),
-                    interactionSource = menuInteractionSource,
-                ) {
-                    if (buttonState.showMarkAsAvailableButton) {
-                        val markText =
-                            if (requestType == RequestType.Movie) {
-                                mokoString(MR.strings.mark_as_available)
-                            } else {
-                                mokoString(MR.strings.mark_all_seasons_as_available)
-                            }
-                        DropdownMenuItem(
-                            text = { Text(markText) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onMarkAsAvailable()
-                            },
-                        )
-                    }
-                    if (buttonState.showRemoveFromServiceButton) {
-                        val removeText =
-                            if (requestType == RequestType.Movie) {
-                                mokoString(MR.strings.remove_from_radarr)
-                            } else {
-                                mokoString(MR.strings.remove_from_sonarr)
-                            }
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = removeText,
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.DeleteOutline,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onRemoveFromService()
-                            },
-                        )
-                    }
-                    if (buttonState.showClearDataButton) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = mokoString(MR.strings.clear_data),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.CleaningServices,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            onClick = {
-                                showMenu = false
-                                onClearData()
-                            },
-                        )
-                    }
                 }
             }
         }

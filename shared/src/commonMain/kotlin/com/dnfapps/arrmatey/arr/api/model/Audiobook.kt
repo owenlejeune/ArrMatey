@@ -252,3 +252,11 @@ fun Audiobook.toEditBody(): JsonElement =
         put("basePath", basePath)
         put("qualityProfileId", if (qualityProfileId > 0) qualityProfileId else -1)
     }
+
+fun Audiobook.toSearchAudiobook(): SearchAudiobook =
+    SearchAudiobook(
+        asin = asin ?: "",
+        title = title ?: "",
+        summary = overview,
+        authors = authors.map { SearchAuthor(name = it) },
+    )

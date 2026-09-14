@@ -1,6 +1,8 @@
 package com.dnfapps.arrmatey.model
 
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -67,5 +69,35 @@ class UnifiedMediaDetailsUiStateTest {
         assertEquals("Indigo League", seasonWrapper.customTitle)
         assertEquals("1997", seasonWrapper.year)
         assertEquals("Indigo League • 1997", seasonWrapper.infoString)
+    }
+
+    @Test
+    fun testCanDeleteFileForAudiobook() {
+        val audiobookWithFile = Audiobook(fileCount = 1)
+        val stateWithFile = UnifiedMediaDetailsUiState.Success(arrMedia = audiobookWithFile)
+        assertTrue(stateWithFile.canDeleteFile(InstanceType.Listenarr))
+
+        val audiobookWithoutFile = Audiobook(fileCount = 0, filePath = null)
+        val stateWithoutFile = UnifiedMediaDetailsUiState.Success(arrMedia = audiobookWithoutFile)
+        assertFalse(stateWithoutFile.canDeleteFile(InstanceType.Listenarr))
+    }
+
+    @Test
+    fun testGetAvailableTabsAndDefaultTab() {
+        val stateWithSeasons = UnifiedMediaDetailsUiState.Success(
+            seasons = listOf(SeasonWrapper(seasonNumber = 1))
+        )
+        assertEquals(UnifiedMediaDetailsTab.SeasonsFiles, stateWithSeasons.defaultTab)
+        assertEquals(
+            listOf(UnifiedMediaDetailsTab.SeasonsFiles, UnifiedMediaDetailsTab.Overview),
+            stateWithSeasons.getAvailableTabs(isTracearrConfigured = false)
+        )
+
+        val stateEmpty = UnifiedMediaDetailsUiState.Success()
+        assertEquals(UnifiedMediaDetailsTab.Overview, stateEmpty.defaultTab)
+        assertEquals(
+            listOf(UnifiedMediaDetailsTab.Overview),
+            stateEmpty.getAvailableTabs(isTracearrConfigured = false)
+        )
     }
 }
