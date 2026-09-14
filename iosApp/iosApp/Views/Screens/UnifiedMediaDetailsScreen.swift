@@ -192,7 +192,7 @@ extension UnifiedMediaDetailsScreen {
                     if hasSeasonsOrFiles || hasTracearr {
                         Picker("View Mode", selection: $selectedTab) {
                             if hasSeasonsOrFiles {
-                                Text(!success.seasons.isEmpty ? MR.plurals().seasons.localized(formatArgs: [2]) : MR.strings().media.localized())
+                                Text(!success.seasons.isEmpty ? MR.plurals().seasons.localized(2) : MR.strings().media.localized())
                                     .tag(DetailsTab.seasonsFiles)
                             }
                             Text(MR.strings().overview.localized())
@@ -1224,7 +1224,7 @@ struct UnifiedMediaDetailsHeader: View {
             items.append(runtime)
         }
         if let seasonCount = success.seasonCount {
-            items.append(MR.plurals().seasons.localized(Int32(seasonCount)))
+            items.append(MR.plurals().seasons.localized(seasonCount.intValue))
         }
         if let certification = success.getCertification(countryCode: Locale.current.region?.identifier ?? "") {
             items.append(certification)

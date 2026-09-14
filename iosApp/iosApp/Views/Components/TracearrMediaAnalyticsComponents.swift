@@ -17,6 +17,29 @@ func formatMsAsDurationSwift(_ ms: Int64) -> String {
     }
 }
 
+struct StatChip: View {
+    let title: String
+    let icon: String
+    var color: Color? = nil
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            Capsule()
+                .fill(color?.opacity(0.15) ?? Color.secondary.opacity(0.1))
+        )
+        .foregroundColor(color ?? .primary)
+    }
+}
+
 struct TracearrSummaryChipRowView: View {
     let uiState: TracearrMediaUiState
 
@@ -24,13 +47,13 @@ struct TracearrSummaryChipRowView: View {
         if uiState.isTracearrConfigured, let stats = uiState.stats, let allTime = stats.windows?.allTime?.combined {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    Chip(text: MR.plurals().plays_count.localized(formatArgs: [allTime.plays]), systemImage: "play.fill", color: .accentColor)
-                    Chip(text: formatMsAsDurationSwift(allTime.watchTimeMs), systemImage: "clock.fill")
+                    StatChip(title: MR.plurals().plays_count.localized(allTime.plays), icon: "play.fill", color: .accentColor)
+                    StatChip(title: formatMsAsDurationSwift(allTime.watchTimeMs), icon: "clock.fill")
                     if allTime.uniqueUsers > 0 {
-                        Chip(text: MR.plurals().viewers_count.localized(formatArgs: [allTime.uniqueUsers]), systemImage: "person.2.fill")
+                        StatChip(title: MR.plurals().viewers_count.localized(Int32(allTime.uniqueUsers)), icon: "person.2.fill")
                     }
                     if let perServer = stats.windows?.allTime?.perServer, !perServer.isEmpty {
-                        Chip(text: MR.plurals().servers_count.localized(formatArgs: [Int32(perServer.count)]), systemImage: "server.rack")
+                        StatChip(title: MR.plurals().servers_count.localized(Int32(perServer.count)), icon: "server.rack")
                     }
                 }
             }
@@ -71,7 +94,7 @@ struct TracearrAnalyticsSectionView: View {
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                             Spacer()
-                            Text("\(MR.plurals().plays_count.localized(formatArgs: [serverStat.plays])) • \(formatMsAsDurationSwift(serverStat.watchTimeMs))")
+                            Text("\(MR.plurals().plays_count.localized(serverStat.plays)) • \(formatMsAsDurationSwift(serverStat.watchTimeMs))")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -137,13 +160,13 @@ struct WatcherRowView: View {
                 Text(watcher.user?.identityName ?? watcher.user?.username ?? MR.strings().users.localized())
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                Text("\(MR.plurals().plays_count.localized(formatArgs: [watcher.plays])) • \(formatMsAsDurationSwift(watcher.watchTimeMs))")
+                Text("\(MR.plurals().plays_count.localized(watcher.plays)) • \(formatMsAsDurationSwift(watcher.watchTimeMs))")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 if let day = watcher.lastWatchedDay {
-                    Text("\(MR.strings().last_watched.localized(formatArgs: [day]))")
+                    Text(MR.strings().last_watched.formatted(args: [day]))
                         .font(.caption2)
-                        .foregroundColor(.tertiary)
+                        .foregroundColor(Color(UIColor.tertiaryLabel))
                 }
             }
 
