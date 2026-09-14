@@ -48,9 +48,9 @@ import com.dnfapps.arrmatey.model.TracearrMediaUiState
 import com.dnfapps.arrmatey.model.TracearrStatsWindowType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
-import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaWatcher
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 
