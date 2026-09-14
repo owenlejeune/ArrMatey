@@ -581,7 +581,9 @@ fun UnifiedMediaDetailsScreen(
                                     }
 
                                     val isMovieOrTv =
-                                        state.arrMedia is ArrMovie || state.arrMedia is ArrSeries || state.seerrMedia is MovieDetails ||
+                                        state.arrMedia is ArrMovie ||
+                                            state.arrMedia is ArrSeries ||
+                                            state.seerrMedia is MovieDetails ||
                                             state.seerrMedia is TvDetails
 
                                     if (isMovieOrTv) {
