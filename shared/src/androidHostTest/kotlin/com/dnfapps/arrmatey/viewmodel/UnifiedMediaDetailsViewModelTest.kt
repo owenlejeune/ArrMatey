@@ -41,6 +41,10 @@ class UnifiedMediaDetailsViewModelTest {
                     mockk(relaxed = true) {
                         every { observeSelected() } returns flowOf(null)
                     },
+                getTracearrInstanceRepositoryUseCase =
+                    mockk(relaxed = true) {
+                        every { observeSelected() } returns flowOf(null)
+                    },
                 toggleMonitorUseCase = mockk(),
                 updateMediaUseCase = mockk(),
                 deleteMediaUseCase = mockk(),

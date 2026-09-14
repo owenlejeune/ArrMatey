@@ -782,7 +782,7 @@ class UnifiedMediaDetailsViewModel(
 
                 val isMovieOrTv = resolvedReqType == RequestType.Movie || resolvedReqType == RequestType.Tv
 
-                if (resolvedTmdbId != null && resolvedTmdbId > 0 && isMovieOrTv && resolvedReqType != null) {
+                if (resolvedTmdbId != null && resolvedTmdbId > 0 && isMovieOrTv) {
                     val ref =
                         if (resolvedReqType == RequestType.Tv) {
                             "show:tmdb:$resolvedTmdbId"
