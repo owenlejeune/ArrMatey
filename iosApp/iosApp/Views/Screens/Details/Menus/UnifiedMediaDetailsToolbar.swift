@@ -12,7 +12,7 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
     let onShowEditSheet: () -> Void
     let onShowConfirmSheet: () -> Void
     let onShowAddSheet: () -> Void
-    let onShowAddSheetForInstance: (ArrInstance) -> Void
+    let onShowAddSheetForInstance: (Instance) -> Void
     let onConfirmDeleteFile: () -> Void
     let onConfirmRemoveFromService: () -> Void
     let onConfirmClearData: () -> Void
