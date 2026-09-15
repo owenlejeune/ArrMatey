@@ -249,6 +249,7 @@ fun UnifiedLibraryScreen(
                                     },
                                     onRunRssSync = { unifiedLibraryViewModel.runRssSync() },
                                     onSearchAllMissing = { unifiedLibraryViewModel.searchAllMissing() },
+                                    onSearchFiltered = { unifiedLibraryViewModel.searchFiltered() },
                                     onUpdateLibrary = { unifiedLibraryViewModel.updateLibrary() },
                                     onBackupDatabase = { unifiedLibraryViewModel.backupDatabase() },
                                     trigger = { onClick ->

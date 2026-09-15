@@ -12,6 +12,7 @@ struct InstanceOptionsMenu<Label: View>: View {
     let instanceUrl: String?
     let onRunRssSync: () -> Void
     let onSearchAllMissing: () -> Void
+    let onSearchFiltered: (() -> Void)?
     let onUpdateLibrary: () -> Void
     let onBackupDatabase: () -> Void
     @ViewBuilder let label: () -> Label
@@ -22,6 +23,7 @@ struct InstanceOptionsMenu<Label: View>: View {
         instanceUrl: String?,
         onRunRssSync: @escaping () -> Void,
         onSearchAllMissing: @escaping () -> Void,
+        onSearchFiltered: (() -> Void)? = nil,
         onUpdateLibrary: @escaping () -> Void,
         onBackupDatabase: @escaping () -> Void,
         @ViewBuilder label: @escaping () -> Label
@@ -29,6 +31,7 @@ struct InstanceOptionsMenu<Label: View>: View {
         self.instanceUrl = instanceUrl
         self.onRunRssSync = onRunRssSync
         self.onSearchAllMissing = onSearchAllMissing
+        self.onSearchFiltered = onSearchFiltered
         self.onUpdateLibrary = onUpdateLibrary
         self.onBackupDatabase = onBackupDatabase
         self.label = label
@@ -54,6 +57,14 @@ struct InstanceOptionsMenu<Label: View>: View {
                 onSearchAllMissing()
             } label: {
                 SwiftUI.Label(MR.strings().search_all_missing.localized(), systemImage: "magnifyingglass")
+            }
+
+            if let onSearchFiltered = onSearchFiltered {
+                Button {
+                    onSearchFiltered()
+                } label: {
+                    SwiftUI.Label(MR.strings().search_filtered.localized(), systemImage: "line.3.horizontal.decrease.circle")
+                }
             }
 
             Button {

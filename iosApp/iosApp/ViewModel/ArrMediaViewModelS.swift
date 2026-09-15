@@ -224,6 +224,10 @@ class ArrMediaViewModelS: ObservableObject {
         viewModel.searchAllMissing()
     }
 
+    func searchFiltered() {
+        viewModel.searchFiltered()
+    }
+
     func updateLibrary() {
         viewModel.updateLibrary()
     }

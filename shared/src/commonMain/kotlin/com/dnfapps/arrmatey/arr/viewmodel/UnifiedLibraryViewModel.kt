@@ -604,6 +604,20 @@ class UnifiedLibraryViewModel(
         }
     }
 
+    fun searchFiltered() {
+        val success = currentLibraryState.value as? ArrLibrary.Success ?: return
+        val instance = _selectedInstance.value ?: return
+        val repository = instanceManager.getArrRepository(instance.id) ?: return
+        val filteredIds = success.items.mapNotNull { it.id }
+        if (filteredIds.isEmpty()) return
+        viewModelScope.launch {
+            filteredIds.forEach { id ->
+                performAutomaticSearchUseCase(id, instance.type, repository)
+            }
+            _lastSearchResult.value = true
+        }
+    }
+
     fun updateLibrary() {
         val instanceId = _selectedInstance.value?.id ?: return
         viewModelScope.launch {

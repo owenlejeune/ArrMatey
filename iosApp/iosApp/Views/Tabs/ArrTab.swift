@@ -184,6 +184,7 @@ struct ArrTab: View {
                     instanceUrl: instance.url,
                     onRunRssSync: { arrMediaViewModel.runRssSync() },
                     onSearchAllMissing: { arrMediaViewModel.searchAllMissing() },
+                    onSearchFiltered: { arrMediaViewModel.searchFiltered() },
                     onUpdateLibrary: { arrMediaViewModel.updateLibrary() },
                     onBackupDatabase: { arrMediaViewModel.backupDatabase() }
                 ) {

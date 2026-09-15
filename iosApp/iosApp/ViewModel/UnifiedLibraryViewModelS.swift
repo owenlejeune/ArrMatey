@@ -264,6 +264,10 @@ class UnifiedLibraryViewModelS: ObservableObject {
     func searchAllMissing() {
         viewModel.searchAllMissing()
     }
+
+    func searchFiltered() {
+        viewModel.searchFiltered()
+    }
     
     func updateLibrary() {
         viewModel.updateLibrary()

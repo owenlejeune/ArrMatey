@@ -270,6 +270,7 @@ fun ArrLibraryScreen(
                                 },
                                 onRunRssSync = { arrMediaViewModel.runRssSync() },
                                 onSearchAllMissing = { arrMediaViewModel.searchAllMissing() },
+                                onSearchFiltered = { arrMediaViewModel.searchFiltered() },
                                 onUpdateLibrary = { arrMediaViewModel.updateLibrary() },
                                 onBackupDatabase = { arrMediaViewModel.backupDatabase() },
                                 trigger = { onClick ->
