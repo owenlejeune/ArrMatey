@@ -36,6 +36,7 @@ data class DiscoverResult(
     val knownFor: List<DiscoverResult> = emptyList(),
     val knownForDepartment: String? = null,
     val mediaInfo: MediaInfo? = null,
+    val originCountry: List<String> = emptyList(),
 ) {
     val fullPosterPath: String?
         get() = (posterPath ?: profilePath)?.let { "https://image.tmdb.org/t/p/w500$it" }

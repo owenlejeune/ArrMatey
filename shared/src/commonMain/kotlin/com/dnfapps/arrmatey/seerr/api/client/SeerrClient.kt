@@ -76,7 +76,27 @@ interface SeerrClient {
 
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
 
+    suspend fun getMovieRecommendations(
+        movieId: Long,
+        page: Int = 1,
+    ): NetworkResult<DiscoverResponse>
+
+    suspend fun getMovieSimilar(
+        movieId: Long,
+        page: Int = 1,
+    ): NetworkResult<DiscoverResponse>
+
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
+
+    suspend fun getTvRecommendations(
+        seriesId: Long,
+        page: Int = 1,
+    ): NetworkResult<DiscoverResponse>
+
+    suspend fun getTvSimilar(
+        seriesId: Long,
+        page: Int = 1,
+    ): NetworkResult<DiscoverResponse>
 
     suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails>
 
@@ -194,7 +214,27 @@ class SeerrClientImpl(
 
     override suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails> = get("movie/$tmdbId")
 
+    override suspend fun getMovieRecommendations(
+        movieId: Long,
+        page: Int,
+    ): NetworkResult<DiscoverResponse> = get("movie/$movieId/recommendations", mapOf("page" to page))
+
+    override suspend fun getMovieSimilar(
+        movieId: Long,
+        page: Int,
+    ): NetworkResult<DiscoverResponse> = get("movie/$movieId/similar", mapOf("page" to page))
+
     override suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails> = get("tv/$tmdbId")
+
+    override suspend fun getTvRecommendations(
+        seriesId: Long,
+        page: Int,
+    ): NetworkResult<DiscoverResponse> = get("tv/$seriesId/recommendations", mapOf("page" to page))
+
+    override suspend fun getTvSimilar(
+        seriesId: Long,
+        page: Int,
+    ): NetworkResult<DiscoverResponse> = get("tv/$seriesId/similar", mapOf("page" to page))
 
     override suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails> = get("person/$personId")
 

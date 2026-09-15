@@ -338,4 +338,131 @@ class SeerrModelNullabilityTest {
 
         assertFailsWith<SerializationException> { json.decodeFromString<Episode>(payload) }
     }
+
+    @Test
+    fun testMovieRecommendationsPayload() {
+        val payload =
+            """
+            {
+              "page": 1,
+              "totalPages": 30,
+              "totalResults": 589,
+              "results": [
+                {
+                  "id": 11428,
+                  "mediaType": "movie",
+                  "adult": false,
+                  "genreIds": [27, 14, 53],
+                  "originalLanguage": "en",
+                  "originalTitle": "Sleepwalkers",
+                  "overview": "Charles Brady and his mother, Mary...",
+                  "popularity": 5.4788,
+                  "releaseDate": "1992-04-10",
+                  "title": "Sleepwalkers",
+                  "video": false,
+                  "voteAverage": 6.086,
+                  "voteCount": 647,
+                  "backdropPath": "/2GcMfxqQdB4xuyetOYPREdnu7ey.jpg",
+                  "posterPath": "/iiwplv5pET2HgMog6otunohIiSr.jpg"
+                },
+                {
+                  "id": 493922,
+                  "mediaType": "movie",
+                  "adult": false,
+                  "genreIds": [27, 9648, 53],
+                  "originalLanguage": "en",
+                  "originalTitle": "Hereditary",
+                  "overview": "Following the death...",
+                  "popularity": 19.7135,
+                  "releaseDate": "2018-06-07",
+                  "title": "Hereditary",
+                  "video": false,
+                  "voteAverage": 7.297,
+                  "voteCount": 8880,
+                  "backdropPath": "/gJbTXKNTL6O7r7PzF6ZRkJGBlPp.jpg",
+                  "posterPath": "/4GFPuL14eXi66V96xBWY73Y9PfR.jpg",
+                  "mediaInfo": {
+                    "downloadStatus": [],
+                    "downloadStatus4k": [],
+                    "id": 739,
+                    "mediaType": "movie",
+                    "tmdbId": 493922,
+                    "tvdbId": null,
+                    "imdbId": null,
+                    "status": 5,
+                    "status4k": 1,
+                    "createdAt": "2026-02-20T11:36:51.000Z",
+                    "updatedAt": "2026-02-20T11:36:51.000Z",
+                    "lastSeasonChange": "2026-02-20T11:36:51.000Z",
+                    "mediaAddedAt": "2025-07-15T14:58:31.000Z",
+                    "serviceId": 0,
+                    "serviceId4k": null,
+                    "externalServiceId": 2508,
+                    "externalServiceId4k": null,
+                    "externalServiceSlug": "493922",
+                    "externalServiceSlug4k": null,
+                    "ratingKey": "49261",
+                    "ratingKey4k": null,
+                    "jellyfinMediaId": null,
+                    "jellyfinMediaId4k": null,
+                    "watchlists": [],
+                    "mediaUrl": "https://app.plex.tv/desktop#!/server/be7a5a02f72d4e0062715f48974ba7f793e3ef96/details?key=%2Flibrary%2Fmetadata%2F49261",
+                    "iOSPlexUrl": "plex://preplay/?metadataKey=%2Flibrary%2Fmetadata%2F49261&server=be7a5a02f72d4e0062715f48974ba7f793e3ef96",
+                    "serviceUrl": "http://192.168.4.20:7878/movie/493922"
+                  }
+                }
+              ]
+            }
+            """.trimIndent()
+
+        val model = json.decodeFromString<DiscoverResponse>(payload)
+        assertEquals(1, model.page)
+        assertEquals(30, model.totalPages)
+        assertEquals(589, model.totalResults)
+        assertEquals(2, model.results.size)
+        assertEquals(11428L, model.results[0].id)
+        assertEquals(RequestType.Movie, model.results[0].mediaType)
+        assertEquals(493922L, model.results[1].id)
+        assertEquals(739L, model.results[1].mediaInfo?.id)
+    }
+
+    @Test
+    fun testTvRecommendationsPayload() {
+        val payload =
+            """
+            {
+              "page": 1,
+              "totalPages": 29,
+              "totalResults": 561,
+              "results": [
+                {
+                  "id": 40675,
+                  "firstAirDate": "2011-09-16",
+                  "genreIds": [80, 18],
+                  "mediaType": "tv",
+                  "name": "DCI Banks",
+                  "originCountry": ["GB"],
+                  "originalLanguage": "en",
+                  "originalName": "DCI Banks",
+                  "overview": "A thrilling drama...",
+                  "popularity": 13.5199,
+                  "voteAverage": 7.1,
+                  "voteCount": 82,
+                  "backdropPath": "/tdhRbNchHe6xbGQOaJbZ6wopu52.jpg",
+                  "posterPath": "/5TKwpU4Q04dyZwg5jN80zOrzGgP.jpg"
+                }
+              ]
+            }
+            """.trimIndent()
+
+        val model = json.decodeFromString<DiscoverResponse>(payload)
+        assertEquals(1, model.page)
+        assertEquals(29, model.totalPages)
+        assertEquals(561, model.totalResults)
+        assertEquals(1, model.results.size)
+        assertEquals(40675L, model.results[0].id)
+        assertEquals(RequestType.Tv, model.results[0].mediaType)
+        assertEquals(listOf("GB"), model.results[0].originCountry)
+        assertEquals("DCI Banks", model.results[0].name)
+    }
 }
