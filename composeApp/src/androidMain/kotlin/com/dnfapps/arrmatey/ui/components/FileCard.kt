@@ -35,6 +35,7 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun FileCard(
     file: MediaFile,
+    modifier: Modifier = Modifier,
     onDelete: (() -> Unit)? = null,
 ) {
     val state = rememberSwipeToDismissBoxState()
@@ -48,6 +49,7 @@ fun FileCard(
     }
 
     SwipeToDismissBox(
+        modifier = modifier,
         state = state,
         enableDismissFromStartToEnd = false,
         enableDismissFromEndToStart = onDelete != null,

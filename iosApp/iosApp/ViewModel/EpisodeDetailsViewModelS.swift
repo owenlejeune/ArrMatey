@@ -16,6 +16,7 @@ class EpisodeDetailsViewModelS: ObservableObject {
     @Published private(set) var history: HistoryState = HistoryStateInitial()
     @Published private(set) var monitorStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var deleteStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var tracearrState: TracearrMediaUiState = TracearrMediaUiState()
     
     init(seriesId: Int64, episode: Episode) {
         self.episode = episode
@@ -28,6 +29,7 @@ class EpisodeDetailsViewModelS: ObservableObject {
         viewModel.history.observeAsync(on: self, to: \.history)
         viewModel.monitorStatus.observeAsync(on: self, to: \.monitorStatus)
         viewModel.deleteStatus.observeAsync(on: self, to: \.deleteStatus)
+        viewModel.tracearrState.observeAsync(on: self, to: \.tracearrState)
     }
     
     func toggleMonitor() {
@@ -48,5 +50,13 @@ class EpisodeDetailsViewModelS: ObservableObject {
     
     func resetMonitorStatus() {
         viewModel.resetMonitorStatus()
+    }
+
+    func selectTracearrStatsWindow(window: TracearrStatsWindowType) {
+        viewModel.selectTracearrStatsWindow(window: window)
+    }
+
+    func loadMoreTracearrHistory() {
+        viewModel.loadMoreTracearrHistory()
     }
 }

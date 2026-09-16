@@ -22,7 +22,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,6 +52,7 @@ import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
 import com.dnfapps.arrmatey.ui.components.FileCard
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
@@ -58,12 +61,22 @@ import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
+import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
+import com.dnfapps.arrmatey.ui.components.tracearr.TracearrHistorySection
+import com.dnfapps.arrmatey.ui.components.tracearr.TracearrSummaryChipRow
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+private enum class EpisodeDetailsTab {
+    Overview,
+    Analytics,
+    History,
+}
 
 @Composable
 fun EpisodeDetailsScreen(
@@ -85,10 +98,13 @@ fun EpisodeDetailsScreen(
     val deleteStatus by viewModel.deleteStatus.collectAsStateWithLifecycle()
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
+    val tracearrState by viewModel.tracearrState.collectAsStateWithLifecycle()
 
     var confirmDelete by remember { mutableStateOf(false) }
     var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
     var showConfirmRemoveQueueItem by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableStateOf(EpisodeDetailsTab.Overview) }
+    var selectedTracearrStreamSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
 
     LaunchedEffect(monitorStatus) {
         when (val status = monitorStatus) {
@@ -183,18 +199,19 @@ fun EpisodeDetailsScreen(
                 }
 
                 Column(
-                    modifier = Modifier.padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     Column {
                         Text(
                             text = currentEpisode.displayTitle,
                             style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.padding(horizontal = 24.dp),
                         )
                         series.title?.let { title ->
                             Text(
                                 text = title,
                                 style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(horizontal = 24.dp),
                             )
                         }
                         val statusRow =
@@ -206,83 +223,158 @@ fun EpisodeDetailsScreen(
                         Text(
                             text = statusRow,
                             style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(horizontal = 24.dp),
                         )
-                    }
-
-                    currentEpisode.overview?.let { overview ->
-                        ItemDescriptionCard(overview)
-                    }
-
-                    ReleaseDownloadButtons(
-                        onInteractiveClicked = {
-                            onNavigateToSeriesRelease(currentEpisode.id)
-                        },
-                        onAutomaticClicked = {
-                            viewModel.executeAutomaticSearch()
-                        },
-                        automaticSearchEnabled = currentEpisode.monitored,
-                    )
-
-                    if (queueItems.isNotEmpty()) {
-                        MediaActivitySection(
-                            queueItems = queueItems,
-                            onQueueItemClicked = { selectedQueueItem = it },
-                        )
-                    }
-
-                    Text(
-                        text = mokoString(MR.strings.files),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium,
-                    )
-                    currentEpisode.episodeFile?.let { file ->
-                        FileCard(file)
-                    } ?: run {
-                        Text(
-                            text = mokoString(MR.strings.no_files),
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-
-                    series.id?.let { seriesId ->
-                        BazarrSubtitlesSection(
-                            target = BazarrMediaTarget.Episode(seriesId, currentEpisode.id),
-                        )
-                    }
-
-                    when (val historyResult = history) {
-                        is HistoryState.Loading -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                        is HistoryState.Success -> {
-                            Text(
-                                mokoString(MR.strings.history),
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Medium,
+                        if (tracearrState.isTracearrConfigured) {
+                            TracearrSummaryChipRow(
+                                uiState = tracearrState,
+                                modifier = Modifier.padding(top = 4.dp),
                             )
-                            if (historyResult.items.isEmpty()) {
-                                Text(
-                                    text = mokoString(MR.strings.no_history),
-                                    fontWeight = FontWeight.Medium,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth(),
+                        }
+
+                        if (tracearrState.isTracearrConfigured) {
+                            val availableTabs =
+                                listOf(
+                                    EpisodeDetailsTab.Overview to mokoString(MR.strings.overview),
+                                    EpisodeDetailsTab.Analytics to mokoString(MR.strings.statistics),
+                                    EpisodeDetailsTab.History to mokoString(MR.strings.history),
                                 )
-                            } else {
-                                historyResult.items.forEach { historyItem ->
-                                    HistoryItemView(historyItem)
+                            PrimaryScrollableTabRow(
+                                selectedTabIndex = availableTabs.indexOfFirst { it.first == selectedTab }
+                                    .coerceAtLeast(0),
+                                modifier = Modifier.fillMaxWidth(),
+                                edgePadding = 0.dp,
+                            ) {
+                                availableTabs.forEach { (tab, label) ->
+                                    Tab(
+                                        selected = selectedTab == tab,
+                                        onClick = { selectedTab = tab },
+                                        text = { Text(label) },
+                                    )
                                 }
                             }
                         }
-                        is HistoryState.Error -> {}
-                        else -> {}
                     }
+
+                    when (if (tracearrState.isTracearrConfigured) selectedTab else EpisodeDetailsTab.Overview) {
+                        EpisodeDetailsTab.Overview -> {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                currentEpisode.overview?.let { overview ->
+                                    ItemDescriptionCard(
+                                        overview = overview,
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                    )
+                                }
+
+                                ReleaseDownloadButtons(
+                                    modifier = Modifier.padding(horizontal = 24.dp),
+                                    onInteractiveClicked = {
+                                        onNavigateToSeriesRelease(currentEpisode.id)
+                                    },
+                                    onAutomaticClicked = {
+                                        viewModel.executeAutomaticSearch()
+                                    },
+                                    automaticSearchEnabled = currentEpisode.monitored,
+                                )
+
+                                if (queueItems.isNotEmpty()) {
+                                    MediaActivitySection(
+                                        queueItems = queueItems,
+                                        onQueueItemClicked = { selectedQueueItem = it },
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                    )
+                                }
+
+                                Text(
+                                    text = mokoString(MR.strings.files),
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(horizontal = 24.dp),
+                                )
+                                currentEpisode.episodeFile?.let { file ->
+                                    FileCard(file, modifier = Modifier.padding(horizontal = 24.dp))
+                                } ?: run {
+                                    Text(
+                                        text = mokoString(MR.strings.no_files),
+                                        fontWeight = FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                            .padding(horizontal = 24.dp),
+                                    )
+                                }
+
+                                series.id?.let { seriesId ->
+                                    BazarrSubtitlesSection(
+                                        target = BazarrMediaTarget.Episode(
+                                            seriesId,
+                                            currentEpisode.id
+                                        ),
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                    )
+                                }
+
+                                when (val historyResult = history) {
+                                    is HistoryState.Loading -> {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
+                                    }
+
+                                    is HistoryState.Success -> {
+                                        Text(
+                                            text = mokoString(MR.strings.history),
+                                            fontSize = 22.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                        )
+                                        if (historyResult.items.isEmpty()) {
+                                            Text(
+                                                text = mokoString(MR.strings.no_history),
+                                                fontWeight = FontWeight.Medium,
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.fillMaxWidth()
+                                                    .padding(horizontal = 24.dp),
+                                            )
+                                        } else {
+                                            historyResult.items.forEach { historyItem ->
+                                                HistoryItemView(
+                                                    item = historyItem,
+                                                    modifier = Modifier.padding(horizontal = 24.dp),
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    is HistoryState.Error -> {}
+                                    else -> {}
+                                }
+                            }
+                        }
+
+                        EpisodeDetailsTab.Analytics -> {
+                            TracearrAnalyticsSection(
+                                uiState = tracearrState,
+                                onWindowSelected = { viewModel.selectTracearrStatsWindow(it) },
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                            )
+                        }
+
+                        EpisodeDetailsTab.History -> {
+                            TracearrHistorySection(
+                                uiState = tracearrState,
+                                onLoadMore = { viewModel.loadMoreTracearrHistory() },
+                                onClickItem = { selectedTracearrStreamSession = it.toStreamSession() },
+                                isLargeScreen = isExpanded,
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(12.dp))
                 }
             }
@@ -331,6 +423,15 @@ fun EpisodeDetailsScreen(
                     showConfirmRemoveQueueItem = false
                     selectedQueueItem = null
                 },
+            )
+        }
+
+        selectedTracearrStreamSession?.let { session ->
+            TracearrStreamDetailsSheet(
+                session = session,
+                onDismissRequest = { selectedTracearrStreamSession = null },
+                onNavigateToDetails = { _, _ -> },
+                onNavigateToUser = { /* user profile */ },
             )
         }
     }

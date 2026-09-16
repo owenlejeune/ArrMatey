@@ -12,10 +12,15 @@ import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetEpisodeHistoryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.model.TracearrMediaUiState
+import com.dnfapps.arrmatey.model.TracearrStatsWindowType
+import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsTracearrHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,9 +41,14 @@ class EpisodeDetailsViewModel(
     private val deleteEpisodeUseCase: DeleteEpisodeFileUseCase,
     getActivityTasksUseCase: GetActivityTasksUseCase,
     private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
+    private val getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
+    private val preferencesStore: PreferencesStore,
 ) : ViewModel() {
     private val _episode = MutableStateFlow(episode)
     val episode: StateFlow<Episode> = _episode.asStateFlow()
+
+    private val tracearrHandler = UnifiedMediaDetailsTracearrHandler()
+    val tracearrState: StateFlow<TracearrMediaUiState> = tracearrHandler.tracearrState
 
     private val _history = MutableStateFlow<HistoryState>(HistoryState.Initial)
     val history: StateFlow<HistoryState> = _history.asStateFlow()
@@ -82,6 +92,13 @@ class EpisodeDetailsViewModel(
         } else {
             observeSelectedInstance()
         }
+
+        tracearrHandler.observeTracearrDataForRef(
+            scope = viewModelScope,
+            refFlow = _episode.map { it.tvdbId?.takeIf { id -> id > 0 }?.let { id -> "episode:tvdb:$id" } },
+            getTracearrInstanceRepositoryUseCase = getTracearrInstanceRepositoryUseCase,
+            preferencesStore = preferencesStore,
+        )
     }
 
     private fun observeSelectedInstance() {
@@ -178,5 +195,17 @@ class EpisodeDetailsViewModel(
                 _removeQueueItemStatus.value = status
             }
         }
+    }
+
+    fun selectTracearrStatsWindow(window: TracearrStatsWindowType) {
+        tracearrHandler.selectTracearrStatsWindow(window)
+    }
+
+    fun loadMoreTracearrHistory() {
+        tracearrHandler.loadMoreTracearrHistory(
+            scope = viewModelScope,
+            getTracearrInstanceRepositoryUseCase = getTracearrInstanceRepositoryUseCase,
+            preferencesStore = preferencesStore,
+        )
     }
 }

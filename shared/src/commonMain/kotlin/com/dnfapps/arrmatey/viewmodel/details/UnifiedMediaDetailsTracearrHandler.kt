@@ -16,7 +16,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -34,65 +36,83 @@ class UnifiedMediaDetailsTracearrHandler {
         initialTmdbId: Long?,
         initialRequestType: RequestType?,
     ) {
-        scope.launch {
-            combine(
-                uiStateFlow,
-                getTracearrInstanceRepositoryUseCase.observeSelected(),
-                preferencesStore.tracearrDetailsIntegration,
-            ) { state, tracearrRepo, tracearrIntegrationEnabled ->
-                Triple(state, tracearrRepo, tracearrIntegrationEnabled)
-            }.collectLatest { (state, tracearrRepo, tracearrIntegrationEnabled) ->
-                if (tracearrRepo == null || !tracearrIntegrationEnabled) {
-                    _tracearrState.value = TracearrMediaUiState(isTracearrConfigured = false)
-                    return@collectLatest
-                }
+        val refFlow =
+            uiStateFlow
+                .map { state ->
+                    val success = state as? UnifiedMediaDetailsUiState.Success
+                    val targetItem = success?.arrMedia
 
-                val success = state as? UnifiedMediaDetailsUiState.Success
-                val targetItem = success?.arrMedia
+                    val resolvedTmdbId =
+                        initialTmdbId ?: when (targetItem) {
+                            is ArrMovie -> targetItem.tmdbId.takeIf { it > 0 }
+                            is ArrSeries -> targetItem.tmdbId?.takeIf { it > 0 }
+                            else -> null
+                        }
 
-                val resolvedTmdbId =
-                    initialTmdbId ?: when (targetItem) {
-                        is ArrMovie -> targetItem.tmdbId.takeIf { it > 0 }
-                        is ArrSeries -> targetItem.tmdbId?.takeIf { it > 0 }
-                        else -> null
-                    }
+                    val resolvedReqType =
+                        initialRequestType ?: when (targetItem) {
+                            is ArrMovie -> RequestType.Movie
+                            is ArrSeries -> RequestType.Tv
+                            else -> null
+                        }
 
-                val resolvedReqType =
-                    initialRequestType ?: when (targetItem) {
-                        is ArrMovie -> RequestType.Movie
-                        is ArrSeries -> RequestType.Tv
-                        else -> null
-                    }
+                    val isMovieOrTv = resolvedReqType == RequestType.Movie || resolvedReqType == RequestType.Tv
 
-                val isMovieOrTv = resolvedReqType == RequestType.Movie || resolvedReqType == RequestType.Tv
-
-                if (resolvedTmdbId != null && resolvedTmdbId > 0 && isMovieOrTv) {
-                    val ref =
+                    if (resolvedTmdbId != null && resolvedTmdbId > 0 && isMovieOrTv) {
                         if (resolvedReqType == RequestType.Tv) {
                             "show:tmdb:$resolvedTmdbId"
                         } else {
                             "movie:tmdb:$resolvedTmdbId"
                         }
-                    currentTracearrRef = ref
-
-                    _tracearrState.update { it.copy(isTracearrConfigured = true, isLoading = true) }
-
-                    val statsResult = tracearrRepo.getMediaStats(ref)
-                    val watchersResult = tracearrRepo.getMediaWatchers(ref)
-                    val historyResult = tracearrRepo.getMediaHistory(ref, cursor = null, pageSize = 25)
-
-                    _tracearrState.update { currentState ->
-                        currentState.copy(
-                            isTracearrConfigured = true,
-                            stats = (statsResult as? NetworkResult.Success)?.data,
-                            watchers = (watchersResult as? NetworkResult.Success)?.data,
-                            historyItems = (historyResult as? NetworkResult.Success)?.data?.data ?: emptyList(),
-                            nextHistoryCursor = (historyResult as? NetworkResult.Success)?.data?.meta?.nextCursor,
-                            isLoading = false,
-                        )
+                    } else {
+                        null
                     }
-                } else {
+                }.distinctUntilChanged()
+
+        observeTracearrDataForRef(
+            scope = scope,
+            refFlow = refFlow,
+            getTracearrInstanceRepositoryUseCase = getTracearrInstanceRepositoryUseCase,
+            preferencesStore = preferencesStore,
+        )
+    }
+
+    fun observeTracearrDataForRef(
+        scope: CoroutineScope,
+        refFlow: Flow<String?>,
+        getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
+        preferencesStore: PreferencesStore,
+    ) {
+        scope.launch {
+            combine(
+                refFlow,
+                getTracearrInstanceRepositoryUseCase.observeSelected(),
+                preferencesStore.tracearrDetailsIntegration,
+            ) { ref, tracearrRepo, tracearrIntegrationEnabled ->
+                Triple(ref, tracearrRepo, tracearrIntegrationEnabled)
+            }.collectLatest { (ref, tracearrRepo, tracearrIntegrationEnabled) ->
+                if (tracearrRepo == null || !tracearrIntegrationEnabled || ref.isNullOrBlank()) {
                     _tracearrState.value = TracearrMediaUiState(isTracearrConfigured = false)
+                    currentTracearrRef = null
+                    return@collectLatest
+                }
+
+                currentTracearrRef = ref
+                _tracearrState.update { it.copy(isTracearrConfigured = true, isLoading = true) }
+
+                val statsResult = tracearrRepo.getMediaStats(ref)
+                val watchersResult = tracearrRepo.getMediaWatchers(ref)
+                val historyResult = tracearrRepo.getMediaHistory(ref, cursor = null, pageSize = 25)
+
+                _tracearrState.update { currentState ->
+                    currentState.copy(
+                        isTracearrConfigured = true,
+                        stats = (statsResult as? NetworkResult.Success)?.data,
+                        watchers = (watchersResult as? NetworkResult.Success)?.data,
+                        historyItems = (historyResult as? NetworkResult.Success)?.data?.data ?: emptyList(),
+                        nextHistoryCursor = (historyResult as? NetworkResult.Success)?.data?.meta?.nextCursor,
+                        isLoading = false,
+                    )
                 }
             }
         }

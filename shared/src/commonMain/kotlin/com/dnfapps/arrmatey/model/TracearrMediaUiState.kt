@@ -23,6 +23,8 @@ data class TracearrMediaUiState(
     val selectedStatsWindow: TracearrStatsWindowType = TracearrStatsWindowType.AllTime,
     val isLoading: Boolean = false,
 ) {
+    constructor() : this(false) // empty constructor for ios
+
     val totalPlays: Long
         get() =
             when (selectedStatsWindow) {

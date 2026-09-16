@@ -502,7 +502,7 @@ val viewModelModule =
             MovieFilesViewModel(movieId, get(), get(), get())
         }
         viewModel { (seriesId: Long, episode: Episode) ->
-            EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get())
+            EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         viewModelOf(::MoreScreenViewModel)
         viewModelOf(::AddInstanceViewModel)

@@ -21,9 +21,12 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 @Composable
-fun HistoryItemView(item: HistoryItem) {
+fun HistoryItemView(
+    item: HistoryItem,
+    modifier: Modifier = Modifier,
+) {
     ContainerCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
