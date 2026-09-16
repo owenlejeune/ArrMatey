@@ -73,7 +73,6 @@ import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
@@ -199,7 +198,7 @@ fun UnifiedLibraryScreen(
         val currentType = currentInstance.type
         val showFab = !wideRailIsVisible && !isInSelectionMode
         val useFloatingNavigationBar by globalPreferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(
-            false
+            false,
         )
 
         ProvideFloatingBarAction(
@@ -235,10 +234,10 @@ fun UnifiedLibraryScreen(
                         (
                             fadeIn(animationSpec = tween(200, delayMillis = 50)) +
                                 slideInVertically(animationSpec = tween(200, delayMillis = 50)) { -it / 2 }
-                            ).togetherWith(
-                                fadeOut(animationSpec = tween(150)) +
-                                    slideOutVertically(animationSpec = tween(150)) { -it / 2 },
-                            )
+                        ).togetherWith(
+                            fadeOut(animationSpec = tween(150)) +
+                                slideOutVertically(animationSpec = tween(150)) { -it / 2 },
+                        )
                     },
                     label = "SelectionTopBarAnimation",
                 ) { inSelection ->
@@ -431,7 +430,7 @@ fun UnifiedLibraryScreen(
                                         onNavigateToSearch(
                                             textFieldState.text.toString(),
                                             currentType,
-                                            currentInstance.id
+                                            currentInstance.id,
                                         )
                                     }
                                 }

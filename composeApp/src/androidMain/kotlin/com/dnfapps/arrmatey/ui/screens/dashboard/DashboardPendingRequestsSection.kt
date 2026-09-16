@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -170,6 +171,7 @@ private fun CompactRequestCard(
                                 Text(
                                     text = year.toString(),
                                     style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White,
                                 )
                             }
                             MediaRequestTypeChip(text = request.type.name, request.type)
@@ -181,6 +183,7 @@ private fun CompactRequestCard(
                             fontWeight = FontWeight.Bold,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
+                            color = Color.White,
                         )
 
                         StatusChip(request)
@@ -190,6 +193,7 @@ private fun CompactRequestCard(
                     label = mokoString(MR.strings.requested_by),
                     displayName = request.requestedBy.displayName,
                     avatar = request.requestedBy.avatar,
+                    textColor = Color.White,
                 )
             }
         }

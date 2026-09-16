@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -171,6 +172,7 @@ private fun CompactIssueCard(
                                 Text(
                                     text = year.toString(),
                                     style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White,
                                 )
                             }
                             issue.media?.mediaType?.let { requestType ->
@@ -184,6 +186,7 @@ private fun CompactIssueCard(
                             fontWeight = FontWeight.Bold,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
+                            color = Color.White,
                         )
 
                         Row(
@@ -194,7 +197,7 @@ private fun CompactIssueCard(
                             Text(
                                 text = mokoString(issueType.label),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = Color.White,
                             )
                         }
                     }
@@ -221,6 +224,7 @@ private fun CompactIssueCard(
                         label = mokoString(MR.strings.opened_by),
                         displayName = createdBy.displayName,
                         avatar = createdBy.avatar,
+                        textColor = Color.White,
                     )
                 }
             }

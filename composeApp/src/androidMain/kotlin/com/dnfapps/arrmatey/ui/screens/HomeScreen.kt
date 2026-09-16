@@ -84,10 +84,10 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.toSearch
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarActionState
-import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingNavigationBar
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingNavigationBarItem
 import com.dnfapps.arrmatey.ui.components.appbar.LocalFloatingBarActionState
+import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.LocalIsTabActive
 import com.dnfapps.arrmatey.ui.tabs.ActivityTab
