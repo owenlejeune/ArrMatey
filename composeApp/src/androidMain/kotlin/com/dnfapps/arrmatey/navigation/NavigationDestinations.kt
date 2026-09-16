@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
+import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 
@@ -98,6 +99,10 @@ sealed interface SeerrScreen : NavKey {
 
 sealed interface DiscoverScreen : NavKey {
     data object Home : DiscoverScreen
+
+    data class Category(
+        val category: DiscoverCategory,
+    ) : DiscoverScreen
 }
 
 sealed interface CalendarScreen : NavKey {

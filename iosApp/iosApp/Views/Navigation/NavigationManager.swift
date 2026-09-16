@@ -239,6 +239,15 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         }
     }
 
+    func goToDiscoverCategory(category: DiscoverCategory) {
+        let route = SeerrRoute.category(category: category)
+        if showLauncher {
+            launcherPath.append(route)
+        } else {
+            seerrPath.append(route)
+        }
+    }
+
     func goToPersonDetails(id: Int64) {
         goToSeerrDetails(tmdbId: id, requestType: .person)
     }
@@ -516,6 +525,7 @@ enum MediaRoute: Hashable {
 
 enum SeerrRoute: Hashable {
     case details(tmdbId: Int64, requestType: RequestType)
+    case category(category: DiscoverCategory)
 }
 
 enum SettingsRoute : Hashable {

@@ -42,6 +42,7 @@
     <string name="upcoming_series">Upcoming Series</string>
     <string name="recommended">Recommended</string>
     <string name="similar">Similar</string>
+    <string name="see_more">See More</string>
     <string name="deep_links_title">Deep Links</string>
     <string name="deep_links_description">Configure how the app handles web links from external sources.</string>
     <string name="tmdb_links">TMDB Links</string>

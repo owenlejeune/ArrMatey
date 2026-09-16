@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +15,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.StringResource
 
@@ -37,48 +38,60 @@ fun DiscoverSection(
     onItemClick: (DiscoverResult) -> Unit,
     onLoadMore: () -> Unit,
     icon: ImageVector? = null,
+    onSeeMore: (() -> Unit)? = null,
 ) {
-    val lazyListState = rememberLazyListState()
+    val items = data.items
 
-    val shouldLoadMore by remember {
-        derivedStateOf {
-            val totalItemsCount = lazyListState.layoutInfo.totalItemsCount
-            val lastVisibleItemIndex =
-                lazyListState.layoutInfo.visibleItemsInfo
-                    .lastOrNull()
-                    ?.index ?: 0
-            lastVisibleItemIndex >= totalItemsCount - 5 && totalItemsCount > 0
-        }
-    }
+    if (items.isNotEmpty()) {
+        val lazyListState = rememberLazyListState()
 
-    LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore) {
-            onLoadMore()
-        }
-    }
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            icon?.let { icon ->
-                Icon(icon, null, modifier = Modifier.size(24.dp))
+        val shouldLoadMore by remember {
+            derivedStateOf {
+                val totalItemsCount = lazyListState.layoutInfo.totalItemsCount
+                val lastVisibleItemIndex =
+                    lazyListState.layoutInfo.visibleItemsInfo
+                        .lastOrNull()
+                        ?.index ?: 0
+                lastVisibleItemIndex >= totalItemsCount - 5 && totalItemsCount > 0
             }
-            Text(
-                text = mokoString(title),
-                style = MaterialTheme.typography.titleLarge,
-            )
         }
 
-        val items = data.items
-
-        if (data.isLoading && items.isEmpty()) {
-            Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+        LaunchedEffect(shouldLoadMore) {
+            if (shouldLoadMore) {
+                onLoadMore()
             }
-        } else if (items.isNotEmpty()) {
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f, fill = false),
+                ) {
+                    icon?.let { icon ->
+                        Icon(icon, null, modifier = Modifier.size(24.dp))
+                    }
+                    Text(
+                        text = mokoString(title),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                }
+
+                if (onSeeMore != null) {
+                    TextButton(onClick = onSeeMore) {
+                        Text(
+                            text = mokoString(MR.strings.see_more),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                }
+            }
+
             LazyRow(
                 state = lazyListState,
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -99,12 +112,6 @@ fun DiscoverSection(
                     }
                 }
             }
-        } else if (data.error != null) {
-            Text(
-                text = data.error ?: "",
-                modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.error,
-            )
         }
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 @MainActor
 class DiscoverViewModelS: ObservableObject {
     private let viewModel: DiscoverViewModel
-    
+
     @Published private(set) var trendingState = PagedData<DiscoverResult>()
     @Published private(set) var moviesState = PagedData<DiscoverResult>()
     @Published private(set) var tvState = PagedData<DiscoverResult>()
@@ -18,14 +18,15 @@ class DiscoverViewModelS: ObservableObject {
     @Published private(set) var searchResults: [SearchResult] = []
     @Published private(set) var isSearching: Bool = false
     @Published private(set) var isRefreshing: Bool = false
+    @Published private(set) var isInitialLoading: Bool = false
     @Published private(set) var searchShowBanners: Bool = true
     @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
-    
+
     init() {
         self.viewModel = KoinBridge.shared.getDiscoverViewModel()
         startObserving()
     }
-    
+
     private func startObserving() {
         viewModel.trendingState.observeAsync(on: self, to: \.trendingState)
         viewModel.moviesState.observeAsync(on: self, to: \.moviesState)
@@ -41,6 +42,9 @@ class DiscoverViewModelS: ObservableObject {
         viewModel.isRefreshing.observeAsync(on: self) { owner, refreshing in
             owner.isRefreshing = refreshing.boolValue
         }
+        viewModel.isInitialLoading.observeAsync(on: self) { owner, loading in
+            owner.isInitialLoading = loading.boolValue
+        }
         viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
             owner.searchShowBanners = show.boolValue
         }
@@ -48,7 +52,7 @@ class DiscoverViewModelS: ObservableObject {
             owner.searchShowInstanceIndicatorShadow = show.boolValue
         }
     }
-    
+
     func loadNextTrendingPage() {
         viewModel.loadNextTrendingPage()
     }
@@ -68,7 +72,22 @@ class DiscoverViewModelS: ObservableObject {
     func loadNextUpcomingTvPage() {
         viewModel.loadNextUpcomingTvPage()
     }
-    
+
+    func getStateForCategory(_ category: DiscoverCategory) -> PagedData<DiscoverResult> {
+        switch category {
+        case .trending: return trendingState
+        case .popularMovies: return moviesState
+        case .popularSeries: return tvState
+        case .upcomingMovies: return upcomingMoviesState
+        case .upcomingSeries: return upcomingTvState
+        default: return PagedData()
+        }
+    }
+
+    func loadNextPageForCategory(_ category: DiscoverCategory) {
+        viewModel.loadNextPageForCategory(category: category)
+    }
+
     func updateSearchQuery(_ query: String) {
         viewModel.updateSearchQuery(query: query)
     }

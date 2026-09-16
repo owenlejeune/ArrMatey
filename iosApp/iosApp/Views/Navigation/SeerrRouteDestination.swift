@@ -9,7 +9,7 @@ import Shared
 struct SeerrRouteDestination: View {
     let route: SeerrRoute
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     var body: some View {
         switch route {
         case .details(let tmdbId, let requestType):
@@ -18,6 +18,8 @@ struct SeerrRouteDestination: View {
             } else {
                 UnifiedMediaDetailsScreen(tmdbId: tmdbId, requestType: requestType)
             }
+        case .category(let category):
+            DiscoverCategoryScreen(category: category)
         }
     }
 }

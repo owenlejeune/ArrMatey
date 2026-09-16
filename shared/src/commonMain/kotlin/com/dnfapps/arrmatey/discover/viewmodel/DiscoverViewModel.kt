@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
@@ -20,7 +21,6 @@ import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverTvUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetTrendingUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingMoviesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingTvUseCase
-import com.dnfapps.arrmatey.seerr.usecase.SearchSeerrUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -46,24 +46,35 @@ class DiscoverViewModel(
     private val getDiscoverTvUseCase: GetDiscoverTvUseCase,
     private val getUpcomingMoviesUseCase: GetUpcomingMoviesUseCase,
     private val getUpcomingTvUseCase: GetUpcomingTvUseCase,
-    private val searchSeerrUseCase: SearchSeerrUseCase,
     private val globalSearchUseCase: GlobalSearchUseCase,
     private val preferencesStore: PreferencesStore,
 ) : ViewModel() {
     private val seerrRepository: StateFlow<SeerrInstanceRepository?> =
         instanceManager
             .getSelectedSeerrRepository()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null,
+            )
 
     val instances: StateFlow<List<Instance>> =
         instanceRepository.allInstancesFlow
             .map { all -> all.filter { it.type == InstanceType.Seerr } }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
     val selectedInstance: StateFlow<Instance?> =
         seerrRepository
             .map { it?.instance }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null,
+            )
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -91,6 +102,21 @@ class DiscoverViewModel(
     private val _upcomingTvState = MutableStateFlow(PagedData<DiscoverResult>())
     val upcomingTvState: StateFlow<PagedData<DiscoverResult>> = _upcomingTvState.asStateFlow()
 
+    val isInitialLoading: StateFlow<Boolean> =
+        combine(
+            _trendingState,
+            _moviesState,
+            _tvState,
+            _upcomingMoviesState,
+            _upcomingTvState,
+        ) { states: Array<PagedData<DiscoverResult>> ->
+            states.any { it.isLoading && it.items.isEmpty() }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false,
+        )
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -99,7 +125,11 @@ class DiscoverViewModel(
     private val allLibraries: StateFlow<List<ArrMedia>> =
         instanceManager
             .observeAllArrLibraries()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
     val searchState: StateFlow<List<SearchResult>> =
         combine(_searchState, allLibraries) { results, libraries ->
@@ -111,18 +141,30 @@ class DiscoverViewModel(
                     result
                 }
             }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
 
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
     val searchShowBanners: StateFlow<Boolean> =
         preferencesStore.searchShowBanners
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
 
     val searchShowInstanceIndicatorShadow: StateFlow<Boolean> =
         preferencesStore.searchShowInstanceIndicatorShadow
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
 
     init {
         observeRepository()
@@ -236,6 +278,25 @@ class DiscoverViewModel(
 
     fun loadNextUpcomingTvPage() {
         upcomingTvPagingController?.loadNextPage()
+    }
+
+    fun getStateForCategory(category: DiscoverCategory): StateFlow<PagedData<DiscoverResult>> =
+        when (category) {
+            DiscoverCategory.TRENDING -> trendingState
+            DiscoverCategory.POPULAR_MOVIES -> moviesState
+            DiscoverCategory.POPULAR_SERIES -> tvState
+            DiscoverCategory.UPCOMING_MOVIES -> upcomingMoviesState
+            DiscoverCategory.UPCOMING_SERIES -> upcomingTvState
+        }
+
+    fun loadNextPageForCategory(category: DiscoverCategory) {
+        when (category) {
+            DiscoverCategory.TRENDING -> loadNextTrendingPage()
+            DiscoverCategory.POPULAR_MOVIES -> loadNextMoviesPage()
+            DiscoverCategory.POPULAR_SERIES -> loadNextTvPage()
+            DiscoverCategory.UPCOMING_MOVIES -> loadNextUpcomingMoviesPage()
+            DiscoverCategory.UPCOMING_SERIES -> loadNextUpcomingTvPage()
+        }
     }
 
     fun refresh() {

@@ -13,6 +13,7 @@ struct DiscoverSection: View {
     let onItemClick: (DiscoverResult) -> Void
     let onItemClickArr: ((SearchResult) -> Void)?
     let onLoadMore: () -> Void
+    let onSeeMore: (() -> Void)?
     var showOverlays: Bool = true
 
     init(
@@ -22,6 +23,7 @@ struct DiscoverSection: View {
         onItemClick: @escaping (DiscoverResult) -> Void,
         onItemClickArr: ((SearchResult) -> Void)? = nil,
         onLoadMore: @escaping () -> Void,
+        onSeeMore: (() -> Void)? = nil,
         showOverlays: Bool = true
     ) {
         self.title = title
@@ -30,29 +32,32 @@ struct DiscoverSection: View {
         self.onItemClick = onItemClick
         self.onItemClickArr = onItemClickArr
         self.onLoadMore = onLoadMore
+        self.onSeeMore = onSeeMore
         self.showOverlays = showOverlays
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                if let ic = icon {
-                    Image(systemName: ic)
-                        .font(.system(size: 20))
-                }
-                Text(title)
-                    .font(.headline)
-            }
-            .padding(.horizontal, 16)
-
-            if data.isLoading && data.items.isEmpty {
+        if !data.items.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
                 HStack {
+                    HStack(spacing: 8) {
+                        if let ic = icon {
+                            Image(systemName: ic)
+                                .font(.system(size: 20))
+                        }
+                        Text(title)
+                            .font(.headline)
+                    }
                     Spacer()
-                    ProgressView()
-                    Spacer()
+                    if let onSeeMore = onSeeMore {
+                        Button(action: onSeeMore) {
+                            Text(MR.strings().see_more.localized())
+                                .font(.subheadline)
+                        }
+                    }
                 }
-                .padding(.vertical, 24)
-            } else if !data.items.isEmpty {
+                .padding(.horizontal, 16)
+
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: 12) {
                         ForEach(data.items as! [DiscoverResult], id: \.id) { item in
@@ -84,10 +89,6 @@ struct DiscoverSection: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12) // Ensure shadows aren't cut off
                 }
-            } else if let error = data.error {
-                Text(error)
-                    .foregroundColor(.red)
-                    .padding(.horizontal, 16)
             }
         }
     }
