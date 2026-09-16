@@ -62,6 +62,8 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var automaticSearchIds: Set<Int64> = []
     @Published private(set) var lastSearchResult: Bool? = nil
     @Published private(set) var addSheetUiState: AddSheetUiState = AddSheetUiState()
+    @Published private(set) var recommendationsState: PagedData<DiscoverResult> = PagedData()
+    @Published private(set) var similarState: PagedData<DiscoverResult> = PagedData()
 
     var resolvedInstanceType: InstanceType? {
         return viewModel.resolvedInstanceType
@@ -126,6 +128,8 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.rootFolders.observeAsync(on: self, to: \.rootFolders)
         viewModel.tags.observeAsync(on: self, to: \.tags)
         viewModel.preferences.observeAsync(on: self, to: \.preferences)
+        viewModel.recommendationsState.observeAsync(on: self, to: \.recommendationsState)
+        viewModel.similarState.observeAsync(on: self, to: \.similarState)
 
         viewModel.addItemStatus.observeAsync(on: self, to: \.addItemStatus)
 
@@ -398,5 +402,13 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
 
     func loadMoreTracearrHistory() {
         viewModel.loadMoreTracearrHistory()
+    }
+
+    func loadNextRecommendationsPage() {
+        viewModel.loadNextRecommendationsPage()
+    }
+
+    func loadNextSimilarPage() {
+        viewModel.loadNextSimilarPage()
     }
 }

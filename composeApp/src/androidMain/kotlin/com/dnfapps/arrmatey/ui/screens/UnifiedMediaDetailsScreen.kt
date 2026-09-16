@@ -131,6 +131,7 @@ fun UnifiedMediaDetailsScreen(
     onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
     onNavigateToAlbumRelease: (Long, Long) -> Unit,
     onPersonClick: (Long) -> Unit,
+    onMediaClick: ((Long, RequestType) -> Unit)? = null,
     instanceId: Long? = null,
     viewModel: UnifiedMediaDetailsViewModel =
         koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_$instanceId", parameters = {
@@ -139,6 +140,8 @@ fun UnifiedMediaDetailsScreen(
     moko: MokoStrings = koinInject(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val recommendationsState by viewModel.recommendationsState.collectAsStateWithLifecycle()
+    val similarState by viewModel.similarState.collectAsStateWithLifecycle()
     var lastSuccessState by remember { mutableStateOf<UnifiedMediaDetailsUiState.Success?>(null) }
     var hasNavigatedToInitialEpisode by remember(initialEpisodeId) { mutableStateOf(false) }
 
@@ -615,10 +618,15 @@ fun UnifiedMediaDetailsScreen(
                                             tags = tags,
                                             activeInstance = activeInstance,
                                             activeSeerrInstance = activeSeerrInstance,
+                                            recommendationsState = recommendationsState,
+                                            similarState = similarState,
                                             isExpanded = isExpanded,
                                             isDualPanel = isDualPanel,
                                             onEditPath = { showEditPathSheet = true },
                                             onPersonClick = onPersonClick,
+                                            onMediaClick = { id, type -> onMediaClick?.invoke(id, type) },
+                                            onLoadMoreRecommendations = { viewModel.loadNextRecommendationsPage() },
+                                            onLoadMoreSimilar = { viewModel.loadNextSimilarPage() },
                                         )
                                     }
 

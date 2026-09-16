@@ -11,6 +11,7 @@ struct OverviewTabContentView: View {
     @ObservedObject var viewModel: UnifiedMediaDetailsViewModelS
     var onEditPathClick: (() -> Void)? = nil
     let onPersonClick: (Int64) -> Void
+    @EnvironmentObject private var navigationManager: NavigationManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -20,6 +21,30 @@ struct OverviewTabContentView: View {
 
             if let credits = success.seerrMedia?.credits {
                 creditsSection(credits)
+            }
+
+            if !viewModel.recommendationsState.items.isEmpty || viewModel.recommendationsState.isLoading {
+                DiscoverSection(
+                    title: MR.strings().recommended.localized(),
+                    icon: nil,
+                    data: viewModel.recommendationsState,
+                    onItemClick: { item in
+                        navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                    },
+                    onLoadMore: { viewModel.loadNextRecommendationsPage() }
+                )
+            }
+
+            if !viewModel.similarState.items.isEmpty || viewModel.similarState.isLoading {
+                DiscoverSection(
+                    title: MR.strings().similar.localized(),
+                    icon: nil,
+                    data: viewModel.similarState,
+                    onItemClick: { item in
+                        navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                    },
+                    onLoadMore: { viewModel.loadNextSimilarPage() }
+                )
             }
 
             unifiedInfoArea(success)

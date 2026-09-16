@@ -68,6 +68,8 @@ class UnifiedMediaDetailsViewModelTest {
                 clearSeerrMediaDataUseCase = mockk(),
                 markSeerrMediaAsAvailableUseCase = mockk(),
                 deleteEpisodeFileUseCase = mockk(),
+                getRecommendationsUseCase = mockk(relaxed = true),
+                getSimilarUseCase = mockk(relaxed = true),
                 logger = mockk(relaxed = true),
                 preferencesStore =
                     mockk {

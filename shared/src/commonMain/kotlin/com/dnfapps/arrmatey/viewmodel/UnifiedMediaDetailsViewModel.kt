@@ -42,6 +42,11 @@ import com.dnfapps.arrmatey.model.SmartAddSeerrAction
 import com.dnfapps.arrmatey.model.TracearrMediaUiState
 import com.dnfapps.arrmatey.model.TracearrStatsWindowType
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
+import com.dnfapps.arrmatey.client.paging.PagedData
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.seerr.usecase.GetRecommendationsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetSimilarUseCase
+import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsRecommendationsHandler
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -108,6 +113,8 @@ class UnifiedMediaDetailsViewModel(
     removeSeerrMediaFileUseCase: RemoveSeerrMediaFileUseCase,
     clearSeerrMediaDataUseCase: ClearSeerrMediaDataUseCase,
     markSeerrMediaAsAvailableUseCase: MarkSeerrMediaAsAvailableUseCase,
+    getRecommendationsUseCase: GetRecommendationsUseCase,
+    getSimilarUseCase: GetSimilarUseCase,
     private val preferencesStore: PreferencesStore,
     private val logger: Logger,
 ) : ViewModel() {
@@ -174,6 +181,12 @@ class UnifiedMediaDetailsViewModel(
         )
 
     private val tracearrHandler = UnifiedMediaDetailsTracearrHandler()
+
+    private val recommendationsHandler =
+        UnifiedMediaDetailsRecommendationsHandler(
+            getRecommendationsUseCase = getRecommendationsUseCase,
+            getSimilarUseCase = getSimilarUseCase,
+        )
 
     private val arrActionsHandler =
         UnifiedMediaDetailsArrActionsHandler(
@@ -247,6 +260,9 @@ class UnifiedMediaDetailsViewModel(
     val isRequest4k: StateFlow<Boolean> = seerrHandler.isRequest4k
     val automaticSearchIds: StateFlow<Set<Long>> = arrActionsHandler.automaticSearchIds
 
+    val recommendationsState: StateFlow<PagedData<DiscoverResult>> = recommendationsHandler.recommendationsState
+    val similarState: StateFlow<PagedData<DiscoverResult>> = recommendationsHandler.similarState
+
     val selectedInstanceId: StateFlow<Long?> = instanceHandler.selectedInstanceId
     val availableInstances: StateFlow<List<Instance>> = instanceHandler.availableInstances
     val activeInstance: StateFlow<Instance?> = instanceHandler.activeInstance
@@ -259,9 +275,24 @@ class UnifiedMediaDetailsViewModel(
 
     init {
         dataObserver.observeData(_uiState)
+        recommendationsHandler.observeRecommendations(
+            scope = viewModelScope,
+            seerrRepoFlow = instanceHandler.seerrRepositoryFlow,
+            uiStateFlow = _uiState,
+            initialTmdbId = tmdbId,
+            initialRequestType = resolvedRequestType,
+        )
         viewModelScope.launch {
             activityQueueService.manualRefresh()
         }
+    }
+
+    fun loadNextRecommendationsPage() {
+        recommendationsHandler.loadNextRecommendationsPage()
+    }
+
+    fun loadNextSimilarPage() {
+        recommendationsHandler.loadNextSimilarPage()
     }
 
     fun selectInstance(instanceId: Long) {
@@ -287,6 +318,7 @@ class UnifiedMediaDetailsViewModel(
             }
             launch { activityQueueService.manualRefresh() }
         }
+        recommendationsHandler.refresh()
         dataObserver.observeData(_uiState)
     }
 

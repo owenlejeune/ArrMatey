@@ -230,6 +230,62 @@ class SeerrInstanceRepository(
             },
         )
 
+    fun getMovieRecommendationsPaging(movieId: Long): PagingSource<DiscoverResult> =
+        BasePagingSource(
+            fetcher = { page ->
+                client.getMovieRecommendations(movieId = movieId, page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages,
+                )
+            },
+        )
+
+    fun getMovieSimilarPaging(movieId: Long): PagingSource<DiscoverResult> =
+        BasePagingSource(
+            fetcher = { page ->
+                client.getMovieSimilar(movieId = movieId, page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages,
+                )
+            },
+        )
+
+    fun getTvRecommendationsPaging(seriesId: Long): PagingSource<DiscoverResult> =
+        BasePagingSource(
+            fetcher = { page ->
+                client.getTvRecommendations(seriesId = seriesId, page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages,
+                )
+            },
+        )
+
+    fun getTvSimilarPaging(seriesId: Long): PagingSource<DiscoverResult> =
+        BasePagingSource(
+            fetcher = { page ->
+                client.getTvSimilar(seriesId = seriesId, page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages,
+                )
+            },
+        )
+
     suspend fun getRequests(
         page: Int = 1,
         pageSize: Int = 10,

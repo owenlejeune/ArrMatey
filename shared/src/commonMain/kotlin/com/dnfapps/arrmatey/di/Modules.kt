@@ -159,6 +159,8 @@ import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetRecommendationsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetSimilarUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetTrendingUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingMoviesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingTvUseCase
@@ -354,6 +356,8 @@ val useCaseModule =
         factory { GetDiscoverTvUseCase() }
         factory { GetUpcomingMoviesUseCase() }
         factory { GetUpcomingTvUseCase() }
+        factory { GetRecommendationsUseCase() }
+        factory { GetSimilarUseCase() }
         factory { SearchSeerrUseCase() }
         factory { GlobalSearchUseCase(get()) }
         factory { SubmitRequestUseCase() }
@@ -476,6 +480,8 @@ val viewModelModule =
                 removeSeerrMediaFileUseCase = get(),
                 clearSeerrMediaDataUseCase = get(),
                 markSeerrMediaAsAvailableUseCase = get(),
+                getRecommendationsUseCase = get(),
+                getSimilarUseCase = get(),
                 preferencesStore = get(),
                 logger = get(),
             )

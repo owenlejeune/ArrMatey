@@ -35,10 +35,10 @@ import dev.icerock.moko.resources.StringResource
 @Composable
 fun DiscoverSection(
     title: StringResource,
-    icon: ImageVector,
     data: PagedData<DiscoverResult>,
     onItemClick: (DiscoverResult) -> Unit,
     onLoadMore: () -> Unit,
+    icon: ImageVector? = null,
 ) {
     val lazyListState = rememberLazyListState()
 
@@ -63,13 +63,14 @@ fun DiscoverSection(
         Row(
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(icon, null, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
+            icon?.let { icon ->
+                Icon(icon, null, modifier = Modifier.size(24.dp))
+            }
             Text(
                 text = mokoString(title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge
             )
         }
 

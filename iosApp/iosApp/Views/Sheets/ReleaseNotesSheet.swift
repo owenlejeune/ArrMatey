@@ -1,5 +1,4 @@
 import SwiftUI
-import MarkdownView
 import Shared
 
 struct ReleaseNotesSheet: View {
@@ -12,8 +11,12 @@ struct ReleaseNotesSheet: View {
                             .font(.title.bold())
                         Text(update.version)
                     }
-                    
-                    MarkdownView(update.iosContentFile.readText())
+
+                    if let attributedString = try? AttributedString(markdown: update.iosContentFile.readText()) {
+                        Text(attributedString)
+                    } else {
+                        Text(update.iosContentFile.readText())
+                    }
                 }
                 .padding(.horizontal, 12)
                 .padding()

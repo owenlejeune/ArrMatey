@@ -1,5 +1,4 @@
 import SwiftUI
-import MarkdownView
 import Shared
 import UserNotifications
 

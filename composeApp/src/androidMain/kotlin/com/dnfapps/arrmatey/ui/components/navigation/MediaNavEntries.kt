@@ -73,6 +73,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onNavigateToAudiobookRelease = { id, query -> navigation.toAudiobookRelease(id, query ?: "") },
             onNavigateToAlbumRelease = { artistId, albumId -> navigation.toAlbumRelease(albumId, artistId) },
             onPersonClick = { navigation.toPersonDetails(it) },
+            onMediaClick = { tmdbId, type -> navigation.toDetails(tmdbId = tmdbId, requestType = type) },
         )
     }
     entry<MediaScreen.PersonDetails> { details ->
