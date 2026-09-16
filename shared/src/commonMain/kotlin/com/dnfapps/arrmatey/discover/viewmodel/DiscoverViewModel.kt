@@ -118,24 +118,29 @@ class DiscoverViewModel(
         ) { flows ->
             @Suppress("UNCHECKED_CAST")
             val trending = flows[0] as PagedData<DiscoverResult>
+
             @Suppress("UNCHECKED_CAST")
             val movies = flows[1] as PagedData<DiscoverResult>
+
             @Suppress("UNCHECKED_CAST")
             val tv = flows[2] as PagedData<DiscoverResult>
+
             @Suppress("UNCHECKED_CAST")
             val upcomingMovies = flows[3] as PagedData<DiscoverResult>
+
             @Suppress("UNCHECKED_CAST")
             val upcomingTv = flows[4] as PagedData<DiscoverResult>
             val prefs = flows[5] as DiscoverSectionPreferences
 
             val visible = prefs.visibleCategories.toSet()
-            val statesMap = mapOf(
-                DiscoverCategory.TRENDING to trending,
-                DiscoverCategory.POPULAR_MOVIES to movies,
-                DiscoverCategory.POPULAR_SERIES to tv,
-                DiscoverCategory.UPCOMING_MOVIES to upcomingMovies,
-                DiscoverCategory.UPCOMING_SERIES to upcomingTv,
-            )
+            val statesMap =
+                mapOf(
+                    DiscoverCategory.TRENDING to trending,
+                    DiscoverCategory.POPULAR_MOVIES to movies,
+                    DiscoverCategory.POPULAR_SERIES to tv,
+                    DiscoverCategory.UPCOMING_MOVIES to upcomingMovies,
+                    DiscoverCategory.UPCOMING_SERIES to upcomingTv,
+                )
             visible.any { category ->
                 val state = statesMap[category]
                 state != null && state.isLoading && state.items.isEmpty()
