@@ -591,6 +591,19 @@ class ArrMediaViewModel(
         }
     }
 
+    fun searchFiltered() {
+        val success = uiState.value as? ArrLibrary.Success ?: return
+        val repository = currentRepository ?: return
+        val filteredIds = success.items.mapNotNull { it.id }
+        if (filteredIds.isEmpty()) return
+        viewModelScope.launch {
+            filteredIds.forEach { id ->
+                performAutomaticSearchUseCase(id, instanceType, repository)
+            }
+            _lastSearchResult.value = true
+        }
+    }
+
     fun updateLibrary() {
         val instanceId = currentRepository?.instance?.id ?: return
         viewModelScope.launch {

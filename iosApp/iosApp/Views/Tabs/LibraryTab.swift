@@ -119,6 +119,7 @@ struct LibraryTabContent: View {
                             instanceUrl: tabInstance.url,
                             onRunRssSync: { libraryViewModel.runRssSync() },
                             onSearchAllMissing: { libraryViewModel.searchAllMissing() },
+                            onSearchFiltered: { libraryViewModel.searchFiltered() },
                             onUpdateLibrary: { libraryViewModel.updateLibrary() },
                             onBackupDatabase: { libraryViewModel.backupDatabase() }
                         ) {
