@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.BrightnessLow
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MiscellaneousServices
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Splitscreen
@@ -71,6 +72,7 @@ fun UiSettingsScreen(
 
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
+    val useFloatingNavigationBar by viewModel.useFloatingNavigationBar.collectAsStateWithLifecycle()
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
     val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
@@ -213,6 +215,18 @@ fun UiSettingsScreen(
                                 )
                             },
                             onClick = { viewModel.toggleInstanceSwitcher() },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.MoreHoriz),
+                            title = mokoString(MR.strings.floating_navigation_bar_toggle_title),
+                            subtitle = mokoString(MR.strings.floating_navigation_bar_toggle_description),
+                            trailingContent = {
+                                Switch(
+                                    checked = useFloatingNavigationBar,
+                                    onCheckedChange = { viewModel.toggleUseFloatingNavigationBar() },
+                                )
+                            },
+                            onClick = { viewModel.toggleUseFloatingNavigationBar() },
                         ),
                     ),
             )

@@ -111,6 +111,7 @@ import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MediaView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.EditArtistSheet
@@ -212,6 +213,8 @@ fun ArrLibraryScreen(
         arrMediaViewModel.updateSearchQuery(textFieldState.text.toString())
     }
 
+    val fabBottomPadding = LocalFloatingBarBottomPadding.current
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
@@ -219,6 +222,7 @@ fun ArrLibraryScreen(
                 visible = !wideRailIsVisible && !isInSelectionMode && instancesState.selectedInstance != null,
                 enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
                 exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
+                modifier = Modifier.padding(bottom = fabBottomPadding),
             ) {
                 FloatingActionButton(
                     onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) },

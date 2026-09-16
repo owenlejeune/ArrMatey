@@ -34,6 +34,7 @@ import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
 
@@ -116,11 +117,16 @@ fun CalendarListView(
             }
         }
 
+        val fabBottomPadding = LocalFloatingBarBottomPadding.current
+
         AnimatedVisibility(
             visible = !isTodayVisible,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-            modifier = Modifier.align(Alignment.BottomEnd),
+            modifier =
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = fabBottomPadding),
         ) {
             FloatingActionButton(
                 onClick = {

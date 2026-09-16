@@ -84,6 +84,7 @@ class PreferencesStore(
     private val combineSeerrArrMediaKey = booleanPreferencesKey("combineSeerrArrMedia")
     private val bazarrDetailsIntegrationKey = booleanPreferencesKey("bazarrDetailsIntegration")
     private val tracearrDetailsIntegrationKey = booleanPreferencesKey("tracearrDetailsIntegration")
+    private val useFloatingNavigationBarKey = booleanPreferencesKey("useFloatingNavigationBar")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> =
         when (type) {
@@ -637,6 +638,27 @@ class PreferencesStore(
     fun setHideInstanceSwitcher(value: Boolean) {
         scope.launch {
             dataStore.edit { it[hideInstanceSwitcherKey] = value }
+        }
+    }
+
+    val useFloatingNavigationBar: Flow<Boolean> =
+        dataStore.data
+            .map { preferences ->
+                preferences[useFloatingNavigationBarKey] ?: false
+            }
+
+    fun toggleUseFloatingNavigationBar() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[useFloatingNavigationBarKey] ?: false
+                preferences[useFloatingNavigationBarKey] = !current
+            }
+        }
+    }
+
+    fun setUseFloatingNavigationBar(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[useFloatingNavigationBarKey] = value }
         }
     }
 

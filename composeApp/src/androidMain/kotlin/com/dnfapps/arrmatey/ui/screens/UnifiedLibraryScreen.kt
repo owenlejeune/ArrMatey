@@ -70,6 +70,7 @@ import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.MediaView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
@@ -190,6 +191,7 @@ fun UnifiedLibraryScreen(
     } else {
         val currentInstance = selectedInstance!!
         val currentType = currentInstance.type
+        val fabBottomPadding = LocalFloatingBarBottomPadding.current
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -198,6 +200,7 @@ fun UnifiedLibraryScreen(
                     visible = !wideRailIsVisible && !isInSelectionMode,
                     enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
                     exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
+                    modifier = Modifier.padding(bottom = fabBottomPadding),
                 ) {
                     FloatingActionButton(
                         onClick = { onNavigateToSearch("", currentType, currentInstance.id) },

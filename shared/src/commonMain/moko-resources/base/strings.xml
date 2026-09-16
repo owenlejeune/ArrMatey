@@ -351,6 +351,8 @@
     <string name="books_area_series_tab">Series (%1$d)</string>
     <string name="instance_switcher_toggle_title">Smart instance switcher</string>
     <string name="instance_switcher_toggle_description">Automatically hide the switcher when only one instance is configured</string>
+    <string name="floating_navigation_bar_toggle_title">Floating navigation bar</string>
+    <string name="floating_navigation_bar_toggle_description">Use a floating pill navigation bar on phone screens</string>
     <string name="open_in_browser">Open in Browser</string>
     <string name="replace_url_with_current">Replace saved URL with current</string>
     <string name="now_playing">Now Playing</string>

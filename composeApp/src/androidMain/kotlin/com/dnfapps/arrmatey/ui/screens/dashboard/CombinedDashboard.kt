@@ -87,6 +87,7 @@ import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.screens.requests.IssueDetailsSheet
 import com.dnfapps.arrmatey.ui.screens.requests.IssuesList
 import com.dnfapps.arrmatey.ui.screens.requests.RequestsList
@@ -434,11 +435,13 @@ fun CombinedDashboard(
             }
         },
         floatingActionButton = {
+            val fabBottomPadding = LocalFloatingBarBottomPadding.current
             if (isEditing && availableCards.isNotEmpty()) {
                 ExtendedFloatingActionButton(
                     onClick = { showAddCardSheet = true },
                     icon = { Icon(Icons.Default.Add, null) },
                     text = { Text(mokoString(MR.strings.add)) },
+                    modifier = Modifier.padding(bottom = fabBottomPadding),
                 )
             }
         },

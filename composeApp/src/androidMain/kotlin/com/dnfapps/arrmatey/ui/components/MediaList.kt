@@ -59,6 +59,7 @@ import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.extensions.pxToDp
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
@@ -86,11 +87,19 @@ fun <T : ArrMedia> MediaList(
     posterRadius: PosterRadius = PosterRadius.Medium,
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
 ) {
+    val bottomPadding = LocalFloatingBarBottomPadding.current
+
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(18.dp),
         userScrollEnabled = userScrollEnabled,
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp),
+        contentPadding =
+            PaddingValues(
+                start = 18.dp,
+                top = 12.dp,
+                end = 18.dp,
+                bottom = 12.dp + bottomPadding,
+            ),
     ) {
         items(
             items = items,
@@ -165,6 +174,7 @@ fun SearchResultItem(
                     showBannerBackground = showBanners,
                 )
             }
+
             is SearchResult.SeerrMediaResult -> {
                 SeerrMediaItem(
                     result = item,
@@ -173,6 +183,7 @@ fun SearchResultItem(
                     showBannerBackground = showBanners,
                 )
             }
+
             is SearchResult.SeerrPersonResult -> {
                 SeerrPersonItem(
                     result = item,
@@ -497,6 +508,7 @@ private fun SeriesDetails(
             MediaStatus.Continuing ->
                 item.nextAiring?.format()
                     ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
+
             else -> mokoString(item.status.resource)
         }
     Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
@@ -581,6 +593,7 @@ private fun AuthorDetails(
             MediaStatus.Continuing ->
                 item.nextBook?.releaseDate?.format()
                     ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
+
             else -> mokoString(item.status.resource)
         }
     Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)

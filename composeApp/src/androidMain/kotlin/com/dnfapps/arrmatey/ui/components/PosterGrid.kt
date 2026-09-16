@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlackDarker
@@ -51,10 +52,18 @@ fun PosterGrid(
     posterRadius: PosterRadius = PosterRadius.Medium,
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
 ) {
+    val bottomPadding = LocalFloatingBarBottomPadding.current
+
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Adaptive(minSize = gridDensity.minSize),
-        contentPadding = PaddingValues(gridSpacing.spacing),
+        contentPadding =
+            PaddingValues(
+                start = gridSpacing.spacing,
+                top = gridSpacing.spacing,
+                end = gridSpacing.spacing,
+                bottom = gridSpacing.spacing + bottomPadding,
+            ),
         horizontalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
         verticalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
         userScrollEnabled = userScrollEnabled,

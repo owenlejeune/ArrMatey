@@ -47,6 +47,14 @@ class MoreScreenViewModel(
                 initialValue = false,
             )
 
+    val useFloatingNavigationBar =
+        preferencesStore.useFloatingNavigationBar
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
     val appTheme =
         preferencesStore.appTheme
             .stateIn(
@@ -281,6 +289,10 @@ class MoreScreenViewModel(
 
     fun toggleInstanceSwitcher() {
         preferencesStore.toggleInstanceSwitcher()
+    }
+
+    fun toggleUseFloatingNavigationBar() {
+        preferencesStore.toggleUseFloatingNavigationBar()
     }
 
     fun setAppTheme(theme: AppTheme) {

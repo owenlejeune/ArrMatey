@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
@@ -28,11 +29,16 @@ fun BoxScope.ScrollToTodayButton(
     modifier: Modifier = Modifier,
     extended: Boolean = true,
 ) {
+    val fabBottomPadding = LocalFloatingBarBottomPadding.current
+
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
         exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-        modifier = modifier.align(Alignment.BottomCenter),
+        modifier =
+            modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = fabBottomPadding),
     ) {
         if (extended) {
             ExtendedFloatingActionButton(
