@@ -55,7 +55,7 @@ class UnifiedMediaDetailsRecommendationsHandler(
                         is ArrSeries -> targetItem.tmdbId?.takeIf { it > 0 }
                         else -> null
                     } ?: (success?.seerrMedia as? MovieDetails)?.id
-                    ?: (success?.seerrMedia as? TvDetails)?.id
+                        ?: (success?.seerrMedia as? TvDetails)?.id
 
                 val resolvedReqType =
                     initialRequestType ?: when (targetItem) {
@@ -68,7 +68,10 @@ class UnifiedMediaDetailsRecommendationsHandler(
                         else -> null
                     }
 
-                if (resolvedTmdbId != null && resolvedTmdbId > 0 && (resolvedReqType == RequestType.Movie || resolvedReqType == RequestType.Tv)) {
+                if (resolvedTmdbId != null &&
+                    resolvedTmdbId > 0 &&
+                    (resolvedReqType == RequestType.Movie || resolvedReqType == RequestType.Tv)
+                ) {
                     Triple(repo, resolvedTmdbId, resolvedReqType)
                 } else {
                     null
