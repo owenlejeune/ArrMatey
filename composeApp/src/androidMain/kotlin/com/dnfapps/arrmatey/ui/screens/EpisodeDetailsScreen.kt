@@ -240,8 +240,10 @@ fun EpisodeDetailsScreen(
                                     EpisodeDetailsTab.History to mokoString(MR.strings.history),
                                 )
                             PrimaryScrollableTabRow(
-                                selectedTabIndex = availableTabs.indexOfFirst { it.first == selectedTab }
-                                    .coerceAtLeast(0),
+                                selectedTabIndex =
+                                    availableTabs
+                                        .indexOfFirst { it.first == selectedTab }
+                                        .coerceAtLeast(0),
                                 modifier = Modifier.fillMaxWidth(),
                                 edgePadding = 0.dp,
                             ) {
@@ -259,7 +261,7 @@ fun EpisodeDetailsScreen(
                     when (if (tracearrState.isTracearrConfigured) selectedTab else EpisodeDetailsTab.Overview) {
                         EpisodeDetailsTab.Overview -> {
                             Column(
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
                                 currentEpisode.overview?.let { overview ->
                                     ItemDescriptionCard(
@@ -300,17 +302,20 @@ fun EpisodeDetailsScreen(
                                         text = mokoString(MR.strings.no_files),
                                         fontWeight = FontWeight.Medium,
                                         textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                            .padding(horizontal = 24.dp),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 24.dp),
                                     )
                                 }
 
                                 series.id?.let { seriesId ->
                                     BazarrSubtitlesSection(
-                                        target = BazarrMediaTarget.Episode(
-                                            seriesId,
-                                            currentEpisode.id
-                                        ),
+                                        target =
+                                            BazarrMediaTarget.Episode(
+                                                seriesId,
+                                                currentEpisode.id,
+                                            ),
                                         modifier = Modifier.padding(horizontal = 24.dp),
                                     )
                                 }
@@ -337,8 +342,10 @@ fun EpisodeDetailsScreen(
                                                 text = mokoString(MR.strings.no_history),
                                                 fontWeight = FontWeight.Medium,
                                                 textAlign = TextAlign.Center,
-                                                modifier = Modifier.fillMaxWidth()
-                                                    .padding(horizontal = 24.dp),
+                                                modifier =
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 24.dp),
                                             )
                                         } else {
                                             historyResult.items.forEach { historyItem ->
