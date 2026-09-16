@@ -213,21 +213,32 @@ fun ArrLibraryScreen(
         arrMediaViewModel.updateSearchQuery(textFieldState.text.toString())
     }
 
-    val fabBottomPadding = LocalFloatingBarBottomPadding.current
+    val showFab = !wideRailIsVisible && !isInSelectionMode && instancesState.selectedInstance != null
+    val useFloatingNavigationBar by globalPreferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
+
+    com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction(
+        visible = useFloatingNavigationBar && showFab,
+        action =
+            com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
+                icon = { Icon(Icons.Default.Add, null) },
+                onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) },
+            ),
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = !wideRailIsVisible && !isInSelectionMode && instancesState.selectedInstance != null,
-                enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
-                exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
-                modifier = Modifier.padding(bottom = fabBottomPadding),
-            ) {
-                FloatingActionButton(
-                    onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) },
+            if (!useFloatingNavigationBar) {
+                AnimatedVisibility(
+                    visible = showFab,
+                    enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
+                    exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
                 ) {
-                    Icon(Icons.Default.Add, null)
+                    FloatingActionButton(
+                        onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) },
+                    ) {
+                        Icon(Icons.Default.Add, null)
+                    }
                 }
             }
         },

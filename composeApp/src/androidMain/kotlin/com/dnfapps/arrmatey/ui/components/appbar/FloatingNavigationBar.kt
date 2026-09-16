@@ -1,6 +1,8 @@
 package com.dnfapps.arrmatey.ui.components.appbar
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -9,6 +11,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,16 +40,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -54,16 +64,63 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.ui.helpers.LocalIsTabActive
 import com.dnfapps.arrmatey.ui.theme.ArrMateyTheme
 
 private const val AnimationDurationMillis = 300
 
 /**
+ * An action to be displayed as a circular floating button next to the [FloatingNavigationBar].
+ */
+@Immutable
+data class FloatingBarAction(
+    val icon: @Composable () -> Unit,
+    val contentDescription: String? = null,
+    val containerColor: Color? = null,
+    val contentColor: Color? = null,
+    val onClick: () -> Unit,
+)
+
+/**
+ * State holder for the active [FloatingBarAction] displayed alongside the navigation bar.
+ */
+@Stable
+class FloatingBarActionState {
+    var currentAction by mutableStateOf<FloatingBarAction?>(null)
+}
+
+val LocalFloatingBarActionState = staticCompositionLocalOf { FloatingBarActionState() }
+
+/**
+ * Registers a [FloatingBarAction] from a screen to be displayed beside the [FloatingNavigationBar].
+ */
+@Composable
+fun ProvideFloatingBarAction(
+    visible: Boolean = true,
+    action: FloatingBarAction?,
+) {
+    val state = LocalFloatingBarActionState.current
+    val isTabActive = LocalIsTabActive.current
+    val shouldShow = isTabActive && visible && action != null
+
+    DisposableEffect(shouldShow, action) {
+        if (shouldShow) {
+            state.currentAction = action
+        }
+        onDispose {
+            if (state.currentAction == action) {
+                state.currentAction = null
+            }
+        }
+    }
+}
+
+/**
  * A floating pill-style navigation bar matching the Google Photos bottom navigation design.
  *
  * It hosts navigation items inside a rounded pill/capsule container with elevation.
- * Active items display both an icon and label with an accent pill background,
- * while inactive items display only their icon.
+ * If an active [FloatingBarAction] is provided (e.g. via [ProvideFloatingBarAction] or the [action] parameter),
+ * a circular floating action button is displayed alongside the navigation bar.
  */
 @Composable
 fun FloatingNavigationBar(
@@ -73,36 +130,98 @@ fun FloatingNavigationBar(
     contentColor: Color = FloatingNavigationBarDefaults.contentColor,
     tonalElevation: Dp = FloatingNavigationBarDefaults.TonalElevation,
     shadowElevation: Dp = FloatingNavigationBarDefaults.ShadowElevation,
+    action: FloatingBarAction? = LocalFloatingBarActionState.current.currentAction,
     content: @Composable RowScope.() -> Unit,
 ) {
-    Surface(
+    Row(
         modifier = modifier,
-        shape = shape,
-        color = containerColor,
-        contentColor = contentColor,
-        tonalElevation = tonalElevation,
-        shadowElevation = shadowElevation,
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        var maxRowWidth by remember { mutableIntStateOf(0) }
+        Surface(
+            shape = shape,
+            color = containerColor,
+            contentColor = contentColor,
+            tonalElevation = tonalElevation,
+            shadowElevation = shadowElevation,
+        ) {
+            var maxRowWidth by remember { mutableIntStateOf(0) }
 
-        Layout(
-            content = {
-                Row(
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically,
-                    content = content,
+            Layout(
+                content = {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically,
+                        content = content,
+                    )
+                },
+            ) { measurables, constraints ->
+                val placeable = measurables.first().measure(constraints.copy(minWidth = 0))
+                if (placeable.width > maxRowWidth) {
+                    maxRowWidth = placeable.width
+                }
+                val targetWidth = maxOf(maxRowWidth, placeable.width)
+                layout(targetWidth, placeable.height) {
+                    val x = (targetWidth - placeable.width) / 2
+                    placeable.placeRelative(x, 0)
+                }
+            }
+        }
+
+        AnimatedContent(
+            targetState = action,
+            transitionSpec = {
+                (
+                    scaleIn(
+                        initialScale = 0.8f,
+                        transformOrigin = TransformOrigin.Center,
+                        animationSpec = tween(
+                            durationMillis = AnimationDurationMillis,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    ) + fadeIn(
+                        animationSpec = tween(
+                            durationMillis = AnimationDurationMillis,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    )
+                ).togetherWith(
+                    scaleOut(
+                        targetScale = 0.8f,
+                        transformOrigin = TransformOrigin.Center,
+                        animationSpec = tween(
+                            durationMillis = AnimationDurationMillis / 2,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    ) + fadeOut(
+                        animationSpec = tween(
+                            durationMillis = AnimationDurationMillis / 2,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    )
                 )
             },
-        ) { measurables, constraints ->
-            val placeable = measurables.first().measure(constraints.copy(minWidth = 0))
-            if (placeable.width > maxRowWidth) {
-                maxRowWidth = placeable.width
-            }
-            val targetWidth = maxOf(maxRowWidth, placeable.width)
-            layout(targetWidth, placeable.height) {
-                val x = (targetWidth - placeable.width) / 2
-                placeable.placeRelative(x, 0)
+            contentAlignment = Alignment.Center,
+            label = "FloatingBarActionAnimation",
+        ) { currentAction ->
+            if (currentAction != null) {
+                Surface(
+                    onClick = currentAction.onClick,
+                    shape = CircleShape,
+                    color = currentAction.containerColor ?: containerColor,
+                    contentColor = currentAction.contentColor ?: contentColor,
+                    tonalElevation = tonalElevation,
+                    shadowElevation = shadowElevation,
+                    modifier = Modifier.size(56.dp),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        currentAction.icon()
+                    }
+                }
             }
         }
     }

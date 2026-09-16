@@ -83,9 +83,13 @@ import com.dnfapps.arrmatey.navigation.LocalNavigationManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.toSearch
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarActionState
 import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingNavigationBar
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingNavigationBarItem
+import com.dnfapps.arrmatey.ui.components.appbar.LocalFloatingBarActionState
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.helpers.LocalIsTabActive
 import com.dnfapps.arrmatey.ui.tabs.ActivityTab
 import com.dnfapps.arrmatey.ui.tabs.ArrTab
 import com.dnfapps.arrmatey.ui.tabs.BazarrTab
@@ -188,9 +192,12 @@ fun HomeScreen(
             0.dp
         }
 
+    val floatingBarActionState = remember { FloatingBarActionState() }
+
     CompositionLocalProvider(
         LocalNavigationManager provides navigationManager,
-        com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding provides floatingBarBottomPadding,
+        LocalFloatingBarBottomPadding provides floatingBarBottomPadding,
+        LocalFloatingBarActionState provides floatingBarActionState,
     ) {
         val mainContent = @Composable {
             AnimatedContent(
@@ -202,7 +209,9 @@ fun HomeScreen(
                 label = "OverlayTransition",
             ) { currentOverlay ->
                 if (currentOverlay != null) {
-                    TabItemContent(currentOverlay, windowSizeClass, false)
+                    CompositionLocalProvider(LocalIsTabActive provides true) {
+                        TabItemContent(currentOverlay, windowSizeClass, false)
+                    }
                 } else {
                     key(visibleTabs.isNotEmpty()) {
                         HorizontalPager(
@@ -213,7 +222,10 @@ fun HomeScreen(
                             key = { page -> visibleTabs[page].key },
                         ) { page ->
                             val wideRailIsVisible = isExpanded && overlayTab == null && visibleTabs.size > 1
-                            TabItemContent(visibleTabs[page], windowSizeClass, wideRailIsVisible)
+                            val isTabActive = overlayTab == null && pagerState.currentPage == page
+                            CompositionLocalProvider(LocalIsTabActive provides isTabActive) {
+                                TabItemContent(visibleTabs[page], windowSizeClass, wideRailIsVisible)
+                            }
                         }
                     }
                 }

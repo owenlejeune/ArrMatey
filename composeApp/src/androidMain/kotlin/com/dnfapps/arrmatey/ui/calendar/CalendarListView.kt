@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -117,31 +118,49 @@ fun CalendarListView(
             }
         }
 
-        val fabBottomPadding = LocalFloatingBarBottomPadding.current
+        val preferencesStore: com.dnfapps.arrmatey.datastore.PreferencesStore = org.koin.compose.koinInject()
+        val useFloatingNavigationBar by preferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
 
-        AnimatedVisibility(
-            visible = !isTodayVisible,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-            exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-            modifier =
-                Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = fabBottomPadding),
-        ) {
-            FloatingActionButton(
-                onClick = {
-                    scope.launch {
-                        listState.animateScrollToItem(todayIndex)
-                    }
-                },
-                modifier = Modifier.padding(12.dp),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction(
+            visible = useFloatingNavigationBar && !isTodayVisible,
+            action =
+                com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Today,
+                            contentDescription = mokoString(MR.strings.today),
+                        )
+                    },
+                    onClick = {
+                        scope.launch {
+                            listState.animateScrollToItem(todayIndex)
+                        }
+                    },
+                ),
+        )
+
+        if (!useFloatingNavigationBar) {
+            AnimatedVisibility(
+                visible = !isTodayVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+                exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+                modifier = Modifier.align(Alignment.BottomEnd),
             ) {
-                Icon(
-                    imageVector = Icons.Default.Today,
-                    contentDescription = mokoString(MR.strings.today),
-                )
+                FloatingActionButton(
+                    onClick = {
+                        scope.launch {
+                            listState.animateScrollToItem(todayIndex)
+                        }
+                    },
+                    modifier = Modifier.padding(12.dp),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Today,
+                        contentDescription = mokoString(MR.strings.today),
+                    )
+                }
             }
         }
     }
