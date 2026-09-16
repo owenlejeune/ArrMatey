@@ -28,7 +28,9 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
 
     # Re-run push with an environment guard to prevent looping (pushing HEAD to remote $1 and setting upstream)
     LINTING_PRE_PUSH=1 git push -u "${1:-origin}" HEAD
-    exit $?
+
+    # Abort the original push attempt since the inner push has completed the push
+    exit 1
 fi
 
 echo "Code formatting clean. Proceeding with push."
