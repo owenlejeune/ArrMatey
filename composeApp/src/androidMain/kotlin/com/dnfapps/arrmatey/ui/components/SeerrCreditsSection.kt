@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,11 +41,14 @@ fun SeerrCreditsSection(
     modifier: Modifier = Modifier,
     onPersonClick: (Long) -> Unit = {},
 ) {
+    val cast = remember(credits) { credits.groupedCast }
+    val crew = remember(credits) { credits.groupedCrew }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier,
     ) {
-        if (credits.cast.isNotEmpty()) {
+        if (cast.isNotEmpty()) {
             Text(
                 text = mokoString(MR.strings.cast),
                 style = MaterialTheme.typography.titleLarge,
@@ -54,7 +58,7 @@ fun SeerrCreditsSection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 24.dp),
             ) {
-                items(credits.cast) { castMember ->
+                items(cast, key = { it.id }) { castMember ->
                     CastCrewItem(
                         profilePath = castMember.fullProfilePath,
                         name = castMember.name,
@@ -65,11 +69,11 @@ fun SeerrCreditsSection(
             }
         }
 
-        if (credits.cast.isNotEmpty() && credits.crew.isNotEmpty()) {
+        if (cast.isNotEmpty() && crew.isNotEmpty()) {
             Spacer(modifier = Modifier.height(0.dp))
         }
 
-        if (credits.crew.isNotEmpty()) {
+        if (crew.isNotEmpty()) {
             Text(
                 text = mokoString(MR.strings.crew),
                 style = MaterialTheme.typography.titleLarge,
@@ -79,7 +83,7 @@ fun SeerrCreditsSection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = 24.dp),
             ) {
-                items(credits.crew) { crewMember ->
+                items(crew, key = { it.id }) { crewMember ->
                     CastCrewItem(
                         profilePath = crewMember.fullProfilePath,
                         name = crewMember.name,

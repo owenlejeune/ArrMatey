@@ -85,12 +85,12 @@ struct CrewMemberView: View {
                 
                 Text(member.name)
                     .font(.caption)
-                    .lineLimit(1)
+                    .lineLimit(2, reservesSpace: true)
                 
                 Text(member.job)
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                    .lineLimit(1)
+                    .lineLimit(2, reservesSpace: true)
             }
             .frame(width: 80)
         }

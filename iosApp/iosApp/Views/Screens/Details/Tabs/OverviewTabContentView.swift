@@ -53,14 +53,17 @@ struct OverviewTabContentView: View {
 
     @ViewBuilder
     private func creditsSection(_ credits: Credits) -> some View {
+        let cast = credits.groupedCast
+        let crew = credits.groupedCrew
+
         VStack(alignment: .leading, spacing: 12) {
-            if !credits.cast.isEmpty {
+            if !cast.isEmpty {
                 Text(MR.strings().cast.localized())
                     .font(.title3.bold())
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        ForEach(credits.cast.prefix(20), id: \.id) { member in
+                        ForEach(cast.prefix(20), id: \.id) { member in
                             CastMemberView(member: member) { personId in
                                 onPersonClick(personId)
                             }
@@ -69,13 +72,13 @@ struct OverviewTabContentView: View {
                 }
             }
 
-            if !credits.crew.isEmpty {
+            if !crew.isEmpty {
                 Text(MR.strings().crew.localized())
                     .font(.title3.bold())
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        ForEach(credits.crew.prefix(20), id: \.creditId) { member in
+                        ForEach(crew.prefix(20), id: \.id) { member in
                             CrewMemberView(member: member) { personId in
                                 onPersonClick(personId)
                             }
