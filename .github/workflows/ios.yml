@@ -12,8 +12,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      iosApp: ${{ steps.filter.outputs.iosApp }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Check paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            iosApp:
+              - 'iosApp/**'
+            shared:
+              - 'shared/**'
+              - 'networking/**'
+              - 'gradle/**'
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle.properties'
+              - 'gradlew'
+              - 'gradlew.bat'
+              - '.github/workflows/ios.yml'
+
   build:
     name: Build and Test iOS
+    needs: changes
+    if: ${{ needs.changes.outputs.iosApp == 'true' || needs.changes.outputs.shared == 'true' || github.event_name != 'pull_request' }}
     runs-on: macos-latest
     steps:
       - name: Checkout code
@@ -59,11 +92,12 @@ jobs:
             ${{ runner.os }}-deriveddata-
 
       - name: Build and Test Shared
+        if: ${{ needs.changes.outputs.shared == 'true' || github.event_name != 'pull_request' }}
         # allTests would also re-run testAndroidHostTest, which the Linux job covers.
         run: ./gradlew :shared:iosSimulatorArm64Test :networking:iosSimulatorArm64Test
 
       - name: Upload Shared Test Results
-        if: always()
+        if: ${{ (needs.changes.outputs.shared == 'true' || github.event_name != 'pull_request') && always() }}
         uses: actions/upload-artifact@v7
         with:
           name: shared-test-results

@@ -12,8 +12,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      composeApp: ${{ steps.filter.outputs.composeApp }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Check paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            composeApp:
+              - 'composeApp/**'
+            shared:
+              - 'shared/**'
+              - 'networking/**'
+              - 'gradle/**'
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle.properties'
+              - 'gradlew'
+              - 'gradlew.bat'
+              - '.github/workflows/android.yml'
+
   check-and-build:
     name: Lint, Test, and Build Android
+    needs: changes
+    if: ${{ needs.changes.outputs.composeApp == 'true' || needs.changes.outputs.shared == 'true' || github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -37,12 +70,20 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Run Lint, Tests, and Build Debug APK
+      - name: Run Lint, Tests, and Build Debug APK (Shared and Android)
+        if: ${{ needs.changes.outputs.shared == 'true' || github.event_name != 'pull_request' }}
         # The `test` lifecycle task only reaches :composeApp.
         run: >
           ./gradlew spotlessCheck lintDebug
           :shared:testAndroidHostTest
           :networking:testAndroidHostTest
+          :composeApp:testDebugUnitTest
+          :composeApp:assembleDebug --continue
+
+      - name: Run Lint, Tests, and Build Debug APK (composeApp only)
+        if: ${{ needs.changes.outputs.shared != 'true' && needs.changes.outputs.composeApp == 'true' && github.event_name == 'pull_request' }}
+        run: >
+          ./gradlew :composeApp:spotlessCheck :composeApp:lintDebug
           :composeApp:testDebugUnitTest
           :composeApp:assembleDebug --continue
 
