@@ -32,7 +32,7 @@ struct TracearrTab: View {
 struct TracearrTabContent: View {
     @StateObject private var viewModel = TracearrViewModelS()
     @StateObject private var instancesViewModel = InstancesViewModelS(type: .tracearr)
-    @ObservedObject private var globalPreferences = PreferencesViewModel()
+    @StateObject private var globalPreferences = PreferencesViewModel()
     @EnvironmentObject private var navigationManager: NavigationManager
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 

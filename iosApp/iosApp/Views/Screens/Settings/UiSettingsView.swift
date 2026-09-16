@@ -9,7 +9,8 @@ import SwiftUI
 import Shared
 
 struct UiSettingsView: View {
-    @ObservedObject private var viewModel = MoreScreenViewModelS()
+    @StateObject private var viewModel = MoreScreenViewModelS()
+    @State private var showDiscoverCustomizationSheet = false
 
     var body: some View {
         Form {
@@ -44,6 +45,28 @@ struct UiSettingsView: View {
             }
 
             Section {
+                Button {
+                    showDiscoverCustomizationSheet = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(MR.strings().discover_sections.localized())
+                                .foregroundColor(.primary)
+                            Text(MR.strings().reorganize_hide_sections.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } header: {
+                Text(MR.strings().view_customization.localized())
+            }
+
+            Section {
                 Toggle(isOn: Binding(
                     get: { viewModel.searchShowBanners },
                     set: { _ in viewModel.toggleSearchShowBanners() }
@@ -71,5 +94,12 @@ struct UiSettingsView: View {
             }
         }
         .navigationTitle(MR.strings().user_interface.localized())
+        .sheet(isPresented: $showDiscoverCustomizationSheet) {
+            DiscoverSectionCustomizationSheet(
+                preferences: viewModel.discoverSectionPreferences,
+                onUpdatePreferences: { viewModel.updateDiscoverSectionPreferences($0) },
+                onResetPreferences: { viewModel.resetDiscoverSectionPreferences() }
+            )
+        }
     }
 }

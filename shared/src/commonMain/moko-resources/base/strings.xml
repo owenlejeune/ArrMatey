@@ -43,6 +43,11 @@
     <string name="recommended">Recommended</string>
     <string name="similar">Similar</string>
     <string name="see_more">See More</string>
+    <string name="reorganize_hide_sections">Reorganize/Hide Sections</string>
+    <string name="view_customization">View Customization</string>
+    <string name="discover_sections">Discover Sections</string>
+    <string name="at_least_one_section_visible">At least one section must remain visible</string>
+    <string name="reset">Reset</string>
     <string name="deep_links_title">Deep Links</string>
     <string name="deep_links_description">Configure how the app handles web links from external sources.</string>
     <string name="tmdb_links">TMDB Links</string>
@@ -534,6 +539,7 @@
     <string name="navigation_items_selected">Navigation Bar</string>
     <string name="navigation_items_drawer">Drawer</string>
     <string name="navigation_items_hidden">Hidden</string>
+    <string name="navigation_items_visible">Visible</string>
     <string name="customize_navigation">Customize Navigation</string>
     <string name="customize_navigation_description">Drag items to reorder your navigation bar. Items moved to the 'Drawer' section will be accessible via the drawer menu. You can have at most five items in the navigation bar, and must have at least one item. If there is only one item in the navigation bar section, the navigation bar will be hidden.</string>
     <string name="remove_navigation_tab_confirm">Are you sure you want to remove this tab? It will be moved to the hidden section.</string>

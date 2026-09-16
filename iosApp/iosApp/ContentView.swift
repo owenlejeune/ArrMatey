@@ -3,8 +3,8 @@ import Shared
 
 struct ContentView: View {
     @EnvironmentObject var navigationManager: NavigationManager
-    @ObservedObject private var queueViewModel = ActivityQueueViewModelS()
-    @ObservedObject private var preferences = PreferencesViewModel()
+    @StateObject private var queueViewModel = ActivityQueueViewModelS()
+    @StateObject private var preferences = PreferencesViewModel()
 
     init() {
         let appearance = UITabBarAppearance()
@@ -79,7 +79,7 @@ struct ContentView: View {
 }
 
 struct AppLauncherGrid: View {
-    @ObservedObject private var preferences = PreferencesViewModel()
+    @StateObject private var preferences = PreferencesViewModel()
     @EnvironmentObject private var navigationManager: NavigationManager
 
     private let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]

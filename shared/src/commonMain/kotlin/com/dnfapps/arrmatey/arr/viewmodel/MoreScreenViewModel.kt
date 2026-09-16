@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.database.InstanceRepository
+import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
@@ -124,6 +125,14 @@ class MoreScreenViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = true,
+            )
+
+    val discoverSectionPreferences =
+        preferencesStore.discoverSectionPreferences
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = DiscoverSectionPreferences(),
             )
 
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
@@ -312,5 +321,13 @@ class MoreScreenViewModel(
 
     fun toggleTracearrDetailsIntegration() {
         preferencesStore.toggleTracearrDetailsIntegration()
+    }
+
+    fun updateDiscoverSectionPreferences(prefs: DiscoverSectionPreferences) {
+        preferencesStore.saveDiscoverSectionPreferences(prefs)
+    }
+
+    fun resetDiscoverSectionPreferences() {
+        preferencesStore.resetDiscoverSectionPreferences()
     }
 }

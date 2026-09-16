@@ -24,6 +24,7 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var combineSeerrArrMedia: Bool = true
     @Published private(set) var bazarrDetailsIntegration: Bool = true
     @Published private(set) var tracearrDetailsIntegration: Bool = true
+    @Published private(set) var discoverSectionPreferences = DiscoverSectionPreferences()
     @Published private(set) var hasSeerr: Bool = false
     @Published private(set) var hasArr: Bool = false
     @Published private(set) var hasSeerrAndArr: Bool = false
@@ -73,6 +74,7 @@ class MoreScreenViewModelS: ObservableObject {
         viewModel.hasTracearr.observeAsync(on: self) { owner, has in
             owner.hasTracearr = has.boolValue
         }
+        viewModel.discoverSectionPreferences.observeAsync(on: self, to: \.discoverSectionPreferences)
         viewModel.smartAddSeerrAction.observeAsync(on: self, to: \.smartAddSeerrAction)
     }
 
@@ -102,6 +104,14 @@ class MoreScreenViewModelS: ObservableObject {
 
     func toggleTracearrDetailsIntegration() {
         viewModel.toggleTracearrDetailsIntegration()
+    }
+
+    func updateDiscoverSectionPreferences(_ prefs: DiscoverSectionPreferences) {
+        viewModel.updateDiscoverSectionPreferences(prefs: prefs)
+    }
+
+    func resetDiscoverSectionPreferences() {
+        viewModel.resetDiscoverSectionPreferences()
     }
 
     func setSmartAddSeerrAction(action: SmartAddSeerrAction) {

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,17 +17,28 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material3.DropdownMenuGroup
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,10 +47,13 @@ import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.entensions.isExpanded
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.DiscoverSection
+import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.sheets.DiscoverSectionCustomizationSheet
 import com.dnfapps.arrmatey.ui.tabs.DiscoverSearchOverlay
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -50,6 +65,7 @@ fun DiscoverHomeScreen(
     onSeeMore: (DiscoverCategory) -> Unit,
     onItemClick: (SearchResult) -> Unit,
 ) {
+    val selectedInstance by viewModel.selectedInstance.collectAsStateWithLifecycle()
     val trendingState by viewModel.trendingState.collectAsStateWithLifecycle()
     val moviesState by viewModel.moviesState.collectAsStateWithLifecycle()
     val tvState by viewModel.tvState.collectAsStateWithLifecycle()
@@ -62,6 +78,10 @@ fun DiscoverHomeScreen(
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
     val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
     val isInitialLoading by viewModel.isInitialLoading.collectAsStateWithLifecycle()
+    val sectionPreferences by viewModel.discoverSectionPreferences.collectAsStateWithLifecycle()
+
+    var showMenu by remember { mutableStateOf(false) }
+    var showCustomizationSheet by remember { mutableStateOf(false) }
 
     val textFieldState = rememberTextFieldState(searchQuery)
     val searchBarState = rememberSearchBarState()
@@ -81,6 +101,39 @@ fun DiscoverHomeScreen(
                         NavigationDrawerButton()
                     }
                 },
+                actions = {
+                    if (selectedInstance != null) {
+                        Box {
+                            IconButton(onClick = { showMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = null,
+                                )
+                            }
+                            DropdownMenuPopup(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false },
+                            ) {
+                                DropdownMenuGroup(
+                                    shapes = MenuDefaults.groupShape(0, 1),
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    containerColor = MenuDefaults.groupStandardContainerColor,
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text(mokoString(MR.strings.reorganize_hide_sections)) },
+                                        shapes = MenuDefaults.itemShape(0, 1),
+                                        colors = MenuDefaults.itemColors(),
+                                        onClick = {
+                                            showMenu = false
+                                            showCustomizationSheet = true
+                                        },
+                                        selected = false,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
             )
         },
         contentWindowInsets = WindowInsets.statusBars,
@@ -91,7 +144,9 @@ fun DiscoverHomeScreen(
                     .padding(paddingValues)
                     .fillMaxSize(),
         ) {
-            if (searchBarState.isExpanded()) {
+            if (selectedInstance == null) {
+                NoInstanceView(InstanceType.Seerr)
+            } else if (searchBarState.isExpanded()) {
                 DiscoverSearchOverlay(
                     items = searchState,
                     isLoading = isSearching,
@@ -120,55 +175,74 @@ fun DiscoverHomeScreen(
                                 .padding(vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
-                        DiscoverSection(
-                            title = MR.strings.trending,
-                            icon = Icons.AutoMirrored.Filled.TrendingUp,
-                            data = trendingState,
-                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextTrendingPage() },
-                            onSeeMore = { onSeeMore(DiscoverCategory.TRENDING) },
-                        )
-
-                        DiscoverSection(
-                            title = MR.strings.popular_movies,
-                            icon = Icons.Default.Movie,
-                            data = moviesState,
-                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextMoviesPage() },
-                            onSeeMore = { onSeeMore(DiscoverCategory.POPULAR_MOVIES) },
-                        )
-
-                        DiscoverSection(
-                            title = MR.strings.upcoming_movies,
-                            icon = Icons.Default.Event,
-                            data = upcomingMoviesState,
-                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextUpcomingMoviesPage() },
-                            onSeeMore = { onSeeMore(DiscoverCategory.UPCOMING_MOVIES) },
-                        )
-
-                        DiscoverSection(
-                            title = MR.strings.popular_series,
-                            icon = Icons.Default.Tv,
-                            data = tvState,
-                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextTvPage() },
-                            onSeeMore = { onSeeMore(DiscoverCategory.POPULAR_SERIES) },
-                        )
-
-                        DiscoverSection(
-                            title = MR.strings.upcoming_series,
-                            icon = Icons.Default.Event,
-                            data = upcomingTvState,
-                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
-                            onLoadMore = { viewModel.loadNextUpcomingTvPage() },
-                            onSeeMore = { onSeeMore(DiscoverCategory.UPCOMING_SERIES) },
-                        )
+                        sectionPreferences.visibleCategories.forEach { category ->
+                            when (category) {
+                                DiscoverCategory.TRENDING -> {
+                                    DiscoverSection(
+                                        title = MR.strings.trending,
+                                        icon = Icons.AutoMirrored.Filled.TrendingUp,
+                                        data = trendingState,
+                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onLoadMore = { viewModel.loadNextTrendingPage() },
+                                        onSeeMore = { onSeeMore(DiscoverCategory.TRENDING) },
+                                    )
+                                }
+                                DiscoverCategory.POPULAR_MOVIES -> {
+                                    DiscoverSection(
+                                        title = MR.strings.popular_movies,
+                                        icon = Icons.Default.Movie,
+                                        data = moviesState,
+                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onLoadMore = { viewModel.loadNextMoviesPage() },
+                                        onSeeMore = { onSeeMore(DiscoverCategory.POPULAR_MOVIES) },
+                                    )
+                                }
+                                DiscoverCategory.POPULAR_SERIES -> {
+                                    DiscoverSection(
+                                        title = MR.strings.popular_series,
+                                        icon = Icons.Default.Tv,
+                                        data = tvState,
+                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onLoadMore = { viewModel.loadNextTvPage() },
+                                        onSeeMore = { onSeeMore(DiscoverCategory.POPULAR_SERIES) },
+                                    )
+                                }
+                                DiscoverCategory.UPCOMING_MOVIES -> {
+                                    DiscoverSection(
+                                        title = MR.strings.upcoming_movies,
+                                        icon = Icons.Default.Event,
+                                        data = upcomingMoviesState,
+                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onLoadMore = { viewModel.loadNextUpcomingMoviesPage() },
+                                        onSeeMore = { onSeeMore(DiscoverCategory.UPCOMING_MOVIES) },
+                                    )
+                                }
+                                DiscoverCategory.UPCOMING_SERIES -> {
+                                    DiscoverSection(
+                                        title = MR.strings.upcoming_series,
+                                        icon = Icons.Default.Event,
+                                        data = upcomingTvState,
+                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onLoadMore = { viewModel.loadNextUpcomingTvPage() },
+                                        onSeeMore = { onSeeMore(DiscoverCategory.UPCOMING_SERIES) },
+                                    )
+                                }
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(0.dp))
                     }
                 }
             }
         }
+    }
+
+    if (showCustomizationSheet) {
+        DiscoverSectionCustomizationSheet(
+            preferences = sectionPreferences,
+            onUpdatePreferences = { viewModel.updateDiscoverSectionPreferences(it) },
+            onResetPreferences = { viewModel.resetDiscoverSectionPreferences() },
+            onDismissRequest = { showCustomizationSheet = false },
+        )
     }
 }

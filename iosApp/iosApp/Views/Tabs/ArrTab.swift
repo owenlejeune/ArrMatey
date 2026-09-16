@@ -14,8 +14,8 @@ struct ArrTab: View {
     
     @ObservedObject private var arrMediaViewModel: ArrMediaViewModelS
     @ObservedObject private var instancesViewModel: InstancesViewModelS
-    @ObservedObject private var networkViewModel: NetworkConnectivityViewModel = NetworkConnectivityViewModel()
-    @ObservedObject private var globalPreferences = PreferencesViewModel()
+    @StateObject private var networkViewModel: NetworkConnectivityViewModel = NetworkConnectivityViewModel()
+    @StateObject private var globalPreferences = PreferencesViewModel()
     
     @EnvironmentObject private var navigation: NavigationManager
     

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Splitscreen
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +51,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.icons.Hard_drive
+import com.dnfapps.arrmatey.ui.sheets.DiscoverSectionCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import org.koin.compose.viewmodel.koinViewModel
@@ -72,6 +74,9 @@ fun UiSettingsScreen(
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
     val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
+    val discoverSectionPreferences by viewModel.discoverSectionPreferences.collectAsStateWithLifecycle()
+
+    var showDiscoverCustomizationSheet by remember { mutableStateOf(false) }
 
     val isLargeScreenSupported =
         remember(windowSizeClass, configuration) {
@@ -212,6 +217,19 @@ fun UiSettingsScreen(
                     ),
             )
 
+            SettingsGroup(
+                title = mokoString(MR.strings.view_customization),
+                items =
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Tune),
+                            title = mokoString(MR.strings.discover_sections),
+                            subtitle = mokoString(MR.strings.reorganize_hide_sections),
+                            onClick = { showDiscoverCustomizationSheet = true },
+                        ),
+                    ),
+            )
+
             if (isLargeScreenSupported) {
                 SettingsGroup(
                     title = mokoString(MR.strings.large_screen_settings_title),
@@ -264,5 +282,14 @@ fun UiSettingsScreen(
                     ),
             )
         }
+    }
+
+    if (showDiscoverCustomizationSheet) {
+        DiscoverSectionCustomizationSheet(
+            preferences = discoverSectionPreferences,
+            onUpdatePreferences = { viewModel.updateDiscoverSectionPreferences(it) },
+            onResetPreferences = { viewModel.resetDiscoverSectionPreferences() },
+            onDismissRequest = { showDiscoverCustomizationSheet = false },
+        )
     }
 }

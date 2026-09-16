@@ -11,16 +11,12 @@ import Shared
 // MARK: - Screen
 
 struct TabConfigurationScreen: View {
-    @ObservedObject private var viewModel: PreferencesViewModel
+    @StateObject private var viewModel = PreferencesViewModel()
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var navigationManager: NavigationManager
 
     @State private var draggedTab: AnyTabItem?
     @State private var dropTargetID: String?
-    
-    init() {
-        self.viewModel = PreferencesViewModel()
-    }
 
     var body: some View {
         ScrollView {

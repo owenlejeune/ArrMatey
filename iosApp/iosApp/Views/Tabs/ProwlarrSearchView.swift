@@ -9,7 +9,7 @@ import SwiftUI
 import Shared
 
 struct ProwlarrSearchView: View {
-    @ObservedObject private var viewModel = ProwlarrSearchViewModelS()
+    @StateObject private var viewModel = ProwlarrSearchViewModelS()
     @State private var queryText = ""
     @State private var grabTarget: ProwlarrSearchResult? = nil
     @State private var grabbingGuid: String? = nil

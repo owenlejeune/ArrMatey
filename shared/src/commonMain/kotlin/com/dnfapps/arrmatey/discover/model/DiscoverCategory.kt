@@ -8,7 +8,7 @@ enum class DiscoverCategory(
 ) {
     TRENDING(MR.strings.trending),
     POPULAR_MOVIES(MR.strings.popular_movies),
-    POPULAR_SERIES(MR.strings.popular_series),
     UPCOMING_MOVIES(MR.strings.upcoming_movies),
+    POPULAR_SERIES(MR.strings.popular_series),
     UPCOMING_SERIES(MR.strings.upcoming_series),
 }

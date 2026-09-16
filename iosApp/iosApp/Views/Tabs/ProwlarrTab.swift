@@ -25,7 +25,7 @@ struct ProwlarrTab: View {
 
 struct ProwlarrTabContent: View {
     @State private var selectedSegment = 0
-    @ObservedObject private var viewModel = ProwlarrIndexersViewModelS()
+    @StateObject private var viewModel = ProwlarrIndexersViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     
     var body: some View {

@@ -10,7 +10,7 @@ import Shared
 
 struct ProwlarrIndexersView: View {
     @ObservedObject var viewModel: ProwlarrIndexersViewModelS
-    @ObservedObject private var instanceViewModel = InstancesViewModelS(type: .prowlarr)
+    @StateObject private var instanceViewModel = InstancesViewModelS(type: .prowlarr)
     
     @State private var selectedItem: IdentifiableIndexerStatus? = nil
     

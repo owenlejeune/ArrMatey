@@ -31,6 +31,7 @@ private struct DiscoverTabContent: View {
     @EnvironmentObject private var navigationManager: NavigationManager
     @Environment(\.navigationContext) private var context
     @State private var searchQuery = ""
+    @State private var showCustomizationSheet = false
 
     var body: some View {
         Group {
@@ -46,85 +47,92 @@ private struct DiscoverTabContent: View {
                         } else {
                             ScrollView {
                                 VStack(alignment: .leading, spacing: 24) {
-                                    DiscoverSection(
-                                        title: MR.strings().trending.localized(),
-                                        icon: "chart.line.uptrend.xyaxis",
-                                        data: viewModel.trendingState,
-                                        onItemClick: { item in
-                                            navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
-                                        },
-                                        onItemClickArr: { result in
-                                            handleItemClick(result)
-                                        },
-                                        onLoadMore: { viewModel.loadNextTrendingPage() },
-                                        onSeeMore: {
-                                            navigationManager.goToDiscoverCategory(category: .trending)
+                                    ForEach(viewModel.discoverSectionPreferences.visibleCategories, id: \.self) { category in
+                                        switch category {
+                                        case .trending:
+                                            DiscoverSection(
+                                                title: MR.strings().trending.localized(),
+                                                icon: "chart.line.uptrend.xyaxis",
+                                                data: viewModel.trendingState,
+                                                onItemClick: { item in
+                                                    navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                                                },
+                                                onItemClickArr: { result in
+                                                    handleItemClick(result)
+                                                },
+                                                onLoadMore: { viewModel.loadNextTrendingPage() },
+                                                onSeeMore: {
+                                                    navigationManager.goToDiscoverCategory(category: .trending)
+                                                }
+                                            )
+                                        case .popularMovies:
+                                            DiscoverSection(
+                                                title: MR.strings().popular_movies.localized(),
+                                                icon: "movieclapper",
+                                                data: viewModel.moviesState,
+                                                onItemClick: { item in
+                                                    navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                                                },
+                                                onItemClickArr: { result in
+                                                    handleItemClick(result)
+                                                },
+                                                onLoadMore: { viewModel.loadNextMoviesPage() },
+                                                onSeeMore: {
+                                                    navigationManager.goToDiscoverCategory(category: .popularMovies)
+                                                }
+                                            )
+                                        case .popularSeries:
+                                            DiscoverSection(
+                                                title: MR.strings().popular_series.localized(),
+                                                icon: "tv",
+                                                data: viewModel.tvState,
+                                                onItemClick: { item in
+                                                    navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                                                },
+                                                onItemClickArr: { result in
+                                                    handleItemClick(result)
+                                                },
+                                                onLoadMore: { viewModel.loadNextTvPage() },
+                                                onSeeMore: {
+                                                    navigationManager.goToDiscoverCategory(category: .popularSeries)
+                                                }
+                                            )
+                                        case .upcomingMovies:
+                                            DiscoverSection(
+                                                title: MR.strings().upcoming_movies.localized(),
+                                                icon: "calendar",
+                                                data: viewModel.upcomingMoviesState,
+                                                onItemClick: { item in
+                                                    navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                                                },
+                                                onItemClickArr: { result in
+                                                    handleItemClick(result)
+                                                },
+                                                onLoadMore: { viewModel.loadNextUpcomingMoviesPage() },
+                                                onSeeMore: {
+                                                    navigationManager.goToDiscoverCategory(category: .upcomingMovies)
+                                                }
+                                            )
+                                        case .upcomingSeries:
+                                            DiscoverSection(
+                                                title: MR.strings().upcoming_series.localized(),
+                                                icon: "calendar",
+                                                data: viewModel.upcomingTvState,
+                                                onItemClick: { item in
+                                                    navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
+                                                },
+                                                onItemClickArr: { result in
+                                                    handleItemClick(result)
+                                                },
+                                                onLoadMore: { viewModel.loadNextUpcomingTvPage() },
+                                                onSeeMore: {
+                                                    navigationManager.goToDiscoverCategory(category: .upcomingSeries)
+                                                }
+                                            )
+                                        default:
+                                            EmptyView()
                                         }
-                                    )
-
-                                    DiscoverSection(
-                                        title: MR.strings().popular_movies.localized(),
-                                        icon: "movieclapper",
-                                        data: viewModel.moviesState,
-                                        onItemClick: { item in
-                                            navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
-                                        },
-                                        onItemClickArr: { result in
-                                            handleItemClick(result)
-                                        },
-                                        onLoadMore: { viewModel.loadNextMoviesPage() },
-                                        onSeeMore: {
-                                            navigationManager.goToDiscoverCategory(category: .popularMovies)
-                                        }
-                                    )
-
-                                    DiscoverSection(
-                                        title: MR.strings().upcoming_movies.localized(),
-                                        icon: "calendar",
-                                        data: viewModel.upcomingMoviesState,
-                                        onItemClick: { item in
-                                            navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
-                                        },
-                                        onItemClickArr: { result in
-                                            handleItemClick(result)
-                                        },
-                                        onLoadMore: { viewModel.loadNextUpcomingMoviesPage() },
-                                        onSeeMore: {
-                                            navigationManager.goToDiscoverCategory(category: .upcomingMovies)
-                                        }
-                                    )
-
-                                    DiscoverSection(
-                                        title: MR.strings().popular_series.localized(),
-                                        icon: "tv",
-                                        data: viewModel.tvState,
-                                        onItemClick: { item in
-                                            navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
-                                        },
-                                        onItemClickArr: { result in
-                                            handleItemClick(result)
-                                        },
-                                        onLoadMore: { viewModel.loadNextTvPage() },
-                                        onSeeMore: {
-                                            navigationManager.goToDiscoverCategory(category: .popularSeries)
-                                        }
-                                    )
-
-                                    DiscoverSection(
-                                        title: MR.strings().upcoming_series.localized(),
-                                        icon: "calendar",
-                                        data: viewModel.upcomingTvState,
-                                        onItemClick: { item in
-                                            navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
-                                        },
-                                        onItemClickArr: { result in
-                                            handleItemClick(result)
-                                        },
-                                        onLoadMore: { viewModel.loadNextUpcomingTvPage() },
-                                        onSeeMore: {
-                                            navigationManager.goToDiscoverCategory(category: .upcomingSeries)
-                                        }
-                                    )
+                                    }
                                 }
                                 .padding(.vertical, 16)
                             }
@@ -163,6 +171,26 @@ private struct DiscoverTabContent: View {
                     }
                 }
             }
+            if instancesViewModel.instancesState.selectedInstance != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button {
+                            showCustomizationSheet = true
+                        } label: {
+                            Label(MR.strings().reorganize_hide_sections.localized(), systemImage: "slider.horizontal.3")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showCustomizationSheet) {
+            DiscoverSectionCustomizationSheet(
+                preferences: viewModel.discoverSectionPreferences,
+                onUpdatePreferences: { viewModel.updateDiscoverSectionPreferences($0) },
+                onResetPreferences: { viewModel.resetDiscoverSectionPreferences() }
+            )
         }
     }
 

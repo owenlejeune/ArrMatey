@@ -29,7 +29,7 @@ struct CalendarTab: View {
 
 struct CalendarTabContent: View {
     
-    @ObservedObject private var viewModel = CalendarViewModelS()
+    @StateObject private var viewModel = CalendarViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     
     private var viewModeIcon: String {

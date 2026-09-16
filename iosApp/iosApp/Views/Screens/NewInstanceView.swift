@@ -11,7 +11,7 @@ import Shared
 struct NewInstanceView: View {
     @Environment(\.dismiss) var dismiss
     
-    @ObservedObject private var viewModel = AddInstanceViewModelS()
+    @StateObject private var viewModel = AddInstanceViewModelS()
     
     @State private var instanceType: InstanceType
     private let onSaveSuccess: () -> Void

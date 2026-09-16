@@ -25,7 +25,7 @@ struct ActivityTab: View {
 
 struct ActivityTabContent: View {
     
-    @ObservedObject private var viewModel = ActivityQueueViewModelS()
+    @StateObject private var viewModel = ActivityQueueViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     
     @State private var selectedItem: IdentifiableQueueItem? = nil

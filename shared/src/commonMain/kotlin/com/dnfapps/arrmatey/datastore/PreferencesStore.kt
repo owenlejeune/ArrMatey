@@ -15,6 +15,7 @@ import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueSortState
+import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.features.ReleaseNotes
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.AppColor
@@ -65,6 +66,7 @@ class PreferencesStore(
     private val appThemeKey = stringPreferencesKey("appTheme")
     private val appColorKey = stringPreferencesKey("appColor")
     private val tabPreferencesKey = stringPreferencesKey("tabPreferences")
+    private val discoverSectionPreferencesKey = stringPreferencesKey("discoverSectionPreferences")
     private val lastReleaseNotesKey = intPreferencesKey("lastReleaseNotes")
     private val isFirstLaunchKey = booleanPreferencesKey("isFirstLaunch")
     private val downloadClientSortByKey = stringPreferencesKey("downloadClientSortBy")
@@ -102,6 +104,12 @@ class PreferencesStore(
         dataStore.data
             .map { preferences ->
                 extractTabPreferences(preferences)
+            }
+
+    val discoverSectionPreferences: Flow<DiscoverSectionPreferences> =
+        dataStore.data
+            .map { preferences ->
+                extractDiscoverSectionPreferences(preferences)
             }
 
     val showInfoCards: Flow<Map<InstanceType, Boolean>> =
@@ -456,6 +464,53 @@ class PreferencesStore(
     fun updateTabPreferences(tabPreferences: TabPreferences) {
         scope.launch {
             saveTabPreferences(tabPreferences)
+        }
+    }
+
+    fun saveDiscoverSectionPreferences(prefs: DiscoverSectionPreferences) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val json = Json { encodeDefaults = true }
+                preferences[discoverSectionPreferencesKey] = json.encodeToString(prefs)
+            }
+        }
+    }
+
+    fun resetDiscoverSectionPreferences() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                preferences.remove(discoverSectionPreferencesKey)
+            }
+        }
+    }
+
+    private fun extractDiscoverSectionPreferences(preferences: Preferences): DiscoverSectionPreferences {
+        val jsonString = preferences[discoverSectionPreferencesKey] ?: return DiscoverSectionPreferences()
+        return try {
+            val json = Json { ignoreUnknownKeys = true }
+            val parsed = json.decodeFromString<DiscoverSectionPreferences>(jsonString)
+            val allCategories = DiscoverCategory.entries
+            val tracked = (parsed.visibleCategories + parsed.hiddenCategories).toSet()
+            val missing = allCategories.filter { it !in tracked }
+
+            val visible = parsed.visibleCategories.filter { it in allCategories } + missing
+            val hidden = parsed.hiddenCategories.filter { it in allCategories && it !in visible }
+
+            if (visible.isEmpty() && hidden.isNotEmpty()) {
+                DiscoverSectionPreferences(
+                    visibleCategories = listOf(hidden.first()),
+                    hiddenCategories = hidden.drop(1),
+                )
+            } else if (visible.isEmpty()) {
+                DiscoverSectionPreferences()
+            } else {
+                DiscoverSectionPreferences(
+                    visibleCategories = visible,
+                    hiddenCategories = hidden,
+                )
+            }
+        } catch (e: Exception) {
+            DiscoverSectionPreferences()
         }
     }
 

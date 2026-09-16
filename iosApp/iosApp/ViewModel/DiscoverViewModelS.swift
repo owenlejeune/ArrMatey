@@ -21,6 +21,7 @@ class DiscoverViewModelS: ObservableObject {
     @Published private(set) var isInitialLoading: Bool = false
     @Published private(set) var searchShowBanners: Bool = true
     @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
+    @Published private(set) var discoverSectionPreferences = DiscoverSectionPreferences()
 
     init() {
         self.viewModel = KoinBridge.shared.getDiscoverViewModel()
@@ -50,6 +51,9 @@ class DiscoverViewModelS: ObservableObject {
         }
         viewModel.searchShowInstanceIndicatorShadow.observeAsync(on: self) { owner, show in
             owner.searchShowInstanceIndicatorShadow = show.boolValue
+        }
+        viewModel.discoverSectionPreferences.observeAsync(on: self) { owner, prefs in
+            owner.discoverSectionPreferences = prefs
         }
     }
 
@@ -90,6 +94,14 @@ class DiscoverViewModelS: ObservableObject {
 
     func updateSearchQuery(_ query: String) {
         viewModel.updateSearchQuery(query: query)
+    }
+
+    func updateDiscoverSectionPreferences(_ prefs: DiscoverSectionPreferences) {
+        viewModel.updateDiscoverSectionPreferences(prefs: prefs)
+    }
+
+    func resetDiscoverSectionPreferences() {
+        viewModel.resetDiscoverSectionPreferences()
     }
 
     func refresh() {

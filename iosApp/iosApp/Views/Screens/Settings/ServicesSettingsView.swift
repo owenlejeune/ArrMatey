@@ -9,7 +9,7 @@ import SwiftUI
 import Shared
 
 struct ServicesSettingsView: View {
-    @ObservedObject private var viewModel = MoreScreenViewModelS()
+    @StateObject private var viewModel = MoreScreenViewModelS()
 
     private var instances: [Instance] {
         viewModel.instances

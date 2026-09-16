@@ -9,7 +9,7 @@ import SwiftUI
 import Shared
 
 struct IntegrationsSettingsView: View {
-    @ObservedObject private var viewModel = MoreScreenViewModelS()
+    @StateObject private var viewModel = MoreScreenViewModelS()
 
     var body: some View {
         Form {

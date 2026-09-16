@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.database.InstanceRepository
+import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.discover.model.SearchResult
@@ -102,6 +103,10 @@ class DiscoverViewModel(
     private val _upcomingTvState = MutableStateFlow(PagedData<DiscoverResult>())
     val upcomingTvState: StateFlow<PagedData<DiscoverResult>> = _upcomingTvState.asStateFlow()
 
+    val discoverSectionPreferences: StateFlow<DiscoverSectionPreferences> =
+        preferencesStore.discoverSectionPreferences
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DiscoverSectionPreferences())
+
     val isInitialLoading: StateFlow<Boolean> =
         combine(
             _trendingState,
@@ -109,8 +114,32 @@ class DiscoverViewModel(
             _tvState,
             _upcomingMoviesState,
             _upcomingTvState,
-        ) { states: Array<PagedData<DiscoverResult>> ->
-            states.any { it.isLoading && it.items.isEmpty() }
+            discoverSectionPreferences,
+        ) { flows ->
+            @Suppress("UNCHECKED_CAST")
+            val trending = flows[0] as PagedData<DiscoverResult>
+            @Suppress("UNCHECKED_CAST")
+            val movies = flows[1] as PagedData<DiscoverResult>
+            @Suppress("UNCHECKED_CAST")
+            val tv = flows[2] as PagedData<DiscoverResult>
+            @Suppress("UNCHECKED_CAST")
+            val upcomingMovies = flows[3] as PagedData<DiscoverResult>
+            @Suppress("UNCHECKED_CAST")
+            val upcomingTv = flows[4] as PagedData<DiscoverResult>
+            val prefs = flows[5] as DiscoverSectionPreferences
+
+            val visible = prefs.visibleCategories.toSet()
+            val statesMap = mapOf(
+                DiscoverCategory.TRENDING to trending,
+                DiscoverCategory.POPULAR_MOVIES to movies,
+                DiscoverCategory.POPULAR_SERIES to tv,
+                DiscoverCategory.UPCOMING_MOVIES to upcomingMovies,
+                DiscoverCategory.UPCOMING_SERIES to upcomingTv,
+            )
+            visible.any { category ->
+                val state = statesMap[category]
+                state != null && state.isLoading && state.items.isEmpty()
+            }
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -297,6 +326,14 @@ class DiscoverViewModel(
             DiscoverCategory.UPCOMING_MOVIES -> loadNextUpcomingMoviesPage()
             DiscoverCategory.UPCOMING_SERIES -> loadNextUpcomingTvPage()
         }
+    }
+
+    fun updateDiscoverSectionPreferences(prefs: DiscoverSectionPreferences) {
+        preferencesStore.saveDiscoverSectionPreferences(prefs)
+    }
+
+    fun resetDiscoverSectionPreferences() {
+        preferencesStore.resetDiscoverSectionPreferences()
     }
 
     fun refresh() {

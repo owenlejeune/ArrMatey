@@ -12,7 +12,7 @@ struct DevSettingsScreen: View {
     
     @Environment(\.dismiss) var dismiss
     
-    @ObservedObject var preferences: PreferencesViewModel = PreferencesViewModel()
+    @StateObject var preferences: PreferencesViewModel = PreferencesViewModel()
     @StateObject private var logViewModel: LogsViewModel = LogsViewModel()
     
     var body: some View {
