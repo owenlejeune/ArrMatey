@@ -78,6 +78,7 @@ enum class DashboardCards(
     InstanceDashboard(MR.strings.dashboard_instance_dashboards),
     BazarrOverview(MR.strings.dashboard_bazarr_overview),
     TracearrOverview(MR.strings.dashboard_tracearr_overview),
+    TracearrActiveStreams(MR.strings.dashboard_tracearr_active_streams),
     ;
 
     companion object {
@@ -91,6 +92,7 @@ enum class DashboardCards(
                     ProwlarrOverview,
                     BazarrOverview,
                     TracearrOverview,
+                    TracearrActiveStreams,
                     ActivityQueue,
                     RecentlyAdded,
                     OnToday,

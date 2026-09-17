@@ -8,6 +8,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTimeFilled
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.FileDownloadDone
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -81,7 +88,7 @@ fun DashboardCalendarItemRow(
                 ?: MaterialTheme.colorScheme.primary
 
         Box(Modifier.size(4.dp).clip(CircleShape).background(color))
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
             if (sub.isNotBlank()) {
                 Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -93,6 +100,66 @@ fun DashboardCalendarItemRow(
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
+        }
+
+        val statusIcon =
+            when (item) {
+                is Episode ->
+                    when {
+                        item.hasFile -> Icons.Default.FileDownloadDone
+                        !item.monitored -> Icons.Default.BookmarkBorder
+                        !item.hasAired -> Icons.Default.AccessTimeFilled
+                        item.monitored -> Icons.Default.Bookmark
+                        else -> null
+                    }
+                is EpisodeGroup ->
+                    when {
+                        item.first.hasFile -> Icons.Default.FileDownloadDone
+                        !item.first.monitored -> Icons.Default.BookmarkBorder
+                        !item.first.hasAired -> Icons.Default.AccessTimeFilled
+                        item.first.monitored -> Icons.Default.Bookmark
+                        else -> null
+                    }
+                is ArrMovie ->
+                    when {
+                        item.isDownloaded -> Icons.Default.FileDownloadDone
+                        !item.monitored -> Icons.Default.BookmarkBorder
+                        item.isWaiting -> Icons.Default.AccessTimeFilled
+                        item.monitored -> Icons.Default.Bookmark
+                        else -> null
+                    }
+                is ArrAlbum ->
+                    when {
+                        item.isDownloaded -> Icons.Default.FileDownloadDone
+                        item.isPartiallyDownloaded -> Icons.Default.Download
+                        !item.monitored -> Icons.Default.BookmarkBorder
+                        item.monitored -> Icons.Default.Bookmark
+                        else -> null
+                    }
+                is Audiobook ->
+                    when {
+                        item.isDownloaded -> Icons.Default.FileDownloadDone
+                        !item.monitored -> Icons.Default.BookmarkBorder
+                        item.monitored -> Icons.Default.Bookmark
+                        else -> null
+                    }
+                is Book ->
+                    when {
+                        item.isDownloaded -> Icons.Default.FileDownloadDone
+                        item.isPartiallyDownloaded -> Icons.Default.Download
+                        !item.monitored -> Icons.Default.BookmarkBorder
+                        item.monitored -> Icons.Default.Bookmark
+                        else -> null
+                    }
+            }
+
+        statusIcon?.let { icon ->
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+            )
         }
     }
 }

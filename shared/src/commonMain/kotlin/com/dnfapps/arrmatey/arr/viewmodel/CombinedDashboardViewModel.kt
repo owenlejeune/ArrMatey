@@ -251,9 +251,11 @@ class CombinedDashboardViewModel(
                         val states =
                             tracearrRepos.map { repo ->
                                 val stats = (repo.getTodayStats() as? NetworkResult.Success)?.data
+                                val streams = (repo.getPublicStreams() as? NetworkResult.Success)?.data?.data ?: emptyList()
                                 TracearrDashboardState(
                                     instance = repo.instance,
                                     stats = stats,
+                                    activeStreams = streams,
                                 )
                             }
                         emit(states)

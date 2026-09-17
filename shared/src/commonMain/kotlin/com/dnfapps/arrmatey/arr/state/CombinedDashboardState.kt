@@ -30,6 +30,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import dev.icerock.moko.resources.ImageResource
 import kotlinx.datetime.LocalDate
@@ -63,6 +64,9 @@ sealed interface CombinedDashboardState {
 
         val openIssues: List<MediaIssuePackage>
             get() = seerrInstances.flatMap { it.openIssues }
+
+        val activeStreams: List<TracearrStreamSession>
+            get() = tracearrStats.flatMap { it.activeStreams }
     }
 
     companion object {
@@ -334,6 +338,7 @@ data class BazarrDashboardState(
 data class TracearrDashboardState(
     val instance: Instance,
     val stats: TracearrTodayStats? = null,
+    val activeStreams: List<TracearrStreamSession> = emptyList(),
 )
 
 data class DashboardCalendarItem(

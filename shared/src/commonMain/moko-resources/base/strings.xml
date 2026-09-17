@@ -819,6 +819,8 @@
     <string name="dashboard_upcoming_releases">Upcoming Releases</string>
     <string name="dashboard_instance_dashboards">Instance Dashboards</string>
     <string name="dashboard_tracearr_overview">Tracearr Overview</string>
+    <string name="dashboard_tracearr_active_streams">Active Streams</string>
+    <string name="active_streams">Active Streams</string>
     <string name="dashboard_first_launch">Long press to edit and reorder</string>
 
     <!-- Release Notes -->

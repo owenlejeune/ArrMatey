@@ -86,12 +86,14 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.screens.requests.IssueDetailsSheet
 import com.dnfapps.arrmatey.ui.screens.requests.IssuesList
 import com.dnfapps.arrmatey.ui.screens.requests.RequestsList
 import com.dnfapps.arrmatey.ui.screens.tracearr.DashboardTracearrSection
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.sheets.HealthNoticesSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
@@ -132,6 +134,7 @@ fun DashboardCardContent(
     onRequestClick: (MediaRequestPackage) -> Unit = {},
     onIssueClick: (MediaIssuePackage) -> Unit = {},
     onRequestActivityItem: (QueueItem) -> Unit = {},
+    onRequestStreamSession: (TracearrStreamSession) -> Unit = {},
     onHealthClick: () -> Unit = {},
     onSeerrRequestsStatClick: () -> Unit = {},
     onSeerrIssuesStatClick: () -> Unit = {},
@@ -267,6 +270,16 @@ fun DashboardCardContent(
                     if (!isEditing && enabled) onNavigateToTracearrActivity()
                 },
             )
+
+        DashboardCards.TracearrActiveStreams ->
+            DashboardActiveStreamsSection(
+                state = currentState,
+                isEditing = isEditing,
+                enabled = enabled,
+                onItemClick = { session ->
+                    if (!isEditing && enabled) onRequestStreamSession(session)
+                },
+            )
     }
 }
 
@@ -336,6 +349,7 @@ fun CombinedDashboard(
     var selectedRequestForSheet by remember { mutableStateOf<MediaRequestPackage?>(null) }
     var selectedIssueForSheet by remember { mutableStateOf<MediaIssuePackage?>(null) }
     var selectedActivityItem by remember { mutableStateOf<QueueItem?>(null) }
+    var selectedTracearrStreamSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
     var showConfirmRemoveActivity by remember { mutableStateOf(false) }
     var showHealthNoticesSheet by remember { mutableStateOf(false) }
     var showSeerrRequestsSheet by remember { mutableStateOf(false) }
@@ -473,9 +487,11 @@ fun CombinedDashboard(
                             is SearchResult.ArrMediaResult -> {
                                 onNavigateToArrMediaDetailsOrPreview(result.media, result.instanceType)
                             }
+
                             is SearchResult.SeerrMediaResult -> {
                                 onNavigateToSeerrMediaDetails(result.result.id, result.result.mediaType)
                             }
+
                             is SearchResult.SeerrPersonResult -> {
                                 onNavigateToSeerrPersonDetails(result.result.id)
                             }
@@ -493,6 +509,7 @@ fun CombinedDashboard(
                         is CombinedDashboardState.Loading -> {
                             LoadingIndicator(modifier = Modifier.align(Alignment.Center))
                         }
+
                         is CombinedDashboardState.Success -> {
                             if (cards.isEmpty()) {
                                 Column(
@@ -555,32 +572,42 @@ fun CombinedDashboard(
                                                         DashboardCards.ArrOverview -> {
                                                             { onNavigateToSettings() }
                                                         }
+
                                                         DashboardCards.SeerrOverview,
                                                         DashboardCards.PendingRequests,
                                                         DashboardCards.PendingIssues,
                                                         -> {
                                                             { onNavigateToRequestsTab() }
                                                         }
+
                                                         DashboardCards.ProwlarrOverview -> {
                                                             { onNavigateToProwlarrTab() }
                                                         }
+
                                                         DashboardCards.DownloadClients -> {
                                                             { onNavigateToDownloadsTab() }
                                                         }
+
                                                         DashboardCards.ActivityQueue -> {
                                                             { onNavigateToActivityTab() }
                                                         }
+
                                                         DashboardCards.OnToday,
                                                         DashboardCards.UpcomingReleases,
                                                         -> {
                                                             { onNavigateToScheduleTab() }
                                                         }
+
                                                         DashboardCards.BazarrOverview -> {
                                                             { onNavigateToBazarrTab() }
                                                         }
-                                                        DashboardCards.TracearrOverview -> {
+
+                                                        DashboardCards.TracearrOverview,
+                                                        DashboardCards.TracearrActiveStreams,
+                                                        -> {
                                                             { onNavigateToTracearrTab() }
                                                         }
+
                                                         else -> null
                                                     }
 
@@ -619,6 +646,7 @@ fun CombinedDashboard(
                                                         onRequestClick = { selectedRequestForSheet = it },
                                                         onIssueClick = { selectedIssueForSheet = it },
                                                         onRequestActivityItem = { selectedActivityItem = it },
+                                                        onRequestStreamSession = { selectedTracearrStreamSession = it },
                                                         onHealthClick = { showHealthNoticesSheet = true },
                                                         onSeerrRequestsStatClick = {
                                                             showSeerrRequestsSheet = true
@@ -756,6 +784,25 @@ fun CombinedDashboard(
                         item = item,
                         onDismiss = { selectedActivityItem = null },
                         onRemove = { showConfirmRemoveActivity = true },
+                    )
+                }
+
+                selectedTracearrStreamSession?.let { session ->
+                    TracearrStreamDetailsSheet(
+                        session = session,
+                        onDismissRequest = { selectedTracearrStreamSession = null },
+                        onNavigateToDetails = { type, tmdbId ->
+                            selectedTracearrStreamSession = null
+                            if (tmdbId != null) {
+                                type?.requestType?.let { reqType ->
+                                    onNavigateToSeerrMediaDetails(tmdbId, reqType)
+                                }
+                            }
+                        },
+                        onNavigateToUser = {
+                            selectedTracearrStreamSession = null
+                            onNavigateToTracearrUsers()
+                        },
                     )
                 }
 

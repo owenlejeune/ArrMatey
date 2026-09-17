@@ -39,6 +39,7 @@ struct DashboardTabContent: View {
     @State private var selectedRequestForSheet: MediaRequestPackage? = nil
     @State private var selectedIssueForSheet: MediaIssuePackage? = nil
     @State private var selectedActivityItem: IdentifiableQueueItem? = nil
+    @State private var selectedTracearrStreamSession: TracearrStreamSession? = nil
 
     private let columns = [
         GridItem(.adaptive(minimum: 300, maximum: .infinity), spacing: 16)
@@ -190,6 +191,9 @@ struct DashboardTabContent: View {
         .sheet(isPresented: $showSeerrSheet) {
             SeerrSheetView(viewModel: requestsViewModel)
         }
+        .sheet(item: $selectedTracearrStreamSession) { session in
+            TracearrStreamDetailsSheet(session: session)
+        }
     }
 
     @ViewBuilder
@@ -204,6 +208,7 @@ struct DashboardTabContent: View {
                         onRequestClick: { selectedRequestForSheet = $0 },
                         onIssueClick: { selectedIssueForSheet = $0 },
                         onActivityClick: { selectedActivityItem = IdentifiableQueueItem(item: $0) },
+                        onStreamClick: { selectedTracearrStreamSession = $0 },
                         onHealthClick: { showHealthSheet = true },
                         onSeerrRequestsStatClick: {
                             requestsViewModel.setSelectedTab(.requests)
@@ -269,7 +274,7 @@ struct DashboardTabContent: View {
         case .seerrOverview, .pendingRequests, .pendingIssues: navigationManager.openRequestsTab()
         case .prowlarrOverview: navigationManager.openProwlarrTab()
         case .bazarrOverview: navigationManager.openBazarrTab()
-        case .tracearrOverview: navigationManager.openTracearrTab()
+        case .tracearrOverview, .tracearrActiveStreams: navigationManager.openTracearrTab()
         case .downloadClients: navigationManager.openDownloadsTab()
         case .activityQueue: navigationManager.openActivityTab()
         case .onToday, .upcomingReleases: navigationManager.openScheduleTab()
@@ -335,6 +340,7 @@ struct DashboardCardWrapper: View {
     var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
     var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
     var onActivityClick: ((QueueItem) -> Void)? = nil
+    var onStreamClick: ((TracearrStreamSession) -> Void)? = nil
     var onHealthClick: (() -> Void)? = nil
     var onSeerrRequestsStatClick: (() -> Void)? = nil
     var onSeerrIssuesStatClick: (() -> Void)? = nil
@@ -349,6 +355,7 @@ struct DashboardCardWrapper: View {
                 onRequestClick: onRequestClick,
                 onIssueClick: onIssueClick,
                 onActivityClick: onActivityClick,
+                onStreamClick: onStreamClick,
                 onHealthClick: onHealthClick,
                 onSeerrRequestsStatClick: onSeerrRequestsStatClick,
                 onSeerrIssuesStatClick: onSeerrIssuesStatClick
@@ -378,6 +385,7 @@ struct DashboardCardView: View {
     var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
     var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
     var onActivityClick: ((QueueItem) -> Void)? = nil
+    var onStreamClick: ((TracearrStreamSession) -> Void)? = nil
     var onHealthClick: (() -> Void)? = nil
     var onSeerrRequestsStatClick: (() -> Void)? = nil
     var onSeerrIssuesStatClick: (() -> Void)? = nil
@@ -398,6 +406,7 @@ struct DashboardCardView: View {
             case .upcomingReleases: DashboardUpcomingSection(state: state, isEditing: isEditing)
             case .bazarrOverview: DashboardBazarrSection(state: state, isEditing: isEditing)
             case .tracearrOverview: DashboardTracearrSection(state: state, isEditing: isEditing)
+            case .tracearrActiveStreams: DashboardActiveStreamsSection(state: state, isEditing: isEditing, onItemClick: onStreamClick)
             case .instanceDashboard: DashboardInstanceDashboardSection(state: state, isEditing: isEditing)
             }
         }
@@ -913,6 +922,144 @@ struct DashboardActivityQueueSection: View {
     }
 }
 
+struct DashboardActiveStreamsSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    var onItemClick: ((TracearrStreamSession) -> Void)? = nil
+
+    private var activeStreams: [TracearrStreamSession] {
+        state.tracearrStats.flatMap { $0.activeStreams }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "play.tv")
+                Text(MR.strings().active_streams.localized())
+                    .font(.headline)
+                    .bold()
+            }
+
+            if activeStreams.isEmpty {
+                Text(MR.strings().no_active_streams.localized())
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical)
+            } else {
+                ForEach(activeStreams.prefix(5), id: \.id) { session in
+                    Button(action: {
+                        if !isEditing {
+                            onItemClick?(session)
+                        }
+                    }) {
+                        HStack {
+                            let dotColor: Color = {
+                                Color.serverColor(type: session.server?.type ?? session.serverType, name: session.server?.name ?? session.serverName)
+                            }()
+
+                            Circle()
+                                .fill(dotColor)
+                                .frame(width: 4, height: 4)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(displayTitle(for: session))
+                                    .font(.subheadline)
+                                    .bold()
+                                    .lineLimit(1)
+
+                                if let epInfo = episodeInfo(for: session) {
+                                    Text(epInfo)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                }
+
+                                HStack(spacing: 4) {
+                                    if !session.effectiveServerName.isEmpty {
+                                        Text("\(session.effectiveServerName) •")
+                                            .font(.caption)
+                                            .foregroundColor(.accentColor)
+                                    }
+                                    Text(streamStatusText(for: session))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            Spacer()
+
+                            if let progressText = progressPercentage(for: session) {
+                                Text(progressText)
+                                    .font(.caption)
+                                    .bold()
+                            }
+                        }
+                        .padding(12)
+                        .background(Color(UIColor.tertiarySystemBackground))
+                        .cornerRadius(12)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if activeStreams.count > 5 {
+                    HStack {
+                        Spacer()
+                        Text(MR.strings().additional_items_count.formatted(args: [Int32(activeStreams.count - 5)]))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private func displayTitle(for session: TracearrStreamSession) -> String {
+        session.grandparentTitle ?? session.showTitle ?? session.mediaTitle ?? session.channelTitle ?? MR.strings().unknown.localized()
+    }
+
+    private func episodeInfo(for session: TracearrStreamSession) -> String? {
+        let isEpisode = session.mediaType == .episode || (session.seasonNumber != nil && session.episodeNumber != nil)
+        guard isEpisode else { return nil }
+        let s = session.seasonNumber?.intValue ?? 0
+        let e = session.episodeNumber?.intValue ?? 0
+        let sStr = String(format: "%02d", s)
+        let eStr = String(format: "%02d", e)
+        let mainTitle = displayTitle(for: session)
+        if let epTitle = session.mediaTitle, !epTitle.isEmpty, epTitle != mainTitle {
+            return "S\(sStr)E\(eStr) • \(epTitle)"
+        } else {
+            return "S\(sStr)E\(eStr)"
+        }
+    }
+
+    private func streamStatusText(for session: TracearrStreamSession) -> String {
+        var parts: [String] = []
+        if !session.effectiveUsername.isEmpty {
+            parts.append(session.effectiveUsername)
+        }
+        if let state = session.state {
+            if state.lowercased() == "paused" {
+                parts.append(MR.strings().paused.localized())
+            } else if state.lowercased() == "playing" {
+                parts.append(MR.strings().playing.localized())
+            } else {
+                parts.append(state.capitalized)
+            }
+        }
+        if let quality = session.quality ?? session.resolution {
+            parts.append(quality)
+        }
+        return parts.joined(separator: " • ")
+    }
+
+    private func progressPercentage(for session: TracearrStreamSession) -> String? {
+        let total = session.totalDurationMs?.int64Value ?? session.durationMs?.int64Value ?? 0
+        let progress = session.progressMs?.int64Value ?? 0
+        guard total > 0, progress > 0 else { return nil }
+        let percent = Int((Double(progress) / Double(total)) * 100)
+        return "\(min(max(percent, 0), 100))%"
+    }
+}
+
 struct DashboardTodaySection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
@@ -1011,12 +1158,82 @@ struct CalendarItemRow: View {
                     }
                 }
                 Spacer()
+
+                if let icon = statusIcon {
+                    Image(systemName: icon)
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                }
             }
             .padding(12)
             .background(Color(UIColor.tertiarySystemBackground))
             .cornerRadius(12)
         }
         .buttonStyle(.plain)
+    }
+
+    private var statusIcon: String? {
+        if let episode = item as? Episode {
+            if episode.hasFile {
+                return "checkmark.circle.fill"
+            } else if !episode.monitored {
+                return "bookmark"
+            } else if !episode.hasAired {
+                return "clock.fill"
+            } else if episode.monitored {
+                return "bookmark.fill"
+            }
+        } else if let group = item as? EpisodeGroup {
+            let first = group.first
+            if first.hasFile {
+                return "checkmark.circle.fill"
+            } else if !first.monitored {
+                return "bookmark"
+            } else if !first.hasAired {
+                return "clock.fill"
+            } else if first.monitored {
+                return "bookmark.fill"
+            }
+        } else if let movie = item as? ArrMovie {
+            if movie.isDownloaded {
+                return "checkmark.circle.fill"
+            } else if !movie.monitored {
+                return "bookmark"
+            } else if movie.isWaiting {
+                return "clock.fill"
+            } else if movie.monitored {
+                return "bookmark.fill"
+            }
+        } else if let album = item as? ArrAlbum {
+            if album.isDownloaded {
+                return "square.and.arrow.down.fill"
+            } else if album.isPartiallyDownloaded {
+                return "arrow.down.circle.dotted"
+            } else if album.monitored {
+                return "bookmark.fill"
+            } else if !album.monitored {
+                return "bookmark"
+            }
+        } else if let book = item as? Book {
+            if book.isDownloaded {
+                return "square.and.arrow.down.fill"
+            } else if book.isPartiallyDownloaded {
+                return "arrow.down.circle.dotted"
+            } else if book.monitored {
+                return "bookmark.fill"
+            } else if !book.monitored {
+                return "bookmark"
+            }
+        } else if let audiobook = item as? Audiobook {
+            if audiobook.isDownloaded {
+                return "square.and.arrow.down.fill"
+            } else if audiobook.monitored {
+                return "bookmark.fill"
+            } else if !audiobook.monitored {
+                return "bookmark"
+            }
+        }
+        return nil
     }
 
     private var title: String {

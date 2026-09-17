@@ -691,7 +691,7 @@ class PreferencesStore(
                     cardOrderPrefs
                         .takeUnless { it.isEmpty() }
                         ?.split("~")
-                        ?.map { DashboardCards.valueOf(it) }
+                        ?.mapNotNull { runCatching { DashboardCards.valueOf(it) }.getOrNull() }
                         ?: emptyList()
                 } ?: DashboardCards.defaultEntries.toList()
             }
