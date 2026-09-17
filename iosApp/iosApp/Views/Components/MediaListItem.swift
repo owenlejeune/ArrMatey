@@ -21,6 +21,7 @@ struct MediaItemView<T: ArrMedia>: View {
     let bannerImage: Shared.ImageResource?
     
     let instanceType: InstanceType?
+    let edgeColor: Color?
     
     init(
         item: T,
@@ -33,7 +34,8 @@ struct MediaItemView<T: ArrMedia>: View {
         posterElevation: Shared.PosterElevation = .medium,
         posterRadius: Shared.PosterRadius = .medium,
         posterImage: Shared.ImageResource? = nil,
-        bannerImage: Shared.ImageResource? = nil
+        bannerImage: Shared.ImageResource? = nil,
+        edgeColor: Color? = nil
     ) {
         self.item = item
         self.aspectRatio = aspectRatio
@@ -46,16 +48,11 @@ struct MediaItemView<T: ArrMedia>: View {
         self.posterRadius = posterRadius
         self.posterImage = posterImage
         self.bannerImage = bannerImage
+        self.edgeColor = edgeColor
     }
     
     private var itemTitle: String {
-        var result = item.title ?? MR.strings().unknown.localized()
-        if let year = item.year,
-            let title = item.title,
-            !title.contains(String(describing: year)) {
-                result += " (\(year))"
-            }
-        return result
+        item.title ?? MR.strings().unknown.localized()
     }
     
     private var textColor: Color {
@@ -63,24 +60,32 @@ struct MediaItemView<T: ArrMedia>: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top, spacing: 18) {
+        HStack(spacing: 0) {
+            if let edgeColor = edgeColor {
+                Rectangle()
+                    .fill(edgeColor)
+                    .frame(width: 6)
+            }
+
+            HStack(alignment: .top, spacing: 16) {
+                let pHeight = 100 / CGFloat(aspectRatio.ratio)
                 PosterItem(
                     item: item,
                     instanceType: instanceType,
                     aspectRatio: aspectRatio,
                     elevation: posterElevation,
                     radius: posterRadius,
+                    posterHeight: pHeight,
                     posterImage: posterImage
                 )
-                .frame(height: 75)
+                .frame(width: 100, height: pHeight)
                 
-                VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .top) {
                         Text(itemTitle)
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(textColor)
-                            .lineLimit(2)
+                            .lineLimit(1)
                         
                         Spacer()
                         
@@ -91,20 +96,18 @@ struct MediaItemView<T: ArrMedia>: View {
                     }
                     
                     MediaDetailsView(item: item, isActive: isActive, showBannerBackground: showBannerBackground)
-                        .padding(.top, 4)
+                    
+                    if includeOverview, let overview = item.overview {
+                        Text(overview.decodingHTMLEntities())
+                            .font(.system(size: 14))
+                            .lineLimit(4)
+                            .foregroundColor(showBannerBackground ? .white.opacity(0.8) : .secondary)
+                            .padding(.top, 4)
+                    }
                 }
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(12)
-            
-            if includeOverview, let overview = item.overview {
-                Text(overview.decodingHTMLEntities())
-                    .font(.system(size: 14))
-                    .lineLimit(3)
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 12)
-                    .foregroundColor(showBannerBackground ? .white.opacity(0.8) : .secondary)
-            }
         }
         .background {
             if showBannerBackground {

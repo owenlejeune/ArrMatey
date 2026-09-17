@@ -22,12 +22,12 @@ struct SeriesDetailsView: View {
     }
     
     private var fileSizeString: String? {
-        guard let size = item.fileSize?.int64Value, size > 0 else { return nil }
+        guard item.id != nil, let size = item.fileSize?.int64Value, size > 0 else { return nil }
         return ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
     }
     
     private var firstLine: String {
-        [item.network, seasonString, fileSizeString]
+        [seasonString, fileSizeString, item.network]
             .compactMap { $0 }
             .joined(separator: " • ")
     }
@@ -66,22 +66,26 @@ struct SeriesDetailsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(firstLine)
-                .font(.system(size: 14))
-                .lineSpacing(4)
+            if !firstLine.isEmpty {
+                Text(firstLine)
+                    .font(.system(size: 14))
+                    .lineSpacing(4)
+            }
             
             Text(statusString)
                 .font(.system(size: 14))
                 .lineSpacing(4)
             
-            Text("\(item.episodeFileCount)/\(item.episodeCount)")
-                .font(.system(size: 12))
-                .padding(.bottom, 1)
-                .padding(.top, 4)
-            
-            ProgressView(value: item.statusProgress)
-                .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
-                .frame(height: 6)
+            if item.id != nil {
+                Text("\(item.episodeFileCount)/\(item.episodeCount)")
+                    .font(.system(size: 12))
+                    .padding(.bottom, 1)
+                    .padding(.top, 4)
+                
+                ProgressView(value: item.statusProgress)
+                    .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
+                    .frame(height: 6)
+            }
         }
     }
     

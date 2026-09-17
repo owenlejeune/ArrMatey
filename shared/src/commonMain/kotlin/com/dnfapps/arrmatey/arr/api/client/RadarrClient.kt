@@ -27,6 +27,7 @@ class RadarrClient(
             .onSuccess { movies ->
                 movies.map { movie ->
                     movie.copy(
+                        instanceId = instance.id,
                         images =
                             movie.images.map { image ->
                                 if (image.remoteUrl?.startsWith("/") == true) {

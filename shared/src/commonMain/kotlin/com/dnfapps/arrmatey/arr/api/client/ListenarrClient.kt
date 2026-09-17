@@ -43,9 +43,12 @@ import kotlinx.serialization.json.put
 class ListenarrClient(
     override val instance: Instance,
     httpClient: HttpClient,
-) : BaseArrClient(httpClient),
-    ArrClient {
-    override suspend fun getLibrary(): NetworkResult<List<Audiobook>> = get("library")
+) : BaseArrClient(httpClient), ArrClient {
+
+    override suspend fun getLibrary(): NetworkResult<List<Audiobook>> =
+        get<List<Audiobook>>("library").map { books ->
+            books.map { it.copy(instanceId = instance.id) }
+        }
 
     override suspend fun getDetail(id: Long): NetworkResult<Audiobook> = get("library/$id")
 
@@ -124,7 +127,8 @@ class ListenarrClient(
         return get<List<ListenarrRelease>>("search/indexers", mapOf("query" to query))
     }
 
-    override suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> = post("download/send", payload)
+    override suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> =
+        post("download/send", payload)
 
     override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> = get("rootfolders")
 
@@ -144,7 +148,11 @@ class ListenarrClient(
 
     override suspend fun command(payload: CommandPayload): NetworkResult<Any> =
         when (payload) {
-            is CommandPayload.Audiobook -> post<CommandPayload.Audiobook, ListenarrCommandResponse>("download/search-and-download", payload)
+            is CommandPayload.Audiobook -> post<CommandPayload.Audiobook, ListenarrCommandResponse>(
+                "download/search-and-download",
+                payload
+            )
+
             else -> super.command(payload)
         }
 

@@ -54,7 +54,6 @@ import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.BULLET
-import com.dnfapps.arrmatey.entensions.colouredDropShadow
 import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.extensions.pxToDp
@@ -153,41 +152,40 @@ fun SearchResultItem(
     includeOverview: Boolean = true,
     showBanners: Boolean = true,
 ) {
-    val shadowColor =
+    val edgeColor =
         remember(item) {
             item.instanceType.associatedColor
         }
 
-    Box(
-        modifier = Modifier.colouredDropShadow(shadowColor),
-    ) {
-        when (item) {
-            is SearchResult.ArrMediaResult -> {
-                MediaItem(
-                    aspectRatio = item.aspectRatio,
-                    item = item.media,
-                    onItemClick = { onItemClick(item) },
-                    includeOverview = includeOverview,
-                    showBannerBackground = showBanners,
-                )
-            }
+    when (item) {
+        is SearchResult.ArrMediaResult -> {
+            MediaItem(
+                aspectRatio = item.aspectRatio,
+                item = item.media,
+                onItemClick = { onItemClick(item) },
+                includeOverview = includeOverview,
+                showBannerBackground = showBanners,
+                edgeColor = edgeColor,
+            )
+        }
 
-            is SearchResult.SeerrMediaResult -> {
-                SeerrMediaItem(
-                    result = item,
-                    onItemClick = onItemClick,
-                    includeOverview = includeOverview,
-                    showBannerBackground = showBanners,
-                )
-            }
+        is SearchResult.SeerrMediaResult -> {
+            SeerrMediaItem(
+                result = item,
+                onItemClick = onItemClick,
+                includeOverview = includeOverview,
+                showBannerBackground = showBanners,
+                edgeColor = edgeColor,
+            )
+        }
 
-            is SearchResult.SeerrPersonResult -> {
-                SeerrPersonItem(
-                    result = item,
-                    onItemClick = onItemClick,
-                    includeOverview = includeOverview,
-                )
-            }
+        is SearchResult.SeerrPersonResult -> {
+            SeerrPersonItem(
+                result = item,
+                onItemClick = onItemClick,
+                includeOverview = includeOverview,
+                edgeColor = edgeColor,
+            )
         }
     }
 }
@@ -208,6 +206,7 @@ fun <T : ArrMedia> MediaItem(
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
+    edgeColor: Color? = null,
 ) {
     val isSelected = multiSelectState.isSelected(item.guid)
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
@@ -241,73 +240,85 @@ fun <T : ArrMedia> MediaItem(
         elevation = CardDefaults.cardElevation(defaultElevation = posterElevation.elevation),
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 200.dp),
-        ) {
-            if (hasBanner) {
-                BannerView(
-                    bannerModel = bannerModel ?: item.getBanner()?.remoteUrl?.let { rememberRemoteImageData(it) },
-                    blur = blur,
-                    modifier = Modifier.height(contentHeight.pxToDp() + 24.dp),
+        Row(modifier = Modifier.fillMaxWidth()) {
+            if (edgeColor != null) {
+                Box(
+                    modifier =
+                        Modifier
+                            .width(6.dp)
+                            .height(contentHeight.pxToDp() + 24.dp)
+                            .background(edgeColor),
                 )
             }
 
-            Row(
+            Box(
                 modifier =
                     Modifier
-                        .wrapContentHeight()
-                        .padding(12.dp)
-                        .onGloballyPositioned {
-                            contentHeight = it.size.height
-                        },
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                        .weight(1f)
+                        .heightIn(max = 200.dp),
             ) {
-                PosterItem(
-                    item = item,
-                    aspectRatio = aspectRatio,
-                    modifier = Modifier.width(100.dp),
-                    posterModel = posterModel,
-                    elevation = posterElevation,
-                    radius = posterRadius,
-                    multiSelectState = multiSelectState,
-                )
-
-                Column(
-                    modifier = Modifier.weight(1f).wrapContentHeight(),
-                    verticalArrangement = Arrangement.Top,
-                ) {
-                    val titleColor = if (hasBanner) Color.White else MaterialTheme.colorScheme.onSurface
-                    Text(
-                        text = item.title ?: mokoString(MR.strings.unknown),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = titleColor,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                if (hasBanner) {
+                    BannerView(
+                        bannerModel = bannerModel ?: item.getBanner()?.remoteUrl?.let { rememberRemoteImageData(it) },
+                        blur = blur,
+                        modifier = Modifier.height(contentHeight.pxToDp() + 24.dp),
                     )
-                    MediaDetails(item, isActive, hasBanner)
+                }
 
-                    if (includeOverview && item.overview != null) {
-                        val parsed = item.overview?.rememberHtml() ?: ""
+                Row(
+                    modifier =
+                        Modifier
+                            .wrapContentHeight()
+                            .padding(12.dp)
+                            .onGloballyPositioned {
+                                contentHeight = it.size.height
+                            },
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PosterItem(
+                        item = item,
+                        aspectRatio = aspectRatio,
+                        modifier = Modifier.width(100.dp),
+                        posterModel = posterModel,
+                        elevation = posterElevation,
+                        radius = posterRadius,
+                        multiSelectState = multiSelectState,
+                    )
+
+                    Column(
+                        modifier = Modifier.weight(1f).wrapContentHeight(),
+                        verticalArrangement = Arrangement.Top,
+                    ) {
+                        val titleColor = if (hasBanner) Color.White else MaterialTheme.colorScheme.onSurface
                         Text(
-                            text = parsed,
-                            style = MaterialTheme.typography.bodySmall,
-                            color =
-                                if (hasBanner) {
-                                    Color.White.copy(
-                                        alpha = 0.8f,
-                                    )
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                            maxLines = 6,
-                            minLines = 3,
+                            text = item.title ?: mokoString(MR.strings.unknown),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = titleColor,
+                            maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 8.dp),
                         )
+                        MediaDetails(item, isActive, hasBanner)
+
+                        if (includeOverview && item.overview != null) {
+                            val parsed = item.overview?.rememberHtml() ?: ""
+                            Text(
+                                text = parsed,
+                                style = MaterialTheme.typography.bodySmall,
+                                color =
+                                    if (hasBanner) {
+                                        Color.White.copy(
+                                            alpha = 0.8f,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    },
+                                maxLines = 6,
+                                minLines = 3,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -324,6 +335,7 @@ fun SeerrMediaItem(
     includeOverview: Boolean = true,
     showBannerBackground: Boolean = true,
     bannerModel: Any? = null,
+    edgeColor: Color? = null,
 ) {
     var contentHeight by remember { mutableIntStateOf(0) }
 
@@ -336,75 +348,87 @@ fun SeerrMediaItem(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 200.dp),
-        ) {
-            if (showBannerBackground && (bannerModel != null || item.fullBackdropPath != null)) {
-                BannerView(
-                    bannerModel = bannerModel ?: item.fullBackdropPath?.let { rememberRemoteImageData(it) },
-                    blur = Blur.Normal,
-                    modifier = Modifier.height(contentHeight.pxToDp() + 24.dp),
+        Row(modifier = Modifier.fillMaxWidth()) {
+            if (edgeColor != null) {
+                Box(
+                    modifier =
+                        Modifier
+                            .width(6.dp)
+                            .height(contentHeight.pxToDp() + 24.dp)
+                            .background(edgeColor),
                 )
             }
 
-            Row(
+            Box(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .padding(12.dp)
-                        .onGloballyPositioned {
-                            contentHeight = it.size.height
-                        },
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                        .weight(1f)
+                        .heightIn(max = 200.dp),
             ) {
-                PosterItem(
-                    item = item,
-                    modifier = Modifier.width(75.dp),
-                )
+                if (showBannerBackground && (bannerModel != null || item.fullBackdropPath != null)) {
+                    BannerView(
+                        bannerModel = bannerModel ?: item.fullBackdropPath?.let { rememberRemoteImageData(it) },
+                        blur = Blur.Normal,
+                        modifier = Modifier.height(contentHeight.pxToDp() + 24.dp),
+                    )
+                }
 
-                Column(
-                    modifier = Modifier.weight(1f).wrapContentHeight(),
-                    verticalArrangement = Arrangement.Center,
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(12.dp)
+                            .onGloballyPositioned {
+                                contentHeight = it.size.height
+                            },
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    val titleColor =
-                        if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
-                    Text(
-                        text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = titleColor,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    PosterItem(
+                        item = item,
+                        modifier = Modifier.width(100.dp),
                     )
 
-                    val releaseDate = item.releaseDate ?: item.firstAirDate
-                    val year = releaseDate?.take(4)
-                    val secondLine = listOfNotNull(year, item.mediaType.name).joinToString(BULLET)
-                    Text(
-                        text = secondLine,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-
-                    if (includeOverview && item.overview != null) {
+                    Column(
+                        modifier = Modifier.weight(1f).wrapContentHeight(),
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        val titleColor =
+                            if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
                         Text(
-                            text = item.overview ?: "",
-                            style = MaterialTheme.typography.bodySmall,
-                            color =
-                                if (showBannerBackground) {
-                                    Color.White.copy(
-                                        alpha = 0.8f,
-                                    )
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                            maxLines = 2,
+                            text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = titleColor,
+                            maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 8.dp),
                         )
+
+                        val releaseDate = item.releaseDate ?: item.firstAirDate
+                        val year = releaseDate?.take(4)
+                        val secondLine = listOfNotNull(year, item.mediaType.name).joinToString(BULLET)
+                        Text(
+                            text = secondLine,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+
+                        if (includeOverview && item.overview != null) {
+                            Text(
+                                text = item.overview ?: "",
+                                style = MaterialTheme.typography.bodySmall,
+                                color =
+                                    if (showBannerBackground) {
+                                        Color.White.copy(
+                                            alpha = 0.8f,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    },
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -418,7 +442,9 @@ fun SeerrPersonItem(
     result: SearchResult.SeerrPersonResult,
     onItemClick: (SearchResult) -> Unit,
     includeOverview: Boolean = true,
+    edgeColor: Color? = null,
 ) {
+    var contentHeight by remember { mutableIntStateOf(0) }
     val item = result.result
     Card(
         modifier =
@@ -429,42 +455,58 @@ fun SeerrPersonItem(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
-            verticalAlignment = Alignment.Top,
-            modifier =
-                Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-        ) {
-            PersonProfileImage(item.fullPosterPath)
+        Row(modifier = Modifier.fillMaxWidth()) {
+            if (edgeColor != null) {
+                Box(
+                    modifier =
+                        Modifier
+                            .width(6.dp)
+                            .height(contentHeight.pxToDp() + 24.dp)
+                            .background(edgeColor),
+                )
+            }
 
-            Column(
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                verticalAlignment = Alignment.Top,
                 modifier =
                     Modifier
                         .weight(1f)
-                        .wrapContentHeight(),
-                verticalArrangement = Arrangement.Top,
+                        .padding(12.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .onGloballyPositioned {
+                            contentHeight = it.size.height
+                        },
             ) {
-                Text(
-                    text = item.name ?: mokoString(MR.strings.unknown),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                PersonProfileImage(item.fullPosterPath)
 
-                if (includeOverview && item.knownFor.isNotEmpty()) {
-                    val knownFor = item.knownFor.joinToString(", ") { it.title ?: it.name ?: "" }
+                Column(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .wrapContentHeight(),
+                    verticalArrangement = Arrangement.Top,
+                ) {
                     Text(
-                        text = knownFor,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 8,
+                        text = item.name ?: mokoString(MR.strings.unknown),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 8.dp),
                     )
+
+                    if (includeOverview && item.knownFor.isNotEmpty()) {
+                        val knownFor = item.knownFor.joinToString(", ") { it.title ?: it.name ?: "" }
+                        Text(
+                            text = knownFor,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 8,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
                 }
             }
         }
@@ -558,6 +600,19 @@ private fun MovieDetails(
     val thirdLine = listOfNotNull(qualityLabel, fileSizeLabel).joinToString(BULLET)
     thirdLine.unlessEmpty { thirdLine ->
         Text(thirdLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    }
+
+    if (item.id != null) {
+        LinearProgressIndicator(
+            progress = { item.statusProgress },
+            color = if (isActive) ArrPurple else item.statusColor,
+            modifier =
+                Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+                    .height(6.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
     }
 }
 

@@ -209,8 +209,14 @@ class InstanceManager(
 
     fun observeAllArrLibraries(): Flow<List<ArrMedia>> {
         return _instanceRepositories.flatMapLatest { repos ->
-            val libraries = repos.values.filterIsInstance<ArrInstanceRepository>().map { it.library }
-            if (libraries.isEmpty()) return@flatMapLatest flowOf(emptyList())
+            val arrRepos = repos.values.filterIsInstance<ArrInstanceRepository>()
+            if (arrRepos.isEmpty()) return@flatMapLatest flowOf(emptyList())
+            arrRepos.forEach { repo ->
+                if (repo.library.value == null) {
+                    scope.launch { repo.refreshLibrary() }
+                }
+            }
+            val libraries = arrRepos.map { it.library }
             combine(libraries) { results ->
                 results.flatMap { it?.asSuccess()?.data ?: emptyList() }
             }

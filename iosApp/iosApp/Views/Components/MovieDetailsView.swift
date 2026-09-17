@@ -18,7 +18,7 @@ struct MovieDetailsView: View {
         let date = Date(timeIntervalSince1970: timeInterval)
         
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
+        formatter.dateFormat = "MMMM d, yyyy"
         return formatter.string(from: date)
     }
     
@@ -42,13 +42,8 @@ struct MovieDetailsView: View {
     }
     
     private var fileSizeString: String? {
-        guard let size = item.fileSize?.int64Value, size > 0 else { return nil }
+        guard item.id != nil, let size = item.fileSize?.int64Value, size > 0 else { return nil }
         return ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
-    }
-    
-    private var statusLabel: String? {
-        guard item.fileSize == 0 else { return nil }
-        return item.status.name
     }
     
     private var qualityString: String? {
@@ -56,7 +51,7 @@ struct MovieDetailsView: View {
     }
     
     private var secondLine: String {
-        [statusLabel, fileSizeString, qualityString]
+        [qualityString, fileSizeString]
             .compactMap { $0 }
             .joined(separator: " • ")
     }
@@ -90,19 +85,24 @@ struct MovieDetailsView: View {
                     .lineSpacing(4)
             }
             
-            Text(firstLine)
-                .font(.system(size: 14))
-                .lineSpacing(4)
+            if !firstLine.isEmpty {
+                Text(firstLine)
+                    .font(.system(size: 14))
+                    .lineSpacing(4)
+            }
             
-            Text(secondLine)
-                .font(.system(size: 14))
-                .lineSpacing(4)
+            if !secondLine.isEmpty {
+                Text(secondLine)
+                    .font(.system(size: 14))
+                    .lineSpacing(4)
+            }
             
-            Spacer()
-            
-            ProgressView(value: item.statusProgress)
-                .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
-                .frame(height: 6)
+            if item.id != nil {
+                ProgressView(value: item.statusProgress)
+                    .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
+                    .frame(height: 6)
+                    .padding(.top, 4)
+            }
         }
     }
 }

@@ -3,6 +3,9 @@ package com.dnfapps.arrmatey.discover.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.database.InstanceRepository
@@ -12,11 +15,13 @@ import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
+import com.dnfapps.networking.asSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverMoviesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverTvUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetTrendingUseCase
@@ -168,11 +173,42 @@ class DiscoverViewModel(
     val searchState: StateFlow<List<SearchResult>> =
         combine(_searchState, allLibraries) { results, libraries ->
             results.map { result ->
-                if (result is SearchResult.ArrMediaResult) {
-                    val merged = listOf(result.media).mergeWithLibrary(libraries).first()
-                    result.copy(media = merged)
-                } else {
-                    result
+                when (result) {
+                    is SearchResult.ArrMediaResult -> {
+                        val merged = listOf(result.media).mergeWithLibrary(libraries).first()
+                        result.copy(media = merged)
+                    }
+
+                    is SearchResult.SeerrMediaResult -> {
+                        val tmdbId = result.result.id
+                        val cleanTitle = (result.result.title ?: result.result.name)?.replace(Regex("[^a-zA-Z0-9]"), "")?.lowercase()
+                        val match = if (result.result.mediaType == RequestType.Movie) {
+                            libraries.filterIsInstance<ArrMovie>()
+                                .firstOrNull { (it.tmdbId != 0L && it.tmdbId == tmdbId) || (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true) }
+                        } else if (result.result.mediaType == RequestType.Tv) {
+                            libraries.filterIsInstance<ArrSeries>().firstOrNull {
+                                (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == tmdbId) ||
+                                    (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
+                            }
+                        } else null
+
+                        if (match != null) {
+                            val instanceId = (match as? ArrMovie)?.instanceId
+                                ?: (match as? CalendarItem)?.instanceId
+                                ?: instanceManager.getAllArrRepositories().firstOrNull { repo ->
+                                    repo.library.value?.asSuccess()?.data?.any { it.id == match.id } == true
+                                }?.instance?.id
+                            SearchResult.ArrMediaResult(
+                                media = match,
+                                instanceId = instanceId,
+                                originalRank = result.originalRank,
+                            )
+                        } else {
+                            result
+                        }
+                    }
+
+                    is SearchResult.SeerrPersonResult -> result
                 }
             }
         }.stateIn(

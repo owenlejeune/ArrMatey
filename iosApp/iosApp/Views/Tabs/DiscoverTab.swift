@@ -238,12 +238,8 @@ struct DiscoverSearchResultRow: View {
     let showBanners: Bool
     let onItemClick: (SearchResult) -> Void
 
-    private var shadowColor: Color? {
-        if let arrResult = item as? SearchResultArrMediaResult {
-            return arrResult.instanceType.associatedColor.toSwiftUI()
-        } else {
-            return InstanceType.seerr.associatedColor.toSwiftUI()
-        }
+    private var edgeColor: Color {
+        item.instanceType.associatedColor.toSwiftUI()
     }
 
     var body: some View {
@@ -254,15 +250,22 @@ struct DiscoverSearchResultRow: View {
                     aspectRatio: .poster,
                     instanceType: arrResult.instanceType,
                     showBannerBackground: showBanners,
-                    includeOverview: true
+                    includeOverview: true,
+                    edgeColor: edgeColor
                 )
             } else if let seerrMedia = item as? SearchResultSeerrMediaResult {
-                SeerrMediaSearchResultView(result: seerrMedia, showBannerBackground: showBanners)
+                SeerrMediaSearchResultView(
+                    result: seerrMedia,
+                    showBannerBackground: showBanners,
+                    edgeColor: edgeColor
+                )
             } else if let seerrPerson = item as? SearchResultSeerrPersonResult {
-                SeerrPersonSearchResultView(result: seerrPerson)
+                SeerrPersonSearchResultView(
+                    result: seerrPerson,
+                    edgeColor: edgeColor
+                )
             }
         }
-        .colouredDropShadow(color: shadowColor)
         .onTapGesture {
             onItemClick(item)
         }
@@ -272,24 +275,36 @@ struct DiscoverSearchResultRow: View {
 struct SeerrMediaSearchResultView: View {
     let result: SearchResultSeerrMediaResult
     let showBannerBackground: Bool
+    var edgeColor: Color? = InstanceType.seerr.associatedColor.toSwiftUI()
 
     var body: some View {
         let item = result.result
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top, spacing: 18) {
+        HStack(spacing: 0) {
+            if let edgeColor = edgeColor {
+                Rectangle()
+                    .fill(edgeColor)
+                    .frame(width: 6)
+            }
+
+            HStack(alignment: .top, spacing: 16) {
                 GenericPosterItem(
                     posterUrl: item.fullPosterPath,
-                    aspectRatio: .poster
+                    aspectRatio: .poster,
+                    posterHeight: 150
                 )
-                .frame(height: 75)
+                .frame(width: 100, height: 150)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.title ?? item.name ?? MR.strings().unknown.localized())
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(showBannerBackground ? .white : .primary)
+                        .lineLimit(1)
 
-                    if let date = item.releaseDate ?? item.firstAirDate {
-                        Text(String(date.prefix(4)))
+                    let releaseDate = item.releaseDate ?? item.firstAirDate
+                    let year = releaseDate.map { String($0.prefix(4)) }
+                    let secondLine = [year, item.mediaType.name].compactMap { $0 }.joined(separator: " • ")
+                    if !secondLine.isEmpty {
+                        Text(secondLine)
                             .font(.system(size: 14))
                             .foregroundColor(showBannerBackground ? .white.opacity(0.8) : .secondary)
                     }
@@ -297,11 +312,13 @@ struct SeerrMediaSearchResultView: View {
                     if let overview = item.overview {
                         Text(overview)
                             .font(.system(size: 14))
-                            .lineLimit(3)
+                            .lineLimit(4)
                             .foregroundColor(showBannerBackground ? .white.opacity(0.7) : .secondary)
+                            .padding(.top, 4)
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(12)
         }
         .background {
@@ -322,49 +339,61 @@ struct SeerrMediaSearchResultView: View {
             }
         }
         .cornerRadius(12)
+        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
     }
 }
 
 struct SeerrPersonSearchResultView: View {
     let result: SearchResultSeerrPersonResult
+    var edgeColor: Color? = InstanceType.seerr.associatedColor.toSwiftUI()
 
     var body: some View {
         let item = result.result
-        HStack(alignment: .top, spacing: 18) {
-            AsyncImage(url: URL(string: item.fullPosterPath ?? "")) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                ZStack {
-                    Color(.systemGray4)
-                    Image(systemName: "person.fill")
-                        .foregroundColor(.gray)
+        HStack(spacing: 0) {
+            if let edgeColor = edgeColor {
+                Rectangle()
+                    .fill(edgeColor)
+                    .frame(width: 6)
+            }
+
+            HStack(alignment: .top, spacing: 16) {
+                AsyncImage(url: URL(string: item.fullPosterPath ?? "")) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    ZStack {
+                        Color(.systemGray4)
+                        Image(systemName: "person.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
+                .frame(width: 88, height: 88)
+                .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.name ?? MR.strings().unknown.localized())
+                        .font(.system(size: 18, weight: .bold))
+                        .lineLimit(1)
+
+                    let knownFor = item.knownFor.compactMap { $0.title ?? $0.name }.joined(separator: ", ")
+                    if !knownFor.isEmpty {
+                        Text("Known for: \(knownFor)")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
+
+                    if let overview = item.overview {
+                        Text(overview)
+                            .font(.system(size: 14))
+                            .lineLimit(3)
+                            .foregroundColor(.secondary)
+                            .padding(.top, 4)
+                    }
                 }
             }
-            .frame(width: 80, height: 80)
-            .cornerRadius(8)
-            .clipped()
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.name ?? MR.strings().unknown.localized())
-                    .font(.system(size: 18, weight: .bold))
-
-                let knownFor = item.knownFor.compactMap { $0.title ?? $0.name }.joined(separator: ", ")
-                if !knownFor.isEmpty {
-                    Text("Known for: \(knownFor)")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
-
-                if let overview = item.overview {
-                    Text(overview)
-                        .font(.system(size: 14))
-                        .lineLimit(2)
-                        .foregroundColor(.secondary)
-                }
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
         }
-        .padding(12)
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.1), radius: 4)
