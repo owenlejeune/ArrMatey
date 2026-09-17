@@ -61,22 +61,36 @@ class UnifiedSearchViewModel(
                     is SearchResult.SeerrMediaResult -> {
                         val tmdbId = result.result.id
                         val cleanTitle = (result.result.title ?: result.result.name)?.replace(Regex("[^a-zA-Z0-9]"), "")?.lowercase()
-                        val match = if (result.result.mediaType == RequestType.Movie) {
-                            libraries.filterIsInstance<ArrMovie>()
-                                .firstOrNull { (it.tmdbId != 0L && it.tmdbId == tmdbId) || (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true) }
-                        } else if (result.result.mediaType == RequestType.Tv) {
-                            libraries.filterIsInstance<ArrSeries>().firstOrNull {
-                                (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == tmdbId) ||
-                                    (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
+                        val match =
+                            if (result.result.mediaType == RequestType.Movie) {
+                                libraries
+                                    .filterIsInstance<ArrMovie>()
+                                    .firstOrNull {
+                                        (it.tmdbId != 0L && it.tmdbId == tmdbId) ||
+                                            (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
+                                    }
+                            } else if (result.result.mediaType == RequestType.Tv) {
+                                libraries.filterIsInstance<ArrSeries>().firstOrNull {
+                                    (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == tmdbId) ||
+                                        (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
+                                }
+                            } else {
+                                null
                             }
-                        } else null
 
                         if (match != null) {
-                            val instanceId = (match as? ArrMovie)?.instanceId
-                                ?: (match as? CalendarItem)?.instanceId
-                                ?: instanceManager.getAllArrRepositories().firstOrNull { repo ->
-                                    repo.library.value?.asSuccess()?.data?.any { it.id == match.id } == true
-                                }?.instance?.id
+                            val instanceId =
+                                (match as? ArrMovie)?.instanceId
+                                    ?: (match as? CalendarItem)?.instanceId
+                                    ?: instanceManager
+                                        .getAllArrRepositories()
+                                        .firstOrNull { repo ->
+                                            repo.library.value
+                                                ?.asSuccess()
+                                                ?.data
+                                                ?.any { it.id == match.id } == true
+                                        }?.instance
+                                        ?.id
                             SearchResult.ArrMediaResult(
                                 media = match,
                                 instanceId = instanceId,

@@ -48,7 +48,10 @@ class GlobalSearchUseCase(
             val libraryByCleanTitle = mutableMapOf<String, MutableList<SearchResult.ArrMediaResult>>()
 
             arrRepos.forEach { repo ->
-                val items = repo.library.value?.asSuccess()?.data ?: emptyList()
+                val items =
+                    repo.library.value
+                        ?.asSuccess()
+                        ?.data ?: emptyList()
                 items.forEach { media ->
                     val res = SearchResult.ArrMediaResult(media, instanceId = repo.instance.id, originalRank = 0)
                     when (media) {
@@ -60,7 +63,11 @@ class GlobalSearchUseCase(
                         }
                         is ArrSeries -> {
                             if (media.tvdbId != 0L) libraryByTvdbId.getOrPut(media.tvdbId) { mutableListOf() }.add(res)
-                            if (media.tmdbId != null && media.tmdbId != 0L) libraryByTmdbId.getOrPut(media.tmdbId) { mutableListOf() }.add(res)
+                            if (media.tmdbId != null &&
+                                media.tmdbId != 0L
+                            ) {
+                                libraryByTmdbId.getOrPut(media.tmdbId) { mutableListOf() }.add(res)
+                            }
                             media.cleanTitle?.takeIf { it.isNotBlank() }?.let {
                                 libraryByCleanTitle.getOrPut(it) { mutableListOf() }.add(res)
                             }

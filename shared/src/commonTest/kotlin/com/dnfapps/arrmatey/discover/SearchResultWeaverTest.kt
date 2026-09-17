@@ -11,8 +11,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SearchResultWeaverTest {
-
-    private fun createMockMovie(title: String, tmdbId: Long = 1L, popularity: Double = 10.0, inLibrary: Boolean = false): ArrMovie =
+    private fun createMockMovie(
+        title: String,
+        tmdbId: Long = 1L,
+        popularity: Double = 10.0,
+        inLibrary: Boolean = false,
+    ): ArrMovie =
         ArrMovie(
             id = if (inLibrary) 100L else null,
             title = title,
@@ -29,7 +33,10 @@ class SearchResultWeaverTest {
             popularity = popularity,
         )
 
-    private fun createMockSeries(title: String, tvdbId: Long = 2L): ArrSeries =
+    private fun createMockSeries(
+        title: String,
+        tvdbId: Long = 2L,
+    ): ArrSeries =
         ArrSeries(
             id = null,
             title = title,

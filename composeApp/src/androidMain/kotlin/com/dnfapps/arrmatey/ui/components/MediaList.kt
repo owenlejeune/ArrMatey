@@ -236,9 +236,10 @@ fun <T : ArrMedia> MediaItem(
 
     var contentHeight by remember { mutableIntStateOf(0) }
 
-    val hasBanner = remember(showBannerBackground, bannerModel, item) {
-        showBannerBackground && (bannerModel != null || item.getBanner()?.remoteUrl != null)
-    }
+    val hasBanner =
+        remember(showBannerBackground, bannerModel, item) {
+            showBannerBackground && (bannerModel != null || item.getBanner()?.remoteUrl != null)
+        }
 
     Card(
         modifier =
@@ -431,7 +432,14 @@ fun SeerrMediaItem(
                         Text(
                             text = secondLine,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color =
+                                if (showBannerBackground) {
+                                    Color.White.copy(
+                                        alpha = 0.8f,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
                         )
 
                         if (includeOverview && item.overview != null) {

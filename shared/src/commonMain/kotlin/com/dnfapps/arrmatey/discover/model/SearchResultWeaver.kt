@@ -79,6 +79,6 @@ object SearchResultWeaver {
                     .thenByDescending { it.voteAverage }
                     .thenByDescending { it.year ?: DEFAULT_YEAR }
                     .thenBy { it.title }
-                    .thenBy { it.id }
+                    .thenBy { it.id },
             )
 }
