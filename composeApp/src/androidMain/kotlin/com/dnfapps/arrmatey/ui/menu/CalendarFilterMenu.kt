@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import com.dnfapps.arrmatey.arr.state.CalendarFilterState
 import com.dnfapps.arrmatey.arr.state.ContentFilter
 import com.dnfapps.arrmatey.entensions.imageVector
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -34,6 +35,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun CalendarFilterMenu(
     filterState: CalendarFilterState,
+    instances: List<Instance>,
     onContentFilterChanged: (ContentFilter) -> Unit,
     onToggleFilterMonitored: () -> Unit,
     onToggleFilterPremiersOnly: () -> Unit,
@@ -41,6 +43,12 @@ fun CalendarFilterMenu(
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val groupInteractionSource = remember { MutableInteractionSource() }
+
+    val configuredTypes = remember(instances) { instances.map { it.type }.toSet() }
+    val contentFilters =
+        remember(configuredTypes) {
+            ContentFilter.entries.filter { it.instanceType == null || configuredTypes.contains(it.instanceType) }
+        }
 
     Box {
         IconButton(onClick = {
@@ -55,7 +63,6 @@ fun CalendarFilterMenu(
             expanded = menuExpanded,
             onDismissRequest = { menuExpanded = false },
         ) {
-            val contentFilters = ContentFilter.entries
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(0, 2),
                 interactionSource = groupInteractionSource,

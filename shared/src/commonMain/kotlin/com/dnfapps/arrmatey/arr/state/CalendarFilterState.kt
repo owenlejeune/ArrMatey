@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.state
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 
@@ -21,11 +22,12 @@ enum class CalendarViewMode {
 enum class ContentFilter(
     val resource: StringResource,
     val systemImage: String,
+    val instanceType: InstanceType? = null,
 ) {
     All(MR.strings.all, "play.square.stack"),
-    MoviesOnly(MR.strings.movies, "movieclapper"),
-    EpisodesOnly(MR.strings.episodes, "tv"),
-    AlbumsOnly(MR.strings.albums_header, "music.note"),
-    BooksOnly(MR.strings.books, "book"),
-    AudiobooksOnly(MR.strings.audiobooks, "headphones"),
+    MoviesOnly(MR.strings.movies, "movieclapper", InstanceType.Radarr),
+    EpisodesOnly(MR.strings.episodes, "tv", InstanceType.Sonarr),
+    AlbumsOnly(MR.strings.albums_header, "music.note", InstanceType.Lidarr),
+    BooksOnly(MR.strings.books, "book", InstanceType.Bookshelf),
+    AudiobooksOnly(MR.strings.audiobooks, "headphones", InstanceType.Listenarr),
 }

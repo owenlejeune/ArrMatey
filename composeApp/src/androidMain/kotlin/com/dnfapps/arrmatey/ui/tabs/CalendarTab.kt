@@ -187,6 +187,7 @@ private fun CalendarHomeScreen(
 
                     CalendarFilterMenu(
                         filterState = calendarState.filterState,
+                        instances = instances,
                         onContentFilterChanged = { viewModel.setContentFilter(it) },
                         onToggleFilterMonitored = { viewModel.toggleShowMonitoredOnly() },
                         onToggleFilterPremiersOnly = { viewModel.toggleShowPremiersOnly() },

@@ -128,7 +128,8 @@ struct CalendarTabContent: View {
                 onlyFinales: Binding(
                     get: { viewModel.calendarState.filterState.showFinalesOnly },
                     set: { _ in viewModel.toggleShowFinalesOnly() }
-                )
+                ),
+                instances: viewModel.instances
             )
             .menuIndicator(.hidden)
         }

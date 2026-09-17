@@ -13,11 +13,20 @@ struct CalendarFilterMenu: View {
     @Binding var onlyMonitored: Bool
     @Binding var onlyPremiers: Bool
     @Binding var onlyFinales: Bool
+    let instances: [Instance]
+    
+    private var availableContentFilters: [ContentFilter] {
+        let configuredTypes = Set(instances.map { $0.type })
+        return ContentFilter.allCases.filter { filter in
+            guard let instanceType = filter.instanceType else { return true }
+            return configuredTypes.contains(instanceType)
+        }
+    }
     
     var body: some View {
         Menu {
             Picker("contentfilter", selection: $contentFilter) {
-                ForEach(ContentFilter.allCases, id: \.self) { filter in
+                ForEach(availableContentFilters, id: \.self) { filter in
                     Label(filter.resource.localized(), systemImage: filter.systemImage)
                 }
             }

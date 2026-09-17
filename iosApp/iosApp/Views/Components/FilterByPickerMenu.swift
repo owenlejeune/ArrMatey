@@ -73,7 +73,17 @@ struct FilterByPickerMenu: View {
                 }
             }
         } label: {
-            Label(selectedCustomFilterId != nil ? customFilters.first(where: { $0.id == selectedCustomFilterId })?.label ?? filterBy.resource.localized() : filterBy.resource.localized(), systemImage: "line.3.horizontal.decrease")
+            let filterLabel = selectedCustomFilterId != nil ? (customFilters.first(where: { $0.id == selectedCustomFilterId })?.label ?? filterBy.resource.localized()) : filterBy.resource.localized()
+            Label {
+                VStack(alignment: .leading) {
+                    Text(MR.strings().filter.localized())
+                    Text(filterLabel)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } icon: {
+                Image(systemName: "line.3.horizontal.decrease")
+            }
         }
     }
 }

@@ -54,7 +54,19 @@ struct SortByPickerMenu: View {
                 }
             }
         } label: {
-            Label(sortBy.resource.localized(), systemImage: "arrow.up.arrow.down")
+            Label {
+                VStack(alignment: .leading) {
+                    Text(MR.strings().sort.localized())
+                    HStack(spacing: 2) {
+                        Text(sortBy.resource.localized())
+                        Image(systemName: sortOrder == .asc ? "chevron.up" : "chevron.down")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+            } icon: {
+                Image(systemName: "arrow.up.arrow.down")
+            }
         }
     }
 }
