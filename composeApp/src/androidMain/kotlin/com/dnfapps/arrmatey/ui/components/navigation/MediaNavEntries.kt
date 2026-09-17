@@ -22,7 +22,7 @@ import com.dnfapps.arrmatey.navigation.toMovieFiles
 import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
-import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.ui.screens.ArrSearchScreen
 import com.dnfapps.arrmatey.ui.screens.AudiobookFilesScreen
 import com.dnfapps.arrmatey.ui.screens.AuthorFilesScreen
@@ -33,7 +33,9 @@ import com.dnfapps.arrmatey.ui.screens.MediaPreviewScreen
 import com.dnfapps.arrmatey.ui.screens.MovieFilesScreen
 import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
+import com.dnfapps.arrmatey.ui.screens.UnifiedSearchScreen
 import com.dnfapps.arrmatey.ui.screens.WebViewScreen
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
 fun EntryProviderScope<NavKey>.mediaNavEntries(
@@ -214,6 +216,25 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                 },
             )
         }
+    }
+    entry<MediaScreen.GlobalSearch> { search ->
+        UnifiedSearchScreen(
+            initialQuery = search.query,
+            onBack = { navigation.popBackStack() },
+            onItemClick = { result ->
+                when (result) {
+                    is SearchResult.ArrMediaResult -> {
+                        navigation.toArrDetailsOrPreview(result.media, result.instanceType)
+                    }
+                    is SearchResult.SeerrMediaResult -> {
+                        navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
+                    }
+                    is SearchResult.SeerrPersonResult -> {
+                        navigation.toPersonDetails(result.result.id)
+                    }
+                }
+            },
+        )
     }
     entry<MediaScreen.Preview<ArrMedia>> { preview ->
         val type = preview.type ?: defaultInstanceType

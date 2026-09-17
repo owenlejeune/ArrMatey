@@ -90,6 +90,7 @@ fun UnifiedLibraryScreen(
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
+    onNavigateToGlobalSearch: (String) -> Unit = {},
     onNavigateToDetails: (ArrMedia, InstanceType, Long?) -> Unit,
     unifiedLibraryViewModel: UnifiedLibraryViewModel = koinViewModel(),
     globalPreferencesStore: PreferencesStore = org.koin.compose.koinInject(),
@@ -200,13 +201,24 @@ fun UnifiedLibraryScreen(
         val useFloatingNavigationBar by globalPreferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(
             false,
         )
+        val searchAllInstances by globalPreferencesStore.unifiedLibrarySearchAllInstances.collectAsStateWithLifecycle(
+            true,
+        )
+
+        val handleAddSearch: (String) -> Unit = { query ->
+            if (searchAllInstances) {
+                onNavigateToGlobalSearch(query)
+            } else {
+                onNavigateToSearch(query, currentType, currentInstance.id)
+            }
+        }
 
         ProvideFloatingBarAction(
             visible = useFloatingNavigationBar && showFab,
             action =
                 FloatingBarAction(
                     icon = { Icon(Icons.Default.Add, null) },
-                    onClick = { onNavigateToSearch("", currentType, currentInstance.id) },
+                    onClick = { handleAddSearch("") },
                 ),
         )
 
@@ -220,7 +232,7 @@ fun UnifiedLibraryScreen(
                         exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
                     ) {
                         FloatingActionButton(
-                            onClick = { onNavigateToSearch("", currentType, currentInstance.id) },
+                            onClick = { handleAddSearch("") },
                         ) {
                             Icon(Icons.Default.Add, null)
                         }
@@ -427,11 +439,7 @@ fun UnifiedLibraryScreen(
                                     )
                                 } else {
                                     EmptySearchResultsView(currentType, textFieldState.text.toString()) {
-                                        onNavigateToSearch(
-                                            textFieldState.text.toString(),
-                                            currentType,
-                                            currentInstance.id,
-                                        )
+                                        handleAddSearch(textFieldState.text.toString())
                                     }
                                 }
                             }

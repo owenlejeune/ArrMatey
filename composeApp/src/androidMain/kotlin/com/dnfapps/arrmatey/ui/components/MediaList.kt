@@ -218,6 +218,10 @@ fun <T : ArrMedia> MediaItem(
 
     var contentHeight by remember { mutableIntStateOf(0) }
 
+    val hasBanner = remember(showBannerBackground, bannerModel, item) {
+        showBannerBackground && (bannerModel != null || item.getBanner()?.remoteUrl != null)
+    }
+
     Card(
         modifier =
             modifier
@@ -246,7 +250,7 @@ fun <T : ArrMedia> MediaItem(
                     .fillMaxWidth()
                     .heightIn(max = 200.dp),
         ) {
-            if (showBannerBackground && (bannerModel != null || item.getBanner()?.remoteUrl != null)) {
+            if (hasBanner) {
                 BannerView(
                     bannerModel = bannerModel ?: item.getBanner()?.remoteUrl?.let { rememberRemoteImageData(it) },
                     blur = blur,
@@ -268,7 +272,7 @@ fun <T : ArrMedia> MediaItem(
                 PosterItem(
                     item = item,
                     aspectRatio = aspectRatio,
-                    modifier = Modifier.width(75.dp),
+                    modifier = Modifier.width(100.dp),
                     posterModel = posterModel,
                     elevation = posterElevation,
                     radius = posterRadius,
@@ -279,7 +283,7 @@ fun <T : ArrMedia> MediaItem(
                     modifier = Modifier.weight(1f).wrapContentHeight(),
                     verticalArrangement = Arrangement.Top,
                 ) {
-                    val titleColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
+                    val titleColor = if (hasBanner) Color.White else MaterialTheme.colorScheme.onSurface
                     Text(
                         text = item.title ?: mokoString(MR.strings.unknown),
                         style = MaterialTheme.typography.titleLarge,
@@ -287,7 +291,7 @@ fun <T : ArrMedia> MediaItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    MediaDetails(item, isActive, showBannerBackground)
+                    MediaDetails(item, isActive, hasBanner)
 
                     if (includeOverview && item.overview != null) {
                         val parsed = item.overview?.rememberHtml() ?: ""
@@ -295,7 +299,7 @@ fun <T : ArrMedia> MediaItem(
                             text = parsed,
                             style = MaterialTheme.typography.bodySmall,
                             color =
-                                if (showBannerBackground) {
+                                if (hasBanner) {
                                     Color.White.copy(
                                         alpha = 0.8f,
                                     )

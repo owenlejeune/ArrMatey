@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.InstancePreferences
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceData
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -66,8 +67,17 @@ class UnifiedLibraryViewModel(
     private val deleteMediaUseCase: DeleteMediaUseCase,
     private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
     private val executeArrCommandUseCase: ExecuteArrCommandUseCase,
+    private val preferencesStore: PreferencesStore,
     getActivityTasksUseCase: GetActivityTasksUseCase,
 ) : ViewModel() {
+    val searchAllInstances: StateFlow<Boolean> =
+        preferencesStore.unifiedLibrarySearchAllInstances
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
     val activeMediaIdsByInstance: StateFlow<Map<Long, Set<Long>>> =
         getActivityTasksUseCase()
             .map { tasks ->

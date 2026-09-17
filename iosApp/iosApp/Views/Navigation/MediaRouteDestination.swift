@@ -27,6 +27,9 @@ struct MediaRouteDestination: View {
         case .search(let query, let type, let instanceId):
             MediaSearchScreen(query: query, type: type, instanceId: instanceId)
 
+        case .globalSearch(let query):
+            UnifiedSearchScreen(query: query)
+
         case .preview(let json, let type):
             MediaPreviewScreen(json: json, type: type)
 

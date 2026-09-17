@@ -359,6 +359,8 @@
     <string name="no_active_streams">No active streams</string>
 
     <string name="search_results">Search Results</string>
+    <string name="unified_library_search_all_instances_title">Search all instances on add</string>
+    <string name="unified_library_search_all_instances_description">Search across all instances when adding media from the unified library instead of only the selected instance.</string>
     <string name="search_show_banners">Show banners</string>
     <string name="search_show_banners_description">Display wide banner images instead of posters in search results.</string>
     <string name="search_show_instance_indicator_shadow">Show instance indicator shadow</string>

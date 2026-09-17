@@ -36,6 +36,7 @@ import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
+import com.dnfapps.arrmatey.discover.viewmodel.UnifiedSearchViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
@@ -177,6 +178,8 @@ object KoinBridge : KoinComponent {
     fun getMokoStrings(): MokoStrings = getKoin().get()
 
     fun getUnifiedLibraryViewModel(): UnifiedLibraryViewModel = getKoin().get()
+
+    fun getUnifiedSearchViewModel(): UnifiedSearchViewModel = getKoin().get()
 
     fun getInstanceRepository(): InstanceRepository = getKoin().get()
 }

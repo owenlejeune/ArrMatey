@@ -503,6 +503,7 @@ enum MediaRoute: Hashable {
         episodeId: Int64? = nil
     )
     case search(query: String, type: InstanceType, instanceId: Int64? = nil)
+    case globalSearch(query: String = "")
     case preview(_ json : String, type: InstanceType)
     case movieRelease(Int64)
     case movieFiles(String)

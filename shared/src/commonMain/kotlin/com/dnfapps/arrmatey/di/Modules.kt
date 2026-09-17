@@ -96,6 +96,7 @@ import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
+import com.dnfapps.arrmatey.discover.viewmodel.UnifiedSearchViewModel
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
@@ -562,7 +563,26 @@ val viewModelModule =
             TracearrUserViewModel(userRef, get(), get(), get(), get())
         }
         viewModelOf(::BackupViewModel)
-        viewModelOf(::UnifiedLibraryViewModel)
+        viewModel {
+            UnifiedLibraryViewModel(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+            )
+        }
+        viewModelOf(::UnifiedSearchViewModel)
     }
 
 val resourcesModule =

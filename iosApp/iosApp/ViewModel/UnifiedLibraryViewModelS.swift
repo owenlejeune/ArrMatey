@@ -19,6 +19,7 @@ class UnifiedLibraryViewModelS: ObservableObject {
     @Published private(set) var instanceData: InstanceData?
     @Published private(set) var preferences: InstancePreferences = InstancePreferences()
     @Published private(set) var hasBazarr: Bool = false
+    @Published private(set) var searchAllInstances: Bool = true
     @Published private(set) var deleteStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var editItemStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var errorMessage: String? = nil
@@ -46,6 +47,7 @@ class UnifiedLibraryViewModelS: ObservableObject {
         self.instanceData = vm.instanceData.value
         self.preferences = vm.preferences.value
         self.hasBazarr = vm.hasBazarr.value.boolValue
+        self.searchAllInstances = vm.searchAllInstances.value.boolValue
         self.deleteStatus = vm.deleteStatus.value
         self.editItemStatus = vm.editItemStatus.value
         self.errorMessage = vm.errorMessage.value
@@ -89,6 +91,9 @@ class UnifiedLibraryViewModelS: ObservableObject {
         }
         viewModel.hasBazarr.observeAsync(on: self) { owner, hasBazarr in
             owner.hasBazarr = hasBazarr.boolValue
+        }
+        viewModel.searchAllInstances.observeAsync(on: self) { owner, searchAll in
+            owner.searchAllInstances = searchAll.boolValue
         }
         viewModel.deleteStatus.observeAsync(on: self) { owner, status in
             owner.deleteStatus = status

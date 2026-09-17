@@ -175,6 +175,10 @@ fun Navigator<*>.toSearch(
     instanceId: Long? = null,
 ) = nav().navigateTo(MediaScreen.Search(query, type, instanceId))
 
+fun Navigator<*>.toGlobalSearch(
+    query: String = "",
+) = nav().navigateTo(MediaScreen.GlobalSearch(query))
+
 fun Navigator<*>.toMovieReleases(movieId: Long) = nav().navigateTo(MediaScreen.MovieReleases(movieId))
 
 fun Navigator<*>.toMovieFiles(movie: ArrMovie) = nav().navigateTo(MediaScreen.MovieFiles(movie))

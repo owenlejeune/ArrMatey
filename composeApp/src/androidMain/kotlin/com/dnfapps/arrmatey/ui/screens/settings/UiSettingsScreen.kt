@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Splitscreen
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.DropdownMenu
@@ -76,6 +77,7 @@ fun UiSettingsScreen(
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
     val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
+    val unifiedLibrarySearchAllInstances by viewModel.unifiedLibrarySearchAllInstances.collectAsStateWithLifecycle()
     val discoverSectionPreferences by viewModel.discoverSectionPreferences.collectAsStateWithLifecycle()
 
     var showDiscoverCustomizationSheet by remember { mutableStateOf(false) }
@@ -292,6 +294,18 @@ fun UiSettingsScreen(
                                 )
                             },
                             onClick = { viewModel.toggleSearchShowInstanceIndicatorShadow() },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Search),
+                            title = mokoString(MR.strings.unified_library_search_all_instances_title),
+                            subtitle = mokoString(MR.strings.unified_library_search_all_instances_description),
+                            trailingContent = {
+                                Switch(
+                                    checked = unifiedLibrarySearchAllInstances,
+                                    onCheckedChange = { viewModel.toggleUnifiedLibrarySearchAllInstances() },
+                                )
+                            },
+                            onClick = { viewModel.toggleUnifiedLibrarySearchAllInstances() },
                         ),
                     ),
             )

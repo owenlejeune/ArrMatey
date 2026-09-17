@@ -84,6 +84,7 @@ class PreferencesStore(
     private val combineSeerrArrMediaKey = booleanPreferencesKey("combineSeerrArrMedia")
     private val bazarrDetailsIntegrationKey = booleanPreferencesKey("bazarrDetailsIntegration")
     private val tracearrDetailsIntegrationKey = booleanPreferencesKey("tracearrDetailsIntegration")
+    private val unifiedLibrarySearchAllInstancesKey = booleanPreferencesKey("unifiedLibrarySearchAllInstances")
     private val useFloatingNavigationBarKey = booleanPreferencesKey("useFloatingNavigationBar")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> =
@@ -161,6 +162,12 @@ class PreferencesStore(
         dataStore.data
             .map { preferences ->
                 preferences[useClearLogoKey] ?: true
+            }
+
+    val unifiedLibrarySearchAllInstances: Flow<Boolean> =
+        dataStore.data
+            .map { preferences ->
+                preferences[unifiedLibrarySearchAllInstancesKey] ?: true
             }
 
     val searchShowBanners: Flow<Boolean> =
@@ -335,6 +342,21 @@ class PreferencesStore(
             dataStore.edit { preferences ->
                 preferences[appColorKey] = color.name
             }
+        }
+    }
+
+    fun toggleUnifiedLibrarySearchAllInstances() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[unifiedLibrarySearchAllInstancesKey] ?: true
+                preferences[unifiedLibrarySearchAllInstancesKey] = !current
+            }
+        }
+    }
+
+    fun setUnifiedLibrarySearchAllInstances(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[unifiedLibrarySearchAllInstancesKey] = value }
         }
     }
 

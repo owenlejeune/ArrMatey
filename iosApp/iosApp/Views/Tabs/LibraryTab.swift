@@ -220,7 +220,11 @@ struct LibraryTabContent: View {
         VStack(spacing: 0) {
             if items.isEmpty {
                 EmptySearchResultsView(type: currentType, query: libraryViewModel.searchQuery, onShouldSearch: {
-                    navigationManager.go(to: .search(query: libraryViewModel.searchQuery, type: currentType, instanceId: selectedInstance?.id), of: currentType)
+                    if libraryViewModel.searchAllInstances {
+                        navigationManager.go(to: .globalSearch(query: libraryViewModel.searchQuery), of: currentType)
+                    } else {
+                        navigationManager.go(to: .search(query: libraryViewModel.searchQuery, type: currentType, instanceId: selectedInstance?.id), of: currentType)
+                    }
                 })
             } else {
                 mediaView(
@@ -569,7 +573,11 @@ struct LibraryTabContent: View {
     private var toolbarViewOptions: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button(action: {
-                navigationManager.go(to: .search(query: "", type: currentType, instanceId: selectedInstance?.id), of: currentType)
+                if libraryViewModel.searchAllInstances {
+                    navigationManager.go(to: .globalSearch(query: ""), of: currentType)
+                } else {
+                    navigationManager.go(to: .search(query: "", type: currentType, instanceId: selectedInstance?.id), of: currentType)
+                }
             }) {
                 Image(systemName: "plus")
                     .imageScale(.medium)

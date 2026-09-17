@@ -89,6 +89,17 @@ struct UiSettingsView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                Toggle(isOn: Binding(
+                    get: { viewModel.unifiedLibrarySearchAllInstances },
+                    set: { _ in viewModel.toggleUnifiedLibrarySearchAllInstances() }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(MR.strings().unified_library_search_all_instances_title.localized())
+                        Text(MR.strings().unified_library_search_all_instances_description.localized())
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             } header: {
                 Text(MR.strings().search_results.localized())
             }

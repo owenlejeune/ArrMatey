@@ -34,6 +34,10 @@ sealed interface MediaScreen : NavKey {
         val instanceId: Long? = null,
     ) : MediaScreen
 
+    data class GlobalSearch(
+        val query: String = "",
+    ) : MediaScreen
+
     data class MovieReleases(
         val movieId: Long,
     ) : MediaScreen

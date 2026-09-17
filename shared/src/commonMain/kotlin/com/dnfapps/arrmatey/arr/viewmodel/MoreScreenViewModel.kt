@@ -135,6 +135,14 @@ class MoreScreenViewModel(
                 initialValue = true,
             )
 
+    val unifiedLibrarySearchAllInstances =
+        preferencesStore.unifiedLibrarySearchAllInstances
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
     val discoverSectionPreferences =
         preferencesStore.discoverSectionPreferences
             .stateIn(
@@ -333,6 +341,10 @@ class MoreScreenViewModel(
 
     fun toggleTracearrDetailsIntegration() {
         preferencesStore.toggleTracearrDetailsIntegration()
+    }
+
+    fun toggleUnifiedLibrarySearchAllInstances() {
+        preferencesStore.toggleUnifiedLibrarySearchAllInstances()
     }
 
     fun updateDiscoverSectionPreferences(prefs: DiscoverSectionPreferences) {
