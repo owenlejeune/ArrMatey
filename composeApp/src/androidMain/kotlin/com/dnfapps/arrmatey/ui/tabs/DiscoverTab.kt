@@ -105,7 +105,6 @@ fun DiscoverSearchOverlay(
     isLoading: Boolean,
     onItemClick: (SearchResult) -> Unit,
     showBanners: Boolean,
-    showInstanceIndicatorShadow: Boolean,
 ) {
     if (isLoading && items.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -117,7 +116,6 @@ fun DiscoverSearchOverlay(
             onItemClick = onItemClick,
             includeOverview = true,
             showBanners = showBanners,
-            showInstanceIndicatorShadow = showInstanceIndicatorShadow,
         )
     }
 }

@@ -47,7 +47,6 @@ fun UnifiedSearchScreen(
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
     val showBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
-    val showInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
 
     val textFieldState = rememberTextFieldState(initialQuery)
     val searchBarState = rememberSearchBarState()
@@ -106,7 +105,6 @@ fun UnifiedSearchScreen(
                     onItemClick = onItemClick,
                     includeOverview = true,
                     showBanners = showBanners,
-                    showInstanceIndicatorShadow = showInstanceIndicatorShadow,
                 )
             }
         }

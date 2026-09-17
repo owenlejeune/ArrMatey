@@ -30,7 +30,6 @@ struct UnifiedSearchScreen: View {
                         DiscoverSearchResultRow(
                             item: item,
                             showBanners: viewModel.searchShowBanners,
-                            showInstanceIndicatorShadow: viewModel.searchShowInstanceIndicatorShadow,
                             onItemClick: { result in
                                 handleItemClick(result)
                             }

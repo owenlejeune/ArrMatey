@@ -15,7 +15,6 @@ class UnifiedSearchViewModelS: ObservableObject {
     @Published private(set) var searchState: [SearchResult] = []
     @Published private(set) var isSearching: Bool = false
     @Published private(set) var searchShowBanners: Bool = true
-    @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
     @Published var searchQuery: String = ""
 
     init() {
@@ -30,9 +29,6 @@ class UnifiedSearchViewModelS: ObservableObject {
         }
         viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
             owner.searchShowBanners = show.boolValue
-        }
-        viewModel.searchShowInstanceIndicatorShadow.observeAsync(on: self) { owner, show in
-            owner.searchShowInstanceIndicatorShadow = show.boolValue
         }
     }
 

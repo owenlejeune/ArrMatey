@@ -315,7 +315,6 @@ fun CombinedDashboard(
     val searchState by discoverViewModel.searchState.collectAsStateWithLifecycle()
     val isSearching by discoverViewModel.isSearching.collectAsStateWithLifecycle()
     val searchShowBanners by discoverViewModel.searchShowBanners.collectAsStateWithLifecycle()
-    val searchShowInstanceIndicatorShadow by discoverViewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
 
     val requestsState by requestsViewModel.requestsState.collectAsStateWithLifecycle()
     val issuesState by requestsViewModel.issuesState.collectAsStateWithLifecycle()
@@ -469,7 +468,6 @@ fun CombinedDashboard(
                     items = searchState,
                     isLoading = isSearching,
                     showBanners = searchShowBanners,
-                    showInstanceIndicatorShadow = searchShowInstanceIndicatorShadow,
                     onItemClick = { result ->
                         when (result) {
                             is SearchResult.ArrMediaResult -> {
@@ -793,7 +791,7 @@ fun CombinedDashboard(
                                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                             )
                             RequestsList(
-                                items = requestsState.items.filterIsInstance<MediaRequestPackage>(),
+                                items = requestsState.items,
                                 hasMore = requestsState.hasMore,
                                 isLoadingMore = requestsState.isLoadingMore,
                                 userState = userState,

@@ -87,14 +87,6 @@ class MoreScreenViewModel(
                 initialValue = true,
             )
 
-    val searchShowInstanceIndicatorShadow =
-        preferencesStore.searchShowInstanceIndicatorShadow
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = true,
-            )
-
     val dualPanelSupport =
         preferencesStore.dualPanelSupport
             .stateIn(
@@ -317,10 +309,6 @@ class MoreScreenViewModel(
 
     fun toggleSearchShowBanners() {
         preferencesStore.toggleSearchShowBanners()
-    }
-
-    fun toggleSearchShowInstanceIndicatorShadow() {
-        preferencesStore.toggleSearchShowInstanceIndicatorShadow()
     }
 
     fun toggleDualPanelSupport() {

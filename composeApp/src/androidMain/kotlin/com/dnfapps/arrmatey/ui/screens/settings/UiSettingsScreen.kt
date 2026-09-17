@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
-import androidx.compose.material.icons.filled.BrightnessLow
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MiscellaneousServices
@@ -76,7 +75,6 @@ fun UiSettingsScreen(
     val useFloatingNavigationBar by viewModel.useFloatingNavigationBar.collectAsStateWithLifecycle()
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
-    val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
     val unifiedLibrarySearchAllInstances by viewModel.unifiedLibrarySearchAllInstances.collectAsStateWithLifecycle()
     val discoverSectionPreferences by viewModel.discoverSectionPreferences.collectAsStateWithLifecycle()
 
@@ -282,18 +280,6 @@ fun UiSettingsScreen(
                                 )
                             },
                             onClick = { viewModel.toggleSearchShowBanners() },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.BrightnessLow),
-                            title = mokoString(MR.strings.search_show_instance_indicator_shadow),
-                            subtitle = mokoString(MR.strings.search_show_instance_indicator_shadow_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = searchShowInstanceIndicatorShadow,
-                                    onCheckedChange = { viewModel.toggleSearchShowInstanceIndicatorShadow() },
-                                )
-                            },
-                            onClick = { viewModel.toggleSearchShowInstanceIndicatorShadow() },
                         ),
                         SettingItem(
                             icon = IconSource.Vector(Icons.Default.Search),

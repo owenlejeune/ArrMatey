@@ -48,9 +48,6 @@ class MoreScreenViewModelS: ObservableObject {
         viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
             owner.searchShowBanners = show.boolValue
         }
-        viewModel.searchShowInstanceIndicatorShadow.observeAsync(on: self) { owner, show in
-            owner.searchShowInstanceIndicatorShadow = show.boolValue
-        }
         viewModel.unifiedLibrarySearchAllInstances.observeAsync(on: self) { owner, searchAll in
             owner.unifiedLibrarySearchAllInstances = searchAll.boolValue
         }
@@ -92,10 +89,6 @@ class MoreScreenViewModelS: ObservableObject {
 
     func toggleSearchShowBanners() {
         viewModel.toggleSearchShowBanners()
-    }
-
-    func toggleSearchShowInstanceIndicatorShadow() {
-        viewModel.toggleSearchShowInstanceIndicatorShadow()
     }
 
     func toggleUnifiedLibrarySearchAllInstances() {

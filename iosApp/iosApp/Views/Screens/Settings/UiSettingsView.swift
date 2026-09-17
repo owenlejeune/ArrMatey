@@ -79,17 +79,6 @@ struct UiSettingsView: View {
                     }
                 }
                 Toggle(isOn: Binding(
-                    get: { viewModel.searchShowInstanceIndicatorShadow },
-                    set: { _ in viewModel.toggleSearchShowInstanceIndicatorShadow() }
-                )) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(MR.strings().search_show_instance_indicator_shadow.localized())
-                        Text(MR.strings().search_show_instance_indicator_shadow_description.localized())
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                Toggle(isOn: Binding(
                     get: { viewModel.unifiedLibrarySearchAllInstances },
                     set: { _ in viewModel.toggleUnifiedLibrarySearchAllInstances() }
                 )) {

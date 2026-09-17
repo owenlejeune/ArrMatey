@@ -129,7 +129,6 @@ fun SearchResultList(
     modifier: Modifier = Modifier,
     includeOverview: Boolean = true,
     showBanners: Boolean = true,
-    showInstanceIndicatorShadow: Boolean = true,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -142,7 +141,6 @@ fun SearchResultList(
                 onItemClick = onItemClick,
                 includeOverview = includeOverview,
                 showBanners = showBanners,
-                showInstanceIndicatorShadow = showInstanceIndicatorShadow,
             )
         }
     }
@@ -154,11 +152,10 @@ fun SearchResultItem(
     onItemClick: (SearchResult) -> Unit,
     includeOverview: Boolean = true,
     showBanners: Boolean = true,
-    showInstanceIndicatorShadow: Boolean = true,
 ) {
     val shadowColor =
-        remember(item, showInstanceIndicatorShadow) {
-            if (showInstanceIndicatorShadow) item.instanceType.associatedColor else Color.Unspecified
+        remember(item) {
+            item.instanceType.associatedColor
         }
 
     Box(

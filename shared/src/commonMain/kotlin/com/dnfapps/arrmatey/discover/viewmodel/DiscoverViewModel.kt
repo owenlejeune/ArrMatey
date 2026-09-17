@@ -192,14 +192,6 @@ class DiscoverViewModel(
                 initialValue = false,
             )
 
-    val searchShowInstanceIndicatorShadow: StateFlow<Boolean> =
-        preferencesStore.searchShowInstanceIndicatorShadow
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = false,
-            )
-
     init {
         observeRepository()
         observeSearchQuery()

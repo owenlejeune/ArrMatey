@@ -20,7 +20,6 @@ class DiscoverViewModelS: ObservableObject {
     @Published private(set) var isRefreshing: Bool = false
     @Published private(set) var isInitialLoading: Bool = false
     @Published private(set) var searchShowBanners: Bool = true
-    @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
     @Published private(set) var discoverSectionPreferences = DiscoverSectionPreferences()
 
     init() {
@@ -35,7 +34,7 @@ class DiscoverViewModelS: ObservableObject {
         viewModel.upcomingMoviesState.observeAsync(on: self, to: \.upcomingMoviesState)
         viewModel.upcomingTvState.observeAsync(on: self, to: \.upcomingTvState)
         viewModel.searchState.observeAsync(on: self) { owner, results in
-            owner.searchResults = results as? [SearchResult] ?? []
+            owner.searchResults = results
         }
         viewModel.isSearching.observeAsync(on: self) { owner, searching in
             owner.isSearching = searching.boolValue
@@ -48,9 +47,6 @@ class DiscoverViewModelS: ObservableObject {
         }
         viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
             owner.searchShowBanners = show.boolValue
-        }
-        viewModel.searchShowInstanceIndicatorShadow.observeAsync(on: self) { owner, show in
-            owner.searchShowInstanceIndicatorShadow = show.boolValue
         }
         viewModel.discoverSectionPreferences.observeAsync(on: self) { owner, prefs in
             owner.discoverSectionPreferences = prefs

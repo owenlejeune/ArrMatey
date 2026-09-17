@@ -57,7 +57,6 @@ struct DashboardTabContent: View {
                     items: discoverViewModel.searchResults,
                     isLoading: discoverViewModel.isSearching,
                     showBanners: discoverViewModel.searchShowBanners,
-                    showInstanceIndicatorShadow: discoverViewModel.searchShowInstanceIndicatorShadow,
                     onItemClick: { result in
                         handleSearchItemClick(result)
                     }

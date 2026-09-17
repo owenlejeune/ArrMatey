@@ -78,7 +78,6 @@ class PreferencesStore(
     private val localNetworkNoticeSeenKey = booleanPreferencesKey("localNetworkNoticeSeen")
     private val localNetworkPermissionInfoDismissedKey = booleanPreferencesKey("localNetworkPermissionInfoDismissed")
     private val searchShowBannersKey = booleanPreferencesKey("searchShowBanners")
-    private val searchShowInstanceIndicatorShadowKey = booleanPreferencesKey("searchShowInstanceIndicatorShadow")
     private val dualPanelSupportKey = booleanPreferencesKey("dualPanelSupport")
     private val smartAddSeerrActionKey = stringPreferencesKey("smartAddSeerrAction")
     private val combineSeerrArrMediaKey = booleanPreferencesKey("combineSeerrArrMedia")
@@ -174,12 +173,6 @@ class PreferencesStore(
         dataStore.data
             .map { preferences ->
                 preferences[searchShowBannersKey] ?: true
-            }
-
-    val searchShowInstanceIndicatorShadow: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[searchShowInstanceIndicatorShadowKey] ?: true
             }
 
     val dualPanelSupport: Flow<Boolean> =
@@ -365,15 +358,6 @@ class PreferencesStore(
             dataStore.edit { preferences ->
                 val current = preferences[searchShowBannersKey] ?: true
                 preferences[searchShowBannersKey] = !current
-            }
-        }
-    }
-
-    fun toggleSearchShowInstanceIndicatorShadow() {
-        scope.launch {
-            dataStore.edit { preferences ->
-                val current = preferences[searchShowInstanceIndicatorShadowKey] ?: true
-                preferences[searchShowInstanceIndicatorShadowKey] = !current
             }
         }
     }

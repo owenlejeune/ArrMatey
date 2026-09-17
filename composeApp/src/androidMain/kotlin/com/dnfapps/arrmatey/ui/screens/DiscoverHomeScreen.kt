@@ -96,7 +96,6 @@ fun DiscoverHomeScreen(
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
-    val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
     val isInitialLoading by viewModel.isInitialLoading.collectAsStateWithLifecycle()
     val sectionPreferences by viewModel.discoverSectionPreferences.collectAsStateWithLifecycle()
 
@@ -222,7 +221,6 @@ fun DiscoverHomeScreen(
                     isLoading = isSearching,
                     onItemClick = onItemClick,
                     showBanners = searchShowBanners,
-                    showInstanceIndicatorShadow = searchShowInstanceIndicatorShadow,
                 )
             } else if (isInitialLoading) {
                 Box(

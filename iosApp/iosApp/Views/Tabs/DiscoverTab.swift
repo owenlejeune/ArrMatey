@@ -145,7 +145,6 @@ private struct DiscoverTabContent: View {
                             items: viewModel.searchResults,
                             isLoading: viewModel.isSearching,
                             showBanners: viewModel.searchShowBanners,
-                            showInstanceIndicatorShadow: viewModel.searchShowInstanceIndicatorShadow,
                             onItemClick: { result in
                                 handleItemClick(result)
                             }
@@ -209,7 +208,6 @@ struct DiscoverSearchOverlay: View {
     let items: [SearchResult]
     let isLoading: Bool
     let showBanners: Bool
-    let showInstanceIndicatorShadow: Bool
     let onItemClick: (SearchResult) -> Void
 
     var body: some View {
@@ -223,7 +221,6 @@ struct DiscoverSearchOverlay: View {
                         DiscoverSearchResultRow(
                             item: item,
                             showBanners: showBanners,
-                            showInstanceIndicatorShadow: showInstanceIndicatorShadow,
                             onItemClick: onItemClick
                         )
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -239,11 +236,9 @@ struct DiscoverSearchOverlay: View {
 struct DiscoverSearchResultRow: View {
     let item: SearchResult
     let showBanners: Bool
-    let showInstanceIndicatorShadow: Bool
     let onItemClick: (SearchResult) -> Void
 
     private var shadowColor: Color? {
-        guard showInstanceIndicatorShadow else { return nil }
         if let arrResult = item as? SearchResultArrMediaResult {
             return arrResult.instanceType.associatedColor.toSwiftUI()
         } else {
