@@ -5,12 +5,12 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import kotlinx.coroutines.flow.first
 
-class CredentialMigrationUseCase(
+open class CredentialMigrationUseCase(
     private val instanceDao: InstanceDao,
     private val downloadClientDao: DownloadClientDao,
     private val preferencesStore: PreferencesStore,
 ) {
-    suspend operator fun invoke() {
+    open suspend operator fun invoke() {
         val migrated = preferencesStore.credentialsMigrated.first()
         if (migrated) return
 

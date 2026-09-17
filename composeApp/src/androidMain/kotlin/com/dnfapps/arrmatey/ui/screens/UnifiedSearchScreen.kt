@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -105,6 +106,7 @@ fun UnifiedSearchScreen(
                     onItemClick = onItemClick,
                     includeOverview = true,
                     showBanners = showBanners,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

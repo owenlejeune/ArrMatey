@@ -120,7 +120,9 @@ class UnifiedSearchViewModel(
                     if (query.isNotEmpty()) {
                         performSearch(query)
                     } else {
+                        searchJob?.cancel()
                         _searchState.value = emptyList()
+                        _isSearching.value = false
                     }
                 }
         }
@@ -131,17 +133,29 @@ class UnifiedSearchViewModel(
         searchJob =
             viewModelScope.launch {
                 _isSearching.value = true
-                _searchState.value = globalSearchUseCase(query)
+                _searchState.value = emptyList()
+                globalSearchUseCase(query).collect { results ->
+                    _searchState.value = results
+                }
                 _isSearching.value = false
             }
     }
 
     fun updateSearchQuery(query: String) {
-        _searchQuery.value = query
+        if (_searchQuery.value != query) {
+            searchJob?.cancel()
+            _isSearching.value = false
+            _searchQuery.value = query
+            if (query.isEmpty()) {
+                _searchState.value = emptyList()
+            }
+        }
     }
 
     fun clearSearch() {
+        searchJob?.cancel()
         _searchQuery.value = ""
         _searchState.value = emptyList()
+        _isSearching.value = false
     }
 }

@@ -102,11 +102,11 @@ fun createInstanceClient(
     }
 }
 
-class HttpClientFactory(
+open class HttpClientFactory(
     private val json: Json,
     private val logger: Logger,
 ) {
-    fun create(instance: Instance): HttpClient = createInstanceClient(instance, json, logger)
+    open fun create(instance: Instance): HttpClient = createInstanceClient(instance, json, logger)
 
     fun createDownloadClient(downloadClient: DownloadClient): HttpClient =
         HttpClient {

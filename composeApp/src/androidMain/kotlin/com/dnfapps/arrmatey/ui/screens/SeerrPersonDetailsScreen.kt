@@ -189,7 +189,6 @@ fun SeerrPersonDetailsScreen(
                                 if (personCredits.cast.isNotEmpty()) {
                                     seerrCreditsGrid(
                                         title = MR.strings.appearances,
-                                        icon = Icons.Default.Movie,
                                         items = personCredits.cast,
                                         onItemClick = { result ->
                                             onMediaClick(result.id, result.mediaType)
@@ -199,7 +198,6 @@ fun SeerrPersonDetailsScreen(
                                 if (personCredits.crew.isNotEmpty()) {
                                     seerrCreditsGrid(
                                         title = MR.strings.crew,
-                                        icon = Icons.Default.Settings,
                                         items = personCredits.crew,
                                         onItemClick = { result ->
                                             onMediaClick(result.id, result.mediaType)
@@ -233,23 +231,14 @@ fun SeerrPersonDetailsScreen(
 
 private fun LazyGridScope.seerrCreditsGrid(
     title: StringResource,
-    icon: ImageVector,
     items: List<DiscoverResult>,
     onItemClick: (DiscoverResult) -> Unit,
 ) {
     item(span = { GridItemSpan(maxLineSpan) }) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 12.dp),
-        ) {
-            Icon(icon, null, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = mokoString(title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+        Text(
+            text = mokoString(title),
+            style = MaterialTheme.typography.titleLarge
+        )
     }
 
     items(items) { item ->

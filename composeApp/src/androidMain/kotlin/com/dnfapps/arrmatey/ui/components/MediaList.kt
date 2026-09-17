@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -26,10 +28,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -126,10 +131,27 @@ fun SearchResultList(
     items: List<SearchResult>,
     onItemClick: (SearchResult) -> Unit,
     modifier: Modifier = Modifier,
+    lazyListState: LazyListState = rememberLazyListState(),
     includeOverview: Boolean = true,
     showBanners: Boolean = true,
 ) {
+    var wasAtTop by remember { mutableStateOf(true) }
+
+    LaunchedEffect(lazyListState) {
+        snapshotFlow { !lazyListState.canScrollBackward }
+            .collect { atTop ->
+                wasAtTop = atTop
+            }
+    }
+
+    LaunchedEffect(items) {
+        if (wasAtTop && items.isNotEmpty()) {
+            lazyListState.scrollToItem(0)
+        }
+    }
+
     LazyColumn(
+        state = lazyListState,
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(18.dp),
         contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp),

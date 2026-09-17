@@ -116,6 +116,7 @@ fun DiscoverSearchOverlay(
             onItemClick = onItemClick,
             includeOverview = true,
             showBanners = showBanners,
+            modifier = Modifier.fillMaxSize()
         )
     }
 }

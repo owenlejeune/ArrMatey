@@ -83,6 +83,8 @@ suspend inline fun <reified T> HttpClient.safeCall(crossinline block: suspend Ht
         NetworkResult.Error(message = "Request timed out", cause = e, errorType = ErrorType.Timeout)
     } catch (e: HttpRequestTimeoutException) {
         NetworkResult.Error(message = "Request timed out", cause = e, errorType = ErrorType.Timeout)
+    } catch (e: kotlinx.coroutines.CancellationException) {
+        throw e
     } catch (e: Throwable) {
         if (e.isTimeoutError()) {
             NetworkResult.Error(message = "Request timed out", cause = e, errorType = ErrorType.Timeout)
