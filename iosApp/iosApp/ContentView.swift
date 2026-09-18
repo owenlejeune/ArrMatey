@@ -16,7 +16,11 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if preferences.bottomTabItems.isEmpty {
+            if preferences.isFirstLaunch {
+                OnboardingView {
+                    preferences.markFirstLaunchComplete()
+                }
+            } else if preferences.bottomTabItems.isEmpty {
                 ProgressView()
             } else {
                 TabView(selection: Binding(

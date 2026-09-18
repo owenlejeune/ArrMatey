@@ -29,11 +29,11 @@
     <string name="type_audiobook">audiobook</string>
 
     <!-- Titles -->
-    <string name="add_instance">Add instance</string>
-    <string name="edit_instance">Edit instance</string>
-    <string name="instances">Instances</string>
+    <string name="add_instance">Add service</string>
+    <string name="edit_instance">Edit service</string>
+    <string name="instances">Services</string>
     <string name="couldnt_connect">Couldn\'t Connect</string>
-    <string name="no_type_instances">No %1$s instances</string>
+    <string name="no_type_instances">No %1$s services</string>
     <string name="empty_library">Nothing here</string>
     <string name="trending">Trending</string>
     <string name="popular_movies">Popular Movies</string>
@@ -76,7 +76,7 @@
     <string name="smart_add_seerr_action_title">Automatic Seerr Approval</string>
     <string name="smart_add_seerr_action_description">Control how pending requests are handled when media is added directly to Sonarr or Radarr.</string>
     <string name="combine_seerr_arr_media_title">Seerr/Arr Combined Media</string>
-    <string name="combine_seerr_arr_media_description">When enabled, the media details screen will combine information from Seerr and your Arr instances. If disabled, details will only display data based on the context.</string>
+    <string name="combine_seerr_arr_media_description">When enabled, the media details screen will combine information from Seerr and your Arr services. If disabled, details will only display data based on the context.</string>
     <string name="bazarr_details_integration_title">Bazarr Subtitles Integration</string>
     <string name="bazarr_details_integration_description">Display subtitle information and management options from Bazarr in media and episode details.</string>
     <string name="tracearr_details_integration_title">Tracearr Integration</string>
@@ -91,7 +91,7 @@
     <string name="confirm_delete_custom_webpage">Are you sure you want to delete this webpage?</string>
     <string name="confirm_grab_release">Are you sure you want to grab %1$s?</string>
     <string name="couldnt_connect_message">There was an error connecting to the server</string>
-    <string name="no_type_instances_message">You don\'t have any %1$s instances added yet</string>
+    <string name="no_type_instances_message">You don\'t have any %1$s services added yet</string>
     <string name="empty_library_message">Try adding something to your library</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="confirm_close_issue">Are you sure you want to close this issue?</string>
@@ -138,7 +138,7 @@
     <string name="resume">Resume</string>
     <string name="search_monitored">Search monitored</string>
     <string name="copy_link">Copy Link</string>
-    <string name="api_key_in_browser">Open instance settings to copy API key</string>
+    <string name="api_key_in_browser">Open service settings to copy API key</string>
 
     <!-- Labels -->
     <string name="label">Label</string>
@@ -150,7 +150,7 @@
     <string name="test">Test</string>
     <string name="success">Success</string>
     <string name="failure">Failure</string>
-    <string name="instance_type">Instance type</string>
+    <string name="instance_type">Service type</string>
     <string name="github">GitHub</string>
     <string name="website">Website</string>
     <string name="sort">Sort</string>
@@ -188,7 +188,7 @@
     <string name="cutoff_unmet">Cutoff Unmet</string>
     <string name="continuing_only">Continuing Only</string>
     <string name="ended_only">Ended Only</string>
-    <string name="slow_instance">Slow instance</string>
+    <string name="slow_instance">Slow service</string>
     <string name="custom_timeout_seconds">Custom timeout (s)</string>
     <string name="cache_on_disk">Cache library on disk</string>
     <string name="cache_on_disk_description">Cache the contents of this library on device for offline access.</string>
@@ -287,7 +287,7 @@
     <string name="grid_view">Grid</string>
     <string name="search_placeholder">Search %1$s</string>
     <string name="custom_headers">Custom Headers</string>
-    <string name="custom_headers_description">Add custom HTTP headers to be sent with every request to this instance</string>
+    <string name="custom_headers_description">Add custom HTTP headers to be sent with every request to this service</string>
     <string name="add_header">Add header</string>
     <string name="header_name">Header Name</string>
     <string name="header_value">Header Value</string>
@@ -343,14 +343,14 @@
     <string name="publisher">Publisher</string>
     <string name="audiobooks">Audiobooks</string>
     <string name="search_on_add_label">Search for files immediately</string>
-    <string name="no_api_key">This instance doesn't require an API key</string>
+    <string name="no_api_key">This service doesn't require an API key</string>
     <string name="no_auth_required">No authentication required</string>
     <string name="message">Message</string>
     <string name="type">Type</string>
     <string name="books_area_books_tab">Books (%1$d)</string>
     <string name="books_area_series_tab">Series (%1$d)</string>
-    <string name="instance_switcher_toggle_title">Smart instance switcher</string>
-    <string name="instance_switcher_toggle_description">Automatically hide the switcher when only one instance is configured</string>
+    <string name="instance_switcher_toggle_title">Smart service switcher</string>
+    <string name="instance_switcher_toggle_description">Automatically hide the switcher when only one service is configured</string>
     <string name="floating_navigation_bar_toggle_title">Floating navigation bar</string>
     <string name="floating_navigation_bar_toggle_description">Use a floating pill navigation bar on phone screens</string>
     <string name="open_in_browser">Open in Browser</string>
@@ -359,12 +359,12 @@
     <string name="no_active_streams">No active streams</string>
 
     <string name="search_results">Search Results</string>
-    <string name="unified_library_search_all_instances_title">Search all instances on add</string>
-    <string name="unified_library_search_all_instances_description">Search across all instances when adding media from the unified library instead of only the selected instance.</string>
+    <string name="unified_library_search_all_instances_title">Search all services on add</string>
+    <string name="unified_library_search_all_instances_description">Search across all services when adding media from the unified library instead of only the selected service.</string>
     <string name="search_show_banners">Show banners</string>
     <string name="search_show_banners_description">Display wide banner images instead of posters in search results.</string>
-    <string name="search_show_instance_indicator_shadow">Show instance indicator shadow</string>
-    <string name="search_show_instance_indicator_shadow_description">Add a subtle shadow behind the instance indicator for better visibility on bright backgrounds.</string>
+    <string name="search_show_instance_indicator_shadow">Show service indicator shadow</string>
+    <string name="search_show_instance_indicator_shadow_description">Add a subtle shadow behind the service indicator for better visibility on bright backgrounds.</string>
     <string name="confirm_delete">Confirm delete</string>
     <string name="confirm_delete_file">This file will be deleted</string>
     <string name="audiobook_info_authors">Author(s)</string>
@@ -395,13 +395,13 @@
 
     <!-- Errors -->
     <string name="error">Error</string>
-    <string name="instance_connect_error">Failed to connect to instance at %1$s</string>
-    <string name="instance_connect_error_ios">Failed to connect to instance</string>
+    <string name="instance_connect_error">Failed to connect to service at %1$s</string>
+    <string name="instance_connect_error_ios">Failed to connect to service</string>
     <string name="showing_cached_library">Showing cached library</string>
     <string name="no_network">No network connectivity</string>
     <string name="invalid_host">Invalid host format</string>
-    <string name="instance_label_exists">An instance with this label already exists</string>
-    <string name="instance_url_exists">An instance with this host already exists</string>
+    <string name="instance_label_exists">A service with this label already exists</string>
+    <string name="instance_url_exists">A service with this host already exists</string>
     <string name="download_queue_error">Error queuing download</string>
     <string name="add_exclusion">Add Exclusion</string>
     <string name="add_exclusion_description">Prevent this item from being readded to your library by lists</string>
@@ -409,8 +409,8 @@
     <string name="delete_files_description">Permanently erase the folder and its contents</string>
     <string name="error_timeout_title">Request Timed Out</string>
     <string name="error_timeout_description">The search took too long to complete. This can happen with slower indexers or network connections.</string>
-    <string name="error_timeout_configure_instance">Configure Instance</string>
-    <string name="error_timeout_tip">Tip: Enable "%1$s" in instance settings for indexers that need more time.</string>
+    <string name="error_timeout_configure_instance">Configure Service</string>
+    <string name="error_timeout_tip">Tip: Enable "%1$s" in service settings for indexers that need more time.</string>
     <string name="error_network_title">Network Error</string>
     <string name="error_generic_title">Something went wrong</string>
 
@@ -687,7 +687,7 @@
     <string name="nothing_on_today">Nothing on Today</string>
     <string name="nothing_upcoming">Nothing Upcoming</string>
     <string name="overview">Overview</string>
-    <string name="instances_overview">Arr Instances Overview</string>
+    <string name="instances_overview">Arr Services Overview</string>
     <string name="no_activity">No Activity</string>
     <string name="nothing_recently_added">Nothing Added Recently</string>
     <string name="empty_dashboard_message">Try adding something to your dashboard</string>
@@ -767,7 +767,7 @@
     <string name="poster_elevation">Poster Elevation</string>
     <string name="poster_radius">Poster Radius</string>
     <string name="apply_globally">Apply Globally</string>
-    <string name="apply_globally_message">Apply these settings to all instances</string>
+    <string name="apply_globally_message">Apply these settings to all services</string>
 
     <!-- Grid Density -->
     <string name="grid_density_compact">Compact</string>
@@ -817,7 +817,7 @@
     <string name="dashboard_activity_queue_overview">Activity Queue</string>
     <string name="dashboard_todays_releases">Today's Releases</string>
     <string name="dashboard_upcoming_releases">Upcoming Releases</string>
-    <string name="dashboard_instance_dashboards">Instance Dashboards</string>
+    <string name="dashboard_instance_dashboards">Service Dashboards</string>
     <string name="dashboard_tracearr_overview">Tracearr Overview</string>
     <string name="dashboard_tracearr_active_streams">Active Streams</string>
     <string name="active_streams">Active Streams</string>
@@ -848,7 +848,7 @@
     <string name="import_data">Import Data</string>
     <string name="export_password_prompt">Enter a password to encrypt your backup. You will need this password to import the data on another device.</string>
     <string name="import_password_prompt">Enter the password used to encrypt the backup file.</string>
-    <string name="include_preferences">Include instance preferences</string>
+    <string name="include_preferences">Include service preferences</string>
     <string name="select_items_to_export">Select items to export</string>
     <string name="select_items_to_import">Select items to import</string>
     <string name="password">Password</string>
@@ -955,4 +955,54 @@
     <string name="load_more_history">Load More History</string>
     <string name="analytics">Analytics</string>
     <string name="media_files">Media Files</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_to_arrmatey">Welcome to ArrMatey</string>
+    <string name="onboarding_welcome_title">Welcome to ArrMatey</string>
+    <string name="onboarding_welcome_subtitle">Your all-in-one companion for managing and exploring your *arr media server ecosystem.</string>
+    <string name="onboarding_supported_services">Supported Services</string>
+    <string name="onboarding_features_title">Key Features</string>
+    <string name="onboarding_features_subtitle">Everything you need to navigate your media empire.</string>
+    <string name="onboarding_feature_unified_library_title">Unified Library &amp; Media</string>
+    <string name="onboarding_feature_unified_library_desc">Browse and manage movies, shows, music, books, and audiobooks across all your services in one place.</string>
+    <string name="onboarding_feature_calendar_title">Calendar &amp; Schedules</string>
+    <string name="onboarding_feature_calendar_desc">Track upcoming release dates, season premieres, and finale broadcasts with rich filters.</string>
+    <string name="onboarding_feature_activity_title">Activity &amp; Downloads</string>
+    <string name="onboarding_feature_activity_desc">Monitor real-time download queues, client speeds, and indexer health in real time.</string>
+    <string name="onboarding_feature_discover_title">Discover &amp; Requests</string>
+    <string name="onboarding_feature_discover_desc">Search across indexers, discover trending media, and request content via Seerr.</string>
+    <string name="onboarding_setup_choice_title">Get Started</string>
+    <string name="onboarding_setup_choice_subtitle">Choose how you want to set up your ArrMatey configuration.</string>
+    <string name="onboarding_choice_fresh_title">Configure Manually</string>
+    <string name="onboarding_choice_fresh_desc">Add your media server services step by step.</string>
+    <string name="onboarding_choice_backup_title">Restore from Backup</string>
+    <string name="onboarding_choice_backup_desc">Import an existing configuration backup (.json) file.</string>
+    <string name="onboarding_choice_skip_title">Set Up Later</string>
+    <string name="onboarding_choice_skip_desc">Skip configuration for now and head straight into the app.</string>
+    <string name="onboarding_instances_title">Connected Services</string>
+    <string name="onboarding_instances_subtitle">Add your server services now, or add and manage them anytime in Settings.</string>
+    <string name="onboarding_instances_empty">No services configured yet.</string>
+    <string name="onboarding_add_instance">Add Service</string>
+    <string name="onboarding_preferences_title">Preferences</string>
+    <string name="onboarding_preferences_subtitle">Customize your initial theme and navigation behavior.</string>
+    <string name="onboarding_pref_theme">Theme</string>
+    <string name="onboarding_pref_dynamic_color">Dynamic Color</string>
+    <string name="onboarding_pref_dynamic_color_desc">Match app accents to your system wallpaper.</string>
+    <string name="onboarding_pref_nav_logos">Service Navigation Logos</string>
+    <string name="onboarding_pref_nav_logos_desc">Display service icons instead of generic tab icons.</string>
+    <string name="onboarding_pref_polling">Background Activity Polling</string>
+    <string name="onboarding_pref_polling_desc">Periodically fetch download progress and task updates.</string>
+    <string name="onboarding_ready_title">Ready to Set Sail!</string>
+    <string name="onboarding_ready_subtitle">You are all set to begin using ArrMatey. You can customize more settings or add more services anytime.</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_set_sail">Set Sail</string>
+    <string name="dev_settings_launch_onboarding">Launch Onboarding Flow</string>
+    <string name="connection_failed">Connection Failed</string>
+    <string name="onboarding_ready_explore">Ready to Explore</string>
+    <string name="onboarding_connected_format">%1$s Connected</string>
+    <string name="onboarding_services_and_clients_connected">%1$s, %2$s Connected</string>
 </resources>

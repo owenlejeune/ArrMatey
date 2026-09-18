@@ -1,0 +1,96 @@
+//
+//  WelcomePageView.swift
+//  iosApp
+//
+//  Created by Owen LeJeune on 2026-09-18.
+//
+
+import SwiftUI
+import Shared
+
+struct WelcomePageView: View {
+    private struct SupportedService: Identifiable {
+        let id: String
+        let name: String
+        let icon: Shared.ImageResource?
+    }
+
+    private var supportedServices: [SupportedService] {
+        var list: [SupportedService] = []
+        for type in InstanceType.allCases {
+            list.append(SupportedService(id: "instance_\(type.name)", name: type.name, icon: type.tabIcon))
+        }
+        for client in DownloadClientType.allCases {
+            list.append(SupportedService(id: "client_\(client.displayName)", name: client.displayName, icon: client.tabIcon))
+        }
+        return list
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 24) {
+                    Spacer(minLength: 20)
+
+                    ZStack {
+                        Circle()
+                            .fill(Color.themePrimary.opacity(0.12))
+                            .frame(width: 100, height: 100)
+
+                        Image(systemName: "sailboat.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(.themePrimary)
+                    }
+
+                    VStack(spacing: 8) {
+                        Text(MR.strings().onboarding_welcome_title.localized())
+                            .font(.title.bold())
+                            .multilineTextAlignment(.center)
+
+                        Text(MR.strings().onboarding_welcome_subtitle.localized())
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                    }
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(MR.strings().onboarding_supported_services.localized())
+                            .font(.caption.bold())
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 24)
+
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                            ForEach(supportedServices) { service in
+                                HStack(spacing: 10) {
+                                    if let logo = service.icon {
+                                        logo.toImage(renderingMode: .template)
+                                            .frame(width: 20, height: 20)
+                                            .foregroundColor(.themePrimary)
+                                    } else {
+                                        Image(systemName: "server.rack")
+                                            .foregroundColor(.themePrimary)
+                                    }
+
+                                    Text(service.name)
+                                        .font(.subheadline.weight(.medium))
+
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .background(Color(UIColor.secondarySystemGroupedBackground))
+                                .cornerRadius(12)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+
+                    Spacer(minLength: 20)
+                }
+                .frame(minHeight: geometry.size.height)
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+}

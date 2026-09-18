@@ -75,4 +75,16 @@
         <item quantity="one">%d Missing</item>
         <item quantity="other">%d Missing</item>
     </plurals>
+    <plurals name="services_count">
+        <item quantity="one">%d Service</item>
+        <item quantity="other">%d Services</item>
+    </plurals>
+    <plurals name="clients_count">
+        <item quantity="one">%d Client</item>
+        <item quantity="other">%d Clients</item>
+    </plurals>
+    <plurals name="download_clients_count">
+        <item quantity="one">%d Download Client</item>
+        <item quantity="other">%d Download Clients</item>
+    </plurals>
 </resources>

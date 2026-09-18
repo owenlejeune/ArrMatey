@@ -73,6 +73,11 @@ struct NewInstanceView: View {
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .cancellationAction) {
+            Button(MR.strings().cancel.localized()) {
+                dismiss()
+            }
+        }
         ToolbarItem(placement: .primaryAction) {
             Button(MR.strings().save.localized()) {
                 viewModel.createInstance(instanceType)

@@ -14,6 +14,7 @@ struct DevSettingsScreen: View {
     
     @StateObject var preferences: PreferencesViewModel = PreferencesViewModel()
     @StateObject private var logViewModel: LogsViewModel = LogsViewModel()
+    @State private var showOnboarding: Bool = false
     
     var body: some View {
         Form {
@@ -42,10 +43,21 @@ struct DevSettingsScreen: View {
                 }
             }
             
+            Section("Onboarding") {
+                Button(MR.strings().dev_settings_launch_onboarding.localized()) {
+                    showOnboarding = true
+                }
+            }
+            
 //            Section("Application Logs") {
 //                LogsView(logContent: logViewModel.logContent)
 //                    .frame(height: 250)
 //            }
+        }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView {
+                showOnboarding = false
+            }
         }
         .onAppear {
             logViewModel.startPolling()

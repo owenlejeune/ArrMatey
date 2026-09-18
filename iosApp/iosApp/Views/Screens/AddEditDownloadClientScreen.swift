@@ -362,6 +362,11 @@ struct AddEditDownloadClientScreen: View {
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .cancellationAction) {
+            Button(MR.strings().cancel.localized()) {
+                dismiss()
+            }
+        }
         if viewModel.uiState.isEditing {
             ToolbarItem(placement: .primaryAction) {
                 Button(action: {

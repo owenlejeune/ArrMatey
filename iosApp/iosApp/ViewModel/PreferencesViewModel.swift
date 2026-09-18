@@ -20,6 +20,7 @@ class PreferencesViewModel: ObservableObject {
     @Published var shouldShowReleaseNotes: Bool = false
     @Published var useServiceNavLogos: Bool = false
     @Published var hideInstanceSwitcher: Bool = false
+    @Published var isFirstLaunch: Bool = false
     
     @Published var bottomTabItems: [AnyTabItem] = []
     @Published var drawerTabs: [AnyTabItem] = []
@@ -32,6 +33,9 @@ class PreferencesViewModel: ObservableObject {
     }
     
     private func observeFlows() {
+        preferenceStore.isFirstLaunch.observeAsync(on: self) { owner, firstLaunch in
+            owner.isFirstLaunch = firstLaunch.boolValue
+        }
         preferenceStore.showInfoCards.observeAsync(on: self) { owner, cards in
             owner.showInfoCardMap = cards.mapValues(\.boolValue)
         }
@@ -94,7 +98,21 @@ class PreferencesViewModel: ObservableObject {
         preferenceStore.markReleaseNotesAsSeen()
     }
     
+    func markFirstLaunchComplete() {
+        preferenceStore.markFirstLaunchComplete()
+    }
+    
     func toggleUseServiceNavLogos() {
         preferenceStore.toggleUseServiceNavLogos()
+    }
+    
+    func setUseServiceNavLogos(_ value: Bool) {
+        preferenceStore.setUseServiceNavLogos(value: value)
+    }
+    
+    func setActivityPolling(_ enabled: Bool) {
+        if enableAcitivityPolling != enabled {
+            preferenceStore.toggleActivityPolling()
+        }
     }
 }

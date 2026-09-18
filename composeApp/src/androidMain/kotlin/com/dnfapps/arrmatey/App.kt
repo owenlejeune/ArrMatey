@@ -20,7 +20,14 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.HomeScreen
 import com.dnfapps.arrmatey.ui.theme.ArrMateyTheme
 import com.dnfapps.arrmatey.utils.mokoString
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import com.dnfapps.arrmatey.ui.screens.onboarding.OnboardingScreen
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -29,14 +36,14 @@ fun App(
     windowSizeClass: WindowSizeClass,
     preferences: PreferencesStore = koinInject(),
 ) {
+    val isFirstLaunch by preferences.isFirstLaunch.collectAsStateWithLifecycle(null)
     val showReleaseNotesSheet by preferences.shouldShowReleaseNotes.collectAsStateWithLifecycle(false)
+    val coroutineScope = rememberCoroutineScope()
 
     val localNetworkPermissionHandler = rememberLocalNetworkPermissionHandler()
     var showLocalNetworkNotice by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        preferences.markFirstLaunchComplete()
-
         val seen = preferences.localNetworkNoticeSeen.first()
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN &&
@@ -48,32 +55,50 @@ fun App(
     }
 
     ArrMateyTheme {
-        HomeScreen(windowSizeClass = windowSizeClass)
-
-        if (showReleaseNotesSheet) {
-            ReleaseNotesSheet {
-                preferences.markReleaseNotesAsSeen()
+        AnimatedContent(
+            targetState = isFirstLaunch,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            label = "AppEntryTransition",
+        ) { firstLaunch ->
+            if (firstLaunch == true) {
+                OnboardingScreen(
+                    onComplete = {
+                        coroutineScope.launch {
+                            preferences.markFirstLaunchComplete()
+                        }
+                    },
+                )
+            } else if (firstLaunch == false) {
+                HomeScreen(windowSizeClass = windowSizeClass)
             }
         }
 
-        if (showLocalNetworkNotice) {
-            AlertDialog(
-                onDismissRequest = {
-                    showLocalNetworkNotice = false
-                    preferences.markLocalNetworkNoticeAsSeen()
-                },
-                title = { Text(mokoString(MR.strings.local_network_rationale_title)) },
-                text = { Text(mokoString(MR.strings.local_network_rationale_description)) },
-                confirmButton = {
-                    TextButton(onClick = {
+        if (isFirstLaunch == false) {
+            if (showReleaseNotesSheet) {
+                ReleaseNotesSheet {
+                    preferences.markReleaseNotesAsSeen()
+                }
+            }
+
+            if (showLocalNetworkNotice) {
+                AlertDialog(
+                    onDismissRequest = {
                         showLocalNetworkNotice = false
                         preferences.markLocalNetworkNoticeAsSeen()
-                        localNetworkPermissionHandler.requestPermission()
-                    }) {
-                        Text(mokoString(MR.strings.ok))
-                    }
-                },
-            )
+                    },
+                    title = { Text(mokoString(MR.strings.local_network_rationale_title)) },
+                    text = { Text(mokoString(MR.strings.local_network_rationale_description)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showLocalNetworkNotice = false
+                            preferences.markLocalNetworkNoticeAsSeen()
+                            localNetworkPermissionHandler.requestPermission()
+                        }) {
+                            Text(mokoString(MR.strings.ok))
+                        }
+                    },
+                )
+            }
         }
     }
 }

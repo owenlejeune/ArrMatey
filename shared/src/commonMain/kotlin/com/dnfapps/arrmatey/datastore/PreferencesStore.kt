@@ -59,8 +59,6 @@ class PreferencesStore(
     private val calendarFinalesOnlyKey = booleanPreferencesKey("calendarFinalesOnly")
     private val activityPollingKey = booleanPreferencesKey("enableActivityPolling")
     private val httpLogLevelKey = stringPreferencesKey("httpLogLevel")
-    private val useDynamicThemeKey = booleanPreferencesKey("useDynamicTheme")
-    private val useClearLogoKey = booleanPreferencesKey("useClearLogo")
     private val useServiceNavLogosKey = booleanPreferencesKey("useServiceNavLogos")
     private val hideInstanceSwitcherKey = booleanPreferencesKey("hideInstanceSwitcher")
     private val appThemeKey = stringPreferencesKey("appTheme")
@@ -139,12 +137,6 @@ class PreferencesStore(
                 } ?: LoggerLevel.Headers
             }
 
-    val useDynamicTheme: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[useDynamicThemeKey] ?: true
-            }
-
     val appTheme: Flow<AppTheme> =
         dataStore.data
             .map { preferences ->
@@ -155,12 +147,6 @@ class PreferencesStore(
         dataStore.data
             .map { preferences ->
                 preferences[appColorKey]?.let { AppColor.valueOf(it) } ?: dataStoreFactory.defaultAppColor
-            }
-
-    val useClearLogo: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[useClearLogoKey] ?: true
             }
 
     val unifiedLibrarySearchAllInstances: Flow<Boolean> =
@@ -425,24 +411,6 @@ class PreferencesStore(
     fun setTracearrDetailsIntegration(value: Boolean) {
         scope.launch {
             dataStore.edit { it[tracearrDetailsIntegrationKey] = value }
-        }
-    }
-
-    fun toggleUseDynamicTheme() {
-        scope.launch {
-            dataStore.edit { preferences ->
-                val current = preferences[useDynamicThemeKey] ?: true
-                preferences[useDynamicThemeKey] = !current
-            }
-        }
-    }
-
-    fun toggleUseClearLogo() {
-        scope.launch {
-            dataStore.edit { preferences ->
-                val current = preferences[useClearLogoKey] ?: true
-                preferences[useClearLogoKey] = !current
-            }
         }
     }
 
