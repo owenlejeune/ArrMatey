@@ -103,6 +103,7 @@ fun SettingsTabNavHost(
                 entry<SettingsScreen.BackupRestore> {
                     BackupRestoreSettingsScreen(
                         onBack = { navigation.popBackStack() },
+                        onNavigateToOnboarding = { navigation.toOnboarding() }
                     )
                 }
                 entry<SettingsScreen.AddInstance> {

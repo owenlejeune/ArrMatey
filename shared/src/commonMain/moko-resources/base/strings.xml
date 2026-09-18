@@ -957,6 +957,7 @@
     <string name="media_files">Media Files</string>
 
     <!-- Onboarding -->
+    <string name="onboarding">Onboarding</string>
     <string name="welcome_to_arrmatey">Welcome to ArrMatey</string>
     <string name="onboarding_welcome_title">Welcome to ArrMatey</string>
     <string name="onboarding_welcome_subtitle">Your all-in-one companion for managing and exploring your *arr media server ecosystem.</string>

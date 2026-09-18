@@ -54,15 +54,7 @@ fun WelcomePage(
                 Modifier
                     .size(96.dp)
                     .clip(RoundedCornerShape(24.dp))
-                    .background(
-                        Brush.radialGradient(
-                            colors =
-                                listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                    MaterialTheme.colorScheme.primaryContainer,
-                                ),
-                        ),
-                    ),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

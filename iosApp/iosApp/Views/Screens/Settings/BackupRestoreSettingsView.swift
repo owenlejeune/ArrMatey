@@ -19,6 +19,7 @@ struct BackupRestoreSettingsView: View {
     @State private var importData: String = ""
     @State private var showExportSuccess: Bool = false
     @State private var showImportSuccess: Bool = false
+    @State private var showOnboarding: Bool = false
 
     var body: some View {
         Form {
@@ -37,8 +38,23 @@ struct BackupRestoreSettingsView: View {
             } header: {
                 Text(MR.strings().backup_restore.localized())
             }
+
+            Section {
+                Button {
+                    showOnboarding = true
+                } label: {
+                    Label(MR.strings().dev_settings_launch_onboarding.localized(), systemImage: "paperplane")
+                }
+            } header: {
+                Text(MR.strings().onboarding.localized())
+            }
         }
         .navigationTitle(MR.strings().backup_restore.localized())
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView {
+                showOnboarding = false
+            }
+        }
         .sheet(isPresented: $showExportSheet) {
             ExportSheet(viewModel: backupViewModel, isPresented: $showExportSheet) { data in
                 self.exportData = data
