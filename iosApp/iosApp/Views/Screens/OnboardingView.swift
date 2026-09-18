@@ -24,7 +24,7 @@ struct OnboardingView: View {
     @State private var importData: String = ""
     @State private var showImportSuccess: Bool = false
 
-    private let totalPages = 6
+    private let totalPages = 8
 
     var body: some View {
         ZStack {
@@ -36,8 +36,11 @@ struct OnboardingView: View {
                     WelcomePageView()
                         .tag(0)
 
-                    FeaturesPageView()
+                    MediaFeaturesPageView()
                         .tag(1)
+
+                    PowerFeaturesPageView()
+                        .tag(2)
 
                     SetupChoicePageView(
                         onRestoreBackup: {
@@ -45,16 +48,16 @@ struct OnboardingView: View {
                         },
                         onManualSetup: {
                             withAnimation {
-                                currentPage = 3
+                                currentPage = 4
                             }
                         },
                         onSkip: {
                             withAnimation {
-                                currentPage = 4
+                                currentPage = 5
                             }
                         }
                     )
-                    .tag(2)
+                    .tag(3)
 
                     InstancesPageView(
                         instances: instances,
@@ -74,19 +77,24 @@ struct OnboardingView: View {
                             downloadClientsViewModel.deleteClient(client)
                         }
                     )
-                    .tag(3)
+                    .tag(4)
 
                     PreferencesPageView(
                         preferences: preferences
                     )
-                    .tag(4)
+                    .tag(5)
+
+                    NavigationPageView(
+                        preferences: preferences
+                    )
+                    .tag(6)
 
                     ReadyPageView(
                         instancesCount: instances.count,
                         downloadClientsCount: downloadClientsViewModel.downloadClientsState.downloadClients.count,
                         onFinish: onComplete
                     )
-                    .tag(5)
+                    .tag(7)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.3), value: currentPage)
@@ -133,7 +141,7 @@ struct OnboardingView: View {
         .alert(MR.strings().success.localized(), isPresented: $showImportSuccess) {
             Button(MR.strings().ok.localized(), role: .cancel) {
                 withAnimation {
-                    currentPage = 4
+                    currentPage = min(currentPage + 1, totalPages - 1)
                 }
             }
         } message: {

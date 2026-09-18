@@ -20,7 +20,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,7 +45,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
-import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.settings.ImportDialog
 import com.dnfapps.arrmatey.utils.MokoStrings
@@ -55,7 +53,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
-private const val PAGE_COUNT = 6
+private const val PAGE_COUNT = 8
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -74,8 +72,9 @@ fun OnboardingScreen(
     val downloadClients by moreViewModel.downloadClients.collectAsStateWithLifecycle()
     val appTheme by moreViewModel.appTheme.collectAsStateWithLifecycle()
     val appColor by moreViewModel.appColor.collectAsStateWithLifecycle()
-    val useDynamicTheme = appColor == AppColor.Dynamic
     val useServiceNavLogos by moreViewModel.useServiceNavLogos.collectAsStateWithLifecycle()
+    val useFloatingNavigationBar by moreViewModel.useFloatingNavigationBar.collectAsStateWithLifecycle()
+    val tabPreferences by preferences.tabPreferences.collectAsStateWithLifecycle(com.dnfapps.arrmatey.datastore.TabPreferences())
     val enableActivityPolling by preferences.enableActivityPolling.collectAsStateWithLifecycle(true)
 
     var showAddInstanceSheet by remember { mutableStateOf(false) }
@@ -186,6 +185,7 @@ fun OnboardingScreen(
         },
     ) { paddingValues ->
         HorizontalPager(
+            userScrollEnabled = false,
             state = pagerState,
             modifier =
                 Modifier
@@ -194,11 +194,12 @@ fun OnboardingScreen(
         ) { page ->
             when (page) {
                 0 -> WelcomePage()
-                1 -> FeaturesPage()
-                2 -> SetupChoicePage(
+                1 -> MediaFeaturesPage()
+                2 -> PowerFeaturesPage()
+                3 -> SetupChoicePage(
                     onManualSetup = {
                         scope.launch {
-                            pagerState.animateScrollToPage(3)
+                            pagerState.animateScrollToPage(4)
                         }
                     },
                     onRestoreBackup = {
@@ -206,32 +207,37 @@ fun OnboardingScreen(
                     },
                     onSkip = {
                         scope.launch {
-                            pagerState.animateScrollToPage(4)
+                            pagerState.animateScrollToPage(5)
                         }
                     },
                 )
 
-                3 -> InstancesSetupPage(
+                4 -> InstancesSetupPage(
                     instances = instances,
                     downloadClients = downloadClients,
                     onAddInstance = { showAddInstanceSheet = true },
                     onAddDownloadClient = { showAddDownloadClientSheet = true },
                 )
 
-                4 -> PreferencesSetupPage(
+                5 -> PreferencesSetupPage(
                     appTheme = appTheme,
                     onThemeChange = { moreViewModel.setAppTheme(it) },
-                    useDynamicTheme = useDynamicTheme,
-                    onToggleDynamicTheme = {
-                        moreViewModel.setAppColor(if (useDynamicTheme) AppColor.ArrMatey else AppColor.Dynamic)
-                    },
-                    useServiceNavLogos = useServiceNavLogos,
-                    onToggleServiceNavLogos = { moreViewModel.toggleUseServiceNavLogos() },
+                    appColor = appColor,
+                    onColorChange = { moreViewModel.setAppColor(it) },
                     enableActivityPolling = enableActivityPolling,
                     onToggleActivityPolling = { preferences.toggleActivityPolling() },
                 )
 
-                5 -> ReadyPage(
+                6 -> NavigationSetupPage(
+                    useFloatingNavigationBar = useFloatingNavigationBar,
+                    onToggleFloatingNavigationBar = { moreViewModel.toggleUseFloatingNavigationBar() },
+                    tabPreferences = tabPreferences,
+                    onUpdateTabPreferences = { preferences.updateTabPreferences(it) },
+                    useServiceNavLogos = useServiceNavLogos,
+                    onToggleServiceNavLogos = { moreViewModel.toggleUseServiceNavLogos() },
+                )
+
+                7 -> ReadyPage(
                     instancesCount = instances.size,
                     downloadClientsCount = downloadClients.size,
                     onFinish = onComplete,
@@ -276,6 +282,9 @@ fun OnboardingScreen(
                     showImportDialog = false
                     pendingImportData = null
                     Toast.makeText(context, moko.getString(MR.strings.import_complete), Toast.LENGTH_SHORT).show()
+                    scope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
                 }
             },
         )

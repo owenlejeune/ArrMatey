@@ -238,6 +238,8 @@ fun Navigator<SettingsScreen>.toEditInstance(id: Long) {
 
 fun Navigator<SettingsScreen>.toDev() = navigateTo(SettingsScreen.Dev)
 
+fun Navigator<SettingsScreen>.toOnboarding() = navigateTo(SettingsScreen.Onboarding)
+
 fun Navigator<SettingsScreen>.toTabPreferences() {
     if (backStack.lastOrNull() != SettingsScreen.UserInterface) {
         navigateTo(SettingsScreen.UserInterface)

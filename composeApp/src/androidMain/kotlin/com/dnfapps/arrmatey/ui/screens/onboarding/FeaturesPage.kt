@@ -15,10 +15,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Downloading
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -36,7 +40,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
-fun FeaturesPage(
+fun MediaFeaturesPage(
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -47,11 +51,18 @@ fun FeaturesPage(
                 .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
     ) {
-        Text(
-            text = mokoString(MR.strings.onboarding_features_title),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = mokoString(MR.strings.onboarding_features_media_title),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = mokoString(MR.strings.onboarding_features_media_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         FeatureCard(
             icon = Icons.Default.VideoLibrary,
@@ -61,9 +72,9 @@ fun FeaturesPage(
         )
 
         FeatureCard(
-            icon = Icons.Default.CalendarMonth,
-            title = mokoString(MR.strings.onboarding_feature_calendar_title),
-            description = mokoString(MR.strings.onboarding_feature_calendar_desc),
+            icon = Icons.Default.AutoAwesome,
+            title = mokoString(MR.strings.onboarding_feature_cross_service_title),
+            description = mokoString(MR.strings.onboarding_feature_cross_service_desc),
             tint = MaterialTheme.colorScheme.secondary,
         )
 
@@ -75,10 +86,65 @@ fun FeaturesPage(
         )
 
         FeatureCard(
-            icon = Icons.Default.Search,
-            title = mokoString(MR.strings.onboarding_feature_discover_title),
-            description = mokoString(MR.strings.onboarding_feature_discover_desc),
+            icon = Icons.Default.CalendarMonth,
+            title = mokoString(MR.strings.onboarding_feature_calendar_title),
+            description = mokoString(MR.strings.onboarding_feature_calendar_desc),
             tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
+fun PowerFeaturesPage(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = mokoString(MR.strings.onboarding_features_power_title),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = mokoString(MR.strings.onboarding_features_power_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        FeatureCard(
+            icon = Icons.Default.Search,
+            title = mokoString(MR.strings.onboarding_feature_search_indexers_title),
+            description = mokoString(MR.strings.onboarding_feature_search_indexers_desc),
+            tint = MaterialTheme.colorScheme.secondary,
+        )
+
+        FeatureCard(
+            icon = Icons.Default.Wifi,
+            title = mokoString(MR.strings.onboarding_feature_local_network_title),
+            description = mokoString(MR.strings.onboarding_feature_local_network_desc),
+            tint = MaterialTheme.colorScheme.tertiary,
+        )
+
+        FeatureCard(
+            icon = Icons.Default.Dns,
+            title = mokoString(MR.strings.onboarding_feature_multi_instance_title),
+            description = mokoString(MR.strings.onboarding_feature_multi_instance_desc),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+
+        FeatureCard(
+            icon = Icons.Default.Lock,
+            title = mokoString(MR.strings.onboarding_feature_backup_sync_title),
+            description = mokoString(MR.strings.onboarding_feature_backup_sync_desc),
+            tint = MaterialTheme.colorScheme.secondary,
         )
     }
 }

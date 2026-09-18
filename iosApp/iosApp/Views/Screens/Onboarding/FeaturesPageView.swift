@@ -8,7 +8,7 @@
 import SwiftUI
 import Shared
 
-struct FeaturesPageView: View {
+struct MediaFeaturesPageView: View {
     var body: some View {
         GeometryReader { geometry in
             ScrollView {
@@ -16,11 +16,11 @@ struct FeaturesPageView: View {
                     Spacer(minLength: 16)
 
                     VStack(spacing: 8) {
-                        Text(MR.strings().onboarding_features_title.localized())
+                        Text(MR.strings().onboarding_features_media_title.localized())
                             .font(.title2.bold())
                             .multilineTextAlignment(.center)
 
-                        Text(MR.strings().onboarding_features_subtitle.localized())
+                        Text(MR.strings().onboarding_features_media_subtitle.localized())
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -35,9 +35,9 @@ struct FeaturesPageView: View {
                         )
 
                         FeatureCard(
-                            icon: "calendar",
-                            title: MR.strings().onboarding_feature_calendar_title.localized(),
-                            description: MR.strings().onboarding_feature_calendar_desc.localized()
+                            icon: "sparkles.rectangle.stack.fill",
+                            title: MR.strings().onboarding_feature_cross_service_title.localized(),
+                            description: MR.strings().onboarding_feature_cross_service_desc.localized()
                         )
 
                         FeatureCard(
@@ -47,9 +47,64 @@ struct FeaturesPageView: View {
                         )
 
                         FeatureCard(
-                            icon: "sparkles",
-                            title: MR.strings().onboarding_feature_discover_title.localized(),
-                            description: MR.strings().onboarding_feature_discover_desc.localized()
+                            icon: "calendar",
+                            title: MR.strings().onboarding_feature_calendar_title.localized(),
+                            description: MR.strings().onboarding_feature_calendar_desc.localized()
+                        )
+                    }
+                    .padding(.horizontal, 20)
+
+                    Spacer(minLength: 20)
+                }
+                .frame(minHeight: geometry.size.height)
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+}
+
+struct PowerFeaturesPageView: View {
+    var body: some View {
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 20) {
+                    Spacer(minLength: 16)
+
+                    VStack(spacing: 8) {
+                        Text(MR.strings().onboarding_features_power_title.localized())
+                            .font(.title2.bold())
+                            .multilineTextAlignment(.center)
+
+                        Text(MR.strings().onboarding_features_power_subtitle.localized())
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+                    }
+
+                    VStack(spacing: 12) {
+                        FeatureCard(
+                            icon: "magnifyingglass",
+                            title: MR.strings().onboarding_feature_search_indexers_title.localized(),
+                            description: MR.strings().onboarding_feature_search_indexers_desc.localized()
+                        )
+
+                        FeatureCard(
+                            icon: "wifi",
+                            title: MR.strings().onboarding_feature_local_network_title.localized(),
+                            description: MR.strings().onboarding_feature_local_network_desc.localized()
+                        )
+
+                        FeatureCard(
+                            icon: "server.rack",
+                            title: MR.strings().onboarding_feature_multi_instance_title.localized(),
+                            description: MR.strings().onboarding_feature_multi_instance_desc.localized()
+                        )
+
+                        FeatureCard(
+                            icon: "lock.shield.fill",
+                            title: MR.strings().onboarding_feature_backup_sync_title.localized(),
+                            description: MR.strings().onboarding_feature_backup_sync_desc.localized()
                         )
                     }
                     .padding(.horizontal, 20)

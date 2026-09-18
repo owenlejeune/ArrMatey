@@ -126,6 +126,8 @@ sealed interface SettingsScreen : NavKey {
 
     data object Dev : SettingsScreen
 
+    data object Onboarding : SettingsScreen
+
     data object TabPreferences : SettingsScreen
 
     data object ShortcutPreferences : SettingsScreen

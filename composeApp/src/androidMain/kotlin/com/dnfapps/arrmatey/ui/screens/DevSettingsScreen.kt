@@ -35,16 +35,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.client.LoggerLevel
@@ -53,7 +49,6 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.logging.LogReader
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
-import com.dnfapps.arrmatey.ui.screens.onboarding.OnboardingScreen
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -71,6 +66,7 @@ private const val MAX_LOG_PREVIEW_CHARS = 30_000
 @Composable
 fun DevSettingsScreen(
     preferenceStore: PreferencesStore = koinInject<PreferencesStore>(),
+    onNavigateToOnboarding: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -78,7 +74,6 @@ fun DevSettingsScreen(
     val showInfoCardMap by preferenceStore.showInfoCards.collectAsStateWithLifecycle(emptyMap())
     val activityPollingOn by preferenceStore.enableActivityPolling.collectAsStateWithLifecycle(true)
     val logLevel by preferenceStore.httpLogLevel.collectAsStateWithLifecycle(LoggerLevel.Headers)
-    var showOnboarding by remember { mutableStateOf(false) }
 
     val logsScrollState = rememberScrollState()
     val logsFlow =
@@ -194,7 +189,7 @@ fun DevSettingsScreen(
                 )
 
                 OutlinedButton(
-                    onClick = { showOnboarding = true },
+                    onClick = onNavigateToOnboarding,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(
@@ -204,21 +199,6 @@ fun DevSettingsScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(mokoString(MR.strings.dev_settings_launch_onboarding))
-                }
-
-                if (showOnboarding) {
-                    Dialog(
-                        onDismissRequest = { showOnboarding = false },
-                        properties =
-                            DialogProperties(
-                                usePlatformDefaultWidth = false,
-                                decorFitsSystemWindows = false,
-                            ),
-                    ) {
-                        OnboardingScreen(
-                            onComplete = { showOnboarding = false },
-                        )
-                    }
                 }
 
                 Box(

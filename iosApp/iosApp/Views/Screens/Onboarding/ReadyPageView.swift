@@ -76,21 +76,6 @@ struct ReadyPageView: View {
                     }
 
                     Spacer(minLength: 20)
-
-                    Button(action: onFinish) {
-                        HStack {
-                            Image(systemName: "sailboat.fill")
-                            Text(MR.strings().onboarding_set_sail.localized())
-                        }
-                        .font(.headline.bold())
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.themePrimary)
-                        .cornerRadius(16)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 16)
                 }
                 .frame(minHeight: geometry.size.height)
                 .frame(maxWidth: .infinity)
