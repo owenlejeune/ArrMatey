@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.extensions.nowTimestamp
@@ -133,13 +132,14 @@ fun BackupRestoreSettingsScreen(
 
             SettingsGroup(
                 title = mokoString(MR.strings.onboarding),
-                items = listOf(
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.RocketLaunch),
-                        title = mokoString(MR.strings.dev_settings_launch_onboarding),
-                        onClick = onNavigateToOnboarding
-                    )
-                )
+                items =
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.RocketLaunch),
+                            title = mokoString(MR.strings.dev_settings_launch_onboarding),
+                            onClick = onNavigateToOnboarding,
+                        ),
+                    ),
             )
         }
 

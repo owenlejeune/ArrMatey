@@ -74,7 +74,10 @@ fun OnboardingScreen(
     val appColor by moreViewModel.appColor.collectAsStateWithLifecycle()
     val useServiceNavLogos by moreViewModel.useServiceNavLogos.collectAsStateWithLifecycle()
     val useFloatingNavigationBar by moreViewModel.useFloatingNavigationBar.collectAsStateWithLifecycle()
-    val tabPreferences by preferences.tabPreferences.collectAsStateWithLifecycle(com.dnfapps.arrmatey.datastore.TabPreferences())
+    val tabPreferences by preferences.tabPreferences.collectAsStateWithLifecycle(
+        com.dnfapps.arrmatey.datastore
+            .TabPreferences(),
+    )
     val enableActivityPolling by preferences.enableActivityPolling.collectAsStateWithLifecycle(true)
 
     var showAddInstanceSheet by remember { mutableStateOf(false) }
@@ -196,52 +199,57 @@ fun OnboardingScreen(
                 0 -> WelcomePage()
                 1 -> MediaFeaturesPage()
                 2 -> PowerFeaturesPage()
-                3 -> SetupChoicePage(
-                    onManualSetup = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(4)
-                        }
-                    },
-                    onRestoreBackup = {
-                        importLauncher.launch(arrayOf("application/json"))
-                    },
-                    onSkip = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(5)
-                        }
-                    },
-                )
+                3 ->
+                    SetupChoicePage(
+                        onManualSetup = {
+                            scope.launch {
+                                pagerState.animateScrollToPage(4)
+                            }
+                        },
+                        onRestoreBackup = {
+                            importLauncher.launch(arrayOf("application/json"))
+                        },
+                        onSkip = {
+                            scope.launch {
+                                pagerState.animateScrollToPage(5)
+                            }
+                        },
+                    )
 
-                4 -> InstancesSetupPage(
-                    instances = instances,
-                    downloadClients = downloadClients,
-                    onAddInstance = { showAddInstanceSheet = true },
-                    onAddDownloadClient = { showAddDownloadClientSheet = true },
-                )
+                4 ->
+                    InstancesSetupPage(
+                        instances = instances,
+                        downloadClients = downloadClients,
+                        onAddInstance = { showAddInstanceSheet = true },
+                        onAddDownloadClient = { showAddDownloadClientSheet = true },
+                    )
 
-                5 -> PreferencesSetupPage(
-                    appTheme = appTheme,
-                    onThemeChange = { moreViewModel.setAppTheme(it) },
-                    appColor = appColor,
-                    onColorChange = { moreViewModel.setAppColor(it) },
-                    enableActivityPolling = enableActivityPolling,
-                    onToggleActivityPolling = { preferences.toggleActivityPolling() },
-                )
+                5 ->
+                    PreferencesSetupPage(
+                        appTheme = appTheme,
+                        onThemeChange = { moreViewModel.setAppTheme(it) },
+                        appColor = appColor,
+                        onColorChange = { moreViewModel.setAppColor(it) },
+                        enableActivityPolling = enableActivityPolling,
+                        onToggleActivityPolling = { preferences.toggleActivityPolling() },
+                    )
 
-                6 -> NavigationSetupPage(
-                    useFloatingNavigationBar = useFloatingNavigationBar,
-                    onToggleFloatingNavigationBar = { moreViewModel.toggleUseFloatingNavigationBar() },
-                    tabPreferences = tabPreferences,
-                    onUpdateTabPreferences = { preferences.updateTabPreferences(it) },
-                    useServiceNavLogos = useServiceNavLogos,
-                    onToggleServiceNavLogos = { moreViewModel.toggleUseServiceNavLogos() },
-                )
+                6 ->
+                    NavigationSetupPage(
+                        useFloatingNavigationBar = useFloatingNavigationBar,
+                        onToggleFloatingNavigationBar = { moreViewModel.toggleUseFloatingNavigationBar() },
+                        tabPreferences = tabPreferences,
+                        onUpdateTabPreferences = { preferences.updateTabPreferences(it) },
+                        useServiceNavLogos = useServiceNavLogos,
+                        onToggleServiceNavLogos = { moreViewModel.toggleUseServiceNavLogos() },
+                    )
 
-                7 -> ReadyPage(
-                    instancesCount = instances.size,
-                    downloadClientsCount = downloadClients.size,
-                    onFinish = onComplete,
-                )
+                7 ->
+                    ReadyPage(
+                        instancesCount = instances.size,
+                        downloadClientsCount = downloadClients.size,
+                        onFinish = onComplete,
+                    )
             }
         }
     }

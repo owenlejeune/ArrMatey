@@ -40,9 +40,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
-fun MediaFeaturesPage(
-    modifier: Modifier = Modifier,
-) {
+fun MediaFeaturesPage(modifier: Modifier = Modifier) {
     Column(
         modifier =
             modifier
@@ -95,9 +93,7 @@ fun MediaFeaturesPage(
 }
 
 @Composable
-fun PowerFeaturesPage(
-    modifier: Modifier = Modifier,
-) {
+fun PowerFeaturesPage(modifier: Modifier = Modifier) {
     Column(
         modifier =
             modifier

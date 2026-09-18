@@ -1,6 +1,10 @@
 package com.dnfapps.arrmatey
 
 import android.os.Build
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -12,22 +16,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.permissions.rememberLocalNetworkPermissionHandler
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.HomeScreen
+import com.dnfapps.arrmatey.ui.screens.onboarding.OnboardingScreen
 import com.dnfapps.arrmatey.ui.theme.ArrMateyTheme
 import com.dnfapps.arrmatey.utils.mokoString
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import com.dnfapps.arrmatey.ui.screens.onboarding.OnboardingScreen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)

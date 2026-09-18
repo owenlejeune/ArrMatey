@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.onboarding
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +24,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -74,7 +73,7 @@ fun SetupChoicePage(
             icon = Icons.Default.Add,
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             iconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            onClick = onManualSetup
+            onClick = onManualSetup,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -85,7 +84,7 @@ fun SetupChoicePage(
             icon = Icons.Default.Download,
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             iconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            onClick = onRestoreBackup
+            onClick = onRestoreBackup,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -96,7 +95,7 @@ fun SetupChoicePage(
             icon = Icons.AutoMirrored.Filled.ArrowForward,
             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
             iconColor = MaterialTheme.colorScheme.onTertiaryContainer,
-            onClick = onSkip
+            onClick = onSkip,
         )
     }
 }
@@ -108,7 +107,7 @@ private fun ConfigurationCard(
     containerColor: Color,
     iconColor: Color,
     icon: ImageVector,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         modifier =

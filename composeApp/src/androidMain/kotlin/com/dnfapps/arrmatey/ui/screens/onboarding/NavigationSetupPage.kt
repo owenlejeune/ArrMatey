@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,7 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -55,7 +53,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.compose.TabItem
@@ -140,7 +137,7 @@ fun NavigationSetupPage(
 
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             PreferenceToggleCard(
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -187,13 +184,22 @@ fun NavigationSetupPage(
                                             if (useFloatingNavigationBar != isFloating) {
                                                 onToggleFloatingNavigationBar()
                                             }
-                                        }
-                                        .border(
+                                        }.border(
                                             width = if (isSelected) 2.dp else 1.dp,
-                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                                            color =
+                                                if (isSelected) {
+                                                    MaterialTheme.colorScheme.primary
+                                                } else {
+                                                    MaterialTheme.colorScheme.outlineVariant
+                                                },
                                             shape = RoundedCornerShape(12.dp),
                                         ),
-                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                                color =
+                                    if (isSelected) {
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.surface
+                                    },
                             ) {
                                 Box(
                                     modifier = Modifier.padding(vertical = 10.dp),
@@ -317,7 +323,7 @@ fun NavigationSetupPage(
                                                     .size(18.dp)
                                                     .background(
                                                         MaterialTheme.colorScheme.primary,
-                                                        CircleShape
+                                                        CircleShape,
                                                     ),
                                             contentAlignment = Alignment.Center,
                                         ) {

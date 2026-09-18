@@ -66,9 +66,11 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun AddDownloadClientSheet(
     onDismiss: () -> Unit,
-    viewModel: DownloadClientSettingsViewModel = koinViewModel(
-        key = "onboarding_download_client",
-        parameters = { parametersOf(null) }),
+    viewModel: DownloadClientSettingsViewModel =
+        koinViewModel(
+            key = "onboarding_download_client",
+            parameters = { parametersOf(null) },
+        ),
 ) {
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -217,10 +219,12 @@ fun AddDownloadClientSheet(
                     onValueChange = { viewModel.updateLabel(it) },
                     label = mokoString(MR.strings.client_label),
                     isError = hasLabelConflict,
-                    errorMessage = hasLabelConflict thenGet mokoString(
-                        MR.strings.field_conflict,
-                        mokoString(MR.strings.client_label)
-                    ),
+                    errorMessage =
+                        hasLabelConflict thenGet
+                            mokoString(
+                                MR.strings.field_conflict,
+                                mokoString(MR.strings.client_label),
+                            ),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                 )

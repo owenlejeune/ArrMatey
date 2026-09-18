@@ -168,8 +168,8 @@ fun DevSettingsScreen(
                                 value = activityPollingOn,
                                 onValueChange = { preferenceStore.toggleActivityPolling() },
                             ),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = "Enable activity polling",

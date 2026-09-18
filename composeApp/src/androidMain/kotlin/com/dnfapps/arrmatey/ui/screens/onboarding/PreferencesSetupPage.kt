@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -124,10 +123,20 @@ fun PreferencesSetupPage(
                                     .clickable { onThemeChange(theme) }
                                     .border(
                                         width = if (isSelected) 2.dp else 1.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                                        color =
+                                            if (isSelected) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.outlineVariant
+                                            },
                                         shape = RoundedCornerShape(12.dp),
                                     ),
-                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                            color =
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
                         ) {
                             Column(
                                 modifier = Modifier.padding(vertical = 12.dp),
@@ -181,10 +190,20 @@ fun PreferencesSetupPage(
                                     .clickable { onColorChange(color) }
                                     .border(
                                         width = if (isSelected) 2.dp else 1.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                                        color =
+                                            if (isSelected) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.outlineVariant
+                                            },
                                         shape = RoundedCornerShape(12.dp),
                                     ),
-                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                            color =
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
                         ) {
                             Column(
                                 modifier = Modifier.padding(vertical = 12.dp),
