@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,7 +40,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -116,12 +114,14 @@ fun EpisodeDetailsScreen(
                 Toast.makeText(context, status.message ?: "Updated", Toast.LENGTH_SHORT).show()
                 viewModel.resetMonitorStatus()
             }
+
             is OperationStatus.Error -> {
                 status.message?.let { message ->
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
                 viewModel.resetMonitorStatus()
             }
+
             else -> {}
         }
     }
@@ -131,11 +131,13 @@ fun EpisodeDetailsScreen(
             is OperationStatus.Success -> {
                 Toast.makeText(context, status.message ?: "Deleted", Toast.LENGTH_SHORT).show()
             }
+
             is OperationStatus.Error -> {
                 status.message?.let { message ->
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
             }
+
             else -> {}
         }
     }

@@ -375,7 +375,7 @@ private fun WatcherCard(
 
             watcher.completionPct?.let { pct ->
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = MaterialTheme.shapes.small,
                     color = MaterialTheme.colorScheme.secondaryContainer,
                 ) {
                     Text(

@@ -263,7 +263,8 @@ fun BookRow(
         ) {
             if (searchInProgress(book.id)) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
                 )
             } else {
                 Icon(

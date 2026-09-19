@@ -326,7 +326,7 @@ private fun StatusChip(
         }
 
     Surface(
-        shape = RoundedCornerShape(4.dp),
+        shape = MaterialTheme.shapes.extraSmall,
         color = containerColor,
     ) {
         Text(

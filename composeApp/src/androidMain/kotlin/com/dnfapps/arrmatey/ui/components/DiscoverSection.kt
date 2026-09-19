@@ -11,8 +11,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,6 +32,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.StringResource
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DiscoverSection(
     title: StringResource,
@@ -52,33 +54,43 @@ fun DiscoverSection(
                     lazyListState.layoutInfo.visibleItemsInfo
                         .lastOrNull()
                         ?.index ?: 0
-                lastVisibleItemIndex >= totalItemsCount - 5 && totalItemsCount > 0
+                lastVisibleItemIndex >= (totalItemsCount - 5)
             }
         }
 
         LaunchedEffect(shouldLoadMore) {
-            if (shouldLoadMore) {
+            if (shouldLoadMore && !data.isLoadingMore && data.hasMore) {
                 onLoadMore()
             }
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f, fill = false),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    icon?.let { icon ->
-                        Icon(icon, null, modifier = Modifier.size(24.dp))
+                    if (icon != null) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
                     }
                     Text(
                         text = mokoString(title),
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 }
 
@@ -108,7 +120,7 @@ fun DiscoverSection(
 
                 if (data.isLoadingMore) {
                     item {
-                        CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+                        LoadingIndicator(modifier = Modifier.padding(16.dp))
                     }
                 }
             }

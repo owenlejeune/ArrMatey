@@ -361,7 +361,7 @@ fun TracearrHistoryTableRow(
                         }
 
                     Surface(
-                        shape = RoundedCornerShape(4.dp),
+                        shape = MaterialTheme.shapes.extraSmall,
                         color = chipColor,
                     ) {
                         Row(
@@ -445,7 +445,7 @@ private fun TableStatusChip(
         }
 
     Surface(
-        shape = RoundedCornerShape(4.dp),
+        shape = MaterialTheme.shapes.extraSmall,
         color = containerColor,
     ) {
         Text(

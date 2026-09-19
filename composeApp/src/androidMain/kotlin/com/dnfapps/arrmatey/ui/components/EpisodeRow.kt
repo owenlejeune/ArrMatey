@@ -254,7 +254,7 @@ fun EpisodeRow(
                         Modifier
                             .height(70.dp)
                             .aspectRatio(1.77f)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(MaterialTheme.shapes.small)
                             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                     contentDescription = null,
                 )
