@@ -83,6 +83,8 @@ class PreferencesStore(
     private val tracearrDetailsIntegrationKey = booleanPreferencesKey("tracearrDetailsIntegration")
     private val unifiedLibrarySearchAllInstancesKey = booleanPreferencesKey("unifiedLibrarySearchAllInstances")
     private val useFloatingNavigationBarKey = booleanPreferencesKey("useFloatingNavigationBar")
+    private val useColoredActivityCardsKey = booleanPreferencesKey("useColoredActivityCards")
+    private val useColoredCalendarCardsKey = booleanPreferencesKey("useColoredCalendarCards")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> =
         when (type) {
@@ -730,6 +732,48 @@ class PreferencesStore(
         scope.launch {
             dataStore.edit {
                 it[localNetworkPermissionInfoDismissedKey] = true
+            }
+        }
+    }
+
+    val useColoredActivityCards: Flow<Boolean> =
+        dataStore.data
+            .map { it[useColoredActivityCardsKey] ?: false }
+
+    fun toggleUseColoredActivityCards() {
+        scope.launch {
+            dataStore.edit {
+                val current = it[useColoredActivityCardsKey] ?: false
+                it[useColoredActivityCardsKey] = !current
+            }
+        }
+    }
+
+    fun setUseColoredActivityCards(value: Boolean) {
+        scope.launch {
+            dataStore.edit {
+                it[useColoredActivityCardsKey] = value
+            }
+        }
+    }
+
+    val useColoredCalendarCards: Flow<Boolean> =
+        dataStore.data
+            .map { it[useColoredCalendarCardsKey] ?: false }
+
+    fun toggleUseColoredCalendarCards() {
+        scope.launch {
+            dataStore.edit {
+                val current = it[useColoredCalendarCardsKey] ?: false
+                it[useColoredCalendarCardsKey] = !current
+            }
+        }
+    }
+
+    fun setUseColoredCalendarCards(value: Boolean) {
+        scope.launch {
+            dataStore.edit {
+                it[useColoredCalendarCardsKey] = value
             }
         }
     }

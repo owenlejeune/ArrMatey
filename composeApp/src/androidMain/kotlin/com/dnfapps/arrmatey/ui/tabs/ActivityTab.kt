@@ -1,14 +1,17 @@
 package com.dnfapps.arrmatey.ui.tabs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -66,6 +70,7 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.bullet
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
@@ -75,6 +80,7 @@ import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
 import com.dnfapps.arrmatey.ui.theme.surfaceDark
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.ExperimentalTime
 
@@ -83,6 +89,7 @@ import kotlin.time.ExperimentalTime
 fun ActivityTab(
     wideRailIsVisible: Boolean,
     viewModel: ActivityQueueViewModel = koinViewModel(),
+    preferences: PreferencesStore = koinInject(),
 ) {
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
@@ -90,6 +97,7 @@ fun ActivityTab(
     val removeItemStatus by viewModel.removeItemState.collectAsStateWithLifecycle()
     val isLoading by viewModel.isPolling.collectAsStateWithLifecycle()
     val hasLoaded by viewModel.hasLoaded.collectAsStateWithLifecycle()
+    val useColoredCards by preferences.useColoredActivityCards.collectAsStateWithLifecycle(false)
 
     var showConfirmRemove by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf<QueueItem?>(null) }
@@ -166,7 +174,10 @@ fun ActivityTab(
                                     .fillMaxSize(),
                         ) {
                             items(items = queueItems) { item ->
-                                ActivityItem(item) {
+                                ActivityItem(
+                                    item = item,
+                                    useFullColorCards = useColoredCards,
+                                ) {
                                     selectedItem = item
                                 }
                             }
@@ -202,70 +213,108 @@ fun ActivityTab(
 @Composable
 fun ActivityItem(
     item: QueueItem,
+    useFullColorCards: Boolean = false,
     onClick: () -> Unit,
 ) {
-    val colors =
+    val containerColor =
         when {
-            item.hasIssue ->
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                )
-            else ->
-                CardDefaults.cardColors(
-                    containerColor = item.type.associatedColor,
-                    contentColor = surfaceDark,
-                )
+            item.hasIssue -> MaterialTheme.colorScheme.errorContainer
+            useFullColorCards -> item.type.associatedColor
+            else -> MaterialTheme.colorScheme.surfaceContainerHigh
+        }
+    val contentColor =
+        when {
+            item.hasIssue -> MaterialTheme.colorScheme.onErrorContainer
+            useFullColorCards -> surfaceDark
+            else -> MaterialTheme.colorScheme.onSurface
+        }
+    val secondaryContentColor =
+        when {
+            item.hasIssue -> MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+            useFullColorCards -> surfaceDark.copy(alpha = 0.8f)
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
         }
 
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        colors = colors,
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = containerColor,
+                contentColor = contentColor,
+            ),
+        shape = MaterialTheme.shapes.large,
     ) {
         Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(
-                    text = item.titleLabel,
-                    fontWeight = FontWeight.Medium,
-                    overflow = TextOverflow.Ellipsis,
-                )
-
-                val statusRow =
-                    buildString {
-                        append(item.statusLabel)
-                        if (item.trackedDownloadState == QueueDownloadState.Downloading) {
-                            bullet()
-                            append(item.progressLabel)
-                            item.remainingTimeLabel?.let { remainingTimeLabel ->
-                                bullet()
-                                append(remainingTimeLabel)
-                                append(" left")
-                            }
-                        }
-                    }
-                Text(
-                    text = statusRow,
-                    fontSize = 14.sp,
-                )
-
-                Text(
-                    text = item.instanceName ?: "",
-                    fontSize = 12.sp,
+            if (!useFullColorCards) {
+                Box(
+                    modifier =
+                        Modifier
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .background(item.type.associatedColor),
                 )
             }
 
-            if (item.hasIssue) {
-                Icon(
-                    imageVector = Icons.Default.ErrorOutline,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f).padding(vertical = 12.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        text = item.titleLabel,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        overflow = TextOverflow.Ellipsis,
+                        color = contentColor,
+                    )
+
+                    val statusRow =
+                        buildString {
+                            append(item.statusLabel)
+                            if (item.trackedDownloadState == QueueDownloadState.Downloading) {
+                                bullet()
+                                append(item.progressLabel)
+                                item.remainingTimeLabel?.let { remainingTimeLabel ->
+                                    bullet()
+                                    append(remainingTimeLabel)
+                                    append(" left")
+                                }
+                            }
+                        }
+                    Text(
+                        text = statusRow,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = secondaryContentColor,
+                    )
+
+                    item.instanceName?.takeIf { it.isNotBlank() }?.let { instanceName ->
+                        Text(
+                            text = instanceName,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = secondaryContentColor,
+                        )
+                    }
+                }
+
+                if (item.hasIssue) {
+                    Icon(
+                        imageVector = Icons.Default.ErrorOutline,
+                        contentDescription = null,
+                        tint = if (useFullColorCards) surfaceDark else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
         }
     }

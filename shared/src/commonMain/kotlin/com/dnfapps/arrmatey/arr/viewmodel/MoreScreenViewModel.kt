@@ -55,6 +55,22 @@ class MoreScreenViewModel(
                 initialValue = false,
             )
 
+    val useColoredActivityCards =
+        preferencesStore.useColoredActivityCards
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
+    val useColoredCalendarCards =
+        preferencesStore.useColoredCalendarCards
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
     val appTheme =
         preferencesStore.appTheme
             .stateIn(
@@ -293,6 +309,14 @@ class MoreScreenViewModel(
 
     fun toggleUseFloatingNavigationBar() {
         preferencesStore.toggleUseFloatingNavigationBar()
+    }
+
+    fun toggleUseColoredActivityCards() {
+        preferencesStore.toggleUseColoredActivityCards()
+    }
+
+    fun toggleUseColoredCalendarCards() {
+        preferencesStore.toggleUseColoredCalendarCards()
     }
 
     fun setAppTheme(theme: AppTheme) {

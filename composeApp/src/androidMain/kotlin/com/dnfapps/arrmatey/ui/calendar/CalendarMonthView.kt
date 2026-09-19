@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.extensions.localToday
@@ -100,6 +101,9 @@ fun CalendarMonthView(
         HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
 
         if (selectedDate.month == currentMonth.month && selectedDate.year == currentMonth.year) {
+            val preferencesStore: com.dnfapps.arrmatey.datastore.PreferencesStore = org.koin.compose.koinInject()
+            val useColoredCards by preferencesStore.useColoredCalendarCards.collectAsStateWithLifecycle(false)
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
@@ -109,6 +113,7 @@ fun CalendarMonthView(
                         date = selectedDate,
                         items = state.items[selectedDate] ?: emptyList(),
                         instances = instances,
+                        useFullColorCards = useColoredCards,
                         onItemClick = onItemClick,
                     )
                 }

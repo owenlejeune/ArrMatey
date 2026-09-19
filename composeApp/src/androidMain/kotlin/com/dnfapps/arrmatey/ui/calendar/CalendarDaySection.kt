@@ -39,6 +39,7 @@ fun CalendarDaySection(
     date: LocalDate,
     items: List<CalendarItem>,
     instances: List<Instance>,
+    useFullColorCards: Boolean = false,
     onItemClick: (CalendarItem, Long?) -> Unit,
 ) {
     val today =
@@ -110,6 +111,7 @@ fun CalendarDaySection(
                         date = date,
                         movie = item,
                         instances = instances,
+                        useFullColorCards = useFullColorCards,
                         onNavigate = onNavigate,
                     )
 
@@ -118,6 +120,7 @@ fun CalendarDaySection(
                         episode = item.first,
                         additional = item.additional,
                         instances = instances,
+                        useFullColorCards = useFullColorCards,
                         onNavigate = onNavigate,
                     )
 
@@ -125,6 +128,7 @@ fun CalendarDaySection(
                     EpisodeCalendarItem(
                         episode = item,
                         instances = instances,
+                        useFullColorCards = useFullColorCards,
                         onNavigate = onNavigate,
                     )
 
@@ -132,6 +136,7 @@ fun CalendarDaySection(
                     AlbumCalendarItem(
                         album = item,
                         instances = instances,
+                        useFullColorCards = useFullColorCards,
                         onNavigate = onNavigate,
                     )
 
@@ -139,6 +144,7 @@ fun CalendarDaySection(
                     BookCalendarItem(
                         book = item,
                         instances = instances,
+                        useFullColorCards = useFullColorCards,
                         onNavigate = onNavigate,
                     )
 
@@ -146,6 +152,7 @@ fun CalendarDaySection(
                     AudiobookCalendarItem(
                         audiobook = item,
                         instances = instances,
+                        useFullColorCards = useFullColorCards,
                         onNavigate = onNavigate,
                     )
             }

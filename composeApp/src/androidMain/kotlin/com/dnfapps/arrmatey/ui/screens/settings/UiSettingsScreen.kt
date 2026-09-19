@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MiscellaneousServices
@@ -71,6 +72,8 @@ fun UiSettingsScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
+    val useColoredActivityCards by viewModel.useColoredActivityCards.collectAsStateWithLifecycle()
+    val useColoredCalendarCards by viewModel.useColoredCalendarCards.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
     val useFloatingNavigationBar by viewModel.useFloatingNavigationBar.collectAsStateWithLifecycle()
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
@@ -182,6 +185,30 @@ fun UiSettingsScreen(
                                 )
                             },
                             onClick = { viewModel.toggleUseServiceNavLogos() },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.ColorLens),
+                            title = mokoString(MR.strings.use_colored_activity_cards),
+                            subtitle = mokoString(MR.strings.use_colored_activity_cards_desc),
+                            trailingContent = {
+                                Switch(
+                                    checked = useColoredActivityCards,
+                                    onCheckedChange = { viewModel.toggleUseColoredActivityCards() },
+                                )
+                            },
+                            onClick = { viewModel.toggleUseColoredActivityCards() },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.ColorLens),
+                            title = mokoString(MR.strings.use_colored_calendar_cards),
+                            subtitle = mokoString(MR.strings.use_colored_calendar_cards_desc),
+                            trailingContent = {
+                                Switch(
+                                    checked = useColoredCalendarCards,
+                                    onCheckedChange = { viewModel.toggleUseColoredCalendarCards() },
+                                )
+                            },
+                            onClick = { viewModel.toggleUseColoredCalendarCards() },
                         ),
                     ),
             )

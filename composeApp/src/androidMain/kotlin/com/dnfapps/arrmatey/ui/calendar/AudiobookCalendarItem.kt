@@ -1,9 +1,14 @@
 package com.dnfapps.arrmatey.ui.calendar
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,8 +42,29 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun AudiobookCalendarItem(
     audiobook: Audiobook,
     instances: List<Instance>,
+    useFullColorCards: Boolean = false,
     onNavigate: (Long?) -> Unit,
 ) {
+    val associatedColor = audiobook.associatedType?.associatedColor ?: ArrLightPurple
+    val containerColor =
+        if (useFullColorCards) {
+            associatedColor
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        }
+    val contentColor =
+        if (useFullColorCards) {
+            surfaceDark
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
+    val secondaryContentColor =
+        if (useFullColorCards) {
+            surfaceContainerLowDark
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
     SlidableCalendarItem(
         instanceIds = audiobook.instanceIds,
         instances = instances,
@@ -49,55 +75,79 @@ fun AudiobookCalendarItem(
                 Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
+            shape = MaterialTheme.shapes.large,
             colors =
                 CardDefaults.cardColors(
-                    containerColor = ArrLightPurple,
-                    contentColor = surfaceDark,
+                    containerColor = containerColor,
+                    contentColor = contentColor,
                 ),
         ) {
             Row(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        .height(IntrinsicSize.Min),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                BasePosterItem(
-                    model = rememberRemoteImageData(audiobook.getPoster()?.remoteUrl),
-                    aspectRatio = AspectRatio.Cover,
-                    modifier = Modifier.width(50.dp),
-                )
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = audiobook.title ?: mokoString(MR.strings.unknown),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                    )
-                    Text(
-                        text =
-                            listOfNotNull(
-                                audiobook.authors.joinToString(", "),
-                                audiobook.series?.takeUnless { it.isEmpty() },
-                            ).joinToString(separator = BULLET),
-                        style = MaterialTheme.typography.bodyMedium,
+                if (!useFullColorCards) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .width(6.dp)
+                                .fillMaxHeight()
+                                .background(associatedColor),
                     )
                 }
 
-                val statusIcon =
-                    when {
-                        audiobook.isDownloaded -> Icons.Default.FileDownloadDone
-                        !audiobook.monitored -> Icons.Default.BookmarkBorder
-                        audiobook.monitored -> Icons.Default.Bookmark
-                        else -> null
-                    }
-                statusIcon?.let { icon ->
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = surfaceContainerLowDark,
-                        modifier = Modifier.size(18.dp),
+                Row(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .padding(vertical = 12.dp, horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BasePosterItem(
+                        model = rememberRemoteImageData(audiobook.getPoster()?.remoteUrl),
+                        aspectRatio = AspectRatio.Cover,
+                        modifier = Modifier.width(50.dp),
                     )
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(
+                            text = audiobook.title ?: mokoString(MR.strings.unknown),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = contentColor,
+                        )
+                        Text(
+                            text =
+                                listOfNotNull(
+                                    audiobook.authors.joinToString(", "),
+                                    audiobook.series?.takeUnless { it.isEmpty() },
+                                ).joinToString(separator = BULLET),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = secondaryContentColor,
+                        )
+                    }
+
+                    val statusIcon =
+                        when {
+                            audiobook.isDownloaded -> Icons.Default.FileDownloadDone
+                            !audiobook.monitored -> Icons.Default.BookmarkBorder
+                            audiobook.monitored -> Icons.Default.Bookmark
+                            else -> null
+                        }
+                    statusIcon?.let { icon ->
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = secondaryContentColor,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
             }
         }
