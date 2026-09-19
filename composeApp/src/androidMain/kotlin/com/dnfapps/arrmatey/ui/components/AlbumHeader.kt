@@ -1,11 +1,11 @@
 package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
@@ -46,7 +46,8 @@ fun AlbumHeader(
     val infoString = albumInfo.joinToString(BULLET)
     Text(
         text = infoString,
-        fontSize = 16.sp,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     ReleaseDownloadButtons(
         onInteractiveClicked = {

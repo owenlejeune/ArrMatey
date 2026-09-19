@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 
 @Composable
@@ -35,11 +34,7 @@ fun MediaRequestTypeChip(
     ) {
         Text(
             text = text,
-            style =
-                MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 12.sp,
-                    lineHeight = 14.sp,
-                ),
+            style = MaterialTheme.typography.labelSmall,
             color = content,
         )
     }

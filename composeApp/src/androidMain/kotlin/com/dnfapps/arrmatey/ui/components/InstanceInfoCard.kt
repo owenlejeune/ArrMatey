@@ -14,14 +14,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
@@ -56,8 +55,7 @@ fun InstanceInfoCard(
                 )
                 Text(
                     text = instanceType.toString(),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(
@@ -71,8 +69,7 @@ fun InstanceInfoCard(
             }
             Text(
                 text = mokoString(instanceType.resource),
-                fontSize = 14.sp,
-                lineHeight = 18.sp,
+                style = MaterialTheme.typography.bodyMedium,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),

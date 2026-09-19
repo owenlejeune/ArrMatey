@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.MR
@@ -51,12 +50,14 @@ fun NoInstanceView(
             )
             Text(
                 text = mokoString(MR.strings.no_type_instances, type.name),
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
             )
             Text(
                 text = mokoString(MR.strings.no_type_instances_message, type.name),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
 
@@ -79,8 +80,7 @@ fun NoInstanceView(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = mokoString(MR.strings.add_instance),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -18,11 +17,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.shared.MR
@@ -54,8 +51,7 @@ fun InfoCardInstanceFooter(
         )
         Text(
             text = instance.label,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -71,7 +67,7 @@ fun InfoAreaCard(
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(10.dp),
+        shape = MaterialTheme.shapes.large,
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
@@ -96,13 +92,13 @@ fun InfoAreaCard(
                                 },
                             ).padding(vertical = 4.dp),
                 ) {
-                    Text(text = key, fontSize = 14.sp)
+                    Text(text = key, style = MaterialTheme.typography.bodyMedium)
                     Text(
                         text = value,
                         color = MaterialTheme.colorScheme.primary,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.End,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.widthIn(max = 200.dp),
                     )
                 }

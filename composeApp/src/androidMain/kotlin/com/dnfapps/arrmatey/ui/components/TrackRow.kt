@@ -23,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
 import com.dnfapps.arrmatey.entensions.bullet
@@ -68,18 +67,16 @@ fun TrackRow(
         ) {
             val titleString =
                 buildAnnotatedString {
-                    withStyle(SpanStyle(fontSize = 16.sp)) {
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                            append("${track.absoluteTrackNumber}.")
-                        }
-                        withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                            append(track.title)
-                        }
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                        append("${track.absoluteTrackNumber}.")
+                    }
+                    withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(track.title)
                     }
                 }
             Text(
                 text = titleString,
-                lineHeight = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 overflow = TextOverflow.MiddleEllipsis,
                 maxLines = 1,
             )
@@ -95,7 +92,6 @@ fun TrackRow(
                 buildAnnotatedString {
                     withStyle(
                         SpanStyle(
-                            fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.secondary,
                         ),
                     ) {
@@ -104,7 +100,6 @@ fun TrackRow(
                     bullet()
                     withStyle(
                         SpanStyle(
-                            fontSize = 14.sp,
                             color = statusColor,
                             fontStyle = FontStyle.Italic,
                         ),
@@ -112,7 +107,10 @@ fun TrackRow(
                         append(statusText)
                     }
                 }
-            Text(styledStatusText)
+            Text(
+                text = styledStatusText,
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
 
         mediaInfoStatusCondensed?.let { staus ->

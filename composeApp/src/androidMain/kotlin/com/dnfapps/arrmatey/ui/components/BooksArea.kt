@@ -48,7 +48,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
@@ -106,9 +105,8 @@ fun BooksArea(
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = mokoString(MR.strings.history),
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium,
                 modifier =
                     Modifier.clickable {
                         onNavigateToAuthorFiles(author)
@@ -224,7 +222,7 @@ fun BookRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = statusText,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = statusColor,
                     fontStyle = if (statusColor != Color.Unspecified) FontStyle.Italic else FontStyle.Normal,
                 )
@@ -239,7 +237,7 @@ fun BookRow(
                     text = "$BULLET${book.releaseDate?.format("MMM d, yyyy")}",
                     color = color,
                     fontWeight = weight,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         }

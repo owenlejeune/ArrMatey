@@ -44,7 +44,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -520,7 +519,7 @@ fun SeerrPersonItem(
                 ) {
                     Text(
                         text = item.name ?: mokoString(MR.strings.unknown),
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -574,7 +573,7 @@ private fun SeriesDetails(
     val network = item.network
 
     val secondLine = listOfNotNull(seasonLabel, fileSizeString, network).joinToString(BULLET)
-    Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
     val statusStr =
         when (item.status) {
@@ -584,12 +583,12 @@ private fun SeriesDetails(
 
             else -> mokoString(item.status.resource)
         }
-    Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
     if (item.id != null) {
         Text(
             text = "${item.episodeFileCount}/${item.episodeCount}",
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.labelSmall,
             color = contentColor,
             modifier = Modifier.padding(top = 8.dp, bottom = 1.dp),
         )
@@ -613,12 +612,12 @@ private fun MovieDetails(
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     item.releaseDate?.format("MMMM d, yyyy")?.let {
-        Text(it, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+        Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
     val firstLine = listOfNotNull(item.runtimeString, item.studio).joinToString(" • ")
     firstLine.unlessEmpty { firstLine ->
-        Text(firstLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+        Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
     val qualityLabel =
@@ -629,7 +628,7 @@ private fun MovieDetails(
     val fileSizeLabel = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
     val thirdLine = listOfNotNull(qualityLabel, fileSizeLabel).joinToString(BULLET)
     thirdLine.unlessEmpty { thirdLine ->
-        Text(thirdLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+        Text(thirdLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
     if (item.id != null) {
@@ -656,10 +655,10 @@ private fun ArtistDetails(
     val albumLabel = mokoPlural(MR.plurals.albums, item.albumCount)
     val trackLabel = mokoPlural(MR.plurals.tracks, item.trackCount)
     val secondLine = listOfNotNull(albumLabel, trackLabel).joinToString(BULLET)
-    Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
     val statusStr = mokoString(item.status.resource)
-    Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 }
 
 @Composable
@@ -672,7 +671,7 @@ private fun AuthorDetails(
 
     val bookLabel = mokoPlural(MR.plurals.books_count, item.bookCount)
     val firstLine = listOfNotNull(bookLabel).joinToString(BULLET)
-    Text(firstLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
     val statusStr =
         when (item.status) {
@@ -682,12 +681,12 @@ private fun AuthorDetails(
 
             else -> mokoString(item.status.resource)
         }
-    Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
     if (item.id != null) {
         Text(
             text = "${item.bookFileCount}/${item.bookCount}",
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.labelSmall,
             color = contentColor,
             modifier = Modifier.padding(top = 8.dp, bottom = 1.dp),
         )
@@ -713,7 +712,7 @@ private fun AudiobookDetails(
         if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
 
     val authorString = item.authors.joinToString(", ")
-    Text(authorString, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(authorString, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
     val seriesString =
         item.series?.let {
@@ -723,11 +722,11 @@ private fun AudiobookDetails(
 
     val secondLine = listOfNotNull(seriesString, fileSizeString, item.publisher).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {
-        Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+        Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
     val statusStr = mokoString(item.status.resource)
-    Text(statusStr, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 }
 
 @Composable
@@ -739,7 +738,7 @@ private fun SearchAudiobookDetails(
         if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
 
     val authorString = item.authors.joinToString(", ") { it.name }
-    Text(authorString, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(authorString, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
     val seriesString =
         item.series.firstOrNull()?.let {
@@ -747,11 +746,11 @@ private fun SearchAudiobookDetails(
         }
     val secondLine = listOfNotNull(seriesString, item.publisher).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {
-        Text(secondLine, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+        Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
     item.releaseDate?.format("MMMM d, yyyy")?.let {
-        Text(it, color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+        Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -763,8 +762,8 @@ private fun MockDetails(
     val contentColor =
         if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
 
-    Text("Mock Studio", color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
-    Text("Mock Quality", color = contentColor, fontSize = 14.sp, lineHeight = 18.sp)
+    Text("Mock Studio", color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    Text("Mock Quality", color = contentColor, style = MaterialTheme.typography.bodyMedium)
 }
 
 @Composable

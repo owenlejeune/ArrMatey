@@ -34,7 +34,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
@@ -97,15 +96,16 @@ fun AlbumsArea(
                                             append(" ($year)")
                                         }
                                     },
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 16.sp,
                                 maxLines = 2,
                                 overflow = TextOverflow.MiddleEllipsis,
                             )
                             album.statistics?.let { statistics ->
                                 Text(
                                     text = "${statistics.trackFileCount}/${statistics.totalTrackCount}",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }

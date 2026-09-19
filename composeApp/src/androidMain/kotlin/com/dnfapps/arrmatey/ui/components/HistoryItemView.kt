@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ListenarrHistoryItem
 import com.dnfapps.arrmatey.compose.utils.breakable
@@ -34,15 +33,17 @@ fun HistoryItemView(
             Text(
                 text = mokoString(item.eventType.resource),
                 color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.labelMedium,
             )
             Text(
                 text = item.date.format("MMM d, yyyy"),
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Text(
             text = item.displayTitle?.breakable() ?: "---",
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
         )
 
@@ -66,7 +67,8 @@ fun HistoryItemView(
         subLabel.takeUnless { it.isEmpty() }?.let { subLabel ->
             Text(
                 text = subLabel,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
