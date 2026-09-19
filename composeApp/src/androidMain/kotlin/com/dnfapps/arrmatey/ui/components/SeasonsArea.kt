@@ -229,7 +229,7 @@ fun SeasonsArea(
                             )
 
                             if (index < season.episodes.size - 1) {
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                             }
                         }
                     }

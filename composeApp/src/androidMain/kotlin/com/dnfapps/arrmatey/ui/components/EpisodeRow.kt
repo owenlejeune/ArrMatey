@@ -72,13 +72,15 @@ fun EpisodeRow(
     val arrEp = episode.arrEpisode
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier =
-            modifier.combinedClickable(
-                enabled = onClick != null || onLongClick != null,
-                onClick = onClick ?: {},
-                onLongClick = onLongClick,
-            ),
+            modifier
+                .padding(vertical = 4.dp)
+                .combinedClickable(
+                    enabled = onClick != null || onLongClick != null,
+                    onClick = onClick ?: {},
+                    onLongClick = onLongClick,
+                ),
     ) {
         Row(
             verticalAlignment = Alignment.Top,
@@ -174,18 +176,19 @@ fun EpisodeRow(
             ) {
                 if (arrEp != null) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(0.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         IconButton(
                             onClick = {
                                 onNavigateToSeriesRelease(arrEp.id)
                             },
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(32.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = null,
+                                modifier = Modifier.size(20.dp),
                             )
                         }
                         IconButton(
@@ -193,16 +196,18 @@ fun EpisodeRow(
                                 onAutomaticSearch(arrEp.id)
                             },
                             enabled = arrEp.monitored && !searchInProgress(arrEp.id),
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(32.dp),
                         ) {
                             if (searchInProgress(arrEp.id)) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
                                 )
                             } else {
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
                                 )
                             }
                         }
@@ -210,7 +215,7 @@ fun EpisodeRow(
                             onClick = {
                                 onToggleMonitor(arrEp)
                             },
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(32.dp),
                         ) {
                             AnimatedContent(
                                 targetState = arrEp.monitored,
@@ -227,6 +232,7 @@ fun EpisodeRow(
                                             Icons.Default.BookmarkBorder
                                         },
                                     contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
                                 )
                             }
                         }

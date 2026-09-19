@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -51,10 +52,11 @@ fun UnifiedDetailsHeader(
 ) {
     var detailHeight by remember { mutableIntStateOf(0) }
     val isInTwoPane = LocalIsInTwoPane.current
+    val density = LocalDensity.current
     Box(modifier = Modifier.fillMaxWidth()) {
         DetailHeaderBanner(
             bannerUrl = bannerUrl,
-            gradientHeight = bannerGradientHeight ?: detailHeight.dp,
+            gradientHeight = bannerGradientHeight ?: with(density) { detailHeight.toDp() },
             startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
         )
 

@@ -384,7 +384,7 @@ private fun MissingSubtitleItem(
             ) {
                 LanguageTag(text = subtitle.name.uppercase(), containerColor = Color(0xFF4A2C5E))
 
-                IconButton(onClick = { /* TODO */ }, modifier = Modifier.size(24.dp)) {
+                IconButton(onClick = { /* TODO */ }) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
@@ -427,7 +427,7 @@ private fun SubtitleItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (subtitle.isExternal) {
-                    IconButton(onClick = { onDownload(subtitle) }, modifier = Modifier.size(24.dp)) {
+                    IconButton(onClick = { onDownload(subtitle) }) {
                         Icon(
                             imageVector = Icons.Default.Download,
                             contentDescription = mokoString(MR.strings.bazarr_download_subtitle),

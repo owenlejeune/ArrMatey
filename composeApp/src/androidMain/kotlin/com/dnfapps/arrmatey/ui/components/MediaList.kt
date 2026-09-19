@@ -367,8 +367,7 @@ fun SeerrMediaItem(
             modifier
                 .fillMaxWidth()
                 .combinedClickable(onClick = { onItemClick(result) }),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        shape = MaterialTheme.shapes.large,
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             if (edgeColor != null) {
@@ -481,8 +480,7 @@ fun SeerrPersonItem(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .combinedClickable(onClick = { onItemClick(result) }),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        shape = MaterialTheme.shapes.large,
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             if (edgeColor != null) {

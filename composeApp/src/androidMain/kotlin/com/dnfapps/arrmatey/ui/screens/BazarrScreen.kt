@@ -507,8 +507,7 @@ private fun BazarrItem(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        shape = MaterialTheme.shapes.large,
     ) {
         Box(
             modifier =
