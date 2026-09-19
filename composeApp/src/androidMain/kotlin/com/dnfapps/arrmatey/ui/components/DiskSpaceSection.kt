@@ -1,8 +1,6 @@
 package com.dnfapps.arrmatey.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
@@ -28,11 +27,13 @@ import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun DiskSpaceSection(diskSpaces: List<ArrDiskSpace>) {
-    Box(
-        modifier =
-            Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             diskSpaces.forEachIndexed { index, disk ->
@@ -72,7 +73,12 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        val progressColor = if (disk.usedPercentage > 0.9f) Color.Red else MaterialTheme.colorScheme.primary
+        val progressColor =
+            if (disk.usedPercentage > 0.9f) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.primary
+            }
 
         LinearProgressIndicator(
             progress = { disk.usedPercentage },
@@ -82,7 +88,7 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp)),
             color = progressColor,
-            trackColor = progressColor.copy(alpha = 0.2f),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
         )
 
         Spacer(modifier = Modifier.height(8.dp))

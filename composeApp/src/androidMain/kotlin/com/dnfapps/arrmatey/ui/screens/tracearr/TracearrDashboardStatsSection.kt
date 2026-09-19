@@ -166,8 +166,18 @@ fun TracearrDashboardStatsSection(
                 icon = Icons.Default.Warning,
                 count = stats.alertsLast24h,
                 label = mokoString(MR.strings.alerts),
-                containerColor = if (stats.alertsLast24h > 0) MaterialTheme.colorScheme.errorContainer else TracearrDarkBlue,
-                contentColor = if (stats.alertsLast24h > 0) MaterialTheme.colorScheme.onErrorContainer else Color.White,
+                containerColor =
+                    if (stats.alertsLast24h > 0) {
+                        MaterialTheme.colorScheme.errorContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    },
+                contentColor =
+                    if (stats.alertsLast24h > 0) {
+                        MaterialTheme.colorScheme.onErrorContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToViolations,
             )
@@ -177,8 +187,8 @@ fun TracearrDashboardStatsSection(
                 firstLabel = mokoString(MR.strings.plays),
                 secondValue = stats.todaySessions.toString(),
                 secondLabel = mokoString(MR.strings.sessions),
-                color = TracearrBlue,
-                contentColor = TracearrNavy,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToHistory,
             )
@@ -186,8 +196,8 @@ fun TracearrDashboardStatsSection(
                 icon = Icons.Default.Schedule,
                 value = stats.formattedWatchTime,
                 label = mokoString(MR.strings.watch_time),
-                containerColor = TracearrLightBlue,
-                contentColor = TracearrDarkBlue,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToActivity,
             )
@@ -195,8 +205,8 @@ fun TracearrDashboardStatsSection(
                 icon = Icons.Default.Group,
                 count = stats.activeUsersToday,
                 label = mokoString(MR.strings.active_users),
-                containerColor = TracearrNavy,
-                contentColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToAllUsers,
             )

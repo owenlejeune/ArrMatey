@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
@@ -38,10 +37,14 @@ fun ArrHealthCard(health: ArrHealth) {
                 )
             ArrHealthType.Warning ->
                 CardDefaults.cardColors(
-                    containerColor = Color(0xffffc653),
-                    contentColor = Color.Black,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
-            else -> CardDefaults.cardColors()
+            else ->
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                )
         }
     val icon =
         when (health.type) {

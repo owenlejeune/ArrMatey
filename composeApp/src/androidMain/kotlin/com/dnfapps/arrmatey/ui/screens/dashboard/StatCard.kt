@@ -26,7 +26,7 @@ fun StatCard(
     icon: ImageVector,
     label: String,
     value: String,
-    color: Color,
+    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     onClick: (() -> Unit)? = null,
 ) {
     Card(
@@ -54,8 +54,8 @@ fun SplitStatCard(
     firstValue: String,
     secondLabel: String,
     secondValue: String,
-    color: Color,
     modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     contentColor: Color = contentColorFor(color),
     onClick: (() -> Unit)? = null,
 ) {
@@ -103,12 +103,12 @@ fun CountStatItem(
     icon: ImageVector,
     label: String,
     count: Int,
-    containerColor: Color,
     modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     contentColor: Color = contentColorFor(containerColor),
     onClick: (() -> Unit)? = null,
 ) {
-    CompactStatCard(icon, label, count.toString(), containerColor, modifier, contentColor, onClick)
+    CompactStatCard(icon, label, count.toString(), modifier, containerColor, contentColor, onClick)
 }
 
 @Composable
@@ -116,8 +116,8 @@ fun CompactStatCard(
     icon: ImageVector,
     label: String,
     value: String,
-    containerColor: Color,
     modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     contentColor: Color = contentColorFor(containerColor),
     onClick: (() -> Unit)? = null,
 ) {

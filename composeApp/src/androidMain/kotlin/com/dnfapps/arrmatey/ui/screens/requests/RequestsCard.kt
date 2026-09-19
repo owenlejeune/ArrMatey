@@ -25,8 +25,6 @@ import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
-import com.dnfapps.arrmatey.ui.theme.inverseOnSurfaceLight
-import com.dnfapps.arrmatey.ui.theme.inverseSurfaceLight
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -52,11 +50,10 @@ fun RequestCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
         colors =
             CardDefaults.cardColors(
-                containerColor = inverseSurfaceLight,
-                contentColor = inverseOnSurfaceLight,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
             ),
         onClick = onClick,
     ) {
