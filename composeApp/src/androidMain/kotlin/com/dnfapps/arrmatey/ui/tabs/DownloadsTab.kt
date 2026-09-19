@@ -1,69 +1,32 @@
-@file:Suppress("ktlint:standard:max-line-length")
-
 package com.dnfapps.arrmatey.ui.tabs
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudQueue
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,40 +35,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dnfapps.arrmatey.compose.utils.breakable
-import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
-import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientCommandState
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
-import com.dnfapps.arrmatey.entensions.ARROW_DOWN
-import com.dnfapps.arrmatey.entensions.ARROW_UP
-import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.showErrorImmediately
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
-import com.dnfapps.arrmatey.ui.components.ContainerCard
+import com.dnfapps.arrmatey.ui.components.downloads.DeleteDownloadDialog
+import com.dnfapps.arrmatey.ui.components.downloads.DownloadSelectionBottomBar
+import com.dnfapps.arrmatey.ui.components.downloads.DownloadSelectionTopBar
+import com.dnfapps.arrmatey.ui.components.downloads.DownloadTransferSpeedChips
+import com.dnfapps.arrmatey.ui.components.downloads.NoDownloadClientsView
+import com.dnfapps.arrmatey.ui.components.downloads.TorrentActionsCard
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.menu.DownloadQueueFilterMenu
-import com.dnfapps.arrmatey.ui.theme.ArrBlue
-import com.dnfapps.arrmatey.ui.theme.ArrGreen
-import com.dnfapps.arrmatey.ui.theme.ArrGrey
-import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
@@ -113,7 +62,6 @@ import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
 import com.skydoves.flexible.core.FlexibleSheetSize
 import com.skydoves.flexible.core.FlexibleSheetValue
 import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
-import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -166,6 +114,7 @@ fun DownloadsTab(
                 bulkDeleteTarget = false
                 viewModel.resetCommandState()
             }
+
             is DownloadClientCommandState.Error -> {
                 deleteTarget = null
                 bulkDeleteTarget = false
@@ -174,6 +123,7 @@ fun DownloadsTab(
                 )
                 viewModel.resetCommandState()
             }
+
             else -> {}
         }
     }
@@ -185,7 +135,7 @@ fun DownloadsTab(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             if (isInSelectionMode) {
-                SelectionTopBar(
+                DownloadSelectionTopBar(
                     count = selectionCount,
                     onClose = { viewModel.exitSelectionMode() },
                     onSelectAll = {
@@ -256,44 +206,13 @@ fun DownloadsTab(
                     contentAlignment = Alignment.Center,
                 ) {
                     Column {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp)
-                                    .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            Spacer(Modifier.width(18.dp))
-                            downloadClientState.downloadClients.forEach { client ->
-                                val info =
-                                    queueState.transferInfo.firstOrNull { it.client.id == client.id }
-                                FilterChip(
-                                    selected =
-                                        downloadClientState.downloadClients.size > 1 &&
-                                            filterState.clientIds.contains(client.id),
-                                    onClick = { viewModel.toggleClientIdFilter(client.id) },
-                                    leadingIcon = {
-                                        Image(
-                                            painter = painterResource(client.type.icon),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(18.dp),
-                                        )
-                                    },
-                                    label = {
-                                        Text(
-                                            text =
-                                                "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  " +
-                                                    "↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(vertical = 2.dp),
-                                        )
-                                    },
-                                )
-                            }
-                            Spacer(Modifier.width(18.dp))
-                        }
+                        DownloadTransferSpeedChips(
+                            downloadClients = downloadClientState.downloadClients,
+                            transferInfo = queueState.transferInfo,
+                            selectedClientIds = filterState.clientIds,
+                            onToggleClientIdFilter = viewModel::toggleClientIdFilter,
+                        )
+
                         if (queueState.queueItems.isEmpty()) {
                             Column(
                                 modifier = Modifier.fillMaxSize(),
@@ -412,458 +331,5 @@ fun DownloadsTab(
                 },
             )
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SelectionTopBar(
-    count: Int,
-    onClose: () -> Unit,
-    onSelectAll: () -> Unit,
-    isAllSelected: Boolean,
-) {
-    TopAppBar(
-        title = {
-            Text(
-                text = mokoPlural(MR.plurals.selected_count, count),
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onClose) {
-                Icon(Icons.Default.Close, null)
-            }
-        },
-        actions = {
-            IconButton(onClick = onSelectAll) {
-                Icon(
-                    imageVector = if (isAllSelected) Icons.Default.Deselect else Icons.Default.SelectAll,
-                    contentDescription = null,
-                )
-            }
-        },
-    )
-}
-
-@Composable
-private fun DownloadSelectionBottomBar(
-    onPause: () -> Unit,
-    onResume: () -> Unit,
-    onDelete: () -> Unit,
-) {
-    FlowRow(
-        modifier =
-            Modifier
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 24.dp)
-                .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        DownloadSelectionActionItem(
-            icon = Icons.Default.Pause,
-            label = mokoString(MR.strings.pause),
-            onClick = onPause,
-        )
-        DownloadSelectionActionItem(
-            icon = Icons.Default.PlayArrow,
-            label = mokoString(MR.strings.resume),
-            onClick = onResume,
-        )
-        DownloadSelectionActionItem(
-            icon = Icons.Default.Delete,
-            label = mokoString(MR.strings.delete),
-            onClick = onDelete,
-            isError = true,
-        )
-    }
-}
-
-@Composable
-private fun DownloadSelectionActionItem(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit,
-    enabled: Boolean = true,
-    isError: Boolean = false,
-) {
-    Button(
-        onClick = onClick,
-        colors =
-            if (isError) {
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError,
-                )
-            } else {
-                ButtonDefaults.buttonColors()
-            },
-        enabled = enabled,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            modifier = Modifier.padding(end = 4.dp),
-        )
-        Text(
-            text = label.breakable(),
-        )
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun DownloadQueueItem(
-    item: DownloadItem,
-    showClientInfo: Boolean,
-    isInSelectionMode: Boolean,
-    isSelected: Boolean,
-    onLongClick: () -> Unit,
-    onClick: () -> Unit,
-) {
-    val statusColor =
-        remember(item.status) {
-            when (item.status) {
-                DownloadItemStatus.Downloading,
-                DownloadItemStatus.DownloadingForced,
-                DownloadItemStatus.DownloadingMetadataForced,
-                DownloadItemStatus.Checking,
-                DownloadItemStatus.CheckingResumeData,
-                DownloadItemStatus.Moving,
-                DownloadItemStatus.DownloadingStalled,
-                -> ArrGreen
-                DownloadItemStatus.Uploading,
-                DownloadItemStatus.UploadingForced,
-                -> ArrBlue
-                DownloadItemStatus.DownloadingPaused,
-                DownloadItemStatus.UploadingPaused,
-                -> ArrPurple
-                DownloadItemStatus.Queued,
-                DownloadItemStatus.Allocating,
-                DownloadItemStatus.Propagating,
-                DownloadItemStatus.Fetching,
-                -> ArrGrey
-                DownloadItemStatus.Error,
-                DownloadItemStatus.MissingFiles,
-                DownloadItemStatus.Unknown,
-                -> ArrRed
-            }
-        }
-
-    ContainerCard(
-        modifier =
-            Modifier.combinedClickable(
-                onLongClick = onLongClick,
-                onClick = onClick,
-            ),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
-            ),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            if (isInSelectionMode) {
-                Checkbox(
-                    checked = isSelected,
-                    onCheckedChange = { onClick() },
-                )
-            }
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = item.name.breakable(),
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-
-                val statusLabel =
-                    buildAnnotatedString {
-                        withStyle(SpanStyle(color = statusColor)) {
-                            append(mokoString(item.status.resource))
-                        }
-                        if (item.downloadSpeed > 0L) {
-                            append(BULLET)
-                            append(ARROW_DOWN)
-                            append(item.downloadSpeed.bytesAsFileSizeString())
-                            append("/s")
-                        }
-                        if (item.uploadSpeed > 0L) {
-                            append(BULLET)
-                            append(ARROW_UP)
-                            append(item.uploadSpeed.bytesAsFileSizeString())
-                            append("/s")
-                        }
-                    }
-                Text(
-                    text = statusLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                val progressLabel =
-                    buildString {
-                        append(item.downloaded.bytesAsFileSizeString())
-                        append(" / ")
-                        append(item.size.bytesAsFileSizeString())
-                        append(BULLET)
-                        append("${(item.progress * 100).toInt()}%")
-                    }
-                Text(
-                    text = progressLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                LinearProgressIndicator(
-                    progress = { item.progress.toFloat() },
-                    modifier = Modifier.fillMaxWidth(),
-                    trackColor = statusColor.copy(alpha = 0.3f),
-                    color = statusColor,
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(top = 4.dp),
-                ) {
-                    if (item.etaString.isNotBlank()) {
-                        Text(
-                            text = "ETA: ${item.etaString}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    if (showClientInfo) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            Image(
-                                painter = painterResource(item.client.type.icon),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                            )
-                            Text(
-                                text = item.client.label,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-
-                if (item.category.isNotEmpty() || item.tags.isNotEmpty()) {
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        item.category.takeUnless { it.isEmpty() }?.let { category ->
-                            AssistChip(
-                                onClick = { },
-                                label = { Text(category) },
-                                border = null,
-                                colors =
-                                    AssistChipDefaults.assistChipColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    ),
-                            )
-                        }
-                        item.tags.forEach { tag ->
-                            AssistChip(
-                                onClick = { },
-                                label = { Text(tag) },
-                                border = null,
-                                shape = CircleShape,
-                                colors =
-                                    AssistChipDefaults.assistChipColors(
-                                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                        labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    ),
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DeleteDownloadDialog(
-    commandState: DownloadClientCommandState,
-    onDismiss: () -> Unit,
-    onConfirm: (Boolean) -> Unit,
-) {
-    var deleteFiles by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(mokoString(MR.strings.confirm)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Remove this download?")
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(checked = deleteFiles, onCheckedChange = { deleteFiles = it })
-                    Text(mokoString(MR.strings.delete_files))
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(deleteFiles) },
-                enabled = commandState !is DownloadClientCommandState.Loading,
-            ) {
-                Text(mokoString(MR.strings.yes))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(mokoString(MR.strings.no))
-            }
-        },
-    )
-}
-
-@Composable
-private fun NoDownloadClientsView(
-    modifier: Modifier = Modifier,
-    onAddDownloadClientClick: () -> Unit = {},
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
-    ) {
-        Icon(
-            imageVector = Icons.Default.CloudQueue,
-            contentDescription = null,
-            modifier = Modifier.size(128.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = mokoString(MR.strings.no_download_clients),
-            style = MaterialTheme.typography.titleLarge,
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Button(
-            onClick = onAddDownloadClientClick,
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-        ) {
-            Icon(
-                imageVector = Icons.Default.AddCircle,
-                contentDescription = null,
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = mokoString(MR.strings.add_instance),
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
-    }
-}
-
-@Composable
-fun TorrentActionsCard(
-    item: DownloadItem,
-    showClientInfo: Boolean,
-    isInSelectionMode: Boolean,
-    isSelected: Boolean,
-    onPause: () -> Unit,
-    onResume: () -> Unit,
-    onDelete: () -> Unit,
-    onLongClick: () -> Unit,
-    onClick: () -> Unit,
-) {
-    val state = rememberSwipeToDismissBoxState()
-
-    LaunchedEffect(state.currentValue) {
-        if (!isInSelectionMode) {
-            when (state.currentValue) {
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    if (item.status.isPaused) onResume() else onPause()
-                }
-                SwipeToDismissBoxValue.EndToStart -> {
-                    onDelete()
-                }
-                else -> {}
-            }
-        }
-        state.snapTo(SwipeToDismissBoxValue.Settled)
-    }
-
-    SwipeToDismissBox(
-        state = state,
-        enableDismissFromStartToEnd = !isInSelectionMode,
-        enableDismissFromEndToStart = !isInSelectionMode,
-        backgroundContent = {
-            val color =
-                when (state.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
-                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                    else -> Color.Unspecified
-                }
-            val icon =
-                when (state.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd ->
-                        if (item.status.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause
-                    else -> Icons.Default.Delete
-                }
-            val alignment =
-                when (state.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                    else -> Alignment.CenterEnd
-                }
-
-            when (state.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd,
-                SwipeToDismissBoxValue.EndToStart,
-                -> {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .drawBehind {
-                                    drawRoundRect(
-                                        color = color,
-                                        cornerRadius = CornerRadius(10.dp.toPx()),
-                                    )
-                                }.wrapContentSize(alignment)
-                                .padding(12.dp),
-                    )
-                }
-                else -> {}
-            }
-        },
-        onDismiss = {},
-    ) {
-        DownloadQueueItem(
-            item = item,
-            showClientInfo = showClientInfo,
-            isInSelectionMode = isInSelectionMode,
-            isSelected = isSelected,
-            onLongClick = onLongClick,
-            onClick = onClick,
-        )
     }
 }

@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
 
 val ArrGreen = Color(0xFF00853d)
@@ -21,6 +22,20 @@ val TracearrLightBlue = Color(0xFF48cae4)
 val PlexColor = Color(0xFFE5A00D)
 val JellyfinColor = Color(0xFFAA5CC3)
 val EmbyColor = Color(0xFF52B54B)
+
+val QBittorrentColor = Color(0xFF2F679E)
+val SABnzbdColor = Color(0xFFFFB300)
+val DelugeColor = Color(0xFF3B7BBF)
+val TransmissionColor = Color(0xFFC92A2A)
+
+val DownloadClientType.associatedColor: Color
+    get() =
+        when (this) {
+            DownloadClientType.QBittorrent -> QBittorrentColor
+            DownloadClientType.SABnzbd -> SABnzbdColor
+            DownloadClientType.Deluge -> DelugeColor
+            DownloadClientType.Transmission -> TransmissionColor
+        }
 
 val TracearrServerType?.brandColor: Color
     get() =
