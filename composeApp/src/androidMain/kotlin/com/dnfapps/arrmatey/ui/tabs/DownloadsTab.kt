@@ -750,11 +750,11 @@ private fun NoDownloadClientsView(
             imageVector = Icons.Default.CloudQueue,
             contentDescription = null,
             modifier = Modifier.size(128.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
             text = mokoString(MR.strings.no_download_clients),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.titleLarge,
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -774,8 +774,7 @@ private fun NoDownloadClientsView(
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = mokoString(MR.strings.add_instance),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }

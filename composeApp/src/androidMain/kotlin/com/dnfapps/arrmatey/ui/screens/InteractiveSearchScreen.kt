@@ -23,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -282,7 +283,7 @@ fun <T : ArrRelease> ReleaseItem(
                     onClick = { onItemClick?.invoke(item) },
                     enabled = onItemClick != null,
                 ),
-        shape = RoundedCornerShape(10.dp),
+        shape = MaterialTheme.shapes.medium,
     ) {
         ProgressBox(
             animate = animate,

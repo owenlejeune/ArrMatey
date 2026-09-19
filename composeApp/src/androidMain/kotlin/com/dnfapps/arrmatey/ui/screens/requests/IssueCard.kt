@@ -170,7 +170,7 @@ private fun IssueCardHeader(
                 Modifier
                     .height(100.dp)
                     .aspectRatio(AspectRatio.Poster.ratio, true)
-                    .clip(RoundedCornerShape(12.dp)),
+                    .clip(MaterialTheme.shapes.medium),
             contentScale = ContentScale.Fit,
         )
 

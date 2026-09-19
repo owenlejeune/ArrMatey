@@ -150,7 +150,7 @@ fun EpisodeCalendarItem(
                                         } else {
                                             MaterialTheme.colorScheme.primaryContainer
                                         },
-                                    shape = RoundedCornerShape(4.dp),
+                                    shape = MaterialTheme.shapes.extraSmall,
                                 ) {
                                     Text(
                                         text = mokoString(MR.strings.premier),
@@ -173,7 +173,7 @@ fun EpisodeCalendarItem(
                                         } else {
                                             MaterialTheme.colorScheme.primaryContainer
                                         },
-                                    shape = RoundedCornerShape(4.dp),
+                                    shape = MaterialTheme.shapes.extraSmall,
                                 ) {
                                     Text(
                                         text = mokoString(finaleType.resource),

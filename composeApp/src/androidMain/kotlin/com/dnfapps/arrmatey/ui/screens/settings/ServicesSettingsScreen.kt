@@ -107,9 +107,9 @@ fun ServicesSettingsScreen(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     when (instanceConnectionStatues[instance.id]) {
-                                        is OperationStatus.InProgress -> CircularProgressIndicator()
+                                        is OperationStatus.InProgress -> CircularProgressIndicator(strokeWidth = 2.dp)
                                         is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = Color.Red)
+                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = MaterialTheme.colorScheme.error)
                                         else -> {}
                                     }
                                 }
@@ -150,9 +150,9 @@ fun ServicesSettingsScreen(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     when (instanceConnectionStatues[downloadClient.id + 100_000]) {
-                                        is OperationStatus.InProgress -> CircularProgressIndicator()
+                                        is OperationStatus.InProgress -> CircularProgressIndicator(strokeWidth = 2.dp)
                                         is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = Color.Red)
+                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = MaterialTheme.colorScheme.error)
                                         else -> {}
                                     }
                                 }

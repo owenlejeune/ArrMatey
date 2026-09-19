@@ -44,9 +44,8 @@ fun AudiobookFileView(
             )
             Text(
                 text = mokoString(MR.strings.history),
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium,
                 modifier =
                     Modifier.clickable {
                         onNavigateToAudiobookFiles(audiobook)

@@ -71,7 +71,7 @@ fun InstancesSetupPage(
             if (instances.isEmpty() && downloadClients.isEmpty()) {
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = MaterialTheme.shapes.large,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(
@@ -98,7 +98,7 @@ fun InstancesSetupPage(
                     instances.forEach { instance ->
                         Card(
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = MaterialTheme.shapes.medium,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Row(
@@ -146,7 +146,7 @@ fun InstancesSetupPage(
                     downloadClients.forEach { client ->
                         Card(
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = MaterialTheme.shapes.medium,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Row(
@@ -192,7 +192,7 @@ fun InstancesSetupPage(
             FilledTonalButton(
                 onClick = onAddInstance,
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.shapes.medium,
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))
@@ -202,7 +202,7 @@ fun InstancesSetupPage(
             FilledTonalButton(
                 onClick = onAddDownloadClient,
                 modifier = Modifier.weight(1.5f),
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.shapes.medium,
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))

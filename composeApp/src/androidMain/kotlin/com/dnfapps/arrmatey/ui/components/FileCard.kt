@@ -58,14 +58,14 @@ fun FileCard(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onError,
                     modifier =
                         Modifier
                             .fillMaxSize()
                             .drawBehind {
                                 drawRoundRect(
                                     color = deleteSwipeBackground,
-                                    cornerRadius = CornerRadius(10.dp.toPx()),
+                                    cornerRadius = CornerRadius(16.dp.toPx()),
                                 )
                             }.wrapContentSize(Alignment.CenterEnd)
                             .padding(12.dp),
@@ -77,6 +77,7 @@ fun FileCard(
         ContainerCard(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = file.relativePath.breakable(),
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
@@ -86,12 +87,14 @@ fun FileCard(
                         file.languages.first().name,
                         file.size.bytesAsFileSizeString(),
                     ).joinToString(BULLET),
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             file.dateAdded?.format("MMM d, yyyy")?.let { formattedDate ->
                 Text(
                     text = mokoString(MR.strings.added_on, formattedDate),
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

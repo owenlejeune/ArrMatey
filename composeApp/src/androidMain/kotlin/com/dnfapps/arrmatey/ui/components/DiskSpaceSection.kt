@@ -86,7 +86,7 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
                 Modifier
                     .fillMaxWidth()
                     .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
+                    .clip(MaterialTheme.shapes.extraSmall),
             color = progressColor,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
         )

@@ -91,7 +91,7 @@ fun PreferencesSetupPage(
         // Theme Selection Card
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-            shape = RoundedCornerShape(16.dp),
+            shape = MaterialTheme.shapes.large,
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -119,7 +119,7 @@ fun PreferencesSetupPage(
                             modifier =
                                 Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
+                                    .clip(MaterialTheme.shapes.medium)
                                     .clickable { onThemeChange(theme) }
                                     .border(
                                         width = if (isSelected) 2.dp else 1.dp,
@@ -129,7 +129,7 @@ fun PreferencesSetupPage(
                                             } else {
                                                 MaterialTheme.colorScheme.outlineVariant
                                             },
-                                        shape = RoundedCornerShape(12.dp),
+                                        shape = MaterialTheme.shapes.medium,
                                     ),
                             color =
                                 if (isSelected) {
@@ -164,7 +164,7 @@ fun PreferencesSetupPage(
 
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-            shape = RoundedCornerShape(16.dp),
+            shape = MaterialTheme.shapes.large,
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -186,7 +186,7 @@ fun PreferencesSetupPage(
                             modifier =
                                 Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
+                                    .clip(MaterialTheme.shapes.medium)
                                     .clickable { onColorChange(color) }
                                     .border(
                                         width = if (isSelected) 2.dp else 1.dp,
@@ -196,7 +196,7 @@ fun PreferencesSetupPage(
                                             } else {
                                                 MaterialTheme.colorScheme.outlineVariant
                                             },
-                                        shape = RoundedCornerShape(12.dp),
+                                        shape = MaterialTheme.shapes.medium,
                                     ),
                             color =
                                 if (isSelected) {
@@ -226,7 +226,7 @@ fun PreferencesSetupPage(
         // Notification Permissions Card
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-            shape = RoundedCornerShape(16.dp),
+            shape = MaterialTheme.shapes.large,
         ) {
             Row(
                 modifier =
@@ -305,7 +305,7 @@ private fun PreferenceToggleCard(
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
     ) {
         Row(
             modifier =

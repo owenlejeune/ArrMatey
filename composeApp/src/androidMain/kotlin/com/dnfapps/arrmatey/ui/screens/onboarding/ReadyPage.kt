@@ -103,7 +103,7 @@ fun ReadyPage(
         Spacer(modifier = Modifier.height(24.dp))
 
         Surface(
-            shape = RoundedCornerShape(16.dp),
+            shape = MaterialTheme.shapes.large,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             Row(

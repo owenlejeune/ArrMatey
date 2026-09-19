@@ -88,7 +88,7 @@ fun SlidableCalendarItem(
                             modifier =
                                 Modifier
                                     .size(80.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(MaterialTheme.shapes.small)
                                     .background(MaterialTheme.colorScheme.secondaryContainer)
                                     .clickable {
                                         onInstanceSelected(instance.id)

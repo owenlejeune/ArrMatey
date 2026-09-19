@@ -156,7 +156,7 @@ private fun CompactIssueCard(
                             Modifier
                                 .height(72.dp)
                                 .aspectRatio(AspectRatio.Poster.ratio, true)
-                                .clip(RoundedCornerShape(8.dp)),
+                                .clip(MaterialTheme.shapes.small),
                         contentScale = ContentScale.Fit,
                     )
 

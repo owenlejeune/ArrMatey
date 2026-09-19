@@ -42,7 +42,7 @@ fun TracearrDeviceIcon(streamSession: TracearrStreamSession) {
         }
 
     Surface(
-        shape = RoundedCornerShape(4.dp),
+        shape = MaterialTheme.shapes.extraSmall,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         modifier = Modifier.size(24.dp),
     ) {

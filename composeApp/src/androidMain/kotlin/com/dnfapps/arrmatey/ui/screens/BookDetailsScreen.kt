@@ -18,9 +18,11 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -65,6 +67,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BookDetailsScreen(
     book: Book,
@@ -219,8 +222,7 @@ fun BookDetailsScreen(
 
                     Text(
                         text = mokoString(MR.strings.files),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.titleLarge,
                     )
                     if (bookFiles.isNotEmpty()) {
                         bookFiles.forEach { file ->
@@ -241,15 +243,14 @@ fun BookDetailsScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                CircularProgressIndicator()
+                                androidx.compose.material3.LoadingIndicator()
                             }
                         }
 
                         is HistoryState.Success -> {
                             Text(
                                 mokoString(MR.strings.history),
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.titleLarge,
                             )
                             if (historyResult.items.isEmpty()) {
                                 Text(
@@ -301,6 +302,7 @@ fun BookFileCard(file: BookFile) {
     ContainerCard {
         Text(
             text = file.path?.breakable() ?: "",
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
@@ -309,12 +311,14 @@ fun BookFileCard(file: BookFile) {
                     file.quality?.qualityLabel,
                     file.size?.bytesAsFileSizeString(),
                 ).joinToString(BULLET),
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         file.dateAdded?.format("MMM d, yyyy")?.let { formattedDate ->
             Text(
                 text = mokoString(MR.strings.add, formattedDate),
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

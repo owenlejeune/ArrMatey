@@ -224,7 +224,7 @@ private fun TracearrStatCard(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceContainer,
         onClick = onClick,
     ) {
@@ -234,7 +234,7 @@ private fun TracearrStatCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Surface(
-                shape = RoundedCornerShape(8.dp),
+                shape = MaterialTheme.shapes.small,
                 color = TracearrBlue.copy(alpha = 0.12f),
                 modifier = Modifier.size(40.dp),
             ) {

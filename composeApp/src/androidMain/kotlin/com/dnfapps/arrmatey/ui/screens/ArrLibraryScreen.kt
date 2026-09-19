@@ -907,7 +907,7 @@ private fun BookshelfMonitorOptionsSheet(
                         colors = if (isSelected) ButtonDefaults.buttonColors() else ButtonDefaults.outlinedButtonColors(),
                         modifier = Modifier.weight(1f),
                     ) {
-                        Text(label, textAlign = TextAlign.Center, fontSize = 12.sp)
+                        Text(label, textAlign = TextAlign.Center, style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
@@ -934,7 +934,7 @@ private fun BookshelfMonitorOptionsSheet(
                         onClick = { monitorNewBooks = value },
                         colors = if (isSelected) ButtonDefaults.buttonColors() else ButtonDefaults.outlinedButtonColors(),
                     ) {
-                        Text(label, textAlign = TextAlign.Center, fontSize = 12.sp)
+                        Text(label, textAlign = TextAlign.Center, style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
@@ -984,8 +984,7 @@ internal fun EmptySearchResultsView(
     ) {
         Text(
             text = mokoString(MR.strings.no_query_results, query),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
         )
         Text(
@@ -1009,6 +1008,8 @@ internal fun EmptySearchResultsView(
                         }
                     }
                 },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -1024,14 +1025,16 @@ internal fun EmptyLibraryView(modifier: Modifier = Modifier) {
             imageVector = Icons.Default.VideoLibrary,
             contentDescription = null,
             modifier = Modifier.size(128.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
             text = mokoString(MR.strings.empty_library),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.titleLarge,
         )
         Text(
             text = mokoString(MR.strings.empty_library_message),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

@@ -17,7 +17,9 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -43,7 +45,7 @@ import org.koin.core.parameter.parametersOf
  * Modal sheet listing manual provider subtitle results for a single episode or movie,
  * with a per-row download action. Reused from both the Wanted lists and the detail screens.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BazarrSubtitleSearchSheet(
     target: BazarrMediaTarget,
@@ -73,7 +75,7 @@ fun BazarrSubtitleSearchSheet(
                 SubtitleSearchState.Loading,
                 -> {
                     Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        androidx.compose.material3.LoadingIndicator()
                     }
                 }
 
@@ -128,7 +130,11 @@ private fun SearchResultRow(
         }
         Spacer(Modifier.width(8.dp))
         when (status) {
-            OperationStatus.InProgress -> CircularProgressIndicator(modifier = Modifier.size(24.dp))
+            OperationStatus.InProgress ->
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                )
             is OperationStatus.Success ->
                 Icon(
                     Icons.Default.Check,

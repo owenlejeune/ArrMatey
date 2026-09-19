@@ -78,7 +78,8 @@ fun ConfirmDeleteAlert(
             ) {
                 if (deleteInProgress) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
                     )
                 } else {
                     Icon(

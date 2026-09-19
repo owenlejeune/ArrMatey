@@ -18,9 +18,11 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
@@ -79,6 +81,7 @@ private enum class EpisodeDetailsTab {
     History,
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun EpisodeDetailsScreen(
     series: ArrSeries,
@@ -292,8 +295,7 @@ fun EpisodeDetailsScreen(
 
                                 Text(
                                     text = mokoString(MR.strings.files),
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.Medium,
+                                    style = MaterialTheme.typography.titleLarge,
                                     modifier = Modifier.padding(horizontal = 24.dp),
                                 )
                                 currentEpisode.episodeFile?.let { file ->
@@ -327,15 +329,14 @@ fun EpisodeDetailsScreen(
                                             modifier = Modifier.fillMaxSize(),
                                             contentAlignment = Alignment.Center,
                                         ) {
-                                            CircularProgressIndicator()
+                                            androidx.compose.material3.LoadingIndicator()
                                         }
                                     }
 
                                     is HistoryState.Success -> {
                                         Text(
                                             text = mokoString(MR.strings.history),
-                                            fontSize = 22.sp,
-                                            fontWeight = FontWeight.Medium,
+                                            style = MaterialTheme.typography.titleLarge,
                                             modifier = Modifier.padding(horizontal = 24.dp),
                                         )
                                         if (historyResult.items.isEmpty()) {

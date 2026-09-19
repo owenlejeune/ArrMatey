@@ -103,8 +103,7 @@ fun MovieFilesScreen(
                 item {
                     Text(
                         text = mokoString(MR.strings.files),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.titleLarge,
                     )
                 }
                 item {
@@ -131,8 +130,7 @@ fun MovieFilesScreen(
                 item {
                     Text(
                         text = mokoString(MR.strings.history),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.titleLarge,
                     )
                 }
                 items(uiState.history) { historyItem ->

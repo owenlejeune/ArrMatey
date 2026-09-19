@@ -154,7 +154,7 @@ fun RatingsSection(ratings: List<RatingItem>) {
                     )
                     Text(
                         text = rating.score,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                     )
                 }
@@ -203,15 +203,14 @@ fun DetailsHeader(item: RequestMediaDetails) {
                             },
                             item.getCertification(LocalLocale.current.platformLocale.country),
                         ).joinToString(BULLET),
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 6.dp),
                 )
                 Text(
                     item.genres.joinToString(BULLET) { it.name },
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary,
                     overflow = TextOverflow.Ellipsis,
-                    lineHeight = 16.sp,
                 )
             }
         }

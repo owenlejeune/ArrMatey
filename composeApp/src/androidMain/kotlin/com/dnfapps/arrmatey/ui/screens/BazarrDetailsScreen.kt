@@ -364,7 +364,7 @@ private fun MissingSubtitleItem(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = MaterialTheme.shapes.small,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         onClick = onClick,
     ) {
@@ -386,7 +386,7 @@ private fun MissingSubtitleItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                LanguageTag(text = subtitle.name.uppercase(), containerColor = Color(0xFF4A2C5E))
+                LanguageTag(text = subtitle.name.uppercase())
 
                 IconButton(onClick = { /* TODO */ }) {
                     Icon(
@@ -407,7 +407,7 @@ private fun SubtitleItem(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = MaterialTheme.shapes.small,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Row(
@@ -445,7 +445,7 @@ private fun SubtitleItem(
                         Modifier
                             .background(
                                 color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(4.dp),
+                                shape = MaterialTheme.shapes.extraSmall,
                             ).padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     Text(
@@ -457,10 +457,10 @@ private fun SubtitleItem(
                                         .uppercase()
                                         .ifBlank { subtitle.name },
                                 )
-                                if (subtitle.hi) append(" HI")
+                                if (subtitle.hi) append(":HI")
                             },
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontWeight = FontWeight.Bold,
                     )
                 }
@@ -563,30 +563,27 @@ private fun BazarrEpisodeItem(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             val primaryColor = MaterialTheme.colorScheme.primary
+            val missingStyle = MaterialTheme.typography.bodyMedium.toSpanStyle().copy(
+                color = MaterialTheme.colorScheme.error,
+                fontStyle = FontStyle.Italic,
+            )
             val titleString =
                 buildAnnotatedString {
-                    withStyle(SpanStyle(fontSize = 16.sp)) {
-                        withStyle(SpanStyle(color = primaryColor)) {
-                            append("${episode.episode}. ")
-                        }
-                        withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                            append(episode.title)
-                        }
+                    withStyle(SpanStyle(color = primaryColor)) {
+                        append("${episode.episode}. ")
+                    }
+                    withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(episode.title)
                     }
 
-                    withStyle(
-                        SpanStyle(
-                            color = MaterialTheme.colorScheme.error,
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 14.sp,
-                        ),
-                    ) {
+                    withStyle(missingStyle) {
                         append(" ")
                         append(mokoString(MR.strings.missing))
                     }
                 }
             Text(
                 text = titleString,
+                style = MaterialTheme.typography.titleMedium,
                 lineHeight = 1.5.em,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
@@ -599,7 +596,11 @@ private fun BazarrEpisodeItem(
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 episode.audioLanguages.forEach { lang ->
-                    LanguageTag(text = lang.name.uppercase(), containerColor = Color(0xFF4A2C5E))
+                    LanguageTag(
+                        text = lang.name.uppercase(),
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
                 }
 
                 episode.subtitles
@@ -628,13 +629,13 @@ private fun BazarrEpisodeItem(
 @Composable
 private fun LanguageTag(
     text: String,
-    containerColor: Color,
-    contentColor: Color = Color.White,
+    containerColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
 ) {
     Box(
         modifier =
             Modifier
-                .background(containerColor, RoundedCornerShape(4.dp))
+                .background(containerColor, MaterialTheme.shapes.extraSmall)
                 .padding(horizontal = 6.dp, vertical = 2.dp),
     ) {
         Text(

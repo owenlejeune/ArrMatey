@@ -342,13 +342,13 @@ fun QueueItemInfoSheet(
         ) {
             Text(
                 text = item.titleLabel,
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
                 text = item.title ?: mokoString(MR.strings.unknown),
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
 
@@ -380,11 +380,11 @@ fun QueueItemInfoSheet(
                     ) {
                         Text(
                             text = "$remainingTime left",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                         )
                         Text(
                             text = item.progressLabel,
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                     LinearProgressIndicator(
@@ -410,13 +410,13 @@ fun QueueItemInfoSheet(
                             Modifier.border(
                                 width = 1.dp,
                                 color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = RoundedCornerShape(8.dp),
+                                shape = MaterialTheme.shapes.small,
                             ),
                     ) {
                         Text(
                             chipItem,
                             modifier = Modifier.padding(vertical = 2.dp, horizontal = 6.dp),
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.labelSmall,
                         )
                     }
                 }
@@ -449,15 +449,13 @@ fun QueueItemInfoSheet(
                     ) {
                         Text(
                             text = status.title ?: "",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                         )
                         status.messages.forEach { message ->
                             Text(
                                 text = message,
-                                fontSize = 14.sp,
-                                lineHeight = 16.sp,
-                                fontStyle = FontStyle.Italic,
+                                style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
                             )
                         }
                     }
@@ -482,10 +480,17 @@ fun QueueItemInfoSheet(
                 infoItems.forEach { (key, value) ->
                     value?.let {
                         item {
-                            Text(text = mokoString(key), fontWeight = FontWeight.SemiBold)
+                            Text(
+                                text = mokoString(key),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
                         }
                         item {
-                            Text(text = value, fontSize = 14.sp)
+                            Text(
+                                text = value,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
                         }
                     }
                 }
@@ -548,8 +553,7 @@ fun EmptyActivityState(modifier: Modifier = Modifier) {
         )
         Text(
             text = mokoString(MR.strings.no_activity),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.titleMedium,
         )
     }
 }

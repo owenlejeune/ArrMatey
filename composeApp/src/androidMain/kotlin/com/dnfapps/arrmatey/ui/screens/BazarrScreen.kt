@@ -35,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryScrollableTabRow
@@ -44,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -466,8 +468,7 @@ private fun BazarrSeriesList(
                             item.episodeFileCount,
                             totalEpisodes,
                         ),
-                    color = Color.White,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
@@ -506,8 +507,7 @@ private fun BazarrMoviesList(
                 val missingText = mokoPlural(MR.plurals.bazarr_movie_missing_count, missingCount)
                 Text(
                     text = mokoString(MR.strings.bazarr_movie_subtitle_summary, subtitlesText, missingText),
-                    color = Color.White,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
@@ -551,67 +551,65 @@ private fun BazarrItem(
                         .background(TranslucentBlack),
             )
 
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(18.dp),
-                    verticalAlignment = Alignment.Top,
+            CompositionLocalProvider(LocalContentColor provides Color.White) {
+                Column(
                     modifier =
                         Modifier
-                            .padding(12.dp)
                             .fillMaxWidth()
                             .wrapContentHeight(),
                 ) {
-                    BasePosterItem(
-                        model = rememberRemoteImageData(poster),
-                        modifier = Modifier.height(100.dp),
-                        aspectRatio = AspectRatio.Poster,
-                    )
-
-                    Column(
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(18.dp),
+                        verticalAlignment = Alignment.Top,
                         modifier =
                             Modifier
-                                .weight(1f)
+                                .padding(12.dp)
+                                .fillMaxWidth()
                                 .wrapContentHeight(),
-                        verticalArrangement = Arrangement.Top,
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                        BasePosterItem(
+                            model = rememberRemoteImageData(poster),
+                            modifier = Modifier.height(100.dp),
+                            aspectRatio = AspectRatio.Poster,
+                        )
+
+                        Column(
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .wrapContentHeight(),
+                            verticalArrangement = Arrangement.Top,
                         ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(
+                                    text =
+                                        buildString {
+                                            append(title)
+                                            append(" ($year)")
+                                        },
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Icon(
+                                    imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                    contentDescription = null,
+                                )
+                            }
+                            details()
+
                             Text(
-                                text =
-                                    buildString {
-                                        append(title)
-                                        append(" ($year)")
-                                    },
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                maxLines = 2,
+                                text = overview,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 3,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f),
-                            )
-                            Icon(
-                                imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                contentDescription = null,
-                                tint = Color.White,
                             )
                         }
-                        details()
-
-                        Text(
-                            text = overview,
-                            fontSize = 14.sp,
-                            lineHeight = 16.sp,
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis,
-                            color = Color.White,
-                        )
                     }
                 }
             }

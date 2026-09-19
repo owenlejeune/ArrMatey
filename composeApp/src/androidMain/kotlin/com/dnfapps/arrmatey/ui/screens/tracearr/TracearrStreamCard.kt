@@ -143,7 +143,7 @@ fun TracearrStreamCard(
                             Modifier
                                 .width(80.dp)
                                 .aspectRatio(AspectRatio.Poster.ratio)
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(MaterialTheme.shapes.small)
                                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,
                     ) {

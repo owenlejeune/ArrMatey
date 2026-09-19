@@ -398,14 +398,13 @@ private fun rememberMarker(): CartesianMarker {
     val labelBackground =
         rememberShapeComponent(
             fill = Fill(MaterialTheme.colorScheme.surfaceContainerHigh),
-            shape = MarkerCornerBasedShape(base = RoundedCornerShape(8.dp)),
+            shape = MarkerCornerBasedShape(base = MaterialTheme.shapes.small),
         )
     val label =
         rememberTextComponent(
             style =
-                TextStyle(
+                MaterialTheme.typography.labelSmall.copy(
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                 ),
             padding = Insets(8.dp, 4.dp),

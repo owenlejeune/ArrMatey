@@ -196,7 +196,7 @@ fun AcknowledgedBadge(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = CircleShape,
-        color = Color.Green.copy(alpha = 0.15f),
+        color = MaterialTheme.colorScheme.primaryContainer,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -206,14 +206,14 @@ fun AcknowledgedBadge(modifier: Modifier = Modifier) {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
                 contentDescription = null,
-                tint = Color.Green,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(12.dp),
             )
             Text(
                 text = mokoString(MR.strings.acknowledged),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
-                color = Color.Green,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
     }

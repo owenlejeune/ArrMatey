@@ -116,7 +116,7 @@ fun TrackRow(
         mediaInfoStatusCondensed?.let { staus ->
             Surface(
                 color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(4.dp),
+                shape = MaterialTheme.shapes.extraSmall,
             ) {
                 Text(
                     text = staus,

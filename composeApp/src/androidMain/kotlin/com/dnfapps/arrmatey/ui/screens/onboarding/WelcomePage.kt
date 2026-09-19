@@ -50,7 +50,7 @@ fun WelcomePage(modifier: Modifier = Modifier) {
             modifier =
                 Modifier
                     .size(96.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(MaterialTheme.shapes.extraLarge)
                     .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center,
         ) {
@@ -89,7 +89,7 @@ fun WelcomePage(modifier: Modifier = Modifier) {
         ) {
             InstanceType.entries.forEach { type ->
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = MaterialTheme.shapes.medium,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 ) {
                     Row(
@@ -113,7 +113,7 @@ fun WelcomePage(modifier: Modifier = Modifier) {
             }
             DownloadClientType.entries.forEach { clientType ->
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = MaterialTheme.shapes.medium,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 ) {
                     Row(

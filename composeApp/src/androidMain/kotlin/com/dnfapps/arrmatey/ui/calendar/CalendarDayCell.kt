@@ -60,7 +60,7 @@ fun CalendarDayCell(
                 isToday -> MaterialTheme.colorScheme.primaryContainer
                 else -> Color.Transparent
             },
-        shape = RoundedCornerShape(8.dp),
+        shape = MaterialTheme.shapes.small,
         border =
             if (isToday && !isSelected) {
                 BorderStroke(1.dp, MaterialTheme.colorScheme.primary)

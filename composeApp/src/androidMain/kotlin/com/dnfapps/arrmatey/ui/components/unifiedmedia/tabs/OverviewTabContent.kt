@@ -113,7 +113,7 @@ fun OverviewTabContent(
                                         ) {
                                             Text(
                                                 text = mokoString(MR.strings.tags),
-                                                fontSize = 14.sp,
+                                                style = MaterialTheme.typography.bodyMedium,
                                             )
                                             FlowRow(
                                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -121,7 +121,7 @@ fun OverviewTabContent(
                                             ) {
                                                 state.keywords.forEach { keyword ->
                                                     Surface(
-                                                        shape = RoundedCornerShape(8.dp),
+                                                        shape = MaterialTheme.shapes.small,
                                                         color = MaterialTheme.colorScheme.secondaryContainer,
                                                     ) {
                                                         Text(

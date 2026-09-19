@@ -155,7 +155,7 @@ private fun CompactRequestCard(
                             Modifier
                                 .height(80.dp)
                                 .aspectRatio(AspectRatio.Poster.ratio, true)
-                                .clip(RoundedCornerShape(8.dp)),
+                                .clip(MaterialTheme.shapes.small),
                         contentScale = ContentScale.Fit,
                     )
 

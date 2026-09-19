@@ -670,13 +670,13 @@ fun CombinedDashboard(
                                                                 .clickable {
                                                                     viewModel.removeCard(dashboardCard)
                                                                 }.size(24.dp)
-                                                                .background(ArrRed),
+                                                                .background(MaterialTheme.colorScheme.error),
                                                         contentAlignment = Alignment.Center,
                                                     ) {
                                                         Icon(
                                                             Icons.Default.Close,
                                                             null,
-                                                            tint = Color.Black,
+                                                            tint = MaterialTheme.colorScheme.onError,
                                                             modifier = Modifier.size(18.dp),
                                                         )
                                                     }

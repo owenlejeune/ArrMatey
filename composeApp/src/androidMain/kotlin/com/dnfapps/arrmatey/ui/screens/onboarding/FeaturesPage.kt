@@ -154,7 +154,7 @@ private fun FeatureCard(
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
     ) {
         Row(
             modifier =
@@ -168,7 +168,7 @@ private fun FeatureCard(
                 modifier =
                     Modifier
                         .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(MaterialTheme.shapes.medium)
                         .background(tint.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {

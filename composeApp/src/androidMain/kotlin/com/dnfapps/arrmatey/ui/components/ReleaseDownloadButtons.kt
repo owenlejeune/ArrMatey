@@ -81,7 +81,7 @@ private fun ReleaseDownloadButtons(
         if (includeDeleteButton) {
             IconButton(
                 onClick = { onDelete() },
-                shape = RoundedCornerShape(10.dp),
+                shape = MaterialTheme.shapes.medium,
                 colors =
                     IconButtonDefaults.iconButtonColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -90,7 +90,10 @@ private fun ReleaseDownloadButtons(
                 enabled = !deleteInProgress,
             ) {
                 if (deleteInProgress) {
-                    CircularProgressIndicator(Modifier.size(24.dp))
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                    )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -116,7 +119,11 @@ private fun ReleaseDownloadButtons(
             enabled = automaticSearchEnabled && !automaticSearchInProgress,
         ) {
             if (automaticSearchInProgress) {
-                CircularProgressIndicator(modifier = Modifier.size(25.dp))
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
             } else {
                 Icon(
                     imageVector = Icons.Default.Search,

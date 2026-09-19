@@ -114,7 +114,7 @@ private fun ConfigurationCard(
             Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
         Row(
