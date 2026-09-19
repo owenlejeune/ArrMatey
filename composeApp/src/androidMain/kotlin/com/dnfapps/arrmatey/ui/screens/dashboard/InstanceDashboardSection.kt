@@ -1,16 +1,21 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Warning
@@ -18,12 +23,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -32,6 +39,7 @@ import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 
@@ -48,6 +56,7 @@ fun InstanceDashboardSection(
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -79,8 +88,8 @@ fun InstanceDashboardSection(
                 )
                 if (index < state.instances.size - 1) {
                     HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 6.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
                     )
                 }
             }
@@ -106,18 +115,26 @@ private fun InstanceDashboardCard(
         }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.clickable(onClick = onClick, enabled = enabled),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Image(
-                painter = painterResource(state.instance.type.icon),
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-            )
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+            ) {
+                Box(modifier = Modifier.padding(6.dp)) {
+                    Image(
+                        painter = painterResource(state.instance.type.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                    )
+                }
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = state.instance.label,
@@ -134,46 +151,131 @@ private fun InstanceDashboardCard(
                 )
             }
 
-            if (state.healthItems.any { it.type == ArrHealthType.Error }) {
-                Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
-            } else if (state.healthItems.isNotEmpty()) {
-                Icon(Icons.Default.Warning, null, tint = Color(0xffffc653), modifier = Modifier.size(20.dp))
+            val hasErrors = state.healthItems.any { it.type == ArrHealthType.Error }
+            val hasWarnings = state.healthItems.isNotEmpty()
+
+            when {
+                hasErrors -> {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f)),
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.size(14.dp),
+                            )
+                            Text(
+                                text = "${state.healthItems.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                        }
+                    }
+                }
+                hasWarnings -> {
+                    Surface(
+                        shape = CircleShape,
+                        color = ArrYellow.copy(alpha = 0.2f),
+                        border = BorderStroke(1.dp, ArrYellow.copy(alpha = 0.4f)),
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = ArrYellow,
+                                modifier = Modifier.size(14.dp),
+                            )
+                            Text(
+                                text = "${state.healthItems.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+                }
+                else -> {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                    ) {
+                        Box(modifier = Modifier.padding(4.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                    }
+                }
             }
         }
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            state.disks.forEach { disk ->
-                val usedSpace = disk.totalSpace - disk.freeSpace
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = disk.path ?: mokoString(MR.strings.unknown),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        text = "${(disk.usedPercentage * 100).toInt()}% full",
-                        style = MaterialTheme.typography.labelSmall,
-                        color =
-                            if (disk.usedPercentage > 0.9f) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                    )
+        if (state.disks.isNotEmpty()) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                state.disks.forEach { disk ->
+                    val usedSpace = disk.totalSpace - disk.freeSpace
+                    val diskProgressColor =
+                        when {
+                            disk.usedPercentage > 0.90f -> MaterialTheme.colorScheme.error
+                            disk.usedPercentage > 0.75f -> ArrYellow
+                            else -> MaterialTheme.colorScheme.primary
+                        }
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = disk.path ?: mokoString(MR.strings.unknown),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false),
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()} (${(disk.usedPercentage * 100).toInt()}%)",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Medium,
+                                color = diskProgressColor,
+                            )
+                        }
+
+                        LinearProgressIndicator(
+                            progress = { disk.usedPercentage },
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(5.dp),
+                            color = diskProgressColor,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            strokeCap = StrokeCap.Round,
+                            drawStopIndicator = {},
+                        )
+                    }
                 }
             }
         }

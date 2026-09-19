@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,27 +15,27 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.theme.ArrBlue
-import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 
@@ -53,24 +54,33 @@ fun DashboardDownloadClientsSection(
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(16.dp),
         ) {
-            clients.forEach { state ->
+            clients.forEach { clientState ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Image(
-                        painter = painterResource(state.client.type.icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                    )
+                    Surface(
+                        shape = MaterialTheme.shapes.medium,
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                    ) {
+                        Box(modifier = Modifier.padding(6.dp)) {
+                            Image(
+                                painter = painterResource(clientState.client.type.icon),
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp),
+                            )
+                        }
+                    }
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = state.client.label,
+                            text = clientState.client.label,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                         )
@@ -79,15 +89,15 @@ fun DashboardDownloadClientsSection(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             Text(
-                                text = "${state.activeDownloadsCount} ${mokoString(MR.strings.downloads)}",
+                                text = "${clientState.activeDownloadsCount} ${mokoString(MR.strings.downloads)}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            if (!state.isOnline) {
+                            if (!clientState.isOnline) {
                                 Box(
                                     modifier =
                                         Modifier
-                                            .size(4.dp)
+                                            .size(6.dp)
                                             .clip(CircleShape)
                                             .background(MaterialTheme.colorScheme.error),
                                 )
@@ -95,45 +105,69 @@ fun DashboardDownloadClientsSection(
                                     text = mokoString(MR.strings.offline),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.Medium,
                                 )
                             }
                         }
                     }
 
-                    val transferInfo = state.transferInfo
-                    if (state.isOnline && (transferInfo != null)) {
-                        Column(horizontalAlignment = Alignment.End) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Icon(
-                                    Icons.Default.ExpandMore,
-                                    null,
-                                    tint = ArrGreen,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                                Text(
-                                    text = "${transferInfo.downloadSpeed.bytesAsFileSizeString()}/s",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                )
+                    val transferInfo = clientState.transferInfo
+                    if (clientState.isOnline && (transferInfo != null)) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (transferInfo.downloadSpeed > 0) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)),
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowDownward,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            modifier = Modifier.size(12.dp),
+                                        )
+                                        Text(
+                                            text = "${transferInfo.downloadSpeed.bytesAsFileSizeString()}/s",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        )
+                                    }
+                                }
                             }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Icon(
-                                    Icons.Default.ExpandLess,
-                                    null,
-                                    tint = ArrBlue,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                                Text(
-                                    text = "${transferInfo.uploadSpeed.bytesAsFileSizeString()}/s",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                            if (transferInfo.uploadSpeed > 0) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)),
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowUpward,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                                            modifier = Modifier.size(12.dp),
+                                        )
+                                        Text(
+                                            text = "${transferInfo.uploadSpeed.bytesAsFileSizeString()}/s",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -155,11 +189,19 @@ fun DashboardDownloadClientsSection(
                     )
                     Spacer(Modifier.weight(1f))
                     if (totalDownloadSpeed > 0) {
-                        Text(
-                            "${totalDownloadSpeed.bytesAsFileSizeString()}/s",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
+                        ) {
+                            Text(
+                                text = "${totalDownloadSpeed.bytesAsFileSizeString()}/s",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            )
+                        }
                     }
                 }
 
@@ -192,17 +234,21 @@ fun DashboardDownloadClientsSection(
                             Spacer(Modifier.weight(1f))
                             if (download.downloadSpeed > 0) {
                                 Text(
-                                    text = "${download.downloadSpeed.bytesAsFileSizeString()}/s",
+                                    text = "↓ ${download.downloadSpeed.bytesAsFileSizeString()}/s",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = ArrGreen,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
                                 )
                             }
                         }
 
                         LinearProgressIndicator(
                             progress = { download.progress.toFloat() },
-                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
-                            trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            modifier = Modifier.fillMaxWidth().height(6.dp),
+                            strokeCap = StrokeCap.Round,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            color = MaterialTheme.colorScheme.primary,
+                            drawStopIndicator = {},
                         )
                     }
                 }
@@ -215,6 +261,7 @@ fun DashboardDownloadClientsSection(
                         ),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.align(Alignment.End),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

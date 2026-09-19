@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.screens.dashboard
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,6 +67,7 @@ fun DashboardOverviewCards(
             CardDefaults.cardColors(
                 containerColor = containerColor,
             ),
+        border = if (isEditing) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),

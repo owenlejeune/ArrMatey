@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,7 @@ fun DashboardActiveStreamsSection(
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         val streams = state.activeStreams
         Column(
@@ -113,7 +115,7 @@ fun DashboardActiveStreamsSection(
                 ) {
                     Box(
                         Modifier
-                            .size(4.dp)
+                            .size(8.dp)
                             .clip(CircleShape)
                             .background(
                                 getTracearrServerColor(
