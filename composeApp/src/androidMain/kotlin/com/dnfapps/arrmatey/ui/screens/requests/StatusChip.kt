@@ -1,24 +1,26 @@
 package com.dnfapps.arrmatey.ui.screens.requests
 
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestStatus
+import com.dnfapps.arrmatey.ui.components.AMStatusBadge
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
-fun StatusChip(request: MediaRequest) {
+fun StatusChip(
+    request: MediaRequest,
+    modifier: Modifier = Modifier,
+) {
     val mediaStatus = MediaStatus.fromValue(request.media.status)
     val requestStatus = RequestStatus.fromValue(request.status)
 
     val (label, container, content) =
         when {
             mediaStatus == MediaStatus.Deleted ->
-                Triple(mediaStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+                Triple(mediaStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
 
             mediaStatus == MediaStatus.Available ->
                 Triple(mediaStatus.resource, MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
@@ -30,7 +32,7 @@ fun StatusChip(request: MediaRequest) {
                 Triple(mediaStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
 
             requestStatus == RequestStatus.Declined ->
-                Triple(requestStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+                Triple(requestStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
 
             requestStatus == RequestStatus.Approved ->
                 Triple(requestStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
@@ -39,14 +41,10 @@ fun StatusChip(request: MediaRequest) {
                 Triple(requestStatus.resource, MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
         }
 
-    AssistChip(
-        onClick = { },
-        label = { Text(mokoString(label)) },
-        colors =
-            AssistChipDefaults.assistChipColors(
-                containerColor = container,
-                labelColor = content,
-            ),
-        border = null,
+    AMStatusBadge(
+        text = mokoString(label),
+        containerColor = container,
+        contentColor = content,
+        modifier = modifier,
     )
 }
