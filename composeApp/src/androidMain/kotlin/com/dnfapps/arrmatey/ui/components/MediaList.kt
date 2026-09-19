@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +27,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -265,90 +267,81 @@ fun <T : ArrMedia> MediaItem(
                         }
                     },
                 ),
-        shape = RoundedCornerShape(posterRadius.radius),
+        shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = posterElevation.elevation),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        border =
+            if (isSelected) {
+                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+            } else {
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            },
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            ),
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            if (edgeColor != null) {
-                Box(
-                    modifier =
-                        Modifier
-                            .width(6.dp)
-                            .height(contentHeight.pxToDp() + 24.dp)
-                            .background(edgeColor),
-                )
-            }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            PosterItem(
+                item = item,
+                aspectRatio = aspectRatio,
+                modifier = Modifier.width(76.dp),
+                posterModel = posterModel,
+                elevation = posterElevation,
+                radius = posterRadius,
+                multiSelectState = multiSelectState,
+            )
 
-            Box(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .heightIn(max = 200.dp),
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                if (hasBanner) {
-                    BannerView(
-                        bannerModel = bannerModel ?: item.getBanner()?.remoteUrl?.let { rememberRemoteImageData(it) },
-                        blur = blur,
-                        modifier = Modifier.height(contentHeight.pxToDp() + 24.dp),
-                    )
-                }
-
                 Row(
-                    modifier =
-                        Modifier
-                            .wrapContentHeight()
-                            .padding(12.dp)
-                            .onGloballyPositioned {
-                                contentHeight = it.size.height
-                            },
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    PosterItem(
-                        item = item,
-                        aspectRatio = aspectRatio,
-                        modifier = Modifier.width(100.dp),
-                        posterModel = posterModel,
-                        elevation = posterElevation,
-                        radius = posterRadius,
-                        multiSelectState = multiSelectState,
+                    Text(
+                        text = item.title ?: mokoString(MR.strings.unknown),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
                     )
 
-                    Column(
-                        modifier = Modifier.weight(1f).wrapContentHeight(),
-                        verticalArrangement = Arrangement.Top,
-                    ) {
-                        val titleColor = if (hasBanner) Color.White else MaterialTheme.colorScheme.onSurface
-                        Text(
-                            text = item.title ?: mokoString(MR.strings.unknown),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = titleColor,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        MediaDetails(item, isActive, hasBanner)
-
-                        if (includeOverview && item.overview != null) {
-                            val parsed = item.overview?.rememberHtml() ?: ""
-                            Text(
-                                text = parsed,
-                                style = MaterialTheme.typography.bodySmall,
-                                color =
-                                    if (hasBanner) {
-                                        Color.White.copy(
-                                            alpha = 0.8f,
-                                        )
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
-                                maxLines = 6,
-                                minLines = 3,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(top = 8.dp),
+                    if (edgeColor != null) {
+                        Surface(
+                            shape = androidx.compose.foundation.shape.CircleShape,
+                            color = edgeColor.copy(alpha = 0.2f),
+                            modifier = Modifier.size(12.dp),
+                        ) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(2.5.dp)
+                                        .background(edgeColor, androidx.compose.foundation.shape.CircleShape),
                             )
                         }
                     }
+                }
+
+                MediaDetails(item, isActive, showBannerBackground = false)
+
+                if (includeOverview && item.overview != null) {
+                    val parsed = item.overview?.rememberHtml() ?: ""
+                    Text(
+                        text = parsed,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
         }
@@ -366,105 +359,82 @@ fun SeerrMediaItem(
     bannerModel: Any? = null,
     edgeColor: Color? = null,
 ) {
-    var contentHeight by remember { mutableIntStateOf(0) }
-
     val item = result.result
     Card(
         modifier =
             modifier
                 .fillMaxWidth()
                 .combinedClickable(onClick = { onItemClick(result) }),
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            ),
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            if (edgeColor != null) {
-                Box(
-                    modifier =
-                        Modifier
-                            .width(6.dp)
-                            .height(contentHeight.pxToDp() + 24.dp)
-                            .background(edgeColor),
-                )
-            }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            PosterItem(
+                item = item,
+                modifier = Modifier.width(76.dp),
+            )
 
-            Box(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .heightIn(max = 200.dp),
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                if (showBannerBackground && (bannerModel != null || item.fullBackdropPath != null)) {
-                    BannerView(
-                        bannerModel = bannerModel ?: item.fullBackdropPath?.let { rememberRemoteImageData(it) },
-                        blur = Blur.Normal,
-                        modifier = Modifier.height(contentHeight.pxToDp() + 24.dp),
-                    )
-                }
-
                 Row(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(12.dp)
-                            .onGloballyPositioned {
-                                contentHeight = it.size.height
-                            },
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    PosterItem(
-                        item = item,
-                        modifier = Modifier.width(100.dp),
+                    Text(
+                        text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
                     )
 
-                    Column(
-                        modifier = Modifier.weight(1f).wrapContentHeight(),
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        val titleColor =
-                            if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
-                        Text(
-                            text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = titleColor,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-
-                        val releaseDate = item.releaseDate ?: item.firstAirDate
-                        val year = releaseDate?.take(4)
-                        val secondLine = listOfNotNull(year, item.mediaType.name).joinToString(BULLET)
-                        Text(
-                            text = secondLine,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color =
-                                if (showBannerBackground) {
-                                    Color.White.copy(
-                                        alpha = 0.8f,
-                                    )
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                        )
-
-                        if (includeOverview && item.overview != null) {
-                            Text(
-                                text = item.overview ?: "",
-                                style = MaterialTheme.typography.bodySmall,
-                                color =
-                                    if (showBannerBackground) {
-                                        Color.White.copy(
-                                            alpha = 0.8f,
-                                        )
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(top = 8.dp),
+                    if (edgeColor != null) {
+                        Surface(
+                            shape = androidx.compose.foundation.shape.CircleShape,
+                            color = edgeColor.copy(alpha = 0.2f),
+                            modifier = Modifier.size(12.dp),
+                        ) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(2.5.dp)
+                                        .background(edgeColor, androidx.compose.foundation.shape.CircleShape),
                             )
                         }
                     }
+                }
+
+                val releaseDate = item.releaseDate ?: item.firstAirDate
+                val year = releaseDate?.take(4)
+                val secondLine = listOfNotNull(year, item.mediaType.name).joinToString(BULLET)
+                Text(
+                    text = secondLine,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                if (includeOverview && item.overview != null) {
+                    Text(
+                        text = item.overview ?: "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
         }
