@@ -8,8 +8,10 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -281,28 +283,36 @@ fun <T : ArrMedia> MediaItem(
             ),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
         ) {
-            PosterItem(
-                item = item,
-                aspectRatio = aspectRatio,
-                modifier = Modifier.width(76.dp),
-                posterModel = posterModel,
-                elevation = posterElevation,
-                radius = posterRadius,
-                multiSelectState = multiSelectState,
-            )
+            if (edgeColor != null) {
+                Box(
+                    modifier =
+                        Modifier
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .background(edgeColor),
+                )
+            }
 
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                PosterItem(
+                    item = item,
+                    aspectRatio = aspectRatio,
+                    modifier = Modifier.width(76.dp),
+                    posterModel = posterModel,
+                    elevation = posterElevation,
+                    radius = posterRadius,
+                    multiSelectState = multiSelectState,
+                )
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
                         text = item.title ?: mokoString(MR.strings.unknown),
@@ -311,37 +321,20 @@ fun <T : ArrMedia> MediaItem(
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
                     )
 
-                    if (edgeColor != null) {
-                        Surface(
-                            shape = androidx.compose.foundation.shape.CircleShape,
-                            color = edgeColor.copy(alpha = 0.2f),
-                            modifier = Modifier.size(12.dp),
-                        ) {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(2.5.dp)
-                                        .background(edgeColor, androidx.compose.foundation.shape.CircleShape),
-                            )
-                        }
+                    MediaDetails(item, isActive, showBannerBackground = false)
+
+                    if (includeOverview && item.overview != null) {
+                        val parsed = item.overview?.rememberHtml() ?: ""
+                        Text(
+                            text = parsed,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
-                }
-
-                MediaDetails(item, isActive, showBannerBackground = false)
-
-                if (includeOverview && item.overview != null) {
-                    val parsed = item.overview?.rememberHtml() ?: ""
-                    Text(
-                        text = parsed,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
                 }
             }
         }
@@ -373,23 +366,31 @@ fun SeerrMediaItem(
             ),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
         ) {
-            PosterItem(
-                item = item,
-                modifier = Modifier.width(76.dp),
-            )
+            if (edgeColor != null) {
+                Box(
+                    modifier =
+                        Modifier
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .background(edgeColor),
+                )
+            }
 
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                PosterItem(
+                    item = item,
+                    modifier = Modifier.width(76.dp),
+                )
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
                         text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
@@ -398,43 +399,26 @@ fun SeerrMediaItem(
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
                     )
 
-                    if (edgeColor != null) {
-                        Surface(
-                            shape = androidx.compose.foundation.shape.CircleShape,
-                            color = edgeColor.copy(alpha = 0.2f),
-                            modifier = Modifier.size(12.dp),
-                        ) {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(2.5.dp)
-                                        .background(edgeColor, androidx.compose.foundation.shape.CircleShape),
-                            )
-                        }
-                    }
-                }
-
-                val releaseDate = item.releaseDate ?: item.firstAirDate
-                val year = releaseDate?.take(4)
-                val secondLine = listOfNotNull(year, item.mediaType.name).joinToString(BULLET)
-                Text(
-                    text = secondLine,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                if (includeOverview && item.overview != null) {
+                    val releaseDate = item.releaseDate ?: item.firstAirDate
+                    val year = releaseDate?.take(4)
+                    val secondLine = listOfNotNull(year, item.mediaType.name).joinToString(BULLET)
                     Text(
-                        text = item.overview ?: "",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = secondLine,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
                     )
+
+                    if (includeOverview && item.overview != null) {
+                        Text(
+                            text = item.overview ?: "",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
         }
@@ -449,7 +433,6 @@ fun SeerrPersonItem(
     includeOverview: Boolean = true,
     edgeColor: Color? = null,
 ) {
-    var contentHeight by remember { mutableIntStateOf(0) }
     val item = result.result
     Card(
         modifier =
@@ -459,13 +442,15 @@ fun SeerrPersonItem(
                 .combinedClickable(onClick = { onItemClick(result) }),
         shape = MaterialTheme.shapes.large,
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        ) {
             if (edgeColor != null) {
                 Box(
                     modifier =
                         Modifier
                             .width(6.dp)
-                            .height(contentHeight.pxToDp() + 24.dp)
+                            .fillMaxHeight()
                             .background(edgeColor),
                 )
             }
@@ -478,10 +463,7 @@ fun SeerrPersonItem(
                         .weight(1f)
                         .padding(12.dp)
                         .fillMaxWidth()
-                        .wrapContentHeight()
-                        .onGloballyPositioned {
-                            contentHeight = it.size.height
-                        },
+                        .wrapContentHeight(),
             ) {
                 PersonProfileImage(item.fullPosterPath)
 
