@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -53,7 +54,7 @@ fun RequestCard(
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
+                contentColor = Color.White,
             ),
         onClick = onClick,
     ) {
@@ -130,12 +131,14 @@ private fun RequestCardHeader(
                 Text(
                     text = year,
                     style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.8f),
                 )
                 MediaRequestTypeChip(text = requestType.name, requestType)
             }
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLargeEmphasized,
+                color = Color.White,
                 modifier = Modifier.padding(top = 2.dp),
             )
             Row(
@@ -156,10 +159,12 @@ private fun RequestMetadata(request: MediaRequest) {
             label = mokoString(MR.strings.requested_by),
             displayName = request.requestedBy.displayName,
             avatar = request.requestedBy.avatar,
+            textColor = Color.White.copy(alpha = 0.9f),
         )
         Text(
             text = request.createdAt.format("HH:mm, MMM d, yyyy"),
             style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.7f),
         )
 
         request.modifiedBy?.let { modifiedBy ->
@@ -168,10 +173,12 @@ private fun RequestMetadata(request: MediaRequest) {
                 label = mokoString(MR.strings.modified_by),
                 displayName = modifiedBy.displayName,
                 avatar = modifiedBy.avatar,
+                textColor = Color.White.copy(alpha = 0.9f),
             )
             Text(
                 text = request.updatedAt.format("HH:mm, MMM d, yyyy"),
                 style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
             )
         }
     }
@@ -182,6 +189,7 @@ private fun RequestCardSeasonInfo(seasons: List<RequestSeason>) {
     Text(
         text = mokoString(MR.strings.seasons_header),
         style = MaterialTheme.typography.labelSmall,
+        color = Color.White.copy(alpha = 0.8f),
     )
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(2.dp),

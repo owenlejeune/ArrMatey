@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -39,8 +40,6 @@ import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
-import com.dnfapps.arrmatey.ui.theme.inverseOnSurfaceLight
-import com.dnfapps.arrmatey.ui.theme.inverseSurfaceLight
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -56,11 +55,10 @@ fun IssueCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
         colors =
             CardDefaults.cardColors(
-                containerColor = inverseSurfaceLight,
-                contentColor = inverseOnSurfaceLight,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = Color.White,
             ),
         onClick = onClick,
     ) {
@@ -94,6 +92,7 @@ fun IssueCard(
                         Text(
                             text = mokoString(MR.strings.season),
                             style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.8f),
                         )
                         Box(
                             modifier =
@@ -115,6 +114,7 @@ fun IssueCard(
                         Text(
                             text = mokoString(MR.strings.episode),
                             style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.8f),
                         )
                         Box(
                             modifier =
@@ -140,6 +140,7 @@ fun IssueCard(
                     Text(
                         text = comment.message,
                         style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White,
                     )
                 }
             }
@@ -189,6 +190,7 @@ private fun IssueCardHeader(
                         Text(
                             text = year,
                             style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.8f),
                         )
                         requestType?.let { requestType ->
                             MediaRequestTypeChip(text = requestType.name, requestType)
@@ -197,6 +199,7 @@ private fun IssueCardHeader(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleLargeEmphasized,
+                        color = Color.White,
                         modifier = Modifier.padding(top = 2.dp),
                     )
                 }
@@ -213,6 +216,7 @@ private fun IssueCardHeader(
                         append(mokoString(issueType.label))
                     },
                 style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.9f),
             )
             issue.createdBy?.let { createdBy ->
                 Column {
@@ -220,11 +224,13 @@ private fun IssueCardHeader(
                         label = mokoString(MR.strings.opened_by),
                         displayName = createdBy.displayName,
                         avatar = createdBy.avatar,
+                        textColor = Color.White.copy(alpha = 0.9f),
                     )
                     issue.createdAt?.let { createdAt ->
                         Text(
                             text = createdAt.format("HH:mm, MMM d, yyyy"),
                             style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.7f),
                         )
                     }
                 }
