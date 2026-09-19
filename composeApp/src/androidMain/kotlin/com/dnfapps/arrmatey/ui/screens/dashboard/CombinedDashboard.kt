@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -557,7 +558,7 @@ fun CombinedDashboard(
                                     contentPadding =
                                         PaddingValues(
                                             all = 16.dp,
-                                            bottom = 16.dp + navigationBarBottomInset(),
+                                            bottom = 16.dp + if (LocalFloatingBarBottomPadding.current > 0.dp) LocalFloatingBarBottomPadding.current else navigationBarBottomInset(),
                                         ),
                                     modifier = Modifier.fillMaxSize(),
                                 ) {

@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
 import com.dnfapps.arrmatey.arr.state.ProwlarrSearchState
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
@@ -141,7 +142,7 @@ fun ProwlarrSearchContent(
                                 onGrab = { grabTarget = result },
                             )
                         }
-                        item { Spacer(modifier = Modifier.height(4.dp)) }
+                        item { Spacer(modifier = Modifier.height(4.dp + LocalFloatingBarBottomPadding.current)) }
                     }
                 }
             }

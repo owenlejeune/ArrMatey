@@ -40,6 +40,7 @@ import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.takeUnlessEmpty
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -120,7 +121,7 @@ fun SeerrPersonDetailsScreen(
                             columns = GridCells.Adaptive(minSize = GridDensity.Normal.minSize),
                             state = gridState,
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = 24.dp, start = 24.dp, end = 24.dp),
+                            contentPadding = PaddingValues(bottom = 24.dp + LocalFloatingBarBottomPadding.current, start = 24.dp, end = 24.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {

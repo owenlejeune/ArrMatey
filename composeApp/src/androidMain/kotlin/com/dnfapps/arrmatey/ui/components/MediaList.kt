@@ -149,11 +149,18 @@ fun SearchResultList(
         }
     }
 
+    val bottomPadding = LocalFloatingBarBottomPadding.current
     LazyColumn(
         state = lazyListState,
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(18.dp),
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 18.dp),
+        contentPadding =
+            PaddingValues(
+                top = 12.dp,
+                bottom = bottomPadding + 16.dp,
+                start = 18.dp,
+                end = 18.dp,
+            ),
     ) {
         items(items, key = { it.id }) { item ->
             SearchResultItem(

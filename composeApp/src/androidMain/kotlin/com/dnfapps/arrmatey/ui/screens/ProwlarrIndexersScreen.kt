@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.IndexerMessageType
 import com.dnfapps.arrmatey.arr.api.model.IndexerStatus
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrIndexer
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
 import com.dnfapps.arrmatey.arr.state.ProwlarrIndexersState
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
@@ -129,7 +130,7 @@ fun ProwlarrIndexersContent(
                                     onShowIssues = { showIndexerStatus = indexerStatus },
                                 )
                             }
-                            item { Spacer(modifier = Modifier.size(4.dp)) }
+                            item { Spacer(modifier = Modifier.size(4.dp + LocalFloatingBarBottomPadding.current)) }
                         }
                     }
                 }

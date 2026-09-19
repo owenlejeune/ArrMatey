@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.state.DownloadState
@@ -173,7 +174,11 @@ fun InteractiveSearchScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize().padding(horizontal = 18.dp),
                         verticalArrangement = Arrangement.spacedBy(18.dp),
-                        contentPadding = PaddingValues(vertical = 12.dp),
+                        contentPadding =
+                            PaddingValues(
+                                top = 12.dp,
+                                bottom = 12.dp + LocalFloatingBarBottomPadding.current,
+                            ),
                     ) {
                         items(state.items) { item ->
                             val shouldAnimate =

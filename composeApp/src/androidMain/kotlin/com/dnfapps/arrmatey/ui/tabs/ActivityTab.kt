@@ -43,6 +43,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -182,7 +183,7 @@ fun ActivityTab(
                                 }
                             }
                             item {
-                                Spacer(Modifier.height(0.dp))
+                                Spacer(Modifier.height(LocalFloatingBarBottomPadding.current + 16.dp))
                             }
                         }
                     }

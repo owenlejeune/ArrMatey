@@ -21,6 +21,7 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 
 @Composable
 fun RequestsList(
@@ -58,7 +59,13 @@ fun RequestsList(
 
     LazyColumn(
         state = listState,
-        contentPadding = PaddingValues(16.dp),
+        contentPadding =
+            PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+            ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize(),
     ) {

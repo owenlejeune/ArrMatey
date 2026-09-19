@@ -240,7 +240,7 @@ fun DiscoverHomeScreen(
                             Modifier
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState())
-                                .padding(vertical = 16.dp),
+                                .padding(top = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
                         sectionPreferences.visibleCategories.forEach { category ->

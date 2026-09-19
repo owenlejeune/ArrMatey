@@ -44,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -327,7 +328,13 @@ private fun <T> WantedList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding =
+            PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+            ),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(items, key = { key(it) }) { item ->
@@ -372,7 +379,13 @@ private fun ProvidersContent(
         }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding =
+                PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 8.dp,
+                    bottom = 8.dp + LocalFloatingBarBottomPadding.current,
+                ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(providers, key = { it.name }) { provider ->
@@ -425,7 +438,13 @@ private fun BazarrSeriesList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding =
+            PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+            ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(series) { item ->
@@ -462,7 +481,13 @@ private fun BazarrMoviesList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding =
+            PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+            ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(movies) { item ->

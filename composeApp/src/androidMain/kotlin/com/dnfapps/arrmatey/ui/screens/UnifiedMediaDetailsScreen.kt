@@ -10,12 +10,15 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
@@ -453,7 +456,6 @@ fun UnifiedMediaDetailsScreen(
         ) {
             when {
                 successState != null -> {
-                    val state = successState
                     PullToRefreshBox(
                         isRefreshing = false,
                         onRefresh = { viewModel.refresh() },
@@ -465,36 +467,33 @@ fun UnifiedMediaDetailsScreen(
                             UnifiedDetailsHeader(
                                 type = instanceType,
                                 topPadding = paddingValues.calculateTopPadding(),
-                                bannerUrl = state.bannerUrl,
-                                posterUrl = state.posterUrl,
-                                clearLogo = state.clearLogo,
-                                ratings = state.ratings,
-                                year = state.year,
-                                runtimeString = state.runtimeString,
-                                certification = state.getCertification(LocalLocale.current.platformLocale.country),
-                                releasedBy = state.releasedBy,
-                                seasonCount = state.seasonCount?.let { mokoPlural(MR.plurals.seasons, it) },
-                                genres = state.genres,
+                                bannerUrl = successState.bannerUrl,
+                                posterUrl = successState.posterUrl,
+                                clearLogo = successState.clearLogo,
+                                ratings = successState.ratings,
+                                year = successState.year,
+                                runtimeString = successState.runtimeString,
+                                certification = successState.getCertification(LocalLocale.current.platformLocale.country),
+                                releasedBy = successState.releasedBy,
+                                seasonCount = successState.seasonCount?.let { mokoPlural(MR.plurals.seasons, it) },
+                                genres = successState.genres,
                                 isExpanded = isExpanded,
                                 wideRailIsVisible = wideRailIsVisible,
                             )
 
                             Column(
-                                modifier =
-                                    Modifier
-                                        .padding(bottom = 24.dp)
-                                        .padding(top = 12.dp),
+                                modifier = Modifier.padding(top = 12.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp),
                             ) {
                                 Column {
-                                    val title = state.displayTitle ?: mokoString(MR.strings.unknown)
+                                    val title = successState.displayTitle ?: mokoString(MR.strings.unknown)
                                     Text(
                                         text = title,
                                         style = MaterialTheme.typography.headlineMedium,
                                         modifier = Modifier.padding(horizontal = 24.dp),
                                     )
 
-                                    state.tagline?.unlessEmpty {
+                                    successState.tagline?.unlessEmpty {
                                         Text(
                                             text = it,
                                             style = MaterialTheme.typography.bodyLarge,
@@ -504,7 +503,7 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    state.upcomingDateString?.unlessEmpty { airingString ->
+                                    successState.upcomingDateString?.unlessEmpty { airingString ->
                                         Text(
                                             text = airingString,
                                             style = MaterialTheme.typography.bodyLarge,
@@ -513,34 +512,35 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    if (state.isMovieOrTv) {
+                                    if (successState.isMovieOrTv) {
                                         TracearrSummaryChipRow(
                                             uiState = tracearrState,
                                             modifier = Modifier.padding(top = 8.dp),
                                         )
                                     }
 
-                                    LaunchedEffect(state.hasSeasonsOrFiles) {
+                                    LaunchedEffect(successState.hasSeasonsOrFiles) {
                                         val prev = previousHasSeasonsOrFiles
                                         if (prev == null) {
-                                            if (state.hasSeasonsOrFiles) {
+                                            if (successState.hasSeasonsOrFiles) {
                                                 selectedTab = DetailsTab.SeasonsFiles
                                             }
-                                        } else if (!prev && state.hasSeasonsOrFiles) {
+                                        } else if (!prev && successState.hasSeasonsOrFiles) {
                                             selectedTab = DetailsTab.SeasonsFiles
-                                        } else if (prev && !state.hasSeasonsOrFiles) {
+                                        } else if (prev && !successState.hasSeasonsOrFiles) {
                                             if (selectedTab == DetailsTab.SeasonsFiles) {
                                                 selectedTab = DetailsTab.Overview
                                             }
                                         }
-                                        previousHasSeasonsOrFiles = state.hasSeasonsOrFiles
+                                        previousHasSeasonsOrFiles = successState.hasSeasonsOrFiles
                                     }
 
-                                    val availableTabs = state.getAvailableTabs(tracearrState.isTracearrConfigured)
+                                    val availableTabs =
+                                        successState.getAvailableTabs(tracearrState.isTracearrConfigured)
 
                                     LaunchedEffect(availableTabs) {
                                         if (selectedTab !in availableTabs) {
-                                            selectedTab = state.defaultTab
+                                            selectedTab = successState.defaultTab
                                         }
                                     }
 
@@ -558,7 +558,7 @@ fun UnifiedMediaDetailsScreen(
                                                         Text(
                                                             when (tab) {
                                                                 DetailsTab.SeasonsFiles ->
-                                                                    if (state.seasons.isNotEmpty()) {
+                                                                    if (successState.seasons.isNotEmpty()) {
                                                                         mokoString(MR.strings.seasons_header)
                                                                     } else {
                                                                         mokoString(MR.strings.media)
@@ -578,7 +578,7 @@ fun UnifiedMediaDetailsScreen(
                                 when (selectedTab) {
                                     DetailsTab.SeasonsFiles -> {
                                         SeasonsFilesTabContent(
-                                            state = state,
+                                            state = successState,
                                             automaticSearchIds = automaticSearchIds,
                                             deleteSeasonStatus = deleteSeasonStatus,
                                             deleteAlbumStatus = deleteAlbumStatus,
@@ -613,7 +613,7 @@ fun UnifiedMediaDetailsScreen(
 
                                     DetailsTab.Overview -> {
                                         OverviewTabContent(
-                                            state = state,
+                                            state = successState,
                                             qualityProfiles = qualityProfiles,
                                             tags = tags,
                                             activeInstance = activeInstance,
@@ -649,6 +649,8 @@ fun UnifiedMediaDetailsScreen(
                                     }
                                 }
                             }
+
+                            Spacer(modifier = Modifier.height(LocalFloatingBarBottomPadding.current))
                         }
                     }
                 }

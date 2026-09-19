@@ -20,10 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
@@ -31,6 +34,7 @@ import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.extensions.pxToDp
 import com.dnfapps.arrmatey.navigation.LocalNavigationManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarActionState
@@ -122,9 +126,10 @@ fun HomeScreen(
 
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val floatingBarIsVisible = !isExpanded && useFloatingNavigationBar && overlayTab == null && visibleTabs.size > 1
+    var floatingBarHeight by remember { mutableIntStateOf(0) }
     val floatingBarBottomPadding =
         if (floatingBarIsVisible) {
-            navigationBarBottomInset() + 80.dp
+            floatingBarHeight.pxToDp()
         } else {
             0.dp
         }
@@ -210,7 +215,9 @@ fun HomeScreen(
                             useServiceNavIcons = useServiceNavIcons,
                             activityQueueIssuesCount = activityQueueIssuesCount,
                             onSelectTab = { navigationManager.setSelectedTab(it) },
-                            modifier = Modifier.align(Alignment.BottomCenter),
+                            modifier = Modifier.align(Alignment.BottomCenter).onGloballyPositioned {
+                                floatingBarHeight = it.size.height
+                            },
                         )
                     }
                 }
