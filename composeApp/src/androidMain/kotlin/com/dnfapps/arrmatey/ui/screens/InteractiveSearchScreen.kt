@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,13 +19,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -283,7 +289,12 @@ fun <T : ArrRelease> ReleaseItem(
                     onClick = { onItemClick?.invoke(item) },
                     enabled = onItemClick != null,
                 ),
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.large,
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ),
     ) {
         ProgressBox(
             animate = animate,
@@ -291,42 +302,130 @@ fun <T : ArrRelease> ReleaseItem(
             Column(
                 modifier =
                     Modifier
-                        .padding(12.dp)
+                        .padding(14.dp)
                         .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    item.quality?.qualityLabel?.let { qualityLabel ->
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                        ) {
+                            Text(
+                                text = qualityLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+                            )
+                        }
+                    }
+
+                    if (item.customFormatScore != 0f) {
+                        val isPositive = item.customFormatScore > 0
+                        val scoreText = if (isPositive) "+${item.customFormatScore.toInt()}" else "${item.customFormatScore.toInt()}"
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color =
+                                if (isPositive) {
+                                    MaterialTheme.colorScheme.tertiaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.errorContainer
+                                },
+                        ) {
+                            Text(
+                                text = scoreText,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color =
+                                    if (isPositive) {
+                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.onErrorContainer
+                                    },
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                            )
+                        }
+                    }
+
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = item.peerColor.copy(alpha = 0.16f),
+                    ) {
+                        Text(
+                            text = item.typeLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = item.peerColor,
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Text(
+                        text = item.size.bytesAsFileSizeString(),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
                 Text(
                     text = item.title,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                val secondLine =
-                    buildAnnotatedString {
-                        withStyle(SpanStyle(color = item.peerColor)) {
-                            append(item.typeLabel)
-                        }
-                        bullet()
-                        item.quality?.qualityLabel?.let { qualityLabel ->
-                            append(qualityLabel)
-                            bullet()
-                        }
-                        append(item.size.bytesAsFileSizeString())
-                    }
+                val metadataText =
+                    listOf(
+                        item.indexerLabel,
+                        item.languages.singleLanguageLabel(),
+                        item.ageMinutes.formatAgeMinutes(),
+                    ).filter { it.isNotBlank() }.joinToString(BULLET)
+
                 Text(
-                    text = secondLine,
-                    maxLines = 2,
+                    text = metadataText,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                val thirdLine =
-                    listOf(
-                        item.languages.singleLanguageLabel(),
-                        item.indexerLabel,
-                        item.ageMinutes.formatAgeMinutes(),
-                    ).joinToString(BULLET)
-                Text(
-                    text = thirdLine,
-                    maxLines = 2,
-                )
+                val hasRejections = !item.downloadAllowed || item.rejections.isNotEmpty()
+                if (hasRejections) {
+                    val rejectionReason = item.rejections.firstOrNull() ?: "Download not allowed"
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                            Text(
+                                text = rejectionReason,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
             }
         }
     }

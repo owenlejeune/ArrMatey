@@ -429,6 +429,10 @@ fun BasePosterItem(
                 },
             ),
         border = if (isSelected) BorderStroke(4.dp, ArrLightPurple) else null,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         val isFixedSize = posterHeight != null
         Column(modifier = if (isFixedSize) Modifier.width(IntrinsicSize.Min) else Modifier) {
