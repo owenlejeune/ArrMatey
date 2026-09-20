@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,11 +19,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExpandCircleDown
@@ -42,6 +45,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,7 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -479,8 +483,9 @@ fun TestConnectionSection(
         shape = MaterialTheme.shapes.large,
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
@@ -497,7 +502,7 @@ fun TestConnectionSection(
             ) {
                 if (isTesting) {
                     CircularProgressIndicator(
-                        modifier = Modifier.padding(end = 8.dp).size(24.dp),
+                        modifier = Modifier.padding(end = 8.dp).size(20.dp),
                         strokeWidth = 2.dp,
                     )
                 }
@@ -505,32 +510,47 @@ fun TestConnectionSection(
             }
 
             testResult?.let { result ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                Surface(
+                    shape = CircleShape,
+                    color =
+                        if (result) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.errorContainer
+                        },
                 ) {
-                    if (result) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        Text(
-                            text = mokoString(MR.strings.success),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                        Text(
-                            text = mokoString(MR.strings.failure),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error,
-                        )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        if (result) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Text(
+                                text = mokoString(MR.strings.success),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Text(
+                                text = mokoString(MR.strings.failure),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
                     }
                 }
             }
@@ -619,10 +639,13 @@ fun LocalNetworkArea(
     moko: MokoStrings = koinInject(),
 ) {
     val context = LocalContext.current
+    val locationDeniedString = mokoString(MR.strings.location_denied)
+    val ssidGetErrorString = mokoString(MR.strings.ssid_get_error)
+
     val locationPermissionHandler =
         rememberLocationPermissionHandler(
             onDenied = {
-                Toast.makeText(context, moko.getString(MR.strings.location_denied), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, locationDeniedString, Toast.LENGTH_SHORT).show()
             },
         )
 
@@ -630,8 +653,9 @@ fun LocalNetworkArea(
         shape = MaterialTheme.shapes.large,
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
@@ -716,8 +740,10 @@ fun LocalNetworkArea(
                                         onLocalNetworkSsidChanged(currentSsids)
                                     }
                                 } ?: run {
-                                    Toast.makeText(context, moko.getString(MR.strings.ssid_get_error), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, ssidGetErrorString, Toast.LENGTH_SHORT).show()
                                 }
+                            } else {
+                                locationPermissionHandler.checkAndPerformAction()
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -729,9 +755,9 @@ fun LocalNetworkArea(
                     HorizontalDivider()
 
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Button(
                             onClick = onTestLocalConnection,
@@ -752,36 +778,49 @@ fun LocalNetworkArea(
                             Text(text = mokoString(MR.strings.test_local_connection))
                         }
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            when (uiState.localTestResult) {
-                                true -> {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                    )
-                                    Text(
-                                        text = mokoString(MR.strings.success),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.primary,
-                                    )
+                        uiState.localTestResult?.let { result ->
+                            Surface(
+                                shape = CircleShape,
+                                color =
+                                    if (result) {
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.errorContainer
+                                    },
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    if (result) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                        Text(
+                                            text = mokoString(MR.strings.success),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                        Text(
+                                            text = mokoString(MR.strings.failure),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.error,
+                                        )
+                                    }
                                 }
-                                false -> {
-                                    Icon(
-                                        painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error,
-                                    )
-                                    Text(
-                                        text = mokoString(MR.strings.failure),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.error,
-                                    )
-                                }
-                                else -> {}
                             }
                         }
                     }
@@ -797,8 +836,9 @@ fun Section(content: @Composable ColumnScope.() -> Unit) {
         shape = MaterialTheme.shapes.large,
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(

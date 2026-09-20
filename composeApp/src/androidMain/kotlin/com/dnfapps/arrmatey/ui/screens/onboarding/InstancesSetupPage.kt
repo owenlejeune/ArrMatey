@@ -1,35 +1,45 @@
 package com.dnfapps.arrmatey.ui.screens.onboarding
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.associatedColor
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 
@@ -72,6 +82,7 @@ fun InstancesSetupPage(
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
                     shape = MaterialTheme.shapes.large,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(
@@ -99,37 +110,90 @@ fun InstancesSetupPage(
                         Card(
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
                             shape = MaterialTheme.shapes.medium,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Row(
-                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(IntrinsicSize.Min),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
-                                Icon(
-                                    painter = painterResource(instance.type.icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(28.dp),
-                                    tint = Color.Unspecified,
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .width(6.dp)
+                                            .fillMaxHeight()
+                                            .background(instance.type.associatedColor),
                                 )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = instance.label,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
-                                    Text(
-                                        text = instance.url,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                Row(
+                                    modifier = Modifier.padding(16.dp).weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    Surface(
+                                        shape = MaterialTheme.shapes.small,
+                                        color = instance.type.associatedColor.copy(alpha = 0.15f),
+                                        modifier = Modifier.size(40.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                painter = painterResource(instance.type.icon),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(24.dp),
+                                                tint = Color.Unspecified,
+                                            )
+                                        }
+                                    }
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        ) {
+                                            Text(
+                                                text = instance.label,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                            )
+                                            if (instance.url.startsWith("https://", ignoreCase = true)) {
+                                                Surface(
+                                                    shape = CircleShape,
+                                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                                ) {
+                                                    Row(
+                                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Lock,
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(10.dp),
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text(
+                                                            text = "SSL",
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        Text(
+                                            text = instance.url,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp),
                                     )
                                 }
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp),
-                                )
                             }
                         }
                     }
@@ -147,37 +211,90 @@ fun InstancesSetupPage(
                         Card(
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
                             shape = MaterialTheme.shapes.medium,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Row(
-                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(IntrinsicSize.Min),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
-                                Icon(
-                                    painter = painterResource(client.type.icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(28.dp),
-                                    tint = Color.Unspecified,
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .width(6.dp)
+                                            .fillMaxHeight()
+                                            .background(client.type.associatedColor),
                                 )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = client.label,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
-                                    Text(
-                                        text = client.url,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                Row(
+                                    modifier = Modifier.padding(16.dp).weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    Surface(
+                                        shape = MaterialTheme.shapes.small,
+                                        color = client.type.associatedColor.copy(alpha = 0.15f),
+                                        modifier = Modifier.size(40.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                painter = painterResource(client.type.icon),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(24.dp),
+                                                tint = Color.Unspecified,
+                                            )
+                                        }
+                                    }
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        ) {
+                                            Text(
+                                                text = client.label,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                            )
+                                            if (client.url.startsWith("https://", ignoreCase = true)) {
+                                                Surface(
+                                                    shape = CircleShape,
+                                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                                ) {
+                                                    Row(
+                                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Lock,
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(10.dp),
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text(
+                                                            text = "SSL",
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        Text(
+                                            text = client.url,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp),
                                     )
                                 }
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp),
-                                )
                             }
                         }
                     }
@@ -211,3 +328,4 @@ fun InstancesSetupPage(
         }
     }
 }
+
