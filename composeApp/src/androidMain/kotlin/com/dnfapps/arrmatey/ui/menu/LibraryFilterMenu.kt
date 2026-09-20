@@ -1,30 +1,35 @@
 package com.dnfapps.arrmatey.ui.menu
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.compose.utils.FilterBy
@@ -41,9 +46,8 @@ import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
-import kotlin.let
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun LibraryFilterMenu(
     type: InstanceType,
@@ -58,10 +62,7 @@ fun LibraryFilterMenu(
     onSortOrderChanged: (SortOrder) -> Unit,
     onOpenViewCustomization: () -> Unit,
 ) {
-    var showMenu by remember { mutableStateOf(false) }
-    var showFilterSubMenu by remember { mutableStateOf(false) }
-    var showSortSubMenu by remember { mutableStateOf(false) }
-    val groupInteractionSource = remember { MutableInteractionSource() }
+    var showSheet by remember { mutableStateOf(false) }
 
     val libraryFilters =
         remember(customFilters) {
@@ -72,190 +73,196 @@ fun LibraryFilterMenu(
     val filterOptions = remember(type) { FilterBy.typeEntries(type) }
     val sortOptions = remember(type) { SortBy.typeEntries(type) }
 
+    val isFiltered = filterBy != FilterBy.All || selectedCustomFilterId != null
+
     Box {
-        IconButton(onClick = { showMenu = true }) {
-            Icon(Icons.Default.FilterList, null)
+        IconButton(onClick = { showSheet = true }) {
+            Icon(
+                imageVector = Icons.Default.FilterList,
+                contentDescription = mokoString(MR.strings.filter),
+                tint = if (isFiltered) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            )
         }
-        DropdownMenuPopup(
-            expanded = showMenu,
-            onDismissRequest = {
-                showMenu = false
-                showFilterSubMenu = false
-                showSortSubMenu = false
-            },
-        ) {
-            DropdownMenuGroup(
-                shapes = MenuDefaults.groupShape(0, 2),
-                interactionSource = groupInteractionSource,
-            ) {
-                DropdownMenuItem(
-                    text = { Text(mokoString(MR.strings.view_customization)) },
-                    selected = false,
-                    onClick = {
-                        onOpenViewCustomization()
-                        showMenu = false
-                    },
-                    shapes = MenuDefaults.itemShape(0, 1),
-                    leadingIcon = { Icon(Icons.Default.Palette, null) },
-                )
-            }
-            Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
 
-            DropdownMenuGroup(
-                shapes = MenuDefaults.groupShape(1, 2),
-                interactionSource = groupInteractionSource,
+        if (showSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showSheet = false },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             ) {
-                Box {
-                    DropdownMenuItem(
-                        text = {
-                            Column {
-                                Text(mokoString(MR.strings.filter))
-                                Text(
-                                    text =
-                                        selectedCustomFilterId?.let {
-                                            customFilters.firstOrNull { it.id == selectedCustomFilterId }?.label
-                                        } ?: mokoString(filterBy.resource),
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
-                            }
-                        },
-                        selected = false,
-                        onClick = {
-                            showFilterSubMenu = true
-                            showSortSubMenu = false
-                        },
-                        shapes = MenuDefaults.itemShape(0, 2),
-                        leadingIcon = { Icon(Icons.Default.FilterList, null) },
-                        trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-                    )
-
-                    DropdownMenuPopup(
-                        expanded = showFilterSubMenu,
-                        onDismissRequest = { showFilterSubMenu = false },
-                        offset = DpOffset(x = 350.dp, y = 0.dp),
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = 32.dp)
+                            .navigationBarsPadding()
+                            .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                ) {
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        DropdownMenuGroup(
-                            shapes = MenuDefaults.groupShape(0, if (libraryFilters.isNotEmpty()) 2 else 1),
-                            interactionSource = groupInteractionSource,
-                            containerColor = MenuDefaults.groupVibrantContainerColor,
+                        Text(
+                            text = mokoString(MR.strings.filters),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        OutlinedButton(
+                            onClick = {
+                                onOpenViewCustomization()
+                                showSheet = false
+                            },
                         ) {
-                            filterOptions.forEachIndexed { index, filter ->
-                                DropdownMenuItem(
-                                    text = { Text(mokoString(filter.resource)) },
-                                    selected = filterBy == filter && selectedCustomFilterId == null,
+                            Icon(
+                                Icons.Default.Palette,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(Modifier.size(8.dp))
+                            Text(
+                                text = mokoString(MR.strings.view_customization),
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+                    }
+
+                    // Filter By Section
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = mokoString(MR.strings.filter_by),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            filterOptions.forEach { filter ->
+                                val isSelected = filterBy == filter && selectedCustomFilterId == null
+                                FilterChip(
+                                    selected = isSelected,
                                     onClick = {
                                         onFilterByChanged(filter)
-                                        showMenu = false
-                                        showFilterSubMenu = false
+                                        if (selectedCustomFilterId != null) {
+                                            onCustomFilterChanged(null)
+                                        }
                                     },
-                                    shapes = MenuDefaults.itemShape(index, filterOptions.size),
-                                    colors = MenuDefaults.selectableItemVibrantColors(),
-                                    selectedLeadingIcon = {
-                                        Icon(Icons.Default.Check, null)
-                                    },
+                                    label = { Text(mokoString(filter.resource)) },
+                                    leadingIcon =
+                                        if (isSelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
+                                    shape = MaterialTheme.shapes.small,
                                 )
                             }
                         }
+                    }
 
-                        if (libraryFilters.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
-
-                            DropdownMenuGroup(
-                                shapes = MenuDefaults.groupShape(1, 2),
-                                interactionSource = groupInteractionSource,
-                                containerColor = MenuDefaults.groupVibrantContainerColor,
+                    // Custom Filters Section
+                    if (libraryFilters.isNotEmpty()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = mokoString(MR.strings.filter),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                libraryFilters.forEachIndexed { index, filter ->
-                                    DropdownMenuItem(
-                                        text = { Text(filter.label) },
-                                        selected = selectedCustomFilterId == filter.id,
+                                libraryFilters.forEach { filter ->
+                                    val isSelected = selectedCustomFilterId == filter.id
+                                    FilterChip(
+                                        selected = isSelected,
                                         onClick = {
-                                            onCustomFilterChanged(if (selectedCustomFilterId == filter.id) null else filter.id)
-                                            showMenu = false
-                                            showFilterSubMenu = false
+                                            onCustomFilterChanged(if (isSelected) null else filter.id)
                                         },
-                                        shapes = MenuDefaults.itemShape(index, libraryFilters.size),
-                                        colors = MenuDefaults.selectableItemVibrantColors(),
-                                        selectedLeadingIcon = {
-                                            Icon(Icons.Default.Check, null)
-                                        },
+                                        label = { Text(filter.label) },
+                                        leadingIcon =
+                                            if (isSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
+                                        shape = MaterialTheme.shapes.small,
                                     )
                                 }
                             }
                         }
                     }
-                }
 
-                Box {
-                    DropdownMenuItem(
-                        text = {
-                            Column {
-                                Text(mokoString(MR.strings.sort))
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                ) {
-                                    Text(
-                                        text = mokoString(sortBy.resource),
-                                        style = MaterialTheme.typography.labelSmall,
+                    // Sort By Section
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = mokoString(MR.strings.sort_by),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+
+                            // Asc / Desc toggle
+                            FilterChip(
+                                selected = true,
+                                onClick = {
+                                    onSortOrderChanged(
+                                        if (sortOrder == SortOrder.Asc) SortOrder.Desc else SortOrder.Asc,
                                     )
+                                },
+                                label = {
+                                    Text(
+                                        if (sortOrder == SortOrder.Asc) {
+                                            mokoString(MR.strings.sort_ascending)
+                                        } else {
+                                            mokoString(MR.strings.sort_descending)
+                                        },
+                                    )
+                                },
+                                leadingIcon = {
                                     Icon(
                                         imageVector =
-                                            when (sortOrder) {
-                                                SortOrder.Asc -> Icons.Default.ArrowDropUp
-                                                SortOrder.Desc -> Icons.Default.ArrowDropDown
+                                            if (sortOrder == SortOrder.Asc) {
+                                                Icons.Default.ArrowUpward
+                                            } else {
+                                                Icons.Default.ArrowDownward
                                             },
                                         contentDescription = null,
-                                        modifier = Modifier.size(14.dp),
+                                        modifier = Modifier.size(16.dp),
                                     )
-                                }
-                            }
-                        },
-                        selected = false,
-                        onClick = {
-                            showSortSubMenu = true
-                            showFilterSubMenu = false
-                        },
-                        shapes = MenuDefaults.itemShape(1, 2),
-                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Sort, null) },
-                        trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-                    )
+                                },
+                                shape = MaterialTheme.shapes.small,
+                            )
+                        }
 
-                    DropdownMenuPopup(
-                        expanded = showSortSubMenu,
-                        onDismissRequest = { showSortSubMenu = false },
-                        offset = DpOffset(x = 350.dp, y = 0.dp),
-                    ) {
-                        DropdownMenuGroup(
-                            shapes = MenuDefaults.groupShape(0, 1),
-                            interactionSource = groupInteractionSource,
-                            containerColor = MenuDefaults.groupVibrantContainerColor,
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            sortOptions.forEachIndexed { index, sort ->
-                                DropdownMenuItem(
-                                    text = { Text(mokoString(sort.resource)) },
-                                    selected = sortBy == sort,
-                                    onClick = {
-                                        if (sortBy == sort) {
-                                            onSortOrderChanged(
-                                                if (sortOrder == SortOrder.Asc) {
-                                                    SortOrder.Desc
-                                                } else {
-                                                    SortOrder.Asc
-                                                },
-                                            )
+                            sortOptions.forEach { sort ->
+                                val isSelected = sortBy == sort
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { onSortByChanged(sort) },
+                                    label = { Text(mokoString(sort.resource)) },
+                                    leadingIcon =
+                                        if (isSelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
                                         } else {
-                                            onSortByChanged(sort)
-                                        }
-                                    },
-                                    shapes = MenuDefaults.itemShape(index, sortOptions.size),
-                                    colors = MenuDefaults.selectableItemVibrantColors(),
-                                    selectedLeadingIcon = {
-                                        when (sortOrder) {
-                                            SortOrder.Asc -> Icon(Icons.Default.ArrowDropUp, null)
-                                            SortOrder.Desc -> Icon(Icons.Default.ArrowDropDown, null)
-                                        }
-                                    },
+                                            null
+                                        },
+                                    shape = MaterialTheme.shapes.small,
                                 )
                             }
                         }
