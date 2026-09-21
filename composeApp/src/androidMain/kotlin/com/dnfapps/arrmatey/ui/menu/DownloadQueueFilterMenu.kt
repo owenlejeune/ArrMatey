@@ -144,7 +144,7 @@ fun DownloadQueueFilterMenu(
                         )
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(0.dp),
                         ) {
                             FilterChip(
                                 selected = filterState.activeOnly,
@@ -201,7 +201,7 @@ fun DownloadQueueFilterMenu(
                         }
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(0.dp),
                         ) {
                             DownloadItemStatus.entries.forEach { status ->
                                 val isSelected = filterState.selectedStatuses.contains(status)
@@ -250,7 +250,7 @@ fun DownloadQueueFilterMenu(
                             }
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(0.dp),
                             ) {
                                 availableTags.forEach { tag ->
                                     val isSelected = filterState.selectedTags.contains(tag)
@@ -321,7 +321,7 @@ fun DownloadQueueFilterMenu(
                         val sortOptions = remember { SortBy.downloadClientEntries() }
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(0.dp),
                         ) {
                             sortOptions.forEach { sort ->
                                 val isSelected = sortBy == sort

@@ -40,6 +40,9 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.ui.screens.dashboard.CompactStatCard
 import com.dnfapps.arrmatey.ui.screens.dashboard.CountStatItem
 import com.dnfapps.arrmatey.ui.screens.dashboard.SplitStatCard
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.ArrOrange
+import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.ui.theme.TracearrDarkBlue
 import com.dnfapps.arrmatey.ui.theme.TracearrLightBlue
@@ -162,21 +165,17 @@ fun TracearrDashboardStatsSection(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             maxItemsInEachRow = if (isExpanded) 4 else 2,
         ) {
+            val hasAlerts = stats.alertsLast24h > 0
             CountStatItem(
                 icon = Icons.Default.Warning,
                 count = stats.alertsLast24h,
                 label = mokoString(MR.strings.alerts),
+                iconColor = if (hasAlerts) MaterialTheme.colorScheme.error else ArrGreen,
                 containerColor =
-                    if (stats.alertsLast24h > 0) {
-                        MaterialTheme.colorScheme.errorContainer
+                    if (hasAlerts) {
+                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
                     } else {
                         MaterialTheme.colorScheme.surfaceContainerHigh
-                    },
-                contentColor =
-                    if (stats.alertsLast24h > 0) {
-                        MaterialTheme.colorScheme.onErrorContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
                     },
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToViolations,
@@ -187,7 +186,8 @@ fun TracearrDashboardStatsSection(
                 firstLabel = mokoString(MR.strings.plays),
                 secondValue = stats.todaySessions.toString(),
                 secondLabel = mokoString(MR.strings.sessions),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                iconColor = TracearrBlue,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToHistory,
@@ -196,6 +196,7 @@ fun TracearrDashboardStatsSection(
                 icon = Icons.Default.Schedule,
                 value = stats.formattedWatchTime,
                 label = mokoString(MR.strings.watch_time),
+                iconColor = ArrPurple,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
@@ -205,6 +206,7 @@ fun TracearrDashboardStatsSection(
                 icon = Icons.Default.Group,
                 count = stats.activeUsersToday,
                 label = mokoString(MR.strings.active_users),
+                iconColor = ArrOrange,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),

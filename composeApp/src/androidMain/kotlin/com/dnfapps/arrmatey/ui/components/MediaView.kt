@@ -1,11 +1,11 @@
 package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.QualityProfile
+import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.ui.theme.ViewType
@@ -19,6 +19,8 @@ fun MediaView(
     itemIsActive: (ArrMedia) -> Boolean,
     preferences: InstancePreferences,
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
+    qualityProfiles: List<QualityProfile> = emptyList(),
+    tags: List<Tag> = emptyList(),
 ) {
     when (preferences.viewType) {
         ViewType.List ->
@@ -33,10 +35,9 @@ fun MediaView(
                 posterElevation = preferences.posterElevation,
                 posterRadius = preferences.posterRadius,
                 multiSelectState = multiSelectState,
-                modifier =
-                    Modifier
-                        .padding(horizontal = 12.dp)
-                        .fillMaxSize(),
+                qualityProfiles = qualityProfiles,
+                tags = tags,
+                modifier = Modifier.fillMaxSize(),
             )
         ViewType.Grid ->
             PosterGrid(
@@ -51,9 +52,7 @@ fun MediaView(
                 posterElevation = preferences.posterElevation,
                 posterRadius = preferences.posterRadius,
                 multiSelectState = multiSelectState,
-                modifier =
-                    Modifier
-                        .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
             )
     }
 }

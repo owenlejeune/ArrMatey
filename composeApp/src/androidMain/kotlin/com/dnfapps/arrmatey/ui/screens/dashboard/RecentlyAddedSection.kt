@@ -1,7 +1,9 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,12 +14,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -82,30 +88,76 @@ fun RecentlyAddedSection(
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                 )
-            }
+            } else {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    userScrollEnabled = enabled,
+                ) {
+                    items(items) { item ->
+                        val type = (item as InstanceTypeIdentifiable).instanceType
+                        val posterModel =
+                            if (item is MockMedia) {
+                                type.mockCover?.let { painterResource(it) }
+                            } else {
+                                null
+                            }
+                        PosterItem(
+                            item = item,
+                            modifier = Modifier.width(120.dp),
+                            posterModel = posterModel,
+                            onItemClick = {
+                                onOpenItem(item.id ?: 0, type)
+                            },
+                            showFooter = true,
+                            additionalContent = {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                    shadowElevation = 2.dp,
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(6.dp),
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(4.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            imageVector = if (item.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                            contentDescription = mokoString(if (item.monitored) MR.strings.monitored else MR.strings.unmonitored),
+                                            tint = if (item.monitored) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                    }
+                                }
 
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                userScrollEnabled = enabled,
-            ) {
-                items(items) { item ->
-                    val type = (item as InstanceTypeIdentifiable).instanceType
-                    val posterModel =
-                        if (item is MockMedia) {
-                            type.mockCover?.let { painterResource(it) }
-                        } else {
-                            null
-                        }
-                    PosterItem(
-                        item = item,
-                        modifier = Modifier.width(120.dp),
-                        posterModel = posterModel,
-                        onItemClick = {
-                            onOpenItem(item.id ?: 0, type)
-                        },
-                        showFooter = true,
-                    )
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                    shadowElevation = 2.dp,
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(6.dp),
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(4.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Image(
+                                            painter = painterResource(type.icon),
+                                            contentDescription = type.name,
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                    }
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }

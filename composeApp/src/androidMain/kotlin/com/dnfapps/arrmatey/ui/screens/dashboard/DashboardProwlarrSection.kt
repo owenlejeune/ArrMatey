@@ -29,7 +29,6 @@ import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
-import com.dnfapps.arrmatey.ui.theme.surfaceLight
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 
@@ -99,18 +98,24 @@ fun DashboardProwlarrSection(
                     modifier = Modifier.weight(1f),
                     label = mokoString(MR.strings.healthy_indexers),
                     count = totalHealthyIndexers,
-                    containerColor = ArrGreen,
-                    contentColor = surfaceLight,
+                    iconColor = ArrGreen,
                 )
                 CountStatItem(
                     icon = Icons.Default.Error,
                     modifier = Modifier.weight(1f),
                     label = mokoString(MR.strings.failing_indexers),
                     count = totalFailingIndexers,
+                    iconColor =
+                        if (totalFailingIndexers > 0) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.secondary
+                        },
                     containerColor =
-                        when {
-                            totalFailingIndexers > 0 -> MaterialTheme.colorScheme.errorContainer
-                            else -> MaterialTheme.colorScheme.secondaryContainer
+                        if (totalFailingIndexers > 0) {
+                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
                         },
                 )
             }

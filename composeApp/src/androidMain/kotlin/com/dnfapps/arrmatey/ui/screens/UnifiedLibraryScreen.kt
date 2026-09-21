@@ -436,6 +436,8 @@ fun UnifiedLibraryScreen(
                                             activeMediaIdsByInstance[currentInstance.id]?.contains(item.id) == true
                                         },
                                         multiSelectState = unifiedLibraryViewModel.selectionState,
+                                        qualityProfiles = instanceData?.qualityProfiles ?: emptyList(),
+                                        tags = instanceData?.tags ?: emptyList(),
                                     )
                                 } else {
                                     EmptySearchResultsView(currentType, textFieldState.text.toString()) {

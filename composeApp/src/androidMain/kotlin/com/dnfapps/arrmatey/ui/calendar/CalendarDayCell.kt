@@ -62,7 +62,7 @@ fun CalendarDayCell(
         onClick = onClick,
         color =
             when {
-                isSelected -> MaterialTheme.colorScheme.primaryContainer
+                isSelected -> MaterialTheme.colorScheme.inversePrimary
                 isToday -> MaterialTheme.colorScheme.surfaceContainerHigh
                 else -> Color.Transparent
             },

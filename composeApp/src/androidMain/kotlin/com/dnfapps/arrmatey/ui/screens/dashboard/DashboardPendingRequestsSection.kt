@@ -1,22 +1,17 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -31,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,12 +35,10 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.screens.requests.StatusChip
 import com.dnfapps.arrmatey.ui.screens.requests.UserInfoRow
-import com.dnfapps.arrmatey.ui.theme.TranslucentBlack
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -126,77 +118,71 @@ private fun CompactRequestCard(
     Card(
         modifier =
             Modifier
-                .widthIn(max = 260.dp)
+                .width(280.dp)
                 .clickable(onClick = onClick),
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.large,
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
     ) {
-        Box(modifier = Modifier.wrapContentWidth()) {
-            BannerView(
-                bannerModel = details?.fullBackdropPath?.let { rememberRemoteImageData(it) },
-                modifier = Modifier.matchParentSize(),
-            )
-            Box(modifier = Modifier.matchParentSize().background(TranslucentBlack))
-
-            Column(
-                modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top,
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.Top,
+                AsyncImage(
+                    model = rememberRemoteImageData(details?.fullPosterPath),
+                    contentDescription = null,
+                    modifier =
+                        Modifier
+                            .width(60.dp)
+                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .clip(MaterialTheme.shapes.medium),
+                    contentScale = ContentScale.Crop,
+                )
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.weight(1f),
                 ) {
-                    AsyncImage(
-                        model = rememberRemoteImageData(details?.fullPosterPath),
-                        contentDescription = null,
-                        modifier =
-                            Modifier
-                                .height(80.dp)
-                                .aspectRatio(AspectRatio.Poster.ratio, true)
-                                .clip(MaterialTheme.shapes.small),
-                        contentScale = ContentScale.Fit,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        MediaRequestTypeChip(text = request.type.name, request.type)
+                        details?.displayDate?.year?.let { year ->
+                            Text(
+                                text = year.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = details?.displayTitle ?: mokoString(MR.strings.unknown),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
 
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            details?.displayDate?.year?.let { year ->
-                                Text(
-                                    text = year.toString(),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White,
-                                )
-                            }
-                            MediaRequestTypeChip(text = request.type.name, request.type)
-                        }
-
-                        Text(
-                            text = details?.displayTitle ?: mokoString(MR.strings.unknown),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            color = Color.White,
-                        )
-
-                        StatusChip(request)
-                    }
+                    StatusChip(request)
                 }
-                UserInfoRow(
-                    label = mokoString(MR.strings.requested_by),
-                    displayName = request.requestedBy.displayName,
-                    avatar = request.requestedBy.avatar,
-                    textColor = Color.White,
-                )
             }
+
+            UserInfoRow(
+                label = mokoString(MR.strings.requested_by),
+                displayName = request.requestedBy.displayName,
+                avatar = request.requestedBy.avatar,
+                textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

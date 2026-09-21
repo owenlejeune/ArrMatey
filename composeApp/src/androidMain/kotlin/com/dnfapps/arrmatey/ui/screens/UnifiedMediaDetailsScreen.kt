@@ -382,6 +382,16 @@ fun UnifiedMediaDetailsScreen(
                             onAddDirectlyClicked = { showAddSheet = true },
                         )
 
+                        if (resolvedType != null && success.availableInstances.size > 1) {
+                            InstancePicker(
+                                type = resolvedType,
+                                currentInstance = success.availableInstances.firstOrNull { it.id == success.selectedInstanceId },
+                                typeInstances = success.availableInstances,
+                                onInstanceSelected = { viewModel.selectInstance(it.id) },
+                                buttonColors = IconButtonDefaults.headerBarColors(),
+                            )
+                        }
+
                         if (showArrActions) {
                             IconButton(
                                 onClick = { viewModel.toggleMonitored() },
@@ -397,16 +407,6 @@ fun UnifiedMediaDetailsScreen(
                                     )
                                 }
                             }
-                        }
-
-                        if (resolvedType != null && success.availableInstances.size > 1) {
-                            InstancePicker(
-                                type = resolvedType,
-                                currentInstance = success.availableInstances.firstOrNull { it.id == success.selectedInstanceId },
-                                typeInstances = success.availableInstances,
-                                onInstanceSelected = { viewModel.selectInstance(it.id) },
-                                buttonColors = IconButtonDefaults.headerBarColors(),
-                            )
                         }
 
                         val canDeleteFile = success.canDeleteFile(resolvedType)

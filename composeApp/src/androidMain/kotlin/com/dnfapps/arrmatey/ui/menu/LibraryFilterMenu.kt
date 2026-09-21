@@ -140,7 +140,7 @@ fun LibraryFilterMenu(
                         )
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(0.dp),
                         ) {
                             filterOptions.forEach { filter ->
                                 val isSelected = filterBy == filter && selectedCustomFilterId == null
@@ -169,14 +169,14 @@ fun LibraryFilterMenu(
                     if (libraryFilters.isNotEmpty()) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
-                                text = mokoString(MR.strings.filter),
+                                text = mokoString(MR.strings.custom_filters),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(0.dp),
                             ) {
                                 libraryFilters.forEach { filter ->
                                     val isSelected = selectedCustomFilterId == filter.id
@@ -248,7 +248,7 @@ fun LibraryFilterMenu(
 
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(0.dp),
                         ) {
                             sortOptions.forEach { sort ->
                                 val isSelected = sortBy == sort

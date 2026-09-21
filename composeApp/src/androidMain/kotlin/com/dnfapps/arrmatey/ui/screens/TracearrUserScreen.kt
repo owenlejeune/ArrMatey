@@ -65,6 +65,10 @@ import com.dnfapps.arrmatey.ui.screens.dashboard.CountStatItem
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.ArrOrange
+import com.dnfapps.arrmatey.ui.theme.ArrPurple
+import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.formatWatchTimeMs
 import com.dnfapps.arrmatey.utils.mokoString
@@ -451,7 +455,7 @@ private fun UserStatsCard(
                     icon = Icons.Default.PlayArrow,
                     count = allTime?.plays?.toInt() ?: 0,
                     label = mokoString(MR.strings.plays),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    iconColor = TracearrBlue,
                     modifier = Modifier.weight(1f),
                 )
 
@@ -459,7 +463,7 @@ private fun UserStatsCard(
                     icon = Icons.Default.Schedule,
                     value = formatWatchTimeMs(allTime?.watchTimeMs ?: 0),
                     label = mokoString(MR.strings.watch_time),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    iconColor = ArrPurple,
                     modifier = Modifier.weight(1f),
                 )
 
@@ -468,7 +472,7 @@ private fun UserStatsCard(
                         icon = Icons.Default.PlayArrow,
                         value = last30.plays.toString(),
                         label = mokoString(MR.strings.last_30_days),
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        iconColor = ArrOrange,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -478,7 +482,7 @@ private fun UserStatsCard(
                         icon = Icons.Default.PlayArrow,
                         value = last7.plays.toString(),
                         label = mokoString(MR.strings.last_7_days),
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        iconColor = ArrGreen,
                         modifier = Modifier.weight(1f),
                     )
                 }

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -93,8 +94,35 @@ fun LargeLabelledSwitch(
     sublabel: String? = null,
     enabled: Boolean = true,
 ) {
+    val containerColor =
+        if (!enabled) {
+            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.38f)
+        } else if (checked) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        }
+
+    val contentColor =
+        if (!enabled) {
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        } else if (checked) {
+            MaterialTheme.colorScheme.onPrimaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
+
+    val sublabelColor =
+        if (!enabled) {
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+        } else if (checked) {
+            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
     Card(
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = MaterialTheme.shapes.large,
         modifier =
             modifier
                 .fillMaxWidth()
@@ -106,12 +134,19 @@ fun LargeLabelledSwitch(
                 ),
         colors =
             CardDefaults.cardColors(
-                containerColor = if (enabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                containerColor = containerColor,
+                contentColor = contentColor,
             ),
+        border =
+            if (!checked && enabled) {
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            } else {
+                null
+            },
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -126,6 +161,7 @@ fun LargeLabelledSwitch(
                     style = MaterialTheme.typography.titleMediumEmphasized,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    color = contentColor,
                 )
                 sublabel?.let {
                     Text(
@@ -133,6 +169,7 @@ fun LargeLabelledSwitch(
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
+                        color = sublabelColor,
                     )
                 }
             }

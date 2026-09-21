@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.tracearr
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -222,16 +223,17 @@ fun TracearrStreamCard(
                                         session.audioDecision == TracearrStreamDecision.Transcode
 
                                 if (isTranscoding) {
+                                    val isDark = isSystemInDarkTheme()
                                     Surface(
                                         shape = CircleShape,
-                                        color = ArrYellow.copy(alpha = 0.2f),
+                                        color = Color(0xFFF59E0B).copy(alpha = if (isDark) 0.25f else 0.15f),
                                         modifier = Modifier.size(24.dp),
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
                                             Icon(
                                                 imageVector = Icons.Default.ElectricBolt,
                                                 contentDescription = mokoString(MR.strings.transcoding),
-                                                tint = ArrYellow,
+                                                tint = if (isDark) Color(0xFFFBBF24) else Color(0xFFB45309),
                                                 modifier = Modifier.size(14.dp),
                                             )
                                         }

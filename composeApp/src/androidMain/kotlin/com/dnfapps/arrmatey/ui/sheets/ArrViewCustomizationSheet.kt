@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,6 +29,7 @@ import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
+import com.dnfapps.arrmatey.ui.components.LargeLabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MediaItem
 import com.dnfapps.arrmatey.ui.components.PosterGridItemOverlay
 import com.dnfapps.arrmatey.ui.components.PosterItem
@@ -63,112 +65,128 @@ fun ArrViewCustomizationSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp)
-                    .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             type.mockCover?.let { mockCover ->
-                val model = painterResource(mockCover)
-                when (preferences.viewType) {
-                    ViewType.List -> {
-                        MediaItem(
-                            aspectRatio = type.aspectRatio,
-                            item = type.mockMedia,
-                            onItemClick = {},
-                            showBannerBackground = preferences.showBannerBackground,
-                            includeOverview = preferences.includeOverview,
-                            posterModel = model,
-                            bannerModel = model,
-                            blur = preferences.bannerBlur,
-                            posterRadius = preferences.posterRadius,
-                            posterElevation = preferences.posterElevation,
-                        )
-                    }
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    val model = painterResource(mockCover)
+                    when (preferences.viewType) {
+                        ViewType.List -> {
+                            MediaItem(
+                                aspectRatio = type.aspectRatio,
+                                item = type.mockMedia,
+                                onItemClick = {},
+                                showBannerBackground = preferences.showBannerBackground,
+                                includeOverview = preferences.includeOverview,
+                                posterModel = model,
+                                bannerModel = model,
+                                blur = preferences.bannerBlur,
+                                posterRadius = preferences.posterRadius,
+                                posterElevation = preferences.posterElevation,
+                            )
+                        }
 
-                    ViewType.Grid -> {
-                        PosterItem(
-                            posterHeight = 200.dp,
-                            item = type.mockMedia,
-                            posterModel = model,
-                            aspectRatio = type.aspectRatio,
-                            showFooter = preferences.showFullDetails,
-                            radius = preferences.posterRadius,
-                            elevation = preferences.posterElevation,
-                            additionalContent = {
-                                if (preferences.showOverlay) {
-                                    PosterGridItemOverlay()
-                                }
+                        ViewType.Grid -> {
+                            PosterItem(
+                                posterHeight = 180.dp,
+                                item = type.mockMedia,
+                                posterModel = model,
+                                aspectRatio = type.aspectRatio,
+                                showFooter = preferences.showFullDetails,
+                                radius = preferences.posterRadius,
+                                elevation = preferences.posterElevation,
+                                additionalContent = {
+                                    if (preferences.showOverlay) {
+                                        PosterGridItemOverlay()
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    ViewType.entries.forEachIndexed { index, viewType ->
+                        SegmentedButton(
+                            modifier = Modifier.weight(1f),
+                            shape =
+                                SegmentedButtonDefaults.itemShape(
+                                    index = index,
+                                    count = ViewType.entries.size,
+                                ),
+                            onClick = { onViewTypeChanged(viewType) },
+                            selected = viewType == preferences.viewType,
+                            label = {
+                                Text(
+                                    text = mokoString(viewType.resource),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
                             },
                         )
                     }
                 }
-            }
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                ViewType.entries.forEachIndexed { index, viewType ->
-                    SegmentedButton(
-                        modifier = Modifier.weight(1f),
-                        shape =
-                            SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = ViewType.entries.size,
-                            ),
-                        onClick = { onViewTypeChanged(viewType) },
-                        selected = viewType == preferences.viewType,
-                        label = {
-                            Text(
-                                text = mokoString(viewType.resource),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+
+                LargeLabelledSwitch(
+                    label = mokoString(MR.strings.apply_globally),
+                    sublabel = mokoString(MR.strings.apply_globally_message),
+                    checked = preferences.applyGlobally,
+                    onCheckedChange = { onApplyGloballyChanged(it) },
+                )
+
+                Text(
+                    text = mokoString(MR.strings.customization_options),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                AnimatedContent(
+                    targetState = preferences.viewType,
+                    transitionSpec = { fadeIn().togetherWith(fadeOut()) },
+                ) { type ->
+                    when (type) {
+                        ViewType.List ->
+                            ListTypeOptions(
+                                preferences,
+                                onShowBannerBackgroundChanged,
+                                onIncludeOverviewChanged,
+                                onBannerBlurChanged,
+                                onPosterElevationChanged,
+                                onPosterRadiusChanged,
                             )
-                        },
-                    )
-                }
-            }
 
-            Text(
-                text = mokoString(MR.strings.customization_options),
-                style = MaterialTheme.typography.headlineSmall,
-            )
-
-            LabelledSwitch(
-                label = mokoString(MR.strings.apply_globally),
-                sublabel = mokoString(MR.strings.apply_globally_message),
-                checked = preferences.applyGlobally,
-                onCheckedChange = { onApplyGloballyChanged(it) },
-            )
-
-            AnimatedContent(
-                targetState = preferences.viewType,
-                transitionSpec = { fadeIn().togetherWith(fadeOut()) },
-            ) { type ->
-                when (type) {
-                    ViewType.List ->
-                        ListTypeOptions(
-                            preferences,
-                            onShowBannerBackgroundChanged,
-                            onIncludeOverviewChanged,
-                            onBannerBlurChanged,
-                            onPosterElevationChanged,
-                            onPosterRadiusChanged,
-                        )
-
-                    ViewType.Grid ->
-                        GridTypeOptions(
-                            preferences,
-                            onShowFullDetailsChanged,
-                            onShowOverlayChanged,
-                            onGridDensityChanged,
-                            onGridSpacingChanged,
-                            onPosterElevationChanged,
-                            onPosterRadiusChanged,
-                        )
+                        ViewType.Grid ->
+                            GridTypeOptions(
+                                preferences,
+                                onShowFullDetailsChanged,
+                                onShowOverlayChanged,
+                                onGridDensityChanged,
+                                onGridSpacingChanged,
+                                onPosterElevationChanged,
+                                onPosterRadiusChanged,
+                            )
+                    }
                 }
             }
         }
@@ -185,7 +203,7 @@ fun ListTypeOptions(
     onPosterRadiusChanged: (PosterRadius) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         LabelledSwitch(
             label = mokoString(MR.strings.show_banner_background),
@@ -197,10 +215,13 @@ fun ListTypeOptions(
             checked = preferences.includeOverview,
             onCheckedChange = { onIncludeOverviewChanged(it) },
         )
-        Column {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Text(
                 text = mokoString(MR.strings.banner_blur),
                 style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -218,6 +239,7 @@ fun ListTypeOptions(
                         label = {
                             Text(
                                 text = mokoString(blur.label),
+                                style = MaterialTheme.typography.labelLarge,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -246,7 +268,7 @@ fun GridTypeOptions(
     onPosterRadiusChanged: (PosterRadius) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         LabelledSwitch(
             label = mokoString(MR.strings.show_full_details),
@@ -258,10 +280,13 @@ fun GridTypeOptions(
             checked = preferences.showOverlay,
             onCheckedChange = { onShowOverlayChanged(it) },
         )
-        Column {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Text(
                 text = mokoString(MR.strings.grid_density),
                 style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -279,6 +304,7 @@ fun GridTypeOptions(
                         label = {
                             Text(
                                 text = mokoString(density.label),
+                                style = MaterialTheme.typography.labelLarge,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -287,10 +313,13 @@ fun GridTypeOptions(
                 }
             }
         }
-        Column {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Text(
                 text = mokoString(MR.strings.grid_spacing),
                 style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -308,6 +337,7 @@ fun GridTypeOptions(
                         label = {
                             Text(
                                 text = mokoString(spacing.label),
+                                style = MaterialTheme.typography.labelLarge,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -330,61 +360,73 @@ fun PosterOptions(
     onPosterElevationChanged: (PosterElevation) -> Unit,
     onPosterRadiusChanged: (PosterRadius) -> Unit,
 ) {
-    Column {
-        Text(
-            text = mokoString(MR.strings.poster_elevation),
-            style = MaterialTheme.typography.titleSmall,
-        )
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier.fillMaxWidth(),
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            PosterElevation.entries.forEachIndexed { index, elevation ->
-                SegmentedButton(
-                    modifier = Modifier.weight(1f),
-                    shape =
-                        SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = PosterElevation.entries.size,
-                        ),
-                    onClick = { onPosterElevationChanged(elevation) },
-                    selected = elevation == preferences.posterElevation,
-                    label = {
-                        Text(
-                            text = mokoString(elevation.label),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                )
+            Text(
+                text = mokoString(MR.strings.poster_elevation),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                PosterElevation.entries.forEachIndexed { index, elevation ->
+                    SegmentedButton(
+                        modifier = Modifier.weight(1f),
+                        shape =
+                            SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = PosterElevation.entries.size,
+                            ),
+                        onClick = { onPosterElevationChanged(elevation) },
+                        selected = elevation == preferences.posterElevation,
+                        label = {
+                            Text(
+                                text = mokoString(elevation.label),
+                                style = MaterialTheme.typography.labelLarge,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
+                }
             }
         }
-    }
-    Column {
-        Text(
-            text = mokoString(MR.strings.poster_radius),
-            style = MaterialTheme.typography.titleSmall,
-        )
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier.fillMaxWidth(),
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            PosterRadius.entries.forEachIndexed { index, radius ->
-                SegmentedButton(
-                    modifier = Modifier.weight(1f),
-                    shape =
-                        SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = PosterRadius.entries.size,
-                        ),
-                    onClick = { onPosterRadiusChanged(radius) },
-                    selected = radius == preferences.posterRadius,
-                    label = {
-                        Text(
-                            text = mokoString(radius.label),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                )
+            Text(
+                text = mokoString(MR.strings.poster_radius),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                PosterRadius.entries.forEachIndexed { index, radius ->
+                    SegmentedButton(
+                        modifier = Modifier.weight(1f),
+                        shape =
+                            SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = PosterRadius.entries.size,
+                            ),
+                        onClick = { onPosterRadiusChanged(radius) },
+                        selected = radius == preferences.posterRadius,
+                        label = {
+                            Text(
+                                text = mokoString(radius.label),
+                                style = MaterialTheme.typography.labelLarge,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
+                }
             }
         }
     }

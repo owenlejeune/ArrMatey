@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.tracearr
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,8 @@ import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
+import com.dnfapps.arrmatey.ui.theme.TracearrDarkBlue
+import com.dnfapps.arrmatey.ui.theme.TracearrLightBlue
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -343,18 +346,19 @@ fun TracearrHistoryTableRow(
                         item.isTranscode == true ||
                             item.videoDecision == TracearrStreamDecision.Transcode ||
                             item.audioDecision == TracearrStreamDecision.Transcode
+                    val isDark = isSystemInDarkTheme()
                     val (chipColor, textColor, icon, label) =
                         if (isTranscoding) {
                             Quadruple(
-                                ArrYellow.copy(alpha = 0.2f),
-                                ArrYellow,
+                                Color(0xFFF59E0B).copy(alpha = if (isDark) 0.25f else 0.15f),
+                                if (isDark) Color(0xFFFBBF24) else Color(0xFFB45309),
                                 Icons.Default.Bolt,
                                 mokoString(MR.strings.transcode),
                             )
                         } else {
                             Quadruple(
-                                Color(0xFF4CAF50).copy(alpha = 0.2f),
-                                Color(0xFF4CAF50),
+                                Color(0xFF4CAF50).copy(alpha = if (isDark) 0.25f else 0.15f),
+                                if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32),
                                 Icons.Default.PlayArrow,
                                 mokoString(MR.strings.direct_play),
                             )
@@ -416,31 +420,32 @@ private fun TableStatusChip(
     isSampled: Boolean,
     isAbandoned: Boolean,
 ) {
+    val isDark = isSystemInDarkTheme()
     val (label, containerColor, contentColor) =
         when {
             isWatched ->
                 Triple(
                     mokoString(MR.strings.watched),
-                    Color(0xFF4CAF50).copy(alpha = 0.2f),
-                    Color(0xFF4CAF50),
+                    Color(0xFF4CAF50).copy(alpha = if (isDark) 0.25f else 0.15f),
+                    if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32),
                 )
             isSampled ->
                 Triple(
                     mokoString(MR.strings.sampled),
-                    ArrYellow.copy(alpha = 0.2f),
-                    ArrYellow,
+                    Color(0xFFF59E0B).copy(alpha = if (isDark) 0.25f else 0.15f),
+                    if (isDark) Color(0xFFFBBF24) else Color(0xFFB45309),
                 )
             isAbandoned ->
                 Triple(
                     mokoString(MR.strings.abandoned),
-                    ArrRed.copy(alpha = 0.2f),
-                    ArrRed,
+                    ArrRed.copy(alpha = if (isDark) 0.25f else 0.15f),
+                    if (isDark) Color(0xFFEF5350) else Color(0xFFC62828),
                 )
             else ->
                 Triple(
                     mokoString(MR.strings.unknown),
-                    TracearrBlue.copy(alpha = 0.2f),
-                    TracearrBlue,
+                    TracearrBlue.copy(alpha = if (isDark) 0.25f else 0.15f),
+                    if (isDark) TracearrLightBlue else TracearrDarkBlue,
                 )
         }
 

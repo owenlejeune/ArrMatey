@@ -1,40 +1,43 @@
 package com.dnfapps.arrmatey.ui.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
-import com.dnfapps.arrmatey.ui.theme.TranslucentBlackDarker
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.GridDensity
 import com.dnfapps.arrmatey.utils.GridSpacing
 import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
+import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun PosterGrid(
@@ -98,33 +101,38 @@ fun BoxScope.PosterGridItemOverlay(
     progress: () -> Float = { 0.6f },
     statusColor: Color = ArrBlue,
 ) {
-    Box(
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        shadowElevation = 2.dp,
         modifier =
             Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(.5f)
-                .background(
-                    brush =
-                        Brush.verticalGradient(
-                            listOf(TranslucentBlackDarker, Color.Transparent),
-                        ),
-                ),
-    )
-    Icon(
-        imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-        contentDescription = null,
-        modifier = Modifier.padding(8.dp).align(Alignment.TopStart),
-        tint = Color.White,
-    )
+                .align(Alignment.TopStart)
+                .padding(6.dp),
+    ) {
+        Box(
+            modifier = Modifier.padding(4.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = if (monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                contentDescription = mokoString(if (monitored) MR.strings.monitored else MR.strings.unmonitored),
+                tint = if (monitored) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
     LinearProgressIndicator(
         progress = progress,
         modifier =
             Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .height(6.dp),
+                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .height(4.dp)
+                .clip(CircleShape),
         color = statusColor,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
     )
 }

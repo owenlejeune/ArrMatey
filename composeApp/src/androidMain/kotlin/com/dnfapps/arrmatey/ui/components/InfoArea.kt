@@ -45,7 +45,7 @@ fun InfoCardInstanceFooter(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Image(
-            painter = painterResource(instance.type.icon),
+            painter = painterResource(instance.type.tabIcon ?: instance.type.icon),
             contentDescription = null,
             modifier = Modifier.size(18.dp),
         )

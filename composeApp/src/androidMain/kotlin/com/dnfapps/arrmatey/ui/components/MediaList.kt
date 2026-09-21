@@ -24,9 +24,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -58,7 +64,9 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
+import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.BULLET
@@ -93,18 +101,20 @@ fun <T : ArrMedia> MediaList(
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
+    qualityProfiles: List<QualityProfile> = emptyList(),
+    tags: List<Tag> = emptyList(),
 ) {
     val bottomPadding = LocalFloatingBarBottomPadding.current
 
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(18.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         userScrollEnabled = userScrollEnabled,
         contentPadding =
             PaddingValues(
-                start = 18.dp,
+                start = 12.dp,
                 top = 12.dp,
-                end = 18.dp,
+                end = 12.dp,
                 bottom = 12.dp + bottomPadding,
             ),
     ) {
@@ -124,6 +134,8 @@ fun <T : ArrMedia> MediaList(
                 posterElevation = posterElevation,
                 posterRadius = posterRadius,
                 multiSelectState = multiSelectState,
+                qualityProfiles = qualityProfiles,
+                tags = tags,
             )
         }
     }
@@ -239,6 +251,8 @@ fun <T : ArrMedia> MediaItem(
     posterRadius: PosterRadius = PosterRadius.Medium,
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
     edgeColor: Color? = null,
+    qualityProfiles: List<QualityProfile> = emptyList(),
+    tags: List<Tag> = emptyList(),
 ) {
     val isSelected = multiSelectState.isSelected(item.guid)
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
@@ -319,6 +333,30 @@ fun <T : ArrMedia> MediaItem(
                         elevation = posterElevation,
                         radius = posterRadius,
                         multiSelectState = multiSelectState,
+                        additionalContent = {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                shadowElevation = 2.dp,
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(4.dp),
+                            ) {
+                                Box(
+                                    modifier = Modifier.padding(3.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Icon(
+                                        imageVector = if (item.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                                        contentDescription = mokoString(if (item.monitored) MR.strings.monitored else MR.strings.unmonitored),
+                                        tint = if (item.monitored) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(12.dp),
+                                    )
+                                }
+                            }
+                        },
                     )
 
                     Column(
@@ -335,7 +373,13 @@ fun <T : ArrMedia> MediaItem(
                             overflow = TextOverflow.Ellipsis,
                         )
 
-                        MediaDetails(item, isActive, showBannerBackground = hasBanner)
+                        MediaDetails(
+                            item = item,
+                            isActive = isActive,
+                            showBannerBackground = hasBanner,
+                            qualityProfiles = qualityProfiles,
+                            tags = tags,
+                        )
 
                         if (includeOverview && item.overview != null) {
                             val parsed = item.overview?.rememberHtml() ?: ""
@@ -535,13 +579,15 @@ private fun MediaDetails(
     item: ArrMedia,
     isActive: Boolean,
     showBannerBackground: Boolean,
+    qualityProfiles: List<QualityProfile> = emptyList(),
+    tags: List<Tag> = emptyList(),
 ) {
     Column {
         when (item) {
-            is ArrSeries -> SeriesDetails(item, isActive, showBannerBackground)
-            is ArrMovie -> MovieDetails(item, isActive, showBannerBackground)
-            is Arrtist -> ArtistDetails(item, isActive, showBannerBackground)
-            is Author -> AuthorDetails(item, isActive, showBannerBackground)
+            is ArrSeries -> SeriesDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
+            is ArrMovie -> MovieDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
+            is Arrtist -> ArtistDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
+            is Author -> AuthorDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
             is Audiobook -> AudiobookDetails(item, isActive, showBannerBackground)
             is SearchAudiobook -> SearchAudiobookDetails(item, showBannerBackground)
             is MockMedia -> MockDetails(item, showBannerBackground)
@@ -554,8 +600,11 @@ private fun SeriesDetails(
     item: ArrSeries,
     isActive: Boolean,
     showBannerBackground: Boolean,
+    qualityProfiles: List<QualityProfile> = emptyList(),
+    tags: List<Tag> = emptyList(),
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
+    val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
     val seasonLabel = mokoPlural(MR.plurals.seasons, item.seasonCount)
     val fileSizeString = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
     val network = item.network
@@ -563,22 +612,30 @@ private fun SeriesDetails(
     val secondLine = listOfNotNull(seasonLabel, fileSizeString, network).joinToString(BULLET)
     Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
+    val nextAirStr = item.nextAiring?.format()
     val statusStr =
         when (item.status) {
             MediaStatus.Continuing ->
-                item.nextAiring?.format()
+                nextAirStr
                     ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
 
-            else -> mokoString(item.status.resource)
+            else -> listOfNotNull(mokoString(item.status.resource), nextAirStr).joinToString(BULLET)
         }
     Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+
+    val qualityProfile = qualityProfiles.firstOrNull { it.id == item.qualityProfileId }?.name ?: item.profileName
+    val tagsLabel = item.formatTags(tags)
+    val metaLine = listOfNotNull(qualityProfile, tagsLabel).joinToString(BULLET)
+    if (metaLine.isNotEmpty()) {
+        Text(metaLine, color = secondaryContentColor, style = MaterialTheme.typography.bodySmall)
+    }
 
     if (item.id != null) {
         Text(
             text = "${item.episodeFileCount}/${item.episodeCount}",
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
-            modifier = Modifier.padding(top = 8.dp, bottom = 1.dp),
+            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp),
         )
         LinearProgressIndicator(
             progress = { item.statusProgress },
@@ -586,8 +643,9 @@ private fun SeriesDetails(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(6.dp),
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    .height(4.dp)
+                    .clip(CircleShape),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
         )
     }
 }
@@ -597,9 +655,18 @@ private fun MovieDetails(
     item: ArrMovie,
     isActive: Boolean,
     showBannerBackground: Boolean,
+    qualityProfiles: List<QualityProfile> = emptyList(),
+    tags: List<Tag> = emptyList(),
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
-    item.releaseDate?.format("MMMM d, yyyy")?.let {
+    val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+
+    val nextReleaseDate = item.digitalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.digital_release)}: $it" }
+        ?: item.physicalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.physical_release)}: $it" }
+        ?: item.inCinemas?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.in_cinemas)}: $it" }
+        ?: item.releaseDate?.format("MMMM d, yyyy")
+
+    nextReleaseDate?.let {
         Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
@@ -619,6 +686,13 @@ private fun MovieDetails(
         Text(thirdLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
+    val qualityProfile = qualityProfiles.firstOrNull { it.id == item.qualityProfileId }?.name
+    val tagsLabel = item.formatTags(tags)
+    val metaLine = listOfNotNull(qualityProfile, tagsLabel).joinToString(BULLET)
+    if (metaLine.isNotEmpty()) {
+        Text(metaLine, color = secondaryContentColor, style = MaterialTheme.typography.bodySmall)
+    }
+
     if (item.id != null) {
         LinearProgressIndicator(
             progress = { item.statusProgress },
@@ -627,8 +701,9 @@ private fun MovieDetails(
                 Modifier
                     .padding(top = 8.dp)
                     .fillMaxWidth()
-                    .height(6.dp),
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    .height(4.dp)
+                    .clip(CircleShape),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
         )
     }
 }
@@ -638,15 +713,30 @@ private fun ArtistDetails(
     item: Arrtist,
     isActive: Boolean,
     showBannerBackground: Boolean,
+    qualityProfiles: List<QualityProfile> = emptyList(),
+    tags: List<Tag> = emptyList(),
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
+    val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
     val albumLabel = mokoPlural(MR.plurals.albums, item.albumCount)
     val trackLabel = mokoPlural(MR.plurals.tracks, item.trackCount)
     val secondLine = listOfNotNull(albumLabel, trackLabel).joinToString(BULLET)
     Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
-    val statusStr = mokoString(item.status.resource)
+    val nextRelease = item.nextAlbum?.releaseDate?.format()
+    val statusStr = if (nextRelease != null) {
+        "${mokoString(item.status.resource)} • $nextRelease"
+    } else {
+        mokoString(item.status.resource)
+    }
     Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+
+    val qualityProfile = qualityProfiles.firstOrNull { it.id == item.qualityProfileId }?.name
+    val tagsLabel = item.formatTags(tags)
+    val metaLine = listOfNotNull(qualityProfile, tagsLabel).joinToString(BULLET)
+    if (metaLine.isNotEmpty()) {
+        Text(metaLine, color = secondaryContentColor, style = MaterialTheme.typography.bodySmall)
+    }
 }
 
 @Composable
@@ -654,29 +744,40 @@ private fun AuthorDetails(
     item: Author,
     isActive: Boolean,
     showBannerBackground: Boolean,
+    qualityProfiles: List<QualityProfile> = emptyList(),
+    tags: List<Tag> = emptyList(),
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
+    val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     val bookLabel = mokoPlural(MR.plurals.books_count, item.bookCount)
     val firstLine = listOfNotNull(bookLabel).joinToString(BULLET)
     Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
+    val nextRelease = item.nextBook?.releaseDate?.format()
     val statusStr =
         when (item.status) {
             MediaStatus.Continuing ->
-                item.nextBook?.releaseDate?.format()
+                nextRelease
                     ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
 
-            else -> mokoString(item.status.resource)
+            else -> listOfNotNull(mokoString(item.status.resource), nextRelease).joinToString(BULLET)
         }
     Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+
+    val qualityProfile = qualityProfiles.firstOrNull { it.id == item.qualityProfileId }?.name
+    val tagsLabel = item.formatTags(tags)
+    val metaLine = listOfNotNull(qualityProfile, tagsLabel).joinToString(BULLET)
+    if (metaLine.isNotEmpty()) {
+        Text(metaLine, color = secondaryContentColor, style = MaterialTheme.typography.bodySmall)
+    }
 
     if (item.id != null) {
         Text(
             text = "${item.bookFileCount}/${item.bookCount}",
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
-            modifier = Modifier.padding(top = 8.dp, bottom = 1.dp),
+            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp),
         )
         LinearProgressIndicator(
             progress = { item.statusProgress },
@@ -684,8 +785,9 @@ private fun AuthorDetails(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(6.dp),
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    .height(4.dp)
+                    .clip(CircleShape),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
         )
     }
 }
@@ -713,7 +815,8 @@ private fun AudiobookDetails(
         Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
-    val statusStr = mokoString(item.status.resource)
+    val releaseDate = item.publishedDate?.format("MMMM d, yyyy") ?: item.publishYear
+    val statusStr = listOfNotNull(mokoString(item.status.resource), releaseDate).joinToString(BULLET)
     Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 }
 
@@ -749,9 +852,12 @@ private fun MockDetails(
 ) {
     val contentColor =
         if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
+    val secondaryContentColor =
+        if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     Text("Mock Studio", color = contentColor, style = MaterialTheme.typography.bodyMedium)
     Text("Mock Quality", color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    Text("Any • 1080p • HD", color = secondaryContentColor, style = MaterialTheme.typography.bodySmall)
 }
 
 @Composable

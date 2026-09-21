@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.ui.screens.tracearr
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -94,13 +95,14 @@ fun TracearrStreamDetailsSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val isDark = isSystemInDarkTheme()
     val isPaused = session.state?.equals("paused", ignoreCase = true) == true
     val isPlaying = session.state?.equals("playing", ignoreCase = true) == true
     val stateColor =
         when {
-            isPaused -> ArrYellow
-            isPlaying -> Color(0xFF4CAF50)
-            else -> Color(0xFF2196F3)
+            isPaused -> if (isDark) Color(0xFFFBBF24) else Color(0xFFB45309)
+            isPlaying -> if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32)
+            else -> if (isDark) Color(0xFF64B5F6) else Color(0xFF1976D2)
         }
 
     val stateText =
@@ -198,7 +200,7 @@ fun TracearrStreamDetailsSheet(
                 )
                 Surface(
                     shape = CircleShape,
-                    color = stateColor.copy(alpha = 0.2f),
+                    color = (if (isPaused) Color(0xFFF59E0B) else stateColor).copy(alpha = if (isDark) 0.25f else 0.15f),
                 ) {
                     Text(
                         text = stateText,
@@ -525,13 +527,11 @@ fun TracearrStreamDetailsSheet(
                 session.isTranscode == true ||
                     session.videoDecision == TracearrStreamDecision.Transcode ||
                     session.audioDecision == TracearrStreamDecision.Transcode
-            val streamBadge = if (isStreamTranscode) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
-            val streamBadgeColor = if (isStreamTranscode) ArrYellow else Color(0xFF4CAF50)
 
             SectionCard(
                 icon = Icons.Default.Speed,
                 title = mokoString(MR.strings.stream_details),
-                trailingBadge = { DecisionBadge(text = streamBadge, color = streamBadgeColor) },
+                trailingBadge = { DecisionBadge(isTranscode = isStreamTranscode) },
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     val srcContainer = session.transcodeInfo?.sourceContainer ?: "MKV"
@@ -552,13 +552,11 @@ fun TracearrStreamDetailsSheet(
             }
 
             val isVideoTranscode = session.videoDecision == TracearrStreamDecision.Transcode
-            val videoBadge = if (isVideoTranscode) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
-            val videoBadgeColor = if (isVideoTranscode) ArrYellow else Color(0xFF4CAF50)
 
             SectionCard(
                 icon = Icons.Default.Videocam,
                 title = mokoString(MR.strings.video),
-                trailingBadge = { DecisionBadge(text = videoBadge, color = videoBadgeColor) },
+                trailingBadge = { DecisionBadge(isTranscode = isVideoTranscode) },
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     DetailHeaderRow()
@@ -618,13 +616,11 @@ fun TracearrStreamDetailsSheet(
             }
 
             val isAudioTranscode = session.audioDecision == TracearrStreamDecision.Transcode
-            val audioBadge = if (isAudioTranscode) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
-            val audioBadgeColor = if (isAudioTranscode) ArrYellow else Color(0xFF4CAF50)
 
             SectionCard(
                 icon = Icons.Default.GraphicEq,
                 title = mokoString(MR.strings.audio),
-                trailingBadge = { DecisionBadge(text = audioBadge, color = audioBadgeColor) },
+                trailingBadge = { DecisionBadge(isTranscode = isAudioTranscode) },
             ) {
                 val streamAudioDetails = session.streamAudioDetails
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -717,18 +713,32 @@ private fun SectionCard(
 
 @Composable
 private fun DecisionBadge(
-    text: String,
-    color: Color,
+    isTranscode: Boolean,
 ) {
+    val isDark = isSystemInDarkTheme()
+    val text = if (isTranscode) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
+    val containerColor =
+        if (isTranscode) {
+            Color(0xFFF59E0B).copy(alpha = if (isDark) 0.25f else 0.15f)
+        } else {
+            Color(0xFF4CAF50).copy(alpha = if (isDark) 0.25f else 0.15f)
+        }
+    val contentColor =
+        if (isTranscode) {
+            if (isDark) Color(0xFFFBBF24) else Color(0xFFB45309)
+        } else {
+            if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32)
+        }
+
     Surface(
         shape = CircleShape,
-        color = color.copy(alpha = 0.2f),
+        color = containerColor,
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = color,
+            color = contentColor,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
         )
     }

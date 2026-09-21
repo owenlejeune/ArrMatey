@@ -15,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,12 +29,13 @@ fun StatCard(
     icon: ImageVector,
     label: String,
     value: String,
-    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    iconColor: Color = MaterialTheme.colorScheme.primary,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     onClick: (() -> Unit)? = null,
 ) {
     Card(
         modifier = modifier.then(onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier),
-        colors = CardDefaults.cardColors(containerColor = color),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
         shape = MaterialTheme.shapes.large,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
     ) {
@@ -45,11 +45,16 @@ fun StatCard(
         ) {
             Surface(
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                color = iconColor.copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, iconColor.copy(alpha = 0.25f)),
             ) {
                 Box(modifier = Modifier.padding(6.dp)) {
-                    Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier.size(20.dp),
+                    )
                 }
             }
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -62,6 +67,7 @@ fun StatCard(
                     text = value,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -76,13 +82,14 @@ fun SplitStatCard(
     secondLabel: String,
     secondValue: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-    contentColor: Color = contentColorFor(color),
+    iconColor: Color = MaterialTheme.colorScheme.primary,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
     onClick: (() -> Unit)? = null,
 ) {
     Card(
         modifier = modifier.then(onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier),
-        colors = CardDefaults.cardColors(containerColor = color, contentColor = contentColor),
+        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor),
         shape = MaterialTheme.shapes.large,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
     ) {
@@ -93,11 +100,16 @@ fun SplitStatCard(
         ) {
             Surface(
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                color = iconColor.copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, iconColor.copy(alpha = 0.25f)),
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
-                    Icon(icon, contentDescription = null, modifier = Modifier.size(28.dp))
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier.size(28.dp),
+                    )
                 }
             }
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -109,6 +121,7 @@ fun SplitStatCard(
                         text = firstValue,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
+                        color = contentColor,
                     )
                     Text(
                         text = firstLabel,
@@ -124,6 +137,7 @@ fun SplitStatCard(
                         text = secondValue,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
+                        color = contentColor,
                     )
                     Text(
                         text = secondLabel,
@@ -142,11 +156,21 @@ fun CountStatItem(
     label: String,
     count: Int,
     modifier: Modifier = Modifier,
+    iconColor: Color = MaterialTheme.colorScheme.primary,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-    contentColor: Color = contentColorFor(containerColor),
+    contentColor: Color? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    CompactStatCard(icon, label, count.toString(), modifier, containerColor, contentColor, onClick)
+    CompactStatCard(
+        icon = icon,
+        label = label,
+        value = count.toString(),
+        modifier = modifier,
+        iconColor = iconColor,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        onClick = onClick,
+    )
 }
 
 @Composable
@@ -155,13 +179,14 @@ fun CompactStatCard(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
+    iconColor: Color = MaterialTheme.colorScheme.primary,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-    contentColor: Color = contentColorFor(containerColor),
+    contentColor: Color? = null,
     onClick: (() -> Unit)? = null,
 ) {
     Card(
         modifier = modifier.then(onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier),
-        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
         shape = MaterialTheme.shapes.large,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
     ) {
@@ -175,23 +200,29 @@ fun CompactStatCard(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                    color = iconColor.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, iconColor.copy(alpha = 0.25f)),
                 ) {
                     Box(modifier = Modifier.padding(6.dp)) {
-                        Icon(icon, null, modifier = Modifier.size(18.dp))
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = iconColor,
+                            modifier = Modifier.size(18.dp),
+                        )
                     }
                 }
                 Text(
                     text = value,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
+                    color = contentColor ?: MaterialTheme.colorScheme.onSurface,
                 )
             }
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = contentColor.copy(alpha = 0.85f),
+                color = contentColor?.copy(alpha = 0.85f) ?: MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

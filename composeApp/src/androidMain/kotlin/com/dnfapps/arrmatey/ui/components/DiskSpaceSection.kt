@@ -125,7 +125,7 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
                 text = "${(disk.usedPercentage * 100).toInt()}%",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
-                color = progressColor,
+                color = if (disk.usedPercentage > 0.90f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
             )
         }
     }

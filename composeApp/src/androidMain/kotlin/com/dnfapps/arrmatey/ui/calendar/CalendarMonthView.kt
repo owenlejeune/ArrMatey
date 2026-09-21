@@ -1,7 +1,13 @@
 package com.dnfapps.arrmatey.ui.calendar
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Today
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,13 +39,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarState
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.extensions.localToday
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
+import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -48,6 +63,7 @@ fun CalendarMonthView(
     instances: List<Instance>,
     onItemClick: (CalendarItem, Long?) -> Unit,
     onLoadMore: () -> Unit,
+    preferencesStore: PreferencesStore = koinInject()
 ) {
     val today = remember { Clock.localToday() }
     var currentMonth by remember { mutableStateOf(today) }
@@ -56,6 +72,12 @@ fun CalendarMonthView(
     val isCurrentMonth by remember(currentMonth) {
         derivedStateOf {
             currentMonth.month == today.month && currentMonth.year == today.year
+        }
+    }
+
+    val isTodaySelected by remember(selectedDate, isCurrentMonth) {
+        derivedStateOf {
+            isCurrentMonth && selectedDate == today
         }
     }
 
@@ -83,45 +105,91 @@ fun CalendarMonthView(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        MonthHeader(
-            currentMonth = currentMonth,
-            isCurrentMonth = isCurrentMonth,
-            onPreviousMonth = { currentMonth = currentMonth.minus(1, DateTimeUnit.MONTH) },
-            onNextMonth = { currentMonth = currentMonth.plus(1, DateTimeUnit.MONTH) },
-            onTitleClick = { if (!isCurrentMonth) currentMonth = today },
+    val useColoredCards by preferencesStore.useColoredCalendarCards.collectAsStateWithLifecycle(false)
+    val useFloatingNavigationBar by preferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            MonthHeader(
+                currentMonth = currentMonth,
+                isCurrentMonth = isCurrentMonth,
+                onPreviousMonth = { currentMonth = currentMonth.minus(1, DateTimeUnit.MONTH) },
+                onNextMonth = { currentMonth = currentMonth.plus(1, DateTimeUnit.MONTH) },
+                onTitleClick = {
+                    currentMonth = today
+                    selectedDate = today
+                },
+            )
+
+            CalendarMonthGrid(
+                currentMonth = currentMonth,
+                selectedDate = selectedDate,
+                onDateSelected = { selectedDate = it },
+                state = state,
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+
+            if (selectedDate.month == currentMonth.month && selectedDate.year == currentMonth.year) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding =
+                        PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                        ),
+                ) {
+                    item {
+                        CalendarDaySection(
+                            date = selectedDate,
+                            items = state.items[selectedDate] ?: emptyList(),
+                            instances = instances,
+                            useFullColorCards = useColoredCards,
+                            onItemClick = onItemClick,
+                        )
+                    }
+                }
+            }
+        }
+
+        ProvideFloatingBarAction(
+            visible = useFloatingNavigationBar && !isTodaySelected,
+            action =
+                FloatingBarAction(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Today,
+                            contentDescription = mokoString(MR.strings.today),
+                        )
+                    },
+                    onClick = {
+                        currentMonth = today
+                        selectedDate = today
+                    },
+                ),
         )
 
-        CalendarMonthGrid(
-            currentMonth = currentMonth,
-            selectedDate = selectedDate,
-            onDateSelected = { selectedDate = it },
-            state = state,
-        )
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
-
-        if (selectedDate.month == currentMonth.month && selectedDate.year == currentMonth.year) {
-            val preferencesStore: com.dnfapps.arrmatey.datastore.PreferencesStore = org.koin.compose.koinInject()
-            val useColoredCards by preferencesStore.useColoredCalendarCards.collectAsStateWithLifecycle(false)
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding =
-                    PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 16.dp,
-                        bottom = 16.dp + LocalFloatingBarBottomPadding.current,
-                    ),
+        if (!useFloatingNavigationBar) {
+            AnimatedVisibility(
+                visible = !isTodaySelected,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+                exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+                modifier = Modifier.align(Alignment.BottomEnd),
             ) {
-                item {
-                    CalendarDaySection(
-                        date = selectedDate,
-                        items = state.items[selectedDate] ?: emptyList(),
-                        instances = instances,
-                        useFullColorCards = useColoredCards,
-                        onItemClick = onItemClick,
+                FloatingActionButton(
+                    onClick = {
+                        currentMonth = today
+                        selectedDate = today
+                    },
+                    modifier = Modifier.padding(12.dp),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Today,
+                        contentDescription = mokoString(MR.strings.today),
                     )
                 }
             }

@@ -397,6 +397,8 @@ fun ArrLibraryScreen(
                                         item.id in activeMediaIds
                                     },
                                     multiSelectState = arrMediaViewModel.selectionState,
+                                    qualityProfiles = instanceData?.qualityProfiles ?: emptyList(),
+                                    tags = instanceData?.tags ?: emptyList(),
                                 )
                             } else {
                                 EmptySearchResultsView(type, textFieldState.text.toString()) {

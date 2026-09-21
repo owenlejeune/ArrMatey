@@ -276,6 +276,7 @@
     <string name="move_files_description">Whether to automatically move files to the new folder or not.</string>
     <string name="move_files_confirm">Move files to %1$s</string>
     <string name="direction">Direction</string>
+    <string name="custom_filters">Custom Filters</string>
     <string name="custom_format">Custom Format</string>
     <string name="add">Add</string>
     <string name="episodes">Episodes</string>
