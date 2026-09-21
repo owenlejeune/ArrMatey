@@ -105,18 +105,18 @@ struct EpisodeRow: View {
                     // Title line
                     HStack(spacing: 0) {
                         Text("\(episode.episodeNumber). ")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.themePrimary)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.tint)
 
                         Text(episode.title ?? "")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.subheadline.weight(.medium))
                             .lineLimit(1)
-                            .foregroundColor(.primary)
+                            .foregroundStyle(.primary)
 
                         if let finaleType = episode.finaleType {
                             Text(" • \(finaleType.resource.localized())")
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                         }
                     }
 
@@ -124,7 +124,7 @@ struct EpisodeRow: View {
                     HStack(spacing: 4) {
                         if let status = statusInfo {
                             Text(status.text)
-                                .font(.system(size: 14))
+                                .font(.caption)
                                 .foregroundColor(status.color)
                                 .italic(status.italic)
                         }
@@ -132,17 +132,17 @@ struct EpisodeRow: View {
                         if let fileSize = fileSizeString {
                             let prefix = (statusInfo != nil) ? " • " : ""
                             Text("\(prefix)\(fileSize)")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
 
                         if let dateStr = formattedDate {
                             let isToday = episode.airDate?.isToday() == true
                             let prefix = (statusInfo != nil || fileSizeString != nil) ? " • " : ""
                             Text("\(prefix)\(dateStr)")
-                                .font(.system(size: 14))
-                                .fontWeight(isToday ? .medium : .regular)
-                                .foregroundColor(isToday ? .themePrimary : .secondary)
+                                .font(.caption)
+                                .fontWeight(isToday ? .semibold : .regular)
+                                .foregroundStyle(isToday ? Color.accentColor : Color.secondary)
                         }
                     }
                 }

@@ -88,14 +88,15 @@ struct PosterItem<Content: View>: View {
             footerContent: {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.title ?? MR.strings().unknown.localized())
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.primary)
                         .lineLimit(2, reservesSpace: true)
                         .multilineTextAlignment(.leading)
                     
                     if let year = item.year {
                         Text(String(describing: year))
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
                 }
@@ -449,12 +450,11 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
                 .clipped()
                 
                 if footerVisible {
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 2) {
                         footerContent()
                     }
                     .padding(.horizontal, 8)
-                    .padding(.bottom, 8)
-                    .padding(.top, 8)
+                    .padding(.vertical, 8)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
@@ -462,10 +462,14 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
         }
         .buttonStyle(.plain)
         .disabled(!enabled)
-        .background(Color(.systemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: radius))
-        .shadow(radius: elevation)
-        .animation(.default, value: footerVisible)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+        )
+        .shadow(color: Color.black.opacity(elevation > 0 ? 0.08 : 0), radius: elevation * 1.5, x: 0, y: elevation)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: footerVisible)
     }
 }
 

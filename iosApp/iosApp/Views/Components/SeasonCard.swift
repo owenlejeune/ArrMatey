@@ -69,13 +69,17 @@ struct SeasonCard: View {
             }
         }
         .padding(.vertical, 12)
-        .padding(.horizontal, 18)
+        .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(.systemGroupedBackground))
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(.secondarySystemGroupedBackground))
         )
-        .animation(.easeInOut(duration: 0.3), value: expanded)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+        )
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: expanded)
     }
 
     private var seasonTitle: String {
@@ -124,26 +128,32 @@ struct SeasonCard: View {
 
     private var seasonHeader: some View {
         HStack(alignment: .center, spacing: 12) {
-            HStack(alignment: .center, spacing: 12) {
+            HStack(alignment: .center, spacing: 8) {
                 Text(seasonTitle)
-                    .font(.system(size: 22, weight: .medium))
+                    .font(.headline.weight(.semibold))
 
                 Text(episodeStats)
-                    .font(.system(size: 16))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
 
                 Spacer()
 
                 Image(systemName: "chevron.down.circle.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                     .rotationEffect(.degrees(expanded ? 180 : 0))
-                    .animation(.easeInOut(duration: 0.3), value: expanded)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.8), value: expanded)
             }
 
             Image(systemName: season.monitored ? "bookmark.fill" : "bookmark")
+                .font(.subheadline)
+                .foregroundStyle(season.monitored ? Color.accentColor : Color.secondary)
                 .onTapGesture {
                     onToggleSeasonMonitor(season.seasonNumber)
                 }
         }
         .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
         .onTapGesture {
             expanded = !expanded
         }
@@ -152,7 +162,8 @@ struct SeasonCard: View {
     private var seasonDetails: some View {
         VStack(alignment: .leading) {
             Text(infoString)
-                .font(.system(size: 16))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.leading)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

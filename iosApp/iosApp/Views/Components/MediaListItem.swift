@@ -83,7 +83,7 @@ struct MediaItemView<T: ArrMedia>: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .top) {
                         Text(itemTitle)
-                            .font(.system(size: 18, weight: .bold))
+                            .font(.headline.weight(.semibold))
                             .foregroundColor(textColor)
                             .lineLimit(1)
                         
@@ -92,6 +92,7 @@ struct MediaItemView<T: ArrMedia>: View {
                         if item.id != nil {
                             Image(systemName: item.monitored ? "bookmark.fill" : "bookmark")
                                 .foregroundColor(textColor)
+                                .font(.subheadline)
                         }
                     }
                     
@@ -99,9 +100,9 @@ struct MediaItemView<T: ArrMedia>: View {
                     
                     if includeOverview, let overview = item.overview {
                         Text(overview.decodingHTMLEntities())
-                            .font(.system(size: 14))
+                            .font(.subheadline)
                             .lineLimit(4)
-                            .foregroundColor(showBannerBackground ? .white.opacity(0.8) : .secondary)
+                            .foregroundColor(showBannerBackground ? .white.opacity(0.85) : .secondary)
                             .padding(.top, 4)
                     }
                 }
@@ -117,11 +118,15 @@ struct MediaItemView<T: ArrMedia>: View {
                     Color.black.opacity(0.5)
                 }
             } else {
-                Color(.systemBackground)
+                Color(.secondarySystemGroupedBackground)
             }
         }
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
-        .animation(.default, value: includeOverview)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+        )
+        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: includeOverview)
     }
 }
