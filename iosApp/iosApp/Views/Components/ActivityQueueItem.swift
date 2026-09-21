@@ -28,15 +28,15 @@ struct ActivityQueueItem: View {
 
     private var backgroundColor: Color {
         if item.hasIssue {
-            return Color.red.opacity(0.15)
+            return Color.red.opacity(0.12)
         } else {
-            return Color(uiColor: .secondarySystemBackground)
+            return Color(uiColor: .secondarySystemGroupedBackground)
         }
     }
 
     private var contentColor: Color {
         if item.hasIssue {
-            return Color.red.opacity(0.9)
+            return Color.red
         } else {
             return Color.primary
         }
@@ -44,35 +44,42 @@ struct ActivityQueueItem: View {
 
     var body: some View {
         Button(action: onClick) {
-            HStack(alignment: .center, spacing: 4) {
-                VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .center, spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(item.titleLabel)
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(contentColor)
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(contentColor)
+                        .lineLimit(2)
                     
                     Text(statusText)
-                        .font(.system(size: 14))
-                        .foregroundColor(contentColor.opacity(0.8))
+                        .font(.subheadline)
+                        .foregroundStyle(item.hasIssue ? Color.red.opacity(0.85) : Color.secondary)
                     
-                    Text(item.instanceName ?? "")
-                        .font(.system(size: 12))
+                    if let instanceName = item.instanceName, !instanceName.isEmpty {
+                        Text(instanceName)
+                            .font(.caption2.weight(.medium))
+                            .foregroundStyle(.tertiary)
+                    }
                 }
                 
                 Spacer()
                 
                 if (item.hasIssue) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .imageScale(.medium)
-                        .foregroundColor(.red)
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                        .font(.title3)
                 }
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
             .background(backgroundColor)
-            .cornerRadius(12)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(item.hasIssue ? Color.red.opacity(0.3) : Color.primary.opacity(0.06), lineWidth: 0.5)
+            )
         }
         .buttonStyle(.plain)
     }
-    
 }
+

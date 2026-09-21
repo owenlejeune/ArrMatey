@@ -183,15 +183,11 @@ struct DownloadsTab: View {
             }) {
                 Label(MR.strings().delete.localized(), systemImage: "trash")
             }
-            .foregroundColor(.red)
+            .foregroundStyle(.red)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(uiColor: .systemBackground))
-                .shadow(radius: 10)
-        )
+        .floatingCapsuleBackground(material: .regularMaterial)
         .padding(.horizontal, 16)
         .padding(.bottom, 20)
     }
@@ -244,6 +240,7 @@ struct DownloadsTab: View {
                         }
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                         .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                         .swipeActions(edge: .leading, allowsFullSwipe: false) {
                             if !viewModel.isInSelectionMode {
                                 Button {
@@ -288,27 +285,22 @@ struct DownloadsTab: View {
 
     @ViewBuilder
     private var emptyView: some View {
-        VStack(alignment: .center, spacing: 12) {
-            if let error = viewModel.errorMessage {
-                Image(systemName: "exclamationmark.triangle")
-                    .font(.system(size: 64))
+        if let error = viewModel.errorMessage {
+            ContentUnavailableView {
+                Label(MR.strings().error.localized(), systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.red)
+            } description: {
                 Text(error)
-                    .font(.system(size: 16))
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
-            } else if viewModel.isRefreshing {
-                ProgressView()
-                    .scaleEffect(1.5)
-            } else {
-                Image(systemName: "arrow.down.circle")
-                    .font(.system(size: 64))
-                    .foregroundStyle(.secondary)
-                Text(MR.strings().no_activity.localized())
-                    .font(.system(size: 20, weight: .bold))
             }
+        } else if viewModel.isRefreshing {
+            ProgressView()
+                .scaleEffect(1.5)
+        } else {
+            ContentUnavailableView(
+                MR.strings().no_activity.localized(),
+                systemImage: "arrow.down.circle"
+            )
         }
-        .padding(.horizontal, 24)
     }
 }
 
@@ -323,32 +315,20 @@ struct NoDownloadClientsView: View {
     @EnvironmentObject private var navigation: NavigationManager
     
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "cloud.rainbow.half")
-                .font(.system(size: 100))
-                .foregroundStyle(.secondary)
-            
-            Text(MR.strings().no_download_clients.localized())
-                .font(.title2)
-                .fontWeight(.medium)
-                .multilineTextAlignment(.center)
-            
-            Button(action: {
+        ContentUnavailableView {
+            Label(
+                MR.strings().no_download_clients.localized(),
+                systemImage: "cloud.rainbow.half"
+            )
+        } actions: {
+            Button {
                 navigation.go(to: .newDownloadClient)
-            }) {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                    Text(MR.strings().add_instance.localized())
-                        .fontWeight(.medium)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(10)
+            } label: {
+                Label(MR.strings().add_instance.localized(), systemImage: "plus.circle.fill")
             }
+            .buttonStyle(.borderedProminent)
+            .padding(.top, 4)
         }
-        .padding(32)
     }
 }
 
