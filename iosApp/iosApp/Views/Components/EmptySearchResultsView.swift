@@ -18,23 +18,23 @@ struct EmptySearchResultsView: View {
     }
     
     var body: some View {
-        VStack(spacing: 8) {
-            Text(MR.strings().no_query_results.formatted(args: [query]))
-                .font(.system(size: 18, weight: .medium))
-            
-            HStack(spacing: 4) {
-                Text(MR.strings().no_query_results_label.localized())
-                    .foregroundColor(.secondary)
-                
-                Button(action: onShouldSearch) {
-                    Text(MR.strings().no_query_results_link.formatted(args: [mediaType]))
-                        .fontWeight(.bold)
-                        .foregroundColor(.themePrimary)
-                }
+        ContentUnavailableView {
+            Label(
+                MR.strings().no_query_results.formatted(args: [query]),
+                systemImage: "magnifyingglass"
+            )
+        } description: {
+            Text(MR.strings().no_query_results_label.localized())
+        } actions: {
+            Button(action: onShouldSearch) {
+                Label(
+                    MR.strings().no_query_results_link.formatted(args: [mediaType]),
+                    systemImage: "globe"
+                )
             }
+            .buttonStyle(.borderedProminent)
+            .padding(.top, 4)
         }
-        .multilineTextAlignment(.center)
-        .padding(.horizontal, 16)
-        .frame(maxHeight: .infinity)
     }
 }
+

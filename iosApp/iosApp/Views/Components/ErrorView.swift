@@ -27,52 +27,52 @@ struct ErrorView: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: iconName)
-                .font(.system(size: 48))
-                .foregroundColor(iconColor)
+        ContentUnavailableView {
+            Label(title, systemImage: iconName)
+                .foregroundStyle(iconColor)
+        } description: {
+            VStack(spacing: 8) {
+                Text(detailMessage)
+                    .foregroundStyle(.secondary)
 
-            Text(title)
-                .font(.headline)
-
-            Text(detailMessage)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
+                if errorType == .timeout {
+                    Text(
+                        MR.strings().error_timeout_tip.formatted(
+                            args: [MR.strings().slow_instance.localized()]
+                        )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .padding(.top, 4)
+                }
+            }
+        } actions: {
             VStack(spacing: 12) {
                 if errorType == .timeout {
                     Button(action: onOpenSettings) {
-                        Label(MR.strings().error_timeout_configure_instance.localized(), systemImage: "gear")
+                        Label(MR.strings().error_timeout_configure_instance.localized(), systemImage: "gearshape.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                 }
 
-                Button(action: onRetry) {
-                    Label(MR.strings().retry.localized(), systemImage: "arrow.clockwise")
-                        .frame(maxWidth: .infinity)
+                if errorType == .timeout {
+                    Button(action: onRetry) {
+                        Label(MR.strings().retry.localized(), systemImage: "arrow.clockwise")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                } else {
+                    Button(action: onRetry) {
+                        Label(MR.strings().retry.localized(), systemImage: "arrow.clockwise")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
-                .buttonStyle(.bordered)
             }
-            .padding(.horizontal, 32)
+            .frame(maxWidth: 280)
             .padding(.top, 8)
-
-            if errorType == .timeout {
-                Text(
-                    MR.strings().error_timeout_tip.formatted(
-                        args: [MR.strings().slow_instance.localized()]
-                    )
-                )
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-                .padding(.top, 8)
-            }
         }
-        .padding()
     }
 
     private var iconName: String {
