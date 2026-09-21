@@ -150,8 +150,7 @@ private fun RequestCardHeader(
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleLargeEmphasized,
                 color = Color.White,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -202,15 +201,22 @@ private fun RequestCardSeasonInfo(seasons: List<RequestSeason>) {
         color = Color.White.copy(alpha = 0.8f),
     )
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.padding(top = 2.dp),
     ) {
         seasons.forEach {
-            Badge(
-                containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                contentColor = MaterialTheme.colorScheme.surfaceVariant,
-            ) { Text(it.seasonNumber.toString()) }
+            Surface(
+                shape = RoundedCornerShape(percent = 50),
+                color = MaterialTheme.colorScheme.primaryContainer,
+            ) {
+                Text(
+                    text = it.seasonNumber.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                )
+            }
         }
     }
 }

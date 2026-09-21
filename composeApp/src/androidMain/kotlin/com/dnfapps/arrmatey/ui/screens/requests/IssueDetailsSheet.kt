@@ -4,7 +4,9 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,9 +15,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.CheckCircleOutline
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -23,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,13 +45,15 @@ import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.ContainerCard
+import com.dnfapps.arrmatey.ui.components.sheets.ArrDestructiveConfirmationSheet
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun IssueDetailsSheet(
     ip: MediaIssuePackage,
@@ -99,7 +103,7 @@ fun IssueDetailsSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier =
                 Modifier
                     .padding(horizontal = 24.dp)
@@ -110,31 +114,38 @@ fun IssueDetailsSheet(
                     Modifier
                         .fillMaxWidth()
                         .weight(1f, fill = false),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 commentsList.minByOrNull { it.id }?.let { description ->
                     item {
                         Text(
                             text = mokoString(MR.strings.description),
-                            style = MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.titleMediumEmphasized,
                         )
                     }
                     item {
-                        Text(
-                            text = description.message,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
-                    item {
-                        UserInfoRow(
-                            label = mokoString(MR.strings.opened_by),
-                            avatar = description.user?.avatar,
-                            displayName = description.user?.displayName ?: mokoString(MR.strings.unknown),
-                        )
-                        description.createdAt?.format()?.let { createdAt ->
+                        ContainerCard(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                            shape = MaterialTheme.shapes.large,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            UserInfoRow(
+                                label = mokoString(MR.strings.opened_by),
+                                avatar = description.user?.avatar,
+                                displayName = description.user?.displayName ?: mokoString(MR.strings.unknown),
+                            )
+                            description.createdAt?.format()?.let { createdAt ->
+                                Text(
+                                    text = createdAt,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Spacer(Modifier.height(8.dp))
                             Text(
-                                text = createdAt,
-                                style = MaterialTheme.typography.bodySmall,
+                                text = description.message,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
                         }
                     }
@@ -143,33 +154,47 @@ fun IssueDetailsSheet(
                     item {
                         Text(
                             text = mokoString(MR.strings.comments),
-                            style = MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.titleMediumEmphasized,
                         )
                     }
                     val subList = commentsList.subList(fromIndex = 1, toIndex = commentsList.size)
                     items(items = subList, key = { it.id }) { comment ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ContainerCard(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                            shape = MaterialTheme.shapes.medium,
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
-                            AsyncImage(
-                                model = rememberRemoteImageData(comment.user?.avatar),
-                                modifier = Modifier.size(36.dp).clip(CircleShape),
-                                contentDescription = null,
-                                contentScale = ContentScale.Fit,
-                            )
-                            Column {
-                                Text(
-                                    text = comment.message,
-                                    style = MaterialTheme.typography.bodyLarge,
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                AsyncImage(
+                                    model = rememberRemoteImageData(comment.user?.avatar),
+                                    modifier = Modifier.size(36.dp).clip(CircleShape),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit,
                                 )
-                                comment.createdAt?.format()?.let { createdAt ->
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                     Text(
-                                        text = createdAt,
-                                        style = MaterialTheme.typography.bodySmall,
+                                        text = comment.user?.displayName ?: mokoString(MR.strings.unknown),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                     )
+                                    comment.createdAt?.format()?.let { createdAt ->
+                                        Text(
+                                            text = createdAt,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
                                 }
                             }
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                text = comment.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
                         }
                     }
                 }
@@ -182,7 +207,7 @@ fun IssueDetailsSheet(
             ) {
                 IconButton(
                     onClick = { confirmCloseIssue = true },
-                    modifier = Modifier.size(50.dp),
+                    modifier = Modifier.size(48.dp),
                     colors =
                         IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -218,20 +243,13 @@ fun IssueDetailsSheet(
     }
 
     if (confirmCloseIssue) {
-        AlertDialog(
+        ArrDestructiveConfirmationSheet(
+            title = mokoString(MR.strings.confirm_close_issue),
+            confirmText = mokoString(MR.strings.yes),
+            dismissText = mokoString(MR.strings.no),
             onDismissRequest = { confirmCloseIssue = false },
-            title = { Text(mokoString(MR.strings.confirm_close_issue)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.closeIssue(ip.issue.id)
-                }) {
-                    Text(mokoString(MR.strings.yes))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmCloseIssue = false }) {
-                    Text(mokoString(MR.strings.no))
-                }
+            onConfirm = {
+                viewModel.closeIssue(ip.issue.id)
             },
         )
     }

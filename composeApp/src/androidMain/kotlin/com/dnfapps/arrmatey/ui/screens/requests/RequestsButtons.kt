@@ -21,8 +21,6 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ConfirmableButton
-import com.dnfapps.arrmatey.ui.theme.onPrimaryDark
-import com.dnfapps.arrmatey.ui.theme.primaryDark
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -136,8 +134,8 @@ private fun PendingApprovalButtons(
 ) {
     val approveColors =
         ButtonDefaults.buttonColors(
-            containerColor = primaryDark,
-            contentColor = onPrimaryDark,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
         )
     val declineColors =
         ButtonDefaults.buttonColors(

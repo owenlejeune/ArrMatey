@@ -18,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -65,7 +66,7 @@ fun IssueCard(
         Box(modifier = Modifier.fillMaxSize()) {
             BannerView(
                 bannerModel =
-                    details?.fullPosterPath?.let {
+                    (details?.fullBackdropPath ?: details?.fullPosterPath)?.let {
                         rememberRemoteImageData(it)
                     },
                 modifier = Modifier.matchParentSize(),
@@ -74,7 +75,7 @@ fun IssueCard(
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(18.dp).fillMaxWidth(),
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
             ) {
                 IssueCardHeader(
                     posterUrl = details?.fullPosterPath,
@@ -94,12 +95,9 @@ fun IssueCard(
                             style = MaterialTheme.typography.labelMedium,
                             color = Color.White.copy(alpha = 0.8f),
                         )
-                        Box(
-                            modifier =
-                                Modifier
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                        Surface(
+                            shape = RoundedCornerShape(percent = 50),
+                            color = MaterialTheme.colorScheme.primaryContainer,
                         ) {
                             Text(
                                 text =
@@ -108,7 +106,8 @@ fun IssueCard(
                                         ?.toString()
                                         ?: mokoString(MR.strings.all),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             )
                         }
                         Text(
@@ -116,12 +115,9 @@ fun IssueCard(
                             style = MaterialTheme.typography.labelMedium,
                             color = Color.White.copy(alpha = 0.8f),
                         )
-                        Box(
-                            modifier =
-                                Modifier
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                        Surface(
+                            shape = RoundedCornerShape(percent = 50),
+                            color = MaterialTheme.colorScheme.primaryContainer,
                         ) {
                             Text(
                                 text =
@@ -130,7 +126,8 @@ fun IssueCard(
                                         ?.toString()
                                         ?: mokoString(MR.strings.all),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             )
                         }
                     }
@@ -160,7 +157,7 @@ private fun IssueCardHeader(
     val issueType = IssueType.fromValue(issue.issueType)
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
         AsyncImage(
@@ -168,44 +165,45 @@ private fun IssueCardHeader(
             contentDescription = null,
             modifier =
                 Modifier
-                    .height(100.dp)
+                    .height(110.dp)
                     .aspectRatio(AspectRatio.Poster.ratio, true)
                     .clip(MaterialTheme.shapes.medium),
             contentScale = ContentScale.Fit,
         )
 
         Column(
-            modifier = Modifier.defaultMinSize(minHeight = 100.dp),
+            modifier = Modifier.weight(1f).defaultMinSize(minHeight = 110.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.Top,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    if (year.isNotBlank()) {
                         Text(
                             text = year,
                             style = MaterialTheme.typography.labelMedium,
                             color = Color.White.copy(alpha = 0.8f),
                         )
-                        requestType?.let { requestType ->
-                            MediaRequestTypeChip(text = requestType.name, requestType)
-                        }
                     }
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLargeEmphasized,
-                        color = Color.White,
-                        modifier = Modifier.padding(top = 2.dp),
-                    )
+                    requestType?.let { requestType ->
+                        MediaRequestTypeChip(text = requestType.name, requestType)
+                    }
                 }
-                Spacer(Modifier.weight(1f))
                 IssueStatusChip(issue)
             }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLargeEmphasized,
+                color = Color.White,
+                maxLines = 2,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            )
             Text(
                 text =
                     buildAnnotatedString {
