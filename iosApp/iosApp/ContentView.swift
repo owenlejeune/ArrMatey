@@ -133,38 +133,44 @@ struct AppLauncherGrid: View {
     }
 
     private var launcherContent: some View {
-        LazyVGrid(columns: columns, spacing: 25) {
+        LazyVGrid(columns: columns, spacing: 20) {
             ForEach(preferences.drawerTabs, id: \.key) { item in
                 Button {
+                    HapticFeedback.selection()
                     navigationManager.launcherPath.append(item)
                 } label: {
-                    VStack(spacing: 12) {
+                    VStack(spacing: 8) {
                         launcherIcon(for: item.item)
 
                         Text(tabName(for: item.item))
-                            .font(.caption)
+                            .font(.caption.weight(.medium))
                             .lineLimit(1)
-                            .foregroundColor(.themeOnPrimaryContainer)
+                            .foregroundStyle(.primary)
                     }
-                    .frame(width: 80, height: 80)
-                    .background(.themePrimary.opacity(0.1))
-                    .cornerRadius(16)
+                    .frame(width: 88, height: 88)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                    )
+                    .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(25)
+        .padding(20)
     }
 
     @ViewBuilder
     private func launcherIcon(for item: TabItem) -> some View {
         if preferences.useServiceNavLogos, let logo = item.associatedType?.tabIcon {
             logo.toImage(renderingMode: .template)
-                .foregroundColor(.themeOnPrimaryContainer)
+                .foregroundStyle(Color.accentColor)
         } else {
             Image(systemName: item.iosIcon)
-                .font(.system(size: 30))
-                .foregroundColor(.themeOnPrimaryContainer)
+                .font(.title2)
+                .foregroundStyle(Color.accentColor)
         }
     }
 

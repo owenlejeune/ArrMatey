@@ -26,11 +26,11 @@ struct SettingsScreen: View {
                             Text(MR.strings().services.localized())
                             Text(MR.strings().services_description.localized())
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                     } icon: {
                         Image(systemName: "server.rack")
-                            .foregroundColor(.themePrimary)
+                            .foregroundStyle(Color.accentColor)
                     }
                 }
 
@@ -40,11 +40,11 @@ struct SettingsScreen: View {
                             Text(MR.strings().user_interface.localized())
                             Text(MR.strings().user_interface_description.localized())
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                     } icon: {
                         Image(systemName: "paintpalette")
-                            .foregroundColor(.themePrimary)
+                            .foregroundStyle(Color.accentColor)
                     }
                 }
 
@@ -54,11 +54,11 @@ struct SettingsScreen: View {
                             Text(MR.strings().integrations.localized())
                             Text(MR.strings().integrations_description.localized())
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                     } icon: {
                         Image(systemName: "link")
-                            .foregroundColor(.themePrimary)
+                            .foregroundStyle(Color.accentColor)
                     }
                 }
 
@@ -68,11 +68,11 @@ struct SettingsScreen: View {
                             Text(MR.strings().backup_restore.localized())
                             Text(MR.strings().backup_restore_description.localized())
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                     } icon: {
                         Image(systemName: "arrow.clockwise.icloud")
-                            .foregroundColor(.themePrimary)
+                            .foregroundStyle(Color.accentColor)
                     }
                 }
             }
