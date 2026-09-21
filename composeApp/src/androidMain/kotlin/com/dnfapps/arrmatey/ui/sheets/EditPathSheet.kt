@@ -2,14 +2,18 @@ package com.dnfapps.arrmatey.ui.sheets
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -26,11 +30,12 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.utils.mokoString
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun EditPathSheet(
     item: ArrMedia,
@@ -71,27 +76,34 @@ fun EditPathSheet(
         ) {
             Text(
                 text = mokoString(MR.strings.edit_path),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineMediumEmphasized,
             )
 
-            selectedRootFolder?.let { folder ->
-                DropdownPicker(
-                    options = rootFolders,
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedOption = folder,
-                    onOptionSelected = { selectedRootFolder = it },
-                    label = { Text(mokoString(MR.strings.root_folder)) },
-                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
-                    enabled = !editInProgress,
+            ContainerCard(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                shape = MaterialTheme.shapes.large,
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                selectedRootFolder?.let { folder ->
+                    DropdownPicker(
+                        options = rootFolders,
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedOption = folder,
+                        onOptionSelected = { selectedRootFolder = it },
+                        label = { Text(mokoString(MR.strings.root_folder)) },
+                        getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
+                        enabled = !editInProgress,
+                    )
+                }
+
+                LabelledSwitch(
+                    label = mokoString(MR.strings.move_files),
+                    checked = moveFiles,
+                    onCheckedChange = { moveFiles = it },
+                    enabled = !editInProgress && isPathChanged,
                 )
             }
-
-            LabelledSwitch(
-                label = mokoString(MR.strings.move_files),
-                checked = moveFiles,
-                onCheckedChange = { moveFiles = it },
-                enabled = !editInProgress && isPathChanged,
-            )
 
             Button(
                 onClick = {
@@ -109,6 +121,7 @@ fun EditPathSheet(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                     )
+                    Spacer(Modifier.width(8.dp))
                     Text(mokoString(MR.strings.save))
                 }
             }

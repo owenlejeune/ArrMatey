@@ -2,16 +2,20 @@ package com.dnfapps.arrmatey.ui.sheets
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -37,13 +41,14 @@ import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AddArtistSheet(
     item: Arrtist,
@@ -93,110 +98,138 @@ fun AddArtistSheet(
                 Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp)
-                    .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+                    .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Column {
-                Text(
-                    text = mokoString(MR.strings.type_artist).uppercase(),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = item.title ?: "",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            if (instances.size > 1 && selectedInstance != null) {
-                DropdownPicker(
-                    options = instances,
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Column {
+                    Text(
+                        text = mokoString(MR.strings.type_artist).uppercase(),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = item.title ?: "",
+                        style = MaterialTheme.typography.headlineMediumEmphasized,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
+                if (instances.size > 1 && selectedInstance != null) {
+                    DropdownPicker(
+                        options = instances,
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedOption = selectedInstance,
+                        onOptionSelected = onInstanceSelected,
+                        getOptionLabel = { it.label },
+                        label = { Text(mokoString(MR.strings.instances)) },
+                        enabled = !addInProgress,
+                    )
+                }
+
+                ContainerCard(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                    shape = MaterialTheme.shapes.large,
                     modifier = Modifier.fillMaxWidth(),
-                    selectedOption = selectedInstance,
-                    onOptionSelected = onInstanceSelected,
-                    getOptionLabel = { it.label },
-                    label = { Text(mokoString(MR.strings.instances)) },
-                    enabled = !addInProgress,
-                )
-            }
-            DropdownPicker(
-                options = ArtistMonitorType.entries.toList(),
-                modifier = Modifier.fillMaxWidth(),
-                selectedOption = monitor,
-                onOptionSelected = { monitor = it },
-                getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.monitor)) },
-                enabled = !addInProgress,
-            )
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    DropdownPicker(
+                        options = ArtistMonitorType.entries.toList(),
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedOption = monitor,
+                        onOptionSelected = { monitor = it },
+                        getOptionLabel = { mokoString(it.resource) },
+                        label = { Text(mokoString(MR.strings.monitor)) },
+                        enabled = !addInProgress,
+                    )
 
-            DropdownPicker(
-                options =
-                    listOf(
-                        ArtistMonitorType.All,
-                        ArtistMonitorType.None,
-                        ArtistMonitorType.Future,
-                    ),
-                modifier = Modifier.fillMaxWidth(),
-                selectedOption = monitorNew,
-                onOptionSelected = { monitorNew = it },
-                getOptionLabel = { mokoString(it.resource) },
-                label = { Text(mokoString(MR.strings.monitor_new_albums)) },
-                enabled = !addInProgress,
-            )
+                    DropdownPicker(
+                        options =
+                            listOf(
+                                ArtistMonitorType.All,
+                                ArtistMonitorType.None,
+                                ArtistMonitorType.Future,
+                            ),
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedOption = monitorNew,
+                        onOptionSelected = { monitorNew = it },
+                        getOptionLabel = { mokoString(it.resource) },
+                        label = { Text(mokoString(MR.strings.monitor_new_albums)) },
+                        enabled = !addInProgress,
+                    )
 
-            DropdownPicker(
-                options = qualityProfiles,
-                modifier = Modifier.fillMaxWidth(),
-                selectedOption = qualityProfile,
-                onOptionSelected = { qualityProfile = it },
-                getOptionLabel = { it.name ?: "" },
-                label = { Text(mokoString(MR.strings.quality_profile)) },
-                enabled = !addInProgress,
-            )
+                    DropdownPicker(
+                        options = qualityProfiles,
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedOption = qualityProfile,
+                        onOptionSelected = { qualityProfile = it },
+                        getOptionLabel = { it.name ?: "" },
+                        label = { Text(mokoString(MR.strings.quality_profile)) },
+                        enabled = !addInProgress,
+                    )
 
-            if (tags.isNotEmpty()) {
-                MultiSelectDropdownPicker(
-                    options = tags.map { it.id },
-                    selectedOptions = selectedTags,
-                    valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
-                    onOptionSelected = { tag, isSelected ->
-                        if (isSelected) {
-                            selectedTags.add(tag)
-                        } else {
-                            selectedTags.remove(tag)
-                        }
-                    },
-                    getOptionLabel = { tag ->
-                        tags.firstOrNull { tag == it.id }?.label
-                            ?: mokoString(MR.strings.unknown)
-                    },
-                    label = { Text(mokoString(MR.strings.tags)) },
-                    enabled = !addInProgress,
-                )
-            }
+                    if (tags.isNotEmpty()) {
+                        MultiSelectDropdownPicker(
+                            options = tags.map { it.id },
+                            selectedOptions = selectedTags,
+                            valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
+                            onOptionSelected = { tag, isSelected ->
+                                if (isSelected) {
+                                    selectedTags.add(tag)
+                                } else {
+                                    selectedTags.remove(tag)
+                                }
+                            },
+                            getOptionLabel = { tag ->
+                                tags.firstOrNull { tag == it.id }?.label
+                                    ?: mokoString(MR.strings.unknown)
+                            },
+                            label = { Text(mokoString(MR.strings.tags)) },
+                            enabled = !addInProgress,
+                        )
+                    }
+                }
 
-            if (rootFolders.size > 1) {
-                DropdownPicker(
-                    options = rootFolders,
+                if (rootFolders.size > 1) {
+                    ContainerCard(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        DropdownPicker(
+                            options = rootFolders,
+                            modifier = Modifier.fillMaxWidth(),
+                            selectedOption = rootFolder,
+                            onOptionSelected = { rootFolder = it },
+                            label = { Text(mokoString(MR.strings.root_folder)) },
+                            getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
+                            enabled = !addInProgress,
+                        )
+                    }
+                }
+
+                ContainerCard(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                    shape = MaterialTheme.shapes.large,
                     modifier = Modifier.fillMaxWidth(),
-                    selectedOption = rootFolder,
-                    onOptionSelected = { rootFolder = it },
-                    label = { Text(mokoString(MR.strings.root_folder)) },
-                    getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
-                    enabled = !addInProgress,
-                )
+                ) {
+                    LabelledSwitch(
+                        label = mokoString(MR.strings.search_on_add_label),
+                        checked = searchOnAdd,
+                        onCheckedChange = { searchOnAdd = it },
+                        enabled = !addInProgress,
+                    )
+                }
             }
-
-            LabelledSwitch(
-                label = mokoString(MR.strings.search_on_add_label),
-                checked = searchOnAdd,
-                onCheckedChange = { searchOnAdd = it },
-                enabled = !addInProgress,
-            )
 
             Button(
                 onClick = {
@@ -223,6 +256,7 @@ fun AddArtistSheet(
                         onAddItem(newItem, searchOnAdd)
                     }
                 },
+                modifier = Modifier.fillMaxWidth(),
                 enabled = !addInProgress && qualityProfile != null && rootFolder != null,
             ) {
                 if (addInProgress) {
@@ -232,9 +266,8 @@ fun AddArtistSheet(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                     )
-                    Text(
-                        text = mokoString(MR.strings.save),
-                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(text = mokoString(MR.strings.save))
                 }
             }
         }
