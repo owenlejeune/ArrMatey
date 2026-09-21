@@ -8,6 +8,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,11 +17,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Search
@@ -31,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -107,8 +112,6 @@ import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
 
 fun navigateCalendarItem(
     onNavigateToMediaDetails: (id: Long, instanceType: InstanceType) -> Unit,
@@ -538,18 +541,6 @@ fun CombinedDashboard(
                                     }
                                 }
                             } else {
-                                val reorderableGridState =
-                                    rememberReorderableLazyStaggeredGridState(gridState) { from, to ->
-                                        val newOrder =
-                                            cards.toMutableList().apply {
-                                                this[to.index] =
-                                                    this[from.index].also {
-                                                        this[from.index] = this[to.index]
-                                                    }
-                                            }
-                                        viewModel.saveCardOrder(newOrder)
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-                                    }
                                 LazyVerticalStaggeredGrid(
                                     state = gridState,
                                     columns = StaggeredGridCells.Fixed(count = if (isCompact) 1 else 2),
@@ -562,121 +553,173 @@ fun CombinedDashboard(
                                         ),
                                     modifier = Modifier.fillMaxSize(),
                                 ) {
-                                    items(cards, key = { it }) { dashboardCard ->
-                                        ReorderableItem(reorderableGridState, key = dashboardCard) { isDragging ->
-                                            val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-                                            val innerPadding by animateDpAsState(if (isEditing) 4.dp else 0.dp)
+                                    itemsIndexed(cards, key = { _, it -> it }) { index, dashboardCard ->
+                                        val innerPadding by animateDpAsState(if (isEditing) 4.dp else 0.dp)
 
-                                            Box(contentAlignment = Alignment.Center) {
-                                                val cardOnClick: (() -> Unit)? =
-                                                    when (dashboardCard) {
-                                                        DashboardCards.ArrOverview -> {
-                                                            { onNavigateToSettings() }
-                                                        }
-
-                                                        DashboardCards.SeerrOverview,
-                                                        DashboardCards.PendingRequests,
-                                                        DashboardCards.PendingIssues,
-                                                        -> {
-                                                            { onNavigateToRequestsTab() }
-                                                        }
-
-                                                        DashboardCards.ProwlarrOverview -> {
-                                                            { onNavigateToProwlarrTab() }
-                                                        }
-
-                                                        DashboardCards.DownloadClients -> {
-                                                            { onNavigateToDownloadsTab() }
-                                                        }
-
-                                                        DashboardCards.ActivityQueue -> {
-                                                            { onNavigateToActivityTab() }
-                                                        }
-
-                                                        DashboardCards.OnToday,
-                                                        DashboardCards.UpcomingReleases,
-                                                        -> {
-                                                            { onNavigateToScheduleTab() }
-                                                        }
-
-                                                        DashboardCards.BazarrOverview -> {
-                                                            { onNavigateToBazarrTab() }
-                                                        }
-
-                                                        DashboardCards.TracearrOverview,
-                                                        DashboardCards.TracearrActiveStreams,
-                                                        -> {
-                                                            { onNavigateToTracearrTab() }
-                                                        }
-
-                                                        else -> null
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier.animateItem(),
+                                        ) {
+                                            val cardOnClick: (() -> Unit)? =
+                                                when (dashboardCard) {
+                                                    DashboardCards.ArrOverview -> {
+                                                        { onNavigateToSettings() }
                                                     }
 
-                                                Surface(
-                                                    shadowElevation = elevation,
-                                                    modifier =
-                                                        Modifier
-                                                            .padding(innerPadding)
-                                                            .clip(MaterialTheme.shapes.large)
-                                                            .combinedClickable(
-                                                                enabled = !isEditing,
-                                                                onClick = { cardOnClick?.invoke() },
-                                                            ).longPressDraggableHandle(
-                                                                onDragStarted = {
-                                                                    if (!isEditing) {
-                                                                        viewModel.toggleEditing()
-                                                                    }
+                                                    DashboardCards.SeerrOverview,
+                                                    DashboardCards.PendingRequests,
+                                                    DashboardCards.PendingIssues,
+                                                    -> {
+                                                        { onNavigateToRequestsTab() }
+                                                    }
+
+                                                    DashboardCards.ProwlarrOverview -> {
+                                                        { onNavigateToProwlarrTab() }
+                                                    }
+
+                                                    DashboardCards.DownloadClients -> {
+                                                        { onNavigateToDownloadsTab() }
+                                                    }
+
+                                                    DashboardCards.ActivityQueue -> {
+                                                        { onNavigateToActivityTab() }
+                                                    }
+
+                                                    DashboardCards.OnToday,
+                                                    DashboardCards.UpcomingReleases,
+                                                    -> {
+                                                        { onNavigateToScheduleTab() }
+                                                    }
+
+                                                    DashboardCards.BazarrOverview -> {
+                                                        { onNavigateToBazarrTab() }
+                                                    }
+
+                                                    DashboardCards.TracearrOverview,
+                                                    DashboardCards.TracearrActiveStreams,
+                                                    -> {
+                                                        { onNavigateToTracearrTab() }
+                                                    }
+
+                                                    else -> null
+                                                }
+
+                                            Surface(
+                                                modifier =
+                                                    Modifier
+                                                        .padding(innerPadding)
+                                                        .clip(MaterialTheme.shapes.large)
+                                                        .combinedClickable(
+                                                            enabled = !isEditing,
+                                                            onClick = { cardOnClick?.invoke() },
+                                                            onLongClick = {
+                                                                if (!isEditing) {
+                                                                    viewModel.toggleEditing()
                                                                     hapticFeedback.performHapticFeedback(
                                                                         HapticFeedbackType.GestureThresholdActivate,
                                                                     )
-                                                                },
-                                                                onDragStopped = {
-                                                                    hapticFeedback.performHapticFeedback(
-                                                                        HapticFeedbackType.GestureEnd,
-                                                                    )
-                                                                },
-                                                                enabled = true,
-                                                            ),
+                                                                }
+                                                            },
+                                                        ),
+                                            ) {
+                                                DashboardCardContent(
+                                                    cardType = dashboardCard,
+                                                    currentState = currentState,
+                                                    isEditing = isEditing,
+                                                    onNavigateToArrDashboard = onNavigateToArrDashboard,
+                                                    onNavigateToMediaDetails = onNavigateToMediaDetails,
+                                                    onRequestClick = { selectedRequestForSheet = it },
+                                                    onIssueClick = { selectedIssueForSheet = it },
+                                                    onRequestActivityItem = { selectedActivityItem = it },
+                                                    onRequestStreamSession = { selectedTracearrStreamSession = it },
+                                                    onHealthClick = { showHealthNoticesSheet = true },
+                                                    onSeerrRequestsStatClick = {
+                                                        showSeerrRequestsSheet = true
+                                                    },
+                                                    onSeerrIssuesStatClick = {
+                                                        showSeerrIssuesSheet = true
+                                                    },
+                                                    onNavigateToTracearrHistory = onNavigateToTracearrHistory,
+                                                    onNavigateToTracearrUsers = onNavigateToTracearrUsers,
+                                                    onNavigateToTracearrViolations = onNavigateToTracearrViolations,
+                                                    onNavigateToTracearrActivity = onNavigateToTracearrActivity,
+                                                )
+                                            }
+                                            if (isEditing) {
+                                                Row(
+                                                    modifier =
+                                                        Modifier
+                                                            .align(Alignment.TopEnd)
+                                                            .padding(8.dp),
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
                                                 ) {
-                                                    DashboardCardContent(
-                                                        cardType = dashboardCard,
-                                                        currentState = currentState,
-                                                        isEditing = isEditing,
-                                                        onNavigateToArrDashboard = onNavigateToArrDashboard,
-                                                        onNavigateToMediaDetails = onNavigateToMediaDetails,
-                                                        onRequestClick = { selectedRequestForSheet = it },
-                                                        onIssueClick = { selectedIssueForSheet = it },
-                                                        onRequestActivityItem = { selectedActivityItem = it },
-                                                        onRequestStreamSession = { selectedTracearrStreamSession = it },
-                                                        onHealthClick = { showHealthNoticesSheet = true },
-                                                        onSeerrRequestsStatClick = {
-                                                            showSeerrRequestsSheet = true
+                                                    IconButton(
+                                                        onClick = {
+                                                            if (index > 0) {
+                                                                val newOrder =
+                                                                    cards.toMutableList().apply {
+                                                                        val item = removeAt(index)
+                                                                        add(index - 1, item)
+                                                                    }
+                                                                viewModel.saveCardOrder(newOrder)
+                                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+                                                            }
                                                         },
-                                                        onSeerrIssuesStatClick = {
-                                                            showSeerrIssuesSheet = true
+                                                        enabled = index > 0,
+                                                        modifier = Modifier.size(32.dp),
+                                                        colors =
+                                                            IconButtonDefaults.filledTonalIconButtonColors(
+                                                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                                            ),
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.ArrowUpward,
+                                                            contentDescription = "Move Card Up",
+                                                            modifier = Modifier.size(18.dp),
+                                                        )
+                                                    }
+
+                                                    IconButton(
+                                                        onClick = {
+                                                            if (index < cards.lastIndex) {
+                                                                val newOrder =
+                                                                    cards.toMutableList().apply {
+                                                                        val item = removeAt(index)
+                                                                        add(index + 1, item)
+                                                                    }
+                                                                viewModel.saveCardOrder(newOrder)
+                                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+                                                            }
                                                         },
-                                                        onNavigateToTracearrHistory = onNavigateToTracearrHistory,
-                                                        onNavigateToTracearrUsers = onNavigateToTracearrUsers,
-                                                        onNavigateToTracearrViolations = onNavigateToTracearrViolations,
-                                                        onNavigateToTracearrActivity = onNavigateToTracearrActivity,
-                                                    )
-                                                }
-                                                if (isEditing) {
-                                                    Box(
-                                                        modifier =
-                                                            Modifier
-                                                                .align(Alignment.TopEnd)
-                                                                .clip(CircleShape)
-                                                                .clickable {
-                                                                    viewModel.removeCard(dashboardCard)
-                                                                }.size(24.dp)
-                                                                .background(MaterialTheme.colorScheme.error),
-                                                        contentAlignment = Alignment.Center,
+                                                        enabled = index < cards.lastIndex,
+                                                        modifier = Modifier.size(32.dp),
+                                                        colors =
+                                                            IconButtonDefaults.filledTonalIconButtonColors(
+                                                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                                            ),
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.ArrowDownward,
+                                                            contentDescription = "Move Card Down",
+                                                            modifier = Modifier.size(18.dp),
+                                                        )
+                                                    }
+
+                                                    IconButton(
+                                                        onClick = {
+                                                            viewModel.removeCard(dashboardCard)
+                                                        },
+                                                        modifier = Modifier.size(32.dp),
+                                                        colors =
+                                                            IconButtonDefaults.iconButtonColors(
+                                                                containerColor = MaterialTheme.colorScheme.error,
+                                                                contentColor = MaterialTheme.colorScheme.onError,
+                                                            ),
                                                     ) {
                                                         Icon(
                                                             Icons.Default.Close,
                                                             null,
-                                                            tint = MaterialTheme.colorScheme.onError,
                                                             modifier = Modifier.size(18.dp),
                                                         )
                                                     }

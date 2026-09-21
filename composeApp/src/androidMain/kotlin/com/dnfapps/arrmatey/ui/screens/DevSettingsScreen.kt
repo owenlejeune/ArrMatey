@@ -59,6 +59,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import java.io.File
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.draw.clip
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 
 private const val MAX_LOG_PREVIEW_CHARS = 30_000
 
@@ -131,53 +134,59 @@ fun DevSettingsScreen(
     ) { pv ->
         Box(modifier = Modifier.padding(pv)) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(12.dp),
+                        .padding(16.dp),
             ) {
-                InstanceType.entries.forEach { instanceType ->
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .toggleable(
-                                    value = showInfoCardMap[instanceType] ?: true,
-                                    onValueChange = { preferenceStore.setInfoCardVisibility(instanceType, it) },
-                                ),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = "Show ${instanceType.name} info card",
-                        )
-                        Switch(
-                            checked = showInfoCardMap[instanceType] ?: true,
-                            onCheckedChange = null,
-                        )
-                    }
-                }
+                ContainerCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        InstanceType.entries.forEach { instanceType ->
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .toggleable(
+                                            value = showInfoCardMap[instanceType] ?: true,
+                                            onValueChange = { preferenceStore.setInfoCardVisibility(instanceType, it) },
+                                        ),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = "Show ${instanceType.name} info card",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                                Switch(
+                                    checked = showInfoCardMap[instanceType] ?: true,
+                                    onCheckedChange = null,
+                                )
+                            }
+                        }
 
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .toggleable(
-                                value = activityPollingOn,
-                                onValueChange = { preferenceStore.toggleActivityPolling() },
-                            ),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "Enable activity polling",
-                    )
-                    Switch(
-                        checked = activityPollingOn,
-                        onCheckedChange = null,
-                    )
+                        Row(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .toggleable(
+                                        value = activityPollingOn,
+                                        onValueChange = { preferenceStore.toggleActivityPolling() },
+                                    ),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Enable activity polling",
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Switch(
+                                checked = activityPollingOn,
+                                onCheckedChange = null,
+                            )
+                        }
+                    }
                 }
 
                 DropdownPicker(
@@ -206,7 +215,8 @@ fun DevSettingsScreen(
                         Modifier
                             .height(250.dp)
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.primaryContainer),
+                            .clip(MaterialTheme.shapes.large)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 ) {
                     SelectionContainer {
                         Column(
@@ -224,12 +234,18 @@ fun DevSettingsScreen(
                                         fontFamily = FontFamily.Monospace,
                                     ),
                                 modifier = Modifier.fillMaxWidth(),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
                         }
                     }
                 }
-                Button(onClick = { shareLogs(context) }) {
+
+                Button(
+                    onClick = { shareLogs(context) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
                     Text("Share logs")
                 }
             }

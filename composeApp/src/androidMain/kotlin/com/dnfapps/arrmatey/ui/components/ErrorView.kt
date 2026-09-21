@@ -1,12 +1,15 @@
 package com.dnfapps.arrmatey.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -14,6 +17,7 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -21,13 +25,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.HttpErrorType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ErrorView(
     errorType: HttpErrorType,
@@ -43,10 +47,16 @@ fun ErrorView(
             else -> Icons.Default.Warning
         }
 
+    val containerColor =
+        when (errorType) {
+            HttpErrorType.Timeout, HttpErrorType.Network -> MaterialTheme.colorScheme.tertiaryContainer
+            else -> MaterialTheme.colorScheme.errorContainer
+        }
+
     val iconColor =
         when (errorType) {
-            HttpErrorType.Timeout, HttpErrorType.Network -> Color(0xFFFFA500)
-            else -> MaterialTheme.colorScheme.error
+            HttpErrorType.Timeout, HttpErrorType.Network -> MaterialTheme.colorScheme.onTertiaryContainer
+            else -> MaterialTheme.colorScheme.onErrorContainer
         }
 
     val title =
@@ -67,20 +77,29 @@ fun ErrorView(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = iconColor,
-            modifier = Modifier.size(48.dp),
-        )
+        Box(
+            modifier =
+                Modifier
+                    .size(80.dp)
+                    .background(containerColor, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(40.dp),
+            )
+        }
 
         Text(
             text = mokoString(title),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMediumEmphasized,
+            textAlign = TextAlign.Center,
         )
 
         Text(
@@ -94,7 +113,7 @@ fun ErrorView(
         Column(
             modifier =
                 Modifier
-                    .padding(horizontal = 32.dp)
+                    .padding(horizontal = 16.dp)
                     .padding(top = 8.dp)
                     .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),

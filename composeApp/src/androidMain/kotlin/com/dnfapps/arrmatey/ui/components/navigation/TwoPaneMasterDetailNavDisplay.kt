@@ -7,6 +7,8 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -62,6 +64,10 @@ fun TwoPaneMasterDetailNavDisplay(
                 predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
                 entryProvider = entryProvider,
             )
+        }
+
+        if (showDetails) {
+            VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
 
         val lastValidDetailBackStack = remember { mutableStateOf<List<NavKey>>(emptyList()) }

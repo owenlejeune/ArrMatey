@@ -1,8 +1,5 @@
 package com.dnfapps.arrmatey.ui.screens
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,19 +11,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,17 +30,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.compose.TabItem
@@ -55,12 +43,10 @@ import com.dnfapps.arrmatey.entensions.androidIcon
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.utils.mokoString
-import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
 
 private const val MAX_TABS = 5
 
@@ -107,75 +93,83 @@ fun TabCustomizationContent(
     hiddenTabs: List<TabItem>,
     updatePreferences: (TabPreferences) -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
-
-    var combinedList by remember {
-        mutableStateOf(TabRow.buildList(visibleTabs, drawerTabs, hiddenTabs))
-    }
-
-    LaunchedEffect(visibleTabs, drawerTabs, hiddenTabs) {
-        combinedList = TabRow.buildList(visibleTabs, drawerTabs, hiddenTabs)
-    }
-
-    val lazyListState = rememberLazyListState()
-    val reorderableLazyColumnState =
-        rememberReorderableLazyListState(
-            lazyListState = lazyListState,
-            onMove = { from, to ->
-                val fromIndex = combinedList.indexOfFirst { it.key == from.key }
-                val toIndex = combinedList.indexOfFirst { it.key == to.key }
-
-                if (fromIndex != -1 && toIndex != -1) {
-                    val newList = combinedList.toMutableList()
-
-                    val movedItem = newList.removeAt(fromIndex)
-                    newList.add(toIndex, movedItem)
-
-                    val divider1Index = newList.indexOfFirst { it is TabRow.Divider && it.text == MR.strings.navigation_items_drawer }
-                    if (divider1Index == -1) return@rememberReorderableLazyListState
-
-                    val tabsAbove = newList.subList(0, divider1Index).filterIsInstance<TabRow.Tab>()
-                    if (tabsAbove.isEmpty()) {
-                        return@rememberReorderableLazyListState
-                    }
-
-                    if (tabsAbove.size > MAX_TABS) {
-                        val overflowItem = newList.removeAt(divider1Index - 1)
-                        newList.add(divider1Index, overflowItem)
-                    }
-
-                    combinedList = newList
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                    val filtered = combinedList.filter { it !is TabRow.Placeholder }
-                    val finalDivider1Index = filtered.indexOfFirst { it is TabRow.Divider && it.text == MR.strings.navigation_items_drawer }
-                    val finalDivider2Index = filtered.indexOfFirst { it is TabRow.Divider && it.text == MR.strings.navigation_items_hidden }
-
-                    val newNav =
-                        filtered
-                            .subList(0, finalDivider1Index)
-                            .filterIsInstance<TabRow.Tab>()
-                            .map { it.item.key }
-
-                    val newDrawer =
-                        filtered
-                            .subList(finalDivider1Index + 1, finalDivider2Index)
-                            .filterIsInstance<TabRow.Tab>()
-                            .map { it.item.key }
-
-                    val newHidden =
-                        filtered
-                            .subList(finalDivider2Index + 1, filtered.size)
-                            .filterIsInstance<TabRow.Tab>()
-                            .map { it.item.key }
-
-                    updatePreferences(TabPreferences(newNav, newDrawer, newHidden))
-                }
-            },
+    fun moveVisible(fromIndex: Int, toIndex: Int) {
+        val newVisible = visibleTabs.toMutableList()
+        val item = newVisible.removeAt(fromIndex)
+        newVisible.add(toIndex, item)
+        updatePreferences(
+            TabPreferences(
+                orderedVisibleKeys = newVisible.map { it.key },
+                orderedHiddenKeys = drawerTabs.map { it.key },
+                orderedRemovedKeys = hiddenTabs.map { it.key },
+            ),
         )
+    }
+
+    fun moveToDrawer(tab: TabItem) {
+        if (visibleTabs.size <= 1) return
+        val newVisible = visibleTabs.filter { it.key != tab.key }
+        val newDrawer = drawerTabs + tab
+        updatePreferences(
+            TabPreferences(
+                orderedVisibleKeys = newVisible.map { it.key },
+                orderedHiddenKeys = newDrawer.map { it.key },
+                orderedRemovedKeys = hiddenTabs.map { it.key },
+            ),
+        )
+    }
+
+    fun moveDrawer(fromIndex: Int, toIndex: Int) {
+        val newDrawer = drawerTabs.toMutableList()
+        val item = newDrawer.removeAt(fromIndex)
+        newDrawer.add(toIndex, item)
+        updatePreferences(
+            TabPreferences(
+                orderedVisibleKeys = visibleTabs.map { it.key },
+                orderedHiddenKeys = newDrawer.map { it.key },
+                orderedRemovedKeys = hiddenTabs.map { it.key },
+            ),
+        )
+    }
+
+    fun promoteToVisible(tab: TabItem) {
+        if (visibleTabs.size >= MAX_TABS) return
+        val newDrawer = drawerTabs.filter { it.key != tab.key }
+        val newVisible = visibleTabs + tab
+        updatePreferences(
+            TabPreferences(
+                orderedVisibleKeys = newVisible.map { it.key },
+                orderedHiddenKeys = newDrawer.map { it.key },
+                orderedRemovedKeys = hiddenTabs.map { it.key },
+            ),
+        )
+    }
+
+    fun moveToHidden(tab: TabItem) {
+        val newDrawer = drawerTabs.filter { it.key != tab.key }
+        val newHidden = hiddenTabs + tab
+        updatePreferences(
+            TabPreferences(
+                orderedVisibleKeys = visibleTabs.map { it.key },
+                orderedHiddenKeys = newDrawer.map { it.key },
+                orderedRemovedKeys = newHidden.map { it.key },
+            ),
+        )
+    }
+
+    fun restoreToDrawer(tab: TabItem) {
+        val newHidden = hiddenTabs.filter { it.key != tab.key }
+        val newDrawer = drawerTabs + tab
+        updatePreferences(
+            TabPreferences(
+                orderedVisibleKeys = visibleTabs.map { it.key },
+                orderedHiddenKeys = newDrawer.map { it.key },
+                orderedRemovedKeys = hiddenTabs.map { it.key },
+            ),
+        )
+    }
 
     LazyColumn(
-        state = lazyListState,
         modifier =
             Modifier
                 .fillMaxSize()
@@ -183,7 +177,7 @@ fun TabCustomizationContent(
         contentPadding = PaddingValues(bottom = 16.dp + LocalFloatingBarBottomPadding.current),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item(key = "header_static_section") {
+        item(key = "header_description") {
             ContainerCard(
                 modifier = Modifier.padding(vertical = 8.dp),
             ) {
@@ -192,70 +186,189 @@ fun TabCustomizationContent(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            Text(
-                text = mokoString(MR.strings.navigation_items_selected),
-                style = MaterialTheme.typography.titleMedium,
-            )
         }
 
-        itemsIndexed(combinedList, key = { _, item -> item.key }) { index, row ->
-            ReorderableItem(reorderableLazyColumnState, row.key) { isDragging ->
-                val interactionSource = remember { MutableInteractionSource() }
+        if (visibleTabs.isNotEmpty()) {
+            item(key = "header_visible") {
+                Text(
+                    text = mokoString(MR.strings.navigation_items_selected),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.animateItem(),
+                )
+            }
 
-                when (row) {
-                    is TabRow.Divider -> {
-                        Column(
-                            modifier =
-                                Modifier
-                                    .draggableHandle(
-                                        enabled = false,
-                                        interactionSource = interactionSource,
-                                    ),
+            itemsIndexed(
+                items = visibleTabs,
+                key = { _, tab -> tab.key },
+            ) { index, tab ->
+                ContainerCard(
+                    modifier = Modifier.animateItem(),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f),
                         ) {
-                            HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                            Text(
-                                text = mokoString(row.text),
-                            )
+                            TabItemIconAndLabel(tab = tab, useServiceNavLogos = useServiceNavLogos)
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            IconButton(
+                                onClick = { moveVisible(index, index - 1) },
+                                enabled = index > 0,
+                            ) {
+                                Icon(Icons.Default.ArrowUpward, contentDescription = "Move Up")
+                            }
+
+                            IconButton(
+                                onClick = { moveVisible(index, index + 1) },
+                                enabled = index < visibleTabs.lastIndex,
+                            ) {
+                                Icon(Icons.Default.ArrowDownward, contentDescription = "Move Down")
+                            }
+
+                            IconButton(
+                                onClick = { moveToDrawer(tab) },
+                                enabled = visibleTabs.size > 1,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Remove,
+                                    contentDescription = "Move to Drawer",
+                                    tint =
+                                        if (visibleTabs.size > 1) {
+                                            MaterialTheme.colorScheme.error
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                        },
+                                )
+                            }
                         }
                     }
-                    is TabRow.Placeholder -> {
-                        Spacer(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp),
-                        )
+                }
+            }
+        }
+
+        if (drawerTabs.isNotEmpty()) {
+            item(key = "header_drawer") {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = mokoString(MR.strings.navigation_items_drawer),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.animateItem(),
+                )
+            }
+
+            itemsIndexed(
+                items = drawerTabs,
+                key = { _, tab -> tab.key },
+            ) { index, tab ->
+                ContainerCard(
+                    modifier = Modifier.animateItem(),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            TabItemIconAndLabel(tab = tab, useServiceNavLogos = useServiceNavLogos)
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            IconButton(
+                                onClick = { moveDrawer(index, index - 1) },
+                                enabled = index > 0,
+                            ) {
+                                Icon(Icons.Default.ArrowUpward, contentDescription = "Move Up")
+                            }
+
+                            IconButton(
+                                onClick = { moveDrawer(index, index + 1) },
+                                enabled = index < drawerTabs.lastIndex,
+                            ) {
+                                Icon(Icons.Default.ArrowDownward, contentDescription = "Move Down")
+                            }
+
+                            IconButton(
+                                onClick = { promoteToVisible(tab) },
+                                enabled = visibleTabs.size < MAX_TABS,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Promote to Nav Bar",
+                                    tint =
+                                        if (visibleTabs.size < MAX_TABS) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                        },
+                                )
+                            }
+
+                            IconButton(
+                                onClick = { moveToHidden(tab) },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.VisibilityOff,
+                                    contentDescription = "Hide Tab",
+                                    tint = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        }
                     }
-                    is TabRow.Tab -> {
-                        val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+                }
+            }
+        }
 
-                        val divider1Index =
-                            combinedList.indexOfFirst {
-                                it is TabRow.Divider &&
-                                    it.text == MR.strings.navigation_items_drawer
-                            }
+        if (hiddenTabs.isNotEmpty()) {
+            item(key = "header_hidden") {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = mokoString(MR.strings.navigation_items_hidden),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.animateItem(),
+                )
+            }
 
-                        val isBelowDivider = divider1Index != -1 && index > divider1Index
-                        val visibleTabsCount =
-                            if (divider1Index != -1) {
-                                combinedList.subList(0, divider1Index).count { it is TabRow.Tab }
-                            } else {
-                                0
-                            }
+            itemsIndexed(
+                items = hiddenTabs,
+                key = { _, tab -> tab.key },
+            ) { _, tab ->
+                ContainerCard(
+                    modifier = Modifier.animateItem(),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            TabItemIconAndLabel(tab = tab, useServiceNavLogos = useServiceNavLogos)
+                        }
 
-                        val isVisibleTab = !isBelowDivider
-                        val isDragEnabled = !isVisibleTab || visibleTabsCount > 1
-
-                        val ghostAlpha by animateFloatAsState(if (isBelowDivider) 0.6f else 1f)
-
-                        Box(modifier = Modifier.graphicsLayer { alpha = ghostAlpha }) {
-                            TabItemCard(
-                                modifier = Modifier.draggableHandle(enabled = isDragEnabled),
-                                tab = row.item,
-                                useServiceNavLogos = useServiceNavLogos,
-                                isDragging = isDragging,
-                                elevation = elevation,
-                                isDragEnabled = isDragEnabled,
+                        IconButton(
+                            onClick = { restoreToDrawer(tab) },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Restore Tab",
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -265,132 +378,57 @@ fun TabCustomizationContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TabItemCard(
+private fun TabItemIconAndLabel(
     tab: TabItem,
     useServiceNavLogos: Boolean,
-    isDragging: Boolean,
-    elevation: Dp,
-    modifier: Modifier = Modifier,
-    isDragEnabled: Boolean = true,
 ) {
-    Card(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .graphicsLayer {
-                    translationY = if (isDragging) 4.dp.toPx() else 0f
-                },
-        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+    when (tab) {
+        is TabItem.Standard -> {
+            val logo = tab.associatedType?.tabIcon
+            if (useServiceNavLogos && logo != null) {
                 Icon(
-                    imageVector = Icons.Default.DragHandle,
+                    painter = painterResource(logo),
                     contentDescription = null,
-                    tint =
-                        if (isDragEnabled) {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
-                        },
+                    modifier = Modifier.size(24.dp),
                 )
-
-                when (tab) {
-                    is TabItem.Standard -> {
-                        val logo = tab.associatedType?.tabIcon
-                        if (useServiceNavLogos && logo != null) {
-                            Icon(
-                                painter = painterResource(logo),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        } else {
-                            Icon(
-                                imageVector = tab.androidIcon,
-                                contentDescription = null,
-                            )
-                        }
-                        Text(
-                            text = mokoString(tab.resource),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                    is TabItem.CustomWebpage -> {
-                        Icon(
-                            imageVector = Icons.Default.Language,
-                            contentDescription = null,
-                        )
-                        Column {
-                            Text(
-                                text = tab.name,
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            Text(
-                                text = tab.url,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                    TabItem.Settings -> {
-                        // Settings shouldn't appear here, but handle it just in case
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = null,
-                        )
-                        Text(
-                            text = mokoString(tab.resource),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                }
+            } else {
+                Icon(
+                    imageVector = tab.androidIcon,
+                    contentDescription = null,
+                )
+            }
+            Text(
+                text = mokoString(tab.resource),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+        is TabItem.CustomWebpage -> {
+            Icon(
+                imageVector = Icons.Default.Language,
+                contentDescription = null,
+            )
+            Column {
+                Text(
+                    text = tab.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text = tab.url,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
-    }
-}
-
-sealed class TabRow(
-    val key: String,
-) {
-    data class Divider(
-        val text: StringResource,
-    ) : TabRow("divider_$text")
-
-    data class Tab(
-        val item: TabItem,
-        val isActive: Boolean,
-    ) : TabRow(item.key)
-
-    object Placeholder : TabRow("placeholder_key")
-
-    companion object {
-        fun buildList(
-            visibleTabs: List<TabItem>,
-            drawerTabs: List<TabItem>,
-            hiddenTabs: List<TabItem>,
-        ) = buildList {
-            addAll(visibleTabs.map { Tab(it, isActive = true) })
-            add(Divider(MR.strings.navigation_items_drawer))
-            addAll(drawerTabs.map { Tab(it, isActive = false) })
-            add(Divider(MR.strings.navigation_items_hidden))
-
-            if (hiddenTabs.isEmpty()) {
-                add(Placeholder)
-            } else {
-                addAll(hiddenTabs.map { Tab(it, isActive = false) })
-            }
+        TabItem.Settings -> {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = null,
+            )
+            Text(
+                text = mokoString(tab.resource),
+                style = MaterialTheme.typography.bodyLarge,
+            )
         }
     }
 }

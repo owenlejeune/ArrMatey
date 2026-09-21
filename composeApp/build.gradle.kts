@@ -123,7 +123,6 @@ dependencies {
     implementation(libs.androidx.compose.window.size)
     implementation(libs.androidx.browser)
     implementation(libs.aboutlibraries.compose)
-    implementation(libs.reorderable)
     implementation(libs.compose.markdown)
     implementation(libs.google.fonts)
     implementation(libs.flexible.bottomsheet)

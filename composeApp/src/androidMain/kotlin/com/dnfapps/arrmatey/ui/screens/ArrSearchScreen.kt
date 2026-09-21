@@ -1,15 +1,26 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
@@ -23,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -59,11 +71,10 @@ fun ArrSearchScreen(
     shortcutManager: AppShortcutManager = koinInject(),
     viewModel: ArrSearchViewModel = koinViewModel(key = "${type.name}_$instanceId", parameters = { parametersOf(type, instanceId) }),
 ) {
-    val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()
-    val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
-
     val lookupState by viewModel.lookupUiState.collectAsStateWithLifecycle()
     val activeMediaIds by viewModel.activeMediaIds.collectAsStateWithLifecycle()
+    val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()
+    val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
     val showBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
 
     val textFieldState = rememberTextFieldState(initialQuery)
@@ -81,9 +92,9 @@ fun ArrSearchScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(textFieldState) {
         snapshotFlow { textFieldState.text.toString() }
-            .debounce(500.milliseconds)
+            .debounce(250.milliseconds)
             .distinctUntilChanged()
             .collect { query ->
                 viewModel.performLookup(query)
@@ -91,7 +102,9 @@ fun ArrSearchScreen(
     }
 
     DisposableEffect(Unit) {
-        onDispose { viewModel.clearLookup() }
+        onDispose {
+            viewModel.clearLookup()
+        }
     }
 
     Scaffold(
@@ -132,10 +145,35 @@ fun ArrSearchScreen(
 
                 is ArrLibrary.Success -> {
                     if (state.items.isEmpty()) {
-                        Text(
-                            text = mokoString(MR.strings.empty_library),
-                            modifier = Modifier.align(Alignment.Center),
-                        )
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .size(72.dp)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(36.dp),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                text = mokoString(MR.strings.empty_library),
+                                style = MaterialTheme.typography.titleMedium,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     } else {
                         MediaList(
                             aspectRatio = type.aspectRatio,
@@ -149,7 +187,35 @@ fun ArrSearchScreen(
                 }
 
                 is ArrLibrary.Error -> {
-                    Text("An error occurred")
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .size(72.dp)
+                                    .background(MaterialTheme.colorScheme.errorContainer, CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                modifier = Modifier.size(36.dp),
+                                tint = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = mokoString(MR.strings.error_generic_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
             }
         }

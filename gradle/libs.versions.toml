@@ -34,7 +34,6 @@ cloudy = "0.7.1"
 moko = "0.26.4"
 windowSize = "1.4.0"
 aboutLibraries = "15.2.0"
-reorderable = "3.1.0"
 composeMarkdown = "0.7.2"
 kmp-logger = "2.0.0"
 google-fonts = "1.11.2"
@@ -97,7 +96,6 @@ moko-resources-compose = { module = "dev.icerock.moko:resources-compose", versio
 resources-generator = { module = "dev.icerock.moko:resources-generator", version.ref = "moko" }
 aboutlibraries = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
 aboutlibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
-reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "composeMarkdown" }
 kmp-logger = { module = "io.github.shivathapaa:logger", version.ref = "kmp-logger" }
 google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "google-fonts" }

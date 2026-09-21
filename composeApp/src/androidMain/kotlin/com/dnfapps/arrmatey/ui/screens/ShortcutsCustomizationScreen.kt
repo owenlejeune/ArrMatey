@@ -1,29 +1,27 @@
 package com.dnfapps.arrmatey.ui.screens
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -36,9 +34,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.datastore.AndroidPreferencesStore
@@ -46,12 +41,11 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +73,7 @@ fun ShortcutsCustomizationScreen(
                 existingOrder + newOnes
             }
 
-        shortcutItems = ordered.sortedBy { it.id in disabledShortcuts }
+        shortcutItems = ordered
     }
 
     Scaffold(
@@ -96,57 +90,51 @@ fun ShortcutsCustomizationScreen(
                     .fillMaxSize()
                     .padding(padding),
         ) {
+            val enabledShortcuts = remember(shortcutItems, disabledShortcuts) {
+                shortcutItems.filter { it.id !in disabledShortcuts }
+            }
+            val disabledShortcutItems = remember(shortcutItems, disabledShortcuts) {
+                shortcutItems.filter { it.id in disabledShortcuts }
+            }
+
             ShortcutsList(
-                items = shortcutItems,
-                disabledIds = disabledShortcuts,
-                onMove = { fromIndex, toIndex ->
-                    val newList = shortcutItems.toMutableList()
-                    val movedItem = newList.removeAt(fromIndex)
-                    newList.add(toIndex, movedItem)
+                enabledItems = enabledShortcuts,
+                disabledItems = disabledShortcutItems,
+                onMoveEnabled = { fromIndex, toIndex ->
+                    val newEnabled = enabledShortcuts.toMutableList()
+                    val item = newEnabled.removeAt(fromIndex)
+                    newEnabled.add(toIndex, item)
 
-                    val firstDisabledIndex = shortcutItems.indexOfFirst { it.id in disabledShortcuts }
-                    val n = if (firstDisabledIndex == -1) shortcutItems.size else firstDisabledIndex
-
-                    var nextDisabled = disabledShortcuts
-                    if (n in (toIndex + 1)..fromIndex) {
-                        nextDisabled = nextDisabled - movedItem.id
-                    } else if (n in (fromIndex + 1)..toIndex) {
-                        nextDisabled = nextDisabled + movedItem.id
-                    }
-
-                    shortcutItems = newList
+                    val newFullList = newEnabled + disabledShortcutItems
+                    shortcutItems = newFullList
                     scope.launch {
-                        preferenceStore.saveDisabledShortcuts(nextDisabled)
-                        preferenceStore.saveShortcutsOrder(newList.map { it.id })
+                        preferenceStore.saveShortcutsOrder(newFullList.map { it.id })
                         shortcutManager.updateShortcuts()
                     }
                 },
-                onToggle = { id, enabled ->
+                onDisable = { item ->
                     scope.launch {
                         val currentDisabled = preferenceStore.disabledShortcuts.first()
-                        val nextDisabled = if (enabled) currentDisabled - id else currentDisabled + id
+                        val nextDisabled = currentDisabled + item.id
+                        val newEnabled = enabledShortcuts.filter { it.id != item.id }
+                        val newDisabled = disabledShortcutItems + item
+                        val newFullList = newEnabled + newDisabled
+                        shortcutItems = newFullList
                         preferenceStore.saveDisabledShortcuts(nextDisabled)
-
-                        // Re-sort items: enabled ones at top, disabled at bottom, maintaining relative order
-                        val newList = shortcutItems.toMutableList()
-                        val itemIndex = newList.indexOfFirst { it.id == id }
-                        if (itemIndex != -1) {
-                            val item = newList.removeAt(itemIndex)
-                            if (enabled) {
-                                // Find the first disabled item in the current state to insert before it
-                                val firstDisabledIdx = newList.indexOfFirst { it.id in nextDisabled }
-                                if (firstDisabledIdx == -1) {
-                                    newList.add(item)
-                                } else {
-                                    newList.add(firstDisabledIdx, item)
-                                }
-                            } else {
-                                // Move to the end of the list
-                                newList.add(item)
-                            }
-                        }
-                        shortcutItems = newList
-                        preferenceStore.saveShortcutsOrder(newList.map { it.id })
+                        preferenceStore.saveShortcutsOrder(newFullList.map { it.id })
+                        shortcutManager.updateShortcuts()
+                    }
+                },
+                onEnable = { item ->
+                    scope.launch {
+                        val currentDisabled = preferenceStore.disabledShortcuts.first()
+                        val nextDisabled = currentDisabled - item.id
+                        val newDisabled = disabledShortcutItems.filter { it.id != item.id }
+                        val newEnabled = enabledShortcuts + item
+                        val newFullList = newEnabled + newDisabled
+                        shortcutItems = newFullList
+                        preferenceStore.saveDisabledShortcuts(nextDisabled)
+                        preferenceStore.saveShortcutsOrder(newFullList.map { it.id })
                         shortcutManager.updateShortcuts()
                     }
                 },
@@ -157,30 +145,13 @@ fun ShortcutsCustomizationScreen(
 
 @Composable
 fun ShortcutsList(
-    items: List<AppShortcutManager.ShortcutItem>,
-    disabledIds: Set<String>,
-    onMove: (Int, Int) -> Unit,
-    onToggle: (String, Boolean) -> Unit,
+    enabledItems: List<AppShortcutManager.ShortcutItem>,
+    disabledItems: List<AppShortcutManager.ShortcutItem>,
+    onMoveEnabled: (Int, Int) -> Unit,
+    onDisable: (AppShortcutManager.ShortcutItem) -> Unit,
+    onEnable: (AppShortcutManager.ShortcutItem) -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
-    val lazyListState = rememberLazyListState()
-
-    val reorderableLazyColumnState =
-        rememberReorderableLazyListState(
-            lazyListState = lazyListState,
-            onMove = { from, to ->
-                val fromIndex = items.indexOfFirst { it.id == from.key }
-                val toIndex = items.indexOfFirst { it.id == to.key }
-
-                if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
-                    onMove(fromIndex, toIndex)
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                }
-            },
-        )
-
     LazyColumn(
-        state = lazyListState,
         modifier =
             Modifier
                 .fillMaxSize()
@@ -188,7 +159,7 @@ fun ShortcutsList(
         contentPadding = PaddingValues(bottom = 16.dp + LocalFloatingBarBottomPadding.current),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item {
+        item(key = "header_description") {
             ContainerCard(
                 modifier = Modifier.padding(vertical = 8.dp),
             ) {
@@ -199,55 +170,126 @@ fun ShortcutsList(
             }
         }
 
-        items(items, key = { it.id }) { item ->
-            ReorderableItem(reorderableLazyColumnState, item.id) { isDragging ->
-                val interactionSource = remember { MutableInteractionSource() }
-                val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
-                val isEnabled = item.id !in disabledIds
-                val alpha by animateFloatAsState(if (isEnabled) 1f else 0.6f)
+        if (enabledItems.isNotEmpty()) {
+            item(key = "header_enabled") {
+                Text(
+                    text = mokoString(MR.strings.navigation_items_visible),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.animateItem(),
+                )
+            }
 
-                Card(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .graphicsLayer { this.alpha = alpha },
-                    elevation = CardDefaults.cardElevation(defaultElevation = elevation),
+            itemsIndexed(
+                items = enabledItems,
+                key = { _, item -> item.id },
+            ) { index, item ->
+                ContainerCard(
+                    modifier = Modifier.animateItem(),
                 ) {
                     Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.DragHandle,
-                            contentDescription = null,
-                            modifier =
-                                Modifier.draggableHandle(
-                                    enabled = true,
-                                    interactionSource = interactionSource,
-                                ),
-                        )
-
-                        Icon(
-                            painter = painterResource(item.iconRes),
-                            contentDescription = null,
-                            modifier = Modifier.padding(start = 8.dp).size(24.dp),
-                        )
-
-                        Text(
-                            text = item.label,
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
+                        ) {
+                            Icon(
+                                painter = painterResource(item.iconRes),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
 
-                        Switch(
-                            checked = isEnabled,
-                            onCheckedChange = { onToggle(item.id, it) },
-                        )
+                            Text(
+                                text = item.label,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            IconButton(
+                                onClick = { onMoveEnabled(index, index - 1) },
+                                enabled = index > 0,
+                            ) {
+                                Icon(Icons.Default.ArrowUpward, contentDescription = "Move Up")
+                            }
+
+                            IconButton(
+                                onClick = { onMoveEnabled(index, index + 1) },
+                                enabled = index < enabledItems.lastIndex,
+                            ) {
+                                Icon(Icons.Default.ArrowDownward, contentDescription = "Move Down")
+                            }
+
+                            IconButton(
+                                onClick = { onDisable(item) },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Remove,
+                                    contentDescription = "Disable Shortcut",
+                                    tint = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (disabledItems.isNotEmpty()) {
+            item(key = "header_disabled") {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = mokoString(MR.strings.navigation_items_hidden),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.animateItem(),
+                )
+            }
+
+            itemsIndexed(
+                items = disabledItems,
+                key = { _, item -> item.id },
+            ) { _, item ->
+                ContainerCard(
+                    modifier = Modifier.animateItem(),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Icon(
+                                painter = painterResource(item.iconRes),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            )
+
+                            Text(
+                                text = item.label,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { onEnable(item) },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Enable Shortcut",
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
                     }
                 }
             }
