@@ -41,6 +41,8 @@ struct DashboardTabContent: View {
     @State private var selectedActivityItem: IdentifiableQueueItem? = nil
     @State private var selectedTracearrStreamSession: TracearrStreamSession? = nil
 
+    @State private var toastMessage: String? = nil
+
     private let columns = [
         GridItem(.adaptive(minimum: 300, maximum: .infinity), spacing: 16)
     ]
@@ -89,6 +91,25 @@ struct DashboardTabContent: View {
                 searchQuery = ""
             }
         }
+        .onChange(of: viewModel.showFirstLaunchAlert) { _, show in
+            if show {
+                toastMessage = MR.strings().dashboard_first_launch.localized()
+                viewModel.setFirstLaunchComplete()
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if let message = toastMessage {
+                ToastView(message: message)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                            withAnimation { toastMessage = nil }
+                        }
+                    }
+                    .padding(.bottom, 16)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: toastMessage != nil)
         .toolbar {
             if !viewModel.isEditing {
                 ToolbarItem(placement: .topBarLeading) {
@@ -192,7 +213,19 @@ struct DashboardTabContent: View {
             SeerrSheetView(viewModel: requestsViewModel)
         }
         .sheet(item: $selectedTracearrStreamSession) { session in
-            TracearrStreamDetailsSheet(session: session)
+            TracearrStreamDetailsSheet(
+                session: session,
+                onNavigateToDetails: { type, tmdbId in
+                    selectedTracearrStreamSession = nil
+                    if let tmdbId = tmdbId, let reqType = type?.requestType {
+                        navigationManager.goToSeerrDetailsOnDashboard(tmdbId: tmdbId, requestType: reqType)
+                    }
+                },
+                onNavigateToUser: { _ in
+                    selectedTracearrStreamSession = nil
+                    navigationManager.go(to: TracearrRoute.users)
+                }
+            )
         }
     }
 
@@ -253,9 +286,7 @@ struct DashboardTabContent: View {
             viewModel.refresh()
         }
         .navigationDestination(for: SettingsRoute.self) { route in
-            if case .arrDashboard(let id) = route {
-                ArrInstanceDashboard(id: id)
-            }
+            SettingsRouteView(route: route)
         }
         .navigationDestination(for: MediaRoute.self) { route in
             MediaRouteDestination(route: route)
@@ -265,6 +296,9 @@ struct DashboardTabContent: View {
         }
         .navigationDestination(for: TracearrRoute.self) { route in
             TracearrRouteDestination(route: route)
+        }
+        .navigationDestination(for: BazarrRoute.self) { route in
+            BazarrRouteDestination(route: route)
         }
     }
 
@@ -1379,7 +1413,7 @@ struct AddDashboardCardSheet: View {
     ]
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 let available = DashboardCards.allCases.filter { card in
                     !viewModel.cards.contains(where: { $0.name == card.name })
@@ -1408,6 +1442,7 @@ struct AddDashboardCardSheet: View {
                         .padding()
                         .background(Color(UIColor.secondarySystemBackground))
                         .cornerRadius(16)
+                        .contentShape(Rectangle())
                         .onTapGesture {
                             viewModel.addCard(card: card)
                         }
@@ -1416,6 +1451,7 @@ struct AddDashboardCardSheet: View {
                 .padding()
             }
             .navigationTitle(MR.strings().add_dashboard_cards.localized())
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(MR.strings().close.localized()) {
@@ -1456,7 +1492,7 @@ struct DashboardPendingRequestsSection: View {
                                 if let onRequestClick = onRequestClick {
                                     onRequestClick(mediaPackage)
                                 } else {
-                                    navigationManager.goToSeerrDetails(
+                                    navigationManager.goToSeerrDetailsOnDashboard(
                                         tmdbId: mediaPackage.request.media.tmdbId,
                                         requestType: mediaPackage.request.type
                                     )
@@ -1569,7 +1605,7 @@ struct DashboardPendingIssuesSection: View {
                                 if let onIssueClick = onIssueClick {
                                     onIssueClick(issuePackage)
                                 } else if let media = issuePackage.issue.media {
-                                    navigationManager.goToSeerrDetails(
+                                    navigationManager.goToSeerrDetailsOnDashboard(
                                         tmdbId: media.tmdbId,
                                         requestType: media.mediaType
                                     )
@@ -1667,13 +1703,11 @@ struct CompactIssueCard: View {
 
 private func navigateCalendarItemOnDashboard(item: CalendarItem, navigationManager: NavigationManager) {
     if let episode = item as? Episode {
-        if let seriesId = episode.series?.id {
-            navigationManager.goToDetailsOnDashboard(arrId: seriesId.int64Value, instanceType: .sonarr)
-        }
+        let seriesId = episode.series?.id?.int64Value ?? episode.seriesId
+        navigationManager.goToDetailsOnDashboard(arrId: seriesId, instanceType: .sonarr)
     } else if let group = item as? EpisodeGroup {
-        if let seriesId = group.first.series?.id {
-            navigationManager.goToDetailsOnDashboard(arrId: seriesId.int64Value, instanceType: .sonarr)
-        }
+        let seriesId = group.first.series?.id?.int64Value ?? group.first.seriesId
+        navigationManager.goToDetailsOnDashboard(arrId: seriesId, instanceType: .sonarr)
     } else if let album = item as? ArrAlbum {
         navigationManager.goToDetailsOnDashboard(arrId: album.artistId, instanceType: .lidarr)
     } else if let movie = item as? ArrMovie {
