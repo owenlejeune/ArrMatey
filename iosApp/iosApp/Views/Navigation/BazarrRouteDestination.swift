@@ -15,8 +15,6 @@ struct BazarrRouteDestination: View {
             BazarrTabContent()
         case .details(let id, let type):
             BazarrDetailsScreen(id: id, type: type)
-        default:
-            EmptyView()
         }
     }
 }

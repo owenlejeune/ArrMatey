@@ -163,7 +163,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.pendingSeerrRequest.observeAsync(on: self, to: \.pendingSeerrRequest)
 
         viewModel.automaticSearchIds.observeAsync(on: self) { owner, searchIds in
-            owner.automaticSearchIds = Set(searchIds.map { ($0 as! KotlinLong).int64Value })
+            owner.automaticSearchIds = Set(searchIds.map { $0.int64Value })
         }
         viewModel.lastSearchResult.observeAsync(on: self) { owner, result in
             owner.lastSearchResult = result?.boolValue

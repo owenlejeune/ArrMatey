@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import Combine
 import Shared
 
 struct PersonDetailsHeader: View {

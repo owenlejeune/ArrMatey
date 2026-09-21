@@ -205,6 +205,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		44E4AADA2F3680720024109F /* MOKO Resources */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);

@@ -48,7 +48,7 @@ struct BazarrDetailsScreen: View {
                         if let movie = details as? BazarrMovie {
                             BazarrSubtitlesSection(target: BazarrMediaTargetMovie(radarrId: movie.serviceId))
                         } else if details is BazarrSeries {
-                            let episodes = viewModel.uiState.episodes as? [BazarrEpisode] ?? []
+                            let episodes = viewModel.uiState.episodes
                             BazarrEpisodesSection(episodes: episodes) { seriesId, epId in
                                 searchTarget = SearchTarget(target: BazarrMediaTargetEpisode(seriesId: seriesId, episodeId: epId))
                             }

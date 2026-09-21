@@ -8,6 +8,7 @@
 import SwiftUI
 import Shared
 
+@MainActor
 protocol ArrViewCustomizationViewModel: ObservableObject {
     var preferences: InstancePreferences { get }
     func updateViewType(_ viewType: ViewType)

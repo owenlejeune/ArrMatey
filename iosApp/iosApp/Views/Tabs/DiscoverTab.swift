@@ -129,8 +129,6 @@ private struct DiscoverTabContent: View {
                                                     navigationManager.goToDiscoverCategory(category: .upcomingSeries)
                                                 }
                                             )
-                                        default:
-                                            EmptyView()
                                         }
                                     }
                                 }

@@ -80,7 +80,6 @@ class DiscoverViewModelS: ObservableObject {
         case .popularSeries: return tvState
         case .upcomingMovies: return upcomingMoviesState
         case .upcomingSeries: return upcomingTvState
-        default: return PagedData()
         }
     }
 

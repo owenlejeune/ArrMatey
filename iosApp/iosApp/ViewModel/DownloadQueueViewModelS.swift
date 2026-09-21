@@ -56,7 +56,7 @@ class DownloadQueueViewModelS: ObservableObject {
             owner.selectionCount = count.int32Value
         }
         viewModel.selectionState.selectedItems.observeAsync(on: self) { owner, items in
-            owner.selectedItems = Set(items as? [String] ?? [])
+            owner.selectedItems = Set(items.compactMap { $0 as? String })
         }
         viewModel.selectedItem.observeAsync(on: self, to: \.selectedItem)
     }

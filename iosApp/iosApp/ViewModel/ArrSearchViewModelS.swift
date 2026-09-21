@@ -28,7 +28,7 @@ class ArrSearchViewModelS: ObservableObject {
         viewModel.sortBy.observeAsync(on: self, to: \.sortBy)
         viewModel.sortOrder.observeAsync(on: self, to: \.sortOrder)
         viewModel.activeMediaIds.observeAsync(on: self) { owner, activeMediaIds in
-            owner.activeMediaIds = Set(activeMediaIds.compactMap { ($0 as? NSNumber)?.int64Value })
+            owner.activeMediaIds = Set(activeMediaIds.map { $0.int64Value })
         }
         viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
             owner.searchShowBanners = show.boolValue

@@ -102,11 +102,9 @@ struct BazarrTabContent: View {
                         })
                     case .providers:
                         ProvidersList(
-                            providers: success.providers as? [ProviderStatus] ?? [],
+                            providers: success.providers,
                             onReset: viewModel.resetProviders
                         )
-                    default:
-                        EmptyView()
                     }
                 }
                 .refreshable { viewModel.refresh() }
@@ -140,7 +138,7 @@ struct BazarrTabContent: View {
             case .movies: return Int32(success.movies.count)
             case .wantedEpisodes: return Int32(success.wantedEpisodes.count)
             case .wantedMovies: return Int32(success.wantedMovies.count)
-            default: return 0
+            case .providers: return 0
             }
         }()
 
@@ -151,7 +149,6 @@ struct BazarrTabContent: View {
             case .wantedEpisodes: return MR.strings().bazarr_wanted_episodes.localized()
             case .wantedMovies: return MR.strings().bazarr_wanted_movies.localized()
             case .providers: return MR.strings().bazarr_providers.localized()
-            default: return ""
             }
         }()
 

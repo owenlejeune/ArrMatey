@@ -10,7 +10,7 @@ import SwiftUI
 
 extension SkieSwiftStateFlow {
     func observeAsync(_ consumer: @escaping (_ emission: T) -> Void) {
-        Task {
+        _ = Task {
             for try await value in self {
                 await MainActor.run {
                     consumer(value)
@@ -20,7 +20,7 @@ extension SkieSwiftStateFlow {
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T) -> Void) {
-        Task { [weak owner] in
+        _ = Task { [weak owner] in
             for try await value in self {
                 await MainActor.run { [weak owner] in
                     guard let owner = owner else { return }
@@ -39,7 +39,7 @@ extension SkieSwiftStateFlow {
 
 extension SkieSwiftOptionalStateFlow {
     func observeAsync(_ consumer: @escaping (_ emission: T?) -> Void) {
-        Task {
+        _ = Task {
             for try await value in self {
                 await MainActor.run {
                     consumer(value)
@@ -49,7 +49,7 @@ extension SkieSwiftOptionalStateFlow {
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T?) -> Void) {
-        Task { [weak owner] in
+        _ = Task { [weak owner] in
             for try await value in self {
                 await MainActor.run { [weak owner] in
                     guard let owner = owner else { return }
@@ -68,7 +68,7 @@ extension SkieSwiftOptionalStateFlow {
 
 extension SkieSwiftFlow {
     func observeAsync(_ consumer: @escaping (_ emission: T) -> Void) {
-        Task {
+        _ = Task {
             for try await value in self {
                 await MainActor.run {
                     consumer(value)
@@ -78,7 +78,7 @@ extension SkieSwiftFlow {
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T) -> Void) {
-        Task { [weak owner] in
+        _ = Task { [weak owner] in
             for try await value in self {
                 await MainActor.run { [weak owner] in
                     guard let owner = owner else { return }

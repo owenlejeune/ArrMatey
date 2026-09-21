@@ -1275,7 +1275,6 @@ struct CalendarItemRow: View {
             } else {
                 return MR.strings().release_date.localized()
             }
-            return MR.strings().release_date.localized()
         }
         return ""
     }
