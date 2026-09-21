@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 110;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -59,14 +59,18 @@
 /* Begin PBXFrameworksBuildPhase section */
 		1EBA5235F338DC8F4353F4CC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 				4405C4E52F21671700F7FEC8 /* Flow in Frameworks */,
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		44618212303DCD2A00FD074C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -104,6 +108,8 @@
 				EF3D3043CD8B9AEA0948DDDC /* Resources */,
 			);
 			buildRules = (
+			);
+			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
 				3F3BB1E6F7F76B8495D4C326 /* iosApp */,
@@ -166,7 +172,7 @@
 			packageReferences = (
 				4405C4E32F21671700F7FEC8 /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */,
 			);
-			preferredProjectObjectVersion = 110;
+			preferredProjectObjectVersion = 77;
 			productRefGroup = D5D342071E63D7F728C5AA6C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -180,13 +186,17 @@
 /* Begin PBXResourcesBuildPhase section */
 		44618213303DCD2A00FD074C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		EF3D3043CD8B9AEA0948DDDC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
@@ -194,54 +204,49 @@
 		44E4AADA2F3680720024109F /* MOKO Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
-			name = "MOKO Resources";
-			shellPath = /bin/sh;
-			shellScript = (
-				"# 1. Path to the bundle inside the built framework",
-				"BUNDLE_SRC=\"$SRCROOT/../shared/build/xcode-frameworks/$CONFIGURATION/$SDK_NAME/Shared.framework/ArrMatey:shared.bundle\"",
-				"",
-				"# 2. Destination is the root of the .app",
-				"DEST=\"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\"",
-				"",
-				"# 3. Copy the bundle",
-				"if [ -d \"$BUNDLE_SRC\" ]; then",
-				"    echo \"Success: Copying MOKO bundle from $BUNDLE_SRC\"",
-				"    cp -R \"$BUNDLE_SRC\" \"$DEST/\"",
-				"else",
-				"    echo \"Error: MOKO bundle not found at $BUNDLE_SRC\"",
-				"    echo \"Make sure you have run the build at least once.\"",
-				"    exit 1",
-				"fi",
-				"",
+			buildActionMask = 2147483647;
+			files = (
 			);
+			inputPaths = (
+			);
+			name = "MOKO Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# 1. Path to the bundle inside the built framework\nBUNDLE_SRC=\"$SRCROOT/../shared/build/xcode-frameworks/$CONFIGURATION/$SDK_NAME/Shared.framework/ArrMatey:shared.bundle\"\n\n# 2. Destination is the root of the .app\nDEST=\"$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\"\n\n# 3. Copy the bundle\nif [ -d \"$BUNDLE_SRC\" ]; then\n    echo \"Success: Copying MOKO bundle from $BUNDLE_SRC\"\n    cp -R \"$BUNDLE_SRC\" \"$DEST/\"\nelse\n    echo \"Error: MOKO bundle not found at $BUNDLE_SRC\"\n    echo \"Make sure you have run the build at least once.\"\n    exit 1\nfi\n";
 		};
 		52C0BF1CBE121CC824B275D5 /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
-			name = "Compile Kotlin Framework";
-			shellPath = /bin/sh;
-			shellScript = (
-				"if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then",
-				"  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"",
-				"  exit 0",
-				"fi",
-				"cd \"$SRCROOT/..\"",
-				"./gradlew :shared:embedAndSignAppleFrameworkForXcode",
-				"",
+			buildActionMask = 2147483647;
+			files = (
 			);
+			inputPaths = (
+			);
+			name = "Compile Kotlin Framework";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		44618211303DCD2A00FD074C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		46E7A9BB22F4DD2DDB844A85 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -254,7 +259,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		4461821C303DCD2A00FD074C /* Debug configuration for PBXNativeTarget "iosAppTests" */ = {
+		4461821C303DCD2A00FD074C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -277,7 +282,7 @@
 			};
 			name = Debug;
 		};
-		4461821D303DCD2A00FD074C /* Release configuration for PBXNativeTarget "iosAppTests" */ = {
+		4461821D303DCD2A00FD074C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -300,7 +305,7 @@
 			};
 			name = Release;
 		};
-		551FFC140F341055DBB11BBF /* Debug configuration for PBXProject "iosApp" */ = {
+		551FFC140F341055DBB11BBF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = 9487242E3AD8F152D191234C /* Configuration */;
 			baseConfigurationReferenceRelativePath = Config.xcconfig;
@@ -369,7 +374,7 @@
 			};
 			name = Debug;
 		};
-		83B1747E0BA2DB383B9CC0E8 /* Release configuration for PBXProject "iosApp" */ = {
+		83B1747E0BA2DB383B9CC0E8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = 9487242E3AD8F152D191234C /* Configuration */;
 			baseConfigurationReferenceRelativePath = Config.xcconfig;
@@ -431,7 +436,7 @@
 			};
 			name = Release;
 		};
-		B91B3ACA3D21B31A5E970EB0 /* Release configuration for PBXNativeTarget "iosApp" */ = {
+		B91B3ACA3D21B31A5E970EB0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -465,7 +470,7 @@
 			};
 			name = Release;
 		};
-		BF637D9A8B9FAE90207FB10B /* Debug configuration for PBXNativeTarget "iosApp" */ = {
+		BF637D9A8B9FAE90207FB10B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Dev";
@@ -504,25 +509,28 @@
 		4461821B303DCD2A00FD074C /* Build configuration list for PBXNativeTarget "iosAppTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4461821C303DCD2A00FD074C /* Debug configuration for PBXNativeTarget "iosAppTests" */,
-				4461821D303DCD2A00FD074C /* Release configuration for PBXNativeTarget "iosAppTests" */,
+				4461821C303DCD2A00FD074C /* Debug */,
+				4461821D303DCD2A00FD074C /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		489071EFCFB6FBDA5B6E8AA7 /* Build configuration list for PBXNativeTarget "iosApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BF637D9A8B9FAE90207FB10B /* Debug configuration for PBXNativeTarget "iosApp" */,
-				B91B3ACA3D21B31A5E970EB0 /* Release configuration for PBXNativeTarget "iosApp" */,
+				BF637D9A8B9FAE90207FB10B /* Debug */,
+				B91B3ACA3D21B31A5E970EB0 /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		8B538B18B1E877F77D4BB761 /* Build configuration list for PBXProject "iosApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				551FFC140F341055DBB11BBF /* Debug configuration for PBXProject "iosApp" */,
-				83B1747E0BA2DB383B9CC0E8 /* Release configuration for PBXProject "iosApp" */,
+				551FFC140F341055DBB11BBF /* Debug */,
+				83B1747E0BA2DB383B9CC0E8 /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
