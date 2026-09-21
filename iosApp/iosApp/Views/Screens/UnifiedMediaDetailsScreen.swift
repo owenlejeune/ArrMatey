@@ -165,22 +165,23 @@ extension UnifiedMediaDetailsScreen {
                 UnifiedMediaDetailsHeader(success: success, type: viewModel.resolvedInstanceType)
 
                 VStack(alignment: .leading, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(success.displayTitle ?? MR.strings().unknown.localized())
-                            .font(.system(size: 28, weight: .bold))
+                            .font(.title.weight(.bold))
+                            .foregroundStyle(.primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         if let tagline = success.tagline, !tagline.isEmpty {
                             Text(tagline)
-                                .font(.system(size: 16))
+                                .font(.subheadline)
                                 .italic()
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
 
                         if let airingString = success.upcomingDateString {
                             Text(airingString)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.themePrimary)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Color.accentColor)
                         }
 
                         if isMovieOrTv {
@@ -226,8 +227,9 @@ extension UnifiedMediaDetailsScreen {
                     }
                 }
                 .padding(.top, 12)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 20)
                 .padding(.bottom, 24)
+                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedTab)
                 .animation(.easeInOut(duration: 0.3), value: success.selectedInstanceId?.int64Value)
             }
         }
@@ -338,18 +340,17 @@ extension UnifiedMediaDetailsScreen {
             VStack {
                 Spacer()
                 Text(message)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.primary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.black.opacity(0.75))
-                    .cornerRadius(20)
+                    .floatingCapsuleBackground(material: .regularMaterial)
                     .padding(.bottom, 24)
             }
-            .transition(.opacity)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                    withAnimation {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         toastMessage = nil
                     }
                 }

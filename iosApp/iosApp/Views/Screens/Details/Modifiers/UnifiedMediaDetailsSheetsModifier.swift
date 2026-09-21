@@ -137,7 +137,8 @@ struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
                         selectedQueueItem = nil
                     }
                 )
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
             .sheet(item: $selectedTracearrSession) { session in
                 TracearrStreamDetailsSheet(
