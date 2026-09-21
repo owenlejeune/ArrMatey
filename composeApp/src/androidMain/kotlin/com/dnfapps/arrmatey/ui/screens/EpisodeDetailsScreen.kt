@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmDeleteEpisodeDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
@@ -392,23 +393,12 @@ fun EpisodeDetailsScreen(
         }
 
         if (confirmDelete) {
-            AlertDialog(
-                onDismissRequest = { confirmDelete = false },
-                title = { Text(mokoString(MR.strings.are_you_sure)) },
-                text = { Text(mokoString(MR.strings.episode_delete_message)) },
-                dismissButton = {
-                    TextButton(
-                        onClick = { confirmDelete = false },
-                    ) { Text(mokoString(MR.strings.cancel)) }
+            ConfirmDeleteEpisodeDialog(
+                onConfirm = {
+                    confirmDelete = false
+                    viewModel.deleteEpisode()
                 },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            confirmDelete = false
-                            viewModel.deleteEpisode()
-                        },
-                    ) { Text(mokoString(MR.strings.yes)) }
-                },
+                onDismiss = { confirmDelete = false },
             )
         }
 

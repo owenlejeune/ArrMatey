@@ -1,38 +1,25 @@
 package com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.sheets.ArrDestructiveConfirmationSheet
 import com.dnfapps.arrmatey.utils.mokoString
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfirmDeleteEpisodeDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    ArrDestructiveConfirmationSheet(
         onDismissRequest = onDismiss,
-        title = {
-            Text(mokoString(MR.strings.confirm_delete))
-        },
-        text = {
-            Text(mokoString(MR.strings.episode_delete_message))
-        },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(
-                    text = mokoString(MR.strings.confirm),
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(mokoString(MR.strings.cancel))
-            }
-        },
+        onConfirm = onConfirm,
+        title = mokoString(MR.strings.confirm_delete),
+        text = mokoString(MR.strings.episode_delete_message),
+        confirmText = mokoString(MR.strings.confirm),
+        dismissText = mokoString(MR.strings.cancel),
     )
 }
+
+

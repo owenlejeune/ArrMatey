@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
+import com.dnfapps.arrmatey.ui.components.sheets.ArrDestructiveConfirmationSheet
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -278,23 +279,16 @@ fun BookDetailsScreen(
             }
 
             if (confirmDelete) {
-                AlertDialog(
+                ArrDestructiveConfirmationSheet(
                     onDismissRequest = { confirmDelete = false },
-                    title = { Text(mokoString(MR.strings.are_you_sure)) },
-                    text = { Text(mokoString(MR.strings.book_delete_message)) },
-                    dismissButton = {
-                        TextButton(
-                            onClick = { confirmDelete = false },
-                        ) { Text(mokoString(MR.strings.cancel)) }
+                    onConfirm = {
+                        confirmDelete = false
+                        viewModel.deleteBook()
                     },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                confirmDelete = false
-                                viewModel.deleteBook()
-                            },
-                        ) { Text(mokoString(MR.strings.yes)) }
-                    },
+                    title = mokoString(MR.strings.are_you_sure),
+                    text = mokoString(MR.strings.book_delete_message),
+                    confirmText = mokoString(MR.strings.yes),
+                    dismissText = mokoString(MR.strings.cancel),
                 )
             }
         }

@@ -207,8 +207,8 @@ private fun ArrPrimaryMenuGroup(
             },
             leadingIcon = { Icon(Icons.Default.Edit, null) },
         )
-        HorizontalDivider(modifier = Modifier.padding(MenuDefaults.HorizontalDividerPadding))
         if (missingInstances.isNotEmpty()) {
+            HorizontalDivider(modifier = Modifier.padding(MenuDefaults.HorizontalDividerPadding))
             missingInstances.forEach { instance ->
                 DropdownMenuItem(
                     text = { Text(mokoString(MR.strings.add_to_arr, instance.label)) },

@@ -1,12 +1,17 @@
 package com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs
 
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.sheets.ArrConfirmationSheet
 import com.dnfapps.arrmatey.utils.mokoString
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfirmMoveFilesDialog(
     rootFolderPath: String?,
@@ -14,20 +19,26 @@ fun ConfirmMoveFilesDialog(
     onConfirmKeep: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    ArrConfirmationSheet(
         onDismissRequest = onDismiss,
-        title = {
-            Text(mokoString(MR.strings.move_files_confirm, rootFolderPath ?: ""))
-        },
+        title = mokoString(MR.strings.move_files_confirm, rootFolderPath ?: ""),
         confirmButton = {
-            TextButton(onClick = onConfirmMove) {
+            Button(
+                onClick = onConfirmMove,
+                modifier = Modifier.weight(1f),
+            ) {
                 Text(mokoString(MR.strings.yes))
             }
         },
         dismissButton = {
-            TextButton(onClick = onConfirmKeep) {
+            FilledTonalButton(
+                onClick = onConfirmKeep,
+                modifier = Modifier.weight(1f),
+            ) {
                 Text(mokoString(MR.strings.no))
             }
         },
     )
 }
+
+
