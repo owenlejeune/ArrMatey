@@ -154,15 +154,13 @@ fun HomeBottomNavItem(
                 .semantics {
                     this.selected = selected
                     this.role = Role.Tab
-                }
-                .clip(CircleShape)
+                }.clip(CircleShape)
                 .combinedClickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(bounded = true),
                     onClick = onClick,
                     onLongClick = onLongClick,
-                )
-                .padding(vertical = 8.dp),
+                ).padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

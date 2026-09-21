@@ -21,5 +21,3 @@ fun ConfirmDeleteEpisodeDialog(
         dismissText = mokoString(MR.strings.cancel),
     )
 }
-
-

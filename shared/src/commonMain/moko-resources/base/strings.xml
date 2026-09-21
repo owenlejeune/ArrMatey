@@ -1034,4 +1034,10 @@
     <string name="use_colored_activity_cards_desc">Display queue items with full brand background colors instead of subtle edge accent strips.</string>
     <string name="use_colored_calendar_cards">Full Color Calendar Cards</string>
     <string name="use_colored_calendar_cards_desc">Display calendar items with full brand background colors instead of subtle edge accent strips.</string>
+    <string name="developer_settings">Developer Settings</string>
+    <string name="http_logging_level">HTTP Logging Level</string>
+    <string name="share_logs">Share Logs</string>
+    <string name="simulate_crash">Simulate Crash</string>
+    <string name="show_instance_info_card">Show %1$s info card</string>
+    <string name="enable_activity_polling">Enable activity polling</string>
 </resources>

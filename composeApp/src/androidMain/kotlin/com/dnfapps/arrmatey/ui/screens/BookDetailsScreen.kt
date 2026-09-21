@@ -16,17 +16,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
-import com.dnfapps.arrmatey.ui.components.sheets.ArrDestructiveConfirmationSheet
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.state.HistoryState
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
@@ -59,6 +55,8 @@ import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
+import com.dnfapps.arrmatey.ui.components.sheets.ArrDestructiveConfirmationSheet
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.utils.dp
 import com.dnfapps.arrmatey.utils.format
@@ -75,9 +73,11 @@ fun BookDetailsScreen(
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToBookRelease: (Long) -> Unit = {},
-    viewModel: BookDetailsViewModel = koinViewModel(
-        key = "${author.id}_${book.id}",
-        parameters = { parametersOf(author.id, book) }),
+    viewModel: BookDetailsViewModel =
+        koinViewModel(
+            key = "${author.id}_${book.id}",
+            parameters = { parametersOf(author.id, book) },
+        ),
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()

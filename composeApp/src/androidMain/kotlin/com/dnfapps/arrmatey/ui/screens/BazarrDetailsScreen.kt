@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -42,7 +41,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,7 +61,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
@@ -85,6 +82,7 @@ import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrMediaSubtitlesSheet
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitleSearchSheet
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
@@ -563,10 +561,11 @@ private fun BazarrEpisodeItem(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             val primaryColor = MaterialTheme.colorScheme.primary
-            val missingStyle = MaterialTheme.typography.bodyMedium.toSpanStyle().copy(
-                color = MaterialTheme.colorScheme.error,
-                fontStyle = FontStyle.Italic,
-            )
+            val missingStyle =
+                MaterialTheme.typography.bodyMedium.toSpanStyle().copy(
+                    color = MaterialTheme.colorScheme.error,
+                    fontStyle = FontStyle.Italic,
+                )
             val titleString =
                 buildAnnotatedString {
                     withStyle(SpanStyle(color = primaryColor)) {

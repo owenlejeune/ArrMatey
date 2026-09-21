@@ -160,7 +160,19 @@ fun ArrInstanceDashboard(
                                 .fillMaxSize()
                                 .padding(horizontal = 24.dp)
                                 .verticalScroll(rememberScrollState())
-                                .padding(bottom = (if (LocalFloatingBarBottomPadding.current > 0.dp) LocalFloatingBarBottomPadding.current else navigationBarBottomInset()) + 12.dp),
+                                .padding(
+                                    bottom =
+                                        (
+                                            if (LocalFloatingBarBottomPadding.current >
+                                                0.dp
+                                            ) {
+                                                LocalFloatingBarBottomPadding.current
+                                            } else {
+                                                navigationBarBottomInset()
+                                            }
+                                        ) +
+                                            12.dp,
+                                ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(

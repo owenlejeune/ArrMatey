@@ -121,7 +121,7 @@ fun TorrentActionsCard(
             when (state.dismissDirection) {
                 SwipeToDismissBoxValue.StartToEnd,
                 SwipeToDismissBoxValue.EndToStart,
-                    -> {
+                -> {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
@@ -175,26 +175,26 @@ fun DownloadQueueItem(
                 DownloadItemStatus.CheckingResumeData,
                 DownloadItemStatus.Moving,
                 DownloadItemStatus.DownloadingStalled,
-                    -> ArrGreen
+                -> ArrGreen
 
                 DownloadItemStatus.Uploading,
                 DownloadItemStatus.UploadingForced,
-                    -> ArrBlue
+                -> ArrBlue
 
                 DownloadItemStatus.DownloadingPaused,
                 DownloadItemStatus.UploadingPaused,
-                    -> ArrPurple
+                -> ArrPurple
 
                 DownloadItemStatus.Queued,
                 DownloadItemStatus.Allocating,
                 DownloadItemStatus.Propagating,
                 DownloadItemStatus.Fetching,
-                    -> ArrGrey
+                -> ArrGrey
 
                 DownloadItemStatus.Error,
                 DownloadItemStatus.MissingFiles,
                 DownloadItemStatus.Unknown,
-                    -> ArrRed
+                -> ArrRed
             }
         }
 

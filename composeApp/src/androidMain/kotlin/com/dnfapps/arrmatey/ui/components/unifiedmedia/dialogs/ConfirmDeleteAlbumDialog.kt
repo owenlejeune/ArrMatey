@@ -20,5 +20,3 @@ fun ConfirmDeleteAlbumDialog(
         dismissText = mokoString(MR.strings.no),
     )
 }
-
-

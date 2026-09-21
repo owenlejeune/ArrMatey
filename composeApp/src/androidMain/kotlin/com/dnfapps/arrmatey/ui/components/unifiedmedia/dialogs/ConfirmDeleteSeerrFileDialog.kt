@@ -22,5 +22,3 @@ fun ConfirmDeleteSeerrFileDialog(
         dismissText = mokoString(MR.strings.no),
     )
 }
-
-

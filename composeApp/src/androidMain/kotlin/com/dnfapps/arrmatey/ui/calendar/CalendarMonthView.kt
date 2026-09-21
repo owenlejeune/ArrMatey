@@ -52,7 +52,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -63,7 +62,7 @@ fun CalendarMonthView(
     instances: List<Instance>,
     onItemClick: (CalendarItem, Long?) -> Unit,
     onLoadMore: () -> Unit,
-    preferencesStore: PreferencesStore = koinInject()
+    preferencesStore: PreferencesStore = koinInject(),
 ) {
     val today = remember { Clock.localToday() }
     var currentMonth by remember { mutableStateOf(today) }

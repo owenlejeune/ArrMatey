@@ -39,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.androidModule
 import com.dnfapps.arrmatey.di.appModules
@@ -53,6 +52,7 @@ import com.dnfapps.arrmatey.tracearr.state.TracearrViolationsState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViolationsViewModel
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrViolationCard
 import com.dnfapps.arrmatey.ui.theme.ArrMateyTheme
 import com.dnfapps.arrmatey.utils.mokoString
@@ -217,7 +217,15 @@ fun TracearrViolationsContent(
                                     start = 16.dp,
                                     end = 16.dp,
                                     top = 16.dp,
-                                    bottom = 16.dp + if (LocalFloatingBarBottomPadding.current > 0.dp) LocalFloatingBarBottomPadding.current else navigationBarBottomInset(),
+                                    bottom =
+                                        16.dp +
+                                            if (LocalFloatingBarBottomPadding.current >
+                                                0.dp
+                                            ) {
+                                                LocalFloatingBarBottomPadding.current
+                                            } else {
+                                                navigationBarBottomInset()
+                                            },
                                 ),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {

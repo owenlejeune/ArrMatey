@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,7 +24,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -46,11 +44,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -72,7 +70,6 @@ import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
-import com.dnfapps.arrmatey.extensions.pxToDp
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -349,9 +346,22 @@ fun <T : ArrMedia> MediaItem(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Icon(
-                                        imageVector = if (item.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                        contentDescription = mokoString(if (item.monitored) MR.strings.monitored else MR.strings.unmonitored),
-                                        tint = if (item.monitored) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        imageVector =
+                                            if (item.monitored) {
+                                                Icons.Default.Bookmark
+                                            } else {
+                                                Icons.Default.BookmarkBorder
+                                            },
+                                        contentDescription =
+                                            mokoString(
+                                                if (item.monitored) MR.strings.monitored else MR.strings.unmonitored,
+                                            ),
+                                        tint =
+                                            if (item.monitored) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            },
                                         modifier = Modifier.size(12.dp),
                                     )
                                 }
@@ -661,10 +671,11 @@ private fun MovieDetails(
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
 
-    val nextReleaseDate = item.digitalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.digital_release)}: $it" }
-        ?: item.physicalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.physical_release)}: $it" }
-        ?: item.inCinemas?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.in_cinemas)}: $it" }
-        ?: item.releaseDate?.format("MMMM d, yyyy")
+    val nextReleaseDate =
+        item.digitalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.digital_release)}: $it" }
+            ?: item.physicalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.physical_release)}: $it" }
+            ?: item.inCinemas?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.in_cinemas)}: $it" }
+            ?: item.releaseDate?.format("MMMM d, yyyy")
 
     nextReleaseDate?.let {
         Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
@@ -724,11 +735,12 @@ private fun ArtistDetails(
     Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
     val nextRelease = item.nextAlbum?.releaseDate?.format()
-    val statusStr = if (nextRelease != null) {
-        "${mokoString(item.status.resource)} • $nextRelease"
-    } else {
-        mokoString(item.status.resource)
-    }
+    val statusStr =
+        if (nextRelease != null) {
+            "${mokoString(item.status.resource)} • $nextRelease"
+        } else {
+            mokoString(item.status.resource)
+        }
     Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
     val qualityProfile = qualityProfiles.firstOrNull { it.id == item.qualityProfileId }?.name
@@ -866,13 +878,20 @@ fun BannerView(
     modifier: Modifier = Modifier,
     blur: Blur = Blur.Normal,
 ) {
+    val blurModifier =
+        if (blur.radius > 0) {
+            Modifier.blur(blur.radius.dp)
+        } else {
+            Modifier
+        }
+
     Box(modifier = modifier) {
         when (bannerModel) {
             is Painter -> {
                 Image(
                     painter = bannerModel,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().then(blurModifier),
                     contentScale = ContentScale.Crop,
                     alpha = 0.5f,
                 )
@@ -882,7 +901,7 @@ fun BannerView(
                 AsyncImage(
                     model = bannerModel,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().then(blurModifier),
                     contentScale = ContentScale.Crop,
                     alpha = 0.5f,
                 )

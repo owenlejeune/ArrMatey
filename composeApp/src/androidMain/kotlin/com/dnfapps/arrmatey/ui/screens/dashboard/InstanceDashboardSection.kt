@@ -269,7 +269,14 @@ private fun InstanceDashboardCard(
                                     text = "(${(disk.usedPercentage * 100).toInt()}%)",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (disk.usedPercentage > 0.90f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                                    color =
+                                        if (disk.usedPercentage >
+                                            0.90f
+                                        ) {
+                                            MaterialTheme.colorScheme.error
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurface
+                                        },
                                 )
                             }
                         }

@@ -43,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -60,6 +59,7 @@ import com.dnfapps.arrmatey.tracearr.state.TracearrUsersState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUsersViewModel
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.formatWatchTimeMs
@@ -174,7 +174,15 @@ fun TracearrUsersScreen(
                                 start = 16.dp,
                                 end = 16.dp,
                                 top = 16.dp,
-                                bottom = 16.dp + if (LocalFloatingBarBottomPadding.current > 0.dp) LocalFloatingBarBottomPadding.current else navigationBarBottomInset(),
+                                bottom =
+                                    16.dp +
+                                        if (LocalFloatingBarBottomPadding.current >
+                                            0.dp
+                                        ) {
+                                            LocalFloatingBarBottomPadding.current
+                                        } else {
+                                            navigationBarBottomInset()
+                                        },
                             ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {

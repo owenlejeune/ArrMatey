@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.ui.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -43,7 +41,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -66,19 +63,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.QueueDownloadState
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
-import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
 import com.dnfapps.arrmatey.ui.theme.surfaceDark
 import com.dnfapps.arrmatey.utils.format
@@ -304,7 +301,14 @@ fun ActivityItem(
                         item.instanceName?.takeIf { it.isNotBlank() }?.let { instanceName ->
                             Surface(
                                 shape = MaterialTheme.shapes.extraSmall,
-                                color = if (useFullColorCards) surfaceDark.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                color =
+                                    if (useFullColorCards) {
+                                        surfaceDark.copy(
+                                            alpha = 0.15f,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceContainerHighest
+                                    },
                             ) {
                                 Text(
                                     text = instanceName,
@@ -344,7 +348,14 @@ fun ActivityItem(
 
                         Surface(
                             shape = MaterialTheme.shapes.extraSmall,
-                            color = if (useFullColorCards) surfaceDark.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+                            color =
+                                if (useFullColorCards) {
+                                    surfaceDark.copy(
+                                        alpha = 0.15f,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerHighest
+                                },
                         ) {
                             Text(
                                 text = item.quality.qualityLabel,
@@ -357,7 +368,14 @@ fun ActivityItem(
                         if (item.size > 0f) {
                             Surface(
                                 shape = MaterialTheme.shapes.extraSmall,
-                                color = if (useFullColorCards) surfaceDark.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                color =
+                                    if (useFullColorCards) {
+                                        surfaceDark.copy(
+                                            alpha = 0.15f,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceContainerHighest
+                                    },
                             ) {
                                 Text(
                                     text = item.size.toLong().bytesAsFileSizeString(),
@@ -372,7 +390,14 @@ fun ActivityItem(
                             item.remainingTimeLabel?.let { remainingTimeLabel ->
                                 Surface(
                                     shape = MaterialTheme.shapes.extraSmall,
-                                    color = if (useFullColorCards) surfaceDark.copy(alpha = 0.15f) else MaterialTheme.colorScheme.tertiaryContainer,
+                                    color =
+                                        if (useFullColorCards) {
+                                            surfaceDark.copy(
+                                                alpha = 0.15f,
+                                            )
+                                        } else {
+                                            MaterialTheme.colorScheme.tertiaryContainer
+                                        },
                                 ) {
                                     Text(
                                         text = "$remainingTimeLabel left",
@@ -393,7 +418,14 @@ fun ActivityItem(
                                 modifier = Modifier.fillMaxWidth().height(6.dp),
                                 strokeCap = StrokeCap.Round,
                                 color = if (useFullColorCards) surfaceDark else MaterialTheme.colorScheme.primary,
-                                trackColor = if (useFullColorCards) surfaceDark.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant,
+                                trackColor =
+                                    if (useFullColorCards) {
+                                        surfaceDark.copy(
+                                            alpha = 0.2f,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    },
                             )
                             Row(
                                 modifier = Modifier.fillMaxWidth(),

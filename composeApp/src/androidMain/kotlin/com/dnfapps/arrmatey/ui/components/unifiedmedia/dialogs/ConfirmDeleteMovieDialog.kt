@@ -21,5 +21,3 @@ fun ConfirmDeleteMovieDialog(
         dismissText = mokoString(MR.strings.cancel),
     )
 }
-
-

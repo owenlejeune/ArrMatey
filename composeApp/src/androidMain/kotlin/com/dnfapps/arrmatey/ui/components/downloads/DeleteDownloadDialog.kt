@@ -39,5 +39,3 @@ fun DeleteDownloadDialog(
         },
     )
 }
-
-

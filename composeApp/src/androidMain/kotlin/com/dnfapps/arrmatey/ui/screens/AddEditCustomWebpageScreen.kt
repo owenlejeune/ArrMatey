@@ -195,7 +195,7 @@ fun AddEditCustomWebpageScreen(
     uiState.error?.let { error ->
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
-            title = { Text("Error") },
+            title = { Text(mokoString(MR.strings.error)) },
             text = { Text(error) },
             confirmButton = {
                 TextButton(onClick = { viewModel.clearError() }) {

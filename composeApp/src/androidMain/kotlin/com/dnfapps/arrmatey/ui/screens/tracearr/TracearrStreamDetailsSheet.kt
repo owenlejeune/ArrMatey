@@ -72,7 +72,6 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
-import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.AspectRatio
@@ -712,9 +711,7 @@ private fun SectionCard(
 }
 
 @Composable
-private fun DecisionBadge(
-    isTranscode: Boolean,
-) {
+private fun DecisionBadge(isTranscode: Boolean) {
     val isDark = isSystemInDarkTheme()
     val text = if (isTranscode) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
     val containerColor =

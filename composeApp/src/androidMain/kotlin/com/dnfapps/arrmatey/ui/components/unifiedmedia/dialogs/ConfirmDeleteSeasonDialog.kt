@@ -21,5 +21,3 @@ fun ConfirmDeleteSeasonDialog(
         dismissText = mokoString(MR.strings.no),
     )
 }
-
-

@@ -90,12 +90,14 @@ fun ShortcutsCustomizationScreen(
                     .fillMaxSize()
                     .padding(padding),
         ) {
-            val enabledShortcuts = remember(shortcutItems, disabledShortcuts) {
-                shortcutItems.filter { it.id !in disabledShortcuts }
-            }
-            val disabledShortcutItems = remember(shortcutItems, disabledShortcuts) {
-                shortcutItems.filter { it.id in disabledShortcuts }
-            }
+            val enabledShortcuts =
+                remember(shortcutItems, disabledShortcuts) {
+                    shortcutItems.filter { it.id !in disabledShortcuts }
+                }
+            val disabledShortcutItems =
+                remember(shortcutItems, disabledShortcuts) {
+                    shortcutItems.filter { it.id in disabledShortcuts }
+                }
 
             ShortcutsList(
                 enabledItems = enabledShortcuts,

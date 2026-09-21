@@ -42,7 +42,6 @@ import com.dnfapps.arrmatey.compose.utils.QueueSortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.icons.Hard_drive
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 
@@ -149,13 +148,15 @@ fun ActivityFilterMenu(
                                                 Icon(
                                                     Icons.Default.Check,
                                                     null,
-                                                    Modifier.size(16.dp)
+                                                    Modifier.size(16.dp),
                                                 )
                                             } else {
                                                 Icon(
                                                     painterResource(
-                                                        instance.type.tabIcon ?: instance.type.icon
-                                                    ), null, Modifier.size(16.dp)
+                                                        instance.type.tabIcon ?: instance.type.icon,
+                                                    ),
+                                                    null,
+                                                    Modifier.size(16.dp),
                                                 )
                                             }
                                         },

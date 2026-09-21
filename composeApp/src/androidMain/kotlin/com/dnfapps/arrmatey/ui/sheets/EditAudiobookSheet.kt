@@ -52,7 +52,11 @@ fun EditAudiobookSheet(
 ) {
     var monitored by remember { mutableStateOf(item.monitored) }
     var selectedQualityProfileId by remember { mutableIntStateOf(item.qualityProfileId) }
-    var selectedRootFolder by remember { mutableStateOf(rootFolders.firstOrNull { item.path?.startsWith(it.path) == true } ?: rootFolders.firstOrNull()) }
+    var selectedRootFolder by remember {
+        mutableStateOf(
+            rootFolders.firstOrNull { item.path?.startsWith(it.path) == true } ?: rootFolders.firstOrNull(),
+        )
+    }
     var relativePath by remember { mutableStateOf(item.path?.removePrefix(selectedRootFolder?.path ?: "") ?: "") }
 
     ModalBottomSheet(

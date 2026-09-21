@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,7 +49,7 @@ fun MovieFileView(
             Spacer(modifier = Modifier.weight(1f))
             if (movie.movieFile != null || movieExtraFiles.isNotEmpty()) {
                 TextButton(
-                    onClick = { onNavigateToMovieFiles(movie) }
+                    onClick = { onNavigateToMovieFiles(movie) },
                 ) {
                     Text(mokoString(MR.strings.history))
                 }

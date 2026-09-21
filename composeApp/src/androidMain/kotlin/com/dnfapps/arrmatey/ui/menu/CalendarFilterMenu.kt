@@ -221,7 +221,12 @@ fun CalendarFilterMenu(
                                 label = { Text(mokoString(MR.strings.finales_only)) },
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = if (filterState.showFinalesOnly) Icons.Default.Check else Icons.Default.CurtainsClosed,
+                                        imageVector =
+                                            if (filterState.showFinalesOnly) {
+                                                Icons.Default.Check
+                                            } else {
+                                                Icons.Default.CurtainsClosed
+                                            },
                                         contentDescription = null,
                                         modifier = Modifier.size(16.dp),
                                     )

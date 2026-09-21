@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -109,7 +108,12 @@ fun ServicesSettingsScreen(
                                     when (instanceConnectionStatues[instance.id]) {
                                         is OperationStatus.InProgress -> CircularProgressIndicator(strokeWidth = 2.dp)
                                         is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = MaterialTheme.colorScheme.error)
+                                        is OperationStatus.Error ->
+                                            Icon(
+                                                Icons.Default.WifiOff,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.error,
+                                            )
                                         else -> {}
                                     }
                                 }
@@ -152,7 +156,12 @@ fun ServicesSettingsScreen(
                                     when (instanceConnectionStatues[downloadClient.id + 100_000]) {
                                         is OperationStatus.InProgress -> CircularProgressIndicator(strokeWidth = 2.dp)
                                         is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                        is OperationStatus.Error -> Icon(Icons.Default.WifiOff, null, tint = MaterialTheme.colorScheme.error)
+                                        is OperationStatus.Error ->
+                                            Icon(
+                                                Icons.Default.WifiOff,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.error,
+                                            )
                                         else -> {}
                                     }
                                 }

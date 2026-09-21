@@ -23,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun ConfirmableButton(
@@ -60,7 +62,7 @@ fun ConfirmableButton(
                 if (confirm) {
                     Icon(Icons.Default.Warning, null)
                     Spacer(Modifier.width(4.dp))
-                    Text("Are you sure?")
+                    Text(mokoString(MR.strings.are_you_sure))
                 } else {
                     content()
                 }

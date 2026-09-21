@@ -216,7 +216,7 @@ private fun PendingApprovalButtons(
             ) {
                 Icon(Icons.Default.Edit, null)
                 Spacer(Modifier.width(4.dp))
-                Text("Edit")
+                Text(mokoString(MR.strings.edit))
             }
         }
     }

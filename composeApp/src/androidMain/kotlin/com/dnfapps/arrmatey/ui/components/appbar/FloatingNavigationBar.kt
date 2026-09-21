@@ -16,7 +16,6 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -279,24 +278,24 @@ fun FloatingNavigationBar(
                                             easing = FastOutSlowInEasing,
                                         ),
                                 )
-                            ).togetherWith(
-                                fadeOut(
+                        ).togetherWith(
+                            fadeOut(
+                                animationSpec =
+                                    tween(
+                                        durationMillis = ANIMATION_DURATION_MILLIS / 2,
+                                        easing = FastOutSlowInEasing,
+                                    ),
+                            ) +
+                                scaleOut(
+                                    targetScale = 0.7f,
+                                    transformOrigin = TransformOrigin.Center,
                                     animationSpec =
                                         tween(
                                             durationMillis = ANIMATION_DURATION_MILLIS / 2,
                                             easing = FastOutSlowInEasing,
                                         ),
-                                ) +
-                                    scaleOut(
-                                        targetScale = 0.7f,
-                                        transformOrigin = TransformOrigin.Center,
-                                        animationSpec =
-                                            tween(
-                                                durationMillis = ANIMATION_DURATION_MILLIS / 2,
-                                                easing = FastOutSlowInEasing,
-                                            ),
-                                    ),
-                            )
+                                ),
+                        )
                     },
                     contentAlignment = Alignment.Center,
                     label = "FloatingBarActionIconAnimation",
@@ -562,11 +561,12 @@ class FloatingNavigationBarItemColors(
 @Composable
 private fun FloatingNavigationBarPreview() {
     var selectedIndex by remember { mutableIntStateOf(0) }
-    val items = listOf(
-        "Photos" to Icons.Default.Photo,
-        "Collections" to Icons.Default.Collections,
-        "Create" to Icons.Default.Add
-    )
+    val items =
+        listOf(
+            "Photos" to Icons.Default.Photo,
+            "Collections" to Icons.Default.Collections,
+            "Create" to Icons.Default.Add,
+        )
 
     ArrMateyTheme {
         Box(

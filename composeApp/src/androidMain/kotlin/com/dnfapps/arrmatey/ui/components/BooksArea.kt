@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -107,7 +106,7 @@ fun BooksArea(
             }
             Spacer(modifier = Modifier.weight(1f))
             TextButton(
-                onClick = { onNavigateToAuthorFiles(author) }
+                onClick = { onNavigateToAuthorFiles(author) },
             ) {
                 Text(mokoString(MR.strings.history))
             }

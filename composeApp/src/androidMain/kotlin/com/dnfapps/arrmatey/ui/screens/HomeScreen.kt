@@ -45,10 +45,7 @@ import com.dnfapps.arrmatey.ui.screens.home.HomeDrawerContent
 import com.dnfapps.arrmatey.ui.screens.home.HomeFloatingNavBar
 import com.dnfapps.arrmatey.ui.screens.home.HomeMainContent
 import com.dnfapps.arrmatey.ui.screens.home.HomeNavigationRail
-import com.dnfapps.arrmatey.ui.screens.home.HomeTabNavIcon
-import com.dnfapps.arrmatey.ui.screens.home.HomeTabNavLabel
 import com.dnfapps.arrmatey.ui.sheets.TabCustomizationSheet
-import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -220,9 +217,10 @@ fun HomeScreen(
                             activityQueueIssuesCount = activityQueueIssuesCount,
                             onSelectTab = { navigationManager.setSelectedTab(it) },
                             onLongPressTab = { showReorderSheet = true },
-                            modifier = Modifier.align(Alignment.BottomCenter).onGloballyPositioned {
-                                floatingBarHeight = it.size.height
-                            },
+                            modifier =
+                                Modifier.align(Alignment.BottomCenter).onGloballyPositioned {
+                                    floatingBarHeight = it.size.height
+                                },
                         )
                     }
                 }

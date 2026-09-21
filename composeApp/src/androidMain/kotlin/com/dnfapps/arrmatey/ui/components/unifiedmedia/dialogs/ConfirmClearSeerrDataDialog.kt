@@ -21,5 +21,3 @@ fun ConfirmClearSeerrDataDialog(
         dismissText = mokoString(MR.strings.no),
     )
 }
-
-

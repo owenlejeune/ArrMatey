@@ -126,9 +126,22 @@ fun RecentlyAddedSection(
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Icon(
-                                            imageVector = if (item.monitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                                            contentDescription = mokoString(if (item.monitored) MR.strings.monitored else MR.strings.unmonitored),
-                                            tint = if (item.monitored) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            imageVector =
+                                                if (item.monitored) {
+                                                    Icons.Default.Bookmark
+                                                } else {
+                                                    Icons.Default.BookmarkBorder
+                                                },
+                                            contentDescription =
+                                                mokoString(
+                                                    if (item.monitored) MR.strings.monitored else MR.strings.unmonitored,
+                                                ),
+                                            tint =
+                                                if (item.monitored) {
+                                                    MaterialTheme.colorScheme.primary
+                                                } else {
+                                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                                },
                                             modifier = Modifier.size(16.dp),
                                         )
                                     }

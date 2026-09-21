@@ -95,7 +95,10 @@ fun TabCustomizationContent(
     modifier: Modifier = Modifier.fillMaxSize(),
     contentPadding: PaddingValues = PaddingValues(bottom = 16.dp + LocalFloatingBarBottomPadding.current),
 ) {
-    fun moveVisible(fromIndex: Int, toIndex: Int) {
+    fun moveVisible(
+        fromIndex: Int,
+        toIndex: Int,
+    ) {
         val newVisible = visibleTabs.toMutableList()
         val item = newVisible.removeAt(fromIndex)
         newVisible.add(toIndex, item)
@@ -121,7 +124,10 @@ fun TabCustomizationContent(
         )
     }
 
-    fun moveDrawer(fromIndex: Int, toIndex: Int) {
+    fun moveDrawer(
+        fromIndex: Int,
+        toIndex: Int,
+    ) {
         val newDrawer = drawerTabs.toMutableList()
         val item = newDrawer.removeAt(fromIndex)
         newDrawer.add(toIndex, item)

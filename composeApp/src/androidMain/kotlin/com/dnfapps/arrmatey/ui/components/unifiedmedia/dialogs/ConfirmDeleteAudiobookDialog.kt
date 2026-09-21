@@ -21,5 +21,3 @@ fun ConfirmDeleteAudiobookDialog(
         dismissText = mokoString(MR.strings.cancel),
     )
 }
-
-

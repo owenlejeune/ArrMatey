@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -48,6 +50,7 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.logging.LogReader
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.Dispatchers
@@ -59,9 +62,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import java.io.File
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.ui.draw.clip
-import com.dnfapps.arrmatey.ui.components.ContainerCard
 
 private const val MAX_LOG_PREVIEW_CHARS = 30_000
 
@@ -118,7 +118,7 @@ fun DevSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Developer Settings") },
+                title = { Text(mokoString(MR.strings.developer_settings)) },
                 navigationIcon = {
                     IconButton(
                         onClick = onBack,
@@ -156,7 +156,7 @@ fun DevSettingsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
-                                    text = "Show ${instanceType.name} info card",
+                                    text = mokoString(MR.strings.show_instance_info_card, instanceType.name),
                                     style = MaterialTheme.typography.bodyLarge,
                                 )
                                 Switch(
@@ -178,7 +178,7 @@ fun DevSettingsScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "Enable activity polling",
+                                text = mokoString(MR.strings.enable_activity_polling),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                             Switch(
@@ -193,7 +193,7 @@ fun DevSettingsScreen(
                     options = LoggerLevel.entries,
                     selectedOption = logLevel,
                     onOptionSelected = { preferenceStore.setLogLevel(it) },
-                    label = { Text("HTTP Logging Level") },
+                    label = { Text(mokoString(MR.strings.http_logging_level)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -246,7 +246,7 @@ fun DevSettingsScreen(
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Share logs")
+                    Text(mokoString(MR.strings.share_logs))
                 }
             }
         }
