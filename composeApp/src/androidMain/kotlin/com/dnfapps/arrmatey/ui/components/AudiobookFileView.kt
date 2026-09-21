@@ -1,13 +1,15 @@
 package com.dnfapps.arrmatey.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +22,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.AudiobookFileCard
 import com.dnfapps.arrmatey.utils.mokoString
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AudiobookFileView(
     audiobook: Audiobook,
@@ -40,17 +43,13 @@ fun AudiobookFileView(
         ) {
             Text(
                 text = mokoString(MR.strings.files),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLargeEmphasized,
             )
-            Text(
-                text = mokoString(MR.strings.history),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier =
-                    Modifier.clickable {
-                        onNavigateToAudiobookFiles(audiobook)
-                    },
-            )
+            TextButton(
+                onClick = { onNavigateToAudiobookFiles(audiobook) }
+            ) {
+                Text(mokoString(MR.strings.history))
+            }
         }
 
         ReleaseDownloadButtons(

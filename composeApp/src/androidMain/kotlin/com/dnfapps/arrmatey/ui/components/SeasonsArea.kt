@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ExpandCircleDown
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -77,7 +78,7 @@ fun SeasonsArea(
     ) {
         Text(
             text = mokoString(MR.strings.seasons_header),
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLargeEmphasized,
         )
 
         seasons.forEach { season ->
@@ -92,6 +93,8 @@ fun SeasonsArea(
                 modifier = Modifier.padding(vertical = 8.dp),
             ) {
                 ContainerCard(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                    shape = MaterialTheme.shapes.large,
                     modifier = Modifier.clickable { expanded = !expanded },
                 ) {
                     Row(
@@ -113,7 +116,7 @@ fun SeasonsArea(
                                         } else {
                                             mokoString(MR.strings.season_label, season.seasonNumber)
                                         },
-                                    style = MaterialTheme.typography.titleLarge,
+                                    style = MaterialTheme.typography.titleMediumEmphasized,
                                 )
                                 val activeCount = season.activeEpisodeCount
                                 val statsAnnotatedString =

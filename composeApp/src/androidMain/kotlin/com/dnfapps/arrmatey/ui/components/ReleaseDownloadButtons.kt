@@ -2,7 +2,9 @@ package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -110,6 +112,7 @@ private fun ReleaseDownloadButtons(
                 imageVector = Icons.Default.Person,
                 contentDescription = mokoString(MR.strings.interactive),
             )
+            Spacer(Modifier.width(8.dp))
             Text(text = mokoString(MR.strings.interactive))
         }
 
@@ -129,8 +132,9 @@ private fun ReleaseDownloadButtons(
                     imageVector = Icons.Default.Search,
                     contentDescription = mokoString(MR.strings.automatic),
                 )
-                Text(text = mokoString(MR.strings.automatic))
             }
+            Spacer(Modifier.width(8.dp))
+            Text(text = mokoString(MR.strings.automatic))
         }
     }
 }

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
@@ -31,7 +33,7 @@ import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FileCard(
     file: MediaFile,
@@ -74,11 +76,14 @@ fun FileCard(
         },
         onDismiss = {},
     ) {
-        ContainerCard(modifier = Modifier.fillMaxWidth()) {
+        ContainerCard(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Text(
                 text = file.relativePath.breakable(),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleSmallEmphasized,
             )
             Text(
                 text =

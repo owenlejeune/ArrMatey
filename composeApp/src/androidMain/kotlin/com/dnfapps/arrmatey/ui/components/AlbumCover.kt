@@ -31,7 +31,7 @@ fun AlbumCover(
     item: ArrAlbum,
     modifier: Modifier = Modifier,
     elevation: Dp = 8.dp,
-    radius: Dp = 10.dp,
+    radius: Dp = 12.dp,
     additionalContent: @Composable BoxScope.() -> Unit = {},
 ) {
     var imageLoadError by remember { mutableStateOf(false) }

@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandCircleDown
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,7 +45,7 @@ import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AlbumsArea(
     artist: Arrtist,
@@ -65,7 +67,7 @@ fun AlbumsArea(
     ) {
         Text(
             text = mokoString(MR.strings.albums_header),
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLargeEmphasized,
         )
         albums.forEach { album ->
             var expanded by rememberSaveable { mutableStateOf(false) }
@@ -78,6 +80,8 @@ fun AlbumsArea(
                 modifier = Modifier.padding(vertical = 8.dp),
             ) {
                 ContainerCard(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                    shape = MaterialTheme.shapes.large,
                     modifier = Modifier.clickable { expanded = !expanded },
                 ) {
                     Row(
@@ -96,8 +100,7 @@ fun AlbumsArea(
                                             append(" ($year)")
                                         }
                                     },
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
+                                style = MaterialTheme.typography.titleMediumEmphasized,
                                 maxLines = 2,
                                 overflow = TextOverflow.MiddleEllipsis,
                             )

@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
@@ -30,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -103,15 +106,11 @@ fun BooksArea(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = mokoString(MR.strings.history),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier =
-                    Modifier.clickable {
-                        onNavigateToAuthorFiles(author)
-                    },
-            )
+            TextButton(
+                onClick = { onNavigateToAuthorFiles(author) }
+            ) {
+                Text(mokoString(MR.strings.history))
+            }
         }
         AnimatedContent(
             targetState = selectedTabIndex,
@@ -208,7 +207,11 @@ fun BookRow(
                     }
                     append(book.title)
                 }
-            Text(titleString)
+            Text(
+                text = titleString,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+            )
 
             val releaseDate = book.releaseDate?.takeIf { it.isTodayOrAfter() }
             val (statusText, statusColor) =
@@ -330,6 +333,8 @@ private fun SeriesView(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 ContainerCard(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                    shape = MaterialTheme.shapes.large,
                     modifier =
                         Modifier.clickable {
                             expanded = !expanded
@@ -342,7 +347,7 @@ private fun SeriesView(
                         Column {
                             Text(
                                 text = bookSeries.title ?: mokoString(MR.strings.unknown),
-                                style = MaterialTheme.typography.titleLarge,
+                                style = MaterialTheme.typography.titleLargeEmphasized,
                             )
                             Text(
                                 text = "${bookSeries.links.size} books",
