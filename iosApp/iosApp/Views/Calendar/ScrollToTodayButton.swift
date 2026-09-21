@@ -12,19 +12,30 @@ struct ScrollToTodayButton: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
+        Button(action: {
+            HapticFeedback.impact(style: .light)
+            action()
+        }) {
+            HStack(spacing: 6) {
                 Image(systemName: "calendar")
+                    .font(.subheadline.weight(.semibold))
                 Text(MR.strings().today.localized())
+                    .font(.subheadline.weight(.semibold))
             }
-            .font(.headline)
-            .foregroundColor(.white)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(.themePrimary)
-            .cornerRadius(25)
-            .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 10)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color.accentColor)
+            )
+            .overlay(
+                Capsule(style: .continuous)
+                    .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+            )
+            .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 4)
         }
         .padding(.bottom, 16)
     }
 }
+
