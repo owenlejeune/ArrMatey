@@ -31,7 +31,8 @@ struct OverviewTabContentView: View {
                     onItemClick: { item in
                         navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
                     },
-                    onLoadMore: { viewModel.loadNextRecommendationsPage() }
+                    onLoadMore: { viewModel.loadNextRecommendationsPage() },
+                    horizontalPadding: 0
                 )
             }
 
@@ -43,7 +44,8 @@ struct OverviewTabContentView: View {
                     onItemClick: { item in
                         navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
                     },
-                    onLoadMore: { viewModel.loadNextSimilarPage() }
+                    onLoadMore: { viewModel.loadNextSimilarPage() },
+                    horizontalPadding: 0
                 )
             }
 

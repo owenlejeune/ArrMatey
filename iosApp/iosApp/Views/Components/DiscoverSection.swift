@@ -15,6 +15,7 @@ struct DiscoverSection: View {
     let onLoadMore: () -> Void
     let onSeeMore: (() -> Void)?
     var showOverlays: Bool = true
+    var horizontalPadding: CGFloat = 16
 
     init(
         title: String,
@@ -24,7 +25,8 @@ struct DiscoverSection: View {
         onItemClickArr: ((SearchResult) -> Void)? = nil,
         onLoadMore: @escaping () -> Void,
         onSeeMore: (() -> Void)? = nil,
-        showOverlays: Bool = true
+        showOverlays: Bool = true,
+        horizontalPadding: CGFloat = 16
     ) {
         self.title = title
         self.icon = icon
@@ -34,6 +36,7 @@ struct DiscoverSection: View {
         self.onLoadMore = onLoadMore
         self.onSeeMore = onSeeMore
         self.showOverlays = showOverlays
+        self.horizontalPadding = horizontalPadding
     }
 
     var body: some View {
@@ -56,7 +59,7 @@ struct DiscoverSection: View {
                         }
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, horizontalPadding)
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: 12) {
@@ -83,10 +86,10 @@ struct DiscoverSection: View {
 
                         if data.isLoadingMore {
                             ProgressView()
-                                .padding(.horizontal, 16)
+                                .padding(.horizontal, horizontalPadding)
                         }
                     }
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, horizontalPadding)
                     .padding(.vertical, 12) // Ensure shadows aren't cut off
                 }
             }
