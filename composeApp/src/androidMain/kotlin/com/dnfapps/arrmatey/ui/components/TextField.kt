@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -33,6 +35,13 @@ fun AMOutlinedTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
+    colors: TextFieldColors =
+        OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+        ),
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -90,6 +99,7 @@ fun AMOutlinedTextField(
             trailingIcon = trailingIcon,
             maxLines = maxLines,
             minLines = minLines,
+            colors = colors,
         )
         description?.let {
             Text(

@@ -49,6 +49,7 @@ fun ContainerCard(
 fun ContainerCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     colors: CardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
     shape: Shape = MaterialTheme.shapes.large,
     border: BorderStroke? = null,
@@ -64,6 +65,7 @@ fun ContainerCard(
         shape = shape,
         border = border,
         elevation = elevation,
+        enabled = enabled,
         onClick = onClick,
     ) {
         Column(

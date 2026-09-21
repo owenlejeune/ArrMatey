@@ -34,6 +34,7 @@ fun ArrMateyTheme(content: @Composable () -> Unit) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,
             typography = typography(),
+            shapes = ArrShapes,
             content = {
                 Surface(
                     color = colorScheme.background,
@@ -90,6 +91,7 @@ fun ArrMateyTheme(content: @Composable () -> Unit) {
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
         typography = typography(),
+        shapes = ArrShapes,
         content = {
             Surface(
                 color = colorScheme.background,
