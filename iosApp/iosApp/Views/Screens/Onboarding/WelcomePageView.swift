@@ -18,10 +18,10 @@ struct WelcomePageView: View {
     private var supportedServices: [SupportedService] {
         var list: [SupportedService] = []
         for type in InstanceType.allCases {
-            list.append(SupportedService(id: "instance_\(type.name)", name: type.name, icon: type.tabIcon))
+            list.append(SupportedService(id: "instance_\(type.name)", name: type.name, icon: type.icon))
         }
         for client in DownloadClientType.allCases {
-            list.append(SupportedService(id: "client_\(client.displayName)", name: client.displayName, icon: client.tabIcon))
+            list.append(SupportedService(id: "client_\(client.displayName)", name: client.displayName, icon: client.icon))
         }
         return list
     }
@@ -32,14 +32,23 @@ struct WelcomePageView: View {
                 VStack(spacing: 24) {
                     Spacer(minLength: 20)
 
-                    ZStack {
-                        Circle()
-                            .fill(Color.themePrimary.opacity(0.12))
-                            .frame(width: 100, height: 100)
+                    if let icon = Bundle.main.icon {
+                        Image(uiImage: icon)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 88, height: 88)
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .shadow(color: Color.black.opacity(0.12), radius: 8, x: 0, y: 4)
+                    } else {
+                        ZStack {
+                            Circle()
+                                .fill(Color.accentColor.opacity(0.12))
+                                .frame(width: 88, height: 88)
 
-                        Image(systemName: "sailboat.fill")
-                            .font(.system(size: 48))
-                            .foregroundColor(.themePrimary)
+                            Image(systemName: "sailboat.fill")
+                                .font(.system(size: 44))
+                                .foregroundStyle(Color.accentColor)
+                        }
                     }
 
                     VStack(spacing: 8) {
@@ -64,9 +73,8 @@ struct WelcomePageView: View {
                             ForEach(supportedServices) { service in
                                 HStack(spacing: 10) {
                                     if let logo = service.icon {
-                                        logo.toImage(renderingMode: .template)
+                                        logo.toImage(renderingMode: .original)
                                             .frame(width: 20, height: 20)
-                                            .foregroundColor(.themePrimary)
                                     } else {
                                         Image(systemName: "server.rack")
                                             .foregroundColor(.themePrimary)
