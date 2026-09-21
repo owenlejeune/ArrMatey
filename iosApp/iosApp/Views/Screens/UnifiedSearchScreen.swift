@@ -40,14 +40,12 @@ struct UnifiedSearchScreen: View {
                 }
                 .listStyle(.plain)
             } else if !searchQuery.isEmpty && !viewModel.isSearching {
-                VStack(spacing: 8) {
-                    Text(MR.strings().no_query_results.formatted(args: [searchQuery]))
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ContentUnavailableView.search(text: searchQuery)
             } else {
-                Color.clear
+                ContentUnavailableView(
+                    MR.strings().search.localized(),
+                    systemImage: "magnifyingglass"
+                )
             }
         }
         .navigationTitle(MR.strings().search.localized())

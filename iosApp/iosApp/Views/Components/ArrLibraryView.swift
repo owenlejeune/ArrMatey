@@ -192,15 +192,11 @@ struct ArrLibraryView: View {
             }) {
                 Label(MR.strings().delete.localized(), systemImage: "trash")
             }
-            .foregroundColor(.red)
+            .foregroundStyle(.red)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color(uiColor: .systemBackground))
-                .shadow(radius: 10)
-        )
+        .floatingCapsuleBackground(material: .regularMaterial)
         .padding(.horizontal, 16)
         .padding(.bottom, 20)
     }
@@ -223,6 +219,7 @@ struct ArrLibraryView: View {
                     onItemClicked: { media in
                         if viewModel.isInSelectionMode {
                             if let id = media.id?.int64Value {
+                                HapticFeedback.selection()
                                 viewModel.toggleItemSelection(id)
                             }
                         } else {

@@ -48,17 +48,31 @@ struct MediaSearchScreen: View {
     @ViewBuilder
     private func contentForState() -> some View {
         if uiState is ArrLibraryInitial {
-            Color.clear
+            ContentUnavailableView(
+                MR.strings().search.localized(),
+                systemImage: "magnifyingglass"
+            )
         } else if uiState is ArrLibraryLoading {
-            ZStack {
-                ProgressView()
-                    .progressViewStyle(.circular)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ProgressView()
+                .progressViewStyle(.circular)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let state = uiState as? ArrLibrarySuccess {
-            resultsArea(state)
-        } else if uiState is ArrLibraryError {
-            Text("error state")
+            if state.items.isEmpty {
+                ContentUnavailableView.search(text: searchQuery)
+            } else {
+                resultsArea(state)
+            }
+        } else if let error = uiState as? ArrLibraryError {
+            ErrorView(
+                errorType: error.type,
+                message: error.message,
+                onOpenSettings: {
+                    navigation.openSettings()
+                },
+                onRetry: {
+                    viewModel.performLookup(searchQuery)
+                }
+            )
         } else {
             EmptyView()
         }
