@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -6,6 +8,14 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.aboutLibraries)
 }
+
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties =
+    Properties().apply {
+        if (keystorePropertiesFile.exists()) {
+            load(FileInputStream(keystorePropertiesFile))
+        }
+    }
 
 kotlin {
     compilerOptions {
@@ -64,11 +74,39 @@ android {
             excludes += "**/META-INF/proguard/**"
         }
     }
+    signingConfigs {
+        create("release") {
+            val storeFilePath = keystoreProperties.getProperty("storeFile")
+
+            val resolvedFile =
+                storeFilePath?.let { path ->
+                    val f = file(path)
+                    if (f.exists()) f else rootProject.file(path).takeIf { it.exists() }
+                }
+
+            if (resolvedFile != null) {
+                storeFile = resolvedFile
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
     buildTypes {
+        getByName("debug") {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            manifestPlaceholders["appLabel"] = "ArrMatey (Dev)"
+        }
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            val releaseSigning = signingConfigs.getByName("release")
+            if (releaseSigning.storeFile != null) {
+                signingConfig = releaseSigning
+            }
+            manifestPlaceholders["appLabel"] = "@string/app_name"
         }
     }
     compileOptions {
