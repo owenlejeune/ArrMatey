@@ -32,8 +32,9 @@ struct OverviewTabContentView: View {
                         navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
                     },
                     onLoadMore: { viewModel.loadNextRecommendationsPage() },
-                    horizontalPadding: 0
+                    horizontalPadding: 20
                 )
+                .padding(.horizontal, -20)
             }
 
             if !viewModel.similarState.items.isEmpty || viewModel.similarState.isLoading {
@@ -45,8 +46,9 @@ struct OverviewTabContentView: View {
                         navigationManager.goToSeerrDetails(tmdbId: item.id, requestType: item.mediaType)
                     },
                     onLoadMore: { viewModel.loadNextSimilarPage() },
-                    horizontalPadding: 0
+                    horizontalPadding: 20
                 )
+                .padding(.horizontal, -20)
             }
 
             unifiedInfoArea(success)
@@ -71,7 +73,9 @@ struct OverviewTabContentView: View {
                             }
                         }
                     }
+                    .padding(.horizontal, 20)
                 }
+                .padding(.horizontal, -20)
             }
 
             if !crew.isEmpty {
@@ -86,7 +90,9 @@ struct OverviewTabContentView: View {
                             }
                         }
                     }
+                    .padding(.horizontal, 20)
                 }
+                .padding(.horizontal, -20)
             }
         }
     }
