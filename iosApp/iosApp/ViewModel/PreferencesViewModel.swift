@@ -21,6 +21,8 @@ class PreferencesViewModel: ObservableObject {
     @Published var useServiceNavLogos: Bool = false
     @Published var hideInstanceSwitcher: Bool = false
     @Published var isFirstLaunch: Bool = false
+    @Published var useColoredActivityCards: Bool = false
+    @Published var useColoredCalendarCards: Bool = false
     
     @Published var bottomTabItems: [AnyTabItem] = []
     @Published var drawerTabs: [AnyTabItem] = []
@@ -52,6 +54,12 @@ class PreferencesViewModel: ObservableObject {
         }
         preferenceStore.hideInstanceSwitcher.observeAsync(on: self) { owner, hide in
             owner.hideInstanceSwitcher = hide.boolValue
+        }
+        preferenceStore.useColoredActivityCards.observeAsync(on: self) { owner, val in
+            owner.useColoredActivityCards = val.boolValue
+        }
+        preferenceStore.useColoredCalendarCards.observeAsync(on: self) { owner, val in
+            owner.useColoredCalendarCards = val.boolValue
         }
         
         tabManager.tabConfiguration.observeAsync(on: self) { owner, config in

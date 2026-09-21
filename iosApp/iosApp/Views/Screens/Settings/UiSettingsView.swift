@@ -21,6 +21,28 @@ struct UiSettingsView: View {
                 )) {
                     Text(MR.strings().service_icons_title.localized())
                 }
+                Toggle(isOn: Binding(
+                    get: { viewModel.useColoredActivityCards },
+                    set: { _ in viewModel.toggleUseColoredActivityCards() }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(MR.strings().use_colored_activity_cards.localized())
+                        Text(MR.strings().use_colored_activity_cards_desc.localized())
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                Toggle(isOn: Binding(
+                    get: { viewModel.useColoredCalendarCards },
+                    set: { _ in viewModel.toggleUseColoredCalendarCards() }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(MR.strings().use_colored_calendar_cards.localized())
+                        Text(MR.strings().use_colored_calendar_cards_desc.localized())
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             } header: {
                 Text(MR.strings().appearance.localized())
             }

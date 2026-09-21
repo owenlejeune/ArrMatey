@@ -12,7 +12,12 @@ struct MovieCalendarItem: View {
     let movie: ArrMovie
     let date: LocalDate
     let instances: [Instance]
+    var useFullColorCards: Bool = false
     let onNavigate: (Int64?) -> Void
+    
+    private var associatedColor: Color {
+        .arrOrange
+    }
     
     private var statusIcon: String? {
         if movie.isDownloaded {
@@ -51,41 +56,53 @@ struct MovieCalendarItem: View {
             instances: instances,
             onInstanceSelected: onNavigate
         ) {
-            HStack(spacing: 12) {
-                PosterItem(item: movie)
-                    .frame(width: 50)
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(movie.title ?? MR.strings().unknown.localized())
-                        .font(.headline)
-                        .foregroundColor(.black)
+            HStack(spacing: 0) {
+                if !useFullColorCards {
+                    Rectangle()
+                        .fill(associatedColor)
+                        .frame(width: 5)
+                }
+
+                HStack(spacing: 12) {
+                    PosterItem(item: movie)
+                        .frame(width: 50)
                     
-                    if let releaseType = releaseTypeText {
-                        HStack(spacing: 8) {
-                            Text(releaseType)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(movie.title ?? MR.strings().unknown.localized())
+                            .font(.headline)
+                            .foregroundColor(useFullColorCards ? .black : .primary)
+                        
+                        if let releaseType = releaseTypeText {
+                            HStack(spacing: 8) {
+                                Text(releaseType)
+                                    .font(.footnote)
+                                    .foregroundColor(useFullColorCards ? .black.opacity(0.85) : .secondary)
+                            }
+                        }
+                        
+                        if !infoString.isEmpty {
+                            Text(infoString)
                                 .font(.footnote)
-                                .foregroundColor(.black)
+                                .foregroundColor(useFullColorCards ? .black.opacity(0.75) : .secondary)
                         }
                     }
                     
-                    if !infoString.isEmpty {
-                        Text(infoString)
-                            .font(.footnote)
-                            .foregroundColor(.black)
+                    Spacer()
+                    
+                    if let icon = statusIcon {
+                        Image(systemName: icon)
+                            .font(.system(size: 20))
+                            .foregroundColor(useFullColorCards ? .black : .secondary)
                     }
                 }
-                
-                Spacer()
-                
-                if let icon = statusIcon {
-                    Image(systemName: icon)
-                        .font(.system(size: 20))
-                        .foregroundColor(.black)
-                }
+                .padding(12)
             }
-            .padding()
-            .background(.arrOrange)
-            .cornerRadius(12)
+            .background(useFullColorCards ? associatedColor : Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(useFullColorCards ? Color.clear : Color.primary.opacity(0.06), lineWidth: 0.5)
+            )
         }
     }
 }

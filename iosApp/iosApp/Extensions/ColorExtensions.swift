@@ -129,6 +129,23 @@ extension Color {
     }
 }
 
+extension InstanceType {
+    var associatedSwiftColor: Color {
+        switch self {
+        case .sonarr: return .arrBlue
+        case .radarr: return .arrOrange
+        case .lidarr: return .arrGreen
+        case .bookshelf: return .arrRed
+        case .listenarr: return .arrLightPurple
+        case .seerr: return .arrPurple
+        case .prowlarr: return .arrOrange
+        case .bazarr: return Color(hex: 0x0FA3B1)
+        case .tracearr: return Color(hex: 0x00b4d8)
+        default: return .accentColor
+        }
+    }
+}
+
 extension UInt64 {
     func toSwiftUI() -> Color {
         return Color(argb: self)

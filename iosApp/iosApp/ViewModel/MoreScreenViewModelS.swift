@@ -18,6 +18,8 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var connectionStatuses: [KotlinLong:OperationStatus] = [:]
     @Published private(set) var useServiceNavLogos: Bool = false
     @Published private(set) var hideInstanceSwitcher: Bool = false
+    @Published private(set) var useColoredActivityCards: Bool = false
+    @Published private(set) var useColoredCalendarCards: Bool = false
     @Published private(set) var searchShowBanners: Bool = true
     @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
     @Published private(set) var unifiedLibrarySearchAllInstances: Bool = true
@@ -44,6 +46,12 @@ class MoreScreenViewModelS: ObservableObject {
         }
         viewModel.hideInstanceSwitcher.observeAsync(on: self) { owner, hide in
             owner.hideInstanceSwitcher = hide.boolValue
+        }
+        viewModel.useColoredActivityCards.observeAsync(on: self) { owner, val in
+            owner.useColoredActivityCards = val.boolValue
+        }
+        viewModel.useColoredCalendarCards.observeAsync(on: self) { owner, val in
+            owner.useColoredCalendarCards = val.boolValue
         }
         viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
             owner.searchShowBanners = show.boolValue
@@ -85,6 +93,14 @@ class MoreScreenViewModelS: ObservableObject {
 
     func toggleInstanceSwitcher() {
         viewModel.toggleInstanceSwitcher()
+    }
+
+    func toggleUseColoredActivityCards() {
+        viewModel.toggleUseColoredActivityCards()
+    }
+
+    func toggleUseColoredCalendarCards() {
+        viewModel.toggleUseColoredCalendarCards()
     }
 
     func toggleSearchShowBanners() {

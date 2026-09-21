@@ -11,6 +11,7 @@ import Shared
 struct CalendarListView: View {
     let state: CalendarState
     let instances: [Instance]
+    var useFullColorCards: Bool = false
     let onItemClick: (CalendarItem, Int64?) -> Void
     let onLoadMore: () -> Void
     
@@ -96,6 +97,7 @@ struct CalendarListView: View {
             items: state.items[date] ?? [],
             isToday: isToday,
             instances: instances,
+            useFullColorCards: useFullColorCards,
             onItemClick: onItemClick
         )
         .id(date)

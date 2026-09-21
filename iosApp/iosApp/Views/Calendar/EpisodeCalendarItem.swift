@@ -12,7 +12,12 @@ struct EpisodeCalendarItem: View {
     let episode: Episode
     let additional: [Episode]
     let instances: [Instance]
+    var useFullColorCards: Bool = false
     let onNavigate: (Int64?) -> Void
+    
+    private var associatedColor: Color {
+        .arrBlue
+    }
     
     private var isPremier: Bool {
         episode.seasonNumber == 1 && episode.episodeNumber == 1
@@ -52,54 +57,67 @@ struct EpisodeCalendarItem: View {
             instances: instances,
             onInstanceSelected: onNavigate
         ) {
-            HStack(spacing: 12) {
-                if let series = episode.series {
-                    PosterItem(item: series)
-                        .frame(width: 50)
+            HStack(spacing: 0) {
+                if !useFullColorCards {
+                    Rectangle()
+                        .fill(associatedColor)
+                        .frame(width: 5)
                 }
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(episode.series?.title ?? MR.strings().unknown.localized())
-                        .font(.headline)
-                        .foregroundColor(.black)
+
+                HStack(spacing: 12) {
+                    if let series = episode.series {
+                        PosterItem(item: series)
+                            .frame(width: 50)
+                    }
                     
-                    Text("S\(episode.seasonNumber)E\(episode.episodeNumber) • \(episode.title ?? "")")
-                        .font(.subheadline)
-                    
-                    HStack(spacing: 8) {
-                        if let airTime = airTime {
-                            Text(airTime)
-                                .font(.footnote)
-                                .foregroundColor(.black)
-                        }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(episode.series?.title ?? MR.strings().unknown.localized())
+                            .font(.headline)
+                            .foregroundColor(useFullColorCards ? .black : .primary)
                         
-                        if isPremier {
-                            BadgeView(text: MR.strings().premier.localized(), color: .arrGrey)
-                        }
+                        Text("S\(episode.seasonNumber)E\(episode.episodeNumber) • \(episode.title ?? "")")
+                            .font(.subheadline)
+                            .foregroundColor(useFullColorCards ? .black.opacity(0.85) : .secondary)
                         
-                        if let finaleType = episode.finaleType {
-                            BadgeView(text: finaleType.resource.localized(), color: .arrGrey)
-                        }
-                        
-                        if !additional.isEmpty {
-                            Text(MR.strings().additional_items_count.formatted(args: [additional.count]))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                        HStack(spacing: 8) {
+                            if let airTime = airTime {
+                                Text(airTime)
+                                    .font(.footnote)
+                                    .foregroundColor(useFullColorCards ? .black : .secondary)
+                            }
+                            
+                            if isPremier {
+                                BadgeView(text: MR.strings().premier.localized(), color: .arrGrey)
+                            }
+                            
+                            if let finaleType = episode.finaleType {
+                                BadgeView(text: finaleType.resource.localized(), color: .arrGrey)
+                            }
+                            
+                            if !additional.isEmpty {
+                                Text(MR.strings().additional_items_count.formatted(args: [additional.count]))
+                                    .font(.caption)
+                                    .foregroundColor(useFullColorCards ? .black.opacity(0.7) : .secondary)
+                            }
                         }
                     }
+                    
+                    Spacer()
+                    
+                    if let icon = statusIcon {
+                        Image(systemName: icon)
+                            .font(.system(size: 18))
+                            .foregroundColor(useFullColorCards ? .black : .secondary)
+                    }
                 }
-                
-                Spacer()
-                
-                if let icon = statusIcon {
-                    Image(systemName: icon)
-                        .font(.system(size: 18))
-                        .foregroundColor(.black)
-                }
+                .padding(12)
             }
-            .padding()
-            .background(.arrBlue)
-            .cornerRadius(12)
+            .background(useFullColorCards ? associatedColor : Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(useFullColorCards ? Color.clear : Color.primary.opacity(0.06), lineWidth: 0.5)
+            )
         }
     }
 }

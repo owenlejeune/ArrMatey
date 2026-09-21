@@ -11,7 +11,12 @@ import Shared
 struct AlbumCalendarItem: View {
     let album: ArrAlbum
     let instances: [Instance]
+    var useFullColorCards: Bool = false
     let onNavigate: (Int64?) -> Void
+    
+    private var associatedColor: Color {
+        .arrGreen
+    }
     
     private var statusIcon: String? {
         if album.isDownloaded {
@@ -32,31 +37,43 @@ struct AlbumCalendarItem: View {
             instances: instances,
             onInstanceSelected: onNavigate
         ) {
-            HStack(spacing: 12) {
-                AlbumCoverView(album: album)
-                    .frame(width: 50, height: 50)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(album.title ?? MR.strings().unknown.localized())
-                        .font(.headline)
-                        .foregroundColor(.white)
+            HStack(spacing: 0) {
+                if !useFullColorCards {
+                    Rectangle()
+                        .fill(associatedColor)
+                        .frame(width: 5)
+                }
+
+                HStack(spacing: 12) {
+                    AlbumCoverView(album: album)
+                        .frame(width: 50, height: 50)
                     
-                    Text(album.artist?.title ?? MR.strings().unknown.localized())
-                        .font(.subheadline)
-                        .foregroundColor(.white)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(album.title ?? MR.strings().unknown.localized())
+                            .font(.headline)
+                            .foregroundColor(useFullColorCards ? .white : .primary)
+                        
+                        Text(album.artist?.title ?? MR.strings().unknown.localized())
+                            .font(.subheadline)
+                            .foregroundColor(useFullColorCards ? .white.opacity(0.85) : .secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    if let icon = statusIcon {
+                        Image(systemName: icon)
+                            .font(.system(size: 18))
+                            .foregroundColor(useFullColorCards ? .white : .secondary)
+                    }
                 }
-                
-                Spacer()
-                
-                if let icon = statusIcon {
-                    Image(systemName: icon)
-                        .font(.system(size: 18))
-                        .foregroundColor(.white)
-                }
+                .padding(12)
             }
-            .padding()
-            .background(.arrGreen)
-            .cornerRadius(12)
+            .background(useFullColorCards ? associatedColor : Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(useFullColorCards ? Color.clear : Color.primary.opacity(0.06), lineWidth: 0.5)
+            )
         }
     }
 }

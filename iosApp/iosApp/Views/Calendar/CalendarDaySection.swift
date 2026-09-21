@@ -13,6 +13,7 @@ struct CalendarDaySection: View {
     let items: [CalendarItem]
     let isToday: Bool
     let instances: [Instance]
+    var useFullColorCards: Bool = false
     let onItemClick: (CalendarItem, Int64?) -> Void
     
     private var totalItems: Int {
@@ -62,12 +63,19 @@ struct CalendarDaySection: View {
 
                 switch item {
                 case let movie as ArrMovie:
-                    MovieCalendarItem(movie: movie, date: date, instances: instances, onNavigate: onNavigate)
+                    MovieCalendarItem(
+                        movie: movie,
+                        date: date,
+                        instances: instances,
+                        useFullColorCards: useFullColorCards,
+                        onNavigate: onNavigate
+                    )
                 case let epGroup as EpisodeGroup:
                     EpisodeCalendarItem(
                         episode: epGroup.first,
                         additional: epGroup.additional,
                         instances: instances,
+                        useFullColorCards: useFullColorCards,
                         onNavigate: onNavigate
                     )
                 case let episode as Episode:
@@ -75,14 +83,30 @@ struct CalendarDaySection: View {
                         episode: episode,
                         additional: [],
                         instances: instances,
+                        useFullColorCards: useFullColorCards,
                         onNavigate: onNavigate
                     )
                 case let album as ArrAlbum:
-                    AlbumCalendarItem(album: album, instances: instances, onNavigate: onNavigate)
+                    AlbumCalendarItem(
+                        album: album,
+                        instances: instances,
+                        useFullColorCards: useFullColorCards,
+                        onNavigate: onNavigate
+                    )
                 case let book as Book:
-                    BookCalendarItem(book: book, instances: instances, onNavigate: onNavigate)
+                    BookCalendarItem(
+                        book: book,
+                        instances: instances,
+                        useFullColorCards: useFullColorCards,
+                        onNavigate: onNavigate
+                    )
                 case let audiobook as Audiobook:
-                    AudiobookCalendarItem(audiobook: audiobook, instances: instances, onNavigate: onNavigate)
+                    AudiobookCalendarItem(
+                        audiobook: audiobook,
+                        instances: instances,
+                        useFullColorCards: useFullColorCards,
+                        onNavigate: onNavigate
+                    )
                 default: EmptyView()
                 }
             }

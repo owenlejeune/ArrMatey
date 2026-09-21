@@ -11,6 +11,7 @@ import SwiftUI
 @MainActor
 class ActivityQueueViewModelS: ObservableObject {
     private let viewModel: ActivityQueueViewModel
+    private let preferencesStore: PreferencesStore
     
     @Published private(set) var queueItems: [QueueItem] = []
     @Published private(set) var tasksWithIssues: Int = 0
@@ -20,9 +21,11 @@ class ActivityQueueViewModelS: ObservableObject {
     @Published private(set) var removeItemStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var removeInProgress: Bool = false
     @Published private(set) var removeSuccesss: Bool = false
+    @Published private(set) var useColoredCards: Bool = false
     
     init() {
         self.viewModel = KoinBridge.shared.getActivityQueueViewModel()
+        self.preferencesStore = KoinBridge.shared.getPreferencesStore()
         startObserving()
     }
     
@@ -40,6 +43,9 @@ class ActivityQueueViewModelS: ObservableObject {
             owner.removeItemStatus = status
             owner.removeInProgress = status is OperationStatusInProgress
             owner.removeSuccesss = status is OperationStatusSuccess
+        }
+        preferencesStore.useColoredActivityCards.observeAsync(on: self) { owner, val in
+            owner.useColoredCards = val.boolValue
         }
     }
     

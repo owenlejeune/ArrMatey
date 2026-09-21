@@ -95,9 +95,13 @@ struct ActivityTabContent: View {
         } else {
             List {
                 ForEach(viewModel.queueItems, id: \.id) { item in
-                    ActivityQueueItem(item: item, onClick: {
-                        selectedItem = IdentifiableQueueItem(item: item)
-                    })
+                    ActivityQueueItem(
+                        item: item,
+                        useFullColorCards: viewModel.useColoredCards,
+                        onClick: {
+                            selectedItem = IdentifiableQueueItem(item: item)
+                        }
+                    )
                     .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)

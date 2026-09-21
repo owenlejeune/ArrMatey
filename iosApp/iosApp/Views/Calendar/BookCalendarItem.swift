@@ -11,7 +11,12 @@ import Shared
 struct BookCalendarItem: View {
     let book: Book
     let instances: [Instance]
+    var useFullColorCards: Bool = false
     let onNavigate: (Int64?) -> Void
+    
+    private var associatedColor: Color {
+        .arrRed
+    }
     
     private var statusIcon: String? {
         if book.isDownloaded {
@@ -39,31 +44,43 @@ struct BookCalendarItem: View {
             instances: instances,
             onInstanceSelected: onNavigate
         ) {
-            HStack(spacing: 12) {
-                GenericPosterItem(posterUrl: book.getCover()?.remoteUrl, aspectRatio: .poster)
-                    .frame(width: 50)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(book.title)
-                        .font(.headline)
-                        .foregroundColor(.black)
+            HStack(spacing: 0) {
+                if !useFullColorCards {
+                    Rectangle()
+                        .fill(associatedColor)
+                        .frame(width: 5)
+                }
+
+                HStack(spacing: 12) {
+                    GenericPosterItem(posterUrl: book.getCover()?.remoteUrl, aspectRatio: .poster)
+                        .frame(width: 50)
                     
-                    Text(statusText)
-                        .font(.subheadline)
-                        .foregroundColor(.black)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(book.title)
+                            .font(.headline)
+                            .foregroundColor(useFullColorCards ? .black : .primary)
+                        
+                        Text(statusText)
+                            .font(.subheadline)
+                            .foregroundColor(useFullColorCards ? .black.opacity(0.85) : .secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    if let icon = statusIcon {
+                        Image(systemName: icon)
+                            .font(.system(size: 18))
+                            .foregroundColor(useFullColorCards ? .black : .secondary)
+                    }
                 }
-                
-                Spacer()
-                
-                if let icon = statusIcon {
-                    Image(systemName: icon)
-                        .font(.system(size: 18))
-                        .foregroundColor(.black)
-                }
+                .padding(12)
             }
-            .padding()
-            .background(.arrRed)
-            .cornerRadius(12)
+            .background(useFullColorCards ? associatedColor : Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(useFullColorCards ? Color.clear : Color.primary.opacity(0.06), lineWidth: 0.5)
+            )
         }
     }
 }

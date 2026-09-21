@@ -11,18 +11,24 @@ import SwiftUI
 @MainActor
 class CalendarViewModelS: ObservableObject {
     private let viewModel: CalendarViewModel
+    private let preferencesStore: PreferencesStore
     
     @Published private(set) var calendarState: CalendarState = CalendarState()
     @Published private(set) var instances: [Instance] = []
+    @Published private(set) var useColoredCards: Bool = false
     
     init() {
         self.viewModel = KoinBridge.shared.getCalendarViewModel()
+        self.preferencesStore = KoinBridge.shared.getPreferencesStore()
         startObserving()
     }
     
     private func startObserving() {
         viewModel.calendarState.observeAsync(on: self, to: \.calendarState)
         viewModel.instances.observeAsync(on: self, to: \.instances)
+        preferencesStore.useColoredCalendarCards.observeAsync(on: self) { owner, val in
+            owner.useColoredCards = val.boolValue
+        }
     }
     
     func load() {
