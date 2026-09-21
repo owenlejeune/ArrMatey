@@ -14,8 +14,10 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -122,6 +124,7 @@ fun ProvideFloatingBarAction(
  * If an active [FloatingBarAction] is provided (e.g. via [ProvideFloatingBarAction] or the [action] parameter),
  * a circular floating action button is displayed alongside the navigation bar.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FloatingNavigationBar(
     modifier: Modifier = Modifier,
@@ -131,6 +134,7 @@ fun FloatingNavigationBar(
     tonalElevation: Dp = FloatingNavigationBarDefaults.TonalElevation,
     shadowElevation: Dp = FloatingNavigationBarDefaults.ShadowElevation,
     action: FloatingBarAction? = LocalFloatingBarActionState.current.currentAction,
+    onLongClick: (() -> Unit)? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
     Row(
@@ -144,6 +148,17 @@ fun FloatingNavigationBar(
             contentColor = contentColor,
             tonalElevation = tonalElevation,
             shadowElevation = shadowElevation,
+            modifier =
+                if (onLongClick != null) {
+                    Modifier.combinedClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {},
+                        onLongClick = onLongClick,
+                    )
+                } else {
+                    Modifier
+                },
         ) {
             var maxRowWidth by remember { mutableIntStateOf(0) }
 
@@ -264,24 +279,24 @@ fun FloatingNavigationBar(
                                             easing = FastOutSlowInEasing,
                                         ),
                                 )
-                        ).togetherWith(
-                            fadeOut(
-                                animationSpec =
-                                    tween(
-                                        durationMillis = ANIMATION_DURATION_MILLIS / 2,
-                                        easing = FastOutSlowInEasing,
-                                    ),
-                            ) +
-                                scaleOut(
-                                    targetScale = 0.7f,
-                                    transformOrigin = TransformOrigin.Center,
+                            ).togetherWith(
+                                fadeOut(
                                     animationSpec =
                                         tween(
                                             durationMillis = ANIMATION_DURATION_MILLIS / 2,
                                             easing = FastOutSlowInEasing,
                                         ),
-                                ),
-                        )
+                                ) +
+                                    scaleOut(
+                                        targetScale = 0.7f,
+                                        transformOrigin = TransformOrigin.Center,
+                                        animationSpec =
+                                            tween(
+                                                durationMillis = ANIMATION_DURATION_MILLIS / 2,
+                                                easing = FastOutSlowInEasing,
+                                            ),
+                                    ),
+                            )
                     },
                     contentAlignment = Alignment.Center,
                     label = "FloatingBarActionIconAnimation",
@@ -304,6 +319,7 @@ fun FloatingNavigationBar(
  * When selected, the item expands smoothly to show an accent pill container containing
  * both the [icon] and the animated [label]. When unselected, only the [icon] is displayed.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FloatingNavigationBarItem(
     selected: Boolean,
@@ -311,6 +327,7 @@ fun FloatingNavigationBarItem(
     icon: @Composable () -> Unit,
     label: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     shape: Shape = CircleShape,
     colors: FloatingNavigationBarItemColors = FloatingNavigationBarItemDefaults.colors(),
@@ -354,11 +371,12 @@ fun FloatingNavigationBarItem(
                     this.role = Role.Tab
                 }.clip(shape)
                 .background(containerColor)
-                .clickable(
+                .combinedClickable(
                     enabled = enabled,
                     interactionSource = interactionSource,
                     indication = ripple(bounded = true),
                     onClick = onClick,
+                    onLongClick = onLongClick,
                 ).padding(horizontal = horizontalPadding, vertical = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -544,7 +562,11 @@ class FloatingNavigationBarItemColors(
 @Composable
 private fun FloatingNavigationBarPreview() {
     var selectedIndex by remember { mutableIntStateOf(0) }
-    val items = listOf("Photos" to Icons.Default.Photo, "Collections" to Icons.Default.Collections, "Create" to Icons.Default.Add)
+    val items = listOf(
+        "Photos" to Icons.Default.Photo,
+        "Collections" to Icons.Default.Collections,
+        "Create" to Icons.Default.Add
+    )
 
     ArrMateyTheme {
         Box(

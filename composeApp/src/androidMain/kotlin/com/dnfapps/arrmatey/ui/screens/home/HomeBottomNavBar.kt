@@ -10,22 +10,19 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Surface
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -44,25 +41,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.compose.TabItem
-import com.dnfapps.arrmatey.instances.model.Instance
-import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.toSearch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HomeNavigationRail(
+fun HomeBottomNavBar(
     visibleTabs: List<TabItem>,
     selectedTab: TabItem?,
-    overlayTab: TabItem?,
-    allInstances: List<Instance>,
-    navigationManager: NavigationManager,
     useServiceNavIcons: Boolean,
     activityQueueIssuesCount: Int,
-    onOpenDrawer: () -> Unit,
     onSelectTab: (TabItem) -> Unit,
-    onLongPressTab: () -> Unit = {},
+    onLongPressTab: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
@@ -70,52 +58,33 @@ fun HomeNavigationRail(
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         onLongPressTab()
     }
-    NavigationRail(
+
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        tonalElevation = NavigationBarDefaults.Elevation,
         modifier =
-            modifier.combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = {},
-                onLongClick = handleLongPress,
-            ),
-        header = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                IconButton(onClick = onOpenDrawer) {
-                    Icon(Icons.Default.Menu, contentDescription = null)
-                }
-
-                val currentTab = overlayTab ?: selectedTab
-                val isLibrary = currentTab == TabItem.Standard.LIBRARY
-                val hasInstances =
-                    if (isLibrary) {
-                        allInstances.any { it.type in InstanceType.arrs() }
-                    } else {
-                        currentTab?.associatedType?.let { type -> allInstances.any { it.type == type } } == true
-                    }
-                val navigator = navigationManager.getNavigator(currentTab)
-
-                Box(modifier = Modifier.size(56.dp)) {
-                    if (hasInstances && navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
-                        FloatingActionButton(
-                            onClick = { navigator.toSearch(type = currentTab?.associatedType) },
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = null)
-                        }
-                    }
-                }
-            }
-        },
+            modifier
+                .fillMaxWidth()
+                .combinedClickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {},
+                    onLongClick = handleLongPress,
+                ),
     ) {
-        Column(
-            modifier = Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .windowInsetsPadding(NavigationBarDefaults.windowInsets)
+                    .height(80.dp)
+                    .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             visibleTabs.forEach { entry ->
-                HomeNavigationRailItem(
+                HomeBottomNavItem(
                     selected = entry == selectedTab,
                     onClick = { onSelectTab(entry) },
                     onLongClick = handleLongPress,
@@ -127,16 +96,16 @@ fun HomeNavigationRail(
                         )
                     },
                     label = { HomeTabNavLabel(entry) },
+                    modifier = Modifier.weight(1f),
                 )
             }
-            Spacer(modifier = Modifier.height(56.dp))
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HomeNavigationRailItem(
+fun HomeBottomNavItem(
     selected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -154,7 +123,7 @@ fun HomeNavigationRailItem(
                 Color.Transparent
             },
         animationSpec = animationSpec,
-        label = "RailNavIndicatorColor",
+        label = "BottomNavIndicatorColor",
     )
 
     val iconColor by animateColorAsState(
@@ -165,7 +134,7 @@ fun HomeNavigationRailItem(
                 MaterialTheme.colorScheme.onSurfaceVariant
             },
         animationSpec = animationSpec,
-        label = "RailNavIconColor",
+        label = "BottomNavIconColor",
     )
 
     val textColor by animateColorAsState(
@@ -176,7 +145,7 @@ fun HomeNavigationRailItem(
                 MaterialTheme.colorScheme.onSurfaceVariant
             },
         animationSpec = animationSpec,
-        label = "RailNavTextColor",
+        label = "BottomNavTextColor",
     )
 
     Column(
@@ -193,14 +162,14 @@ fun HomeNavigationRailItem(
                     onClick = onClick,
                     onLongClick = onLongClick,
                 )
-                .padding(vertical = 4.dp, horizontal = 8.dp),
+                .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
             modifier =
                 Modifier
-                    .size(width = 56.dp, height = 32.dp)
+                    .size(width = 64.dp, height = 32.dp)
                     .clip(CircleShape)
                     .background(indicatorColor),
             contentAlignment = Alignment.Center,

@@ -546,13 +546,13 @@
     <string name="navigation_items_hidden">Hidden</string>
     <string name="navigation_items_visible">Visible</string>
     <string name="customize_navigation">Customize Navigation</string>
-    <string name="customize_navigation_description">Drag items to reorder your navigation bar. Items moved to the 'Drawer' section will be accessible via the drawer menu. You can have at most five items in the navigation bar, and must have at least one item. If there is only one item in the navigation bar section, the navigation bar will be hidden.</string>
+    <string name="customize_navigation_description">Use the arrow buttons to reorder your navigation bar. Items moved to the 'Drawer' section will be accessible via the drawer menu. You can have at most five items in the navigation bar, and must have at least one item. If there is only one item in the navigation bar section, the navigation bar will be hidden.</string>
     <string name="remove_navigation_tab_confirm">Are you sure you want to remove this tab? It will be moved to the hidden section.</string>
 
     <!-- Shortcuts Configuration -->
     <string name="shortcuts_configuration">App shortcuts configuration</string>
     <string name="customize_shortcuts">Customize Shortcuts</string>
-    <string name="customize_shortcuts_description">Drag to reorder your app shortcuts. You can also toggle shortcuts on and off. Disabled shortcuts will not be available in the app launcher. The number of available shortcuts may be limited by your launcher.</string>
+    <string name="customize_shortcuts_description">Use the arrow buttons to reorder your app shortcuts. You can also toggle shortcuts on and off. Disabled shortcuts will not be available in the app launcher. The number of available shortcuts may be limited by your launcher.</string>
     <string name="arr_search_shortcut">Search %1$s</string>
     <string name="arr_library_shortcut">%1$s Library</string>
 
@@ -1025,7 +1025,7 @@
     <string name="onboarding_pref_nav_style_standard">Standard</string>
     <string name="onboarding_pref_nav_reorder_button">Reorder</string>
     <string name="onboarding_pref_nav_reorder_title">Reorder Navigation Tabs</string>
-    <string name="onboarding_pref_nav_reorder_desc">Drag items up or down to change their order in the navigation bar.</string>
+    <string name="onboarding_pref_nav_reorder_desc">Use the arrow buttons to change their order in the navigation bar.</string>
     <string name="onboarding_pref_notifications_title">Notifications</string>
     <string name="onboarding_pref_notifications_desc">Receive alerts for new releases, grabs, and background events.</string>
     <string name="onboarding_notifications_enabled">Notifications Enabled</string>

@@ -5,14 +5,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -21,6 +19,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -41,12 +40,14 @@ import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarActionState
 import com.dnfapps.arrmatey.ui.components.appbar.LocalFloatingBarActionState
 import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.screens.home.HomeBottomNavBar
 import com.dnfapps.arrmatey.ui.screens.home.HomeDrawerContent
 import com.dnfapps.arrmatey.ui.screens.home.HomeFloatingNavBar
 import com.dnfapps.arrmatey.ui.screens.home.HomeMainContent
 import com.dnfapps.arrmatey.ui.screens.home.HomeNavigationRail
 import com.dnfapps.arrmatey.ui.screens.home.HomeTabNavIcon
 import com.dnfapps.arrmatey.ui.screens.home.HomeTabNavLabel
+import com.dnfapps.arrmatey.ui.sheets.TabCustomizationSheet
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -136,6 +137,8 @@ fun HomeScreen(
 
     val floatingBarActionState = remember { FloatingBarActionState() }
 
+    var showReorderSheet by remember { mutableStateOf(false) }
+
     CompositionLocalProvider(
         LocalNavigationManager provides navigationManager,
         LocalFloatingBarBottomPadding provides floatingBarBottomPadding,
@@ -201,6 +204,7 @@ fun HomeScreen(
                             activityQueueIssuesCount = activityQueueIssuesCount,
                             onOpenDrawer = { navigationManager.openDrawer() },
                             onSelectTab = { navigationManager.setSelectedTab(it) },
+                            onLongPressTab = { showReorderSheet = true },
                         )
                     }
                     mainContent()
@@ -215,6 +219,7 @@ fun HomeScreen(
                             useServiceNavIcons = useServiceNavIcons,
                             activityQueueIssuesCount = activityQueueIssuesCount,
                             onSelectTab = { navigationManager.setSelectedTab(it) },
+                            onLongPressTab = { showReorderSheet = true },
                             modifier = Modifier.align(Alignment.BottomCenter).onGloballyPositioned {
                                 floatingBarHeight = it.size.height
                             },
@@ -222,35 +227,31 @@ fun HomeScreen(
                     }
                 }
             } else {
-                NavigationSuiteScaffold(
-                    layoutType =
-                        if (overlayTab != null || visibleTabs.size <= 1) {
-                            NavigationSuiteType.None
-                        } else {
-                            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
-                        },
-                    navigationSuiteItems = {
+                Scaffold(
+                    bottomBar = {
                         if (overlayTab == null && visibleTabs.size > 1) {
-                            visibleTabs.forEach { entry ->
-                                item(
-                                    selected = entry == selectedTab,
-                                    onClick = { navigationManager.setSelectedTab(entry) },
-                                    icon = {
-                                        HomeTabNavIcon(
-                                            tabItem = entry,
-                                            useServiceNavIcons = useServiceNavIcons,
-                                            activityQueueIssuesCount = activityQueueIssuesCount,
-                                        )
-                                    },
-                                    label = { HomeTabNavLabel(entry) },
-                                )
-                            }
+                            HomeBottomNavBar(
+                                visibleTabs = visibleTabs,
+                                selectedTab = selectedTab,
+                                useServiceNavIcons = useServiceNavIcons,
+                                activityQueueIssuesCount = activityQueueIssuesCount,
+                                onSelectTab = { navigationManager.setSelectedTab(it) },
+                                onLongPressTab = { showReorderSheet = true },
+                            )
                         }
                     },
-                ) {
-                    mainContent()
+                ) { padding ->
+                    Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+                        mainContent()
+                    }
                 }
             }
+        }
+
+        if (showReorderSheet) {
+            TabCustomizationSheet(
+                onDismissRequest = { showReorderSheet = false },
+            )
         }
     }
 }
