@@ -1,32 +1,42 @@
 package com.dnfapps.arrmatey.ui.menu
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.compose.utils.QueueSortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -34,8 +44,9 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.icons.Hard_drive
 import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.compose.painterResource
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ActivityFilterMenu(
     instances: List<Instance>,
@@ -46,114 +57,183 @@ fun ActivityFilterMenu(
     sortOrder: SortOrder,
     onSortOrderChanged: (SortOrder) -> Unit,
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
-    var instanceMenuExpanded by remember { mutableStateOf(false) }
-    val groupInteractionSource = remember { MutableInteractionSource() }
+    var showSheet by remember { mutableStateOf(false) }
+    val isFiltered = selectedInstanceId != null
 
     Box {
-        IconButton(onClick = {
-            menuExpanded = true
-        }) {
-            Icon(Icons.Default.FilterList, null)
+        IconButton(onClick = { showSheet = true }) {
+            BadgedBox(
+                badge = {
+                    if (isFiltered) {
+                        Badge { Text("1") }
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FilterList,
+                    contentDescription = mokoString(MR.strings.filter),
+                    tint = if (isFiltered) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                )
+            }
         }
-        DropdownMenuPopup(
-            expanded = menuExpanded,
-            onDismissRequest = { menuExpanded = false },
-        ) {
-            if (instances.size > 1) {
-                DropdownMenuGroup(
-                    shapes = MenuDefaults.groupShape(0, 2),
-                    interactionSource = groupInteractionSource,
-                ) {
-                    Box {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text =
-                                        instances.firstOrNull { it.id == selectedInstanceId }?.label
-                                            ?: mokoString(MR.strings.instances),
-                                )
-                            },
-                            onClick = { instanceMenuExpanded = true },
-                            trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
-                            leadingIcon = { Icon(Hard_drive, null) },
-                        )
 
-                        DropdownMenuPopup(
-                            expanded = instanceMenuExpanded,
-                            onDismissRequest = { instanceMenuExpanded = false },
-                            offset = DpOffset(x = 350.dp, y = 0.dp),
-                        ) {
-                            DropdownMenuGroup(
-                                shapes = MenuDefaults.groupShape(0, 1),
-                                interactionSource = groupInteractionSource,
-                                containerColor = MenuDefaults.groupVibrantContainerColor,
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text(mokoString(MR.strings.all)) },
-                                    selected = selectedInstanceId == null,
-                                    onClick = { onInstanceChange(null) },
-                                    selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
-                                    shapes = MenuDefaults.itemShape(0, instances.size + 1),
-                                    colors = MenuDefaults.selectableItemVibrantColors(),
+        if (showSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showSheet = false },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = 32.dp)
+                            .navigationBarsPadding()
+                            .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = mokoString(MR.strings.filters),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        if (isFiltered) {
+                            TextButton(onClick = { onInstanceChange(null) }) {
+                                Text(
+                                    text = mokoString(MR.strings.clear_all),
+                                    style = MaterialTheme.typography.labelMedium,
                                 )
-                                HorizontalDivider(Modifier.padding(MenuDefaults.HorizontalDividerPadding))
-                                instances.forEachIndexed { index, instance ->
-                                    DropdownMenuItem(
-                                        text = { Text(instance.label) },
-                                        selected = selectedInstanceId == instance.id,
+                            }
+                        }
+                    }
+
+                    if (instances.size > 1) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = mokoString(MR.strings.instances),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(0.dp),
+                            ) {
+                                val isAllSelected = selectedInstanceId == null
+                                FilterChip(
+                                    selected = isAllSelected,
+                                    onClick = { onInstanceChange(null) },
+                                    label = { Text(mokoString(MR.strings.all)) },
+                                    leadingIcon =
+                                        if (isAllSelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
+                                    shape = MaterialTheme.shapes.small,
+                                )
+                                instances.forEach { instance ->
+                                    val isSelected = selectedInstanceId == instance.id
+                                    FilterChip(
+                                        selected = isSelected,
                                         onClick = { onInstanceChange(instance.id) },
-                                        selectedLeadingIcon = { Icon(Icons.Default.Check, null) },
-                                        shapes =
-                                            MenuDefaults.itemShape(
-                                                index + 1,
-                                                instances.size + 1,
-                                            ),
-                                        colors = MenuDefaults.selectableItemVibrantColors(),
+                                        label = { Text(instance.label) },
+                                        leadingIcon = {
+                                            if (isSelected) {
+                                                Icon(
+                                                    Icons.Default.Check,
+                                                    null,
+                                                    Modifier.size(16.dp)
+                                                )
+                                            } else {
+                                                Icon(
+                                                    painterResource(
+                                                        instance.type.tabIcon ?: instance.type.icon
+                                                    ), null, Modifier.size(16.dp)
+                                                )
+                                            }
+                                        },
+                                        shape = MaterialTheme.shapes.small,
                                     )
                                 }
                             }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(MenuDefaults.GroupSpacing))
-            }
+                    // Sort By Section
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = mokoString(MR.strings.sort_by),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
 
-            DropdownMenuGroup(
-                shapes =
-                    if (instances.size > 1) {
-                        MenuDefaults.groupShape(1, 2)
-                    } else {
-                        MenuDefaults.groupShape(0, 1)
-                    },
-                interactionSource = groupInteractionSource,
-            ) {
-                QueueSortBy.entries.forEachIndexed { index, sort ->
-                    DropdownMenuItem(
-                        text = { Text(mokoString(sort.resource)) },
-                        shapes = MenuDefaults.itemShape(index, QueueSortBy.entries.size),
-                        selected = sortBy == sort,
-                        onClick = {
-                            if (sortBy == sort) {
-                                onSortOrderChanged(
-                                    when (sortOrder) {
-                                        SortOrder.Asc -> SortOrder.Desc
-                                        SortOrder.Desc -> SortOrder.Asc
-                                    },
+                            // Asc / Desc toggle
+                            FilterChip(
+                                selected = true,
+                                onClick = {
+                                    onSortOrderChanged(
+                                        if (sortOrder == SortOrder.Asc) SortOrder.Desc else SortOrder.Asc,
+                                    )
+                                },
+                                label = {
+                                    Text(
+                                        if (sortOrder == SortOrder.Asc) {
+                                            mokoString(MR.strings.sort_ascending)
+                                        } else {
+                                            mokoString(MR.strings.sort_descending)
+                                        },
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector =
+                                            if (sortOrder == SortOrder.Asc) {
+                                                Icons.Default.ArrowUpward
+                                            } else {
+                                                Icons.Default.ArrowDownward
+                                            },
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                },
+                                shape = MaterialTheme.shapes.small,
+                            )
+                        }
+
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(0.dp),
+                        ) {
+                            QueueSortBy.entries.forEach { sort ->
+                                val isSelected = sortBy == sort
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { onSortByChanged(sort) },
+                                    label = { Text(mokoString(sort.resource)) },
+                                    leadingIcon =
+                                        if (isSelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
+                                    shape = MaterialTheme.shapes.small,
                                 )
-                            } else {
-                                onSortByChanged(sort)
                             }
-                        },
-                        selectedLeadingIcon = {
-                            if (sortOrder == SortOrder.Asc) {
-                                Icon(Icons.Default.ArrowDropUp, null)
-                            } else {
-                                Icon(Icons.Default.ArrowDropDown, null)
-                            }
-                        },
-                    )
+                        }
+                    }
                 }
             }
         }
