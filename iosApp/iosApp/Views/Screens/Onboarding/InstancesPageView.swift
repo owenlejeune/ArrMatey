@@ -78,14 +78,8 @@ struct InstancesPageView: View {
 
                                 ForEach(instances, id: \.id) { instance in
                                     HStack(spacing: 14) {
-                                        if let logo = instance.type.tabIcon {
-                                            logo.toImage(renderingMode: .template)
+                                        instance.type.icon.toImage(renderingMode: .original)
                                                 .frame(width: 24, height: 24)
-                                                .foregroundColor(.themePrimary)
-                                        } else {
-                                            Image(systemName: "server.rack")
-                                                .foregroundColor(.themePrimary)
-                                        }
 
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(instance.label)
@@ -123,9 +117,8 @@ struct InstancesPageView: View {
 
                                 ForEach(downloadClients, id: \.id) { client in
                                     HStack(spacing: 14) {
-                                        client.type.tabIcon.toImage(renderingMode: .template)
+                                        client.type.tabIcon.toImage(renderingMode: .original)
                                             .frame(width: 24, height: 24)
-                                            .foregroundColor(.themePrimary)
 
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(client.label)
