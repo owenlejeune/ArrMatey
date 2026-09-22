@@ -145,6 +145,7 @@ fun UnifiedMediaDetailsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val recommendationsState by viewModel.recommendationsState.collectAsStateWithLifecycle()
     val similarState by viewModel.similarState.collectAsStateWithLifecycle()
+    val selectedInstanceId by viewModel.selectedInstanceId.collectAsStateWithLifecycle()
     var lastSuccessState by remember { mutableStateOf<UnifiedMediaDetailsUiState.Success?>(null) }
     var hasNavigatedToInitialEpisode by remember(initialEpisodeId) { mutableStateOf(false) }
 
@@ -165,7 +166,7 @@ fun UnifiedMediaDetailsScreen(
 
             if (series != null && episode != null) {
                 hasNavigatedToInitialEpisode = true
-                val currentInstanceId = successState.selectedInstanceId ?: instanceId ?: viewModel.selectedInstanceId.value
+                val currentInstanceId = successState.selectedInstanceId ?: instanceId ?: selectedInstanceId
                 onNavigateToEpisodeDetails(series, episode, currentInstanceId)
             }
         }
@@ -579,7 +580,7 @@ fun UnifiedMediaDetailsScreen(
                                 when (selectedTab) {
                                     DetailsTab.SeasonsFiles -> {
                                         val currentInstanceId =
-                                            successState.selectedInstanceId ?: instanceId ?: viewModel.selectedInstanceId.value
+                                            successState.selectedInstanceId ?: instanceId ?: selectedInstanceId
                                         SeasonsFilesTabContent(
                                             state = successState,
                                             automaticSearchIds = automaticSearchIds,
