@@ -208,24 +208,79 @@ struct DiscoverSearchOverlay: View {
     let showBanners: Bool
     let onItemClick: (SearchResult) -> Void
 
+    @State private var selectedFilter: InstanceType? = nil
+
+    private var availableFilters: [InstanceType] {
+        var seen = Set<InstanceType>()
+        return items.compactMap { item in
+            if seen.insert(item.instanceType).inserted {
+                return item.instanceType
+            }
+            return nil
+        }
+    }
+
+    private var itemCounts: [InstanceType: Int] {
+        Dictionary(grouping: items, by: { $0.instanceType })
+            .mapValues { $0.count }
+    }
+
+    private var filteredItems: [SearchResult] {
+        if let selectedFilter {
+            return items.filter { $0.instanceType == selectedFilter }
+        }
+        return items
+    }
+
     var body: some View {
         Group {
             if isLoading && items.isEmpty {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if !items.isEmpty {
-                List {
-                    ForEach(items, id: \.id) { item in
-                        DiscoverSearchResultRow(
-                            item: item,
-                            showBanners: showBanners,
-                            onItemClick: onItemClick
-                        )
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .listRowSeparator(.hidden)
+                VStack(spacing: 0) {
+                    MediaInstanceFilterGlassRow(
+                        selectedFilter: selectedFilter,
+                        availableFilters: availableFilters,
+                        itemCounts: itemCounts,
+                        totalCount: items.count,
+                        onFilterSelected: { filter in
+                            selectedFilter = filter
+                        }
+                    )
+
+                    if filteredItems.isEmpty && selectedFilter != nil {
+                        ContentUnavailableView {
+                            Label("No \(selectedFilter?.name ?? "") Results", systemImage: "line.3.horizontal.decrease.circle")
+                        } description: {
+                            Text("No results match the selected media type filter.")
+                        } actions: {
+                            Button(MR.strings().all.localized()) {
+                                selectedFilter = nil
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        List {
+                            ForEach(filteredItems, id: \.id) { item in
+                                DiscoverSearchResultRow(
+                                    item: item,
+                                    showBanners: showBanners,
+                                    onItemClick: onItemClick
+                                )
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                                .listRowSeparator(.hidden)
+                            }
+                        }
+                        .listStyle(.plain)
                     }
                 }
-                .listStyle(.plain)
+                .onChange(of: items) { newItems in
+                    if let current = selectedFilter, !newItems.contains(where: { $0.instanceType == current }) {
+                        selectedFilter = nil
+                    }
+                }
             }
         }
     }

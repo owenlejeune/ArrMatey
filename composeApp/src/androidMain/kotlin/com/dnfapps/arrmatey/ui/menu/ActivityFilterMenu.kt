@@ -152,11 +152,10 @@ fun ActivityFilterMenu(
                                                 )
                                             } else {
                                                 Icon(
-                                                    painterResource(
-                                                        instance.type.tabIcon ?: instance.type.icon,
-                                                    ),
-                                                    null,
-                                                    Modifier.size(16.dp),
+                                                    painter = painterResource(instance.type.tabIcon),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = instance.type.associatedColor,
                                                 )
                                             }
                                         },

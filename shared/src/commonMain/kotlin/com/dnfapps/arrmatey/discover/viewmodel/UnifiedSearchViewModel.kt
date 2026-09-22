@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.networking.asSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -110,6 +112,35 @@ class UnifiedSearchViewModel(
             initialValue = emptyList(),
         )
 
+    private val _selectedTypeFilter = MutableStateFlow<InstanceType?>(null)
+    val selectedTypeFilter: StateFlow<InstanceType?> = _selectedTypeFilter.asStateFlow()
+
+    val availableTypeFilters: StateFlow<List<InstanceType>> =
+        searchState
+            .map { results -> results.map { it.instanceType }.distinct() }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
+
+    val filteredSearchState: StateFlow<List<SearchResult>> =
+        combine(searchState, _selectedTypeFilter) { results, filter ->
+            if (filter == null) {
+                results
+            } else {
+                results.filter { it.instanceType == filter }
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
+
+    fun selectTypeFilter(type: InstanceType?) {
+        _selectedTypeFilter.value = type
+    }
+
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
@@ -136,6 +167,7 @@ class UnifiedSearchViewModel(
                     } else {
                         searchJob?.cancel()
                         _searchState.value = emptyList()
+                        _selectedTypeFilter.value = null
                         _isSearching.value = false
                     }
                 }
@@ -162,6 +194,7 @@ class UnifiedSearchViewModel(
             _searchQuery.value = query
             if (query.isEmpty()) {
                 _searchState.value = emptyList()
+                _selectedTypeFilter.value = null
             }
         }
     }
@@ -170,6 +203,7 @@ class UnifiedSearchViewModel(
         searchJob?.cancel()
         _searchQuery.value = ""
         _searchState.value = emptyList()
+        _selectedTypeFilter.value = null
         _isSearching.value = false
     }
 }

@@ -148,6 +148,7 @@ struct LibraryTabContent: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 16, height: 16)
+                    .foregroundColor(isSelected ? Color.white : tabInstance.type.associatedColor.toSwiftUI())
             }
             Text(tabInstance.label)
                 .font(.subheadline.weight(isSelected ? .semibold : .regular))

@@ -193,6 +193,7 @@ struct ArrTab: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 20, height: 20)
+                            .foregroundColor(instance.type.associatedColor.toSwiftUI())
                     } else {
                         Image(systemName: "ellipsis.circle")
                     }

@@ -35,6 +35,7 @@ struct SlidableCalendarItem<Content: View>: View {
                                         .resizable()
                                         .renderingMode(.template)
                                         .frame(width: 20, height: 20)
+                                        .foregroundColor(instance.type.associatedColor.toSwiftUI())
                                 }
                                 
                                 Text(instance.label)

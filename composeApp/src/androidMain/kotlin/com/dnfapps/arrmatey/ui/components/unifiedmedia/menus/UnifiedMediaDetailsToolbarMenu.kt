@@ -217,19 +217,12 @@ private fun ArrPrimaryMenuGroup(
                         onDismiss()
                     },
                     leadingIcon = {
-                        instance.type.tabIcon?.let { icon ->
-                            Icon(
-                                painter = painterResource(icon),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        } ?: run {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(instance.type.tabIcon),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = instance.type.associatedColor,
+                        )
                     },
                 )
             }

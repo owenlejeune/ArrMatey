@@ -88,19 +88,17 @@ fun MovieCalendarItem(
                 ),
         ) {
             Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (!useFullColorCards) {
                     Box(
-                        modifier =
-                            Modifier
-                                .width(6.dp)
-                                .fillMaxHeight()
-                                .background(associatedColor),
+                        modifier = Modifier
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .background(associatedColor),
                     )
                 }
 
@@ -108,7 +106,7 @@ fun MovieCalendarItem(
                     modifier =
                         Modifier
                             .weight(1f)
-                            .padding(vertical = 12.dp, horizontal = 16.dp),
+                            .padding(all = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

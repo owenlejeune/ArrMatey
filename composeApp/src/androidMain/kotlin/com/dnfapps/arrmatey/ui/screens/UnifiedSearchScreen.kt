@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.UnifiedSearchViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
+import com.dnfapps.arrmatey.ui.components.MediaInstanceFilterRow
 import com.dnfapps.arrmatey.ui.components.SearchResultList
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.mokoString
@@ -56,8 +58,16 @@ fun UnifiedSearchScreen(
     viewModel: UnifiedSearchViewModel = koinViewModel(),
 ) {
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
+    val filteredSearchState by viewModel.filteredSearchState.collectAsStateWithLifecycle()
+    val selectedTypeFilter by viewModel.selectedTypeFilter.collectAsStateWithLifecycle()
+    val availableTypeFilters by viewModel.availableTypeFilters.collectAsStateWithLifecycle()
     val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
     val showBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
+
+    val itemCounts =
+        remember(searchState) {
+            searchState.groupingBy { it.instanceType }.eachCount()
+        }
 
     val textFieldState = rememberTextFieldState(initialQuery)
     val searchBarState = rememberSearchBarState()
@@ -136,13 +146,46 @@ fun UnifiedSearchScreen(
                     )
                 }
             } else if (searchState.isNotEmpty()) {
-                SearchResultList(
-                    items = searchState,
-                    onItemClick = onItemClick,
-                    includeOverview = true,
-                    showBanners = showBanners,
-                    modifier = Modifier.fillMaxSize(),
-                )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    MediaInstanceFilterRow(
+                        selectedFilter = selectedTypeFilter,
+                        onFilterSelected = { viewModel.selectTypeFilter(it) },
+                        availableFilters = availableTypeFilters,
+                        itemCounts = itemCounts,
+                        totalCount = searchState.size,
+                    )
+
+                    if (filteredSearchState.isEmpty() && selectedTypeFilter != null) {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Text(
+                                text = "No ${selectedTypeFilter?.name} results found",
+                                style = MaterialTheme.typography.titleMedium,
+                                textAlign = TextAlign.Center,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            Button(
+                                onClick = { viewModel.selectTypeFilter(null) },
+                            ) {
+                                Text(mokoString(MR.strings.all))
+                            }
+                        }
+                    } else {
+                        SearchResultList(
+                            items = filteredSearchState,
+                            onItemClick = onItemClick,
+                            includeOverview = true,
+                            showBanners = showBanners,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                }
             }
         }
     }

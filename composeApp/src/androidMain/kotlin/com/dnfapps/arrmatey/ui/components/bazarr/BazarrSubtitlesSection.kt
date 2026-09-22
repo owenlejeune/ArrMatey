@@ -108,13 +108,12 @@ fun BazarrSubtitlesSection(
                 text = mokoString(MR.strings.bazarr_subtitles),
                 style = MaterialTheme.typography.titleLarge,
             )
-            InstanceType.Bazarr.tabIcon?.let { icon ->
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
+            Icon(
+                painter = painterResource(InstanceType.Bazarr.tabIcon),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = InstanceType.Bazarr.associatedColor,
+            )
             Spacer(modifier = Modifier.weight(1f))
             Button(onClick = { showSearch = true }) {
                 Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))

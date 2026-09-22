@@ -83,7 +83,7 @@ data class Instance(
 enum class InstanceType(
     val resource: StringResource,
     val icon: ImageResource,
-    val tabIcon: ImageResource?,
+    val tabIcon: ImageResource,
     val github: String,
     val website: String,
     val defaultPort: Int,

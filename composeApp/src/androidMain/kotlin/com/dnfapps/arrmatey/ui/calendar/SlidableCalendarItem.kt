@@ -88,7 +88,7 @@ fun SlidableCalendarItem(
                                 Modifier
                                     .size(80.dp)
                                     .clip(MaterialTheme.shapes.small)
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .clickable {
                                         onInstanceSelected(instance.id)
                                         isExpanded = false
@@ -100,17 +100,17 @@ fun SlidableCalendarItem(
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 Icon(
-                                    painter = painterResource(instance.type.tabIcon ?: instance.type.icon),
+                                    painter = painterResource(instance.type.tabIcon),
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
-                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    tint = instance.type.associatedColor,
                                 )
                                 Text(
                                     text = instance.label,
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                 )
                             }
                         }

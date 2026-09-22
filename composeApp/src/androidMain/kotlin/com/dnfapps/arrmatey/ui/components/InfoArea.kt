@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,10 +45,11 @@ fun InfoCardInstanceFooter(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Image(
-            painter = painterResource(instance.type.tabIcon ?: instance.type.icon),
+        Icon(
+            painter = painterResource(instance.type.tabIcon),
             contentDescription = null,
             modifier = Modifier.size(18.dp),
+            tint = instance.type.associatedColor,
         )
         Text(
             text = instance.label,
