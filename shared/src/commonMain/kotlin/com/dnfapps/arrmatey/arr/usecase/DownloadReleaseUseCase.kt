@@ -19,10 +19,14 @@ class DownloadReleaseUseCase(
         type: InstanceType,
         release: ArrRelease,
         force: Boolean = false,
+        instanceId: Long? = null,
     ): NetworkResult<Any> {
         val repository =
-            instanceManager.getSelectedArrRepository(type).firstOrNull()
-                ?: return NetworkResult.Error(message = "No instance selected")
+            if (instanceId != null) {
+                instanceManager.getArrRepository(instanceId)
+            } else {
+                instanceManager.getSelectedArrRepository(type).firstOrNull()
+            } ?: return NetworkResult.Error(message = "No instance selected")
 
         val payload =
             when (release) {

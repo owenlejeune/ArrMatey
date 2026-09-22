@@ -16,15 +16,25 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class GetReleasesUseCase(
     private val instanceManager: InstanceManager,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(type: InstanceType): Flow<ReleaseLibrary> =
-        instanceManager
-            .getSelectedArrRepository(type)
+    operator fun invoke(
+        type: InstanceType,
+        instanceId: Long? = null,
+    ): Flow<ReleaseLibrary> {
+        val repoFlow =
+            if (instanceId != null) {
+                flowOf(instanceManager.getArrRepository(instanceId))
+            } else {
+                instanceManager.getSelectedArrRepository(type)
+            }
+
+        return repoFlow
             .filterNotNull()
             .flatMapLatest { repository ->
                 repository.releases.map { result ->
@@ -51,6 +61,7 @@ class GetReleasesUseCase(
                     }
                 }
             }
+    }
 
     private fun parseLanguages(items: List<ArrRelease>): Set<Language> =
         items
@@ -85,17 +96,27 @@ class GetReleasesUseCase(
     suspend fun fetch(
         type: InstanceType,
         params: ReleaseParams,
+        instanceId: Long? = null,
     ) {
-        instanceManager
-            .getSelectedArrRepository(type)
-            .firstOrNull()
-            ?.getReleases(params)
+        val repository =
+            if (instanceId != null) {
+                instanceManager.getArrRepository(instanceId)
+            } else {
+                instanceManager.getSelectedArrRepository(type).firstOrNull()
+            }
+        repository?.getReleases(params)
     }
 
-    suspend fun clear(type: InstanceType) {
-        instanceManager
-            .getSelectedArrRepository(type)
-            .firstOrNull()
-            ?.clearReleases()
+    suspend fun clear(
+        type: InstanceType,
+        instanceId: Long? = null,
+    ) {
+        val repository =
+            if (instanceId != null) {
+                instanceManager.getArrRepository(instanceId)
+            } else {
+                instanceManager.getSelectedArrRepository(type).firstOrNull()
+            }
+        repository?.clearReleases()
     }
 }

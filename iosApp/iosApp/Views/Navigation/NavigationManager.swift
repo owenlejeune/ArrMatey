@@ -505,23 +505,25 @@ enum MediaRoute: Hashable {
     case search(query: String, type: InstanceType, instanceId: Int64? = nil)
     case globalSearch(query: String = "")
     case preview(_ json : String, type: InstanceType)
-    case movieRelease(Int64)
+    case movieRelease(movieId: Int64, instanceId: Int64? = nil)
     case movieFiles(String)
     case seriesReleases(
         seriesId: Int64? = nil,
         seasonNumber: Int32? = nil,
-        episodeId: Int64? = nil
+        episodeId: Int64? = nil,
+        instanceId: Int64? = nil
     )
     case albumReleases(
         albumId: Int64,
-        artistId: Int64? = nil
+        artistId: Int64? = nil,
+        instanceId: Int64? = nil
     )
-    case bookReleases(bookId: Int64)
-    case audiobookReleases(id: Int64?, query: String)
+    case bookReleases(bookId: Int64, instanceId: Int64? = nil)
+    case audiobookReleases(id: Int64?, query: String, instanceId: Int64? = nil)
     case authorFiles(authorJson: String)
     case audiobookFiles(audiobookJson: String)
-    case bookDetails(bookJson: String, authorJson: String)
-    case episodeDetails(String, String)
+    case bookDetails(bookJson: String, authorJson: String, instanceId: Int64? = nil)
+    case episodeDetails(String, String, instanceId: Int64? = nil)
 }
 
 enum SeerrRoute: Hashable {

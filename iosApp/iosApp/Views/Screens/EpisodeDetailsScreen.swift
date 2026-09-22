@@ -10,6 +10,7 @@ import Shared
 
 struct EpisodeDetailsScreen: View {
     private let series: ArrSeries
+    private let instanceId: Int64?
 
     @ObservedObject private var viewModel: EpisodeDetailsViewModelS
 
@@ -30,8 +31,9 @@ struct EpisodeDetailsScreen: View {
         viewModel.episode
     }
 
-    init(seriesJson: String, episodeJson: String) {
+    init(seriesJson: String, episodeJson: String, instanceId: Int64? = nil) {
         self.series = ArrMediaCompanion().fromJson(value: seriesJson) as! ArrSeries
+        self.instanceId = instanceId
 
         let episode = Episode.companion.fromJson(json: episodeJson)
         self.viewModel = EpisodeDetailsViewModelS(seriesId: series.id?.int64Value ?? 0, episode: episode)
@@ -142,7 +144,7 @@ struct EpisodeDetailsScreen: View {
 
         ReleaseDownloadButtons(
             onInteractiveClicked: {
-                navigation.go(to: .seriesReleases(episodeId: episode.id), of: .sonarr)
+                navigation.go(to: .seriesReleases(seriesId: series.id?.int64Value, episodeId: episode.id, instanceId: instanceId), of: .sonarr)
             },
             automaticSearchEnabled: viewModel.episode.monitored,
             onAutomaticClicked: {

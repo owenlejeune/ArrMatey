@@ -27,11 +27,11 @@ struct InteractiveSearchScreen: View {
     private var filterProtocolBinding: Binding<ReleaseProtocol?>
     private var filterIndexerBinding: Binding<String?>
 
-    init(type: InstanceType, releaseParams: ReleaseParams, defaultFilter: ReleaseFilterBy = .any) {
+    init(type: InstanceType, releaseParams: ReleaseParams, defaultFilter: ReleaseFilterBy = .any, instanceId: Int64? = nil) {
         self.type = type
         self.releaseParams = releaseParams
 
-        let vm = InteractiveSearchViewModelS(type: type, defaultFilter: defaultFilter)
+        let vm = InteractiveSearchViewModelS(type: type, defaultFilter: defaultFilter, instanceId: instanceId)
         self.viewModel = vm
         self.instancesViewModel = InstancesViewModelS(type: type)
 

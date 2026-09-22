@@ -40,48 +40,58 @@ sealed interface MediaScreen : NavKey {
 
     data class MovieReleases(
         val movieId: Long,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class MovieFiles(
         val movie: ArrMovie,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class AuthorFiles(
         val author: Author,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class AudiobookFiles(
         val audiobook: Audiobook,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class EpisodeDetails(
         val series: ArrSeries,
         val episode: Episode,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class BookDetails(
         val author: Author,
         val book: Book,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class SeriesRelease(
         val seriesId: Long? = null,
         val seasonNumber: Int? = null,
         val episodeId: Long? = null,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class AlbumRelease(
         val albumId: Long,
         val artistId: Long? = null,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class BookRelease(
         val bookId: Long,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class AudiobookRelease(
         val audiobookId: Long?,
         val query: String,
+        val instanceId: Long? = null,
     ) : MediaScreen
 
     data class PersonDetails(

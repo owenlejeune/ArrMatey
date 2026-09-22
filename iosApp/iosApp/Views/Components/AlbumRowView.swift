@@ -11,6 +11,7 @@ import Shared
 struct AlbumRowView: View {
     let artist: Arrtist
     let album: ArrAlbum
+    var instanceId: Int64? = nil
     let tracks: [LidarrTrack]
     let trackFiles: [LidarrTrackFile]
     let onToggleAlbumMonitor: (ArrAlbum) -> Void
@@ -56,7 +57,7 @@ struct AlbumRowView: View {
                     ReleaseDownloadButtons(
                         onInteractiveClicked: {
                             if let artistId = artist.id?.int64Value {
-                                let route: MediaRoute = .albumReleases(albumId: album.id, artistId: artistId)
+                                let route: MediaRoute = .albumReleases(albumId: album.id, artistId: artistId, instanceId: instanceId)
                                 navigation.go(to: route, of: .lidarr)
                             }
                         },

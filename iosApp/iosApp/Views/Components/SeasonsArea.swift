@@ -12,6 +12,7 @@ import Shared
 struct SeasonsArea: View {
     let seasons: [SeasonWrapper]
     var seriesId: Int64? = nil
+    var instanceId: Int64? = nil
     var searchIds: Set<Int64> = []
     var onToggleSeasonMonitor: (Int32) -> Void = { _ in }
     var onToggleEpisodeMonitor: (Episode) -> Void = { _ in }
@@ -37,6 +38,7 @@ struct SeasonsArea: View {
                     SeasonAreaRow(
                         season: season,
                         seriesId: seriesId,
+                        instanceId: instanceId,
                         searchIds: searchIds,
                         onToggleSeasonMonitor: onToggleSeasonMonitor,
                         onToggleEpisodeMonitor: onToggleEpisodeMonitor,
@@ -60,6 +62,7 @@ struct SeasonsArea: View {
 struct SeasonAreaRow: View {
     let season: SeasonWrapper
     let seriesId: Int64?
+    var instanceId: Int64? = nil
     let searchIds: Set<Int64>
     let onToggleSeasonMonitor: (Int32) -> Void
     let onToggleEpisodeMonitor: (Episode) -> Void
@@ -178,7 +181,7 @@ struct SeasonAreaRow: View {
                                 if let onNavigateToSeriesRelease = onNavigateToSeriesRelease {
                                     onNavigateToSeriesRelease(sId, season.seasonNumber, nil)
                                 } else {
-                                    navigation.go(to: .seriesReleases(seriesId: sId, seasonNumber: season.seasonNumber, episodeId: nil), of: .sonarr)
+                                    navigation.go(to: .seriesReleases(seriesId: sId, seasonNumber: season.seasonNumber, episodeId: nil, instanceId: instanceId), of: .sonarr)
                                 }
                             },
                             automaticSearchEnabled: season.episodes.contains { $0.isMonitored },
@@ -206,7 +209,7 @@ struct SeasonAreaRow: View {
                                 if let onNavigateToSeriesRelease = onNavigateToSeriesRelease {
                                     onNavigateToSeriesRelease(seriesId, season.seasonNumber, epId)
                                 } else {
-                                    navigation.go(to: .seriesReleases(seriesId: seriesId, seasonNumber: season.seasonNumber, episodeId: epId), of: .sonarr)
+                                    navigation.go(to: .seriesReleases(seriesId: seriesId, seasonNumber: season.seasonNumber, episodeId: epId, instanceId: instanceId), of: .sonarr)
                                 }
                             },
                             onDeleteFile: { onDeleteEpisodeFile($0) },

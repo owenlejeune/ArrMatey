@@ -10,6 +10,7 @@ import Shared
 
 struct ArtistFilesView: View {
     let artist: Arrtist
+    var instanceId: Int64? = nil
     let albums: [ArrAlbum]
     let tracks: [KotlinLong: [LidarrTrack]]
     let trackFiles: [KotlinLong: [LidarrTrackFile]]
@@ -26,6 +27,7 @@ struct ArtistFilesView: View {
                 AlbumRowView(
                     artist: artist,
                     album: album,
+                    instanceId: instanceId,
                     tracks: tracks[album.id.asKotlinLong] ?? [],
                     trackFiles: trackFiles[album.id.asKotlinLong] ?? [],
                     onToggleAlbumMonitor: onToggleAlbumMonitor,

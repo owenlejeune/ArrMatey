@@ -79,7 +79,8 @@ object KoinBridge : KoinComponent {
     fun getInteractiveSearchViewModel(
         type: InstanceType,
         defaultFilter: ReleaseFilterBy,
-    ): InteractiveSearchViewModel = getKoin().get { parametersOf(type, defaultFilter) }
+        instanceId: Long? = null,
+    ): InteractiveSearchViewModel = getKoin().get { parametersOf(type, defaultFilter, instanceId) }
 
     fun getMovieFilesViewModel(movieId: Long): MovieFilesViewModel = getKoin().get { parametersOf(movieId) }
 

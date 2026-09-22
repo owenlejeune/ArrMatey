@@ -10,6 +10,7 @@ import Shared
 
 struct MovieFilesView: View {
     let movie: ArrMovie
+    var instanceId: Int64? = nil
     let movieExtraFiles: [ExtraFile]
     let searchIds: Set<Int64>
     let searchResult: Bool?
@@ -22,7 +23,7 @@ struct MovieFilesView: View {
         Section {
             ReleaseDownloadButtons(onInteractiveClicked: {
                 if let id = movie.id?.int64Value {
-                    navigation.go(to: .movieRelease(id), of: .radarr)
+                    navigation.go(to: .movieRelease(movieId: id, instanceId: instanceId), of: .radarr)
                 }
             }, automaticSearchEnabled: movie.monitored, onAutomaticClicked: onAutomaticSearch, automaticSearchInProgress: searchIds.contains(movie.id?.int64Value ?? 0))
             

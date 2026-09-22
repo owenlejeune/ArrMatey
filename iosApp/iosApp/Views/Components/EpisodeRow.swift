@@ -10,6 +10,7 @@ import Shared
 
 struct EpisodeRow: View {
     let episode: EpisodeWrapper
+    var instanceId: Int64? = nil
     var searchInProgress: (Int64) -> Bool = { _ in false }
     var onAutomaticSearch: (Int64) -> Void = { _ in }
     var onToggleMonitor: (Episode) -> Void = { _ in }
@@ -22,6 +23,7 @@ struct EpisodeRow: View {
 
     init(
         episode: EpisodeWrapper,
+        instanceId: Int64? = nil,
         searchInProgress: @escaping (Int64) -> Bool = { _ in false },
         onAutomaticSearch: @escaping (Int64) -> Void = { _ in },
         onToggleMonitor: @escaping (Episode) -> Void = { _ in },
@@ -31,6 +33,7 @@ struct EpisodeRow: View {
         bazarrDetailsIntegration: Bool = true
     ) {
         self.episode = episode
+        self.instanceId = instanceId
         self.searchInProgress = searchInProgress
         self.onAutomaticSearch = onAutomaticSearch
         self.onToggleMonitor = onToggleMonitor
@@ -42,6 +45,7 @@ struct EpisodeRow: View {
 
     init(
         episode: Episode,
+        instanceId: Int64? = nil,
         onToggleEpisodeMonitor: @escaping (Episode) -> Void,
         onAutomaticSearch: @escaping () -> Void,
         automaticSearchDisabled: Bool = false,
@@ -55,6 +59,7 @@ struct EpisodeRow: View {
             isActive: false,
             activityProgress: nil
         )
+        self.instanceId = instanceId
         self.searchInProgress = { _ in false }
         self.onAutomaticSearch = { _ in onAutomaticSearch() }
         self.onToggleMonitor = onToggleEpisodeMonitor
@@ -164,7 +169,7 @@ struct EpisodeRow: View {
                             if let onNavigateToSeriesRelease = onNavigateToSeriesRelease {
                                 onNavigateToSeriesRelease(arrEp.id)
                             } else {
-                                let route: MediaRoute = .seriesReleases(seriesId: nil, seasonNumber: nil, episodeId: arrEp.id)
+                                let route: MediaRoute = .seriesReleases(seriesId: nil, seasonNumber: nil, episodeId: arrEp.id, instanceId: instanceId)
                                 navigation.go(to: route, of: .sonarr)
                             }
                         } label: {

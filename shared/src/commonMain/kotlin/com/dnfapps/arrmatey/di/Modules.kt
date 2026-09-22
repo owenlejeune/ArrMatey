@@ -496,8 +496,8 @@ val viewModelModule =
         viewModel { (preview: ArrMedia, type: InstanceType) ->
             MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get(), get(), get())
         }
-        viewModel { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
-            InteractiveSearchViewModel(type, defaultFilter, get(), get(), get(), get())
+        viewModel { (type: InstanceType, defaultFilter: ReleaseFilterBy, instanceId: Long?) ->
+            InteractiveSearchViewModel(type, defaultFilter, instanceId, get(), get(), get(), get())
         }
         viewModel { (movieId: Long) ->
             MovieFilesViewModel(movieId, get(), get(), get())
