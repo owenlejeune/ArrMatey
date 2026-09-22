@@ -91,17 +91,19 @@ fun AudiobookCalendarItem(
             ) {
                 if (!useFullColorCards) {
                     Box(
-                        modifier = Modifier
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .background(associatedColor),
+                        modifier =
+                            Modifier
+                                .width(6.dp)
+                                .fillMaxHeight()
+                                .background(associatedColor),
                     )
                 }
 
                 Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(all = 12.dp),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .padding(all = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

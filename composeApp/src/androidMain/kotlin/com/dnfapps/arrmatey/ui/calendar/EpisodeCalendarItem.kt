@@ -74,9 +74,10 @@ fun EpisodeCalendarItem(
         onInstanceSelected = onNavigate,
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
             shape = MaterialTheme.shapes.large,
             colors =
                 CardDefaults.cardColors(
@@ -93,10 +94,11 @@ fun EpisodeCalendarItem(
             ) {
                 if (!useFullColorCards) {
                     Box(
-                        modifier = Modifier
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .background(associatedColor),
+                        modifier =
+                            Modifier
+                                .width(6.dp)
+                                .fillMaxHeight()
+                                .background(associatedColor),
                     )
                 }
 
