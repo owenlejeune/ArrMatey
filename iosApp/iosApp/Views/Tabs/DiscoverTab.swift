@@ -276,8 +276,8 @@ struct DiscoverSearchOverlay: View {
                         .listStyle(.plain)
                     }
                 }
-                .onChange(of: items) { newItems in
-                    if let current = selectedFilter, !newItems.contains(where: { $0.instanceType == current }) {
+                .onChange(of: availableFilters) { _, newFilters in
+                    if let current = selectedFilter, !newFilters.contains(current) {
                         selectedFilter = nil
                     }
                 }

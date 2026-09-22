@@ -66,8 +66,8 @@ struct MediaInstanceFilterGlassRow: View {
                                             Image(systemName: "checkmark")
                                                 .font(.system(size: 12, weight: .bold))
                                                 .foregroundColor(Color.primary)
-                                        } else if let icon = type.tabIcon ?? type.icon as ImageResource? {
-                                            icon.toImage(renderingMode: .template)
+                                        } else {
+                                            type.tabIcon.toImage(renderingMode: .template)
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fit)
                                                 .frame(width: 14, height: 14)

@@ -143,13 +143,11 @@ struct LibraryTabContent: View {
     @ViewBuilder
     private func tabPill(tabInstance: Instance, isSelected: Bool, isOffline: Bool) -> some View {
         HStack(spacing: 6) {
-            if let logo = tabInstance.type.tabIcon {
-                logo.toImage(renderingMode: .template)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 16, height: 16)
-                    .foregroundColor(isSelected ? Color.white : tabInstance.type.associatedColor.toSwiftUI())
-            }
+            tabInstance.type.tabIcon.toImage(renderingMode: .template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 16, height: 16)
+                .foregroundColor(isSelected ? Color.white : tabInstance.type.associatedColor.toSwiftUI())
             Text(tabInstance.label)
                 .font(.subheadline.weight(isSelected ? .semibold : .regular))
             

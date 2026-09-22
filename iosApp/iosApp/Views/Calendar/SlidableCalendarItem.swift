@@ -30,13 +30,11 @@ struct SlidableCalendarItem<Content: View>: View {
                             withAnimation { isExpanded = false }
                         } label: {
                             VStack(spacing: 4) {
-                                if let icon = instance.type.tabIcon {
-                                    Image(resource: icon)
-                                        .resizable()
-                                        .renderingMode(.template)
-                                        .frame(width: 20, height: 20)
-                                        .foregroundColor(instance.type.associatedColor.toSwiftUI())
-                                }
+                                Image(resource: instance.type.tabIcon)
+                                    .resizable()
+                                    .renderingMode(.template)
+                                    .frame(width: 20, height: 20)
+                                    .foregroundColor(instance.type.associatedColor.toSwiftUI())
                                 
                                 Text(instance.label)
                                     .font(.caption.bold())
