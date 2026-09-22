@@ -9,7 +9,8 @@ import SwiftUI
 import Shared
 
 struct BookDetailsScreen: View {
-    let author: Author
+    private let author: Author
+    private let instanceId: Int64?
 
     @ObservedObject private var viewModel: BookDetailsViewModelS
 
@@ -22,10 +23,11 @@ struct BookDetailsScreen: View {
         viewModel.book
     }
 
-    init(bookJson: String, authorJson: String) {
+    init(bookJson: String, authorJson: String, instanceId: Int64? = nil) {
         let book = Book.companion.fromJson(value: bookJson)
         let author = Author.companion.fromJson(value: authorJson)
         self.author = author
+        self.instanceId = instanceId
         self.viewModel = BookDetailsViewModelS(authorId: author.id?.int64Value ?? 0, book: book)
     }
 
@@ -74,7 +76,7 @@ struct BookDetailsScreen: View {
 
                     ReleaseDownloadButtons(
                         onInteractiveClicked: {
-                            navigation.go(to: .bookReleases(bookId: viewModel.book.id), of: .bookshelf)
+                            navigation.go(to: .bookReleases(bookId: viewModel.book.id, instanceId: instanceId), of: .bookshelf)
                         },
                         automaticSearchEnabled: viewModel.book.monitored,
                         onAutomaticClicked: {

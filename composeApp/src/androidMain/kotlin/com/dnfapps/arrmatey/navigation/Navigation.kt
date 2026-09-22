@@ -177,41 +177,61 @@ fun Navigator<*>.toSearch(
 
 fun Navigator<*>.toGlobalSearch(query: String = "") = nav().navigateTo(MediaScreen.GlobalSearch(query))
 
-fun Navigator<*>.toMovieReleases(movieId: Long) = nav().navigateTo(MediaScreen.MovieReleases(movieId))
+fun Navigator<*>.toMovieReleases(
+    movieId: Long,
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.MovieReleases(movieId, instanceId))
 
-fun Navigator<*>.toMovieFiles(movie: ArrMovie) = nav().navigateTo(MediaScreen.MovieFiles(movie))
+fun Navigator<*>.toMovieFiles(
+    movie: ArrMovie,
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.MovieFiles(movie, instanceId))
 
-fun Navigator<*>.toAuthorFiles(author: Author) = nav().navigateTo(MediaScreen.AuthorFiles(author))
+fun Navigator<*>.toAuthorFiles(
+    author: Author,
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.AuthorFiles(author, instanceId))
 
-fun Navigator<*>.toAudiobookFiles(audiobook: Audiobook) = nav().navigateTo(MediaScreen.AudiobookFiles(audiobook))
+fun Navigator<*>.toAudiobookFiles(
+    audiobook: Audiobook,
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.AudiobookFiles(audiobook, instanceId))
 
 fun Navigator<*>.toEpisodeDetails(
     series: ArrSeries,
     episode: Episode,
-) = nav().navigateTo(MediaScreen.EpisodeDetails(series, episode))
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.EpisodeDetails(series, episode, instanceId))
 
 fun Navigator<*>.toBookDetails(
     author: Author,
     book: Book,
-) = nav().navigateTo(MediaScreen.BookDetails(author, book))
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.BookDetails(author, book, instanceId))
 
 fun Navigator<*>.toSeriesRelease(
     seriesId: Long? = null,
     seasonNumber: Int? = null,
     episodeId: Long? = null,
-) = nav().navigateTo(MediaScreen.SeriesRelease(seriesId, seasonNumber, episodeId))
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.SeriesRelease(seriesId, seasonNumber, episodeId, instanceId))
 
 fun Navigator<*>.toAlbumRelease(
     albumId: Long,
     artistId: Long? = null,
-) = nav().navigateTo(MediaScreen.AlbumRelease(albumId, artistId))
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.AlbumRelease(albumId, artistId, instanceId))
 
-fun Navigator<*>.toBookRelease(bookId: Long) = nav().navigateTo(MediaScreen.BookRelease(bookId))
+fun Navigator<*>.toBookRelease(
+    bookId: Long,
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.BookRelease(bookId, instanceId))
 
 fun Navigator<*>.toAudiobookRelease(
     audiobookId: Long?,
     query: String,
-) = nav().navigateTo(MediaScreen.AudiobookRelease(audiobookId, query))
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.AudiobookRelease(audiobookId, query, instanceId))
 
 fun Navigator<*>.toPersonDetails(personId: Long) = nav().navigateTo(MediaScreen.PersonDetails(personId))
 

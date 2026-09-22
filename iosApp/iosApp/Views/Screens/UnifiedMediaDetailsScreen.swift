@@ -126,7 +126,7 @@ extension UnifiedMediaDetailsScreen {
             let episodes = success.episodes.compactMap { $0.arrEpisode }
             if let episode = episodes.first(where: { $0.id == episodeId }) {
                 hasNavigatedToInitialEpisode = true
-                navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
+                navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson(), instanceId: success.selectedInstanceId?.int64Value), of: .sonarr)
             }
         }
     }
@@ -288,11 +288,12 @@ extension UnifiedMediaDetailsScreen {
             onEditAlbum: { editAlbum = $0 },
             onConfirmDeleteAlbumId: { confirmDeleteAlbumId = $0 },
             onNavigateToEpisodeDetails: { series, episode in
-                navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
+                navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson(), instanceId: success.selectedInstanceId?.int64Value), of: .sonarr)
             },
             onNavigateToSeriesRelease: { sId, seasonNum, epId in
                 if let sId = sId {
-                    let route: MediaRoute = .seriesReleases(seriesId: sId, seasonNumber: seasonNum, episodeId: epId)
+                    let instId = success.selectedInstanceId?.int64Value
+                    let route: MediaRoute = .seriesReleases(seriesId: sId, seasonNumber: seasonNum, episodeId: epId, instanceId: instId)
                     navigationManager.go(to: route, of: .sonarr)
                 }
             }

@@ -10,6 +10,7 @@ import Shared
 
 struct SeasonCard: View {
     let series: ArrSeries
+    var instanceId: Int64? = nil
     let season: Season
     let episodes: [Episode]
     let onToggleSeasonMonitor: (Int32) -> Void
@@ -45,7 +46,7 @@ struct SeasonCard: View {
 
                     ReleaseDownloadButtons(onInteractiveClicked: {
                         if let id = series.id?.int64Value {
-                            let route: MediaRoute = .seriesReleases(seriesId: id, seasonNumber: season.seasonNumber)
+                            let route: MediaRoute = .seriesReleases(seriesId: id, seasonNumber: season.seasonNumber, instanceId: instanceId)
                             navigation.go(to: route, of: .sonarr)
                         }
                     }, automaticSearchEnabled: episodes.contains(where: { $0.monitored }), onAutomaticClicked: {
@@ -55,12 +56,12 @@ struct SeasonCard: View {
                 .padding(.bottom, 4)
 
                 ForEach(episodes, id: \.id) { episode in
-                    EpisodeRow(episode: episode, onToggleEpisodeMonitor: { ep in
+                    EpisodeRow(episode: episode, instanceId: instanceId, onToggleEpisodeMonitor: { ep in
                         onToggleEpisodeMonitor(ep)
                     }, onAutomaticSearch: {
                         onEpisodeAutomaticSearch(episode.id)
                     }, automaticSearchDisabled: episode.monitored, onClicked: {
-                        navigation.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
+                        navigation.go(to: .episodeDetails(series.toJson(), episode.toJson(), instanceId: instanceId), of: .sonarr)
                     })
                     if episode != episodes.last {
                         Divider()

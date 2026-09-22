@@ -70,11 +70,11 @@ sealed interface TabItem {
 
         fun defaultStandardEntries(): List<Standard> =
             listOf(
+                Standard.DASHBOARD,
                 Standard.LIBRARY,
                 Standard.DISCOVER,
                 Standard.ACTIVITY,
                 Standard.CALENDAR,
-                Standard.DASHBOARD,
             )
 
         fun defaultHiddenStandard(): List<Standard> = standardEntries().filter { !defaultStandardEntries().contains(it) }

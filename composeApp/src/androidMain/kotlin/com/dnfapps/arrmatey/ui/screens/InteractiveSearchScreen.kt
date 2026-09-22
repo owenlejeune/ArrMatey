@@ -77,11 +77,15 @@ import org.koin.core.parameter.parametersOf
 fun InteractiveSearchScreen(
     instanceType: InstanceType,
     releaseParams: ReleaseParams,
+    instanceId: Long? = null,
     defaultFilter: ReleaseFilterBy = ReleaseFilterBy.Any,
     onBack: () -> Unit = {},
     viewModel: InteractiveSearchViewModel =
-        koinViewModel(key = "${instanceType.name}_$defaultFilter", parameters = { parametersOf(instanceType, defaultFilter) }),
-    instanceViewModel: InstancesViewModel = koinViewModel(key = instanceType.name, parameters = { parametersOf(instanceType) }),
+        koinViewModel(key = "${instanceType.name}_${defaultFilter}_$instanceId", parameters = {
+            parametersOf(instanceType, defaultFilter, instanceId)
+        }),
+    instanceViewModel: InstancesViewModel =
+        koinViewModel(key = "${instanceType.name}_$instanceId", parameters = { parametersOf(instanceType) }),
     navigationManager: NavigationManager = koinInject(),
 ) {
     val context = LocalContext.current

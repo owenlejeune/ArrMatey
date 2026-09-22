@@ -10,6 +10,7 @@ import Shared
 
 struct BooksArea: View {
     let author: Author
+    var instanceId: Int64? = nil
     let series: [BookSeries]
     let files: [BookFile]
     let books: [Book]
@@ -56,6 +57,7 @@ struct BooksArea: View {
             ForEach(books, id: \.id) { book in
                 BookRow(
                     book: book,
+                    instanceId: instanceId,
                     bookFile: files.first(where: { $0.bookId?.int64Value == book.id }),
                     onAutomaticSearch: onAutomaticSearch,
                     onToggleMonitor: onToggleMonitor,
@@ -70,7 +72,7 @@ struct BooksArea: View {
     private func navigateToBook(_ book: Book) {
         let bookJson = book.toJson()
         let authorJson = author.toJson()
-        navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson), of: .bookshelf)
+        navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson, instanceId: instanceId), of: .bookshelf)
     }
 
     private var seriesView: some View {
@@ -82,6 +84,7 @@ struct BooksArea: View {
 
                 SeriesSection(
                     author: author,
+                    instanceId: instanceId,
                     bookSeries: bookSeries,
                     seriesBooks: seriesBooks,
                     files: files,
@@ -97,6 +100,7 @@ struct BooksArea: View {
 
 struct BookRow: View {
     let book: Book
+    var instanceId: Int64? = nil
     let bookFile: BookFile?
     let onAutomaticSearch: (Int64) -> Void
     let onToggleMonitor: (Book) -> Void
@@ -136,7 +140,7 @@ struct BookRow: View {
 
             HStack(spacing: 12) {
                 Button(action: {
-                    navigation.go(to: .bookReleases(bookId: book.id), of: .bookshelf)
+                    navigation.go(to: .bookReleases(bookId: book.id, instanceId: instanceId), of: .bookshelf)
                 }) {
                     Image(systemName: "person.fill")
                 }
@@ -175,6 +179,7 @@ struct BookRow: View {
 
 struct SeriesSection: View {
     let author: Author
+    var instanceId: Int64? = nil
     let bookSeries: BookSeries
     let seriesBooks: [Book]
     let files: [BookFile]
@@ -218,6 +223,7 @@ struct SeriesSection: View {
                         if let book = seriesBooks.first(where: { $0.id == link.bookId?.int64Value }) {
                             BookRow(
                                 book: book,
+                                instanceId: instanceId,
                                 bookFile: files.first(where: { $0.bookId?.int64Value == book.id }),
                                 onAutomaticSearch: onAutomaticSearch,
                                 onToggleMonitor: onToggleMonitor,
@@ -225,7 +231,7 @@ struct SeriesSection: View {
                                 onClick: {
                                     let bookJson = book.toJson()
                                     let authorJson = author.toJson()
-                                    navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson), of: .bookshelf)
+                                    navigation.go(to: .bookDetails(bookJson: bookJson, authorJson: authorJson, instanceId: instanceId), of: .bookshelf)
                                 },
                                 seriesPosition: link.position
                             )

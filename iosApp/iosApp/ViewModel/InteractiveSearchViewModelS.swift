@@ -23,9 +23,9 @@ class InteractiveSearchViewModelS: ObservableObject {
         }
     }
     
-    init(type: InstanceType, defaultFilter: ReleaseFilterBy) {
+    init(type: InstanceType, defaultFilter: ReleaseFilterBy, instanceId: Int64? = nil) {
         self.filterUiState = InteractiveSearchUiState.companion.empty(filterBy: defaultFilter)
-        self.viewModel = KoinBridge.shared.getInteractiveSearchViewModel(type: type, defaultFilter: defaultFilter)
+        self.viewModel = KoinBridge.shared.getInteractiveSearchViewModel(type: type, defaultFilter: defaultFilter, instanceId: instanceId?.asKotlinLong)
         startObserving()
     }
     

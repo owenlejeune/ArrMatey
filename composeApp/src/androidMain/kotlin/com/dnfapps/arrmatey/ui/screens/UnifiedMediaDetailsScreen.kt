@@ -123,16 +123,16 @@ fun UnifiedMediaDetailsScreen(
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit,
-    onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit,
-    onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?) -> Unit,
-    onNavigateToMovieFiles: (ArrMovie) -> Unit,
-    onNavigateToMovieReleases: (Long) -> Unit,
-    onNavigateToAuthorFiles: (Author) -> Unit,
-    onNavigateToBookDetails: (Author, Book) -> Unit,
-    onNavigateToBookRelease: (Long) -> Unit,
-    onNavigateToAudiobookFiles: (Audiobook) -> Unit,
-    onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
-    onNavigateToAlbumRelease: (Long, Long) -> Unit,
+    onNavigateToEpisodeDetails: (ArrSeries, Episode, Long?) -> Unit,
+    onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?, instanceId: Long?) -> Unit,
+    onNavigateToMovieFiles: (ArrMovie, Long?) -> Unit,
+    onNavigateToMovieReleases: (movieId: Long, instanceId: Long?) -> Unit,
+    onNavigateToAuthorFiles: (Author, Long?) -> Unit,
+    onNavigateToBookDetails: (Author, Book, Long?) -> Unit,
+    onNavigateToBookRelease: (bookId: Long, instanceId: Long?) -> Unit,
+    onNavigateToAudiobookFiles: (Audiobook, Long?) -> Unit,
+    onNavigateToAudiobookRelease: (audiobookId: Long?, query: String?, instanceId: Long?) -> Unit,
+    onNavigateToAlbumRelease: (artistId: Long, albumId: Long, instanceId: Long?) -> Unit,
     onPersonClick: (Long) -> Unit,
     onMediaClick: ((Long, RequestType) -> Unit)? = null,
     instanceId: Long? = null,
@@ -165,7 +165,8 @@ fun UnifiedMediaDetailsScreen(
 
             if (series != null && episode != null) {
                 hasNavigatedToInitialEpisode = true
-                onNavigateToEpisodeDetails(series, episode)
+                val currentInstanceId = successState.selectedInstanceId ?: instanceId ?: viewModel.selectedInstanceId.value
+                onNavigateToEpisodeDetails(series, episode, currentInstanceId)
             }
         }
     }
@@ -577,6 +578,8 @@ fun UnifiedMediaDetailsScreen(
 
                                 when (selectedTab) {
                                     DetailsTab.SeasonsFiles -> {
+                                        val currentInstanceId =
+                                            successState.selectedInstanceId ?: instanceId ?: viewModel.selectedInstanceId.value
                                         SeasonsFilesTabContent(
                                             state = successState,
                                             automaticSearchIds = automaticSearchIds,
@@ -588,26 +591,36 @@ fun UnifiedMediaDetailsScreen(
                                             onEpisodeAutomaticSearch = { viewModel.performEpisodeAutomaticLookup(it) },
                                             onSeasonAutomaticSearch = { viewModel.performSeasonAutomaticLookup(it) },
                                             onDeleteSeasonFiles = { confirmDeleteSeasonNumber = it },
-                                            onNavigateToEpisodeDetails = onNavigateToEpisodeDetails,
+                                            onNavigateToEpisodeDetails = { series, episode ->
+                                                onNavigateToEpisodeDetails(series, episode, currentInstanceId)
+                                            },
                                             onDeleteEpisodeFile = { confirmDeleteEpisodeId = it },
-                                            onNavigateToSeriesRelease = onNavigateToSeriesRelease,
+                                            onNavigateToSeriesRelease = { sId, sNum, epId ->
+                                                onNavigateToSeriesRelease(sId, sNum, epId, currentInstanceId)
+                                            },
                                             onPerformAutomaticLookup = { viewModel.performAutomaticLookup() },
                                             onDeleteMovieFile = { confirmDeleteMovie = true },
-                                            onNavigateToMovieFiles = onNavigateToMovieFiles,
-                                            onNavigateToMovieReleases = onNavigateToMovieReleases,
+                                            onNavigateToMovieFiles = { onNavigateToMovieFiles(it, currentInstanceId) },
+                                            onNavigateToMovieReleases = { onNavigateToMovieReleases(it, currentInstanceId) },
                                             onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
                                             onEditAlbum = { editAlbum = it },
                                             onAlbumAutomaticSearch = { viewModel.performAlbumAutomaticLookup(it) },
                                             onDeleteAlbumFiles = { confirmDeleteAlbum = it },
-                                            onNavigateToAlbumRelease = onNavigateToAlbumRelease,
+                                            onNavigateToAlbumRelease = { artistId, albumId ->
+                                                onNavigateToAlbumRelease(artistId, albumId, currentInstanceId)
+                                            },
                                             onToggleBookMonitor = { viewModel.toggleBookMonitored(it) },
                                             onToggleBookSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
                                             onBookAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
-                                            onNavigateToAuthorFiles = onNavigateToAuthorFiles,
-                                            onNavigateToBookDetails = onNavigateToBookDetails,
-                                            onNavigateToBookRelease = onNavigateToBookRelease,
-                                            onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
-                                            onNavigateToAudiobookRelease = onNavigateToAudiobookRelease,
+                                            onNavigateToAuthorFiles = { onNavigateToAuthorFiles(it, currentInstanceId) },
+                                            onNavigateToBookDetails = { author, book ->
+                                                onNavigateToBookDetails(author, book, currentInstanceId)
+                                            },
+                                            onNavigateToBookRelease = { onNavigateToBookRelease(it, currentInstanceId) },
+                                            onNavigateToAudiobookFiles = { onNavigateToAudiobookFiles(it, currentInstanceId) },
+                                            onNavigateToAudiobookRelease = { id, query ->
+                                                onNavigateToAudiobookRelease(id, query, currentInstanceId)
+                                            },
                                         )
                                     }
 

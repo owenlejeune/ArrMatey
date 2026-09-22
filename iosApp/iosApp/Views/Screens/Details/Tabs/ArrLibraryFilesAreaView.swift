@@ -14,10 +14,12 @@ struct ArrLibraryFilesAreaView: View {
     let onConfirmDeleteAlbumId: (Int64) -> Void
 
     var body: some View {
+        let currentInstanceId = success.selectedInstanceId?.int64Value
         if let movie = success.arrMedia as? ArrMovie {
             VStack(spacing: 12) {
                 MovieFilesView(
                     movie: movie,
+                    instanceId: currentInstanceId,
                     movieExtraFiles: success.extraFiles,
                     searchIds: viewModel.automaticSearchIds,
                     searchResult: viewModel.lastSearchResult,
@@ -36,6 +38,7 @@ struct ArrLibraryFilesAreaView: View {
         } else if let artist = success.arrMedia as? Arrtist {
             ArtistFilesView(
                 artist: artist,
+                instanceId: currentInstanceId,
                 albums: success.albums,
                 tracks: success.tracks,
                 trackFiles: success.trackFiles,
@@ -49,6 +52,7 @@ struct ArrLibraryFilesAreaView: View {
         } else if let author = success.arrMedia as? Author {
             BooksArea(
                 author: author,
+                instanceId: currentInstanceId,
                 series: success.bookSeries,
                 files: success.bookFiles,
                 books: success.books,
@@ -60,6 +64,7 @@ struct ArrLibraryFilesAreaView: View {
         } else if let audiobook = success.arrMedia as? Audiobook {
             AudiobooksArea(
                 audiobook: audiobook,
+                instanceId: currentInstanceId,
                 searchIds: viewModel.automaticSearchIds,
                 onAutomaticSearch: { viewModel.performAutomaticLookup() }
             )

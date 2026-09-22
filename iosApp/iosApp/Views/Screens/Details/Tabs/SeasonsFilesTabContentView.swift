@@ -36,6 +36,7 @@ struct SeasonsFilesTabContentView: View {
             SeasonsArea(
                 seasons: success.seasons,
                 seriesId: seriesId,
+                instanceId: success.selectedInstanceId?.int64Value,
                 searchIds: viewModel.automaticSearchIds,
                 onToggleSeasonMonitor: { viewModel.toggleSeasonMonitored(seasonNumber: $0) },
                 onToggleEpisodeMonitor: { viewModel.toggleEpisodeMonitored(episode: $0) },

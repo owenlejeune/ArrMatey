@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,6 +41,7 @@ import kotlinx.coroutines.launch
 class InteractiveSearchViewModel(
     private val instanceType: InstanceType,
     defaultFilterBy: ReleaseFilterBy,
+    private val instanceId: Long? = null,
     private val getReleasesUseCase: GetReleasesUseCase,
     private val downloadReleaseUseCase: DownloadReleaseUseCase,
     private val applyCustomFilterItemUseCase: ApplyCustomFilterItemUseCase,
@@ -61,9 +63,11 @@ class InteractiveSearchViewModel(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val selectedRepository =
-        getArrInstanceRepositoryUseCase
-            .observeSelected(instanceType)
-            .filterNotNull()
+        if (instanceId != null) {
+            flowOf(getArrInstanceRepositoryUseCase(instanceId))
+        } else {
+            getArrInstanceRepositoryUseCase.observeSelected(instanceType)
+        }.filterNotNull()
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
@@ -88,7 +92,7 @@ class InteractiveSearchViewModel(
     private fun observeReleases() {
         viewModelScope.launch {
             combine(
-                getReleasesUseCase(instanceType),
+                getReleasesUseCase(instanceType, instanceId),
                 _filterUiState,
                 _searchQuery,
                 customFilters,
@@ -198,8 +202,13 @@ class InteractiveSearchViewModel(
 
     private fun observeDownloadStatus() {
         viewModelScope.launch {
-            getArrInstanceRepositoryUseCase
-                .observeSelected(instanceType)
+            val repoFlow =
+                if (instanceId != null) {
+                    flowOf(getArrInstanceRepositoryUseCase(instanceId))
+                } else {
+                    getArrInstanceRepositoryUseCase.observeSelected(instanceType)
+                }
+            repoFlow
                 .filterNotNull()
                 .collectLatest { repository ->
                     repository.downloadStatus.collect { status ->
@@ -217,7 +226,7 @@ class InteractiveSearchViewModel(
 
     fun getRelease(params: ReleaseParams) {
         viewModelScope.launch {
-            getReleasesUseCase.fetch(instanceType, params)
+            getReleasesUseCase.fetch(instanceType, params, instanceId)
         }
     }
 
@@ -227,7 +236,7 @@ class InteractiveSearchViewModel(
     ) {
         viewModelScope.launch {
             _downloadReleaseState.value = DownloadState.Loading(release.guid)
-            downloadReleaseUseCase(instanceType, release, force)
+            downloadReleaseUseCase(instanceType, release, force, instanceId)
         }
     }
 
@@ -297,7 +306,7 @@ class InteractiveSearchViewModel(
 
     override fun onCleared() {
         viewModelScope.launch {
-            getReleasesUseCase.clear(instanceType)
+            getReleasesUseCase.clear(instanceType, instanceId)
         }
         resetDownloadState()
         super.onCleared()

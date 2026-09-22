@@ -10,6 +10,7 @@ import Shared
 
 struct SeriesFilesView: View {
     let series: ArrSeries
+    var instanceId: Int64? = nil
     let episodes: [Episode]
     let searchIds: Set<Int64>
     let searchResult: Bool?
@@ -30,6 +31,7 @@ struct SeriesFilesView: View {
             ForEach(sortedSeasons, id: \.self) { season in
                 SeasonCard(
                     series: series,
+                    instanceId: instanceId,
                     season: season,
                     episodes: seasonEpisodes[season.seasonNumber]?.reversed() ?? [],
                     onToggleSeasonMonitor: onToggleSeasonMonitor,

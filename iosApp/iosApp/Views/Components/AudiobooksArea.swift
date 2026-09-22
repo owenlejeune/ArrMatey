@@ -10,6 +10,7 @@ import SwiftUI
 
 struct AudiobooksArea: View {
     let audiobook: Audiobook
+    var instanceId: Int64? = nil
     let searchIds: Set<Int64>
     let onAutomaticSearch: () -> Void
     
@@ -21,7 +22,7 @@ struct AudiobooksArea: View {
         Section {
             ReleaseDownloadButtons(onInteractiveClicked: {
                 if let id = audiobook.id?.int64Value {
-                    navigation.go(to: .audiobookReleases(id: id, query: audiobook.releaseQuery), of: .listenarr)
+                    navigation.go(to: .audiobookReleases(id: id, query: audiobook.releaseQuery, instanceId: instanceId), of: .listenarr)
                 }
             }, automaticSearchEnabled: audiobook.monitored, onAutomaticClicked: onAutomaticSearch, automaticSearchInProgress: audiobook.id.map { searchIds.contains($0.int64Value) } ?? false)
             
