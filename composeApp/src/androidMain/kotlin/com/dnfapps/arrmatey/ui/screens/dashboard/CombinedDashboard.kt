@@ -83,6 +83,7 @@ import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -100,6 +101,7 @@ import com.dnfapps.arrmatey.ui.screens.requests.RequestsList
 import com.dnfapps.arrmatey.ui.screens.tracearr.DashboardTracearrSection
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.sheets.HealthNoticesSheet
+import com.dnfapps.arrmatey.ui.sheets.MediaRequestOrAddSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.DiscoverSearchOverlay
@@ -147,6 +149,7 @@ fun DashboardCardContent(
     onNavigateToTracearrViolations: () -> Unit = {},
     onNavigateToTracearrActivity: () -> Unit = {},
     onShuffleQuickPick: () -> Unit = {},
+    onMediaRequestClick: (DiscoverResult) -> Unit = {},
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
@@ -305,7 +308,7 @@ fun DashboardCardContent(
                     if (!isEditing && enabled) onNavigateToSeerrMediaDetails(tmdbId, type)
                 },
                 onRequestClick = { item ->
-                    if (!isEditing && enabled) onNavigateToSeerrMediaDetails(item.id, item.mediaType)
+                    if (!isEditing && enabled) onMediaRequestClick(item)
                 },
             )
 
@@ -319,7 +322,7 @@ fun DashboardCardContent(
                     if (!isEditing && enabled) onNavigateToSeerrMediaDetails(tmdbId, type)
                 },
                 onRequestClick = { item ->
-                    if (!isEditing && enabled) onNavigateToSeerrMediaDetails(item.id, item.mediaType)
+                    if (!isEditing && enabled) onMediaRequestClick(item)
                 },
             )
     }
@@ -393,6 +396,7 @@ fun CombinedDashboard(
     var selectedIssueForSheet by remember { mutableStateOf<MediaIssuePackage?>(null) }
     var selectedActivityItem by remember { mutableStateOf<QueueItem?>(null) }
     var selectedTracearrStreamSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
+    var selectedMediaForRequest by remember { mutableStateOf<DiscoverResult?>(null) }
     var showConfirmRemoveActivity by remember { mutableStateOf(false) }
     var showHealthNoticesSheet by remember { mutableStateOf(false) }
     var showSeerrRequestsSheet by remember { mutableStateOf(false) }
@@ -648,10 +652,7 @@ fun CombinedDashboard(
                                                         { onNavigateToTracearrTab() }
                                                     }
 
-                                                    DashboardCards.DiscoverFeed,
-                                                    DashboardCards.DiscoverSpotlight,
-                                                    DashboardCards.DiscoverQuickPick,
-                                                    -> {
+                                                    DashboardCards.DiscoverFeed -> {
                                                         { onNavigateToDiscoverTab() }
                                                     }
 
@@ -664,7 +665,7 @@ fun CombinedDashboard(
                                                         .padding(innerPadding)
                                                         .clip(MaterialTheme.shapes.large)
                                                         .combinedClickable(
-                                                            enabled = !isEditing,
+                                                            enabled = !isEditing && cardOnClick != null,
                                                             onClick = { cardOnClick?.invoke() },
                                                             onLongClick = {
                                                                 if (!isEditing) {
@@ -700,6 +701,7 @@ fun CombinedDashboard(
                                                     onNavigateToTracearrViolations = onNavigateToTracearrViolations,
                                                     onNavigateToTracearrActivity = onNavigateToTracearrActivity,
                                                     onShuffleQuickPick = { viewModel.shuffleQuickPick() },
+                                                    onMediaRequestClick = { if (!isEditing) selectedMediaForRequest = it },
                                                 )
                                             }
                                             if (isEditing) {
@@ -990,6 +992,13 @@ fun CombinedDashboard(
                             )
                         }
                     }
+                }
+
+                selectedMediaForRequest?.let { item ->
+                    MediaRequestOrAddSheet(
+                        item = item,
+                        onDismiss = { selectedMediaForRequest = null },
+                    )
                 }
             }
         }

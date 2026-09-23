@@ -61,7 +61,15 @@ class UnifiedMediaDetailsDataObserver(
                         activeArrMedia = current.arrMedia,
                         presencesMap = map,
                     )
-                uiStateFlow.value = current.copy(instancePresences = updatedPresences)
+                val effectiveArrMedia =
+                    current.arrMedia
+                        ?: map[current.selectedInstanceId]
+                        ?: map.values.firstOrNull { it != null }
+                uiStateFlow.value =
+                    current.copy(
+                        arrMedia = effectiveArrMedia,
+                        instancePresences = updatedPresences,
+                    )
 
                 val filteredInstances =
                     current.availableInstances.filter { instance ->
@@ -212,10 +220,7 @@ class UnifiedMediaDetailsDataObserver(
                         if (allRepos.isNotEmpty() && query != null) {
                             val missingRepos =
                                 allRepos.filter { repo ->
-                                    repo.instance.id != activeRepo?.instance?.id &&
-                                        !instanceHandler.instancePresencesMap.value.containsKey(
-                                            repo.instance.id,
-                                        )
+                                    instanceHandler.instancePresencesMap.value[repo.instance.id] == null
                                 }
                             if (missingRepos.isNotEmpty()) {
                                 launch {
@@ -240,8 +245,15 @@ class UnifiedMediaDetailsDataObserver(
                                 presencesMap = instanceHandler.instancePresencesMap.value,
                             )
 
+                        val effectiveArrMedia =
+                            rawState.arrMedia
+                                ?: instanceHandler.instancePresencesMap.value[activeRepo?.instance?.id]
+                                ?: instanceHandler.instancePresencesMap.value[instanceHandler.selectedInstanceId.value]
+                                ?: instanceHandler.instancePresencesMap.value.values.firstOrNull { it != null }
+
                         uiStateFlow.value =
                             rawState.copy(
+                                arrMedia = effectiveArrMedia,
                                 availableInstances = if (!combineMedia && !rawState.hasArrId) emptyList() else allRepos.map { it.instance },
                                 selectedInstanceId = activeRepo?.instance?.id ?: instanceHandler.selectedInstanceId.value,
                                 instancePresences = if (!combineMedia && !rawState.hasArrId) emptyList() else presences,

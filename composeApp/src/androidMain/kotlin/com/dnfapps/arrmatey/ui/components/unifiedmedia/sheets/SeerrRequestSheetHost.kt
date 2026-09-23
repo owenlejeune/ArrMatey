@@ -16,6 +16,9 @@ fun SeerrRequestSheetHost(
     requestInProgress: Boolean,
     onSubmitRequest: (profileId: Long?, rootFolder: String?, langId: Long?, seasons: List<Int>?, userId: Long?) -> Unit,
     onDismiss: () -> Unit,
+    canSwitchToAddDirectly: Boolean = false,
+    instanceTypeName: String? = null,
+    onSwitchToAddDirectly: (() -> Unit)? = null,
 ) {
     if (visible && details != null) {
         SeerrRequestSheet(
@@ -26,6 +29,9 @@ fun SeerrRequestSheetHost(
             requestInProgress = requestInProgress,
             onDismissRequest = onDismiss,
             onSubmitRequest = onSubmitRequest,
+            canSwitchToAddDirectly = canSwitchToAddDirectly,
+            instanceTypeName = instanceTypeName,
+            onSwitchToAddDirectly = onSwitchToAddDirectly,
         )
     }
 }

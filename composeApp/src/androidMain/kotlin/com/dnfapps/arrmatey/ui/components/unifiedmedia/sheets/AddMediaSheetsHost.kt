@@ -37,6 +37,9 @@ fun AddMediaSheetsHost(
     onSmartAdd: (ArrMedia, Boolean, Long?) -> Unit,
     onUpdatePreferences: (InstancePreferences) -> Unit,
     onDismiss: () -> Unit,
+    canSwitchToRequest: Boolean = false,
+    instanceTypeName: String? = null,
+    onSwitchToRequest: (() -> Unit)? = null,
 ) {
     if (!visible) return
 
@@ -63,6 +66,9 @@ fun AddMediaSheetsHost(
                 },
                 onUpdatePreferences = onUpdatePreferences,
                 onDismiss = onDismiss,
+                canSwitchToRequest = canSwitchToRequest,
+                instanceTypeName = instanceTypeName,
+                onSwitchToRequest = onSwitchToRequest,
             )
 
         is ArrMovie ->
@@ -81,6 +87,9 @@ fun AddMediaSheetsHost(
                 },
                 onUpdatePreferences = onUpdatePreferences,
                 onDismiss = onDismiss,
+                canSwitchToRequest = canSwitchToRequest,
+                instanceTypeName = instanceTypeName,
+                onSwitchToRequest = onSwitchToRequest,
             )
 
         is Arrtist ->

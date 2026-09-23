@@ -20,7 +20,7 @@ class GetInstancePresencesUseCase {
 
         val missingRepos =
             repositories.filter { repo ->
-                !existingPresences.containsKey(repo.instance.id)
+                existingPresences[repo.instance.id] == null
             }
         if (missingRepos.isEmpty()) return existingPresences
 

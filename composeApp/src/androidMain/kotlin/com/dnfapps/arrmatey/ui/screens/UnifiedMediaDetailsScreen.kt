@@ -703,6 +703,12 @@ fun UnifiedMediaDetailsScreen(
                         )
                     },
                     onDismiss = { viewModel.hideRequestSheet() },
+                    canSwitchToAddDirectly = addSheetUiState.availableInstances.isNotEmpty(),
+                    instanceTypeName = viewModel.resolvedInstanceType?.name,
+                    onSwitchToAddDirectly = {
+                        viewModel.hideRequestSheet()
+                        showAddSheet = true
+                    },
                 )
 
                 SeerrReportIssueSheetHost(
@@ -731,6 +737,12 @@ fun UnifiedMediaDetailsScreen(
                     },
                     onUpdatePreferences = viewModel::updatePreferences,
                     onDismiss = { showAddSheet = false },
+                    canSwitchToRequest = state.seerrMedia != null,
+                    instanceTypeName = viewModel.resolvedInstanceType?.name,
+                    onSwitchToRequest = {
+                        showAddSheet = false
+                        viewModel.showRequestSheet(is4k = false)
+                    },
                 )
 
                 SeerrViewRequestSheetHost(
