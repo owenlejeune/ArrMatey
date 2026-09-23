@@ -148,7 +148,7 @@ struct InstancesPageView: View {
                         }
                     }
 
-                    HStack(spacing: 12) {
+                    VStack(spacing: 10) {
                         Button(action: onAddInstance) {
                             HStack {
                                 Image(systemName: "plus.circle.fill")

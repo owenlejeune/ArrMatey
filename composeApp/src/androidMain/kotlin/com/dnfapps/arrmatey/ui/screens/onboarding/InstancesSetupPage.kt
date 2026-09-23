@@ -301,27 +301,27 @@ fun InstancesSetupPage(
             }
         }
 
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             FilledTonalButton(
                 onClick = onAddInstance,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(mokoString(MR.strings.onboarding_add_instance))
             }
 
             FilledTonalButton(
                 onClick = onAddDownloadClient,
-                modifier = Modifier.weight(1.5f),
+                modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(mokoString(MR.strings.add_download_client))
             }
         }
