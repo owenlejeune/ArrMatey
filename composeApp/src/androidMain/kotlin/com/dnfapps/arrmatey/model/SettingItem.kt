@@ -10,6 +10,7 @@ data class SettingItem(
     val title: String,
     val subtitle: String? = null,
     val backgroundColor: Color? = null,
+    val contentColor: Color? = null,
     val enabled: Boolean = true,
     val titleExtraContent: @Composable (() -> Unit)? = null,
     val trailingContent: @Composable (() -> Unit)? = null,

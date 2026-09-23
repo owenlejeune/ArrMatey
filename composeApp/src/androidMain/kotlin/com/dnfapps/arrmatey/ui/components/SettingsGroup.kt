@@ -90,10 +90,15 @@ fun SettingsRow(
     shape: Shape,
 ) {
     val contentAlpha = if (item.enabled) 1f else 0.38f
+    val titleColor = item.contentColor ?: MaterialTheme.colorScheme.onSurface
+    val subtitleColor = item.contentColor?.copy(alpha = 0.8f) ?: MaterialTheme.colorScheme.onSurfaceVariant
+    val iconTint = item.contentColor ?: MaterialTheme.colorScheme.primary
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = shape,
         color = item.backgroundColor ?: MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = titleColor,
         enabled = item.enabled,
         onClick = item.onClick,
     ) {
@@ -115,7 +120,7 @@ fun SettingsRow(
                                 imageVector = source.imageVector,
                                 contentDescription = null,
                                 modifier = Modifier.size(36.dp).rotate(source.rotation),
-                                tint = MaterialTheme.colorScheme.primary.copy(alpha = contentAlpha),
+                                tint = iconTint.copy(alpha = contentAlpha),
                             )
                         is IconSource.Resource ->
                             Image(
@@ -137,7 +142,7 @@ fun SettingsRow(
                         Text(
                             text = item.title,
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
+                            color = titleColor.copy(alpha = contentAlpha),
                         )
                         item.titleExtraContent?.let {
                             Spacer(modifier = Modifier.width(8.dp))
@@ -148,7 +153,7 @@ fun SettingsRow(
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha),
+                            color = subtitleColor.copy(alpha = contentAlpha),
                         )
                     }
                 }

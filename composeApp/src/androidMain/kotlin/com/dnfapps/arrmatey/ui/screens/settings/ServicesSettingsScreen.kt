@@ -122,7 +122,7 @@ fun ServicesSettingsScreen(
                     } +
                         SettingItem(
                             title = mokoString(MR.strings.add_instance),
-                            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.primary,
                             icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                             onClick = {
                                 onNavigateToAddInstance()
@@ -170,7 +170,7 @@ fun ServicesSettingsScreen(
                     } +
                         SettingItem(
                             title = mokoString(MR.strings.add_download_client),
-                            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.primary,
                             icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                             onClick = {
                                 onNavigateToAddDownloadClient()
@@ -200,7 +200,7 @@ fun ServicesSettingsScreen(
                     } +
                         SettingItem(
                             title = mokoString(MR.strings.add_custom_webpage),
-                            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.primary,
                             icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                             onClick = {
                                 onNavigateToAddCustomWebpage()
