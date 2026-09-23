@@ -26,10 +26,19 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
+import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
+import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
+import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestMedia
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.RequestUser
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import dev.icerock.moko.resources.ImageResource
@@ -56,6 +65,11 @@ sealed interface CombinedDashboardState {
         val prowlarrStats: List<ProwlarrDashboardState> = emptyList(),
         val bazarrStats: List<BazarrDashboardState> = emptyList(),
         val tracearrStats: List<TracearrDashboardState> = emptyList(),
+        val trendingMedia: List<DiscoverResult> = emptyList(),
+        val popularMovies: List<DiscoverResult> = emptyList(),
+        val popularTv: List<DiscoverResult> = emptyList(),
+        val upcomingMovies: List<DiscoverResult> = emptyList(),
+        val upcomingTv: List<DiscoverResult> = emptyList(),
         val networkStatus: NetworkStatusState? = null,
         val isRefreshing: Boolean = false,
     ) : CombinedDashboardState {
@@ -67,10 +81,76 @@ sealed interface CombinedDashboardState {
 
         val activeStreams: List<TracearrStreamSession>
             get() = tracearrStats.flatMap { it.activeStreams }
+
+        val spotlightMedia: List<DiscoverResult>
+            get() = (trendingMedia + popularMovies + popularTv)
+                .filter { it.backdropPath != null || it.posterPath != null }
+                .distinctBy { "${it.mediaType.name}_${it.id}" }
+
+        val quickPickMedia: List<DiscoverResult>
+            get() = (trendingMedia + popularMovies + popularTv)
+                .distinctBy { "${it.mediaType.name}_${it.id}" }
+
+        fun getDiscoverFeedItems(category: DiscoverCategory): List<DiscoverResult> =
+            when (category) {
+                DiscoverCategory.TRENDING -> trendingMedia
+                DiscoverCategory.POPULAR_MOVIES -> popularMovies
+                DiscoverCategory.POPULAR_SERIES -> popularTv
+                DiscoverCategory.UPCOMING_MOVIES,
+                DiscoverCategory.UPCOMING_SERIES -> upcomingMovies.ifEmpty { upcomingTv }
+            }
+
+        fun resolveMediaStatus(item: DiscoverResult): com.dnfapps.arrmatey.seerr.api.model.MediaStatus {
+            val directStatus = item.mediaInfo?.status?.let { com.dnfapps.arrmatey.seerr.api.model.MediaStatus.fromValue(it) }
+            if (directStatus != null && directStatus != com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Unknown) {
+                return directStatus
+            }
+
+            if (item.mediaInfo?.requests?.isNotEmpty() == true) {
+                if (item.mediaInfo.requests.any { it.status == 1 }) {
+                    return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Pending
+                }
+                if (item.mediaInfo.requests.any { it.status == 2 }) {
+                    return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Processing
+                }
+            }
+
+            val isPending =
+                seerrInstances.any { inst ->
+                    inst.pendingRequests.any { pkg ->
+                        pkg.request.media.tmdbId == item.id ||
+                            pkg.details?.id == item.id ||
+                            (item.mediaInfo?.tmdbId != null && pkg.request.media.tmdbId == item.mediaInfo.tmdbId)
+                    }
+                }
+            if (isPending) return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Pending
+
+            val isInLibrary =
+                instances.any { inst ->
+                    inst.library.any { media ->
+                        when (media) {
+                            is com.dnfapps.arrmatey.arr.api.model.ArrMovie ->
+                                (media.tmdbId > 0 && media.tmdbId == item.id) ||
+                                    (item.mediaInfo?.tmdbId != null && media.tmdbId == item.mediaInfo.tmdbId)
+                            is com.dnfapps.arrmatey.arr.api.model.ArrSeries ->
+                                (media.tmdbId != null && media.tmdbId > 0 && media.tmdbId == item.id) ||
+                                    (item.mediaInfo?.tvdbId != null && media.tvdbId == item.mediaInfo.tvdbId) ||
+                                    (item.mediaInfo?.tmdbId != null && media.tmdbId == item.mediaInfo.tmdbId)
+                            else -> false
+                        }
+                    }
+                }
+            if (isInLibrary) return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Available
+
+            return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Unknown
+        }
     }
 
     companion object {
         val Mock: Success by lazy {
+            val now = Clock.System.now()
+            val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
+
             val instances =
                 InstanceType.entries.mapIndexed { index, type ->
                     Instance(
@@ -81,6 +161,102 @@ sealed interface CombinedDashboardState {
                         apiKey = EncryptedString("mock"),
                     )
                 }
+
+            val mockUser =
+                RequestUser(
+                    permissions = 0,
+                    id = 1,
+                    email = "captain@arrmatey.app",
+                    username = "CaptainArr",
+                    displayName = "Captain Arr",
+                    userType = 1,
+                    avatar = "",
+                    createdAt = now,
+                    updatedAt = now,
+                    requestCount = 5,
+                )
+
+            val mockRequestMedia =
+                RequestMedia(
+                    id = 1,
+                    mediaType = RequestType.Movie,
+                    tmdbId = 1011985,
+                    tvdbId = null,
+                    imdbId = null,
+                    status = 2,
+                    status4k = 1,
+                    createdAt = now,
+                    updatedAt = now,
+                    downloadStatus = emptyList(),
+                )
+
+            val mockMovieDetails =
+                MovieDetails(
+                    id = 1,
+                    title = "A Totally Awesome Movie",
+                    originalTitle = "A Totally Awesome Movie",
+                    overview = "Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi aliqua eiusmod reprehenderit sit qui cillum esse.",
+                    posterPath = null,
+                    backdropPath = null,
+                    releaseDate = LocalDate(2026, 3, 8),
+                    voteAverage = 8.5,
+                    originalLanguage = "en",
+                    status = "Released",
+                )
+
+            val mockRequest =
+                MediaRequest(
+                    id = 1,
+                    status = 1,
+                    createdAt = now,
+                    updatedAt = now,
+                    type = RequestType.Movie,
+                    is4k = false,
+                    isAutoRequest = false,
+                    media = mockRequestMedia,
+                    requestedBy = mockUser,
+                    seasonCount = 0,
+                )
+
+            val mockRequestPackage =
+                MediaRequestPackage(
+                    request = mockRequest,
+                    details = mockMovieDetails,
+                    serviceDetails = null,
+                )
+
+            val mockIssue =
+                Issue(
+                    id = 1,
+                    issueType = 1,
+                    status = 1,
+                    createdAt = now,
+                    updatedAt = now,
+                    media = mockRequestMedia,
+                    createdBy = mockUser,
+                )
+
+            val mockIssuePackage =
+                MediaIssuePackage(
+                    issue = mockIssue,
+                    details = mockMovieDetails,
+                )
+
+            val mockStreamSession =
+                TracearrStreamSession(
+                    id = "mock-session-1",
+                    mediaTitle = "A Totally Awesome Movie",
+                    username = "CaptainArr",
+                    playerName = "Living Room Apple TV",
+                    device = "Apple TV 4K",
+                    state = "playing",
+                    progressMs = 1800000L,
+                    totalDurationMs = 5640000L,
+                    mediaType = TracearrMediaType.Movie,
+                    startedAt = now,
+                    thumbPath = null,
+                    posterUrl = null,
+                )
 
             val arrInstances =
                 instances.filter { it.type in InstanceType.arrs() }.map {
@@ -108,6 +284,8 @@ sealed interface CombinedDashboardState {
                         instance = it,
                         pendingRequestsCount = 5,
                         openIssuesCount = 2,
+                        pendingRequests = listOf(mockRequestPackage),
+                        openIssues = listOf(mockIssuePackage),
                     )
                 }
 
@@ -137,13 +315,14 @@ sealed interface CombinedDashboardState {
                         instance = it,
                         stats =
                             TracearrTodayStats(
-                                activeStreams = 2,
+                                activeStreams = 1,
                                 todayPlays = 15,
                                 todaySessions = 18,
                                 watchTimeHours = 4.5f,
                                 alertsLast24h = 0,
                                 activeUsersToday = 3,
                             ),
+                        activeStreams = listOf(mockStreamSession),
                     )
                 }
 
@@ -169,9 +348,6 @@ sealed interface CombinedDashboardState {
                     MockMedia.Lidarr,
                     MockMedia.Readarr,
                 )
-
-            val now = Clock.System.now()
-            val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
 
             val mockEpisode =
                 Episode(
@@ -222,6 +398,50 @@ sealed interface CombinedDashboardState {
                     episodeId = 1,
                 )
 
+            val mockDiscover =
+                listOf(
+                    DiscoverResult(
+                        id = 1,
+                        mediaType = RequestType.Movie,
+                        title = "A Totally Awesome Movie",
+                        overview = "Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi aliqua eiusmod reprehenderit sit qui cillum esse.",
+                        releaseDate = "2026-03-08",
+                        voteAverage = 8.5,
+                        backdropPath = null,
+                        posterPath = null,
+                    ),
+                    DiscoverResult(
+                        id = 2,
+                        mediaType = RequestType.Tv,
+                        name = "A Totally Awesome Series",
+                        overview = "Commodo commodo cupidatat quis minim est est nisi aliqua eiusmod reprehenderit sit qui cillum esse. Consectetur voluptate occaecat est Lorem ut ea sit labore incididunt officia.",
+                        firstAirDate = "2026-01-18",
+                        voteAverage = 9.0,
+                        backdropPath = null,
+                        posterPath = null,
+                    ),
+                    DiscoverResult(
+                        id = 3,
+                        mediaType = RequestType.Movie,
+                        title = "Another Awesome Movie",
+                        overview = "Consectetur voluptate occaecat est Lorem ut ea sit labore incididunt officia incididunt eiusmod pariatur sit.",
+                        releaseDate = "2026-05-20",
+                        voteAverage = 7.8,
+                        backdropPath = null,
+                        posterPath = null,
+                    ),
+                    DiscoverResult(
+                        id = 4,
+                        mediaType = RequestType.Tv,
+                        name = "Another Awesome Series",
+                        overview = "Incididunt eiusmod pariatur sit voluptate occaecat est Lorem ut ea sit labore incididunt officia.",
+                        firstAirDate = "2026-04-10",
+                        voteAverage = 8.2,
+                        backdropPath = null,
+                        posterPath = null,
+                    ),
+                )
+
             Success(
                 instances = arrInstances,
                 seerrInstances = seerrInstances,
@@ -231,6 +451,11 @@ sealed interface CombinedDashboardState {
                 downloadClients = downloadClients,
                 activityQueue = listOf(mockQueueItem),
                 recentlyAdded = recentlyAdded,
+                trendingMedia = mockDiscover,
+                popularMovies = mockDiscover.filter { it.mediaType == RequestType.Movie },
+                popularTv = mockDiscover.filter { it.mediaType == RequestType.Tv },
+                upcomingMovies = mockDiscover.filter { it.mediaType == RequestType.Movie },
+                upcomingTv = mockDiscover.filter { it.mediaType == RequestType.Tv },
                 downloadTransfers =
                     listOf(
                         DownloadTransferInfo(

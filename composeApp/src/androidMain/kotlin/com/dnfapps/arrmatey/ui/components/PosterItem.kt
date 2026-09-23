@@ -61,6 +61,7 @@ import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
 fun PosterItem(
@@ -183,8 +184,10 @@ fun PosterItem(
     radius: PosterRadius = PosterRadius.Medium,
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
+    posterModel: Any? = null,
     isSelected: Boolean = false,
     showOverlays: Boolean = true,
+    showFooter: Boolean = true,
     includeCredits: Boolean = false,
 ) {
     if (item.mediaType == RequestType.Person) {
@@ -200,15 +203,27 @@ fun PosterItem(
     } else {
         var imageLoadError by remember { mutableStateOf(false) }
 
+        val fallbackPainter =
+            if (item.mediaType == RequestType.Tv) {
+                painterResource(MR.images.sonarr_mock_poster)
+            } else {
+                painterResource(MR.images.radarr_mock_poster)
+            }
+
         val model =
-            rememberRemoteImageData(
-                url = item.fullPosterPath,
-                trim = false,
-                onError = { _, err ->
-                    println(err.throwable.message)
-                    imageLoadError = true
-                },
-            )
+            posterModel
+                ?: if (item.fullPosterPath != null) {
+                    rememberRemoteImageData(
+                        url = item.fullPosterPath,
+                        trim = false,
+                        onError = { _, err ->
+                            println(err.throwable.message)
+                            imageLoadError = true
+                        },
+                    )
+                } else {
+                    fallbackPainter
+                }
 
         BasePosterItem(
             model = model,
@@ -226,11 +241,14 @@ fun PosterItem(
                 if (showOverlays) {
                     MediaTypeOverlay(item.mediaType)
                     item.mediaInfo?.let { info ->
-                        StatusOverlay(MediaStatus.fromValue(info.status))
+                        StatusOverlay(
+                            status = MediaStatus.fromValue(info.status),
+                            modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+                        )
                     }
                 }
             },
-            footerVisible = true,
+            footerVisible = showFooter,
             footerContent = {
                 Text(
                     text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
@@ -295,20 +313,34 @@ fun PosterItem(
     radius: PosterRadius = PosterRadius.Medium,
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
+    posterModel: Any? = null,
     isSelected: Boolean = false,
     showOverlays: Boolean = true,
+    showFooter: Boolean = true,
 ) {
     var imageLoadError by remember { mutableStateOf(false) }
 
+    val fallbackPainter =
+        if (item.requestType == RequestType.Tv) {
+            painterResource(MR.images.sonarr_mock_poster)
+        } else {
+            painterResource(MR.images.radarr_mock_poster)
+        }
+
     val model =
-        rememberRemoteImageData(
-            url = item.fullPosterPath,
-            trim = false,
-            onError = { _, err ->
-                println(err.throwable.message)
-                imageLoadError = true
-            },
-        )
+        posterModel
+            ?: if (item.fullPosterPath != null) {
+                rememberRemoteImageData(
+                    url = item.fullPosterPath,
+                    trim = false,
+                    onError = { _, err ->
+                        println(err.throwable.message)
+                        imageLoadError = true
+                    },
+                )
+            } else {
+                fallbackPainter
+            }
 
     BasePosterItem(
         model = model,
@@ -326,7 +358,10 @@ fun PosterItem(
             if (showOverlays) {
                 MediaTypeOverlay(item.requestType)
                 item.mediaInfo?.let { info ->
-                    StatusOverlay(MediaStatus.fromValue(info.status))
+                    StatusOverlay(
+                        status = MediaStatus.fromValue(info.status),
+                        modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+                    )
                 }
             }
         },
@@ -374,7 +409,10 @@ private fun BoxScope.MediaTypeOverlay(type: RequestType) {
 }
 
 @Composable
-private fun BoxScope.StatusOverlay(status: MediaStatus) {
+fun StatusOverlay(
+    status: MediaStatus,
+    modifier: Modifier = Modifier,
+) {
     val (icon, color) =
         when (status) {
             MediaStatus.Available -> Icons.Default.CheckCircle to Color(0xFF50d27d)
@@ -388,10 +426,7 @@ private fun BoxScope.StatusOverlay(status: MediaStatus) {
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         shadowElevation = 2.dp,
-        modifier =
-            Modifier
-                .align(Alignment.TopEnd)
-                .padding(6.dp),
+        modifier = modifier,
     ) {
         Box(
             modifier = Modifier.padding(4.dp),

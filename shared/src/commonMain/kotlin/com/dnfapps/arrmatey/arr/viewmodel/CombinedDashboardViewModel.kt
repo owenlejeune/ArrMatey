@@ -372,7 +372,7 @@ class CombinedDashboardViewModel(
             initialValue = emptyList(),
         )
 
-    private val activeDownloadsFlow =
+    private val _activeDownloadsFlow =
         downloadsFlow
             .map { downloads ->
                 downloads.queueItems.sortedByDescending { it.progress }
@@ -382,26 +382,44 @@ class CombinedDashboardViewModel(
                 initialValue = emptyList(),
             )
 
+    private val _trendingDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
+    private val _popularMoviesDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
+    private val _popularTvDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
+    private val _upcomingMoviesDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
+    private val _upcomingTvDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
+
     init {
         observeDashboard()
+        viewModelScope.launch {
+            instanceManager.instanceRepositories.collect {
+                fetchDiscoverData()
+            }
+        }
         refresh()
     }
 
     private fun observeDashboard() {
         viewModelScope.launch {
             combine(
-                arrInstancesFlow,
-                seerrInstancesFlow,
-                prowlarrInstancesFlow,
-                bazarrInstancesFlow,
-                tracearrInstancesFlow,
-                downloadClientsFlow,
-                recentActivityFlow,
-                recentlyAddedFlow,
-                downloadsFlow.map { it.transferInfo },
-                activeDownloadsFlow,
-                calendarFlow,
-                _isRefreshing,
+                listOf(
+                    arrInstancesFlow,
+                    seerrInstancesFlow,
+                    prowlarrInstancesFlow,
+                    bazarrInstancesFlow,
+                    tracearrInstancesFlow,
+                    downloadClientsFlow,
+                    recentActivityFlow,
+                    recentlyAddedFlow,
+                    downloadsFlow.map { it.transferInfo },
+                    _activeDownloadsFlow,
+                    calendarFlow,
+                    _trendingDiscover,
+                    _popularMoviesDiscover,
+                    _popularTvDiscover,
+                    _upcomingMoviesDiscover,
+                    _upcomingTvDiscover,
+                    _isRefreshing,
+                ),
             ) { args ->
                 @Suppress("UNCHECKED_CAST")
                 val instances = args[0] as List<ArrInstanceDashboardState>
@@ -438,7 +456,22 @@ class CombinedDashboardViewModel(
                 val todayCalendar = calendarPair.first
                 val upcomingCalendar = calendarPair.second
 
-                val refreshing = args[11] as Boolean
+                @Suppress("UNCHECKED_CAST")
+                val trending = args[11] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+
+                @Suppress("UNCHECKED_CAST")
+                val popularMovies = args[12] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+
+                @Suppress("UNCHECKED_CAST")
+                val popularTv = args[13] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+
+                @Suppress("UNCHECKED_CAST")
+                val upcomingMovies = args[14] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+
+                @Suppress("UNCHECKED_CAST")
+                val upcomingTv = args[15] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+
+                val refreshing = args[16] as Boolean
 
                 CombinedDashboardState.Success(
                     instances = instances,
@@ -453,12 +486,72 @@ class CombinedDashboardViewModel(
                     prowlarrStats = prowlarrStats,
                     bazarrStats = bazarrStats,
                     tracearrStats = tracearrStats,
+                    trendingMedia = trending,
+                    popularMovies = popularMovies,
+                    popularTv = popularTv,
+                    upcomingMovies = upcomingMovies,
+                    upcomingTv = upcomingTv,
                     networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats, bazarrStats, downloadClients),
                     isRefreshing = refreshing,
                 )
             }.collect { newState ->
                 _state.value = newState
             }
+        }
+    }
+
+    private suspend fun fetchDiscoverData() {
+        val seerrRepo = instanceManager.getAllSeerrRepositories().firstOrNull() ?: return
+        try {
+            val trendingRes = seerrRepo.client.getTrending(page = 1)
+            if (trendingRes is NetworkResult.Success) {
+                _trendingDiscover.value = trendingRes.data.results
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Error fetching trending discover data" }
+        }
+
+        try {
+            val moviesRes = seerrRepo.client.getDiscoverMovies(page = 1)
+            if (moviesRes is NetworkResult.Success) {
+                _popularMoviesDiscover.value = moviesRes.data.results
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Error fetching popular movies discover data" }
+        }
+
+        try {
+            val tvRes = seerrRepo.client.getDiscoverTv(page = 1)
+            if (tvRes is NetworkResult.Success) {
+                _popularTvDiscover.value = tvRes.data.results
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Error fetching popular tv discover data" }
+        }
+
+        val today =
+            Clock.System
+                .now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+                .toString()
+
+        try {
+            val upcomingMoviesRes = seerrRepo.client.getUpcomingMovies(page = 1, today = today)
+            if (upcomingMoviesRes is NetworkResult.Success) {
+                _upcomingMoviesDiscover.value = upcomingMoviesRes.data.results
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Error fetching upcoming movies discover data" }
+        }
+
+        try {
+            val upcomingTvRes = seerrRepo.client.getUpcomingTv(page = 1, today = today)
+            if (upcomingTvRes is NetworkResult.Success) {
+                _upcomingTvDiscover.value = upcomingTvRes.data.results
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Error fetching upcoming tv discover data" }
         }
     }
 
@@ -583,6 +676,7 @@ class CombinedDashboardViewModel(
                     logger.error(e) { "Error refreshing Seerr instance ${repo.instance.label}" }
                 }
             }
+            fetchDiscoverData()
 
             val prowlarrRepos =
                 instanceManager.instanceRepositories.value.values

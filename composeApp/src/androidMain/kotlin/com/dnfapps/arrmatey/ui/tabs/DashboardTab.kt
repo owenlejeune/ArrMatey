@@ -55,6 +55,7 @@ fun DashboardTab(
                         onNavigateToTracearrUsers = { navigation.navigateTo(TracearrScreen.Users) },
                         onNavigateToTracearrViolations = { navigation.navigateTo(TracearrScreen.Violations) },
                         onNavigateToTracearrActivity = { navigation.navigateTo(TracearrScreen.Activity) },
+                        onNavigateToDiscoverTab = { navigationManager.openDiscoverTab() },
                     )
                 }
                 entry<DashboardScreen.ArrDashboard> {

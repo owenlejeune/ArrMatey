@@ -79,6 +79,9 @@ enum class DashboardCards(
     BazarrOverview(MR.strings.dashboard_bazarr_overview),
     TracearrOverview(MR.strings.dashboard_tracearr_overview),
     TracearrActiveStreams(MR.strings.dashboard_tracearr_active_streams),
+    DiscoverFeed(MR.strings.dashboard_discover_feed),
+    DiscoverSpotlight(MR.strings.dashboard_discover_spotlight),
+    DiscoverQuickPick(MR.strings.dashboard_discover_quick_pick),
     ;
 
     companion object {

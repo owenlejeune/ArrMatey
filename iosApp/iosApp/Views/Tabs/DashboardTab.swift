@@ -442,6 +442,9 @@ struct DashboardCardView: View {
             case .tracearrOverview: DashboardTracearrSection(state: state, isEditing: isEditing)
             case .tracearrActiveStreams: DashboardActiveStreamsSection(state: state, isEditing: isEditing, onItemClick: onStreamClick)
             case .instanceDashboard: DashboardInstanceDashboardSection(state: state, isEditing: isEditing)
+            case .discoverFeed: EmptyView()
+            case .discoverSpotlight: EmptyView()
+            case .discoverQuickPick: EmptyView()
             }
         }
     }
