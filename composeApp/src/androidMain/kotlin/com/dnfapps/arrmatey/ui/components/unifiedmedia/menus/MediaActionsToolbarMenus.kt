@@ -49,9 +49,7 @@ fun MediaActionsToolbarMenus(
     onViewRequestClicked: (Long) -> Unit,
     onApproveRequestClicked: (Long) -> Unit,
     onDeclineRequestClicked: (Long) -> Unit,
-    onRequestClicked: () -> Unit,
-    onRequest4kClicked: () -> Unit,
-    onAddDirectlyClicked: () -> Unit,
+    onAddClicked: () -> Unit,
 ) {
     if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
         var showWatchMenu by remember { mutableStateOf(false) }
@@ -182,66 +180,15 @@ fun MediaActionsToolbarMenus(
         }
     }
 
-    // Add / Request Menu
-    val showAddMenu =
+    // Add Action
+    val showAddAction =
         canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton
-    if (showAddMenu) {
-        var showAddMenuState by remember { mutableStateOf(false) }
-        Box {
-            IconButton(
-                onClick = {
-                    if (canAddDirectly && !buttonState.showRequestButton && !buttonState.showRequest4kButton) {
-                        onAddDirectlyClicked()
-                    } else {
-                        showAddMenuState = true
-                    }
-                },
-                colors = IconButtonDefaults.headerBarColors(),
-            ) {
-                Icon(Icons.Default.Add, mokoString(MR.strings.add))
-            }
-
-            DropdownMenuPopup(
-                expanded = showAddMenuState,
-                onDismissRequest = { showAddMenuState = false },
-            ) {
-                DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
-                    if (canAddDirectly) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.add)) },
-                            onClick = {
-                                onAddDirectlyClicked()
-                                showAddMenuState = false
-                            },
-                            leadingIcon = { Icon(Icons.Default.Add, null) },
-                        )
-                    }
-                    if (buttonState.showRequestButton || buttonState.showRequestMoreButton) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    mokoString(if (buttonState.showRequestMoreButton) MR.strings.request_more else MR.strings.request),
-                                )
-                            },
-                            onClick = {
-                                onRequestClicked()
-                                showAddMenuState = false
-                            },
-                            leadingIcon = { Icon(Icons.Default.FileDownload, null) },
-                        )
-                    }
-                    if (buttonState.showRequest4kButton) {
-                        DropdownMenuItem(
-                            text = { Text(mokoString(MR.strings.request_in_4k)) },
-                            onClick = {
-                                onRequest4kClicked()
-                                showAddMenuState = false
-                            },
-                            leadingIcon = { Icon(Icons.Default.HighQuality, null) },
-                        )
-                    }
-                }
-            }
+    if (showAddAction) {
+        IconButton(
+            onClick = onAddClicked,
+            colors = IconButtonDefaults.headerBarColors(),
+        ) {
+            Icon(Icons.Default.Add, mokoString(MR.strings.add))
         }
     }
 }

@@ -85,6 +85,18 @@ fun MediaRequestOrAddSheet(
             },
         ),
 ) {
+    MediaRequestOrAddSheet(
+        onDismiss = onDismiss,
+        viewModel = viewModel,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MediaRequestOrAddSheet(
+    onDismiss: () -> Unit,
+    viewModel: UnifiedMediaDetailsViewModel,
+) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
@@ -99,7 +111,30 @@ fun MediaRequestOrAddSheet(
     val tags by viewModel.tags.collectAsStateWithLifecycle()
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
 
-    var showMode by remember { mutableStateOf(SheetMode.Request) }
+    val state = uiState as? UnifiedMediaDetailsUiState.Success
+    val seerrMedia = state?.seerrMedia
+    val arrMedia = state?.arrMedia
+    val canAddDirectly = addSheetUiState.availableInstances.isNotEmpty()
+    val canRequest = seerrMedia != null
+    val mediaType =
+        viewModel.resolvedRequestType
+            ?: if (seerrMedia is TvDetails || arrMedia is ArrSeries) RequestType.Tv else RequestType.Movie
+    val instanceType =
+        viewModel.resolvedInstanceType
+            ?: if (mediaType == RequestType.Tv) InstanceType.Sonarr else InstanceType.Radarr
+    val isBusy = requestStatus is OperationStatus.InProgress || addItemStatus is OperationStatus.InProgress
+
+    var showMode by remember {
+        mutableStateOf(if (canAddDirectly) SheetMode.AddDirectly else SheetMode.Request)
+    }
+    var hasManuallySelected by remember { mutableStateOf(false) }
+
+    LaunchedEffect(canAddDirectly) {
+        if (canAddDirectly && !hasManuallySelected) {
+            showMode = SheetMode.AddDirectly
+        }
+    }
+
     var is4k by remember { mutableStateOf(false) }
 
     val itemAddedSuccessfullyMessage = mokoString(MR.strings.item_added_successfully)
@@ -133,13 +168,6 @@ fun MediaRequestOrAddSheet(
             else -> {}
         }
     }
-
-    val state = uiState as? UnifiedMediaDetailsUiState.Success
-    val seerrMedia = state?.seerrMedia
-    val arrMedia = state?.arrMedia
-    val canAddDirectly = addSheetUiState.availableInstances.isNotEmpty()
-    val instanceType = if (item.mediaType == RequestType.Tv) InstanceType.Sonarr else InstanceType.Radarr
-    val isBusy = requestStatus is OperationStatus.InProgress || addItemStatus is OperationStatus.InProgress
 
     // Request state
     var selectedProfileId by remember { mutableStateOf<Long?>(null) }
@@ -223,11 +251,12 @@ fun MediaRequestOrAddSheet(
 
     val isActionEnabled =
         if (showMode == SheetMode.Request) {
-            !isBusy && (seerrMedia !is TvDetails || selectedSeasons.isNotEmpty())
+            !isBusy && seerrMedia != null && (seerrMedia !is TvDetails || selectedSeasons.isNotEmpty())
         } else {
-            when (item.mediaType) {
-                RequestType.Tv -> !isBusy && seriesQualityProfile != null && seriesRootFolder != null && arrMedia is ArrSeries
-                else -> !isBusy && movieQualityProfile != null && movieRootFolder != null && arrMedia is ArrMovie
+            when (arrMedia) {
+                is ArrSeries -> !isBusy && seriesQualityProfile != null && seriesRootFolder != null
+                is ArrMovie -> !isBusy && movieQualityProfile != null && movieRootFolder != null
+                else -> false
             }
         }
 
@@ -243,7 +272,7 @@ fun MediaRequestOrAddSheet(
                 confirmValueChange = { !isBusy },
             ),
     ) {
-        if (state == null || seerrMedia == null) {
+        if (state == null || (seerrMedia == null && arrMedia == null)) {
             Box(
                 modifier =
                     Modifier
@@ -254,6 +283,7 @@ fun MediaRequestOrAddSheet(
                 CircularProgressIndicator()
             }
         } else {
+            val displayTitle = seerrMedia?.displayTitle ?: arrMedia?.title ?: ""
             Column(
                 modifier =
                     Modifier
@@ -269,14 +299,14 @@ fun MediaRequestOrAddSheet(
                         Text(
                             text =
                                 mokoString(
-                                    if (item.mediaType == RequestType.Tv) MR.strings.type_series else MR.strings.type_movie,
+                                    if (mediaType == RequestType.Tv) MR.strings.type_series else MR.strings.type_movie,
                                 ).uppercase(),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                         )
                         Text(
-                            text = seerrMedia.displayTitle,
+                            text = displayTitle,
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             maxLines = 2,
@@ -284,22 +314,28 @@ fun MediaRequestOrAddSheet(
                         )
                     }
 
-                    if (canAddDirectly) {
+                    if (canAddDirectly && canRequest) {
                         SingleChoiceSegmentedButtonRow(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             SegmentedButton(
-                                selected = showMode == SheetMode.Request,
-                                onClick = { showMode = SheetMode.Request },
+                                selected = showMode == SheetMode.AddDirectly,
+                                onClick = {
+                                    showMode = SheetMode.AddDirectly
+                                    hasManuallySelected = true
+                                },
                                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                                label = { Text(mokoString(MR.strings.request)) },
+                                label = { Text(mokoString(MR.strings.add_to_arr, instanceType.name)) },
                                 enabled = !isBusy,
                             )
                             SegmentedButton(
-                                selected = showMode == SheetMode.AddDirectly,
-                                onClick = { showMode = SheetMode.AddDirectly },
+                                selected = showMode == SheetMode.Request,
+                                onClick = {
+                                    showMode = SheetMode.Request
+                                    hasManuallySelected = true
+                                },
                                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                                label = { Text(mokoString(MR.strings.add_to_arr, instanceType.name)) },
+                                label = { Text(mokoString(MR.strings.request)) },
                                 enabled = !isBusy,
                             )
                         }
@@ -323,24 +359,26 @@ fun MediaRequestOrAddSheet(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         if (mode == SheetMode.Request) {
-                            SeerrRequestConfigurationContent(
-                                details = seerrMedia,
-                                serviceDetails = serviceDetails,
-                                isAdmin = isAdmin,
-                                users = users,
-                                selectedProfileId = selectedProfileId,
-                                onSelectedProfileIdChange = { selectedProfileId = it },
-                                selectedRootFolder = selectedRootFolder,
-                                onSelectedRootFolderChange = { selectedRootFolder = it },
-                                selectedUserId = selectedUserId,
-                                onSelectedUserIdChange = { selectedUserId = it },
-                                selectedSeasons = selectedSeasons,
-                                onSelectedSeasonsChange = { selectedSeasons = it },
-                                canRequest4k = buttonState.showRequest4kButton,
-                                is4k = is4k,
-                                onIs4kChange = { is4k = it },
-                                enabled = !isBusy,
-                            )
+                            if (seerrMedia != null) {
+                                SeerrRequestConfigurationContent(
+                                    details = seerrMedia,
+                                    serviceDetails = serviceDetails,
+                                    isAdmin = isAdmin,
+                                    users = users,
+                                    selectedProfileId = selectedProfileId,
+                                    onSelectedProfileIdChange = { selectedProfileId = it },
+                                    selectedRootFolder = selectedRootFolder,
+                                    onSelectedRootFolderChange = { selectedRootFolder = it },
+                                    selectedUserId = selectedUserId,
+                                    onSelectedUserIdChange = { selectedUserId = it },
+                                    selectedSeasons = selectedSeasons,
+                                    onSelectedSeasonsChange = { selectedSeasons = it },
+                                    canRequest4k = buttonState.showRequest4kButton,
+                                    is4k = is4k,
+                                    onIs4kChange = { is4k = it },
+                                    enabled = !isBusy,
+                                )
+                            }
                         } else {
                             if (arrMedia == null) {
                                 Box(
