@@ -31,8 +31,6 @@ interface PreferencesStore {
     val discoverSectionPreferences: Flow<DiscoverSectionPreferences>
     val showInfoCards: Flow<Map<InstanceType, Boolean>>
 
-    val isPollingEnabled: Boolean
-    val enableActivityPolling: Flow<Boolean>
     val httpLogLevel: Flow<LoggerLevel>
 
     val appTheme: Flow<AppTheme>
@@ -75,8 +73,6 @@ interface PreferencesStore {
         type: InstanceType,
         value: Boolean,
     )
-
-    fun toggleActivityPolling()
 
     fun setLogLevel(level: LoggerLevel)
 
@@ -186,17 +182,6 @@ class DefaultPreferencesStore(
             InstanceType.entries.associateWith { type ->
                 preferences[PreferenceKeys.infoCardKey(type)] ?: PreferenceDefaults.SHOW_INFO_CARD
             }
-        }
-
-    private var _isPollingEnabled: Boolean = PreferenceDefaults.ENABLE_ACTIVITY_POLLING
-    override val isPollingEnabled: Boolean
-        get() = _isPollingEnabled
-
-    override val enableActivityPolling: Flow<Boolean> =
-        dataStore.data.map { preferences ->
-            val value = preferences[PreferenceKeys.ACTIVITY_POLLING] ?: PreferenceDefaults.ENABLE_ACTIVITY_POLLING
-            _isPollingEnabled = value
-            value
         }
 
     override val httpLogLevel: Flow<LoggerLevel> =
@@ -337,15 +322,6 @@ class DefaultPreferencesStore(
         scope.launch {
             dataStore.edit { preferences ->
                 preferences[PreferenceKeys.infoCardKey(type)] = value
-            }
-        }
-    }
-
-    override fun toggleActivityPolling() {
-        scope.launch {
-            dataStore.edit { preferences ->
-                val isPolling = preferences[PreferenceKeys.ACTIVITY_POLLING] ?: PreferenceDefaults.ENABLE_ACTIVITY_POLLING
-                preferences[PreferenceKeys.ACTIVITY_POLLING] = !isPolling
             }
         }
     }

@@ -78,7 +78,6 @@ fun OnboardingScreen(
         com.dnfapps.arrmatey.datastore
             .TabPreferences(),
     )
-    val enableActivityPolling by preferences.enableActivityPolling.collectAsStateWithLifecycle(true)
 
     var showAddInstanceSheet by remember { mutableStateOf(false) }
     var showAddDownloadClientSheet by remember { mutableStateOf(false) }
@@ -230,8 +229,6 @@ fun OnboardingScreen(
                         onThemeChange = { moreViewModel.setAppTheme(it) },
                         appColor = appColor,
                         onColorChange = { moreViewModel.setAppColor(it) },
-                        enableActivityPolling = enableActivityPolling,
-                        onToggleActivityPolling = { preferences.toggleActivityPolling() },
                     )
 
                 6 ->

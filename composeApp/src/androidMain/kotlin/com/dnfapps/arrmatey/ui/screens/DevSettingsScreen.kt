@@ -75,7 +75,6 @@ fun DevSettingsScreen(
     val context = LocalContext.current
 
     val showInfoCardMap by preferenceStore.showInfoCards.collectAsStateWithLifecycle(emptyMap())
-    val activityPollingOn by preferenceStore.enableActivityPolling.collectAsStateWithLifecycle(true)
     val logLevel by preferenceStore.httpLogLevel.collectAsStateWithLifecycle(LoggerLevel.Headers)
 
     val logsScrollState = rememberScrollState()
@@ -164,27 +163,6 @@ fun DevSettingsScreen(
                                     onCheckedChange = null,
                                 )
                             }
-                        }
-
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .toggleable(
-                                        value = activityPollingOn,
-                                        onValueChange = { preferenceStore.toggleActivityPolling() },
-                                    ),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = mokoString(MR.strings.enable_activity_polling),
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            Switch(
-                                checked = activityPollingOn,
-                                onCheckedChange = null,
-                            )
                         }
                     }
                 }

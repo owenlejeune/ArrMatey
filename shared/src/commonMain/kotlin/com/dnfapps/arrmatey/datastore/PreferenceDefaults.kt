@@ -23,8 +23,7 @@ object PreferenceDefaults {
     // Info Cards
     const val SHOW_INFO_CARD: Boolean = true
 
-    // Activity & Logging
-    const val ENABLE_ACTIVITY_POLLING: Boolean = true
+    // Logging
     val HTTP_LOG_LEVEL: LoggerLevel = LoggerLevel.Headers
 
     // Calendar

@@ -76,26 +76,6 @@ struct PreferencesPageView: View {
                         .padding(16)
                         .background(Color(UIColor.secondarySystemGroupedBackground))
                         .cornerRadius(14)
-
-                        // Polling Card
-                        VStack(alignment: .leading, spacing: 8) {
-                            Toggle(isOn: Binding(
-                                get: { preferences.enableAcitivityPolling },
-                                set: { preferences.setActivityPolling($0) }
-                            )) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(MR.strings().onboarding_pref_polling.localized())
-                                        .font(.headline)
-                                    Text(MR.strings().onboarding_pref_polling_desc.localized())
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .tint(.themePrimary)
-                        }
-                        .padding(16)
-                        .background(Color(UIColor.secondarySystemGroupedBackground))
-                        .cornerRadius(14)
                     }
                     .padding(.horizontal, 20)
 

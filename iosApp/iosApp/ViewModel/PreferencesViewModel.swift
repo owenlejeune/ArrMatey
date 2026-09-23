@@ -14,7 +14,6 @@ class PreferencesViewModel: ObservableObject {
     private let tabManager: TabManager
 
     @Published var showInfoCardMap: [InstanceType:Bool] = [:]
-    @Published var enableAcitivityPolling: Bool = true
     @Published var logLevel: LoggerLevel = .headers
     @Published var tabPreferences: TabPreferences = TabPreferences()
     @Published var shouldShowReleaseNotes: Bool = false
@@ -40,9 +39,6 @@ class PreferencesViewModel: ObservableObject {
         }
         preferenceStore.showInfoCards.observeAsync(on: self) { owner, cards in
             owner.showInfoCardMap = cards.mapValues(\.boolValue)
-        }
-        preferenceStore.enableActivityPolling.observeAsync(on: self) { owner, polling in
-            owner.enableAcitivityPolling = polling.boolValue
         }
         preferenceStore.httpLogLevel.observeAsync(on: self, to: \.logLevel)
         preferenceStore.tabPreferences.observeAsync(on: self, to: \.tabPreferences)
@@ -73,10 +69,6 @@ class PreferencesViewModel: ObservableObject {
         preferenceStore.setInfoCardVisibility(type: type, value: visible)
     }
 
-    func toggleAcitivityPolling() {
-        preferenceStore.toggleActivityPolling()
-    }
-    
     func setLoggingLevel(_ level: LoggerLevel) {
         preferenceStore.setLogLevel(level: level)
     }
@@ -118,9 +110,4 @@ class PreferencesViewModel: ObservableObject {
         preferenceStore.setUseServiceNavLogos(value: value)
     }
     
-    func setActivityPolling(_ enabled: Bool) {
-        if enableAcitivityPolling != enabled {
-            preferenceStore.toggleActivityPolling()
-        }
-    }
 }

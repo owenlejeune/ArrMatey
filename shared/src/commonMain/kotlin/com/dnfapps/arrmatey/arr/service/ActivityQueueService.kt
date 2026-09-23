@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.arr.service
 
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
-import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +18,6 @@ import kotlinx.coroutines.launch
 
 class ActivityQueueService(
     private val instanceManager: InstanceManager,
-    private val preferencesStore: PreferencesStore,
 ) {
     private val pollingDelay = 30_000L
 
@@ -56,32 +54,30 @@ class ActivityQueueService(
     }
 
     private suspend fun pollActivityTasks() {
-        if (preferencesStore.isPollingEnabled) {
-            _isPolling.value = true
-            val repositories =
-                instanceManager
-                    .getAllArrRepositories()
-                    .filter { it.instance.type.supportsActivityQueue }
+        _isPolling.value = true
+        val repositories =
+            instanceManager
+                .getAllArrRepositories()
+                .filter { it.instance.type.supportsActivityQueue }
 
-            val allTasks =
-                repositories
-                    .map { repo ->
-                        scope.async {
-                            repo.refreshActivityTasks()
-                            repo.activityTasks.value
-                        }
-                    }.awaitAll()
-                    .flatten()
+        val allTasks =
+            repositories
+                .map { repo ->
+                    scope.async {
+                        repo.refreshActivityTasks()
+                        repo.activityTasks.value
+                    }
+                }.awaitAll()
+                .flatten()
 
-            _allActivityTasks.value = allTasks
+        _allActivityTasks.value = allTasks
 
-            val issueCount = allTasks.count { task -> task.hasIssue }
-            _tasksWithIssues.value = issueCount
-            if (repositories.isNotEmpty()) {
-                _hasLoaded.value = true
-            }
-            _isPolling.value = false
+        val issueCount = allTasks.count { task -> task.hasIssue }
+        _tasksWithIssues.value = issueCount
+        if (repositories.isNotEmpty()) {
+            _hasLoaded.value = true
         }
+        _isPolling.value = false
     }
 
     fun cleanup() {

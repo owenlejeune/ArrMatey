@@ -28,11 +28,6 @@ struct DevSettingsScreen: View {
                     ))
                 }
                 
-                Toggle("Enable activity polling", isOn: Binding(
-                    get: { preferences.enableAcitivityPolling },
-                    set: { _ in preferences.toggleAcitivityPolling() }
-                ))
-                
                 Picker("HTTP Logging Level", selection: Binding(
                     get: { preferences.logLevel },
                     set: { level in preferences.setLoggingLevel(level)}

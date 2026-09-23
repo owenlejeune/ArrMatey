@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
@@ -26,7 +25,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.model.AppColor
@@ -52,8 +49,6 @@ fun PreferencesSetupPage(
     onThemeChange: (AppTheme) -> Unit,
     appColor: AppColor,
     onColorChange: (AppColor) -> Unit,
-    enableActivityPolling: Boolean,
-    onToggleActivityPolling: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var hasNotificationPermission by remember { mutableStateOf(false) }
@@ -281,63 +276,6 @@ fun PreferencesSetupPage(
                     }
                 }
             }
-        }
-
-        // Background Polling Card
-        PreferenceToggleCard(
-            icon = Icons.Default.Downloading,
-            title = mokoString(MR.strings.onboarding_pref_polling),
-            description = mokoString(MR.strings.onboarding_pref_polling_desc),
-            checked = enableActivityPolling,
-            onCheckedChange = { onToggleActivityPolling() },
-        )
-    }
-}
-
-@Composable
-private fun PreferenceToggleCard(
-    icon: ImageVector,
-    title: String,
-    description: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        shape = MaterialTheme.shapes.large,
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp),
-            )
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-            )
         }
     }
 }

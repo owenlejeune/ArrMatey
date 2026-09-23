@@ -23,7 +23,6 @@ internal object PreferenceKeys {
     val CALENDAR_PREMIERS_ONLY = booleanPreferencesKey("calendarPremiersOnly")
     val CALENDAR_FINALES_ONLY = booleanPreferencesKey("calendarFinalesOnly")
 
-    val ACTIVITY_POLLING = booleanPreferencesKey("enableActivityPolling")
     val HTTP_LOG_LEVEL = stringPreferencesKey("httpLogLevel")
 
     val USE_SERVICE_NAV_LOGOS = booleanPreferencesKey("useServiceNavLogos")
