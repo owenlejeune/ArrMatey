@@ -103,7 +103,7 @@ fun AudiobookCalendarItem(
                     modifier =
                         Modifier
                             .weight(1f)
-                            .padding(vertical = 12.dp, horizontal = 16.dp),
+                            .padding(all = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

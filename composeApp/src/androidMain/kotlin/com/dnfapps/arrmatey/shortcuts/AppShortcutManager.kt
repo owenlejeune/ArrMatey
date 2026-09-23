@@ -85,7 +85,7 @@ class AppShortcutManager(
                         id = "library_${type.name.lowercase()}",
                         label = moko.getString(MR.strings.arr_library_shortcut, listOf(type.name)),
                         action = ACTION_OPEN_LIBRARY,
-                        iconRes = type.tabIcon?.drawableResId ?: R.drawable.outline_browse_24,
+                        iconRes = type.tabIcon.drawableResId,
                         extras = mapOf(EXTRA_INSTANCE_TYPE to type.name),
                     ),
                 )

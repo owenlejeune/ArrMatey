@@ -31,12 +31,11 @@ struct BazarrSubtitlesSection: View {
                         .font(.title3)
                         .bold()
                     
-                    if let icon = InstanceType.bazarr.tabIcon {
-                        Image(uiImage: icon.toUIImage()!)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 24, height: 24)
-                    }
+                    InstanceType.bazarr.tabIcon.toImage(renderingMode: .template)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(InstanceType.bazarr.associatedColor.toSwiftUI())
                     
                     Spacer()
                     

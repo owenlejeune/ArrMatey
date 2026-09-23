@@ -290,7 +290,7 @@ fun NavigationSetupPage(
                                         addTab(tab)
                                     }
                                 },
-                                enabled = canSelect || isSelected,
+                                enabled = canSelect,
                                 leadingIcon = {
                                     val logo = tab.associatedType?.tabIcon
                                     if (useServiceNavLogos && logo != null) {

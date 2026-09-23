@@ -19,26 +19,57 @@ struct UnifiedSearchScreen: View {
         self._searchQuery = State(initialValue: query)
     }
     
+    private var itemCounts: [InstanceType: Int] {
+        Dictionary(grouping: viewModel.searchState, by: { $0.instanceType })
+            .mapValues { $0.count }
+    }
+    
     var body: some View {
         Group {
             if viewModel.isSearching && viewModel.searchState.isEmpty {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if !viewModel.searchState.isEmpty {
-                List {
-                    ForEach(viewModel.searchState, id: \.id) { item in
-                        DiscoverSearchResultRow(
-                            item: item,
-                            showBanners: viewModel.searchShowBanners,
-                            onItemClick: { result in
-                                handleItemClick(result)
+                VStack(spacing: 0) {
+                    MediaInstanceFilterGlassRow(
+                        selectedFilter: viewModel.selectedTypeFilter,
+                        availableFilters: viewModel.availableTypeFilters,
+                        itemCounts: itemCounts,
+                        totalCount: viewModel.searchState.count,
+                        onFilterSelected: { filter in
+                            viewModel.selectTypeFilter(filter)
+                        }
+                    )
+                    
+                    if viewModel.filteredSearchState.isEmpty && viewModel.selectedTypeFilter != nil {
+                        ContentUnavailableView {
+                            Label("No \(viewModel.selectedTypeFilter?.name ?? "") Results", systemImage: "line.3.horizontal.decrease.circle")
+                        } description: {
+                            Text("No results match the selected media type filter.")
+                        } actions: {
+                            Button(MR.strings().all.localized()) {
+                                viewModel.selectTypeFilter(nil)
                             }
-                        )
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .listRowSeparator(.hidden)
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        List {
+                            ForEach(viewModel.filteredSearchState, id: \.id) { item in
+                                DiscoverSearchResultRow(
+                                    item: item,
+                                    showBanners: viewModel.searchShowBanners,
+                                    onItemClick: { result in
+                                        handleItemClick(result)
+                                    }
+                                )
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                                .listRowSeparator(.hidden)
+                            }
+                        }
+                        .listStyle(.plain)
                     }
                 }
-                .listStyle(.plain)
             } else if !searchQuery.isEmpty && !viewModel.isSearching {
                 ContentUnavailableView.search(text: searchQuery)
             } else {

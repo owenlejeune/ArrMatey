@@ -354,14 +354,12 @@ fun UnifiedLibraryScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                                     ) {
-                                        tabInstance.type.tabIcon?.let { icon ->
-                                            Icon(
-                                                painter = painterResource(icon),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.onBackground,
-                                            )
-                                        }
+                                        Icon(
+                                            painter = painterResource(tabInstance.type.tabIcon),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                            tint = tabInstance.type.associatedColor,
+                                        )
                                         Text(
                                             text = tabInstance.label,
                                             maxLines = 1,
