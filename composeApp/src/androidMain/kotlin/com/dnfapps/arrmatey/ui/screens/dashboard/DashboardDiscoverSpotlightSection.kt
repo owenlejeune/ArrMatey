@@ -58,6 +58,7 @@ import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.components.StatusOverlay
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
@@ -257,6 +258,27 @@ fun DashboardDiscoverSpotlightSection(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
+                                        MediaRequestTypeChip(
+                                            text = mokoString(if (item.mediaType == RequestType.Tv) MR.strings.series else MR.strings.movie),
+                                            requestType = item.mediaType,
+                                        )
+
+                                        if (!item.contentRating.isNullOrBlank()) {
+                                            Surface(
+                                                shape = MaterialTheme.shapes.extraSmall,
+                                                color = Color.Black.copy(alpha = 0.6f),
+                                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+                                            ) {
+                                                Text(
+                                                    text = item.contentRating!!,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White,
+                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                )
+                                            }
+                                        }
+
                                         if (year != null) {
                                             Surface(
                                                 shape = MaterialTheme.shapes.extraSmall,
@@ -300,6 +322,17 @@ fun DashboardDiscoverSpotlightSection(
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                     )
+
+                                    val studioOrNetwork = item.studioOrNetwork
+                                    if (!studioOrNetwork.isNullOrBlank()) {
+                                        Text(
+                                            text = studioOrNetwork,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.White.copy(alpha = 0.85f),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
                                 }
                             }
                         }

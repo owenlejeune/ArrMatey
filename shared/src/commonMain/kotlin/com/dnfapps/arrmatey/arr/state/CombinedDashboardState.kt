@@ -31,10 +31,13 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.Issue
+import com.dnfapps.arrmatey.seerr.api.model.Keyword
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
+import com.dnfapps.arrmatey.seerr.api.model.Network
+import com.dnfapps.arrmatey.seerr.api.model.ProductionCompany
 import com.dnfapps.arrmatey.seerr.api.model.RequestMedia
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RequestUser
@@ -105,7 +108,8 @@ sealed interface CombinedDashboardState {
             }
 
         fun resolveMediaStatus(item: DiscoverResult): com.dnfapps.arrmatey.seerr.api.model.MediaStatus {
-            val directStatus = item.mediaInfo?.status?.let { com.dnfapps.arrmatey.seerr.api.model.MediaStatus.fromValue(it) }
+            val directStatus =
+                item.mediaInfo?.status?.let { com.dnfapps.arrmatey.seerr.api.model.MediaStatus.fromValue(it) }
             if (directStatus != null && directStatus != com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Unknown) {
                 return directStatus
             }
@@ -136,10 +140,12 @@ sealed interface CombinedDashboardState {
                             is com.dnfapps.arrmatey.arr.api.model.ArrMovie ->
                                 (media.tmdbId > 0 && media.tmdbId == item.id) ||
                                     (item.mediaInfo?.tmdbId != null && media.tmdbId == item.mediaInfo.tmdbId)
+
                             is com.dnfapps.arrmatey.arr.api.model.ArrSeries ->
                                 (media.tmdbId != null && media.tmdbId > 0 && media.tmdbId == item.id) ||
                                     (item.mediaInfo?.tvdbId != null && media.tvdbId == item.mediaInfo.tvdbId) ||
                                     (item.mediaInfo?.tmdbId != null && media.tmdbId == item.mediaInfo.tmdbId)
+
                             else -> false
                         }
                     }
@@ -413,6 +419,13 @@ sealed interface CombinedDashboardState {
                         voteAverage = 8.5,
                         backdropPath = null,
                         posterPath = null,
+                        productionCompanies = listOf(ProductionCompany(id = 1, name = "Big Bay Pictures")),
+                        contentRating = "PG-13",
+                        keywords = listOf(
+                            Keyword(id = 1, name = "Action"),
+                            Keyword(id = 2, name = "Sci-Fi"),
+                            Keyword(id = 3, name = "Space"),
+                        ),
                     ),
                     DiscoverResult(
                         id = 2,
@@ -423,6 +436,13 @@ sealed interface CombinedDashboardState {
                         voteAverage = 9.0,
                         backdropPath = null,
                         posterPath = null,
+                        networks = listOf(Network(id = 1, name = "TBO")),
+                        contentRating = "TV-MA",
+                        keywords = listOf(
+                            Keyword(id = 4, name = "Drama"),
+                            Keyword(id = 5, name = "Mystery"),
+                            Keyword(id = 6, name = "Thriller"),
+                        ),
                     ),
                     DiscoverResult(
                         id = 3,
@@ -433,6 +453,12 @@ sealed interface CombinedDashboardState {
                         voteAverage = 7.8,
                         backdropPath = null,
                         posterPath = null,
+                        productionCompanies = listOf(ProductionCompany(id = 2, name = "Solar System Pictures")),
+                        contentRating = "R",
+                        keywords = listOf(
+                            Keyword(id = 7, name = "Adventure"),
+                            Keyword(id = 8, name = "Comedy"),
+                        ),
                     ),
                     DiscoverResult(
                         id = 4,
@@ -443,6 +469,12 @@ sealed interface CombinedDashboardState {
                         voteAverage = 8.2,
                         backdropPath = null,
                         posterPath = null,
+                        networks = listOf(Network(id = 2, name = "Notflix")),
+                        contentRating = "TV-14",
+                        keywords = listOf(
+                            Keyword(id = 9, name = "Fantasy"),
+                            Keyword(id = 10, name = "Animation"),
+                        ),
                     ),
                 )
 

@@ -1979,6 +1979,22 @@ struct DashboardDiscoverSpotlightSection: View {
                         // Bottom info overlay
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 8) {
+                                RequestTypeChip(type: currentItem.mediaType, solid: true)
+
+                                if let rating = currentItem.contentRating, !rating.isEmpty {
+                                    Text(rating)
+                                        .font(.system(size: 11, weight: .bold))
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.black.opacity(0.6))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                        )
+                                        .foregroundColor(.white)
+                                        .cornerRadius(4)
+                                }
+
                                 let dateStr = currentItem.releaseDate ?? currentItem.firstAirDate
                                 if let d = dateStr, d.count >= 4 {
                                     Text(String(d.prefix(4)))
@@ -2006,6 +2022,13 @@ struct DashboardDiscoverSpotlightSection: View {
                                 .font(.title3.bold())
                                 .foregroundColor(.white)
                                 .lineLimit(1)
+
+                            if let studio = currentItem.studioOrNetwork, !studio.isEmpty {
+                                Text(studio)
+                                    .font(.caption)
+                                    .foregroundColor(.white.opacity(0.85))
+                                    .lineLimit(1)
+                            }
                         }
                         .padding(12)
                         .allowsHitTesting(false)

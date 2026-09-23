@@ -37,10 +37,17 @@ data class DiscoverResult(
     val knownForDepartment: String? = null,
     val mediaInfo: MediaInfo? = null,
     val originCountry: List<String> = emptyList(),
+    val keywords: List<Keyword> = emptyList(),
+    val productionCompanies: List<ProductionCompany> = emptyList(),
+    val networks: List<Network> = emptyList(),
+    val contentRating: String? = null,
 ) {
     val fullPosterPath: String?
         get() = (posterPath ?: profilePath)?.let { "https://image.tmdb.org/t/p/w500$it" }
 
     val fullBackdropPath: String?
         get() = backdropPath?.let { "https://image.tmdb.org/t/p/original$it" }
+
+    val studioOrNetwork: String?
+        get() = networks.firstOrNull()?.name ?: productionCompanies.firstOrNull()?.name
 }

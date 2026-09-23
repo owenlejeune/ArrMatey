@@ -35,12 +35,17 @@ import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.TracearrRepository
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -521,12 +526,61 @@ class CombinedDashboardViewModel(
         }
     }
 
+    private suspend fun enrichDiscoverResult(
+        seerrRepo: SeerrInstanceRepository,
+        item: DiscoverResult,
+    ): DiscoverResult {
+        return try {
+            when (item.mediaType) {
+                RequestType.Movie -> {
+                    val detailsRes = seerrRepo.client.getMovieDetails(item.id)
+                    if (detailsRes is NetworkResult.Success) {
+                        val details = detailsRes.data
+                        item.copy(
+                            keywords = details.keywords,
+                            productionCompanies = details.productionCompanies,
+                            contentRating = details.getCertification("US") ?: details.releases?.results?.firstOrNull()?.rating,
+                        )
+                    } else {
+                        item
+                    }
+                }
+                RequestType.Tv -> {
+                    val detailsRes = seerrRepo.client.getTvDetails(item.id)
+                    if (detailsRes is NetworkResult.Success) {
+                        val details = detailsRes.data
+                        item.copy(
+                            keywords = details.keywords,
+                            productionCompanies = details.productionCompanies,
+                            networks = details.networks,
+                            contentRating = details.getCertification("US") ?: details.contentRatings?.results?.firstOrNull()?.rating,
+                        )
+                    } else {
+                        item
+                    }
+                }
+                else -> item
+            }
+        } catch (_: Exception) {
+            item
+        }
+    }
+
     private suspend fun fetchDiscoverData() {
         val seerrRepo = instanceManager.getAllSeerrRepositories().firstOrNull() ?: return
         try {
             val trendingRes = seerrRepo.client.getTrending(page = 1)
             if (trendingRes is NetworkResult.Success) {
-                _trendingDiscover.value = trendingRes.data.results
+                val enrichedTrending = coroutineScope {
+                    trendingRes.data.results.mapIndexed { index, item ->
+                        if (index < 10) {
+                            async { enrichDiscoverResult(seerrRepo, item) }
+                        } else {
+                            async { item }
+                        }
+                    }.awaitAll()
+                }
+                _trendingDiscover.value = enrichedTrending
             }
         } catch (e: Exception) {
             logger.error(e) { "Error fetching trending discover data" }
@@ -535,7 +589,16 @@ class CombinedDashboardViewModel(
         try {
             val moviesRes = seerrRepo.client.getDiscoverMovies(page = 1)
             if (moviesRes is NetworkResult.Success) {
-                _popularMoviesDiscover.value = moviesRes.data.results
+                val enrichedMovies = coroutineScope {
+                    moviesRes.data.results.mapIndexed { index, item ->
+                        if (index < 5) {
+                            async { enrichDiscoverResult(seerrRepo, item) }
+                        } else {
+                            async { item }
+                        }
+                    }.awaitAll()
+                }
+                _popularMoviesDiscover.value = enrichedMovies
             }
         } catch (e: Exception) {
             logger.error(e) { "Error fetching popular movies discover data" }
@@ -544,7 +607,16 @@ class CombinedDashboardViewModel(
         try {
             val tvRes = seerrRepo.client.getDiscoverTv(page = 1)
             if (tvRes is NetworkResult.Success) {
-                _popularTvDiscover.value = tvRes.data.results
+                val enrichedTv = coroutineScope {
+                    tvRes.data.results.mapIndexed { index, item ->
+                        if (index < 5) {
+                            async { enrichDiscoverResult(seerrRepo, item) }
+                        } else {
+                            async { item }
+                        }
+                    }.awaitAll()
+                }
+                _popularTvDiscover.value = enrichedTv
             }
         } catch (e: Exception) {
             logger.error(e) { "Error fetching popular tv discover data" }
