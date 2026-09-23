@@ -29,7 +29,7 @@ fun HomeFloatingNavBar(
 
     FloatingNavigationBar(
         onLongClick = handleLongPress,
-        modifier = modifier.padding(bottom = navigationBarBottomInset() + 16.dp),
+        modifier = modifier.padding(bottom = navigationBarBottomInset())
     ) {
         visibleTabs.forEach { entry ->
             FloatingNavigationBarItem(

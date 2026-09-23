@@ -157,7 +157,7 @@ fun PersonProfileImage(
     profilePath: String?,
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.medium,
-    size: Dp = 88.dp,
+    size: Dp = 76.dp,
 ) {
     Box(
         modifier =

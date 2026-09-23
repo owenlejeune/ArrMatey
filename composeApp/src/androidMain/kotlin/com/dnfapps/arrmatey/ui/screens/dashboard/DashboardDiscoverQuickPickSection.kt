@@ -81,12 +81,6 @@ fun DashboardDiscoverQuickPickSection(
     )
 
     Card(
-        onClick = {
-            if (enabled && currentItem != null) {
-                onMediaClick(currentItem.id, currentItem.mediaType)
-            }
-        },
-        enabled = enabled && currentItem != null,
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
@@ -148,13 +142,9 @@ fun DashboardDiscoverQuickPickSection(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(160.dp)
-                                    .clickable(enabled = enabled) {
-                                        onMediaClick(item.id, item.mediaType)
-                                    },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp),
                             horizontalArrangement = Arrangement.spacedBy(14.dp),
                             verticalAlignment = Alignment.Top,
                         ) {
@@ -162,12 +152,7 @@ fun DashboardDiscoverQuickPickSection(
                                 item = item,
                                 modifier = Modifier.fillMaxHeight(),
                                 showFooter = false,
-                                showOverlays = false,
-                                onItemClick = {
-                                    if (enabled) {
-                                        onMediaClick(item.id, item.mediaType)
-                                    }
-                                },
+                                showOverlays = false
                             )
 
                             Column(

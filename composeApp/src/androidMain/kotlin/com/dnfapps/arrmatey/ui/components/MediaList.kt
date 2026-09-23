@@ -469,6 +469,7 @@ fun SeerrMediaItem(
                     PosterItem(
                         item = item,
                         modifier = Modifier.width(76.dp),
+                        showFooter = false
                     )
 
                     Column(

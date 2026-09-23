@@ -15,13 +15,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -41,7 +39,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -124,32 +121,26 @@ fun DashboardDiscoverSpotlightSection(
                 )
             }
         } else {
+            val currentItem = spotlightItems.getOrNull(pagerState.currentPage) ?: spotlightItems.first()
+
             Column(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                HorizontalPager(
-                    state = pagerState,
-                    userScrollEnabled = enabled && spotlightItems.size > 1,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.large),
-                ) { page ->
-                    val spotlightItem = spotlightItems[page]
-                    val title = spotlightItem.title ?: spotlightItem.name
-                    ?: mokoString(MR.strings.unknown)
-                    val year =
-                        (spotlightItem.releaseDate ?: spotlightItem.firstAirDate)?.take(4)
-                    val voteAverage = spotlightItem.voteAverage
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f)
+                            .clip(MaterialTheme.shapes.large),
+                ) {
+                    HorizontalPager(
+                        state = pagerState,
+                        userScrollEnabled = enabled && spotlightItems.size > 1,
+                        modifier = Modifier.fillMaxSize(),
+                    ) { page ->
+                        val spotlightItem = spotlightItems[page]
+                        val title = spotlightItem.title ?: spotlightItem.name ?: mokoString(MR.strings.unknown)
 
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(16f / 9f)
-                                .clickable(enabled = enabled) {
-                                    onMediaClick(spotlightItem.id, spotlightItem.mediaType)
-                                },
-                    ) {
                         val imageModel: Any =
                             spotlightItem.fullBackdropPath
                                 ?: spotlightItem.fullPosterPath
@@ -158,129 +149,148 @@ fun DashboardDiscoverSpotlightSection(
                                 } else {
                                     painterResource(MR.images.radarr_mock_poster)
                                 }
-                        if (imageModel is Painter) {
-                            Image(
-                                painter = imageModel,
-                                contentDescription = title,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                        } else {
-                            AsyncImage(
-                                model = imageModel,
-                                contentDescription = title,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                        }
 
                         Box(
                             modifier =
                                 Modifier
                                     .fillMaxSize()
-                                    .background(
-                                        Brush.verticalGradient(
-                                            colors =
-                                                listOf(
-                                                    Color.Transparent,
-                                                    Color.Black.copy(alpha = 0.4f),
-                                                    Color.Black.copy(alpha = 0.85f),
-                                                ),
-                                        ),
-                                    ),
-                        )
-
-                        Row(
-                            modifier =
-                                Modifier
-                                    .align(Alignment.TopStart)
-                                    .padding(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+                                    .clickable(enabled = enabled) {
+                                        onMediaClick(spotlightItem.id, spotlightItem.mediaType)
+                                    },
                         ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            ) {
-                                Text(
-                                    text = mokoString(MR.strings.dashboard_discover_spotlight),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(
-                                        horizontal = 8.dp,
-                                        vertical = 4.dp
-                                    ),
+                            if (imageModel is Painter) {
+                                Image(
+                                    painter = imageModel,
+                                    contentDescription = title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            } else {
+                                AsyncImage(
+                                    model = imageModel,
+                                    contentDescription = title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
                                 )
                             }
-
-                            spotlightItem.mediaInfo?.let { info ->
-                                StatusOverlay(MediaStatus.fromValue(info.status))
-                            }
                         }
+                    }
 
-                        Column(
-                            modifier =
-                                Modifier
-                                    .align(Alignment.BottomStart)
-                                    .padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors =
+                                            listOf(
+                                                Color.Transparent,
+                                                Color.Black.copy(alpha = 0.4f),
+                                                Color.Black.copy(alpha = 0.85f),
+                                            ),
+                                    ),
+                                ),
+                    )
+
+                    AnimatedContent(
+                        targetState = currentItem,
+                        transitionSpec = {
+                            fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+                        },
+                        label = "SpotlightBannerOverlayTransition",
+                        modifier = Modifier.fillMaxSize(),
+                    ) { item ->
+                        val title = item.title ?: item.name ?: mokoString(MR.strings.unknown)
+                        val year = (item.releaseDate ?: item.firstAirDate)?.take(4)
+                        val voteAverage = item.voteAverage
+
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
                         ) {
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                if (year != null) {
-                                    Surface(
-                                        shape = MaterialTheme.shapes.extraSmall,
-                                        color = Color.Black.copy(alpha = 0.6f),
-                                    ) {
-                                        Text(
-                                            text = year,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = Color.White,
-                                            modifier = Modifier.padding(
-                                                horizontal = 6.dp,
-                                                vertical = 2.dp
-                                            ),
-                                        )
-                                    }
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                ) {
+                                    Text(
+                                        text = mokoString(MR.strings.dashboard_discover_spotlight),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    )
                                 }
 
-                                if (voteAverage > 0.0) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Star,
-                                            contentDescription = null,
-                                            tint = Color(0xFFFFB800),
-                                            modifier = Modifier.size(14.dp),
-                                        )
-                                        Text(
-                                            text = "${(voteAverage * 10).toInt() / 10.0}",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White,
-                                        )
-                                    }
+                                item.mediaInfo?.let { info ->
+                                    StatusOverlay(MediaStatus.fromValue(info.status))
                                 }
                             }
 
-                            Text(
-                                text = title,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
+                            Column(
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomStart)
+                                        .padding(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    if (year != null) {
+                                        Surface(
+                                            shape = MaterialTheme.shapes.extraSmall,
+                                            color = Color.Black.copy(alpha = 0.6f),
+                                        ) {
+                                            Text(
+                                                text = year,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = Color.White,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                            )
+                                        }
+                                    }
+
+                                    if (voteAverage > 0.0) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Star,
+                                                contentDescription = null,
+                                                tint = Color(0xFFFFB800),
+                                                modifier = Modifier.size(14.dp),
+                                            )
+                                            Text(
+                                                text = "${(voteAverage * 10).toInt() / 10.0}",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White,
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         }
                     }
                 }
-
-                val currentItem = spotlightItems.getOrNull(pagerState.currentPage) ?: spotlightItems.first()
 
                 AnimatedContent(
                     targetState = currentItem,
