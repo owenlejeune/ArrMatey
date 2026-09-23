@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.entensions.bullet
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
@@ -71,7 +72,18 @@ fun DashboardActiveStreamsSection(
                 )
             }
 
-            if (streams.isEmpty()) {
+            if (state.tracearrStats.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Tracearr.name),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp, bottom = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            } else if (streams.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.no_active_streams),
                     modifier =
@@ -79,9 +91,10 @@ fun DashboardActiveStreamsSection(
                             .fillMaxWidth()
                             .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
-            }
+            } else {
 
             streams.take(5).forEach { session ->
                 val displayTitle =
@@ -194,15 +207,16 @@ fun DashboardActiveStreamsSection(
                 }
             }
 
-            if (streams.size > 5) {
-                Text(
-                    mokoString(
-                        MR.strings.additional_items_count,
-                        streams.size - 5,
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.align(Alignment.End),
-                )
+                if (streams.size > 5) {
+                    Text(
+                        mokoString(
+                            MR.strings.additional_items_count,
+                            streams.size - 5,
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.align(Alignment.End),
+                    )
+                }
             }
         }
     }

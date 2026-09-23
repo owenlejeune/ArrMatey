@@ -142,17 +142,21 @@ class InstanceManager(
             .observeSelectedInstance(type)
             .flatMapLatest { instance ->
                 if (instance == null) {
-                    flowOf(null)
+                    _instanceRepositories.map { repos -> repos.values.filterIsInstance<T>().firstOrNull() }
                 } else {
-                    _instanceRepositories.map { repos -> repos[instance.id] as? T }
+                    _instanceRepositories.map { repos -> (repos[instance.id] as? T) ?: repos.values.filterIsInstance<T>().firstOrNull() }
                 }
             }
 
     fun getSelectedSeerrRepository(): Flow<SeerrInstanceRepository?> =
         instanceRepository
             .observeSelectedInstance(InstanceType.Seerr)
-            .map { instance ->
-                instance?.let { getSeerrRepository(it.id) }
+            .flatMapLatest { instance ->
+                if (instance == null) {
+                    _instanceRepositories.map { repos -> repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull() }
+                } else {
+                    _instanceRepositories.map { repos -> (repos[instance.id] as? SeerrInstanceRepository) ?: repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull() }
+                }
             }
 
     fun getSelectedProwlarrRepository(): Flow<ProwlarrInstanceRepository?> =
@@ -160,9 +164,9 @@ class InstanceManager(
             .observeSelectedInstance(InstanceType.Prowlarr)
             .flatMapLatest { instance ->
                 if (instance == null) {
-                    flowOf(null)
+                    _instanceRepositories.map { repos -> repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull() }
                 } else {
-                    _instanceRepositories.map { repos -> repos[instance.id] as? ProwlarrInstanceRepository }
+                    _instanceRepositories.map { repos -> (repos[instance.id] as? ProwlarrInstanceRepository) ?: repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull() }
                 }
             }
 
@@ -171,9 +175,9 @@ class InstanceManager(
             .observeSelectedInstance(InstanceType.Bazarr)
             .flatMapLatest { instance ->
                 if (instance == null) {
-                    flowOf(null)
+                    _instanceRepositories.map { repos -> repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull() }
                 } else {
-                    _instanceRepositories.map { repos -> repos[instance.id] as? BazarrInstanceRepository }
+                    _instanceRepositories.map { repos -> (repos[instance.id] as? BazarrInstanceRepository) ?: repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull() }
                 }
             }
 
@@ -182,9 +186,9 @@ class InstanceManager(
             .observeSelectedInstance(InstanceType.Tracearr)
             .flatMapLatest { instance ->
                 if (instance == null) {
-                    flowOf(null)
+                    _instanceRepositories.map { r -> r.values.filterIsInstance<TracearrRepository>().firstOrNull() }
                 } else {
-                    _instanceRepositories.map { r -> r[instance.id] as? TracearrRepository }
+                    _instanceRepositories.map { r -> (r[instance.id] as? TracearrRepository) ?: r.values.filterIsInstance<TracearrRepository>().firstOrNull() }
                 }
             }
 

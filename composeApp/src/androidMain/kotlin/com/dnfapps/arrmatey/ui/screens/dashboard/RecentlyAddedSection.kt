@@ -78,7 +78,18 @@ fun RecentlyAddedSection(
                 )
             }
 
-            if (items.isEmpty()) {
+            if (state.instances.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, "Arr"),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp, bottom = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            } else if (items.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.nothing_recently_added),
                     modifier =
@@ -86,6 +97,7 @@ fun RecentlyAddedSection(
                             .fillMaxWidth()
                             .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
             } else {

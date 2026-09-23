@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -57,11 +58,12 @@ fun DashboardTracearrSection(
     onNavigateToViolations: () -> Unit = {},
     onNavigateToActivity: () -> Unit = {},
 ) {
-    val statsList = state.tracearrStats.mapNotNull { it.stats }.ifEmpty { listOf(TracearrTodayStats()) }
+    val tracearrStats = state.tracearrStats
+    val statsList = tracearrStats.mapNotNull { it.stats }
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing) {
+            if (isEditing || tracearrStats.isEmpty()) {
                 MaterialTheme.colorScheme.surfaceContainerHigh
             } else {
                 Color.Transparent
@@ -70,7 +72,7 @@ fun DashboardTracearrSection(
     )
 
     val internalPadding by animateDpAsState(
-        targetValue = if (isEditing) 16.dp else 0.dp,
+        targetValue = if (isEditing || tracearrStats.isEmpty()) 16.dp else 0.dp,
         label = "TracearrCardPaddingAnimation",
     )
 
@@ -87,7 +89,7 @@ fun DashboardTracearrSection(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing,
+                visible = isEditing || tracearrStats.isEmpty(),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -106,16 +108,26 @@ fun DashboardTracearrSection(
                 }
             }
 
-            statsList.forEach { stats ->
-                TracearrDashboardStatsSection(
-                    stats = stats,
-                    isExpanded = isExpanded,
-                    showTodayHeader = false,
-                    onNavigateToHistory = onNavigateToHistory,
-                    onNavigateToAllUsers = onNavigateToAllUsers,
-                    onNavigateToViolations = onNavigateToViolations,
-                    onNavigateToActivity = onNavigateToActivity,
+            if (tracearrStats.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Tracearr.name),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
+            } else {
+                statsList.forEach { stats ->
+                    TracearrDashboardStatsSection(
+                        stats = stats,
+                        isExpanded = isExpanded,
+                        showTodayHeader = false,
+                        onNavigateToHistory = onNavigateToHistory,
+                        onNavigateToAllUsers = onNavigateToAllUsers,
+                        onNavigateToViolations = onNavigateToViolations,
+                        onNavigateToActivity = onNavigateToActivity,
+                    )
+                }
             }
         }
     }

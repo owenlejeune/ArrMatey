@@ -300,6 +300,7 @@ fun DashboardCardContent(
             DashboardDiscoverSpotlightSection(
                 state = currentState,
                 enabled = !isEditing && enabled,
+                isEditing = isEditing,
                 onMediaClick = { tmdbId, type ->
                     if (!isEditing && enabled) onNavigateToSeerrMediaDetails(tmdbId, type)
                 },

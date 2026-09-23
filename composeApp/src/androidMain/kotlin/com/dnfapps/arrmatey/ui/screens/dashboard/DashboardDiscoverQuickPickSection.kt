@@ -94,7 +94,7 @@ fun DashboardDiscoverQuickPickSection(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing,
+                visible = isEditing || state.seerrInstances.isEmpty(),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -114,7 +114,18 @@ fun DashboardDiscoverQuickPickSection(
                 }
             }
 
-            if (currentItem == null) {
+            if (state.seerrInstances.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            } else if (currentItem == null) {
                 Text(
                     text = mokoString(MR.strings.no_media_found),
                     modifier =
@@ -122,6 +133,7 @@ fun DashboardDiscoverQuickPickSection(
                             .fillMaxWidth()
                             .padding(vertical = 16.dp),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
             } else {

@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -44,7 +45,7 @@ fun DashboardProwlarrSection(
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing) {
+            if (isEditing || prowlarrStats.isEmpty()) {
                 MaterialTheme.colorScheme.surfaceContainerHigh
             } else {
                 Color.Transparent
@@ -53,7 +54,7 @@ fun DashboardProwlarrSection(
     )
 
     val internalPadding by animateDpAsState(
-        targetValue = if (isEditing) 16.dp else 0.dp,
+        targetValue = if (isEditing || prowlarrStats.isEmpty()) 16.dp else 0.dp,
         label = "ProwlarrCardPaddingAnimation",
     )
 
@@ -64,14 +65,14 @@ fun DashboardProwlarrSection(
             CardDefaults.cardColors(
                 containerColor = containerColor,
             ),
-        border = if (isEditing) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
+        border = if (isEditing || prowlarrStats.isEmpty()) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing,
+                visible = isEditing || prowlarrStats.isEmpty(),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -89,35 +90,45 @@ fun DashboardProwlarrSection(
                     )
                 }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                CountStatItem(
-                    icon = Icons.Default.Favorite,
-                    modifier = Modifier.weight(1f),
-                    label = mokoString(MR.strings.healthy_indexers),
-                    count = totalHealthyIndexers,
-                    iconColor = ArrGreen,
+            if (prowlarrStats.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Prowlarr.name),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
-                CountStatItem(
-                    icon = Icons.Default.Error,
-                    modifier = Modifier.weight(1f),
-                    label = mokoString(MR.strings.failing_indexers),
-                    count = totalFailingIndexers,
-                    iconColor =
-                        if (totalFailingIndexers > 0) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.secondary
-                        },
-                    containerColor =
-                        if (totalFailingIndexers > 0) {
-                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                        },
-                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    CountStatItem(
+                        icon = Icons.Default.Favorite,
+                        modifier = Modifier.weight(1f),
+                        label = mokoString(MR.strings.healthy_indexers),
+                        count = totalHealthyIndexers,
+                        iconColor = ArrGreen,
+                    )
+                    CountStatItem(
+                        icon = Icons.Default.Error,
+                        modifier = Modifier.weight(1f),
+                        label = mokoString(MR.strings.failing_indexers),
+                        count = totalFailingIndexers,
+                        iconColor =
+                            if (totalFailingIndexers > 0) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.secondary
+                            },
+                        containerColor =
+                            if (totalFailingIndexers > 0) {
+                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            },
+                    )
+                }
             }
         }
     }

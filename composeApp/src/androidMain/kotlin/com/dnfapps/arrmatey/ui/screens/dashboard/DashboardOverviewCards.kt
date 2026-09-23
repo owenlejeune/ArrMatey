@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrHealthType
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
@@ -40,14 +41,15 @@ fun DashboardOverviewCards(
     isEditing: Boolean,
     onHealthClick: () -> Unit = {},
 ) {
-    val totalSize = state.instances.sumOf { it.sizeOnDisk }
-    val totalIssues = state.instances.sumOf { it.healthItems.size }
+    val instances = state.instances
+    val totalSize = instances.sumOf { it.sizeOnDisk }
+    val totalIssues = instances.sumOf { it.healthItems.size }
     val criticalIssues =
-        state.instances.sumOf { it.healthItems.count { h -> h.type == ArrHealthType.Error } }
+        instances.sumOf { it.healthItems.count { h -> h.type == ArrHealthType.Error } }
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing) {
+            if (isEditing || instances.isEmpty()) {
                 MaterialTheme.colorScheme.surfaceContainerHigh
             } else {
                 Color.Transparent
@@ -56,7 +58,7 @@ fun DashboardOverviewCards(
     )
 
     val internalPadding by animateDpAsState(
-        targetValue = if (isEditing) 16.dp else 0.dp,
+        targetValue = if (isEditing || instances.isEmpty()) 16.dp else 0.dp,
         label = "ArrOverviewCardPaddingAnimation",
     )
 
@@ -67,14 +69,14 @@ fun DashboardOverviewCards(
             CardDefaults.cardColors(
                 containerColor = containerColor,
             ),
-        border = if (isEditing) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
+        border = if (isEditing || instances.isEmpty()) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing,
+                visible = isEditing || instances.isEmpty(),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -92,41 +94,51 @@ fun DashboardOverviewCards(
                     )
                 }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.Storage,
-                    label = mokoString(MR.strings.total_space),
-                    value = totalSize.bytesAsFileSizeString(),
-                    iconColor = MaterialTheme.colorScheme.primary,
+            if (instances.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, "Arr"),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.Storage,
+                        label = mokoString(MR.strings.total_space),
+                        value = totalSize.bytesAsFileSizeString(),
+                        iconColor = MaterialTheme.colorScheme.primary,
+                    )
 
-                val hasErrors = criticalIssues > 0
-                val hasWarnings = totalIssues > 0
-                val healthColor =
-                    when {
-                        hasErrors -> MaterialTheme.colorScheme.error
-                        hasWarnings -> ArrYellow
-                        else -> MaterialTheme.colorScheme.primary
-                    }
+                    val hasErrors = criticalIssues > 0
+                    val hasWarnings = totalIssues > 0
+                    val healthColor =
+                        when {
+                            hasErrors -> MaterialTheme.colorScheme.error
+                            hasWarnings -> ArrYellow
+                            else -> MaterialTheme.colorScheme.primary
+                        }
 
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    icon = if (hasWarnings) Icons.Default.Warning else Icons.Default.CheckCircle,
-                    label = mokoString(MR.strings.health),
-                    value = if (totalIssues == 0) mokoString(MR.strings.no_issues) else "$totalIssues Issues",
-                    iconColor = healthColor,
-                    containerColor =
-                        if (hasErrors) {
-                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                        },
-                    onClick = if (!isEditing) onHealthClick else null,
-                )
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        icon = if (hasWarnings) Icons.Default.Warning else Icons.Default.CheckCircle,
+                        label = mokoString(MR.strings.health),
+                        value = if (totalIssues == 0) mokoString(MR.strings.no_issues) else "$totalIssues Issues",
+                        iconColor = healthColor,
+                        containerColor =
+                            if (hasErrors) {
+                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            },
+                        onClick = if (!isEditing) onHealthClick else null,
+                    )
+                }
             }
         }
     }

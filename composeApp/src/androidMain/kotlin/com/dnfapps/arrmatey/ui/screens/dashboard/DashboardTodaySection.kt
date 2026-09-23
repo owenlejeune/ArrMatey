@@ -61,7 +61,18 @@ fun DashboardTodaySection(
                 )
             }
 
-            if (state.calendarItems.isEmpty()) {
+            if (state.instances.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, "Arr"),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp, bottom = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            } else if (state.calendarItems.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.nothing_on_today),
                     modifier =
@@ -69,15 +80,16 @@ fun DashboardTodaySection(
                             .fillMaxWidth()
                             .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
-            }
-
-            state.calendarItems.forEach { item ->
-                DashboardCalendarItemRow(
-                    dashboardItem = item,
-                    onClick = { if (!isEditing && enabled) onItemClick(item.item) },
-                )
+            } else {
+                state.calendarItems.forEach { item ->
+                    DashboardCalendarItemRow(
+                        dashboardItem = item,
+                        onClick = { if (!isEditing && enabled) onItemClick(item.item) },
+                    )
+                }
             }
         }
     }

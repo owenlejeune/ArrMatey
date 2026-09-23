@@ -86,13 +86,12 @@ fun DashboardDiscoverFeedSection(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing,
+                visible = isEditing || state.seerrInstances.isEmpty(),
             ) {
                 Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
@@ -109,11 +108,23 @@ fun DashboardDiscoverFeedSection(
                 }
             }
 
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                userScrollEnabled = enabled,
-            ) {
+            if (state.seerrInstances.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            } else {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    userScrollEnabled = enabled,
+                ) {
                 items(categories) { (category, labelRes) ->
                     val isSelected = selectedCategory == category
                     FilterChip(
@@ -192,5 +203,6 @@ fun DashboardDiscoverFeedSection(
                 }
             }
         }
+    }
     }
 }

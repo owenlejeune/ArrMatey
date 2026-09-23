@@ -70,7 +70,18 @@ fun DashboardActivityQueueSection(
                 )
             }
 
-            if (state.activityQueue.isEmpty()) {
+            if (state.instances.isEmpty() && state.downloadClients.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, "Arr"),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp, bottom = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            } else if (state.activityQueue.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.no_activity),
                     modifier =

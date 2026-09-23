@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -46,7 +47,7 @@ fun SeerrSection(
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing) {
+            if (isEditing || seerrInstances.isEmpty()) {
                 MaterialTheme.colorScheme.surfaceContainerHigh
             } else {
                 Color.Transparent
@@ -55,7 +56,7 @@ fun SeerrSection(
     )
 
     val internalPadding by animateDpAsState(
-        targetValue = if (isEditing) 16.dp else 0.dp,
+        targetValue = if (isEditing || seerrInstances.isEmpty()) 16.dp else 0.dp,
         label = "SeerrCardPaddingAnimation",
     )
 
@@ -66,14 +67,14 @@ fun SeerrSection(
             CardDefaults.cardColors(
                 containerColor = containerColor,
             ),
-        border = if (isEditing) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
+        border = if (isEditing || seerrInstances.isEmpty()) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing,
+                visible = isEditing || seerrInstances.isEmpty(),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -91,37 +92,47 @@ fun SeerrSection(
                     )
                 }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                CountStatItem(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.ConfirmationNumber,
-                    label = mokoString(MR.strings.requests),
-                    count = totalRequests,
-                    iconColor = ArrPurple,
-                    onClick = if (!isEditing) onRequestClick else null,
+            if (seerrInstances.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
-                CountStatItem(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.BugReport,
-                    label = mokoString(MR.strings.issues),
-                    count = totalIssues,
-                    iconColor =
-                        if (totalIssues > 0) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.secondary
-                        },
-                    containerColor =
-                        if (totalIssues > 0) {
-                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                        },
-                    onClick = if (!isEditing) onIssueClick else null,
-                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    CountStatItem(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.ConfirmationNumber,
+                        label = mokoString(MR.strings.requests),
+                        count = totalRequests,
+                        iconColor = ArrPurple,
+                        onClick = if (!isEditing) onRequestClick else null,
+                    )
+                    CountStatItem(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.BugReport,
+                        label = mokoString(MR.strings.issues),
+                        count = totalIssues,
+                        iconColor =
+                            if (totalIssues > 0) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.secondary
+                            },
+                        containerColor =
+                            if (totalIssues > 0) {
+                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            },
+                        onClick = if (!isEditing) onIssueClick else null,
+                    )
+                }
             }
         }
     }

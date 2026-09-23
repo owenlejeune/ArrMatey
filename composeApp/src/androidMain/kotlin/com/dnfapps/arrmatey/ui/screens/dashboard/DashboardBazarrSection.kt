@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -45,7 +46,7 @@ fun BazarrSection(
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing) {
+            if (isEditing || bazarrStats.isEmpty()) {
                 MaterialTheme.colorScheme.surfaceContainerHigh
             } else {
                 Color.Transparent
@@ -54,7 +55,7 @@ fun BazarrSection(
     )
 
     val internalPadding by animateDpAsState(
-        targetValue = if (isEditing) 16.dp else 0.dp,
+        targetValue = if (isEditing || bazarrStats.isEmpty()) 16.dp else 0.dp,
         label = "BazarrCardPaddingAnimation",
     )
 
@@ -65,14 +66,14 @@ fun BazarrSection(
             CardDefaults.cardColors(
                 containerColor = containerColor,
             ),
-        border = if (isEditing) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
+        border = if (isEditing || bazarrStats.isEmpty()) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AnimatedVisibility(
-                visible = isEditing,
+                visible = isEditing || bazarrStats.isEmpty(),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -90,24 +91,34 @@ fun BazarrSection(
                     )
                 }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                CountStatItem(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.Tv,
-                    label = mokoString(MR.strings.bazarr_wanted_episodes),
-                    count = totalEpisodes,
-                    iconColor = ArrBlue,
+            if (bazarrStats.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Bazarr.name),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
-                CountStatItem(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.Movie,
-                    label = mokoString(MR.strings.bazarr_wanted_movies),
-                    count = totalMovies,
-                    iconColor = ArrYellow,
-                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    CountStatItem(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.Tv,
+                        label = mokoString(MR.strings.bazarr_wanted_episodes),
+                        count = totalEpisodes,
+                        iconColor = ArrBlue,
+                    )
+                    CountStatItem(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.Movie,
+                        label = mokoString(MR.strings.bazarr_wanted_movies),
+                        count = totalMovies,
+                        iconColor = ArrYellow,
+                    )
+                }
             }
         }
     }

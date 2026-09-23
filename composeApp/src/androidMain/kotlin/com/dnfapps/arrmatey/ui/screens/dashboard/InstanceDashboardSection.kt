@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrHealthType
@@ -78,19 +79,32 @@ fun InstanceDashboardSection(
                 )
             }
 
-            state.instances.forEachIndexed { index, instanceState ->
-                InstanceDashboardCard(
-                    instanceState,
-                    enabled = enabled,
-                    onClick = {
-                        onInstanceClicked(instanceState.instance.id)
-                    },
+            if (state.instances.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, "Arr"),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp, bottom = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
-                if (index < state.instances.size - 1) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+            } else {
+                state.instances.forEachIndexed { index, instanceState ->
+                    InstanceDashboardCard(
+                        instanceState,
+                        enabled = enabled,
+                        onClick = {
+                            onInstanceClicked(instanceState.instance.id)
+                        },
                     )
+                    if (index < state.instances.size - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                        )
+                    }
                 }
             }
         }

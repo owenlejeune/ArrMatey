@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -86,7 +87,18 @@ fun DashboardPendingIssuesSection(
             }
 
             val openIssues = state.openIssues
-            if (openIssues.isEmpty()) {
+            if (state.seerrInstances.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            } else if (openIssues.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.no_issues_found),
                     modifier =
@@ -94,6 +106,7 @@ fun DashboardPendingIssuesSection(
                             .fillMaxWidth()
                             .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
             } else {

@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -68,7 +69,8 @@ fun DashboardDiscoverSpotlightSection(
     state: CombinedDashboardState.Success,
     onMediaClick: (tmdbId: Long, requestType: RequestType) -> Unit,
     onRequestClick: ((DiscoverResult) -> Unit)? = null,
-    enabled: Boolean,
+    isEditing: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val spotlightItems = state.spotlightMedia
 
@@ -95,304 +97,316 @@ fun DashboardDiscoverSpotlightSection(
             ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
-        if (spotlightItems.isEmpty()) {
-            Column(
-                modifier =
-                    Modifier
+        Column {
+            AnimatedVisibility(
+                visible = isEditing || state.seerrInstances.isEmpty() || spotlightItems.isEmpty()
+            ) {
+                Row(
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Image(
-                    painter = painterResource(InstanceType.Seerr.icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                )
-                Text(
-                    text = mokoString(MR.strings.dashboard_discover_spotlight),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = mokoString(MR.strings.no_media_found),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                )
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(InstanceType.Seerr.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = mokoString(MR.strings.dashboard_discover_spotlight),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
             }
-        } else {
-            val currentItem = spotlightItems.getOrNull(pagerState.currentPage) ?: spotlightItems.first()
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Box(
+            if (state.seerrInstances.isEmpty() || spotlightItems.isEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .aspectRatio(16f / 9f)
-                            .clip(MaterialTheme.shapes.large),
-                ) {
-                    HorizontalPager(
-                        state = pagerState,
-                        userScrollEnabled = enabled && spotlightItems.size > 1,
-                        modifier = Modifier.fillMaxSize(),
-                    ) { page ->
-                        val spotlightItem = spotlightItems[page]
-                        val title = spotlightItem.title ?: spotlightItem.name ?: mokoString(MR.strings.unknown)
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 8.dp, bottom = 36.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            } else {
+                val currentItem = spotlightItems.getOrNull(pagerState.currentPage) ?: spotlightItems.first()
 
-                        val imageModel: Any =
-                            spotlightItem.fullBackdropPath
-                                ?: spotlightItem.fullPosterPath
-                                ?: if (spotlightItem.mediaType == RequestType.Tv) {
-                                    painterResource(MR.images.sonarr_mock_poster)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(16f / 9f)
+                                .clip(MaterialTheme.shapes.large),
+                    ) {
+                        HorizontalPager(
+                            state = pagerState,
+                            userScrollEnabled = enabled && spotlightItems.size > 1,
+                            modifier = Modifier.fillMaxSize(),
+                        ) { page ->
+                            val spotlightItem = spotlightItems[page]
+                            val title = spotlightItem.title ?: spotlightItem.name ?: mokoString(MR.strings.unknown)
+
+                            val imageModel: Any =
+                                spotlightItem.fullBackdropPath
+                                    ?: spotlightItem.fullPosterPath
+                                    ?: if (spotlightItem.mediaType == RequestType.Tv) {
+                                        painterResource(MR.images.sonarr_mock_poster)
+                                    } else {
+                                        painterResource(MR.images.radarr_mock_poster)
+                                    }
+
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .clickable(enabled = enabled) {
+                                            onMediaClick(spotlightItem.id, spotlightItem.mediaType)
+                                        },
+                            ) {
+                                if (imageModel is Painter) {
+                                    Image(
+                                        painter = imageModel,
+                                        contentDescription = title,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
                                 } else {
-                                    painterResource(MR.images.radarr_mock_poster)
+                                    AsyncImage(
+                                        model = imageModel,
+                                        contentDescription = title,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
                                 }
+                            }
+                        }
 
                         Box(
                             modifier =
                                 Modifier
                                     .fillMaxSize()
-                                    .clickable(enabled = enabled) {
-                                        onMediaClick(spotlightItem.id, spotlightItem.mediaType)
-                                    },
-                        ) {
-                            if (imageModel is Painter) {
-                                Image(
-                                    painter = imageModel,
-                                    contentDescription = title,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize(),
-                                )
-                            } else {
-                                AsyncImage(
-                                    model = imageModel,
-                                    contentDescription = title,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize(),
-                                )
+                                    .background(
+                                        Brush.verticalGradient(
+                                            colors =
+                                                listOf(
+                                                    Color.Transparent,
+                                                    Color.Black.copy(alpha = 0.4f),
+                                                    Color.Black.copy(alpha = 0.85f),
+                                                ),
+                                        ),
+                                    ),
+                        )
+
+                        AnimatedContent(
+                            targetState = currentItem,
+                            transitionSpec = {
+                                fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+                            },
+                            label = "SpotlightBannerOverlayTransition",
+                            modifier = Modifier.fillMaxSize(),
+                        ) { item ->
+                            val title = item.title ?: item.name ?: mokoString(MR.strings.unknown)
+                            val year = (item.releaseDate ?: item.firstAirDate)?.take(4)
+                            val voteAverage = item.voteAverage
+
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                            ) {
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    ) {
+                                        Text(
+                                            text = mokoString(MR.strings.dashboard_discover_spotlight),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        )
+                                    }
+
+                                    item.mediaInfo?.let { info ->
+                                        StatusOverlay(MediaStatus.fromValue(info.status))
+                                    }
+                                }
+
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomStart)
+                                            .padding(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        if (year != null) {
+                                            Surface(
+                                                shape = MaterialTheme.shapes.extraSmall,
+                                                color = Color.Black.copy(alpha = 0.6f),
+                                            ) {
+                                                Text(
+                                                    text = year,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = Color.White,
+                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                )
+                                            }
+                                        }
+
+                                        if (voteAverage > 0.0) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Star,
+                                                    contentDescription = null,
+                                                    tint = Color(0xFFFFB800),
+                                                    modifier = Modifier.size(14.dp),
+                                                )
+                                                Text(
+                                                    text = "${(voteAverage * 10).toInt() / 10.0}",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White,
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    Text(
+                                        text = title,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
                             }
                         }
                     }
-
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.verticalGradient(
-                                        colors =
-                                            listOf(
-                                                Color.Transparent,
-                                                Color.Black.copy(alpha = 0.4f),
-                                                Color.Black.copy(alpha = 0.85f),
-                                            ),
-                                    ),
-                                ),
-                    )
 
                     AnimatedContent(
                         targetState = currentItem,
                         transitionSpec = {
                             fadeIn(tween(300)) togetherWith fadeOut(tween(300))
                         },
-                        label = "SpotlightBannerOverlayTransition",
-                        modifier = Modifier.fillMaxSize(),
+                        label = "SpotlightContentTransition",
                     ) { item ->
-                        val title = item.title ?: item.name ?: mokoString(MR.strings.unknown)
-                        val year = (item.releaseDate ?: item.firstAirDate)?.take(4)
-                        val voteAverage = item.voteAverage
-
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
+                            Text(
+                                text = item.overview ?: "",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 3,
+                                minLines = 3,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+
                             Row(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.TopStart)
-                                        .padding(12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                ) {
-                                    Text(
-                                        text = mokoString(MR.strings.dashboard_discover_spotlight),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    )
-                                }
-
-                                item.mediaInfo?.let { info ->
-                                    StatusOverlay(MediaStatus.fromValue(info.status))
-                                }
-                            }
-
-                            Column(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    if (year != null) {
-                                        Surface(
-                                            shape = MaterialTheme.shapes.extraSmall,
-                                            color = Color.Black.copy(alpha = 0.6f),
-                                        ) {
-                                            Text(
-                                                text = year,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = Color.White,
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                            )
-                                        }
-                                    }
-
-                                    if (voteAverage > 0.0) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Star,
-                                                contentDescription = null,
-                                                tint = Color(0xFFFFB800),
-                                                modifier = Modifier.size(14.dp),
-                                            )
-                                            Text(
-                                                text = "${(voteAverage * 10).toInt() / 10.0}",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.White,
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Text(
-                                    text = title,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            }
-                        }
-                    }
-                }
-
-                AnimatedContent(
-                    targetState = currentItem,
-                    transitionSpec = {
-                        fadeIn(tween(300)) togetherWith fadeOut(tween(300))
-                    },
-                    label = "SpotlightContentTransition",
-                ) { item ->
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Text(
-                            text = item.overview ?: "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 3,
-                            minLines = 3,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            FilledTonalButton(
-                                onClick = {
-                                    if (enabled) {
-                                        onMediaClick(item.id, item.mediaType)
-                                    }
-                                },
-                                modifier = Modifier.weight(1f),
-                                enabled = enabled,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                                Spacer(Modifier.width(6.dp))
-                                Text(text = mokoString(MR.strings.details))
-                            }
-
-                            val mediaStatus = state.resolveMediaStatus(item)
-                            val (buttonLabel, buttonIcon, isTonal) =
-                                when (mediaStatus) {
-                                    MediaStatus.Available -> {
-                                        if (item.mediaType == RequestType.Tv) {
-                                            Triple(MR.strings.request_more, Icons.Default.Add, false)
-                                        } else {
-                                            Triple(MR.strings.available, Icons.Default.Check, true)
-                                        }
-                                    }
-                                    MediaStatus.Pending -> Triple(MR.strings.pending, Icons.Default.Schedule, true)
-                                    MediaStatus.Processing -> Triple(MR.strings.processing, Icons.Default.Schedule, true)
-                                    MediaStatus.PartiallyAvailable -> Triple(MR.strings.request_more, Icons.Default.Add, false)
-                                    else -> Triple(MR.strings.request, Icons.Default.Add, false)
-                                }
-
-                            if (isTonal) {
                                 FilledTonalButton(
                                     onClick = {
                                         if (enabled) {
-                                            if (onRequestClick != null) {
-                                                onRequestClick(item)
-                                            } else {
-                                                onMediaClick(item.id, item.mediaType)
-                                            }
+                                            onMediaClick(item.id, item.mediaType)
                                         }
                                     },
                                     modifier = Modifier.weight(1f),
                                     enabled = enabled,
                                 ) {
                                     Icon(
-                                        imageVector = buttonIcon,
+                                        imageVector = Icons.Default.Info,
                                         contentDescription = null,
                                         modifier = Modifier.size(18.dp),
                                     )
                                     Spacer(Modifier.width(6.dp))
-                                    Text(text = mokoString(buttonLabel))
+                                    Text(text = mokoString(MR.strings.details))
                                 }
-                            } else {
-                                Button(
-                                    onClick = {
-                                        if (enabled) {
-                                            if (onRequestClick != null) {
-                                                onRequestClick(item)
+
+                                val mediaStatus = state.resolveMediaStatus(item)
+                                val (buttonLabel, buttonIcon, isTonal) =
+                                    when (mediaStatus) {
+                                        MediaStatus.Available -> {
+                                            if (item.mediaType == RequestType.Tv) {
+                                                Triple(MR.strings.request_more, Icons.Default.Add, false)
                                             } else {
-                                                onMediaClick(item.id, item.mediaType)
+                                                Triple(MR.strings.available, Icons.Default.Check, true)
                                             }
                                         }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    enabled = enabled,
-                                ) {
-                                    Icon(
-                                        imageVector = buttonIcon,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp),
-                                    )
-                                    Spacer(Modifier.width(6.dp))
-                                    Text(text = mokoString(buttonLabel))
+                                        MediaStatus.Pending -> Triple(MR.strings.pending, Icons.Default.Schedule, true)
+                                        MediaStatus.Processing -> Triple(MR.strings.processing, Icons.Default.Schedule, true)
+                                        MediaStatus.PartiallyAvailable -> Triple(MR.strings.request_more, Icons.Default.Add, false)
+                                        else -> Triple(MR.strings.request, Icons.Default.Add, false)
+                                    }
+
+                                if (isTonal) {
+                                    FilledTonalButton(
+                                        onClick = {
+                                            if (enabled) {
+                                                if (onRequestClick != null) {
+                                                    onRequestClick(item)
+                                                } else {
+                                                    onMediaClick(item.id, item.mediaType)
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        enabled = enabled,
+                                    ) {
+                                        Icon(
+                                            imageVector = buttonIcon,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                        Spacer(Modifier.width(6.dp))
+                                        Text(text = mokoString(buttonLabel))
+                                    }
+                                } else {
+                                    Button(
+                                        onClick = {
+                                            if (enabled) {
+                                                if (onRequestClick != null) {
+                                                    onRequestClick(item)
+                                                } else {
+                                                    onMediaClick(item.id, item.mediaType)
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        enabled = enabled,
+                                    ) {
+                                        Icon(
+                                            imageVector = buttonIcon,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                        Spacer(Modifier.width(6.dp))
+                                        Text(text = mokoString(buttonLabel))
+                                    }
                                 }
                             }
                         }
