@@ -100,13 +100,14 @@ fun DashboardDiscoverSpotlightSection(
     ) {
         Column {
             AnimatedVisibility(
-                visible = isEditing || state.seerrInstances.isEmpty() || spotlightItems.isEmpty()
+                visible = isEditing || state.seerrInstances.isEmpty() || spotlightItems.isEmpty(),
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
                         painter = painterResource(InstanceType.Seerr.icon),
@@ -259,7 +260,16 @@ fun DashboardDiscoverSpotlightSection(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         MediaRequestTypeChip(
-                                            text = mokoString(if (item.mediaType == RequestType.Tv) MR.strings.series else MR.strings.movie),
+                                            text =
+                                                mokoString(
+                                                    if (item.mediaType ==
+                                                        RequestType.Tv
+                                                    ) {
+                                                        MR.strings.series
+                                                    } else {
+                                                        MR.strings.movie
+                                                    },
+                                                ),
                                             requestType = item.mediaType,
                                         )
 

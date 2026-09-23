@@ -86,118 +86,118 @@ fun DashboardDownloadClientsSection(
                 )
             } else {
                 clients.forEach { clientState ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Surface(
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Box(modifier = Modifier.padding(6.dp)) {
-                            Image(
-                                painter = painterResource(clientState.client.type.icon),
-                                contentDescription = null,
-                                modifier = Modifier.size(28.dp),
-                            )
-                        }
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = clientState.client.label,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        Surface(
+                            shape = MaterialTheme.shapes.medium,
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
                         ) {
-                            Text(
-                                text = "${clientState.activeDownloadsCount} ${mokoString(MR.strings.downloads)}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            if (!clientState.isOnline) {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .size(6.dp)
-                                            .clip(CircleShape)
-                                            .background(MaterialTheme.colorScheme.error),
-                                )
-                                Text(
-                                    text = mokoString(MR.strings.offline),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.error,
-                                    fontWeight = FontWeight.Medium,
+                            Box(modifier = Modifier.padding(6.dp)) {
+                                Image(
+                                    painter = painterResource(clientState.client.type.icon),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(28.dp),
                                 )
                             }
                         }
-                    }
-
-                    val transferInfo = clientState.transferInfo
-                    if (clientState.isOnline && (transferInfo != null)) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            if (transferInfo.downloadSpeed > 0) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)),
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowDownward,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                            modifier = Modifier.size(12.dp),
-                                        )
-                                        Text(
-                                            text = "${transferInfo.downloadSpeed.bytesAsFileSizeString()}/s",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        )
-                                    }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = clientState.client.label,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Text(
+                                    text = "${clientState.activeDownloadsCount} ${mokoString(MR.strings.downloads)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                if (!clientState.isOnline) {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .size(6.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.error),
+                                    )
+                                    Text(
+                                        text = mokoString(MR.strings.offline),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontWeight = FontWeight.Medium,
+                                    )
                                 }
                             }
-                            if (transferInfo.uploadSpeed > 0) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)),
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        }
+
+                        val transferInfo = clientState.transferInfo
+                        if (clientState.isOnline && (transferInfo != null)) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (transferInfo.downloadSpeed > 0) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.secondaryContainer,
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)),
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowUpward,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                                            modifier = Modifier.size(12.dp),
-                                        )
-                                        Text(
-                                            text = "${transferInfo.uploadSpeed.bytesAsFileSizeString()}/s",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowDownward,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                modifier = Modifier.size(12.dp),
+                                            )
+                                            Text(
+                                                text = "${transferInfo.downloadSpeed.bytesAsFileSizeString()}/s",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            )
+                                        }
+                                    }
+                                }
+                                if (transferInfo.uploadSpeed > 0) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)),
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowUpward,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                modifier = Modifier.size(12.dp),
+                                            )
+                                            Text(
+                                                text = "${transferInfo.uploadSpeed.bytesAsFileSizeString()}/s",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
             }
 
             if (state.activeDownloads.isNotEmpty()) {

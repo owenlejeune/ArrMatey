@@ -21,12 +21,12 @@ import com.dnfapps.arrmatey.arr.api.model.Revision
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
 import com.dnfapps.arrmatey.database.EncryptedString
+import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
-import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
@@ -88,15 +88,17 @@ sealed interface CombinedDashboardState {
 
         val spotlightMedia: List<DiscoverResult>
             get() {
-                val all = (trendingMedia + popularMovies + popularTv)
-                    .distinctBy { "${it.mediaType.name}_${it.id}" }
+                val all =
+                    (trendingMedia + popularMovies + popularTv)
+                        .distinctBy { "${it.mediaType.name}_${it.id}" }
                 val withImages = all.filter { it.backdropPath != null || it.posterPath != null }
                 return withImages.ifEmpty { all }
             }
 
         val quickPickMedia: List<DiscoverResult>
-            get() = (trendingMedia + popularMovies + popularTv)
-                .distinctBy { "${it.mediaType.name}_${it.id}" }
+            get() =
+                (trendingMedia + popularMovies + popularTv)
+                    .distinctBy { "${it.mediaType.name}_${it.id}" }
 
         fun getDiscoverFeedItems(category: DiscoverCategory): List<DiscoverResult> =
             when (category) {
@@ -104,12 +106,16 @@ sealed interface CombinedDashboardState {
                 DiscoverCategory.POPULAR_MOVIES -> popularMovies
                 DiscoverCategory.POPULAR_SERIES -> popularTv
                 DiscoverCategory.UPCOMING_MOVIES,
-                DiscoverCategory.UPCOMING_SERIES -> upcomingMovies.ifEmpty { upcomingTv }
+                DiscoverCategory.UPCOMING_SERIES,
+                -> upcomingMovies.ifEmpty { upcomingTv }
             }
 
         fun resolveMediaStatus(item: DiscoverResult): com.dnfapps.arrmatey.seerr.api.model.MediaStatus {
             val directStatus =
-                item.mediaInfo?.status?.let { com.dnfapps.arrmatey.seerr.api.model.MediaStatus.fromValue(it) }
+                item.mediaInfo?.status?.let {
+                    com.dnfapps.arrmatey.seerr.api.model.MediaStatus
+                        .fromValue(it)
+                }
             if (directStatus != null && directStatus != com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Unknown) {
                 return directStatus
             }
@@ -205,7 +211,12 @@ sealed interface CombinedDashboardState {
                     id = 1,
                     title = "A Totally Awesome Movie",
                     originalTitle = "A Totally Awesome Movie",
-                    overview = "Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi aliqua eiusmod reprehenderit sit qui cillum esse.",
+                    overview =
+                        """
+                        Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur deserunt
+                        commodo ex. Commodo commodo cupidatat quis minim est est nisi aliqua eiusmod reprehenderit
+                        sit qui cillum esse.,
+                        """.trimIndent(),
                     posterPath = null,
                     backdropPath = null,
                     releaseDate = LocalDate(2026, 3, 8),
@@ -414,67 +425,91 @@ sealed interface CombinedDashboardState {
                         id = 1,
                         mediaType = RequestType.Movie,
                         title = "A Totally Awesome Movie",
-                        overview = "Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi aliqua eiusmod reprehenderit sit qui cillum esse.",
+                        overview =
+                            """
+                            Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur
+                            deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi
+                            aliqua eiusmod reprehenderit sit qui cillum esse.
+                            """.trimIndent(),
                         releaseDate = "2026-03-08",
                         voteAverage = 8.5,
                         backdropPath = null,
                         posterPath = null,
                         productionCompanies = listOf(ProductionCompany(id = 1, name = "Big Bay Pictures")),
                         contentRating = "PG-13",
-                        keywords = listOf(
-                            Keyword(id = 1, name = "Action"),
-                            Keyword(id = 2, name = "Sci-Fi"),
-                            Keyword(id = 3, name = "Space"),
-                        ),
+                        keywords =
+                            listOf(
+                                Keyword(id = 1, name = "Action"),
+                                Keyword(id = 2, name = "Sci-Fi"),
+                                Keyword(id = 3, name = "Space"),
+                            ),
                     ),
                     DiscoverResult(
                         id = 2,
                         mediaType = RequestType.Tv,
                         name = "A Totally Awesome Series",
-                        overview = "Commodo commodo cupidatat quis minim est est nisi aliqua eiusmod reprehenderit sit qui cillum esse. Consectetur voluptate occaecat est Lorem ut ea sit labore incididunt officia.",
+                        overview =
+                            """
+                            Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur
+                            deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi
+                            aliqua eiusmod reprehenderit sit qui cillum esse.
+                            """.trimIndent(),
                         firstAirDate = "2026-01-18",
                         voteAverage = 9.0,
                         backdropPath = null,
                         posterPath = null,
                         networks = listOf(Network(id = 1, name = "TBO")),
                         contentRating = "TV-MA",
-                        keywords = listOf(
-                            Keyword(id = 4, name = "Drama"),
-                            Keyword(id = 5, name = "Mystery"),
-                            Keyword(id = 6, name = "Thriller"),
-                        ),
+                        keywords =
+                            listOf(
+                                Keyword(id = 4, name = "Drama"),
+                                Keyword(id = 5, name = "Mystery"),
+                                Keyword(id = 6, name = "Thriller"),
+                            ),
                     ),
                     DiscoverResult(
                         id = 3,
                         mediaType = RequestType.Movie,
                         title = "Another Awesome Movie",
-                        overview = "Consectetur voluptate occaecat est Lorem ut ea sit labore incididunt officia incididunt eiusmod pariatur sit.",
+                        overview =
+                            """
+                            Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur
+                            deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi
+                            aliqua eiusmod reprehenderit sit qui cillum esse.
+                            """.trimIndent(),
                         releaseDate = "2026-05-20",
                         voteAverage = 7.8,
                         backdropPath = null,
                         posterPath = null,
                         productionCompanies = listOf(ProductionCompany(id = 2, name = "Solar System Pictures")),
                         contentRating = "R",
-                        keywords = listOf(
-                            Keyword(id = 7, name = "Adventure"),
-                            Keyword(id = 8, name = "Comedy"),
-                        ),
+                        keywords =
+                            listOf(
+                                Keyword(id = 7, name = "Adventure"),
+                                Keyword(id = 8, name = "Comedy"),
+                            ),
                     ),
                     DiscoverResult(
                         id = 4,
                         mediaType = RequestType.Tv,
                         name = "Another Awesome Series",
-                        overview = "Incididunt eiusmod pariatur sit voluptate occaecat est Lorem ut ea sit labore incididunt officia.",
+                        overview =
+                            """
+                            Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur
+                            deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi
+                            aliqua eiusmod reprehenderit sit qui cillum esse.
+                            """.trimIndent(),
                         firstAirDate = "2026-04-10",
                         voteAverage = 8.2,
                         backdropPath = null,
                         posterPath = null,
                         networks = listOf(Network(id = 2, name = "Notflix")),
                         contentRating = "TV-14",
-                        keywords = listOf(
-                            Keyword(id = 9, name = "Fantasy"),
-                            Keyword(id = 10, name = "Animation"),
-                        ),
+                        keywords =
+                            listOf(
+                                Keyword(id = 9, name = "Fantasy"),
+                                Keyword(id = 10, name = "Animation"),
+                            ),
                     ),
                 )
 

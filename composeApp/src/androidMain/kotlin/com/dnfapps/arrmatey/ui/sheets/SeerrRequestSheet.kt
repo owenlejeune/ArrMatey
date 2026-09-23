@@ -235,7 +235,7 @@ fun SeerrRequestSheetContent(
                             mokoString(MR.strings.request_in_4k)
                         } else {
                             mokoString(MR.strings.request)
-                        }
+                        },
                     )
                 }
             }

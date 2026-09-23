@@ -214,47 +214,47 @@ fun AddMovieSheetContent(
             )
         }
 
-            Button(
-                onClick = {
-                    val qp = qualityProfile
-                    val rf = rootFolder
-                    if (qp != null && rf != null) {
-                        onUpdatePreferences(
-                            preferences.copy(
-                                addMovieMonitored = monitored,
-                                addMovieMinimumAvailability = minimumAvailability,
-                                addQualityProfileId = qp.id,
-                                addRootFolderPath = rf.path,
-                                addSearchOnAdd = searchOnAdd,
-                            ),
-                        )
-                        val newItem =
-                            item.copyForCreation(
-                                monitored = monitored,
-                                minimumAvailability = minimumAvailability,
-                                qualityProfileId = qp.id,
-                                rootFolderPath = rf.path,
-                                tags = selectedTags,
-                            )
-                        onAddItem(newItem, searchOnAdd)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !addInProgress && qualityProfile != null && rootFolder != null,
-            ) {
-                if (addInProgress) {
-                    CircularProgressIndicator(Modifier.size(24.dp))
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
+        Button(
+            onClick = {
+                val qp = qualityProfile
+                val rf = rootFolder
+                if (qp != null && rf != null) {
+                    onUpdatePreferences(
+                        preferences.copy(
+                            addMovieMonitored = monitored,
+                            addMovieMinimumAvailability = minimumAvailability,
+                            addQualityProfileId = qp.id,
+                            addRootFolderPath = rf.path,
+                            addSearchOnAdd = searchOnAdd,
+                        ),
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Text(text = mokoString(MR.strings.save))
+                    val newItem =
+                        item.copyForCreation(
+                            monitored = monitored,
+                            minimumAvailability = minimumAvailability,
+                            qualityProfileId = qp.id,
+                            rootFolderPath = rf.path,
+                            tags = selectedTags,
+                        )
+                    onAddItem(newItem, searchOnAdd)
                 }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !addInProgress && qualityProfile != null && rootFolder != null,
+        ) {
+            if (addInProgress) {
+                CircularProgressIndicator(Modifier.size(24.dp))
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(text = mokoString(MR.strings.save))
             }
         }
     }
+}
 
 @Composable
 fun MovieAddConfigurationContent(
@@ -336,7 +336,11 @@ fun MovieAddConfigurationContent(
                 val mutableTags = selectedTags as? androidx.compose.runtime.snapshots.SnapshotStateList<Int>
                 MultiSelectDropdownPicker(
                     options = tags.map { it.id },
-                    selectedOptions = mutableTags ?: androidx.compose.runtime.remember(selectedTags) { androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray()) },
+                    selectedOptions =
+                        mutableTags
+                            ?: androidx.compose.runtime.remember(
+                                selectedTags,
+                            ) { androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray()) },
                     valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
                     onOptionSelected = { tag, isSelected ->
                         if (mutableTags != null) {

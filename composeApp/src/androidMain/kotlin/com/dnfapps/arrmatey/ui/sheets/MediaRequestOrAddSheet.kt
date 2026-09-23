@@ -45,8 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.QualityProfile
-import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
@@ -472,7 +470,7 @@ fun MediaRequestOrAddSheet(
                                     seasons = seasons,
                                     is4k = is4k,
                                     userId = selectedUserId,
-                                    )
+                                )
                             } else {
                                 when (arrMedia) {
                                     is ArrSeries -> {
@@ -551,7 +549,7 @@ fun MediaRequestOrAddSheet(
                                                 mokoString(MR.strings.request_in_4k)
                                             } else {
                                                 mokoString(MR.strings.request)
-                                            }
+                                            },
                                         )
                                     } else {
                                         Icon(

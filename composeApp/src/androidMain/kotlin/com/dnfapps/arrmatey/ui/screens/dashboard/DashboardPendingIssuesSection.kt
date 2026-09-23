@@ -160,7 +160,15 @@ private fun CompactIssueCard(
                     if (details?.fullPosterPath != null) {
                         rememberRemoteImageData(details.fullPosterPath)
                     } else {
-                        painterResource(if (issue.media?.mediaType == RequestType.Tv) MR.images.sonarr_mock_poster else MR.images.radarr_mock_poster)
+                        painterResource(
+                            if (issue.media?.mediaType ==
+                                RequestType.Tv
+                            ) {
+                                MR.images.sonarr_mock_poster
+                            } else {
+                                MR.images.radarr_mock_poster
+                            },
+                        )
                     }
 
                 if (posterModel is Painter) {

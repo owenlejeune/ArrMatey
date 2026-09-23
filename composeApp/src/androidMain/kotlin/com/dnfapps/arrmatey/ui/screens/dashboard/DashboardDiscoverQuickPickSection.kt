@@ -11,7 +11,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -154,9 +153,10 @@ fun DashboardDiscoverQuickPickSection(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(160.dp),
                             horizontalArrangement = Arrangement.spacedBy(14.dp),
                             verticalAlignment = Alignment.Top,
                         ) {
@@ -164,7 +164,7 @@ fun DashboardDiscoverQuickPickSection(
                                 item = item,
                                 modifier = Modifier.fillMaxHeight(),
                                 showFooter = false,
-                                showOverlays = false
+                                showOverlays = false,
                             )
 
                             Column(

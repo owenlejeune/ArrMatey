@@ -155,7 +155,10 @@ class InstanceManager(
                 if (instance == null) {
                     _instanceRepositories.map { repos -> repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull() }
                 } else {
-                    _instanceRepositories.map { repos -> (repos[instance.id] as? SeerrInstanceRepository) ?: repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull() }
+                    _instanceRepositories.map { repos ->
+                        (repos[instance.id] as? SeerrInstanceRepository)
+                            ?: repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull()
+                    }
                 }
             }
 
@@ -166,7 +169,10 @@ class InstanceManager(
                 if (instance == null) {
                     _instanceRepositories.map { repos -> repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull() }
                 } else {
-                    _instanceRepositories.map { repos -> (repos[instance.id] as? ProwlarrInstanceRepository) ?: repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull() }
+                    _instanceRepositories.map { repos ->
+                        (repos[instance.id] as? ProwlarrInstanceRepository)
+                            ?: repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull()
+                    }
                 }
             }
 
@@ -177,7 +183,10 @@ class InstanceManager(
                 if (instance == null) {
                     _instanceRepositories.map { repos -> repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull() }
                 } else {
-                    _instanceRepositories.map { repos -> (repos[instance.id] as? BazarrInstanceRepository) ?: repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull() }
+                    _instanceRepositories.map { repos ->
+                        (repos[instance.id] as? BazarrInstanceRepository)
+                            ?: repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull()
+                    }
                 }
             }
 
@@ -188,7 +197,10 @@ class InstanceManager(
                 if (instance == null) {
                     _instanceRepositories.map { r -> r.values.filterIsInstance<TracearrRepository>().firstOrNull() }
                 } else {
-                    _instanceRepositories.map { r -> (r[instance.id] as? TracearrRepository) ?: r.values.filterIsInstance<TracearrRepository>().firstOrNull() }
+                    _instanceRepositories.map { r ->
+                        (r[instance.id] as? TracearrRepository)
+                            ?: r.values.filterIsInstance<TracearrRepository>().firstOrNull()
+                    }
                 }
             }
 

@@ -348,7 +348,11 @@ fun SeriesAddConfigurationContent(
                 val mutableTags = selectedTags as? androidx.compose.runtime.snapshots.SnapshotStateList<Int>
                 MultiSelectDropdownPicker(
                     options = tags.map { it.id },
-                    selectedOptions = mutableTags ?: androidx.compose.runtime.remember(selectedTags) { androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray()) },
+                    selectedOptions =
+                        mutableTags
+                            ?: androidx.compose.runtime.remember(
+                                selectedTags,
+                            ) { androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray()) },
                     valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
                     onOptionSelected = { tag, isSelected ->
                         if (mutableTags != null) {

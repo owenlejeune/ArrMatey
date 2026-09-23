@@ -249,7 +249,8 @@ class UnifiedMediaDetailsDataObserver(
                             rawState.arrMedia
                                 ?: instanceHandler.instancePresencesMap.value[activeRepo?.instance?.id]
                                 ?: instanceHandler.instancePresencesMap.value[instanceHandler.selectedInstanceId.value]
-                                ?: instanceHandler.instancePresencesMap.value.values.firstOrNull { it != null }
+                                ?: instanceHandler.instancePresencesMap.value.values
+                                    .firstOrNull { it != null }
 
                         uiStateFlow.value =
                             rawState.copy(

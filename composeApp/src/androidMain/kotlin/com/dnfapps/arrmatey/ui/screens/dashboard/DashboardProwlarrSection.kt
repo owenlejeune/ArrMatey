@@ -65,7 +65,14 @@ fun DashboardProwlarrSection(
             CardDefaults.cardColors(
                 containerColor = containerColor,
             ),
-        border = if (isEditing || prowlarrStats.isEmpty()) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
+        border =
+            if (isEditing ||
+                prowlarrStats.isEmpty()
+            ) {
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            } else {
+                null
+            },
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
