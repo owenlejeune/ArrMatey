@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,21 +61,17 @@ import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
-import kotlin.random.Random
 
 @Composable
 fun DashboardDiscoverQuickPickSection(
     state: CombinedDashboardState.Success,
+    onShuffleClick: () -> Unit,
     onMediaClick: (tmdbId: Long, requestType: RequestType) -> Unit,
     onRequestClick: ((DiscoverResult) -> Unit)? = null,
     isEditing: Boolean = false,
     enabled: Boolean = true,
 ) {
-    val pool = state.quickPickMedia
-
-    var selectedIndex by remember(pool.size) {
-        mutableIntStateOf(if (pool.isNotEmpty()) Random.nextInt(pool.size) else 0)
-    }
+    val currentItem = state.quickPickItem ?: state.quickPickMedia.firstOrNull()
 
     var rotationDegrees by remember { mutableFloatStateOf(0f) }
     val animatedRotation by animateFloatAsState(
@@ -83,25 +80,13 @@ fun DashboardDiscoverQuickPickSection(
         label = "ShuffleRotation",
     )
 
-    fun shuffle() {
-        if (pool.size > 1) {
-            var nextIndex: Int
-            do {
-                nextIndex = Random.nextInt(pool.size)
-            } while (nextIndex == selectedIndex)
-            selectedIndex = nextIndex
-            rotationDegrees += 360f
-        }
-    }
-
     Card(
         onClick = {
-            if (enabled && pool.isNotEmpty() && selectedIndex in pool.indices) {
-                val item = pool[selectedIndex]
-                onMediaClick(item.id, item.mediaType)
+            if (enabled && currentItem != null) {
+                onMediaClick(currentItem.id, currentItem.mediaType)
             }
         },
-        enabled = enabled && pool.isNotEmpty(),
+        enabled = enabled && currentItem != null,
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
@@ -135,7 +120,7 @@ fun DashboardDiscoverQuickPickSection(
                 }
             }
 
-            if (pool.isEmpty() || selectedIndex !in pool.indices) {
+            if (currentItem == null) {
                 Text(
                     text = mokoString(MR.strings.no_media_found),
                     modifier =
@@ -146,8 +131,6 @@ fun DashboardDiscoverQuickPickSection(
                     textAlign = TextAlign.Center,
                 )
             } else {
-                val currentItem = pool[selectedIndex]
-
                 AnimatedContent(
                     targetState = currentItem,
                     transitionSpec = {
@@ -168,6 +151,7 @@ fun DashboardDiscoverQuickPickSection(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
+                                    .height(160.dp)
                                     .clickable(enabled = enabled) {
                                         onMediaClick(item.id, item.mediaType)
                                     },
@@ -176,7 +160,7 @@ fun DashboardDiscoverQuickPickSection(
                         ) {
                             PosterItem(
                                 item = item,
-                                modifier = Modifier.width(96.dp),
+                                modifier = Modifier.fillMaxHeight(),
                                 showFooter = false,
                                 showOverlays = false,
                                 onItemClick = {
@@ -246,7 +230,6 @@ fun DashboardDiscoverQuickPickSection(
                                             text = overview,
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 3,
                                             overflow = TextOverflow.Ellipsis,
                                         )
                                     }
@@ -260,8 +243,13 @@ fun DashboardDiscoverQuickPickSection(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             FilledTonalIconButton(
-                                onClick = { if (enabled) shuffle() },
-                                enabled = enabled && pool.isNotEmpty(),
+                                onClick = {
+                                    if (enabled) {
+                                        rotationDegrees += 360f
+                                        onShuffleClick()
+                                    }
+                                },
+                                enabled = enabled && state.quickPickMedia.isNotEmpty(),
                                 colors =
                                     IconButtonDefaults.filledTonalIconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,

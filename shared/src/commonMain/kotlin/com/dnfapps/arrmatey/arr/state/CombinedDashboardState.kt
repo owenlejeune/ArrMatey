@@ -70,6 +70,7 @@ sealed interface CombinedDashboardState {
         val popularTv: List<DiscoverResult> = emptyList(),
         val upcomingMovies: List<DiscoverResult> = emptyList(),
         val upcomingTv: List<DiscoverResult> = emptyList(),
+        val quickPickItem: DiscoverResult? = null,
         val networkStatus: NetworkStatusState? = null,
         val isRefreshing: Boolean = false,
     ) : CombinedDashboardState {
@@ -456,6 +457,7 @@ sealed interface CombinedDashboardState {
                 popularTv = mockDiscover.filter { it.mediaType == RequestType.Tv },
                 upcomingMovies = mockDiscover.filter { it.mediaType == RequestType.Movie },
                 upcomingTv = mockDiscover.filter { it.mediaType == RequestType.Tv },
+                quickPickItem = mockDiscover.firstOrNull(),
                 downloadTransfers =
                     listOf(
                         DownloadTransferInfo(

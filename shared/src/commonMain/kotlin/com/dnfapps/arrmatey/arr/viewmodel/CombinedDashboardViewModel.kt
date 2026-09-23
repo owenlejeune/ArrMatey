@@ -387,6 +387,7 @@ class CombinedDashboardViewModel(
     private val _popularTvDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
     private val _upcomingMoviesDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
     private val _upcomingTvDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
+    private val _quickPickItem = MutableStateFlow<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult?>(null)
 
     init {
         observeDashboard()
@@ -396,6 +397,22 @@ class CombinedDashboardViewModel(
             }
         }
         refresh()
+    }
+
+    fun shuffleQuickPick() {
+        val pool =
+            (_trendingDiscover.value + _popularMoviesDiscover.value + _popularTvDiscover.value)
+                .distinctBy { "${it.mediaType.name}_${it.id}" }
+        if (pool.isNotEmpty()) {
+            val current = _quickPickItem.value
+            val available =
+                if (pool.size > 1 && current != null) {
+                    pool.filterNot { it.id == current.id && it.mediaType == current.mediaType }
+                } else {
+                    pool
+                }
+            _quickPickItem.value = available.random()
+        }
     }
 
     private fun observeDashboard() {
@@ -418,6 +435,7 @@ class CombinedDashboardViewModel(
                     _popularTvDiscover,
                     _upcomingMoviesDiscover,
                     _upcomingTvDiscover,
+                    _quickPickItem,
                     _isRefreshing,
                 ),
             ) { args ->
@@ -471,7 +489,9 @@ class CombinedDashboardViewModel(
                 @Suppress("UNCHECKED_CAST")
                 val upcomingTv = args[15] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
 
-                val refreshing = args[16] as Boolean
+                val quickPick = args[16] as com.dnfapps.arrmatey.seerr.api.model.DiscoverResult?
+
+                val refreshing = args[17] as Boolean
 
                 CombinedDashboardState.Success(
                     instances = instances,
@@ -491,6 +511,7 @@ class CombinedDashboardViewModel(
                     popularTv = popularTv,
                     upcomingMovies = upcomingMovies,
                     upcomingTv = upcomingTv,
+                    quickPickItem = quickPick,
                     networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats, bazarrStats, downloadClients),
                     isRefreshing = refreshing,
                 )
@@ -552,6 +573,15 @@ class CombinedDashboardViewModel(
             }
         } catch (e: Exception) {
             logger.error(e) { "Error fetching upcoming tv discover data" }
+        }
+
+        if (_quickPickItem.value == null) {
+            val pool =
+                (_trendingDiscover.value + _popularMoviesDiscover.value + _popularTvDiscover.value)
+                    .distinctBy { "${it.mediaType.name}_${it.id}" }
+            if (pool.isNotEmpty()) {
+                _quickPickItem.value = pool.random()
+            }
         }
     }
 

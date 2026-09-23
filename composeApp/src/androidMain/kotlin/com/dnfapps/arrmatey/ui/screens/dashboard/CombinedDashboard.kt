@@ -146,6 +146,7 @@ fun DashboardCardContent(
     onNavigateToTracearrUsers: () -> Unit = {},
     onNavigateToTracearrViolations: () -> Unit = {},
     onNavigateToTracearrActivity: () -> Unit = {},
+    onShuffleQuickPick: () -> Unit = {},
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
@@ -310,6 +311,7 @@ fun DashboardCardContent(
         DashboardCards.DiscoverQuickPick ->
             DashboardDiscoverQuickPickSection(
                 state = currentState,
+                onShuffleClick = onShuffleQuickPick,
                 isEditing = isEditing,
                 enabled = !isEditing && enabled,
                 onMediaClick = { tmdbId, type ->
@@ -696,6 +698,7 @@ fun CombinedDashboard(
                                                     onNavigateToTracearrUsers = onNavigateToTracearrUsers,
                                                     onNavigateToTracearrViolations = onNavigateToTracearrViolations,
                                                     onNavigateToTracearrActivity = onNavigateToTracearrActivity,
+                                                    onShuffleQuickPick = { viewModel.shuffleQuickPick() },
                                                 )
                                             }
                                             if (isEditing) {
