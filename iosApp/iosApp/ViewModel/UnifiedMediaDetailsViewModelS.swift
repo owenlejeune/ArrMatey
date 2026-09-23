@@ -44,6 +44,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var preferences: InstancePreferences = InstancePreferences()
 
     @Published private(set) var addItemStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var requestStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var editStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var deleteStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var deleteSeasonStatus: OperationStatus = OperationStatusIdle()
@@ -132,6 +133,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.similarState.observeAsync(on: self, to: \.similarState)
 
         viewModel.addItemStatus.observeAsync(on: self, to: \.addItemStatus)
+        viewModel.requestStatus.observeAsync(on: self, to: \.requestStatus)
 
         viewModel.editStatus.observeAsync(on: self) { owner, status in
             owner.editStatus = status

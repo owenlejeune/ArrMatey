@@ -24,7 +24,7 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
         HStack(spacing: 12) {
             reportIssueButton
             watchMenu
-            addRequestMenu
+            addRequestButton
             approvalMenu
             monitorButton
             instanceSwitcher
@@ -64,29 +64,12 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
     }
 
     @ViewBuilder
-    private var addRequestMenu: some View {
+    private var addRequestButton: some View {
         let buttonState = viewModel.buttonState
         let canAddDirectly = !success.hasArrId && success.arrMedia != nil && viewModel.isArrConfigured
 
         if canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton {
-            Menu {
-                if canAddDirectly {
-                    Button(action: onShowAddSheet) {
-                        Label(MR.strings().add.localized(), systemImage: "plus")
-                    }
-                }
-                if buttonState.showRequestButton || buttonState.showRequestMoreButton {
-                    let title = buttonState.showRequestMoreButton ? MR.strings().request_more.localized() : MR.strings().request.localized()
-                    Button(action: { viewModel.showRequestSheet(is4k: false) }) {
-                        Label(title, systemImage: "plus.circle")
-                    }
-                }
-                if buttonState.showRequest4kButton {
-                    Button(action: { viewModel.showRequestSheet(is4k: true) }) {
-                        Label(MR.strings().request_in_4k.localized(), systemImage: "aqi.medium")
-                    }
-                }
-            } label: {
+            Button(action: onShowAddSheet) {
                 Image(systemName: "plus")
             }
         }

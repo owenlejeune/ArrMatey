@@ -176,20 +176,7 @@ struct DiscoverPosterItem: View {
                     posterImageView
                 },
                 errorContent: {
-                    if loadError || (item.posterPath == nil && item.profilePath == nil) {
-                        VStack(spacing: 4) {
-                            Image(systemName: "photo.badge.exclamationmark")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 48, height: 48)
-                                .foregroundColor(.red)
-                            Text(item.title ?? item.name ?? MR.strings().unknown.localized())
-                                .font(.system(size: 14, weight: .semibold))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 8)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
+                    EmptyView()
                 },
                 additionalContent: {
                     if showOverlays {
@@ -578,16 +565,7 @@ struct GenericPosterItem<Content: View>: View {
                 }
             },
             errorContent: {
-                if loadError || (posterUrl == nil && posterImage == nil) {
-                    VStack(spacing: 4) {
-                        Image(systemName: "photo.badge.exclamationmark")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 64, height: 64)
-                            .foregroundColor(.red)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
+                EmptyView()
             },
             additionalContent: additionalContent
         )

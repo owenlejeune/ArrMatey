@@ -7,6 +7,7 @@
 
 import Shared
 import SwiftUI
+import Combine
 
 struct DashboardTab: View {
     @Environment(\.navigationContext) private var context
@@ -40,6 +41,7 @@ struct DashboardTabContent: View {
     @State private var selectedIssueForSheet: MediaIssuePackage? = nil
     @State private var selectedActivityItem: IdentifiableQueueItem? = nil
     @State private var selectedTracearrStreamSession: TracearrStreamSession? = nil
+    @State private var selectedMediaForRequest: DiscoverResult? = nil
 
     @State private var toastMessage: String? = nil
 
@@ -227,6 +229,15 @@ struct DashboardTabContent: View {
                 }
             )
         }
+        .sheet(item: Binding(
+            get: { selectedMediaForRequest.map { IdentifiableDiscoverResult(result: $0) } },
+            set: { selectedMediaForRequest = $0?.result }
+        )) { wrapper in
+            MediaRequestOrAddSheet(
+                item: wrapper.result,
+                onDismiss: { selectedMediaForRequest = nil }
+            )
+        }
     }
 
     @ViewBuilder
@@ -250,6 +261,12 @@ struct DashboardTabContent: View {
                         onSeerrIssuesStatClick: {
                             requestsViewModel.setSelectedTab(.issues)
                             showSeerrSheet = true
+                        },
+                        onShuffleQuickPick: {
+                            viewModel.shuffleQuickPick()
+                        },
+                        onMediaRequestClick: { item in
+                            selectedMediaForRequest = item
                         }
                     ) {
                         viewModel.removeCard(card: card)
@@ -312,6 +329,7 @@ struct DashboardTabContent: View {
         case .downloadClients: navigationManager.openDownloadsTab()
         case .activityQueue: navigationManager.openActivityTab()
         case .onToday, .upcomingReleases: navigationManager.openScheduleTab()
+        case .discoverFeed: navigationManager.openDiscoverTab()
         default: break
         }
     }
@@ -378,6 +396,8 @@ struct DashboardCardWrapper: View {
     var onHealthClick: (() -> Void)? = nil
     var onSeerrRequestsStatClick: (() -> Void)? = nil
     var onSeerrIssuesStatClick: (() -> Void)? = nil
+    var onShuffleQuickPick: (() -> Void)? = nil
+    var onMediaRequestClick: ((DiscoverResult) -> Void)? = nil
     let onRemove: () -> Void
 
     var body: some View {
@@ -392,7 +412,9 @@ struct DashboardCardWrapper: View {
                 onStreamClick: onStreamClick,
                 onHealthClick: onHealthClick,
                 onSeerrRequestsStatClick: onSeerrRequestsStatClick,
-                onSeerrIssuesStatClick: onSeerrIssuesStatClick
+                onSeerrIssuesStatClick: onSeerrIssuesStatClick,
+                onShuffleQuickPick: onShuffleQuickPick,
+                onMediaRequestClick: onMediaRequestClick
             )
             .padding(12)
             .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
@@ -423,6 +445,10 @@ struct DashboardCardView: View {
     var onHealthClick: (() -> Void)? = nil
     var onSeerrRequestsStatClick: (() -> Void)? = nil
     var onSeerrIssuesStatClick: (() -> Void)? = nil
+    var onShuffleQuickPick: (() -> Void)? = nil
+    var onMediaRequestClick: ((DiscoverResult) -> Void)? = nil
+
+    @EnvironmentObject private var navigationManager: NavigationManager
 
     var body: some View {
         Group {
@@ -442,9 +468,51 @@ struct DashboardCardView: View {
             case .tracearrOverview: DashboardTracearrSection(state: state, isEditing: isEditing)
             case .tracearrActiveStreams: DashboardActiveStreamsSection(state: state, isEditing: isEditing, onItemClick: onStreamClick)
             case .instanceDashboard: DashboardInstanceDashboardSection(state: state, isEditing: isEditing)
-            case .discoverFeed: EmptyView()
-            case .discoverSpotlight: EmptyView()
-            case .discoverQuickPick: EmptyView()
+            case .discoverFeed:
+                DashboardDiscoverFeedSection(
+                    state: state,
+                    isEditing: isEditing,
+                    onMediaClick: { id, type in
+                        if !isEditing {
+                            navigationManager.goToSeerrDetailsOnDashboard(tmdbId: id, requestType: type)
+                        }
+                    }
+                )
+            case .discoverSpotlight:
+                DashboardDiscoverSpotlightSection(
+                    state: state,
+                    isEditing: isEditing,
+                    onMediaClick: { id, type in
+                        if !isEditing {
+                            navigationManager.goToSeerrDetailsOnDashboard(tmdbId: id, requestType: type)
+                        }
+                    },
+                    onRequestClick: { item in
+                        if !isEditing {
+                            onMediaRequestClick?(item)
+                        }
+                    }
+                )
+            case .discoverQuickPick:
+                DashboardDiscoverQuickPickSection(
+                    state: state,
+                    isEditing: isEditing,
+                    onShuffleClick: {
+                        if !isEditing {
+                            onShuffleQuickPick?()
+                        }
+                    },
+                    onMediaClick: { id, type in
+                        if !isEditing {
+                            navigationManager.goToSeerrDetailsOnDashboard(tmdbId: id, requestType: type)
+                        }
+                    },
+                    onRequestClick: { item in
+                        if !isEditing {
+                            onMediaRequestClick?(item)
+                        }
+                    }
+                )
             }
         }
     }
@@ -1790,3 +1858,520 @@ struct HealthNoticesSheet: View {
         }
     }
 }
+
+struct IdentifiableDiscoverResult: Identifiable {
+    let result: DiscoverResult
+    var id: String { "\(result.mediaType.name)_\(result.id)" }
+}
+
+struct DashboardDiscoverSpotlightSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    var onMediaClick: ((Int64, RequestType) -> Void)? = nil
+    var onRequestClick: ((DiscoverResult) -> Void)? = nil
+
+    @State private var selectedIndex: Int = 0
+    private let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        let spotlightItems = state.spotlightMedia
+
+        VStack(alignment: .leading, spacing: 12) {
+            if isEditing || state.seerrInstances.isEmpty || spotlightItems.isEmpty {
+                HStack(spacing: 8) {
+                    Image(resource: InstanceType.seerr.icon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20, height: 20)
+                    Text(MR.strings().dashboard_discover_spotlight.localized())
+                        .font(.headline)
+                        .bold()
+                }
+            }
+
+            if state.seerrInstances.isEmpty || spotlightItems.isEmpty {
+                Text(MR.strings().no_type_instances_message.formatted(args: [InstanceType.seerr.name]))
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 16)
+            } else {
+                let currentIndex = min(max(0, selectedIndex), spotlightItems.count - 1)
+                let currentItem = spotlightItems[currentIndex]
+
+                VStack(spacing: 0) {
+                    // Pager & Backdrop
+                    ZStack(alignment: .bottomLeading) {
+                        TabView(selection: $selectedIndex) {
+                            ForEach(spotlightItems.indices, id: \.self) { index in
+                                let item = spotlightItems[index]
+                                ZStack {
+                                    if let backdrop = item.fullBackdropPath ?? item.fullPosterPath, let url = URL(string: backdrop) {
+                                        AsyncImage(url: url) { phase in
+                                            switch phase {
+                                            case .success(let img):
+                                                img.resizable().aspectRatio(contentMode: .fill)
+                                            case .empty:
+                                                ProgressView()
+                                            default:
+                                                ZStack {
+                                                    Color(.secondarySystemBackground)
+                                                    Image(systemName: item.mediaType == .tv ? "tv" : "film")
+                                                        .font(.system(size: 40))
+                                                        .foregroundColor(.secondary.opacity(0.4))
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        ZStack {
+                                            Color(.secondarySystemBackground)
+                                            Image(systemName: item.mediaType == .tv ? "tv" : "film")
+                                                .font(.system(size: 40))
+                                                .foregroundColor(.secondary.opacity(0.4))
+                                        }
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .clipped()
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    if !isEditing {
+                                        onMediaClick?(item.id, item.mediaType)
+                                    }
+                                }
+                                .tag(index)
+                            }
+                        }
+                        .tabViewStyle(.page(indexDisplayMode: .never))
+                        .aspectRatio(16.0 / 9.0, contentMode: .fit)
+                        .frame(maxWidth: .infinity)
+                        .cornerRadius(12)
+
+                        // Gradient Scrim
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.4), .black.opacity(0.85)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .cornerRadius(12)
+                        .allowsHitTesting(false)
+
+                        // Top overlays
+                        VStack {
+                            HStack(spacing: 6) {
+                                Text(MR.strings().dashboard_discover_spotlight.localized())
+                                    .font(.system(size: 10, weight: .bold))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.accentColor.opacity(0.9))
+                                    .foregroundColor(.white)
+                                    .clipShape(Capsule())
+
+                                if let status = currentItem.mediaInfo?.status {
+                                    StatusBadge(status: status)
+                                }
+                                Spacer()
+                            }
+                            .padding(10)
+                            Spacer()
+                        }
+                        .allowsHitTesting(false)
+
+                        // Bottom info overlay
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 8) {
+                                let dateStr = currentItem.releaseDate ?? currentItem.firstAirDate
+                                if let d = dateStr, d.count >= 4 {
+                                    Text(String(d.prefix(4)))
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.black.opacity(0.6))
+                                        .foregroundColor(.white)
+                                        .cornerRadius(4)
+                                }
+
+                                if currentItem.voteAverage > 0 {
+                                    HStack(spacing: 2) {
+                                        Image(systemName: "star.fill")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.yellow)
+                                        Text(String(format: "%.1f", currentItem.voteAverage))
+                                            .font(.system(size: 11, weight: .bold))
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                            }
+
+                            Text(currentItem.title ?? currentItem.name ?? MR.strings().unknown.localized())
+                                .font(.title3.bold())
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                        }
+                        .padding(12)
+                        .allowsHitTesting(false)
+                        .animation(.easeInOut(duration: 0.3), value: selectedIndex)
+                    }
+
+                    // Content & Actions
+                    VStack(alignment: .leading, spacing: 12) {
+                        if let overview = currentItem.overview, !overview.isEmpty {
+                            Text(overview)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .lineLimit(3)
+                        }
+
+                        HStack(spacing: 8) {
+                            Button(action: {
+                                if !isEditing {
+                                    onMediaClick?(currentItem.id, currentItem.mediaType)
+                                }
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "info.circle")
+                                    Text(MR.strings().details.localized())
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+
+                            let mediaStatus = state.resolveMediaStatus(item: currentItem)
+                            let isAvailable = mediaStatus == .available
+                            let isPending = mediaStatus == .pending
+                            let isProcessing = mediaStatus == .processing
+                            let isTv = currentItem.mediaType == .tv
+
+                            let buttonTitle: String = {
+                                if isAvailable {
+                                    return isTv ? MR.strings().request_more.localized() : MR.strings().available.localized()
+                                } else if isPending {
+                                    return MR.strings().pending.localized()
+                                } else if isProcessing {
+                                    return MR.strings().processing.localized()
+                                } else if mediaStatus == .partiallyAvailable {
+                                    return MR.strings().request_more.localized()
+                                } else {
+                                    return MR.strings().request.localized()
+                                }
+                            }()
+
+                            let buttonIcon: String = {
+                                if isAvailable && !isTv { return "checkmark" }
+                                if isPending || isProcessing { return "clock" }
+                                return "plus"
+                            }()
+
+                            let isTonal = (isAvailable && !isTv) || isPending || isProcessing
+
+                            if isTonal {
+                                Button(action: {
+                                    if !isEditing {
+                                        if let onRequest = onRequestClick {
+                                            onRequest(currentItem)
+                                        } else {
+                                            onMediaClick?(currentItem.id, currentItem.mediaType)
+                                        }
+                                    }
+                                }) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: buttonIcon)
+                                        Text(buttonTitle)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                            } else {
+                                Button(action: {
+                                    if !isEditing {
+                                        if let onRequest = onRequestClick {
+                                            onRequest(currentItem)
+                                        } else {
+                                            onMediaClick?(currentItem.id, currentItem.mediaType)
+                                        }
+                                    }
+                                }) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: buttonIcon)
+                                        Text(buttonTitle)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        }
+                    }
+                    .padding(.top, 12)
+                }
+                .onReceive(timer) { _ in
+                    if !isEditing && spotlightItems.count > 1 {
+                        withAnimation {
+                            selectedIndex = (selectedIndex + 1) % spotlightItems.count
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct DashboardDiscoverQuickPickSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    var onShuffleClick: (() -> Void)? = nil
+    var onMediaClick: ((Int64, RequestType) -> Void)? = nil
+    var onRequestClick: ((DiscoverResult) -> Void)? = nil
+
+    @State private var rotationDegrees: Double = 0
+
+    var body: some View {
+        let currentItem = state.quickPickItem ?? state.quickPickMedia.first
+
+        VStack(alignment: .leading, spacing: 12) {
+            if isEditing || state.seerrInstances.isEmpty {
+                HStack(spacing: 8) {
+                    Image(resource: InstanceType.seerr.icon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20, height: 20)
+                    Text(MR.strings().dashboard_discover_quick_pick.localized())
+                        .font(.headline)
+                        .bold()
+                }
+            }
+
+            if state.seerrInstances.isEmpty {
+                Text(MR.strings().no_type_instances_message.formatted(args: [InstanceType.seerr.name]))
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 16)
+            } else if let item = currentItem {
+                VStack(spacing: 12) {
+                    HStack(alignment: .top, spacing: 12) {
+                        GenericPosterItem(posterUrl: item.fullPosterPath)
+                            .frame(width: 90, height: 135)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(item.title ?? item.name ?? MR.strings().unknown.localized())
+                                .font(.headline.bold())
+                                .lineLimit(2)
+
+                            HStack(spacing: 6) {
+                                RequestTypeChip(type: item.mediaType, solid: true)
+
+                                let dateStr = item.releaseDate ?? item.firstAirDate
+                                if let d = dateStr, d.count >= 4 {
+                                    Text(String(d.prefix(4)))
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color(UIColor.tertiarySystemBackground))
+                                        .cornerRadius(4)
+                                }
+
+                                if item.voteAverage > 0 {
+                                    HStack(spacing: 2) {
+                                        Image(systemName: "star.fill")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.yellow)
+                                        Text(String(format: "%.1f", item.voteAverage))
+                                            .font(.system(size: 11, weight: .bold))
+                                    }
+                                }
+                            }
+
+                            if let overview = item.overview, !overview.isEmpty {
+                                Text(overview)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(3)
+                            }
+                        }
+                    }
+
+                    // Actions
+                    HStack(spacing: 8) {
+                        Button(action: {
+                            if !isEditing {
+                                withAnimation(.easeInOut(duration: 0.4)) {
+                                    rotationDegrees += 360
+                                }
+                                onShuffleClick?()
+                            }
+                        }) {
+                            Image(systemName: "die.face.5.fill")
+                                .font(.system(size: 16))
+                                .rotationEffect(.degrees(rotationDegrees))
+                                .frame(width: 36, height: 36)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(state.quickPickMedia.isEmpty)
+
+                        Button(action: {
+                            if !isEditing {
+                                onMediaClick?(item.id, item.mediaType)
+                            }
+                        }) {
+                            Text(MR.strings().details.localized())
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+
+                        let mediaStatus = state.resolveMediaStatus(item: item)
+                        let isAvailable = mediaStatus == .available
+                        let isPending = mediaStatus == .pending
+                        let isProcessing = mediaStatus == .processing
+                        let isTv = item.mediaType == .tv
+
+                        let buttonTitle: String = {
+                            if isAvailable {
+                                return isTv ? MR.strings().request_more.localized() : MR.strings().available.localized()
+                            } else if isPending {
+                                return MR.strings().pending.localized()
+                            } else if isProcessing {
+                                return MR.strings().processing.localized()
+                            } else if mediaStatus == .partiallyAvailable {
+                                return MR.strings().request_more.localized()
+                            } else {
+                                return MR.strings().request.localized()
+                            }
+                        }()
+
+                        let buttonIcon: String = {
+                            if isAvailable && !isTv { return "checkmark" }
+                            if isPending || isProcessing { return "clock" }
+                            return "plus"
+                        }()
+
+                        let isTonal = (isAvailable && !isTv) || isPending || isProcessing
+
+                        if isTonal {
+                            Button(action: {
+                                if !isEditing {
+                                    if let onRequest = onRequestClick {
+                                        onRequest(item)
+                                    } else {
+                                        onMediaClick?(item.id, item.mediaType)
+                                    }
+                                }
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: buttonIcon)
+                                    Text(buttonTitle)
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                        } else {
+                            Button(action: {
+                                if !isEditing {
+                                    if let onRequest = onRequestClick {
+                                        onRequest(item)
+                                    } else {
+                                        onMediaClick?(item.id, item.mediaType)
+                                    }
+                                }
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: buttonIcon)
+                                    Text(buttonTitle)
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    }
+                }
+            } else {
+                Text(MR.strings().no_media_found.localized())
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 16)
+            }
+        }
+    }
+}
+
+struct DashboardDiscoverFeedSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    var onMediaClick: ((Int64, RequestType) -> Void)? = nil
+
+    @State private var selectedCategory: DiscoverCategory = .trending
+
+    private let categories: [(DiscoverCategory, String, String)] = [
+        (.trending, MR.strings().trending.localized(), "chart.line.uptrend.xyaxis"),
+        (.popularMovies, MR.strings().popular_movies.localized(), "film"),
+        (.popularSeries, MR.strings().popular_series.localized(), "tv"),
+        (.upcomingMovies, MR.strings().upcoming_movies.localized(), "calendar")
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if isEditing || state.seerrInstances.isEmpty {
+                HStack(spacing: 8) {
+                    Image(resource: InstanceType.seerr.icon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20, height: 20)
+                    Text(MR.strings().dashboard_discover_feed.localized())
+                        .font(.headline)
+                        .bold()
+                }
+            }
+
+            if state.seerrInstances.isEmpty {
+                Text(MR.strings().no_type_instances_message.formatted(args: [InstanceType.seerr.name]))
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 16)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(categories, id: \.0) { category, title, icon in
+                            let isSelected = selectedCategory == category
+                            Button(action: {
+                                withAnimation { selectedCategory = category }
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: icon)
+                                    Text(title)
+                                }
+                                .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isSelected ? Color.accentColor : Color(UIColor.tertiarySystemBackground))
+                                .foregroundColor(isSelected ? .white : .primary)
+                                .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+
+                let items = state.getDiscoverFeedItems(category: selectedCategory)
+
+                if items.isEmpty {
+                    Text(MR.strings().no_media_found.localized())
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 24)
+                } else {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(items, id: \.id) { item in
+                                DiscoverPosterItem(item: item, onItemClick: { it in
+                                    if !isEditing {
+                                        onMediaClick?(it.id, it.mediaType)
+                                    }
+                                })
+                                .frame(width: 110)
+                            }
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.25), value: selectedCategory)
+                }
+            }
+        }
+    }
+}
+

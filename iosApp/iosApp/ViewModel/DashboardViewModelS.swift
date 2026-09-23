@@ -94,4 +94,8 @@ class DashboardViewModelS: ObservableObject {
     func toggleDashboardSearch() {
         viewModel.toggleDashboardSearch()
     }
+
+    func shuffleQuickPick() {
+        viewModel.shuffleQuickPick()
+    }
 }

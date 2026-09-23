@@ -184,7 +184,7 @@ fun DashboardDiscoverQuickPickSection(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     MediaRequestTypeChip(
-                                        text = mokoString(if (item.mediaType == RequestType.Tv) MR.strings.series else MR.strings.movies),
+                                        text = mokoString(if (item.mediaType == RequestType.Tv) MR.strings.series else MR.strings.movie),
                                         requestType = item.mediaType,
                                     )
 

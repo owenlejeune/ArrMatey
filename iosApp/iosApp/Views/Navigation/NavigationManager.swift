@@ -395,6 +395,10 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         navigateToTab(TabItemStandard.requests as TabItem)
     }
 
+    func openDiscoverTab() {
+        navigateToTab(TabItemStandard.discover as TabItem)
+    }
+
     func openProwlarrTab() {
         navigateToTab(TabItemStandard.prowlarr as TabItem)
     }

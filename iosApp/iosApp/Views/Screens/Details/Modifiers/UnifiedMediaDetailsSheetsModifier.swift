@@ -65,11 +65,18 @@ struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
             }
             .sheet(isPresented: $showAddSheet) {
                 if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
-                    AddMediaSheetsHostView(
-                        success: success,
-                        viewModel: viewModel,
-                        onDismiss: { showAddSheet = false }
-                    )
+                    if success.arrMedia is ArrSeries || success.arrMedia is ArrMovie || success.seerrMedia != nil {
+                        MediaRequestOrAddSheet(
+                            viewModel: viewModel,
+                            onDismiss: { showAddSheet = false }
+                        )
+                    } else {
+                        AddMediaSheetsHostView(
+                            success: success,
+                            viewModel: viewModel,
+                            onDismiss: { showAddSheet = false }
+                        )
+                    }
                 }
             }
             .sheet(isPresented: $showConfirmSheet) {
@@ -92,25 +99,32 @@ struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
                 )
             }
             .sheet(isPresented: requestSheetBinding) {
-                if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess, let seerrMedia = success.seerrMedia {
-                    SeerrRequestSheet(
-                        details: seerrMedia,
-                        serviceDetails: viewModel.serviceDetails,
-                        currentUser: viewModel.currentUser,
-                        users: viewModel.users,
-                        is4k: viewModel.isRequest4k,
-                        onDismiss: { viewModel.hideRequestSheet() },
-                        onSubmit: { profileId, rootFolder, langId, seasons, is4k, userId in
-                            viewModel.submitRequest(
-                                profileId: profileId,
-                                rootFolder: rootFolder,
-                                languageProfileId: langId,
-                                seasons: seasons,
-                                is4k: is4k,
-                                userId: userId
-                            )
-                        }
-                    )
+                if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess {
+                    if success.arrMedia is ArrSeries || success.arrMedia is ArrMovie || success.seerrMedia != nil {
+                        MediaRequestOrAddSheet(
+                            viewModel: viewModel,
+                            onDismiss: { viewModel.hideRequestSheet() }
+                        )
+                    } else if let seerrMedia = success.seerrMedia {
+                        SeerrRequestSheet(
+                            details: seerrMedia,
+                            serviceDetails: viewModel.serviceDetails,
+                            currentUser: viewModel.currentUser,
+                            users: viewModel.users,
+                            is4k: viewModel.isRequest4k,
+                            onDismiss: { viewModel.hideRequestSheet() },
+                            onSubmit: { profileId, rootFolder, langId, seasons, is4k, userId in
+                                viewModel.submitRequest(
+                                    profileId: profileId,
+                                    rootFolder: rootFolder,
+                                    languageProfileId: langId,
+                                    seasons: seasons,
+                                    is4k: is4k,
+                                    userId: userId
+                                )
+                            }
+                        )
+                    }
                 }
             }
             .sheet(isPresented: reportIssueSheetBinding) {

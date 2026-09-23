@@ -84,9 +84,12 @@ sealed interface CombinedDashboardState {
             get() = tracearrStats.flatMap { it.activeStreams }
 
         val spotlightMedia: List<DiscoverResult>
-            get() = (trendingMedia + popularMovies + popularTv)
-                .filter { it.backdropPath != null || it.posterPath != null }
-                .distinctBy { "${it.mediaType.name}_${it.id}" }
+            get() {
+                val all = (trendingMedia + popularMovies + popularTv)
+                    .distinctBy { "${it.mediaType.name}_${it.id}" }
+                val withImages = all.filter { it.backdropPath != null || it.posterPath != null }
+                return withImages.ifEmpty { all }
+            }
 
         val quickPickMedia: List<DiscoverResult>
             get() = (trendingMedia + popularMovies + popularTv)
