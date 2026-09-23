@@ -2,19 +2,14 @@ package com.dnfapps.arrmatey.datastore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dnfapps.arrmatey.arr.api.client.LoggerLevel
 import com.dnfapps.arrmatey.arr.state.CalendarFilterState
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.state.ContentFilter
 import com.dnfapps.arrmatey.compose.DashboardCards
-import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
-import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueSortState
 import com.dnfapps.arrmatey.features.ReleaseNotes
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -28,239 +23,292 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlin.collections.emptyList
 
-class PreferencesStore(
+interface PreferencesStore {
+    val defaultAppColor: AppColor
+
+    val tabPreferences: Flow<TabPreferences>
+    val discoverSectionPreferences: Flow<DiscoverSectionPreferences>
+    val showInfoCards: Flow<Map<InstanceType, Boolean>>
+
+    val isPollingEnabled: Boolean
+    val enableActivityPolling: Flow<Boolean>
+    val httpLogLevel: Flow<LoggerLevel>
+
+    val appTheme: Flow<AppTheme>
+    val appColor: Flow<AppColor>
+
+    val unifiedLibrarySearchAllInstances: Flow<Boolean>
+    val searchShowBanners: Flow<Boolean>
+    val dualPanelSupport: Flow<Boolean>
+
+    val smartAddSeerrAction: Flow<SmartAddSeerrAction>
+    val combineSeerrArrMedia: Flow<Boolean>
+    val bazarrDetailsIntegration: Flow<Boolean>
+    val tracearrDetailsIntegration: Flow<Boolean>
+
+    val isFirstLaunch: Flow<Boolean>
+    val shouldShowReleaseNotes: Flow<Boolean>
+
+    val useServiceNavLogos: Flow<Boolean>
+    val hideInstanceSwitcher: Flow<Boolean>
+    val useFloatingNavigationBar: Flow<Boolean>
+
+    val dashboardCardsOrder: Flow<List<DashboardCards>>
+    val dashboardFirstLaunch: Flow<Boolean>
+    val showDashboardSearch: Flow<Boolean>
+
+    val credentialsMigrated: Flow<Boolean>
+    val localNetworkNoticeSeen: Flow<Boolean>
+    val localNetworkPermissionInfoDismissed: Flow<Boolean>
+
+    val useColoredActivityCards: Flow<Boolean>
+    val useColoredCalendarCards: Flow<Boolean>
+
+    fun observeCalendarFilterState(): Flow<CalendarFilterState>
+
+    suspend fun saveCalendarFilterState(state: CalendarFilterState)
+
+    fun dismissInfoCard(type: InstanceType)
+
+    fun setInfoCardVisibility(
+        type: InstanceType,
+        value: Boolean,
+    )
+
+    fun toggleActivityPolling()
+
+    fun setLogLevel(level: LoggerLevel)
+
+    fun setAppTheme(theme: AppTheme)
+
+    fun setAppColor(color: AppColor)
+
+    fun toggleUnifiedLibrarySearchAllInstances()
+
+    fun setUnifiedLibrarySearchAllInstances(value: Boolean)
+
+    fun toggleSearchShowBanners()
+
+    fun toggleDualPanelSupport()
+
+    fun setDualPanelSupport(value: Boolean)
+
+    fun setSmartAddSeerrAction(action: SmartAddSeerrAction)
+
+    fun toggleCombineSeerrArrMedia()
+
+    fun setCombineSeerrArrMedia(value: Boolean)
+
+    fun toggleBazarrDetailsIntegration()
+
+    fun setBazarrDetailsIntegration(value: Boolean)
+
+    fun toggleTracearrDetailsIntegration()
+
+    fun setTracearrDetailsIntegration(value: Boolean)
+
+    fun resetTabPreferences()
+
+    fun saveTabPreferences(tabPreferences: TabPreferences)
+
+    fun updateTabPreferences(tabPreferences: TabPreferences)
+
+    fun saveDiscoverSectionPreferences(prefs: DiscoverSectionPreferences)
+
+    fun resetDiscoverSectionPreferences()
+
+    fun markReleaseNotesAsSeen()
+
+    fun markFirstLaunchComplete()
+
+    fun toggleUseServiceNavLogos()
+
+    fun setUseServiceNavLogos(value: Boolean)
+
+    fun toggleInstanceSwitcher()
+
+    fun setHideInstanceSwitcher(value: Boolean)
+
+    fun toggleUseFloatingNavigationBar()
+
+    fun setUseFloatingNavigationBar(value: Boolean)
+
+    fun observeDownloadClientUiState(): Flow<DownloadQueueSortState>
+
+    suspend fun saveDownloadClientUiState(state: DownloadQueueSortState)
+
+    suspend fun updateDashboardCardsOrder(cards: List<DashboardCards>)
+
+    fun markDashboardAsSeen()
+
+    fun setShowDashboardSearch(show: Boolean)
+
+    fun markCredentialsMigrated()
+
+    fun markLocalNetworkNoticeAsSeen()
+
+    fun dismissLocalNetworkPermissionInfo()
+
+    fun toggleUseColoredActivityCards()
+
+    fun setUseColoredActivityCards(value: Boolean)
+
+    fun toggleUseColoredCalendarCards()
+
+    fun setUseColoredCalendarCards(value: Boolean)
+
+    companion object {
+        operator fun invoke(dataStoreFactory: DataStoreFactory): PreferencesStore = DefaultPreferencesStore(dataStoreFactory)
+    }
+}
+
+class DefaultPreferencesStore(
     private val dataStoreFactory: DataStoreFactory,
-) {
-    val defaultAppColor: AppColor = dataStoreFactory.defaultAppColor
+) : PreferencesStore {
+    override val defaultAppColor: AppColor = dataStoreFactory.defaultAppColor
 
     private val dataStore: DataStore<Preferences> = dataStoreFactory.provideDataStore()
-
-    private val sonarrInfoCardKey = booleanPreferencesKey("sonarrInfoCard")
-    private val radarrInfoCardKey = booleanPreferencesKey("radarrInfoCard")
-    private val lidarrInfoCardKey = booleanPreferencesKey("lidarrInfoCard")
-    private val bookshelfInfoCardKey = booleanPreferencesKey("bookshelfInfoCard")
-    private val prowlarrInfoCardKey = booleanPreferencesKey("prowlarrInfoCard")
-    private val seerrInfoCardKey = booleanPreferencesKey("seerrInfoCard")
-    private val listenarrInfoCardKey = booleanPreferencesKey("listenarrIndoCard")
-    private val bazarrInfoCardKey = booleanPreferencesKey("bazarrInfoCard")
-    private val tracearrInfoCardKey = booleanPreferencesKey("tracearrInfoCard")
-    private val calendarViewTypeKey = stringPreferencesKey("calendarViewType")
-    private val calendarContentFilterKey = stringPreferencesKey("calendarContentFilter")
-    private val calendarMonitorOnlyKey = booleanPreferencesKey("calendarMonitorOnly")
-    private val calendarPremiersOnlyKey = booleanPreferencesKey("calendarPremiersOnly")
-    private val calendarFinalesOnlyKey = booleanPreferencesKey("calendarFinalesOnly")
-    private val activityPollingKey = booleanPreferencesKey("enableActivityPolling")
-    private val httpLogLevelKey = stringPreferencesKey("httpLogLevel")
-    private val useServiceNavLogosKey = booleanPreferencesKey("useServiceNavLogos")
-    private val hideInstanceSwitcherKey = booleanPreferencesKey("hideInstanceSwitcher")
-    private val appThemeKey = stringPreferencesKey("appTheme")
-    private val appColorKey = stringPreferencesKey("appColor")
-    private val tabPreferencesKey = stringPreferencesKey("tabPreferences")
-    private val discoverSectionPreferencesKey = stringPreferencesKey("discoverSectionPreferences")
-    private val lastReleaseNotesKey = intPreferencesKey("lastReleaseNotes")
-    private val isFirstLaunchKey = booleanPreferencesKey("isFirstLaunch")
-    private val downloadClientSortByKey = stringPreferencesKey("downloadClientSortBy")
-    private val downloadClientSortOrderKey = stringPreferencesKey("downloadClientSortOrder")
-    private val dashboardCardsOrderKey = stringPreferencesKey("dashboardCardsOrderKey")
-    private val dashboardFirstLaunchKey = booleanPreferencesKey("dashboardFirstLaunchKey")
-    private val showDashboardSearchKey = booleanPreferencesKey("showDashboardSearchKey")
-    private val credentialsMigratedKey = booleanPreferencesKey("credentialsMigrated")
-    private val localNetworkNoticeSeenKey = booleanPreferencesKey("localNetworkNoticeSeen")
-    private val localNetworkPermissionInfoDismissedKey = booleanPreferencesKey("localNetworkPermissionInfoDismissed")
-    private val searchShowBannersKey = booleanPreferencesKey("searchShowBanners")
-    private val dualPanelSupportKey = booleanPreferencesKey("dualPanelSupport")
-    private val smartAddSeerrActionKey = stringPreferencesKey("smartAddSeerrAction")
-    private val combineSeerrArrMediaKey = booleanPreferencesKey("combineSeerrArrMedia")
-    private val bazarrDetailsIntegrationKey = booleanPreferencesKey("bazarrDetailsIntegration")
-    private val tracearrDetailsIntegrationKey = booleanPreferencesKey("tracearrDetailsIntegration")
-    private val unifiedLibrarySearchAllInstancesKey = booleanPreferencesKey("unifiedLibrarySearchAllInstances")
-    private val useFloatingNavigationBarKey = booleanPreferencesKey("useFloatingNavigationBar")
-    private val useColoredActivityCardsKey = booleanPreferencesKey("useColoredActivityCards")
-    private val useColoredCalendarCardsKey = booleanPreferencesKey("useColoredCalendarCards")
-
-    private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> =
-        when (type) {
-            InstanceType.Sonarr -> sonarrInfoCardKey
-            InstanceType.Radarr -> radarrInfoCardKey
-            InstanceType.Lidarr -> lidarrInfoCardKey
-            InstanceType.Seerr -> seerrInfoCardKey
-            InstanceType.Bookshelf -> bookshelfInfoCardKey
-            InstanceType.Prowlarr -> prowlarrInfoCardKey
-            InstanceType.Listenarr -> listenarrInfoCardKey
-            InstanceType.Bazarr -> bazarrInfoCardKey
-            InstanceType.Tracearr -> tracearrInfoCardKey
-        }
-
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    val tabPreferences: Flow<TabPreferences> =
-        dataStore.data
-            .map { preferences ->
-                extractTabPreferences(preferences)
-            }
+    override val tabPreferences: Flow<TabPreferences> =
+        dataStore.data.map { preferences ->
+            TabPreferencesSerializer.deserialize(preferences[PreferenceKeys.TAB_PREFERENCES])
+        }
 
-    val discoverSectionPreferences: Flow<DiscoverSectionPreferences> =
-        dataStore.data
-            .map { preferences ->
-                extractDiscoverSectionPreferences(preferences)
-            }
+    override val discoverSectionPreferences: Flow<DiscoverSectionPreferences> =
+        dataStore.data.map { preferences ->
+            DiscoverSectionPreferencesSerializer.deserialize(preferences[PreferenceKeys.DISCOVER_SECTION_PREFERENCES])
+        }
 
-    val showInfoCards: Flow<Map<InstanceType, Boolean>> =
-        dataStore.data
-            .map { preferences ->
-                InstanceType.entries.associateWith { type -> (preferences[infoCardKey(type)] ?: true) }
+    override val showInfoCards: Flow<Map<InstanceType, Boolean>> =
+        dataStore.data.map { preferences ->
+            InstanceType.entries.associateWith { type ->
+                preferences[PreferenceKeys.infoCardKey(type)] ?: PreferenceDefaults.SHOW_INFO_CARD
             }
+        }
 
-    private var _isPollingEnabled: Boolean = true
-    val isPollingEnabled: Boolean
+    private var _isPollingEnabled: Boolean = PreferenceDefaults.ENABLE_ACTIVITY_POLLING
+    override val isPollingEnabled: Boolean
         get() = _isPollingEnabled
 
-    val enableActivityPolling: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                val value = preferences[activityPollingKey] ?: true
-                _isPollingEnabled = value
-                value
-            }
+    override val enableActivityPolling: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            val value = preferences[PreferenceKeys.ACTIVITY_POLLING] ?: PreferenceDefaults.ENABLE_ACTIVITY_POLLING
+            _isPollingEnabled = value
+            value
+        }
 
-    val httpLogLevel: Flow<LoggerLevel> =
-        dataStore.data
-            .map { preferences ->
-                preferences[httpLogLevelKey]?.let { logLevel ->
-                    LoggerLevel.valueOf(logLevel)
-                } ?: LoggerLevel.Headers
-            }
+    override val httpLogLevel: Flow<LoggerLevel> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.HTTP_LOG_LEVEL]?.let { logLevel ->
+                runCatching { LoggerLevel.valueOf(logLevel) }.getOrNull()
+            } ?: PreferenceDefaults.HTTP_LOG_LEVEL
+        }
 
-    val appTheme: Flow<AppTheme> =
-        dataStore.data
-            .map { preferences ->
-                preferences[appThemeKey]?.let { AppTheme.valueOf(it) } ?: AppTheme.System
-            }
+    override val appTheme: Flow<AppTheme> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.APP_THEME]?.let {
+                runCatching { AppTheme.valueOf(it) }.getOrNull()
+            } ?: PreferenceDefaults.APP_THEME
+        }
 
-    val appColor: Flow<AppColor> =
-        dataStore.data
-            .map { preferences ->
-                preferences[appColorKey]?.let { AppColor.valueOf(it) } ?: dataStoreFactory.defaultAppColor
-            }
+    override val appColor: Flow<AppColor> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.APP_COLOR]?.let {
+                runCatching { AppColor.valueOf(it) }.getOrNull()
+            } ?: dataStoreFactory.defaultAppColor
+        }
 
-    val unifiedLibrarySearchAllInstances: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[unifiedLibrarySearchAllInstancesKey] ?: true
-            }
+    override val unifiedLibrarySearchAllInstances: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.UNIFIED_LIBRARY_SEARCH_ALL_INSTANCES]
+                ?: PreferenceDefaults.UNIFIED_LIBRARY_SEARCH_ALL_INSTANCES
+        }
 
-    val searchShowBanners: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[searchShowBannersKey] ?: true
-            }
+    override val searchShowBanners: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.SEARCH_SHOW_BANNERS] ?: PreferenceDefaults.SEARCH_SHOW_BANNERS
+        }
 
-    val dualPanelSupport: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[dualPanelSupportKey] ?: true
-            }
+    override val dualPanelSupport: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.DUAL_PANEL_SUPPORT] ?: PreferenceDefaults.DUAL_PANEL_SUPPORT
+        }
 
-    val smartAddSeerrAction: Flow<SmartAddSeerrAction> =
-        dataStore.data
-            .map { preferences ->
-                preferences[smartAddSeerrActionKey]?.let {
-                    try {
-                        SmartAddSeerrAction.valueOf(it)
-                    } catch (e: Exception) {
-                        SmartAddSeerrAction.default
-                    }
-                } ?: SmartAddSeerrAction.default
-            }
+    override val smartAddSeerrAction: Flow<SmartAddSeerrAction> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.SMART_ADD_SEERR_ACTION]?.let {
+                runCatching { SmartAddSeerrAction.valueOf(it) }.getOrNull()
+            } ?: PreferenceDefaults.SMART_ADD_SEERR_ACTION
+        }
 
-    val combineSeerrArrMedia: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[combineSeerrArrMediaKey] ?: true
-            }
+    override val combineSeerrArrMedia: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.COMBINE_SEERR_ARR_MEDIA] ?: PreferenceDefaults.COMBINE_SEERR_ARR_MEDIA
+        }
 
-    val bazarrDetailsIntegration: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[bazarrDetailsIntegrationKey] ?: true
-            }
+    override val bazarrDetailsIntegration: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.BAZARR_DETAILS_INTEGRATION] ?: PreferenceDefaults.BAZARR_DETAILS_INTEGRATION
+        }
 
-    val tracearrDetailsIntegration: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[tracearrDetailsIntegrationKey] ?: true
-            }
+    override val tracearrDetailsIntegration: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.TRACEARR_DETAILS_INTEGRATION] ?: PreferenceDefaults.TRACEARR_DETAILS_INTEGRATION
+        }
 
     private val calendarViewMode: Flow<CalendarViewMode> =
-        dataStore.data
-            .map { preferences ->
-                preferences[calendarViewTypeKey]?.let { type ->
-                    CalendarViewMode.valueOf(type)
-                } ?: CalendarViewMode.List
-            }
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.CALENDAR_VIEW_TYPE]?.let { type ->
+                runCatching { CalendarViewMode.valueOf(type) }.getOrNull()
+            } ?: PreferenceDefaults.CALENDAR_VIEW_MODE
+        }
 
     private val calendarContentFilter: Flow<ContentFilter> =
-        dataStore.data
-            .map { preferences ->
-                preferences[calendarContentFilterKey]?.let { cf ->
-                    ContentFilter.valueOf(cf)
-                } ?: ContentFilter.All
-            }
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.CALENDAR_CONTENT_FILTER]?.let { cf ->
+                runCatching { ContentFilter.valueOf(cf) }.getOrNull()
+            } ?: PreferenceDefaults.CALENDAR_CONTENT_FILTER
+        }
 
     private val calendarShowMonitorOnly: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[calendarMonitorOnlyKey] ?: false
-            }
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.CALENDAR_MONITOR_ONLY] ?: PreferenceDefaults.CALENDAR_MONITOR_ONLY
+        }
 
     private val calendarShowPremiersOnly: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[calendarPremiersOnlyKey] ?: false
-            }
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.CALENDAR_PREMIERS_ONLY] ?: PreferenceDefaults.CALENDAR_PREMIERS_ONLY
+        }
 
     private val calendarShowFinalesOnly: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[calendarFinalesOnlyKey] ?: false
-            }
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.CALENDAR_FINALES_ONLY] ?: PreferenceDefaults.CALENDAR_FINALES_ONLY
+        }
 
     private val downloadClientSortBy: Flow<SortBy> =
-        dataStore.data
-            .map { preferences ->
-                val sortBy =
-                    preferences[downloadClientSortByKey]?.let {
-                        SortBy.valueOf(it)
-                    }
-                sortBy ?: SortBy.Title
-            }
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.DOWNLOAD_CLIENT_SORT_BY]?.let {
+                runCatching { SortBy.valueOf(it) }.getOrNull()
+            } ?: PreferenceDefaults.DOWNLOAD_CLIENT_SORT_BY
+        }
 
     private val downloadClientSortOrder: Flow<SortOrder> =
-        dataStore.data
-            .map { preferences ->
-                val sortOrder =
-                    preferences[downloadClientSortOrderKey]?.let {
-                        SortOrder.valueOf(it)
-                    }
-                sortOrder ?: SortOrder.Asc
-            }
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.DOWNLOAD_CLIENT_SORT_ORDER]?.let {
+                runCatching { SortOrder.valueOf(it) }.getOrNull()
+            } ?: PreferenceDefaults.DOWNLOAD_CLIENT_SORT_ORDER
+        }
 
-    fun observeCalendarFilterState(): Flow<CalendarFilterState> =
+    override fun observeCalendarFilterState(): Flow<CalendarFilterState> =
         combine(
             combine(
                 calendarViewMode,
                 calendarContentFilter,
                 calendarShowMonitorOnly,
-            ) { viewMode, contentFiler, monitorOnly ->
-                Triple(viewMode, contentFiler, monitorOnly)
+            ) { viewMode, contentFilter, monitorOnly ->
+                Triple(viewMode, contentFilter, monitorOnly)
             },
             calendarShowPremiersOnly,
             calendarShowFinalesOnly,
@@ -268,377 +316,294 @@ class PreferencesStore(
             CalendarFilterState(viewMode, contentFilter, monitorOnly, premiersOnly, finalesOnly)
         }
 
-    suspend fun saveCalendarFilterState(state: CalendarFilterState) {
+    override suspend fun saveCalendarFilterState(state: CalendarFilterState) {
         dataStore.edit { preferences ->
-            preferences[calendarViewTypeKey] = state.viewMode.name
-            preferences[calendarContentFilterKey] = state.contentFilter.name
-            preferences[calendarMonitorOnlyKey] = state.showMonitoredOnly
-            preferences[calendarPremiersOnlyKey] = state.showPremiersOnly
-            preferences[calendarFinalesOnlyKey] = state.showFinalesOnly
+            preferences[PreferenceKeys.CALENDAR_VIEW_TYPE] = state.viewMode.name
+            preferences[PreferenceKeys.CALENDAR_CONTENT_FILTER] = state.contentFilter.name
+            preferences[PreferenceKeys.CALENDAR_MONITOR_ONLY] = state.showMonitoredOnly
+            preferences[PreferenceKeys.CALENDAR_PREMIERS_ONLY] = state.showPremiersOnly
+            preferences[PreferenceKeys.CALENDAR_FINALES_ONLY] = state.showFinalesOnly
         }
     }
 
-    fun dismissInfoCard(type: InstanceType) {
+    override fun dismissInfoCard(type: InstanceType) {
         setInfoCardVisibility(type, false)
     }
 
-    fun setInfoCardVisibility(
+    override fun setInfoCardVisibility(
         type: InstanceType,
         value: Boolean,
     ) {
         scope.launch {
             dataStore.edit { preferences ->
-                preferences[infoCardKey(type)] = value
+                preferences[PreferenceKeys.infoCardKey(type)] = value
             }
         }
     }
 
-    fun toggleActivityPolling() {
+    override fun toggleActivityPolling() {
         scope.launch {
             dataStore.edit { preferences ->
-                val isPolling = preferences[activityPollingKey] ?: true
-                preferences[activityPollingKey] = !isPolling
+                val isPolling = preferences[PreferenceKeys.ACTIVITY_POLLING] ?: PreferenceDefaults.ENABLE_ACTIVITY_POLLING
+                preferences[PreferenceKeys.ACTIVITY_POLLING] = !isPolling
             }
         }
     }
 
-    fun setLogLevel(level: LoggerLevel) {
+    override fun setLogLevel(level: LoggerLevel) {
         scope.launch {
             dataStore.edit { preferences ->
-                preferences[httpLogLevelKey] = level.name
+                preferences[PreferenceKeys.HTTP_LOG_LEVEL] = level.name
             }
         }
     }
 
-    fun setAppTheme(theme: AppTheme) {
+    override fun setAppTheme(theme: AppTheme) {
         scope.launch {
             dataStore.edit { preferences ->
-                preferences[appThemeKey] = theme.name
+                preferences[PreferenceKeys.APP_THEME] = theme.name
             }
         }
     }
 
-    fun setAppColor(color: AppColor) {
+    override fun setAppColor(color: AppColor) {
         scope.launch {
             dataStore.edit { preferences ->
-                preferences[appColorKey] = color.name
+                preferences[PreferenceKeys.APP_COLOR] = color.name
             }
         }
     }
 
-    fun toggleUnifiedLibrarySearchAllInstances() {
+    override fun toggleUnifiedLibrarySearchAllInstances() {
         scope.launch {
             dataStore.edit { preferences ->
-                val current = preferences[unifiedLibrarySearchAllInstancesKey] ?: true
-                preferences[unifiedLibrarySearchAllInstancesKey] = !current
+                val current =
+                    preferences[PreferenceKeys.UNIFIED_LIBRARY_SEARCH_ALL_INSTANCES]
+                        ?: PreferenceDefaults.UNIFIED_LIBRARY_SEARCH_ALL_INSTANCES
+                preferences[PreferenceKeys.UNIFIED_LIBRARY_SEARCH_ALL_INSTANCES] = !current
             }
         }
     }
 
-    fun setUnifiedLibrarySearchAllInstances(value: Boolean) {
+    override fun setUnifiedLibrarySearchAllInstances(value: Boolean) {
         scope.launch {
-            dataStore.edit { it[unifiedLibrarySearchAllInstancesKey] = value }
+            dataStore.edit { it[PreferenceKeys.UNIFIED_LIBRARY_SEARCH_ALL_INSTANCES] = value }
         }
     }
 
-    fun toggleSearchShowBanners() {
+    override fun toggleSearchShowBanners() {
         scope.launch {
             dataStore.edit { preferences ->
-                val current = preferences[searchShowBannersKey] ?: true
-                preferences[searchShowBannersKey] = !current
+                val current = preferences[PreferenceKeys.SEARCH_SHOW_BANNERS] ?: PreferenceDefaults.SEARCH_SHOW_BANNERS
+                preferences[PreferenceKeys.SEARCH_SHOW_BANNERS] = !current
             }
         }
     }
 
-    fun toggleDualPanelSupport() {
+    override fun toggleDualPanelSupport() {
         scope.launch {
             dataStore.edit { preferences ->
-                val current = preferences[dualPanelSupportKey] ?: true
-                preferences[dualPanelSupportKey] = !current
+                val current = preferences[PreferenceKeys.DUAL_PANEL_SUPPORT] ?: PreferenceDefaults.DUAL_PANEL_SUPPORT
+                preferences[PreferenceKeys.DUAL_PANEL_SUPPORT] = !current
             }
         }
     }
 
-    fun setDualPanelSupport(value: Boolean) {
+    override fun setDualPanelSupport(value: Boolean) {
         scope.launch {
-            dataStore.edit { it[dualPanelSupportKey] = value }
+            dataStore.edit { it[PreferenceKeys.DUAL_PANEL_SUPPORT] = value }
         }
     }
 
-    fun setSmartAddSeerrAction(action: SmartAddSeerrAction) {
+    override fun setSmartAddSeerrAction(action: SmartAddSeerrAction) {
         scope.launch {
-            dataStore.edit { it[smartAddSeerrActionKey] = action.name }
+            dataStore.edit { it[PreferenceKeys.SMART_ADD_SEERR_ACTION] = action.name }
         }
     }
 
-    fun toggleCombineSeerrArrMedia() {
+    override fun toggleCombineSeerrArrMedia() {
         scope.launch {
             dataStore.edit { preferences ->
-                val current = preferences[combineSeerrArrMediaKey] ?: true
-                preferences[combineSeerrArrMediaKey] = !current
+                val current = preferences[PreferenceKeys.COMBINE_SEERR_ARR_MEDIA] ?: PreferenceDefaults.COMBINE_SEERR_ARR_MEDIA
+                preferences[PreferenceKeys.COMBINE_SEERR_ARR_MEDIA] = !current
             }
         }
     }
 
-    fun setCombineSeerrArrMedia(value: Boolean) {
+    override fun setCombineSeerrArrMedia(value: Boolean) {
         scope.launch {
-            dataStore.edit { it[combineSeerrArrMediaKey] = value }
+            dataStore.edit { it[PreferenceKeys.COMBINE_SEERR_ARR_MEDIA] = value }
         }
     }
 
-    fun toggleBazarrDetailsIntegration() {
+    override fun toggleBazarrDetailsIntegration() {
         scope.launch {
             dataStore.edit { preferences ->
-                val current = preferences[bazarrDetailsIntegrationKey] ?: true
-                preferences[bazarrDetailsIntegrationKey] = !current
+                val current = preferences[PreferenceKeys.BAZARR_DETAILS_INTEGRATION] ?: PreferenceDefaults.BAZARR_DETAILS_INTEGRATION
+                preferences[PreferenceKeys.BAZARR_DETAILS_INTEGRATION] = !current
             }
         }
     }
 
-    fun setBazarrDetailsIntegration(value: Boolean) {
+    override fun setBazarrDetailsIntegration(value: Boolean) {
         scope.launch {
-            dataStore.edit { it[bazarrDetailsIntegrationKey] = value }
+            dataStore.edit { it[PreferenceKeys.BAZARR_DETAILS_INTEGRATION] = value }
         }
     }
 
-    fun toggleTracearrDetailsIntegration() {
+    override fun toggleTracearrDetailsIntegration() {
         scope.launch {
             dataStore.edit { preferences ->
-                val current = preferences[tracearrDetailsIntegrationKey] ?: true
-                preferences[tracearrDetailsIntegrationKey] = !current
+                val current = preferences[PreferenceKeys.TRACEARR_DETAILS_INTEGRATION] ?: PreferenceDefaults.TRACEARR_DETAILS_INTEGRATION
+                preferences[PreferenceKeys.TRACEARR_DETAILS_INTEGRATION] = !current
             }
         }
     }
 
-    fun setTracearrDetailsIntegration(value: Boolean) {
+    override fun setTracearrDetailsIntegration(value: Boolean) {
         scope.launch {
-            dataStore.edit { it[tracearrDetailsIntegrationKey] = value }
+            dataStore.edit { it[PreferenceKeys.TRACEARR_DETAILS_INTEGRATION] = value }
         }
     }
 
-    fun resetTabPreferences() {
-        scope.launch {
-            dataStore.edit { preferences ->
-                preferences.remove(tabPreferencesKey)
-            }
-        }
-    }
-
-    fun saveTabPreferences(tabPreferences: TabPreferences) {
+    override fun resetTabPreferences() {
         scope.launch {
             dataStore.edit { preferences ->
-                val json =
-                    Json {
-                        encodeDefaults = true
-                    }
-                val jsonString = json.encodeToString(tabPreferences)
-
-                preferences[tabPreferencesKey] = jsonString
+                preferences.remove(PreferenceKeys.TAB_PREFERENCES)
             }
         }
     }
 
-    fun updateTabPreferences(tabPreferences: TabPreferences) {
+    override fun saveTabPreferences(tabPreferences: TabPreferences) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                preferences[PreferenceKeys.TAB_PREFERENCES] = TabPreferencesSerializer.serialize(tabPreferences)
+            }
+        }
+    }
+
+    override fun updateTabPreferences(tabPreferences: TabPreferences) {
         scope.launch {
             saveTabPreferences(tabPreferences)
         }
     }
 
-    fun saveDiscoverSectionPreferences(prefs: DiscoverSectionPreferences) {
+    override fun saveDiscoverSectionPreferences(prefs: DiscoverSectionPreferences) {
         scope.launch {
             dataStore.edit { preferences ->
-                val json = Json { encodeDefaults = true }
-                preferences[discoverSectionPreferencesKey] = json.encodeToString(prefs)
+                preferences[PreferenceKeys.DISCOVER_SECTION_PREFERENCES] =
+                    DiscoverSectionPreferencesSerializer.serialize(prefs)
             }
         }
     }
 
-    fun resetDiscoverSectionPreferences() {
+    override fun resetDiscoverSectionPreferences() {
         scope.launch {
             dataStore.edit { preferences ->
-                preferences.remove(discoverSectionPreferencesKey)
+                preferences.remove(PreferenceKeys.DISCOVER_SECTION_PREFERENCES)
             }
         }
     }
 
-    private fun extractDiscoverSectionPreferences(preferences: Preferences): DiscoverSectionPreferences {
-        val jsonString = preferences[discoverSectionPreferencesKey] ?: return DiscoverSectionPreferences()
-        return try {
-            val json = Json { ignoreUnknownKeys = true }
-            val parsed = json.decodeFromString<DiscoverSectionPreferences>(jsonString)
-            val allCategories = DiscoverCategory.entries
-            val tracked = (parsed.visibleCategories + parsed.hiddenCategories).toSet()
-            val missing = allCategories.filter { it !in tracked }
+    override val isFirstLaunch: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.IS_FIRST_LAUNCH] ?: PreferenceDefaults.IS_FIRST_LAUNCH
+        }
 
-            val visible = parsed.visibleCategories.filter { it in allCategories } + missing
-            val hidden = parsed.hiddenCategories.filter { it in allCategories && it !in visible }
-
-            if (visible.isEmpty() && hidden.isNotEmpty()) {
-                DiscoverSectionPreferences(
-                    visibleCategories = listOf(hidden.first()),
-                    hiddenCategories = hidden.drop(1),
-                )
-            } else if (visible.isEmpty()) {
-                DiscoverSectionPreferences()
+    override val shouldShowReleaseNotes: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            val isFirst = preferences[PreferenceKeys.IS_FIRST_LAUNCH] ?: PreferenceDefaults.IS_FIRST_LAUNCH
+            if (isFirst) {
+                false
             } else {
-                DiscoverSectionPreferences(
-                    visibleCategories = visible,
-                    hiddenCategories = hidden,
-                )
+                val lastCode = preferences[PreferenceKeys.LAST_RELEASE_NOTES] ?: -1
+                lastCode < ReleaseNotes.latestUpdate.buildCode
             }
-        } catch (e: Exception) {
-            DiscoverSectionPreferences()
         }
-    }
 
-    private fun extractTabPreferences(preferences: Preferences): TabPreferences {
-        val jsonString = preferences[tabPreferencesKey] ?: return TabPreferences()
-
-        return try {
-            val jsonElement = Json.parseToJsonElement(jsonString).jsonObject
-
-            if (jsonElement.containsKey("orderedVisibleKeys")) {
-                return Json.decodeFromString<TabPreferences>(jsonString)
-            }
-
-            fun extractKey(element: JsonElement): String? =
-                if (element is JsonPrimitive) {
-                    "standard_${element.content}"
-                } else {
-                    element.jsonObject["key"]?.jsonPrimitive?.content
-                        ?: element.jsonObject["id"]
-                            ?.jsonPrimitive
-                            ?.content
-                            ?.let { "webpage_$it" }
-                }
-
-            val migratedVisible = jsonElement["bottomTabItems"]?.jsonArray?.mapNotNull { extractKey(it) } ?: emptyList()
-            val migratedHidden = jsonElement["hiddenTabs"]?.jsonArray?.mapNotNull { extractKey(it) } ?: emptyList()
-
-            val allStandardKeys = TabItem.Standard.entries.map { it.key }
-            val trackedKeys = (migratedVisible + migratedHidden).toSet()
-            val missingKeys =
-                allStandardKeys.filter { key ->
-                    val name = key.replace("standard_", "")
-                    val entry = TabItem.Standard.entries.find { it.name == name }
-                    key !in trackedKeys && entry?.isDisabled == false
-                }
-
-            if (migratedVisible.isEmpty() && migratedHidden.isEmpty() && missingKeys.isEmpty()) {
-                return TabPreferences()
-            }
-
-            TabPreferences(
-                orderedVisibleKeys = migratedVisible.ifEmpty { TabItem.defaultStandardKeys() },
-                orderedHiddenKeys = migratedHidden + missingKeys,
-            )
-        } catch (e: Exception) {
-            TabPreferences()
-        }
-    }
-
-    val isFirstLaunch: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[isFirstLaunchKey] ?: true
-            }
-
-    val shouldShowReleaseNotes: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                val isFirst = preferences[isFirstLaunchKey] ?: true
-                if (isFirst) {
-                    false
-                } else {
-                    val lastCode = preferences[lastReleaseNotesKey] ?: -1
-                    lastCode < ReleaseNotes.latestUpdate.buildCode
-                }
-            }
-
-    fun markReleaseNotesAsSeen() {
+    override fun markReleaseNotesAsSeen() {
         scope.launch {
             dataStore.edit { preferences ->
-                preferences[lastReleaseNotesKey] = ReleaseNotes.latestUpdate.buildCode
+                preferences[PreferenceKeys.LAST_RELEASE_NOTES] = ReleaseNotes.latestUpdate.buildCode
             }
         }
     }
 
-    fun markFirstLaunchComplete() {
+    override fun markFirstLaunchComplete() {
         scope.launch {
             dataStore.edit { preferences ->
-                val current = preferences[isFirstLaunchKey] ?: true
+                val current = preferences[PreferenceKeys.IS_FIRST_LAUNCH] ?: PreferenceDefaults.IS_FIRST_LAUNCH
                 if (current) {
-                    preferences[lastReleaseNotesKey] = ReleaseNotes.latestUpdate.buildCode
+                    preferences[PreferenceKeys.LAST_RELEASE_NOTES] = ReleaseNotes.latestUpdate.buildCode
                 }
-                preferences[isFirstLaunchKey] = false
+                preferences[PreferenceKeys.IS_FIRST_LAUNCH] = false
             }
         }
     }
 
-    val useServiceNavLogos: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[useServiceNavLogosKey] ?: false
-            }
+    override val useServiceNavLogos: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.USE_SERVICE_NAV_LOGOS] ?: PreferenceDefaults.USE_SERVICE_NAV_LOGOS
+        }
 
-    fun toggleUseServiceNavLogos() {
+    override fun toggleUseServiceNavLogos() {
         scope.launch {
             dataStore.edit { preferences ->
-                val current = preferences[useServiceNavLogosKey] ?: false
-                preferences[useServiceNavLogosKey] = !current
+                val current = preferences[PreferenceKeys.USE_SERVICE_NAV_LOGOS] ?: PreferenceDefaults.USE_SERVICE_NAV_LOGOS
+                preferences[PreferenceKeys.USE_SERVICE_NAV_LOGOS] = !current
             }
         }
     }
 
-    fun setUseServiceNavLogos(value: Boolean) {
+    override fun setUseServiceNavLogos(value: Boolean) {
         scope.launch {
-            dataStore.edit { it[useServiceNavLogosKey] = value }
+            dataStore.edit { it[PreferenceKeys.USE_SERVICE_NAV_LOGOS] = value }
         }
     }
 
-    val hideInstanceSwitcher: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[hideInstanceSwitcherKey] ?: false
-            }
-
-    fun toggleInstanceSwitcher() {
-        scope.launch {
-            dataStore.edit { preferences ->
-                val current = preferences[hideInstanceSwitcherKey] ?: false
-                preferences[hideInstanceSwitcherKey] = !current
-            }
+    override val hideInstanceSwitcher: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.HIDE_INSTANCE_SWITCHER] ?: PreferenceDefaults.HIDE_INSTANCE_SWITCHER
         }
-    }
 
-    fun setHideInstanceSwitcher(value: Boolean) {
-        scope.launch {
-            dataStore.edit { it[hideInstanceSwitcherKey] = value }
-        }
-    }
-
-    val useFloatingNavigationBar: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[useFloatingNavigationBarKey] ?: false
-            }
-
-    fun toggleUseFloatingNavigationBar() {
+    override fun toggleInstanceSwitcher() {
         scope.launch {
             dataStore.edit { preferences ->
-                val current = preferences[useFloatingNavigationBarKey] ?: false
-                preferences[useFloatingNavigationBarKey] = !current
+                val current = preferences[PreferenceKeys.HIDE_INSTANCE_SWITCHER] ?: PreferenceDefaults.HIDE_INSTANCE_SWITCHER
+                preferences[PreferenceKeys.HIDE_INSTANCE_SWITCHER] = !current
             }
         }
     }
 
-    fun setUseFloatingNavigationBar(value: Boolean) {
+    override fun setHideInstanceSwitcher(value: Boolean) {
         scope.launch {
-            dataStore.edit { it[useFloatingNavigationBarKey] = value }
+            dataStore.edit { it[PreferenceKeys.HIDE_INSTANCE_SWITCHER] = value }
         }
     }
 
-    fun observeDownloadClientUiState(): Flow<DownloadQueueSortState> =
+    override val useFloatingNavigationBar: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.USE_FLOATING_NAVIGATION_BAR] ?: PreferenceDefaults.USE_FLOATING_NAVIGATION_BAR
+        }
+
+    override fun toggleUseFloatingNavigationBar() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current =
+                    preferences[PreferenceKeys.USE_FLOATING_NAVIGATION_BAR]
+                        ?: PreferenceDefaults.USE_FLOATING_NAVIGATION_BAR
+                preferences[PreferenceKeys.USE_FLOATING_NAVIGATION_BAR] = !current
+            }
+        }
+    }
+
+    override fun setUseFloatingNavigationBar(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[PreferenceKeys.USE_FLOATING_NAVIGATION_BAR] = value }
+        }
+    }
+
+    override fun observeDownloadClientUiState(): Flow<DownloadQueueSortState> =
         combine(
             downloadClientSortBy,
             downloadClientSortOrder,
@@ -646,134 +611,137 @@ class PreferencesStore(
             DownloadQueueSortState(sortBy, sortOrder)
         }
 
-    suspend fun saveDownloadClientUiState(state: DownloadQueueSortState) {
+    override suspend fun saveDownloadClientUiState(state: DownloadQueueSortState) {
         dataStore.edit {
-            it[downloadClientSortByKey] = state.sortBy.name
-            it[downloadClientSortOrderKey] = state.sortOrder.name
+            it[PreferenceKeys.DOWNLOAD_CLIENT_SORT_BY] = state.sortBy.name
+            it[PreferenceKeys.DOWNLOAD_CLIENT_SORT_ORDER] = state.sortOrder.name
         }
     }
 
-    val dashboardCardsOrder: Flow<List<DashboardCards>> =
-        dataStore.data
-            .map { preferences ->
-                val cardOrderPrefs = preferences[dashboardCardsOrderKey]
-                cardOrderPrefs?.let { cardOrderPrefs ->
-                    cardOrderPrefs
-                        .takeUnless { it.isEmpty() }
-                        ?.split("~")
-                        ?.mapNotNull { runCatching { DashboardCards.valueOf(it) }.getOrNull() }
-                        ?: emptyList()
-                } ?: DashboardCards.defaultEntries.toList()
-            }
+    override val dashboardCardsOrder: Flow<List<DashboardCards>> =
+        dataStore.data.map { preferences ->
+            val cardOrderPrefs = preferences[PreferenceKeys.DASHBOARD_CARDS_ORDER]
+            cardOrderPrefs?.let { raw ->
+                raw
+                    .takeUnless { it.isEmpty() }
+                    ?.split("~")
+                    ?.mapNotNull { runCatching { DashboardCards.valueOf(it) }.getOrNull() }
+                    ?: emptyList()
+            } ?: PreferenceDefaults.DASHBOARD_CARDS_ORDER
+        }
 
-    suspend fun updateDashboardCardsOrder(cards: List<DashboardCards>) {
+    override suspend fun updateDashboardCardsOrder(cards: List<DashboardCards>) {
         dataStore.edit {
-            it[dashboardCardsOrderKey] = cards.joinToString("~")
+            it[PreferenceKeys.DASHBOARD_CARDS_ORDER] = cards.joinToString("~")
         }
     }
 
-    val dashboardFirstLaunch: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[dashboardFirstLaunchKey] ?: true
-            }
-
-    fun markDashboardAsSeen() {
-        scope.launch {
-            dataStore.edit {
-                it[dashboardFirstLaunchKey] = false
-            }
+    override val dashboardFirstLaunch: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.DASHBOARD_FIRST_LAUNCH] ?: PreferenceDefaults.DASHBOARD_FIRST_LAUNCH
         }
-    }
 
-    val showDashboardSearch: Flow<Boolean> =
-        dataStore.data
-            .map { preferences ->
-                preferences[showDashboardSearchKey] ?: true
-            }
-
-    fun setShowDashboardSearch(show: Boolean) {
+    override fun markDashboardAsSeen() {
         scope.launch {
             dataStore.edit {
-                it[showDashboardSearchKey] = show
+                it[PreferenceKeys.DASHBOARD_FIRST_LAUNCH] = false
             }
         }
     }
 
-    val credentialsMigrated: Flow<Boolean> =
-        dataStore.data
-            .map { it[credentialsMigratedKey] ?: false }
+    override val showDashboardSearch: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.SHOW_DASHBOARD_SEARCH] ?: PreferenceDefaults.SHOW_DASHBOARD_SEARCH
+        }
 
-    fun markCredentialsMigrated() {
+    override fun setShowDashboardSearch(show: Boolean) {
         scope.launch {
             dataStore.edit {
-                it[credentialsMigratedKey] = true
+                it[PreferenceKeys.SHOW_DASHBOARD_SEARCH] = show
             }
         }
     }
 
-    val localNetworkNoticeSeen: Flow<Boolean> =
-        dataStore.data
-            .map { it[localNetworkNoticeSeenKey] ?: false }
+    override val credentialsMigrated: Flow<Boolean> =
+        dataStore.data.map {
+            it[PreferenceKeys.CREDENTIALS_MIGRATED] ?: PreferenceDefaults.CREDENTIALS_MIGRATED
+        }
 
-    fun markLocalNetworkNoticeAsSeen() {
+    override fun markCredentialsMigrated() {
         scope.launch {
             dataStore.edit {
-                it[localNetworkNoticeSeenKey] = true
+                it[PreferenceKeys.CREDENTIALS_MIGRATED] = true
             }
         }
     }
 
-    val localNetworkPermissionInfoDismissed: Flow<Boolean> =
-        dataStore.data
-            .map { it[localNetworkPermissionInfoDismissedKey] ?: false }
+    override val localNetworkNoticeSeen: Flow<Boolean> =
+        dataStore.data.map {
+            it[PreferenceKeys.LOCAL_NETWORK_NOTICE_SEEN] ?: PreferenceDefaults.LOCAL_NETWORK_NOTICE_SEEN
+        }
 
-    fun dismissLocalNetworkPermissionInfo() {
+    override fun markLocalNetworkNoticeAsSeen() {
         scope.launch {
             dataStore.edit {
-                it[localNetworkPermissionInfoDismissedKey] = true
+                it[PreferenceKeys.LOCAL_NETWORK_NOTICE_SEEN] = true
             }
         }
     }
 
-    val useColoredActivityCards: Flow<Boolean> =
-        dataStore.data
-            .map { it[useColoredActivityCardsKey] ?: false }
+    override val localNetworkPermissionInfoDismissed: Flow<Boolean> =
+        dataStore.data.map {
+            it[PreferenceKeys.LOCAL_NETWORK_PERMISSION_INFO_DISMISSED]
+                ?: PreferenceDefaults.LOCAL_NETWORK_PERMISSION_INFO_DISMISSED
+        }
 
-    fun toggleUseColoredActivityCards() {
+    override fun dismissLocalNetworkPermissionInfo() {
         scope.launch {
             dataStore.edit {
-                val current = it[useColoredActivityCardsKey] ?: false
-                it[useColoredActivityCardsKey] = !current
+                it[PreferenceKeys.LOCAL_NETWORK_PERMISSION_INFO_DISMISSED] = true
             }
         }
     }
 
-    fun setUseColoredActivityCards(value: Boolean) {
+    override val useColoredActivityCards: Flow<Boolean> =
+        dataStore.data.map {
+            it[PreferenceKeys.USE_COLORED_ACTIVITY_CARDS] ?: PreferenceDefaults.USE_COLORED_ACTIVITY_CARDS
+        }
+
+    override fun toggleUseColoredActivityCards() {
         scope.launch {
             dataStore.edit {
-                it[useColoredActivityCardsKey] = value
+                val current = it[PreferenceKeys.USE_COLORED_ACTIVITY_CARDS] ?: PreferenceDefaults.USE_COLORED_ACTIVITY_CARDS
+                it[PreferenceKeys.USE_COLORED_ACTIVITY_CARDS] = !current
             }
         }
     }
 
-    val useColoredCalendarCards: Flow<Boolean> =
-        dataStore.data
-            .map { it[useColoredCalendarCardsKey] ?: false }
-
-    fun toggleUseColoredCalendarCards() {
+    override fun setUseColoredActivityCards(value: Boolean) {
         scope.launch {
             dataStore.edit {
-                val current = it[useColoredCalendarCardsKey] ?: false
-                it[useColoredCalendarCardsKey] = !current
+                it[PreferenceKeys.USE_COLORED_ACTIVITY_CARDS] = value
             }
         }
     }
 
-    fun setUseColoredCalendarCards(value: Boolean) {
+    override val useColoredCalendarCards: Flow<Boolean> =
+        dataStore.data.map {
+            it[PreferenceKeys.USE_COLORED_CALENDAR_CARDS] ?: PreferenceDefaults.USE_COLORED_CALENDAR_CARDS
+        }
+
+    override fun toggleUseColoredCalendarCards() {
         scope.launch {
             dataStore.edit {
-                it[useColoredCalendarCardsKey] = value
+                val current = it[PreferenceKeys.USE_COLORED_CALENDAR_CARDS] ?: PreferenceDefaults.USE_COLORED_CALENDAR_CARDS
+                it[PreferenceKeys.USE_COLORED_CALENDAR_CARDS] = !current
+            }
+        }
+    }
+
+    override fun setUseColoredCalendarCards(value: Boolean) {
+        scope.launch {
+            dataStore.edit {
+                it[PreferenceKeys.USE_COLORED_CALENDAR_CARDS] = value
             }
         }
     }
