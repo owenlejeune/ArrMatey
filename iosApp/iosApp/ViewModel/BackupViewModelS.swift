@@ -29,6 +29,10 @@ class BackupViewModelS: ObservableObject {
     func toggleDownloadClientSelection(id: Int64) {
         viewModel.toggleDownloadClientSelection(id: id)
     }
+
+    func toggleCustomWebpageSelection(id: Int64) {
+        viewModel.toggleCustomWebpageSelection(id: id)
+    }
     
     func setExportPassword(password: String) {
         viewModel.setExportPassword(password: password)
@@ -44,6 +48,10 @@ class BackupViewModelS: ObservableObject {
     
     func toggleIncludeUiPreferences() {
         viewModel.toggleIncludeUiPreferences()
+    }
+    
+    func toggleIncludeIntegrationsPreferences() {
+        viewModel.toggleIncludeIntegrationsPreferences()
     }
     
     func exportData(onExportReady: @escaping (String) -> Void) {
@@ -65,6 +73,10 @@ class BackupViewModelS: ObservableObject {
     func toggleImportDownloadClientSelection(index: Int32) {
         viewModel.toggleImportDownloadClientSelection(index: index)
     }
+
+    func toggleImportCustomWebpageSelection(index: Int32) {
+        viewModel.toggleImportCustomWebpageSelection(index: index)
+    }
     
     func toggleImportTabPreferences() {
         viewModel.toggleImportTabPreferences()
@@ -72,6 +84,10 @@ class BackupViewModelS: ObservableObject {
     
     func toggleImportUiPreferences() {
         viewModel.toggleImportUiPreferences()
+    }
+    
+    func toggleImportIntegrationsPreferences() {
+        viewModel.toggleImportIntegrationsPreferences()
     }
     
     func executeImport(onComplete: @escaping () -> Void) {

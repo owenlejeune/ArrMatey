@@ -86,6 +86,8 @@ interface PreferencesStore {
 
     fun toggleSearchShowBanners()
 
+    fun setSearchShowBanners(value: Boolean)
+
     fun toggleDualPanelSupport()
 
     fun setDualPanelSupport(value: Boolean)
@@ -373,6 +375,12 @@ class DefaultPreferencesStore(
                 val current = preferences[PreferenceKeys.SEARCH_SHOW_BANNERS] ?: PreferenceDefaults.SEARCH_SHOW_BANNERS
                 preferences[PreferenceKeys.SEARCH_SHOW_BANNERS] = !current
             }
+        }
+    }
+
+    override fun setSearchShowBanners(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[PreferenceKeys.SEARCH_SHOW_BANNERS] = value }
         }
     }
 

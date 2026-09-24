@@ -7,8 +7,10 @@ data class ImportUiState(
     val decryptedBackup: BackupExport? = null,
     val selectedInstanceIndices: Set<Int> = emptySet(),
     val selectedDownloadClientIndices: Set<Int> = emptySet(),
+    val selectedCustomWebpageIndices: Set<Int> = emptySet(),
     val importTabPreferences: Boolean = true,
     val importUiPreferences: Boolean = true,
+    val importIntegrationsPreferences: Boolean = true,
     val isImporting: Boolean = false,
     val error: String? = null,
 ) {

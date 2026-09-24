@@ -416,8 +416,8 @@ val useCaseModule =
         factory { PerformBazarrAutomaticSearchUseCase() }
         factory { DownloadBazarrSubtitleToDeviceUseCase(get(), get(), get()) }
         factory { CredentialMigrationUseCase(get(), get(), get()) }
-        factory { ExportDataUseCase(get(), get(), get(), get(), get(), get()) }
-        factory { ImportDataUseCase(get(), get(), get(), get(), get(), get()) }
+        factory { ExportDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
+        factory { ImportDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
         factory { GetInstancePresencesUseCase() }
         factory { UpdateAllPreferencesUseCase(get(), get()) }
     }

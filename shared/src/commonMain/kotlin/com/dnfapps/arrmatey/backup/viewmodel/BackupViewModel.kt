@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.backup.state.ExportUiState
 import com.dnfapps.arrmatey.backup.state.ImportUiState
 import com.dnfapps.arrmatey.backup.usecase.ExportDataUseCase
 import com.dnfapps.arrmatey.backup.usecase.ImportDataUseCase
+import com.dnfapps.arrmatey.database.dao.CustomWebpageDao
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ class BackupViewModel(
     private val importDataUseCase: ImportDataUseCase,
     private val instanceDao: InstanceDao,
     private val downloadClientDao: DownloadClientDao,
+    private val customWebpageDao: CustomWebpageDao,
 ) : ViewModel() {
     private val _exportUiState = MutableStateFlow(ExportUiState())
     val exportUiState: StateFlow<ExportUiState> = _exportUiState.asStateFlow()
@@ -34,12 +36,15 @@ class BackupViewModel(
         viewModelScope.launch {
             val instances = instanceDao.getAllInstances()
             val downloadClients = downloadClientDao.getAllDownloadClients()
+            val customWebpages = customWebpageDao.getAllWebpagesList()
             _exportUiState.update {
                 it.copy(
                     instances = instances,
                     downloadClients = downloadClients,
+                    customWebpages = customWebpages,
                     selectedInstanceIds = instances.map { i -> i.id }.toSet(),
                     selectedDownloadClientIds = downloadClients.map { c -> c.id }.toSet(),
+                    selectedCustomWebpageIds = customWebpages.map { w -> w.id }.toSet(),
                 )
             }
         }
@@ -61,6 +66,14 @@ class BackupViewModel(
         }
     }
 
+    fun toggleCustomWebpageSelection(id: Long) {
+        _exportUiState.update { state ->
+            val newSelected = state.selectedCustomWebpageIds.toMutableSet()
+            if (newSelected.contains(id)) newSelected.remove(id) else newSelected.add(id)
+            state.copy(selectedCustomWebpageIds = newSelected)
+        }
+    }
+
     fun setExportPassword(password: String) {
         _exportUiState.update { it.copy(password = password) }
     }
@@ -77,6 +90,10 @@ class BackupViewModel(
         _exportUiState.update { it.copy(includeUiPreferences = !it.includeUiPreferences) }
     }
 
+    fun toggleIncludeIntegrationsPreferences() {
+        _exportUiState.update { it.copy(includeIntegrationsPreferences = !it.includeIntegrationsPreferences) }
+    }
+
     fun exportData(onExportReady: (String) -> Unit) {
         val state = _exportUiState.value
         if (state.password.isBlank()) return
@@ -88,9 +105,11 @@ class BackupViewModel(
                     password = state.password,
                     selectedInstanceIds = state.selectedInstanceIds,
                     selectedDownloadClientIds = state.selectedDownloadClientIds,
+                    selectedCustomWebpageIds = state.selectedCustomWebpageIds,
                     includeInstancePreferences = state.includeInstancePreferences,
                     includeTabPreferences = state.includeTabPreferences,
                     includeUiPreferences = state.includeUiPreferences,
+                    includeIntegrationsPreferences = state.includeIntegrationsPreferences,
                 )
             _exportUiState.update { it.copy(isExporting = false) }
             onExportReady(encryptedData)
@@ -114,6 +133,7 @@ class BackupViewModel(
                         decryptedBackup = backup,
                         selectedInstanceIndices = backup.instances.indices.toSet(),
                         selectedDownloadClientIndices = backup.downloadClients.indices.toSet(),
+                        selectedCustomWebpageIndices = backup.customWebpages.indices.toSet(),
                         error = null,
                     )
                 }
@@ -139,12 +159,24 @@ class BackupViewModel(
         }
     }
 
+    fun toggleImportCustomWebpageSelection(index: Int) {
+        _importUiState.update { state ->
+            val newSelected = state.selectedCustomWebpageIndices.toMutableSet()
+            if (newSelected.contains(index)) newSelected.remove(index) else newSelected.add(index)
+            state.copy(selectedCustomWebpageIndices = newSelected)
+        }
+    }
+
     fun toggleImportTabPreferences() {
         _importUiState.update { it.copy(importTabPreferences = !it.importTabPreferences) }
     }
 
     fun toggleImportUiPreferences() {
         _importUiState.update { it.copy(importUiPreferences = !it.importUiPreferences) }
+    }
+
+    fun toggleImportIntegrationsPreferences() {
+        _importUiState.update { it.copy(importIntegrationsPreferences = !it.importIntegrationsPreferences) }
     }
 
     fun executeImport(onComplete: () -> Unit) {
@@ -157,8 +189,10 @@ class BackupViewModel(
                 backup = backup,
                 selectedInstanceIndices = state.selectedInstanceIndices,
                 selectedDownloadClientIndices = state.selectedDownloadClientIndices,
+                selectedCustomWebpageIndices = state.selectedCustomWebpageIndices,
                 importTabPreferences = state.importTabPreferences,
                 importUiPreferences = state.importUiPreferences,
+                importIntegrationsPreferences = state.importIntegrationsPreferences,
             )
             _importUiState.update { it.copy(isImporting = false) }
             onComplete()

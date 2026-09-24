@@ -157,8 +157,10 @@ fun BackupRestoreSettingsScreen(
                 onToggleIncludeInstancePreferences = { backupViewModel.toggleIncludePreferences() },
                 onToggleIncludeTabPreferences = { backupViewModel.toggleIncludeTabPreferences() },
                 onToggleIncludeUiPreferences = { backupViewModel.toggleIncludeUiPreferences() },
+                onToggleIncludeIntegrationsPreferences = { backupViewModel.toggleIncludeIntegrationsPreferences() },
                 onToggleInstanceSelection = { backupViewModel.toggleInstanceSelection(it) },
                 onToggleDownloadClientSelection = { backupViewModel.toggleDownloadClientSelection(it) },
+                onToggleCustomWebpageSelection = { backupViewModel.toggleCustomWebpageSelection(it) },
             )
         }
 
@@ -174,8 +176,10 @@ fun BackupRestoreSettingsScreen(
                 onPasswordChanged = { backupViewModel.setImportPassword(it) },
                 onToggleInstanceSelection = { backupViewModel.toggleImportInstanceSelection(it) },
                 onToggleDownloadClientSelection = { backupViewModel.toggleImportDownloadClientSelection(it) },
+                onToggleCustomWebpageSelection = { backupViewModel.toggleImportCustomWebpageSelection(it) },
                 onToggleImportTabPreferences = { backupViewModel.toggleImportTabPreferences() },
                 onToggleImportUiPreferences = { backupViewModel.toggleImportUiPreferences() },
+                onToggleImportIntegrationsPreferences = { backupViewModel.toggleImportIntegrationsPreferences() },
                 onConfirmDecrypt = {
                     pendingImportData?.let { data ->
                         backupViewModel.prepareImport(data)

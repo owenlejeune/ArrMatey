@@ -275,8 +275,10 @@ fun OnboardingScreen(
             onPasswordChanged = { backupViewModel.setImportPassword(it) },
             onToggleInstanceSelection = { backupViewModel.toggleImportInstanceSelection(it) },
             onToggleDownloadClientSelection = { backupViewModel.toggleImportDownloadClientSelection(it) },
+            onToggleCustomWebpageSelection = { backupViewModel.toggleImportCustomWebpageSelection(it) },
             onToggleImportTabPreferences = { backupViewModel.toggleImportTabPreferences() },
             onToggleImportUiPreferences = { backupViewModel.toggleImportUiPreferences() },
+            onToggleImportIntegrationsPreferences = { backupViewModel.toggleImportIntegrationsPreferences() },
             onConfirmDecrypt = {
                 pendingImportData?.let { data ->
                     backupViewModel.prepareImport(data)

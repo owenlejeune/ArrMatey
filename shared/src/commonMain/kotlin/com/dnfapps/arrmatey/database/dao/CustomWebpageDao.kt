@@ -14,6 +14,9 @@ interface CustomWebpageDao {
     @Query("SELECT * FROM custom_webpages ORDER BY id ASC")
     fun getAllWebpages(): Flow<List<CustomWebpage>>
 
+    @Query("SELECT * FROM custom_webpages ORDER BY id ASC")
+    suspend fun getAllWebpagesList(): List<CustomWebpage>
+
     @Query("SELECT * FROM custom_webpages WHERE id = :id")
     suspend fun getWebpageById(id: Long): CustomWebpage?
 

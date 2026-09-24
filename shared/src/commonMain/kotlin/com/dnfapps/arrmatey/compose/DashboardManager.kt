@@ -61,6 +61,7 @@ class DashboardManager(
     }
 }
 
+@kotlinx.serialization.Serializable
 enum class DashboardCards(
     val title: StringResource,
 ) {

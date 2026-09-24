@@ -2,7 +2,9 @@ package com.dnfapps.arrmatey.downloadclient.state
 
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class DownloadQueueSortState(
     val sortBy: SortBy = SortBy.Title,
     val sortOrder: SortOrder = SortOrder.Asc,

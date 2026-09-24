@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.backup.usecase
 import com.dnfapps.arrmatey.backup.TransportEncryptor
 import com.dnfapps.arrmatey.backup.model.BackupExport
 import com.dnfapps.arrmatey.database.EncryptedString
+import com.dnfapps.arrmatey.database.dao.CustomWebpageDao
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
@@ -10,11 +11,13 @@ import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import kotlinx.serialization.json.Json
 
 class ImportDataUseCase(
     private val instanceDao: InstanceDao,
     private val downloadClientDao: DownloadClientDao,
+    private val customWebpageDao: CustomWebpageDao,
     private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository,
     private val preferencesStore: PreferencesStore,
     private val transportEncryptor: TransportEncryptor,
@@ -40,8 +43,10 @@ class ImportDataUseCase(
         backup: BackupExport,
         selectedInstanceIndices: Set<Int>,
         selectedDownloadClientIndices: Set<Int>,
+        selectedCustomWebpageIndices: Set<Int> = emptySet(),
         importTabPreferences: Boolean,
         importUiPreferences: Boolean,
+        importIntegrationsPreferences: Boolean = true,
     ) {
         backup.instances.forEachIndexed { index, export ->
             if (index in selectedInstanceIndices) {
@@ -146,6 +151,18 @@ class ImportDataUseCase(
             }
         }
 
+        backup.customWebpages.forEachIndexed { index, export ->
+            if (index in selectedCustomWebpageIndices) {
+                val webpage =
+                    CustomWebpage(
+                        name = export.name,
+                        url = export.url,
+                        headers = export.headers,
+                    )
+                customWebpageDao.insert(webpage)
+            }
+        }
+
         backup.globalPreferences?.let { global ->
             if (importTabPreferences) {
                 global.tabPreferences?.let { preferencesStore.saveTabPreferences(it) }
@@ -153,6 +170,28 @@ class ImportDataUseCase(
             if (importUiPreferences) {
                 global.useServiceNavLogos?.let { preferencesStore.setUseServiceNavLogos(it) }
                 global.hideInstanceSwitcher?.let { preferencesStore.setHideInstanceSwitcher(it) }
+                global.useFloatingNavigationBar?.let { preferencesStore.setUseFloatingNavigationBar(it) }
+                global.appTheme?.let { preferencesStore.setAppTheme(it) }
+                global.appColor?.let { preferencesStore.setAppColor(it) }
+                global.searchShowBanners?.let { preferencesStore.setSearchShowBanners(it) }
+                global.dualPanelSupport?.let { preferencesStore.setDualPanelSupport(it) }
+                global.useColoredActivityCards?.let { preferencesStore.setUseColoredActivityCards(it) }
+                global.useColoredCalendarCards?.let { preferencesStore.setUseColoredCalendarCards(it) }
+                global.showInfoCards?.forEach { (type, visible) ->
+                    preferencesStore.setInfoCardVisibility(type, visible)
+                }
+                global.calendarFilterState?.let { preferencesStore.saveCalendarFilterState(it) }
+                global.downloadQueueSortState?.let { preferencesStore.saveDownloadClientUiState(it) }
+                global.dashboardCardsOrder?.let { preferencesStore.updateDashboardCardsOrder(it) }
+                global.showDashboardSearch?.let { preferencesStore.setShowDashboardSearch(it) }
+            }
+            if (importIntegrationsPreferences) {
+                global.discoverSectionPreferences?.let { preferencesStore.saveDiscoverSectionPreferences(it) }
+                global.smartAddSeerrAction?.let { preferencesStore.setSmartAddSeerrAction(it) }
+                global.combineSeerrArrMedia?.let { preferencesStore.setCombineSeerrArrMedia(it) }
+                global.bazarrDetailsIntegration?.let { preferencesStore.setBazarrDetailsIntegration(it) }
+                global.tracearrDetailsIntegration?.let { preferencesStore.setTracearrDetailsIntegration(it) }
+                global.unifiedLibrarySearchAllInstances?.let { preferencesStore.setUnifiedLibrarySearchAllInstances(it) }
             }
         }
     }

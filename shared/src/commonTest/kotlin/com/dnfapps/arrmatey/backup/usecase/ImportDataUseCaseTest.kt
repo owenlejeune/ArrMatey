@@ -117,6 +117,25 @@ class ImportDataUseCaseTest {
             override suspend fun ensureFirstSelectedIfNone() {}
         }
 
+    private val dummyCustomWebpageDao =
+        object : com.dnfapps.arrmatey.database.dao.CustomWebpageDao {
+            override fun getAllWebpages(): Flow<List<com.dnfapps.arrmatey.webpage.model.CustomWebpage>> = emptyFlow()
+
+            override suspend fun getAllWebpagesList(): List<com.dnfapps.arrmatey.webpage.model.CustomWebpage> = emptyList()
+
+            override suspend fun getWebpageById(id: Long): com.dnfapps.arrmatey.webpage.model.CustomWebpage? = null
+
+            override fun observeWebpageById(id: Long): Flow<com.dnfapps.arrmatey.webpage.model.CustomWebpage?> = emptyFlow()
+
+            override suspend fun insert(webpage: com.dnfapps.arrmatey.webpage.model.CustomWebpage): Long = 0
+
+            override suspend fun update(webpage: com.dnfapps.arrmatey.webpage.model.CustomWebpage): Int = 0
+
+            override suspend fun delete(webpage: com.dnfapps.arrmatey.webpage.model.CustomWebpage) {}
+
+            override suspend fun deleteById(id: Long) {}
+        }
+
     private val dataStoreFactory = DataStoreFactory()
 
     @Test
@@ -147,6 +166,7 @@ class ImportDataUseCaseTest {
             ImportDataUseCase(
                 instanceDao = dummyInstanceDao,
                 downloadClientDao = dummyDownloadClientDao,
+                customWebpageDao = dummyCustomWebpageDao,
                 instancePreferenceStoreRepository = InstancePreferenceStoreRepository(dataStoreFactory),
                 preferencesStore = PreferencesStore(dataStoreFactory),
                 transportEncryptor = fakeEncryptor,
@@ -189,6 +209,7 @@ class ImportDataUseCaseTest {
             ImportDataUseCase(
                 instanceDao = dummyInstanceDao,
                 downloadClientDao = dummyDownloadClientDao,
+                customWebpageDao = dummyCustomWebpageDao,
                 instancePreferenceStoreRepository = InstancePreferenceStoreRepository(dataStoreFactory),
                 preferencesStore = PreferencesStore(dataStoreFactory),
                 transportEncryptor = fakeEncryptor,

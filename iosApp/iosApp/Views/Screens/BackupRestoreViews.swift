@@ -17,39 +17,51 @@ struct ExportSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(header: Text(MR.strings().password.localized())) {
+                Section(header: Text(MR.strings().password.localized()), footer: Text(MR.strings().export_password_prompt.localized())) {
                     SecureField(MR.strings().password.localized(), text: Binding(
                         get: { viewModel.exportState.password },
                         set: { viewModel.setExportPassword(password: $0) }
                     ))
-                    Text(MR.strings().export_password_prompt.localized())
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
                 
-                Section {
-                    Toggle(MR.strings().include_preferences.localized(), isOn: Binding(
+                Section(header: Text(MR.strings().onboarding_preferences_title.localized())) {
+                    Toggle(isOn: Binding(
                         get: { viewModel.exportState.includeInstancePreferences },
                         set: { _ in viewModel.toggleIncludePreferences() }
-                    ))
+                    )) {
+                        Label(MR.strings().include_preferences.localized(), systemImage: "gearshape")
+                    }
                     
-                    Toggle(MR.strings().navigation_bar_configuration.localized(), isOn: Binding(
+                    Toggle(isOn: Binding(
                         get: { viewModel.exportState.includeTabPreferences },
                         set: { _ in viewModel.toggleIncludeTabPreferences() }
-                    ))
+                    )) {
+                        Label(MR.strings().navigation_bar_configuration.localized(), systemImage: "sidebar.left")
+                    }
                     
-                    Toggle(MR.strings().user_interface.localized(), isOn: Binding(
+                    Toggle(isOn: Binding(
                         get: { viewModel.exportState.includeUiPreferences },
                         set: { _ in viewModel.toggleIncludeUiPreferences() }
-                    ))
+                    )) {
+                        Label(MR.strings().user_interface.localized(), systemImage: "paintbrush")
+                    }
+
+                    Toggle(isOn: Binding(
+                        get: { viewModel.exportState.includeIntegrationsPreferences },
+                        set: { _ in viewModel.toggleIncludeIntegrationsPreferences() }
+                    )) {
+                        Label(MR.strings().integrations.localized(), systemImage: "link")
+                    }
                 }
                 
-                Section(header: Text(MR.strings().select_items_to_export.localized())) {
-                    if !viewModel.exportState.instances.isEmpty {
-                        Text(MR.strings().instances.localized())
+                if !viewModel.exportState.instances.isEmpty {
+                    Section(header: HStack {
+                        Label(MR.strings().instances.localized(), systemImage: "server.rack")
+                        Spacer()
+                        Text("\(viewModel.exportState.selectedInstanceIds.count)/\(viewModel.exportState.instances.count)")
                             .font(.caption)
-                            .foregroundColor(.themePrimary)
-                        
+                            .foregroundColor(.secondary)
+                    }) {
                         ForEach(viewModel.exportState.instances, id: \.id) { instance in
                             Toggle(instance.label, isOn: Binding(
                                 get: { viewModel.exportState.selectedInstanceIds.contains(instance.id.asKotlinLong) },
@@ -57,17 +69,37 @@ struct ExportSheet: View {
                             ))
                         }
                     }
-                    
-                    if !viewModel.exportState.downloadClients.isEmpty {
-                        Text(MR.strings().download_clients.localized())
+                }
+                
+                if !viewModel.exportState.downloadClients.isEmpty {
+                    Section(header: HStack {
+                        Label(MR.strings().download_clients.localized(), systemImage: "arrow.down.circle")
+                        Spacer()
+                        Text("\(viewModel.exportState.selectedDownloadClientIds.count)/\(viewModel.exportState.downloadClients.count)")
                             .font(.caption)
-                            .foregroundColor(.themePrimary)
-                            .padding(.top, 8)
-                        
+                            .foregroundColor(.secondary)
+                    }) {
                         ForEach(viewModel.exportState.downloadClients, id: \.id) { client in
                             Toggle(client.label, isOn: Binding(
                                 get: { viewModel.exportState.selectedDownloadClientIds.contains(client.id.asKotlinLong) },
                                 set: { _ in viewModel.toggleDownloadClientSelection(id: client.id) }
+                            ))
+                        }
+                    }
+                }
+
+                if !viewModel.exportState.customWebpages.isEmpty {
+                    Section(header: HStack {
+                        Label(MR.strings().custom_webpages.localized(), systemImage: "globe")
+                        Spacer()
+                        Text("\(viewModel.exportState.selectedCustomWebpageIds.count)/\(viewModel.exportState.customWebpages.count)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }) {
+                        ForEach(viewModel.exportState.customWebpages, id: \.id) { webpage in
+                            Toggle(webpage.name, isOn: Binding(
+                                get: { viewModel.exportState.selectedCustomWebpageIds.contains(webpage.id.asKotlinLong) },
+                                set: { _ in viewModel.toggleCustomWebpageSelection(id: webpage.id) }
                             ))
                         }
                     }
@@ -88,7 +120,17 @@ struct ExportSheet: View {
                             isPresented = false
                         }
                     }
-                    .disabled(viewModel.exportState.password.isEmpty || (viewModel.exportState.selectedInstanceIds.isEmpty && viewModel.exportState.selectedDownloadClientIds.isEmpty))
+                    .disabled(
+                        viewModel.exportState.password.isEmpty ||
+                        (
+                            viewModel.exportState.selectedInstanceIds.isEmpty &&
+                            viewModel.exportState.selectedDownloadClientIds.isEmpty &&
+                            viewModel.exportState.selectedCustomWebpageIds.isEmpty &&
+                            !viewModel.exportState.includeTabPreferences &&
+                            !viewModel.exportState.includeUiPreferences &&
+                            !viewModel.exportState.includeIntegrationsPreferences
+                        )
+                    )
                 }
             }
         }
@@ -105,14 +147,11 @@ struct ImportSheet: View {
         NavigationStack {
             Form {
                 if viewModel.importState.decryptedBackup == nil {
-                    Section(header: Text(MR.strings().password.localized())) {
+                    Section(header: Text(MR.strings().password.localized()), footer: Text(MR.strings().import_password_prompt.localized())) {
                         SecureField(MR.strings().password.localized(), text: Binding(
                             get: { viewModel.importState.password },
                             set: { viewModel.setImportPassword(password: $0) }
                         ))
-                        Text(MR.strings().import_password_prompt.localized())
-                            .font(.caption)
-                            .foregroundColor(.secondary)
                         
                         if let error = viewModel.importState.error {
                             Text(error)
@@ -120,55 +159,90 @@ struct ImportSheet: View {
                                 .foregroundColor(.red)
                         }
                     }
-                } else {
-                    Section(header: Text(MR.strings().select_items_to_import.localized())) {
-                        if let backup = viewModel.importState.decryptedBackup {
-                            if !backup.instances.isEmpty {
-                                Text(MR.strings().instances.localized())
-                                    .font(.caption)
-                                    .foregroundColor(.themePrimary)
-                                
-                                ForEach(Array(backup.instances.enumerated()), id: \.offset) { index, instance in
-                                    Toggle(instance.label, isOn: Binding(
-                                        get: { viewModel.importState.selectedInstanceIndices.contains(Int32(index).asKotlinInt) },
-                                        set: { _ in viewModel.toggleImportInstanceSelection(index: Int32(index)) }
-                                    ))
+                } else if let backup = viewModel.importState.decryptedBackup {
+                    let hasAnyPreferences = backup.globalPreferences != nil &&
+                        (backup.globalPreferences?.tabPreferences != nil ||
+                         backup.globalPreferences?.hasUiPreferences == true ||
+                         backup.globalPreferences?.hasIntegrationsPreferences == true)
+                    
+                    if hasAnyPreferences {
+                        Section(header: Label(MR.strings().onboarding_preferences_title.localized(), systemImage: "slider.horizontal.3")) {
+                            if backup.globalPreferences?.tabPreferences != nil {
+                                Toggle(isOn: Binding(
+                                    get: { viewModel.importState.importTabPreferences },
+                                    set: { _ in viewModel.toggleImportTabPreferences() }
+                                )) {
+                                    Label(MR.strings().navigation_bar_configuration.localized(), systemImage: "sidebar.left")
                                 }
                             }
                             
-                            if !backup.downloadClients.isEmpty {
-                                Text(MR.strings().download_clients.localized())
-                                    .font(.caption)
-                                    .foregroundColor(.themePrimary)
-                                    .padding(.top, 8)
-                                
-                                ForEach(Array(backup.downloadClients.enumerated()), id: \.offset) { index, client in
-                                    Toggle(client.label, isOn: Binding(
-                                        get: { viewModel.importState.selectedDownloadClientIndices.contains(Int32(index).asKotlinInt) },
-                                        set: { _ in viewModel.toggleImportDownloadClientSelection(index: Int32(index)) }
-                                    ))
+                            if backup.globalPreferences?.hasUiPreferences == true {
+                                Toggle(isOn: Binding(
+                                    get: { viewModel.importState.importUiPreferences },
+                                    set: { _ in viewModel.toggleImportUiPreferences() }
+                                )) {
+                                    Label(MR.strings().user_interface.localized(), systemImage: "paintbrush")
                                 }
                             }
-                            
-                            if backup.globalPreferences != nil {
-                                Text(MR.strings().backup_restore.localized())
-                                    .font(.caption)
-                                    .foregroundColor(.themePrimary)
-                                    .padding(.top, 8)
-                                
-                                if backup.globalPreferences?.tabPreferences != nil {
-                                    Toggle(MR.strings().navigation_bar_configuration.localized(), isOn: Binding(
-                                        get: { viewModel.importState.importTabPreferences },
-                                        set: { _ in viewModel.toggleImportTabPreferences() }
-                                    ))
+
+                            if backup.globalPreferences?.hasIntegrationsPreferences == true {
+                                Toggle(isOn: Binding(
+                                    get: { viewModel.importState.importIntegrationsPreferences },
+                                    set: { _ in viewModel.toggleImportIntegrationsPreferences() }
+                                )) {
+                                    Label(MR.strings().integrations.localized(), systemImage: "link")
                                 }
-                                
-                                if backup.globalPreferences?.useServiceNavLogos != nil || backup.globalPreferences?.hideInstanceSwitcher != nil {
-                                    Toggle(MR.strings().user_interface.localized(), isOn: Binding(
-                                        get: { viewModel.importState.importUiPreferences },
-                                        set: { _ in viewModel.toggleImportUiPreferences() }
-                                    ))
-                                }
+                            }
+                        }
+                    }
+
+                    if !backup.instances.isEmpty {
+                        Section(header: HStack {
+                            Label(MR.strings().instances.localized(), systemImage: "server.rack")
+                            Spacer()
+                            Text("\(viewModel.importState.selectedInstanceIndices.count)/\(backup.instances.count)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }) {
+                            ForEach(Array(backup.instances.enumerated()), id: \.offset) { index, instance in
+                                Toggle(instance.label, isOn: Binding(
+                                    get: { viewModel.importState.selectedInstanceIndices.contains(Int32(index).asKotlinInt) },
+                                    set: { _ in viewModel.toggleImportInstanceSelection(index: Int32(index)) }
+                                ))
+                            }
+                        }
+                    }
+                    
+                    if !backup.downloadClients.isEmpty {
+                        Section(header: HStack {
+                            Label(MR.strings().download_clients.localized(), systemImage: "arrow.down.circle")
+                            Spacer()
+                            Text("\(viewModel.importState.selectedDownloadClientIndices.count)/\(backup.downloadClients.count)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }) {
+                            ForEach(Array(backup.downloadClients.enumerated()), id: \.offset) { index, client in
+                                Toggle(client.label, isOn: Binding(
+                                    get: { viewModel.importState.selectedDownloadClientIndices.contains(Int32(index).asKotlinInt) },
+                                    set: { _ in viewModel.toggleImportDownloadClientSelection(index: Int32(index)) }
+                                ))
+                            }
+                        }
+                    }
+
+                    if !backup.customWebpages.isEmpty {
+                        Section(header: HStack {
+                            Label(MR.strings().custom_webpages.localized(), systemImage: "globe")
+                            Spacer()
+                            Text("\(viewModel.importState.selectedCustomWebpageIndices.count)/\(backup.customWebpages.count)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }) {
+                            ForEach(Array(backup.customWebpages.enumerated()), id: \.offset) { index, webpage in
+                                Toggle(webpage.name, isOn: Binding(
+                                    get: { viewModel.importState.selectedCustomWebpageIndices.contains(Int32(index).asKotlinInt) },
+                                    set: { _ in viewModel.toggleImportCustomWebpageSelection(index: Int32(index)) }
+                                ))
                             }
                         }
                     }
@@ -189,13 +263,23 @@ struct ImportSheet: View {
                         }
                         .disabled(viewModel.importState.password.isEmpty)
                     } else {
+                        let hasGlobalPrefToImport =
+                            (viewModel.importState.decryptedBackup?.globalPreferences?.tabPreferences != nil && viewModel.importState.importTabPreferences) ||
+                            (viewModel.importState.decryptedBackup?.globalPreferences?.hasUiPreferences == true && viewModel.importState.importUiPreferences) ||
+                            (viewModel.importState.decryptedBackup?.globalPreferences?.hasIntegrationsPreferences == true && viewModel.importState.importIntegrationsPreferences)
+
                         Button(MR.strings().import_data.localized()) {
                             viewModel.executeImport {
                                 onComplete()
                                 isPresented = false
                             }
                         }
-                        .disabled(viewModel.importState.selectedInstanceIndices.isEmpty && viewModel.importState.selectedDownloadClientIndices.isEmpty)
+                        .disabled(
+                            viewModel.importState.selectedInstanceIndices.isEmpty &&
+                            viewModel.importState.selectedDownloadClientIndices.isEmpty &&
+                            viewModel.importState.selectedCustomWebpageIndices.isEmpty &&
+                            !hasGlobalPrefToImport
+                        )
                     }
                 }
             }

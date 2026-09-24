@@ -2,7 +2,9 @@ package com.dnfapps.arrmatey.model
 
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class AppTheme(
     val resource: StringResource,
 ) {
