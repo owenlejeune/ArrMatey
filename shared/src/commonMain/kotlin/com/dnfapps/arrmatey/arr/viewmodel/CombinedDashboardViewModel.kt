@@ -55,7 +55,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -252,19 +251,20 @@ class CombinedDashboardViewModel(
                 if (tracearrRepos.isEmpty()) {
                     flowOf(emptyList())
                 } else {
-                    flow {
-                        val states =
-                            tracearrRepos.map { repo ->
-                                val stats = (repo.getTodayStats() as? NetworkResult.Success)?.data
-                                val streams = (repo.getPublicStreams() as? NetworkResult.Success)?.data?.data ?: emptyList()
+                    val flows =
+                        tracearrRepos.map { repo ->
+                            combine(
+                                repo.todayStats,
+                                repo.activeStreams,
+                            ) { stats, streams ->
                                 TracearrDashboardState(
                                     instance = repo.instance,
                                     stats = stats,
                                     activeStreams = streams,
                                 )
                             }
-                        emit(states)
-                    }
+                        }
+                    combine(flows) { it.toList() }
                 }
             }.stateIn(
                 scope = viewModelScope,
@@ -814,6 +814,16 @@ class CombinedDashboardViewModel(
                     repo.refreshBadges()
                 } catch (e: Exception) {
                     logger.error(e) { "Error refreshing Bazarr instance ${repo.instance.label}" }
+                }
+            }
+
+            val tracearrRepos = instanceManager.getAllTracearrRepositories()
+            tracearrRepos.forEach { repo ->
+                try {
+                    repo.refreshStats()
+                    repo.refreshStreams()
+                } catch (e: Exception) {
+                    logger.error(e) { "Error refreshing Tracearr instance ${repo.instance.label}" }
                 }
             }
 

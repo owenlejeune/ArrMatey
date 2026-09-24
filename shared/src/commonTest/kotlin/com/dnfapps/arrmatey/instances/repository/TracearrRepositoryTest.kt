@@ -120,5 +120,36 @@ class TracearrRepositoryTest {
             val result2 = repository.getPublicStreams()
             assertTrue(result2 is NetworkResult.Success)
             assertEquals(2, mediaCallCount)
+            assertEquals(3, repository.activeStreams.value.size)
+        }
+
+    @Test
+    fun testGetTodayStatsUpdatesTodayStatsStateFlow() =
+        runTest {
+            val httpClient =
+                createHttpClient { url ->
+                    if (url.contains("/public/stats/today")) {
+                        """
+                        {
+                          "activeStreams": 2,
+                          "todayPlays": 15,
+                          "todaySessions": 10,
+                          "watchTimeHours": 4.5,
+                          "alertsLast24h": 0,
+                          "activeUsersToday": 3
+                        }
+                        """.trimIndent()
+                    } else {
+                        "{}"
+                    }
+                }
+
+            val repository = TracearrRepository(fakeInstance, httpClient)
+            assertEquals(null, repository.todayStats.value)
+
+            val result = repository.getTodayStats()
+            assertTrue(result is NetworkResult.Success)
+            assertEquals(2, repository.todayStats.value?.activeStreams)
+            assertEquals(15, repository.todayStats.value?.todayPlays)
         }
 }

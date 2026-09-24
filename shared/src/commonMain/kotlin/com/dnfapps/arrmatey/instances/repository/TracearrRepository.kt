@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaDetails
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaWatchers
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrPeriod
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
@@ -20,6 +21,9 @@ import io.ktor.client.HttpClient
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -29,10 +33,20 @@ class TracearrRepository(
 ) : InstanceScopedRepository {
     private val tracearrClient = TracearrClient(instance, httpClient)
 
+    private val _todayStats = MutableStateFlow<TracearrTodayStats?>(null)
+    val todayStats: StateFlow<TracearrTodayStats?> = _todayStats.asStateFlow()
+
+    private val _activeStreams = MutableStateFlow<List<TracearrStreamSession>>(emptyList())
+    val activeStreams: StateFlow<List<TracearrStreamSession>> = _activeStreams.asStateFlow()
+
     private val mediaDetailsCache = mutableMapOf<String, TracearrMediaDetails>()
     private val cacheMutex = Mutex()
 
     override suspend fun testConnection(): NetworkResult<Unit> = tracearrClient.testConnection()
+
+    suspend fun refreshStats(): NetworkResult<TracearrTodayStats> = getTodayStats()
+
+    suspend fun refreshStreams(): NetworkResult<TracearrStreamsResponse> = getPublicStreams()
 
     suspend fun getPublicStreams(): NetworkResult<TracearrStreamsResponse> {
         val baseUrl = instance.getEffectiveBaseUrl()
@@ -52,6 +66,7 @@ class TracearrRepository(
                         )
                     }
 
+                _activeStreams.value = updatedSessions
                 NetworkResult.Success(streamsResult.data.copy(data = updatedSessions))
             }
             is NetworkResult.Error -> streamsResult
@@ -59,7 +74,7 @@ class TracearrRepository(
         }
     }
 
-    suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> = tracearrClient.getTodayStats()
+    suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> = tracearrClient.getTodayStats().onSuccess { _todayStats.value = it }
 
     suspend fun getHistory(
         cursor: String? = null,
