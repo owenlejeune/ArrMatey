@@ -18,7 +18,7 @@ import kotlin.coroutines.cancellation.CancellationException
 fun DoubleBackToExit(
     openDrawerInstead: Boolean = false,
     moko: MokoStrings = koinInject(),
-    navigationManager: NavigationManager = koinInject()
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val context = LocalContext.current
     val lastBackPressTime = remember { mutableLongStateOf(0L) }
