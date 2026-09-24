@@ -41,4 +41,27 @@ class PreferencesStoreTest {
             assertEquals("standard_LIBRARY", tabs.orderedVisibleKeys[0])
             assertEquals("standard_SHOWS", tabs.orderedVisibleKeys[1])
         }
+
+    @Test
+    fun testOverlayTabBackOpensDrawer() =
+        runTest {
+            val file = tmpFolder.newFile("test_overlay_back.preferences_pb")
+            val dataStore = PreferenceDataStoreFactory.create { file }
+
+            every { dataStoreFactory.provideDataStore() } returns dataStore
+            every { dataStoreFactory.defaultAppColor } returns AppColor.ArrMatey
+
+            val preferencesStore = PreferencesStore(dataStoreFactory)
+
+            // Default is true
+            assertEquals(true, preferencesStore.overlayTabBackOpensDrawer.first())
+
+            // Toggle to false
+            preferencesStore.toggleOverlayTabBackOpensDrawer()
+            assertEquals(false, preferencesStore.overlayTabBackOpensDrawer.first())
+
+            // Set to true
+            preferencesStore.setOverlayTabBackOpensDrawer(true)
+            assertEquals(true, preferencesStore.overlayTabBackOpensDrawer.first())
+        }
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Contrast
@@ -76,6 +77,7 @@ fun UiSettingsScreen(
     val useColoredCalendarCards by viewModel.useColoredCalendarCards.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
     val useFloatingNavigationBar by viewModel.useFloatingNavigationBar.collectAsStateWithLifecycle()
+    val overlayTabBackOpensDrawer by viewModel.overlayTabBackOpensDrawer.collectAsStateWithLifecycle()
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
     val unifiedLibrarySearchAllInstances by viewModel.unifiedLibrarySearchAllInstances.collectAsStateWithLifecycle()
@@ -254,6 +256,18 @@ fun UiSettingsScreen(
                                 )
                             },
                             onClick = { viewModel.toggleUseFloatingNavigationBar() },
+                        ),
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.AutoMirrored.Default.ArrowBack),
+                            title = mokoString(MR.strings.overlay_tab_back_opens_drawer_title),
+                            subtitle = mokoString(MR.strings.overlay_tab_back_opens_drawer_description),
+                            trailingContent = {
+                                Switch(
+                                    checked = overlayTabBackOpensDrawer,
+                                    onCheckedChange = { viewModel.toggleOverlayTabBackOpensDrawer() },
+                                )
+                            },
+                            onClick = { viewModel.toggleOverlayTabBackOpensDrawer() },
                         ),
                     ),
             )

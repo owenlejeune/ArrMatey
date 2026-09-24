@@ -51,6 +51,7 @@ interface PreferencesStore {
     val useServiceNavLogos: Flow<Boolean>
     val hideInstanceSwitcher: Flow<Boolean>
     val useFloatingNavigationBar: Flow<Boolean>
+    val overlayTabBackOpensDrawer: Flow<Boolean>
 
     val dashboardCardsOrder: Flow<List<DashboardCards>>
     val dashboardFirstLaunch: Flow<Boolean>
@@ -131,6 +132,10 @@ interface PreferencesStore {
     fun toggleUseFloatingNavigationBar()
 
     fun setUseFloatingNavigationBar(value: Boolean)
+
+    fun toggleOverlayTabBackOpensDrawer()
+
+    fun setOverlayTabBackOpensDrawer(value: Boolean)
 
     fun observeDownloadClientUiState(): Flow<DownloadQueueSortState>
 
@@ -584,6 +589,28 @@ class DefaultPreferencesStore(
     override fun setUseFloatingNavigationBar(value: Boolean) {
         scope.launch {
             dataStore.edit { it[PreferenceKeys.USE_FLOATING_NAVIGATION_BAR] = value }
+        }
+    }
+
+    override val overlayTabBackOpensDrawer: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.OVERLAY_TAB_BACK_OPENS_DRAWER] ?: PreferenceDefaults.OVERLAY_TAB_BACK_OPENS_DRAWER
+        }
+
+    override fun toggleOverlayTabBackOpensDrawer() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current =
+                    preferences[PreferenceKeys.OVERLAY_TAB_BACK_OPENS_DRAWER]
+                        ?: PreferenceDefaults.OVERLAY_TAB_BACK_OPENS_DRAWER
+                preferences[PreferenceKeys.OVERLAY_TAB_BACK_OPENS_DRAWER] = !current
+            }
+        }
+    }
+
+    override fun setOverlayTabBackOpensDrawer(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[PreferenceKeys.OVERLAY_TAB_BACK_OPENS_DRAWER] = value }
         }
     }
 

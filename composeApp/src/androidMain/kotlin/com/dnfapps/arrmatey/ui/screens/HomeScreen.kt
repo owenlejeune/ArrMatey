@@ -74,6 +74,7 @@ fun HomeScreen(
 
     val useServiceNavIcons by preferencesStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
     val useFloatingNavigationBar by preferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
+    val overlayTabBackOpensDrawer by preferencesStore.overlayTabBackOpensDrawer.collectAsStateWithLifecycle(true)
     val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle()
     if (tabConfig.isInitialValue) return
 
@@ -121,7 +122,10 @@ fun HomeScreen(
         }
     }
 
-    DoubleBackToExit(openDrawerInstead = overlayTab != null)
+    DoubleBackToExit(
+        openDrawerInstead = overlayTab != null && overlayTabBackOpensDrawer,
+        closeOverlayInstead = overlayTab != null && !overlayTabBackOpensDrawer,
+    )
 
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val floatingBarIsVisible = !isExpanded && useFloatingNavigationBar && overlayTab == null && visibleTabs.size > 1

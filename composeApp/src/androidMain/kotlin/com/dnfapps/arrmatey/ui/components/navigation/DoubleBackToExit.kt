@@ -17,6 +17,7 @@ import kotlin.coroutines.cancellation.CancellationException
 @Composable
 fun DoubleBackToExit(
     openDrawerInstead: Boolean = false,
+    closeOverlayInstead: Boolean = false,
     moko: MokoStrings = koinInject(),
     navigationManager: NavigationManager = koinInject(),
 ) {
@@ -28,6 +29,8 @@ fun DoubleBackToExit(
             progress.collect { }
             if (openDrawerInstead) {
                 navigationManager.openDrawer()
+            } else if (closeOverlayInstead) {
+                navigationManager.closeOverlay()
             } else {
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - lastBackPressTime.longValue < 2000) {

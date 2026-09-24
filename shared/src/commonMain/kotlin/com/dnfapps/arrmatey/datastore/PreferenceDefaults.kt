@@ -15,6 +15,7 @@ object PreferenceDefaults {
     const val HIDE_INSTANCE_SWITCHER: Boolean = false
     const val USE_SERVICE_NAV_LOGOS: Boolean = false
     const val USE_FLOATING_NAVIGATION_BAR: Boolean = false
+    const val OVERLAY_TAB_BACK_OPENS_DRAWER: Boolean = true
     const val USE_COLORED_ACTIVITY_CARDS: Boolean = false
     const val USE_COLORED_CALENDAR_CARDS: Boolean = false
     const val SEARCH_SHOW_BANNERS: Boolean = true

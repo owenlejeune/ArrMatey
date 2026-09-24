@@ -111,6 +111,7 @@ class ExportDataUseCase(
                     useServiceNavLogos = if (includeUiPreferences) preferencesStore.useServiceNavLogos.first() else null,
                     hideInstanceSwitcher = if (includeUiPreferences) preferencesStore.hideInstanceSwitcher.first() else null,
                     useFloatingNavigationBar = if (includeUiPreferences) preferencesStore.useFloatingNavigationBar.first() else null,
+                    overlayTabBackOpensDrawer = if (includeUiPreferences) preferencesStore.overlayTabBackOpensDrawer.first() else null,
                     appTheme = if (includeUiPreferences) preferencesStore.appTheme.first() else null,
                     appColor = if (includeUiPreferences) preferencesStore.appColor.first() else null,
                     searchShowBanners = if (includeUiPreferences) preferencesStore.searchShowBanners.first() else null,

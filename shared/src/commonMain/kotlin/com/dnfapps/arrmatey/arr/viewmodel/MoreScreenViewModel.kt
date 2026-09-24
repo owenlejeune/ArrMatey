@@ -55,6 +55,14 @@ class MoreScreenViewModel(
                 initialValue = false,
             )
 
+    val overlayTabBackOpensDrawer =
+        preferencesStore.overlayTabBackOpensDrawer
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
     val useColoredActivityCards =
         preferencesStore.useColoredActivityCards
             .stateIn(
@@ -309,6 +317,10 @@ class MoreScreenViewModel(
 
     fun toggleUseFloatingNavigationBar() {
         preferencesStore.toggleUseFloatingNavigationBar()
+    }
+
+    fun toggleOverlayTabBackOpensDrawer() {
+        preferencesStore.toggleOverlayTabBackOpensDrawer()
     }
 
     fun toggleUseColoredActivityCards() {
