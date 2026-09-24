@@ -16,7 +16,7 @@ data class SeerrUser(
     val username: String? = null,
     @Contextual val recoveryLinkExpirationDate: Instant? = null,
     val plexId: Long? = null,
-    val jellyfinUserId: Long? = null,
+    val jellyfinUserId: String? = null,
     val avatar: String? = null,
     val movieQuotaLimit: Int? = null,
     val movieQuotaDays: Int? = null,

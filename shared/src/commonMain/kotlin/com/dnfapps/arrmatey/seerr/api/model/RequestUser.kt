@@ -19,7 +19,7 @@ data class RequestUser(
     val jellyfinUserId: String? = null,
     val avatar: String,
     val avatarETag: String? = null,
-    val avatarVersion: Int? = null,
+    val avatarVersion: String? = null,
     val movieQuotaLimit: Int? = null,
     val movieQuotaDays: Int? = null,
     val tvQuotaLimit: Int? = null,

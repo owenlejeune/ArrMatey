@@ -153,6 +153,29 @@ class SeerrModelNullabilityTest {
     }
 
     @Test
+    fun testRequestUserWithAvatarVersionString() {
+        val payload =
+            """
+            {
+              "permissions": 0,
+              "id": 42,
+              "email": "user@example.com",
+              "userType": 1,
+              "avatar": "https://example.com/a.png",
+              "avatarVersion": "1786354066000",
+              "createdAt": "2024-01-01T00:00:00Z",
+              "updatedAt": "2024-01-02T00:00:00Z",
+              "requestCount": 5,
+              "displayName": "User"
+            }
+            """.trimIndent()
+
+        val model = json.decodeFromString<RequestUser>(payload)
+
+        assertEquals("1786354066000", model.avatarVersion)
+    }
+
+    @Test
     fun testRequestUserNullAvatarCurrentlyThrows() {
         val payload =
             """
