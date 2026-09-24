@@ -107,7 +107,16 @@ class CalendarService(
         start: LocalDate,
         end: LocalDate,
     ) {
-        val repositories = instanceManager.getAllArrRepositories()
+        val repositories = instanceManager.awaitAllArrRepositories()
+        fetchForRepositories(repositories, start, end)
+    }
+
+    private suspend fun fetchForRepositories(
+        repositories: List<ArrInstanceRepository>,
+        start: LocalDate,
+        end: LocalDate,
+    ) {
+        if (repositories.isEmpty()) return
 
         coroutineScope {
             repositories.forEach { repository ->
