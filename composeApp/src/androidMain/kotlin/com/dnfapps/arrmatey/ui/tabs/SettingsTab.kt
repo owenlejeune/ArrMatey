@@ -1,13 +1,9 @@
 package com.dnfapps.arrmatey.ui.tabs
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.SettingsScreen
 import com.dnfapps.arrmatey.navigation.SettingsTabNavigator
@@ -49,16 +45,8 @@ import org.koin.compose.koinInject
 fun SettingsTabNavHost(
     windowSizeClass: WindowSizeClass,
     navigationManager: NavigationManager = koinInject(),
-    instanceRepository: InstanceRepository = koinInject(),
     navigation: SettingsTabNavigator = navigationManager.settings,
 ) {
-    val instances by instanceRepository.allInstancesFlow.collectAsStateWithLifecycle()
-
-    BackHandler(enabled = navigation.backStack.size <= 1 && instances.isNotEmpty()) {
-        navigationManager.closeOverlay()
-        navigationManager.closeDrawer()
-    }
-
     NavDisplay(
         backStack = navigation.backStack,
         onBack = { navigation.popBackStack() },

@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -50,6 +51,7 @@ import com.dnfapps.arrmatey.ui.sheets.TabCustomizationSheet
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnrememberedMutableState")
@@ -121,7 +123,7 @@ fun HomeScreen(
         }
     }
 
-    DoubleBackToExit()
+    DoubleBackToExit(openDrawerInstead = overlayTab != null)
 
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val floatingBarIsVisible = !isExpanded && useFloatingNavigationBar && overlayTab == null && visibleTabs.size > 1

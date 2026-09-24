@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -58,7 +57,6 @@ import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
-import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.permissions.rememberLocalNetworkPermissionHandler
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
@@ -78,7 +76,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +88,6 @@ fun SettingsScreen(
     onNavigateToBackupRestore: () -> Unit = {},
     onNavigateToDev: () -> Unit = {},
 ) {
-    val navManager = navigationManager
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -101,15 +97,6 @@ fun SettingsScreen(
 
     val localNetworkPermissionInfoDismissed by viewModel.localNetworkPermissionInfoDismissed.collectAsStateWithLifecycle()
     val localNetworkPermissionHandler = rememberLocalNetworkPermissionHandler()
-
-    PredictiveBackHandler { progress ->
-        try {
-            progress.collect { }
-            navManager.openDrawer()
-        } catch (_: CancellationException) {
-            // Gesture cancelled
-        }
-    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
