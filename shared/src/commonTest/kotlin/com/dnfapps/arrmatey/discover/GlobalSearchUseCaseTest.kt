@@ -74,8 +74,7 @@ class GlobalSearchUseCaseTest {
         override fun observeSelectedInstance(type: InstanceType): Flow<Instance?> =
             MutableStateFlow(instances.value.find { it.type == type && it.selected })
 
-        override suspend fun getInstancesOfType(type: InstanceType): List<Instance> =
-            instances.value.filter { it.type == type }
+        override suspend fun getInstancesOfType(type: InstanceType): List<Instance> = instances.value.filter { it.type == type }
 
         override suspend fun unselectAllOf(type: InstanceType) {}
 
@@ -103,11 +102,9 @@ class GlobalSearchUseCaseTest {
 
         override fun observeAllDownloadClients(): Flow<List<DownloadClient>> = clients
 
-        override fun observeSelectedDownloadClient(): Flow<DownloadClient?> =
-            MutableStateFlow(clients.value.firstOrNull { it.selected })
+        override fun observeSelectedDownloadClient(): Flow<DownloadClient?> = MutableStateFlow(clients.value.firstOrNull { it.selected })
 
-        override suspend fun getDownloadClientById(id: Long): DownloadClient? =
-            clients.value.firstOrNull { it.id == id }
+        override suspend fun getDownloadClientById(id: Long): DownloadClient? = clients.value.firstOrNull { it.id == id }
 
         override suspend fun getAllDownloadClients(): List<DownloadClient> = clients.value
 
