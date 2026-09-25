@@ -267,7 +267,8 @@ struct DashboardTabContent: View {
                         },
                         onMediaRequestClick: { item in
                             selectedMediaForRequest = item
-                        }
+                        },
+                        visibleCategories: viewModel.discoverSectionPreferences.visibleCategories
                     ) {
                         viewModel.removeCard(card: card)
                     }
@@ -398,6 +399,7 @@ struct DashboardCardWrapper: View {
     var onSeerrIssuesStatClick: (() -> Void)? = nil
     var onShuffleQuickPick: (() -> Void)? = nil
     var onMediaRequestClick: ((DiscoverResult) -> Void)? = nil
+    var visibleCategories: [DiscoverCategory] = []
     let onRemove: () -> Void
 
     var body: some View {
@@ -414,7 +416,8 @@ struct DashboardCardWrapper: View {
                 onSeerrRequestsStatClick: onSeerrRequestsStatClick,
                 onSeerrIssuesStatClick: onSeerrIssuesStatClick,
                 onShuffleQuickPick: onShuffleQuickPick,
-                onMediaRequestClick: onMediaRequestClick
+                onMediaRequestClick: onMediaRequestClick,
+                visibleCategories: visibleCategories
             )
             .padding(12)
             .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
@@ -447,6 +450,7 @@ struct DashboardCardView: View {
     var onSeerrIssuesStatClick: (() -> Void)? = nil
     var onShuffleQuickPick: (() -> Void)? = nil
     var onMediaRequestClick: ((DiscoverResult) -> Void)? = nil
+    var visibleCategories: [DiscoverCategory] = []
 
     @EnvironmentObject private var navigationManager: NavigationManager
 
@@ -472,7 +476,7 @@ struct DashboardCardView: View {
                 DashboardDiscoverFeedSection(
                     state: state,
                     isEditing: isEditing,
-                    visibleCategories: viewModel.discoverSectionPreferences.visibleCategories,
+                    visibleCategories: visibleCategories,
                     onMediaClick: { id, type in
                         if !isEditing {
                             navigationManager.goToSeerrDetailsOnDashboard(tmdbId: id, requestType: type)
@@ -2325,7 +2329,7 @@ struct DashboardDiscoverFeedSection: View {
     @State private var selectedCategory: DiscoverCategory? = nil
 
     private var activeCategories: [DiscoverCategory] {
-        visibleCategories.isEmpty ? DiscoverCategory.entries : visibleCategories
+        visibleCategories.isEmpty ? DiscoverCategory.allCases : visibleCategories
     }
 
     private var currentSelectedCategory: DiscoverCategory {
