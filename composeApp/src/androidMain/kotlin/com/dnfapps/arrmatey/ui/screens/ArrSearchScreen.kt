@@ -25,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -86,7 +85,7 @@ fun ArrSearchScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (initialQuery.isEmpty()) {
+        if (initialQuery.isEmpty() && textFieldState.text.isEmpty()) {
             searchBarState.animateToExpanded()
             focusRequester.requestFocus()
         }
@@ -99,12 +98,6 @@ fun ArrSearchScreen(
             .collect { query ->
                 viewModel.performLookup(query)
             }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.clearLookup()
-        }
     }
 
     Scaffold(

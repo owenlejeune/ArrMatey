@@ -25,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -74,20 +73,16 @@ fun UnifiedSearchScreen(
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
-        if (initialQuery.isEmpty()) {
+        if (initialQuery.isEmpty() && textFieldState.text.isEmpty()) {
             searchBarState.animateToExpanded()
             focusRequester.requestFocus()
-        } else {
+        } else if (initialQuery.isNotEmpty()) {
             viewModel.updateSearchQuery(initialQuery)
         }
     }
 
     LaunchedEffect(textFieldState.text) {
         viewModel.updateSearchQuery(textFieldState.text.toString())
-    }
-
-    DisposableEffect(Unit) {
-        onDispose { viewModel.clearSearch() }
     }
 
     Scaffold(
