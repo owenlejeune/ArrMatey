@@ -234,6 +234,14 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.updateAlbum(album: album)
     }
 
+    func resetEditStatus() {
+        viewModel.resetEditStatus()
+    }
+
+    func resetAddItemStatus() {
+        viewModel.resetAddItemStatus()
+    }
+
     func deleteMedia(deleteFiles: Bool, addImportExclusion: Bool) {
         viewModel.deleteMedia(deleteFiles: deleteFiles, addImportExclusion: addImportExclusion)
     }

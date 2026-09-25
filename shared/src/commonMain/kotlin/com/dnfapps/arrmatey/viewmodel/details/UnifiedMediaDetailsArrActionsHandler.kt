@@ -99,8 +99,16 @@ class UnifiedMediaDetailsArrActionsHandler(
         _addItemStatus.value = status
     }
 
+    fun resetAddItemStatus() {
+        _addItemStatus.value = OperationStatus.Idle
+    }
+
     fun updateEditStatus(status: OperationStatus) {
         _editStatus.value = status
+    }
+
+    fun resetEditStatus() {
+        _editStatus.value = OperationStatus.Idle
     }
 
     fun removeQueueItem(

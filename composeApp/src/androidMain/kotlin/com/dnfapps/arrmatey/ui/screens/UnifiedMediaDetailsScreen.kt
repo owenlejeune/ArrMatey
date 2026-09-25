@@ -252,10 +252,12 @@ fun UnifiedMediaDetailsScreen(
             is OperationStatus.Success -> {
                 Toast.makeText(context, itemAddedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
                 showAddSheet = false
+                viewModel.resetAddItemStatus()
             }
 
             is OperationStatus.Error -> {
                 Toast.makeText(context, errorAddingItemMessage, Toast.LENGTH_SHORT).show()
+                viewModel.resetAddItemStatus()
             }
 
             else -> {}
@@ -268,10 +270,12 @@ fun UnifiedMediaDetailsScreen(
                 Toast.makeText(context, itemEditedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
                 showEditSheet = false
                 editAlbum = null
+                viewModel.resetEditStatus()
             }
 
             is OperationStatus.Error -> {
                 Toast.makeText(context, errorEditingItemMessage, Toast.LENGTH_SHORT).show()
+                viewModel.resetEditStatus()
             }
 
             else -> {}

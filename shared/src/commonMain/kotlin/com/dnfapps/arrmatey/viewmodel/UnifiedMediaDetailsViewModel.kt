@@ -600,6 +600,17 @@ class UnifiedMediaDetailsViewModel(
         )
     }
 
+    fun resetEditStatus() {
+        arrActionsHandler.resetEditStatus()
+        viewModelScope.launch {
+            instanceHandler.getActiveArrRepository()?.resetEditItemStatus()
+        }
+    }
+
+    fun resetAddItemStatus() {
+        arrActionsHandler.resetAddItemStatus()
+    }
+
     fun deleteMedia(
         deleteFiles: Boolean,
         addImportExclusion: Boolean,

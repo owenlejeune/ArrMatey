@@ -146,6 +146,8 @@ class UnifiedMediaDetailsDataObserver(
                         instanceHandler.setSelectedInstanceId(activeRepo.instance.id)
                         instanceHandler.setInitialInstanceId(activeRepo.instance.id)
                     }
+                    activeRepo.resetEditItemStatus()
+                    arrActionsHandler.resetEditStatus()
                     launch {
                         activeRepo.qualityProfiles.collect { instanceHandler.updateQualityProfiles(it) }
                     }
