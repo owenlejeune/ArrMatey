@@ -84,7 +84,7 @@ fun TracearrUserScreen(
     isLargeScreen: Boolean = false,
     onNavigateToDetails: (type: RequestType?, tmdbId: Long?) -> Unit = { _, _ -> },
     onNavigateToUser: (ref: String) -> Unit = {},
-    viewModel: TracearrUserViewModel = koinViewModel { parametersOf(userRef) },
+    viewModel: TracearrUserViewModel = koinViewModel(key = userRef, parameters = { parametersOf(userRef) }),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
