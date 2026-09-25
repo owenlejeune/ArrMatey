@@ -122,7 +122,7 @@ sealed interface QueueItem {
 fun List<QueueItem>.groupByTask(): List<QueueItem> =
     groupBy { it.taskGroup }
         .map { (_, groupItems) ->
-            val first = groupItems.first()
+            val first = groupItems.firstOrNull { it.hasIssue } ?: groupItems.first()
             groupItems.size.takeIf { it > 0 }?.let { size ->
                 when (first) {
                     is SonarrQueueItem -> first.copy(taskGroupCount = size)

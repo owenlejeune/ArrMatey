@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.arr.service
 
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
+import com.dnfapps.arrmatey.arr.api.model.groupByTask
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -72,7 +73,7 @@ class ActivityQueueService(
 
         _allActivityTasks.value = allTasks
 
-        val issueCount = allTasks.count { task -> task.hasIssue }
+        val issueCount = allTasks.groupByTask().count { task -> task.hasIssue }
         _tasksWithIssues.value = issueCount
         if (repositories.isNotEmpty()) {
             _hasLoaded.value = true
