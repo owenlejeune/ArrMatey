@@ -115,7 +115,7 @@ fun UnifiedSearchScreen(
                             .size(96.dp)
                             .align(Alignment.Center),
                 )
-            } else if (searchState.isEmpty() && textFieldState.text.isNotEmpty() && !isSearching) {
+            } else if (searchState.isEmpty() && textFieldState.text.isNotEmpty()) {
                 Column(
                     modifier =
                         Modifier

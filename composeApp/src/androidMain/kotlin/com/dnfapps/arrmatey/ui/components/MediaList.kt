@@ -255,8 +255,6 @@ fun <T : ArrMedia> MediaItem(
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
     val isSelectionModeAvailable by multiSelectState.isSelectionModeAvailable.collectAsStateWithLifecycle()
 
-    var contentHeight by remember { mutableIntStateOf(0) }
-
     val hasBanner =
         remember(showBannerBackground, bannerModel, item) {
             showBannerBackground && (bannerModel != null || item.getBanner()?.remoteUrl != null)
@@ -331,39 +329,44 @@ fun <T : ArrMedia> MediaItem(
                         radius = posterRadius,
                         multiSelectState = multiSelectState,
                         additionalContent = {
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-                                shadowElevation = 2.dp,
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.TopStart)
-                                        .padding(4.dp),
-                            ) {
-                                Box(
-                                    modifier = Modifier.padding(3.dp),
-                                    contentAlignment = Alignment.Center,
+                            item.id?.let {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                    border = BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                    ),
+                                    shadowElevation = 2.dp,
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(4.dp),
                                 ) {
-                                    Icon(
-                                        imageVector =
-                                            if (item.monitored) {
-                                                Icons.Default.Bookmark
-                                            } else {
-                                                Icons.Default.BookmarkBorder
-                                            },
-                                        contentDescription =
-                                            mokoString(
-                                                if (item.monitored) MR.strings.monitored else MR.strings.unmonitored,
-                                            ),
-                                        tint =
-                                            if (item.monitored) {
-                                                MaterialTheme.colorScheme.primary
-                                            } else {
-                                                MaterialTheme.colorScheme.onSurfaceVariant
-                                            },
-                                        modifier = Modifier.size(12.dp),
-                                    )
+                                    Box(
+                                        modifier = Modifier.padding(3.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            imageVector =
+                                                if (item.monitored) {
+                                                    Icons.Default.Bookmark
+                                                } else {
+                                                    Icons.Default.BookmarkBorder
+                                                },
+                                            contentDescription =
+                                                mokoString(
+                                                    if (item.monitored) MR.strings.monitored else MR.strings.unmonitored,
+                                                ),
+                                            tint =
+                                                if (item.monitored) {
+                                                    MaterialTheme.colorScheme.primary
+                                                } else {
+                                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                                },
+                                            modifier = Modifier.size(12.dp),
+                                        )
+                                    }
                                 }
                             }
                         },
