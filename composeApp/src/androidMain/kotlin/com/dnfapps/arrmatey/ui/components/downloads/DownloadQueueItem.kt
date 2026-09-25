@@ -217,27 +217,31 @@ fun DownloadQueueItem(
                     },
             ),
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-            verticalAlignment = Alignment.CenterVertically,
+        Box(
+            modifier = Modifier.fillMaxWidth(),
         ) {
             if (showClientInfo) {
                 Box(
-                    modifier =
-                        Modifier
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .background(item.client.type.associatedColor),
-                )
+                    modifier = Modifier.matchParentSize(),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .width(6.dp)
+                                .fillMaxHeight()
+                                .background(item.client.type.associatedColor)
+                                .align(Alignment.CenterStart),
+                    )
+                }
             }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.weight(1f),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = if (showClientInfo) 6.dp else 0.dp),
             ) {
                 if (isInSelectionMode) {
                     Checkbox(

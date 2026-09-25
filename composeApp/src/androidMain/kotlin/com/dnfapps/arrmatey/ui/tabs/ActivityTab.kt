@@ -245,32 +245,32 @@ fun ActivityItem(
             ),
         shape = MaterialTheme.shapes.large,
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-            verticalAlignment = Alignment.CenterVertically,
+        Box(
+            modifier = Modifier.fillMaxWidth(),
         ) {
             if (!useFullColorCards) {
                 Box(
-                    modifier =
-                        Modifier
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .background(item.type.associatedColor),
-                )
+                    modifier = Modifier.matchParentSize(),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .width(6.dp)
+                                .fillMaxHeight()
+                                .background(item.type.associatedColor)
+                                .align(Alignment.CenterStart),
+                    )
+                }
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f).padding(vertical = 12.dp, horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = if (!useFullColorCards) 6.dp else 0.dp)
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -440,7 +440,6 @@ fun ActivityItem(
                             }
                         }
                     }
-                }
             }
         }
     }
