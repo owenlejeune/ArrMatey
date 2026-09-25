@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.viewmodel.details
 
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.usecase.GetInstancePresencesUseCase
@@ -39,15 +40,16 @@ class UnifiedMediaDetailsDataObserver(
     private val getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
     private val onIsMonitoredUpdated: (Boolean) -> Unit,
 ) {
-    private val quadFlow:
-        Flow<Quad<ArrInstanceRepository?, List<ArrInstanceRepository>, SeerrInstanceRepository?, BazarrInstanceRepository?>> =
+    private val dataFlow:
+        Flow<Quint<ArrInstanceRepository?, List<ArrInstanceRepository>, SeerrInstanceRepository?, BazarrInstanceRepository?, Map<Long, ArrMedia?>>> =
         combine(
             instanceHandler.activeArrRepoFlow,
             instanceHandler.allArrReposFlow,
             instanceHandler.seerrRepositoryFlow,
             instanceHandler.bazarrRepositoryFlow,
-        ) { activeRepo, allRepos, seerrRepo, bazarrRepo ->
-            Quad(activeRepo, allRepos, seerrRepo, bazarrRepo)
+            instanceHandler.instancePresencesMap,
+        ) { activeRepo, allRepos, seerrRepo, bazarrRepo, presencesMap ->
+            Quint(activeRepo, allRepos, seerrRepo, bazarrRepo, presencesMap)
         }
 
     fun observeData(uiStateFlow: MutableStateFlow<UnifiedMediaDetailsUiState>) {
@@ -62,8 +64,8 @@ class UnifiedMediaDetailsDataObserver(
                         presencesMap = map,
                     )
                 val effectiveArrMedia =
-                    current.arrMedia
-                        ?: map[current.selectedInstanceId]
+                    map[current.selectedInstanceId]
+                        ?: current.arrMedia
                         ?: map.values.firstOrNull { it != null }
                 uiStateFlow.value =
                     current.copy(
@@ -113,9 +115,8 @@ class UnifiedMediaDetailsDataObserver(
         )
 
         scope.launch {
-            quadFlow.collectLatest { (activeRepo, allRepos, seerrRepo, bazarrRepo) ->
+            dataFlow.collectLatest { (activeRepo, allRepos, seerrRepo, bazarrRepo, map) ->
                 val instances = allRepos.map { it.instance }
-                val map = instanceHandler.instancePresencesMap.value
                 val filteredInstances =
                     instances.filter { instance ->
                         val arrMedia = map[instance.id]
@@ -165,7 +166,7 @@ class UnifiedMediaDetailsDataObserver(
                     }
                 }
 
-                val cachedArrMedia = activeRepo?.let { instanceHandler.instancePresencesMap.value[it.instance.id] }
+                val cachedArrMedia = activeRepo?.let { map[it.instance.id] }
                 val targetArrId =
                     if (activeRepo?.instance?.id == instanceHandler.initialInstanceId) {
                         cachedArrMedia?.id ?: arrId
@@ -249,10 +250,9 @@ class UnifiedMediaDetailsDataObserver(
 
                         val effectiveArrMedia =
                             rawState.arrMedia
-                                ?: instanceHandler.instancePresencesMap.value[activeRepo?.instance?.id]
-                                ?: instanceHandler.instancePresencesMap.value[instanceHandler.selectedInstanceId.value]
-                                ?: instanceHandler.instancePresencesMap.value.values
-                                    .firstOrNull { it != null }
+                                ?: activeRepo?.instance?.id?.let { map[it] }
+                                ?: instanceHandler.selectedInstanceId.value?.let { map[it] }
+                                ?: map.values.firstOrNull { it != null }
 
                         uiStateFlow.value =
                             rawState.copy(
@@ -274,9 +274,10 @@ class UnifiedMediaDetailsDataObserver(
     }
 }
 
-private data class Quad<A, B, C, D>(
+private data class Quint<A, B, C, D, E>(
     val first: A,
     val second: B,
     val third: C,
     val fourth: D,
+    val fifth: E,
 )

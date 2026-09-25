@@ -61,8 +61,14 @@ struct UnifiedMediaDetailsScreen: View {
     }
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             contentForState()
+            if viewModel.isRefreshing {
+                ProgressView()
+                    .progressViewStyle(.linear)
+                    .tint(.accentColor)
+                    .padding(.top, 44)
+            }
             toastOverlay
         }
         .ignoresSafeArea(edges: .top)

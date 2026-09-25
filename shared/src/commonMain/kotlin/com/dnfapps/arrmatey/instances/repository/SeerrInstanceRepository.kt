@@ -30,6 +30,7 @@ import com.dnfapps.arrmatey.seerr.service.MediaIssuePackageService
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
@@ -389,6 +390,25 @@ class SeerrInstanceRepository(
         }
     }
 
+    suspend fun refreshMediaDetails(
+        tmdbId: Long,
+        mediaType: RequestType,
+    ) {
+        val result =
+            when (mediaType) {
+                RequestType.Movie -> client.getMovieDetails(tmdbId)
+                RequestType.Tv -> client.getTvDetails(tmdbId)
+                RequestType.Person -> client.getPersonDetails(tmdbId)
+            }
+        if (result is NetworkResult.Success<*>) {
+            val currentCache = _mediaDetailsCache.value.toMutableMap()
+            result.asSuccess()?.data?.let {
+                currentCache[tmdbId] = it
+            }
+            _mediaDetailsCache.value = currentCache
+        }
+    }
+
     fun observeMediaDetails(
         tmdbId: Long,
         mediaType: RequestType,
@@ -461,9 +481,11 @@ class SeerrInstanceRepository(
 
     suspend fun getIssueDetails(issueId: Long): NetworkResult<Issue> = client.getIssueDetails(issueId)
 
-    suspend fun getRadarrServices(): NetworkResult<List<Service>> = client.getRadarrServices().onSuccess { _radarrServices.value = it }
+    suspend fun getRadarrServices(): NetworkResult<List<Service>> =
+        client.getRadarrServices().onSuccess { _radarrServices.value = it }
 
-    suspend fun getSonarrServices(): NetworkResult<List<Service>> = client.getSonarrServices().onSuccess { _sonarrServices.value = it }
+    suspend fun getSonarrServices(): NetworkResult<List<Service>> =
+        client.getSonarrServices().onSuccess { _sonarrServices.value = it }
 
     suspend fun getRadarrDetails(serverId: Long): NetworkResult<ServiceDetails> = client.getRadarrDetails(serverId)
 

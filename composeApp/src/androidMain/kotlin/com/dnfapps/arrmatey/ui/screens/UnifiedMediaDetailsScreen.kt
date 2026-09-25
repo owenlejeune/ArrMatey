@@ -29,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
@@ -143,6 +144,7 @@ fun UnifiedMediaDetailsScreen(
     moko: MokoStrings = koinInject(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val recommendationsState by viewModel.recommendationsState.collectAsStateWithLifecycle()
     val similarState by viewModel.similarState.collectAsStateWithLifecycle()
     val selectedInstanceId by viewModel.selectedInstanceId.collectAsStateWithLifecycle()
@@ -461,7 +463,7 @@ fun UnifiedMediaDetailsScreen(
             when {
                 successState != null -> {
                     PullToRefreshBox(
-                        isRefreshing = false,
+                        isRefreshing = isRefreshing,
                         onRefresh = { viewModel.refresh() },
                     ) {
                         Column(

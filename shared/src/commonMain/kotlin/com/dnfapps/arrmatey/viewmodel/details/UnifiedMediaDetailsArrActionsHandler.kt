@@ -272,6 +272,7 @@ class UnifiedMediaDetailsArrActionsHandler(
         effectiveIdProvider: () -> Long?,
         item: ArrMedia,
         moveFiles: Boolean = false,
+        onSuccessRefresh: (() -> Unit)? = null,
     ) {
         scope.launch {
             val repository = repositoryProvider() ?: return@launch
@@ -289,7 +290,12 @@ class UnifiedMediaDetailsArrActionsHandler(
                 } else {
                     item
                 }
-            updateMediaUseCase.edit(contextualItem, moveFiles, repository)
+            updateMediaUseCase.edit(contextualItem, moveFiles, repository).onSuccess {
+                contextualItem.id?.let { id ->
+                    repository.getMediaDetails(id)
+                }
+                onSuccessRefresh?.invoke()
+            }
         }
     }
 
