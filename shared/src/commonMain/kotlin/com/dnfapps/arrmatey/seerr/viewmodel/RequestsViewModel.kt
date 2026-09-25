@@ -279,16 +279,3 @@ class RequestsViewModel(
         _selectedTab.value = tab
     }
 }
-
-private fun MediaRequest.matchesFilter(state: RequestState): Boolean =
-    when (state) {
-        RequestState.All -> true
-        RequestState.Pending -> RequestStatus.fromValue(status) == RequestStatus.Pending
-        RequestState.Approved -> RequestStatus.fromValue(status) == RequestStatus.Approved
-        RequestState.Processing -> MediaStatus.fromValue(media.status) == MediaStatus.Processing
-        RequestState.Available -> MediaStatus.fromValue(media.status) == MediaStatus.Available || MediaStatus.fromValue(media.status) == MediaStatus.PartiallyAvailable
-        RequestState.Unavailable -> MediaStatus.fromValue(media.status) == MediaStatus.Unknown
-        RequestState.Failed -> RequestStatus.fromValue(status) == RequestStatus.Failed || RequestStatus.fromValue(status) == RequestStatus.Declined
-        RequestState.Deleted -> MediaStatus.fromValue(media.status) == MediaStatus.Deleted
-        RequestState.Completed -> MediaStatus.fromValue(media.status) == MediaStatus.Available
-    }

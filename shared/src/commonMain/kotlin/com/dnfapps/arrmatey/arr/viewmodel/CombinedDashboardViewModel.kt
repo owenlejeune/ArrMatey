@@ -177,7 +177,7 @@ class CombinedDashboardViewModel(
                             combine(
                                 repo.pendingRequestsCount,
                                 repo.openIssuesCount,
-                                repo.pendingRequests,
+                                repo.requests,
                                 repo.openIssues,
                                 repo.isOnline,
                             ) { pendingCount, issuesCount, requests, issues, isOnline ->
@@ -185,7 +185,7 @@ class CombinedDashboardViewModel(
                                     instance = repo.instance,
                                     pendingRequestsCount = pendingCount,
                                     openIssuesCount = issuesCount,
-                                    pendingRequests = requests,
+                                    requests = requests,
                                     openIssues = issues,
                                     isOnline = isOnline,
                                 )

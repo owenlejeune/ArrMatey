@@ -22,10 +22,15 @@ import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +43,7 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
+import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -52,6 +58,15 @@ fun DashboardPendingRequestsSection(
     enabled: Boolean = true,
     onRequestClick: (MediaRequestPackage) -> Unit = {},
 ) {
+    var selectedFilter by remember { mutableStateOf(RequestState.Pending) }
+    val filteredRequests = remember(selectedFilter, state.allRequests) {
+        if (selectedFilter == RequestState.All) {
+            state.allRequests
+        } else {
+            state.allRequests.filter { it.request.matchesFilter(selectedFilter) }
+        }
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -82,7 +97,6 @@ fun DashboardPendingRequestsSection(
                 )
             }
 
-            val pendingRequests = state.pendingRequests
             if (state.seerrInstances.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
@@ -94,27 +108,43 @@ fun DashboardPendingRequestsSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
-            } else if (pendingRequests.isEmpty()) {
-                Text(
-                    text = mokoString(MR.strings.no_requests_found),
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
             } else {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    items(pendingRequests, key = { it.request.id }) { item ->
-                        CompactRequestCard(
-                            mediaPackage = item,
-                            onClick = { if (enabled) onRequestClick(item) },
+                    items(RequestState.entries) { filterState ->
+                        FilterChip(
+                            selected = selectedFilter == filterState,
+                            onClick = { selectedFilter = filterState },
+                            label = { Text(mokoString(filterState.resource)) },
                         )
+                    }
+                }
+
+                if (filteredRequests.isEmpty()) {
+                    Text(
+                        text = mokoString(MR.strings.no_requests_found),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                } else {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                    ) {
+                        items(filteredRequests, key = { it.request.id }) { item ->
+                            CompactRequestCard(
+                                mediaPackage = item,
+                                onClick = { if (enabled) onRequestClick(item) },
+                            )
+                        }
                     }
                 }
             }

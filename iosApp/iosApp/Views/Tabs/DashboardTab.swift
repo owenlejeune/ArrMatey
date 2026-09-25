@@ -625,7 +625,7 @@ struct DashboardSeerrSection: View {
             let totalIssues = state.seerrInstances.reduce(0) { $0 + Int($1.openIssuesCount) }
 
             HStack(spacing: 12) {
-                StatCard(icon: "tray", label: MR.strings().requests.localized(), value: "\(totalRequests)", color: .purple, onClick: isEditing ? nil : onRequestClick)
+                StatCard(icon: "tray", label: MR.strings().dashboard_pending_requests.localized(), value: "\(totalRequests)", color: .purple, onClick: isEditing ? nil : onRequestClick)
                 StatCard(icon: "ladybug", label: MR.strings().issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary, onClick: isEditing ? nil : onIssueClick)
             }
         }
@@ -1545,6 +1545,15 @@ struct DashboardPendingRequestsSection: View {
     let isEditing: Bool
     var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
     @EnvironmentObject private var navigationManager: NavigationManager
+    @State private var selectedFilter: RequestState = .pending
+
+    private var filteredRequests: [MediaRequestPackage] {
+        if selectedFilter == .all {
+            return state.allRequests
+        } else {
+            return state.allRequests.filter { $0.request.matchesFilter(state: selectedFilter) }
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -1555,8 +1564,29 @@ struct DashboardPendingRequestsSection: View {
                     .bold()
             }
 
-            let pendingRequests = state.pendingRequests
-            if pendingRequests.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(RequestState.allCases, id: \.self) { filterState in
+                        let isSelected = selectedFilter == filterState
+                        Button(action: { selectedFilter = filterState }) {
+                            Text(filterState.resource.localized())
+                                .font(.subheadline)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+                                .foregroundColor(isSelected ? .white : .primary)
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.primary.opacity(0.1), lineWidth: isSelected ? 0 : 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
+            if filteredRequests.isEmpty {
                 Text(MR.strings().no_requests_found.localized())
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -1564,7 +1594,7 @@ struct DashboardPendingRequestsSection: View {
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        ForEach(pendingRequests, id: \.request.id) { mediaPackage in
+                        ForEach(filteredRequests, id: \.request.id) { mediaPackage in
                             CompactRequestCard(mediaPackage: mediaPackage) {
                                 if let onRequestClick = onRequestClick {
                                     onRequestClick(mediaPackage)

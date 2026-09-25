@@ -115,7 +115,7 @@ fun SeerrSection(
                     CountStatItem(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.ConfirmationNumber,
-                        label = mokoString(MR.strings.requests),
+                        label = mokoString(MR.strings.dashboard_pending_requests),
                         count = totalRequests,
                         iconColor = ArrPurple,
                         onClick = if (!isEditing) onRequestClick else null,

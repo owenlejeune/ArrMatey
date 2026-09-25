@@ -35,9 +35,11 @@ import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
@@ -78,8 +80,9 @@ class SeerrInstanceRepository(
     private val _openIssuesCount = MutableStateFlow(0)
     val openIssuesCount: StateFlow<Int> = _openIssuesCount.asStateFlow()
 
-    private val _pendingRequests = MutableStateFlow<List<MediaRequestPackage>>(emptyList())
-    val pendingRequests: StateFlow<List<MediaRequestPackage>> = _pendingRequests.asStateFlow()
+    private val _requests = MutableStateFlow<List<MediaRequestPackage>>(emptyList())
+    val requests: StateFlow<List<MediaRequestPackage>> = _requests.asStateFlow()
+    val pendingRequests: StateFlow<List<MediaRequestPackage>> = _requests.asStateFlow()
 
     private val _openIssues = MutableStateFlow<List<MediaIssuePackage>>(emptyList())
     val openIssues: StateFlow<List<MediaIssuePackage>> = _openIssues.asStateFlow()
@@ -101,28 +104,39 @@ class SeerrInstanceRepository(
             .onSuccess { _users.value = it.results }
     }
 
-    suspend fun refreshCounts() {
-        client
-            .getRequests(page = 1, pageSize = 20, filter = RequestState.Pending)
-            .onSuccess { response ->
-                _isOnline.value = true
-                _pendingRequestsCount.value = response.pageInfo.results
-                val enrichedRequests = mediaPackageService.enrichRequests(response.results)
-                _pendingRequests.value = enrichedRequests
-            }.onError { _, _, _ ->
-                _isOnline.value = false
-                _pendingRequests.value = emptyList()
+    suspend fun refreshCounts() =
+        coroutineScope {
+            launch {
+                client
+                    .getRequests(page = 1, pageSize = 50, filter = RequestState.All)
+                    .onSuccess { response ->
+                        _isOnline.value = true
+                        val enrichedRequests = mediaPackageService.enrichRequests(response.results)
+                        _requests.value = enrichedRequests
+                    }.onError { _, _, _ ->
+                        _isOnline.value = false
+                        _requests.value = emptyList()
+                    }
             }
-        client
-            .getIssues(page = 1, pageSize = 20)
-            .onSuccess { response ->
-                _openIssuesCount.value = response.pageInfo.results
-                val enrichedIssues = issuePackageService.enrichIssues(response.results)
-                _openIssues.value = enrichedIssues
-            }.onError { _, _, _ ->
-                _openIssues.value = emptyList()
+            launch {
+                client
+                    .getRequests(page = 1, pageSize = 1, filter = RequestState.Pending)
+                    .onSuccess { response ->
+                        _pendingRequestsCount.value = response.pageInfo.results
+                    }
             }
-    }
+            launch {
+                client
+                    .getIssues(page = 1, pageSize = 20)
+                    .onSuccess { response ->
+                        _openIssuesCount.value = response.pageInfo.results
+                        val enrichedIssues = issuePackageService.enrichIssues(response.results)
+                        _openIssues.value = enrichedIssues
+                    }.onError { _, _, _ ->
+                        _openIssues.value = emptyList()
+                    }
+            }
+        }
 
     fun getRequestsPaging(filter: RequestState = RequestState.All): PagingSource<MediaRequestPackage> =
         BasePagingSource(
