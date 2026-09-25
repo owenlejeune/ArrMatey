@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
+import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
@@ -45,10 +46,15 @@ fun RequestsList(
     onRemoveFromService: (MediaRequest) -> Unit,
     onNavigateToDetails: (Long, RequestType) -> Unit,
     onLoadMore: () -> Unit,
+    selectedFilter: RequestState? = null,
     loadMoreFailed: Boolean = false,
     onViewRequest: ((MediaRequestPackage) -> Unit)? = null,
 ) {
     val listState = rememberLazyListState()
+
+    LaunchedEffect(selectedFilter) {
+        listState.scrollToItem(0)
+    }
 
     LaunchedEffect(listState) {
         snapshotFlow {
@@ -72,7 +78,7 @@ fun RequestsList(
             PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
-                top = 16.dp,
+                top = 0.dp,
                 bottom = 16.dp + LocalFloatingBarBottomPadding.current,
             ),
         verticalArrangement = Arrangement.spacedBy(12.dp),

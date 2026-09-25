@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
+import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
@@ -70,6 +71,7 @@ interface SeerrClient {
     suspend fun getRequests(
         page: Int = 1,
         pageSize: Int = 100,
+        filter: RequestState = RequestState.All
     ): NetworkResult<RequestResponse>
 
     suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest>
@@ -200,13 +202,14 @@ class SeerrClientImpl(
     override suspend fun getRequests(
         page: Int,
         pageSize: Int,
+        filter: RequestState
     ): NetworkResult<RequestResponse> =
         get(
             "request",
             mapOf(
                 "take" to pageSize,
                 "skip" to (page - 1) * pageSize,
-                "filter" to "pending",
+                "filter" to filter.value,
             ),
         )
 

@@ -20,6 +20,7 @@ import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
+import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
@@ -102,7 +103,7 @@ class SeerrInstanceRepository(
 
     suspend fun refreshCounts() {
         client
-            .getRequests(page = 1, pageSize = 20)
+            .getRequests(page = 1, pageSize = 20, filter = RequestState.Pending)
             .onSuccess { response ->
                 _isOnline.value = true
                 _pendingRequestsCount.value = response.pageInfo.results
@@ -123,10 +124,10 @@ class SeerrInstanceRepository(
             }
     }
 
-    fun getRequestsPaging(): PagingSource<MediaRequestPackage> =
+    fun getRequestsPaging(filter: RequestState = RequestState.All): PagingSource<MediaRequestPackage> =
         BasePagingSource(
             fetcher = { page ->
-                client.getRequests(page = page)
+                client.getRequests(page = page, filter = filter)
             },
             processor = { response ->
                 val enrichedRequests = mediaPackageService.enrichRequests(response.results)
@@ -295,7 +296,8 @@ class SeerrInstanceRepository(
     suspend fun getRequests(
         page: Int = 1,
         pageSize: Int = 10,
-    ): NetworkResult<RequestResponse> = client.getRequests(page = page, pageSize = pageSize)
+        filter: RequestState = RequestState.All,
+    ): NetworkResult<RequestResponse> = client.getRequests(page = page, pageSize = pageSize, filter = filter)
 
     suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> = client.createRequest(request)
 

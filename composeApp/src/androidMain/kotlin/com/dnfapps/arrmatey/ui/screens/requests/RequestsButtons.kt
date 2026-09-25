@@ -70,7 +70,7 @@ fun RequestButtons(
         requestStatusValue == 2 ||
             requestStatusValue == 5 ||
             mediaStatusValue >= 4
-    val isDeclined = requestStatusValue == 3
+    val isDeclined = requestStatusValue == 3 || requestStatusValue == 4
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         if (isPendingApproval && !isApproved) {

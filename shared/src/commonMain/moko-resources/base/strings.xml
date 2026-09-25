@@ -649,6 +649,8 @@
     <string name="processing">Processing</string>
     <string name="partially_available">Partially Available</string>
     <string name="available">Available</string>
+    <string name="unavailable">Unavailable</string>
+    <string name="deleted">Deleted</string>
     <string name="no_app_found">No playback app available</string>
     <string name="manage">Manage</string>
     <string name="report_issue">Report issue</string>

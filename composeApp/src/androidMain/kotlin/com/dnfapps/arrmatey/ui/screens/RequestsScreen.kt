@@ -58,6 +58,8 @@ fun RequestsScreen(
     val userState by viewModel.userState.collectAsStateWithLifecycle()
     val pagedData by viewModel.requestsState.collectAsStateWithLifecycle()
     val issuesData by viewModel.issuesState.collectAsStateWithLifecycle()
+    val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
+    val pendingRequestsCount by viewModel.pendingRequestsCount.collectAsStateWithLifecycle()
     val requestOperationsState by viewModel.operationsState.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val requestActionStatus by viewModel.requestActionStatus.collectAsStateWithLifecycle()
@@ -126,8 +128,8 @@ fun RequestsScreen(
                                         text =
                                             buildString {
                                                 append(mokoString(MR.strings.requests))
-                                                if (pagedData.totalItemCount > 0) {
-                                                    append(" (${pagedData.totalItemCount})")
+                                                if (pendingRequestsCount > 0) {
+                                                    append(" ($pendingRequestsCount)")
                                                 }
                                             },
                                     )
@@ -155,6 +157,8 @@ fun RequestsScreen(
                                 pagedData = pagedData,
                                 userState = userState,
                                 operationsState = requestOperationsState,
+                                selectedFilter = selectedFilter,
+                                onFilterSelected = { viewModel.setFilter(it) },
                                 onApprove = { viewModel.approveRequest(it) },
                                 onApproveWithDetails = { id, profileId, rootFolder, lang, seasons ->
                                     viewModel.approveRequest(id, profileId, rootFolder, lang, seasons)
@@ -197,6 +201,8 @@ fun RequestsScreen(
                                         pagedData = pagedData,
                                         userState = userState,
                                         operationsState = requestOperationsState,
+                                        selectedFilter = selectedFilter,
+                                        onFilterSelected = { viewModel.setFilter(it) },
                                         onApprove = { viewModel.approveRequest(it) },
                                         onApproveWithDetails = { id, profileId, rootFolder, lang, seasons ->
                                             viewModel.approveRequest(id, profileId, rootFolder, lang, seasons)

@@ -10,6 +10,7 @@ enum class RequestStatus(
     Pending(1, MR.strings.pending),
     Approved(2, MR.strings.approved),
     Declined(3, MR.strings.declined),
+    Failed(4, MR.strings.failed),
     Available(5, MR.strings.available),
     ;
 

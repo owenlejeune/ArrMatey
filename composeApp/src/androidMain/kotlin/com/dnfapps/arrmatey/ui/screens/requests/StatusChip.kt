@@ -31,7 +31,7 @@ fun StatusChip(
             mediaStatus == MediaStatus.Processing ->
                 Triple(mediaStatus.resource, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
 
-            requestStatus == RequestStatus.Declined ->
+            requestStatus == RequestStatus.Failed || requestStatus == RequestStatus.Declined ->
                 Triple(requestStatus.resource, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
 
             requestStatus == RequestStatus.Approved ->

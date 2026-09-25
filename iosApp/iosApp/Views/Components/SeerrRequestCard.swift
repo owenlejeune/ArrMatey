@@ -214,8 +214,10 @@ struct SeerrStatusChip: View {
             break
         }
 
-        // Request statuses: 1=Pending, 2=Approved, 3=Declined, 5=Available
+        // Request statuses: 1=Pending, 2=Approved, 3=Declined, 4=Failed, 5=Available
         switch requestStatusVal {
+        case 4:
+            return (MR.strings().failed.localized(), .red.opacity(0.2), .red)
         case 3:
             return (MR.strings().declined.localized(), .red.opacity(0.2), .red)
         case 2:
@@ -300,7 +302,7 @@ struct RequestActionButtons: View {
 
     private var isPendingApproval: Bool { request.status == 1 }
     private var isApproved: Bool { request.status == 2 || request.status == 5 || request.media.status >= 4 }
-    private var isDeclined: Bool { request.status == 3 }
+    private var isDeclined: Bool { request.status == 3 || request.status == 4 }
 
     var body: some View {
         VStack(spacing: 6) {

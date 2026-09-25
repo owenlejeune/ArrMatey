@@ -37,6 +37,8 @@ struct SeerrTabContent: View {
                                 pagedData: viewModel.requestsState,
                                 userState: viewModel.userState,
                                 operationsState: viewModel.operationsState,
+                                selectedFilter: viewModel.selectedFilter,
+                                onFilterSelected: { viewModel.setFilter($0) },
                                 onApprove: { viewModel.approveRequest($0) },
                                 onApproveWithDetails: { id, profileId, rootFolder, lang, seasons in
                                     viewModel.approveRequest(id, profileId: profileId, rootFolder: rootFolder, languageProfileId: lang, seasons: seasons)
@@ -132,7 +134,7 @@ struct SeerrTabContent: View {
 
     @ViewBuilder
     private var requestsTabLabel: some View {
-        let count = viewModel.requestsState.totalItemCount
+        let count = viewModel.pendingRequestsCount
         if count > 0 {
             Text("\(MR.strings().requests.localized()) (\(count))")
         } else {
@@ -157,6 +159,8 @@ struct RequestsContentView: View {
     let pagedData: PagedData<MediaRequestPackage>
     let userState: SeerrUser?
     let operationsState: RequestOperationsState
+    let selectedFilter: RequestState
+    let onFilterSelected: (RequestState) -> Void
     let onApprove: (Int64) -> Void
     var onApproveWithDetails: ((Int64, Int64?, String?, Int64?, [Int32]?) -> Void)? = nil
     let onDecline: (Int64) -> Void
@@ -171,10 +175,35 @@ struct RequestsContentView: View {
     @State private var selectedPackageForSheet: MediaRequestPackage? = nil
 
     var body: some View {
-        ZStack {
-            if pagedData.isLoading && pagedData.items.isEmpty {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack(spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(RequestState.allCases, id: \.self) { state in
+                        let isSelected = selectedFilter == state
+                        Button(action: { onFilterSelected(state) }) {
+                            Text(state.resource.localized())
+                                .font(.subheadline)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+                                .foregroundColor(isSelected ? .white : .primary)
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.primary.opacity(0.1), lineWidth: isSelected ? 0 : 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            }
+
+            ZStack {
+                if pagedData.isLoading && pagedData.items.isEmpty {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if pagedData.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "tray")
@@ -187,6 +216,7 @@ struct RequestsContentView: View {
             } else {
                 RequestsListView(
                     items: pagedData.items as! [MediaRequestPackage],
+                    selectedFilter: selectedFilter,
                     hasMore: pagedData.hasMore,
                     isLoadingMore: pagedData.isLoadingMore,
                     loadMoreFailed: pagedData.loadMoreFailed,
@@ -214,6 +244,7 @@ struct RequestsContentView: View {
                     .padding(16)
                 }
             }
+        }
         }
         .sheet(item: Binding(
             get: { selectedPackageForSheet.map { IdentifiableRequestPackage(package: $0) } },
@@ -315,6 +346,7 @@ struct IssuesContentView: View {
 
 private struct RequestsListView: View {
     let items: [MediaRequestPackage]
+    let selectedFilter: RequestState
     let hasMore: Bool
     let isLoadingMore: Bool
     var loadMoreFailed: Bool = false
@@ -330,9 +362,14 @@ private struct RequestsListView: View {
     var onViewRequest: ((MediaRequestPackage) -> Void)? = nil
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 12) {
-                ForEach(items, id: \.request.id) { rPackage in
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    Color.clear
+                        .frame(height: 0)
+                        .id("requestsTop")
+
+                    ForEach(items, id: \.request.id) { rPackage in
                     SeerrRequestCard(
                         mediaPackage: rPackage,
                         user: userState,
@@ -357,21 +394,26 @@ private struct RequestsListView: View {
                     }
                 }
 
-                if isLoadingMore {
-                    ProgressView()
+                    if isLoadingMore {
+                        ProgressView()
+                            .padding(16)
+                    } else if loadMoreFailed {
+                        Button(action: onLoadMore) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.accentColor)
+                                .padding(8)
+                        }
+                        .buttonStyle(.plain)
                         .padding(16)
-                } else if loadMoreFailed {
-                    Button(action: onLoadMore) {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.accentColor)
-                            .padding(8)
                     }
-                    .buttonStyle(.plain)
-                    .padding(16)
                 }
+                .padding(16)
             }
-            .padding(16)
+            .id(selectedFilter)
+            .onChange(of: selectedFilter) { _ in
+                proxy.scrollTo("requestsTop", anchor: .top)
+            }
         }
     }
 }
@@ -486,6 +528,8 @@ struct SeerrSheetView: View {
                         pagedData: viewModel.requestsState,
                         userState: viewModel.userState,
                         operationsState: viewModel.operationsState,
+                        selectedFilter: viewModel.selectedFilter,
+                        onFilterSelected: { viewModel.setFilter($0) },
                         onApprove: { viewModel.approveRequest($0) },
                         onApproveWithDetails: { id, profileId, rootFolder, lang, seasons in
                             viewModel.approveRequest(id, profileId: profileId, rootFolder: rootFolder, languageProfileId: lang, seasons: seasons)

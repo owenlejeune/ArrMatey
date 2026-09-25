@@ -12,8 +12,10 @@ class RequestsViewModelS: ObservableObject {
 
     @Published private(set) var requestsState = PagedData<MediaRequestPackage>()
     @Published private(set) var issuesState = PagedData<MediaIssuePackage>()
+    @Published private(set) var selectedFilter: RequestState = .pending
     @Published private(set) var operationsState: RequestOperationsState = RequestOperationsState()
     @Published private(set) var userState: SeerrUser? = nil
+    @Published private(set) var pendingRequestsCount: Int32 = 0
     @Published private(set) var selectedTab: SeerrTab = .requests
     @Published private(set) var requestActionStatus: OperationStatus = OperationStatusIdle()
 
@@ -25,10 +27,18 @@ class RequestsViewModelS: ObservableObject {
     private func startObserving() {
         viewModel.requestsState.observeAsync(on: self, to: \.requestsState)
         viewModel.issuesState.observeAsync(on: self, to: \.issuesState)
+        viewModel.selectedFilter.observeAsync(on: self, to: \.selectedFilter)
         viewModel.operationsState.observeAsync(on: self, to: \.operationsState)
         viewModel.userState.observeAsync(on: self, to: \.userState)
+        viewModel.pendingRequestsCount.observeAsync(on: self) { owner, count in
+            owner.pendingRequestsCount = count.int32Value
+        }
         viewModel.selectedTab.observeAsync(on: self, to: \.selectedTab)
         viewModel.requestActionStatus.observeAsync(on: self, to: \.requestActionStatus)
+    }
+
+    func setFilter(_ filter: RequestState) {
+        viewModel.setFilter(filter: filter)
     }
 
     func resetRequestActionStatus() {
