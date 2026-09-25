@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUsersResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrViolationsResponse
 import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.async
@@ -74,7 +75,11 @@ class TracearrRepository(
         }
     }
 
-    suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> = tracearrClient.getTodayStats().onSuccess { _todayStats.value = it }
+    suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> =
+        tracearrClient
+            .getTodayStats()
+            .onSuccess { _todayStats.value = it }
+            .onError { _, _, _ -> _todayStats.value = null }
 
     suspend fun getHistory(
         cursor: String? = null,

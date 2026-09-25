@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.ProwlarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +35,7 @@ class ProwlarrInstanceRepository(
         prowlarrClient
             .getStatus()
             .onSuccess { _softwareStatus.value = it }
+            .onError { _, _, _ -> _softwareStatus.value = null }
     }
 
     suspend fun getIndexers(): NetworkResult<List<ProwlarrIndexer>> = prowlarrClient.getIndexers().onSuccess { _indexers.value = it }

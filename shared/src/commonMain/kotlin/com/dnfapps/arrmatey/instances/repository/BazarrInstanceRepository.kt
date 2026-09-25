@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.bazarr.api.model.WantedMovie
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.mapValues
+import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,13 +65,16 @@ class BazarrInstanceRepository(
         bazarrClient
             .getSystemStatus()
             .onSuccess { _systemStatus.value = it }
+            .onError { _, _, _ -> _systemStatus.value = null }
 
     suspend fun refreshBadges() {
-        bazarrClient.getBadges().onSuccess { badges ->
-            _wantedEpisodesCount.value = badges.episodes
-            _wantedMoviesCount.value = badges.movies
-            _providerIssuesCount.value = badges.providers
-        }
+        bazarrClient
+            .getBadges()
+            .onSuccess { badges ->
+                _wantedEpisodesCount.value = badges.episodes
+                _wantedMoviesCount.value = badges.movies
+                _providerIssuesCount.value = badges.providers
+            }
     }
 
     suspend fun getWantedEpisodes(): NetworkResult<List<WantedEpisode>> = bazarrClient.getWantedEpisodes().map { it.data }

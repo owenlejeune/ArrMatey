@@ -79,18 +79,21 @@ class MetadataRepository(
         client
             .getStatus()
             .onSuccess { _softwareStatus.value = it }
+            .onError { _, _, _ -> _softwareStatus.value = null }
     }
 
     suspend fun refreshDiskSpace() {
         client
             .getDiskSpace()
             .onSuccess { _diskSpace.value = it }
+            .onError { _, _, _ -> _diskSpace.value = emptyList() }
     }
 
     suspend fun refreshHealth() {
         client
             .getHealth()
             .onSuccess { _health.value = it }
+            .onError { _, _, _ -> _health.value = emptyList() }
     }
 
     private val metadataMutex = Mutex()

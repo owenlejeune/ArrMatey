@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -271,81 +270,34 @@ fun ActivityItem(
                         .padding(vertical = 12.dp, horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = item.titleLabel,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            overflow = TextOverflow.Ellipsis,
-                            color = contentColor,
-                            modifier = Modifier.weight(1f, fill = false),
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = item.titleLabel,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        overflow = TextOverflow.Ellipsis,
+                        color = contentColor,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (item.hasIssue) {
+                        Icon(
+                            imageVector = Icons.Default.ErrorOutline,
+                            contentDescription = null,
+                            tint = if (useFullColorCards) surfaceDark else MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp).padding(start = 4.dp),
                         )
-                        if (item.hasIssue) {
-                            Icon(
-                                imageVector = Icons.Default.ErrorOutline,
-                                contentDescription = null,
-                                tint = if (useFullColorCards) surfaceDark else MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(20.dp).padding(start = 4.dp),
-                            )
-                        }
                     }
+                }
 
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        item.instanceName?.takeIf { it.isNotBlank() }?.let { instanceName ->
-                            Surface(
-                                shape = MaterialTheme.shapes.extraSmall,
-                                color =
-                                    if (useFullColorCards) {
-                                        surfaceDark.copy(
-                                            alpha = 0.15f,
-                                        )
-                                    } else {
-                                        MaterialTheme.colorScheme.surfaceContainerHighest
-                                    },
-                            ) {
-                                Text(
-                                    text = instanceName,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = secondaryContentColor,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                )
-                            }
-                        }
-
-                        Surface(
-                            shape = MaterialTheme.shapes.extraSmall,
-                            color =
-                                if (item.hasIssue) {
-                                    MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
-                                } else if (useFullColorCards) {
-                                    surfaceDark.copy(alpha = 0.15f)
-                                } else {
-                                    MaterialTheme.colorScheme.secondaryContainer
-                                },
-                        ) {
-                            Text(
-                                text = item.statusLabel,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color =
-                                    if (item.hasIssue) {
-                                        MaterialTheme.colorScheme.error
-                                    } else if (useFullColorCards) {
-                                        surfaceDark
-                                    } else {
-                                        MaterialTheme.colorScheme.onSecondaryContainer
-                                    },
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            )
-                        }
-
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    item.instanceName?.takeIf { it.isNotBlank() }?.let { instanceName ->
                         Surface(
                             shape = MaterialTheme.shapes.extraSmall,
                             color =
@@ -358,14 +310,83 @@ fun ActivityItem(
                                 },
                         ) {
                             Text(
-                                text = item.quality.qualityLabel,
+                                text = instanceName,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = secondaryContentColor,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                             )
                         }
+                    }
 
-                        if (item.size > 0f) {
+                    Surface(
+                        shape = MaterialTheme.shapes.extraSmall,
+                        color =
+                            if (item.hasIssue) {
+                                MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
+                            } else if (useFullColorCards) {
+                                surfaceDark.copy(alpha = 0.15f)
+                            } else {
+                                MaterialTheme.colorScheme.secondaryContainer
+                            },
+                    ) {
+                        Text(
+                            text = item.statusLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color =
+                                if (item.hasIssue) {
+                                    MaterialTheme.colorScheme.error
+                                } else if (useFullColorCards) {
+                                    surfaceDark
+                                } else {
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                },
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        )
+                    }
+
+                    Surface(
+                        shape = MaterialTheme.shapes.extraSmall,
+                        color =
+                            if (useFullColorCards) {
+                                surfaceDark.copy(
+                                    alpha = 0.15f,
+                                )
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHighest
+                            },
+                    ) {
+                        Text(
+                            text = item.quality.qualityLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = secondaryContentColor,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        )
+                    }
+
+                    if (item.size > 0f) {
+                        Surface(
+                            shape = MaterialTheme.shapes.extraSmall,
+                            color =
+                                if (useFullColorCards) {
+                                    surfaceDark.copy(
+                                        alpha = 0.15f,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerHighest
+                                },
+                        ) {
+                            Text(
+                                text = item.size.toLong().bytesAsFileSizeString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = secondaryContentColor,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            )
+                        }
+                    }
+
+                    if (item.trackedDownloadState == QueueDownloadState.Downloading) {
+                        item.remainingTimeLabel?.let { remainingTimeLabel ->
                             Surface(
                                 shape = MaterialTheme.shapes.extraSmall,
                                 color =
@@ -374,72 +395,50 @@ fun ActivityItem(
                                             alpha = 0.15f,
                                         )
                                     } else {
-                                        MaterialTheme.colorScheme.surfaceContainerHighest
+                                        MaterialTheme.colorScheme.tertiaryContainer
                                     },
                             ) {
                                 Text(
-                                    text = item.size.toLong().bytesAsFileSizeString(),
+                                    text = "$remainingTimeLabel left",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = secondaryContentColor,
+                                    fontWeight = FontWeight.Medium,
+                                    color = if (useFullColorCards) surfaceDark else MaterialTheme.colorScheme.onTertiaryContainer,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 )
                             }
                         }
+                    }
+                }
 
-                        if (item.trackedDownloadState == QueueDownloadState.Downloading) {
-                            item.remainingTimeLabel?.let { remainingTimeLabel ->
-                                Surface(
-                                    shape = MaterialTheme.shapes.extraSmall,
-                                    color =
-                                        if (useFullColorCards) {
-                                            surfaceDark.copy(
-                                                alpha = 0.15f,
-                                            )
-                                        } else {
-                                            MaterialTheme.colorScheme.tertiaryContainer
-                                        },
-                                ) {
-                                    Text(
-                                        text = "$remainingTimeLabel left",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = if (useFullColorCards) surfaceDark else MaterialTheme.colorScheme.onTertiaryContainer,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                if (item.trackedDownloadState == QueueDownloadState.Downloading && item.progressPercent > 0f) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        LinearProgressIndicator(
+                            progress = { item.progressPercent / 100f },
+                            modifier = Modifier.fillMaxWidth().height(6.dp),
+                            strokeCap = StrokeCap.Round,
+                            color = if (useFullColorCards) surfaceDark else MaterialTheme.colorScheme.primary,
+                            trackColor =
+                                if (useFullColorCards) {
+                                    surfaceDark.copy(
+                                        alpha = 0.2f,
                                     )
-                                }
-                            }
-                        }
-                    }
-
-                    if (item.trackedDownloadState == QueueDownloadState.Downloading && item.progressPercent > 0f) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            LinearProgressIndicator(
-                                progress = { item.progressPercent / 100f },
-                                modifier = Modifier.fillMaxWidth().height(6.dp),
-                                strokeCap = StrokeCap.Round,
-                                color = if (useFullColorCards) surfaceDark else MaterialTheme.colorScheme.primary,
-                                trackColor =
-                                    if (useFullColorCards) {
-                                        surfaceDark.copy(
-                                            alpha = 0.2f,
-                                        )
-                                    } else {
-                                        MaterialTheme.colorScheme.surfaceVariant
-                                    },
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                },
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                        ) {
+                            Text(
+                                text = item.progressLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = secondaryContentColor,
                             )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End,
-                            ) {
-                                Text(
-                                    text = item.progressLabel,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = secondaryContentColor,
-                                )
-                            }
                         }
                     }
+                }
             }
         }
     }

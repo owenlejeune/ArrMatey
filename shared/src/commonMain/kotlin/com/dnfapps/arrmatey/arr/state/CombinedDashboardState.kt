@@ -609,6 +609,7 @@ data class SeerrDashboardState(
     val openIssuesCount: Int = 0,
     val pendingRequests: List<MediaRequestPackage> = emptyList(),
     val openIssues: List<MediaIssuePackage> = emptyList(),
+    val isOnline: Boolean = true,
 )
 
 data class DownloadClientDashboardState(
@@ -630,6 +631,7 @@ data class BazarrDashboardState(
     val instance: Instance,
     val wantedEpisodesCount: Int,
     val wantedMoviesCount: Int,
+    val isOnline: Boolean = true,
 )
 
 data class TracearrDashboardState(

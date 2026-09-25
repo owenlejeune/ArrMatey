@@ -82,6 +82,9 @@ class SeerrInstanceRepository(
     private val _openIssues = MutableStateFlow<List<MediaIssuePackage>>(emptyList())
     val openIssues: StateFlow<List<MediaIssuePackage>> = _openIssues.asStateFlow()
 
+    private val _isOnline = MutableStateFlow(true)
+    val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
+
     override suspend fun testConnection(): NetworkResult<Unit> = client.testConnection()
 
     suspend fun getLoggedInUser() {
@@ -100,10 +103,12 @@ class SeerrInstanceRepository(
         client
             .getRequests(page = 1, pageSize = 20)
             .onSuccess { response ->
+                _isOnline.value = true
                 _pendingRequestsCount.value = response.pageInfo.results
                 val enrichedRequests = mediaPackageService.enrichRequests(response.results)
                 _pendingRequests.value = enrichedRequests
             }.onError { _, _, _ ->
+                _isOnline.value = false
                 _pendingRequests.value = emptyList()
             }
         client

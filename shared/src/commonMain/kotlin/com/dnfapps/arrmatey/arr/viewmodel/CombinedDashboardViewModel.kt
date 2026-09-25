@@ -169,13 +169,15 @@ class CombinedDashboardViewModel(
                                 repo.openIssuesCount,
                                 repo.pendingRequests,
                                 repo.openIssues,
-                            ) { pendingCount, issuesCount, requests, issues ->
+                                repo.isOnline,
+                            ) { pendingCount, issuesCount, requests, issues, isOnline ->
                                 SeerrDashboardState(
                                     instance = repo.instance,
                                     pendingRequestsCount = pendingCount,
                                     openIssuesCount = issuesCount,
                                     pendingRequests = requests,
                                     openIssues = issues,
+                                    isOnline = isOnline,
                                 )
                             }
                         }
@@ -228,11 +230,12 @@ class CombinedDashboardViewModel(
                 } else {
                     val flows =
                         bazarrRepos.map { repo ->
-                            combine(repo.wantedEpisodesCount, repo.wantedMoviesCount) { episodes, movies ->
+                            combine(repo.wantedEpisodesCount, repo.wantedMoviesCount, repo.systemStatus) { episodes, movies, status ->
                                 BazarrDashboardState(
                                     instance = repo.instance,
                                     wantedEpisodesCount = episodes,
                                     wantedMoviesCount = movies,
+                                    isOnline = status != null,
                                 )
                             }
                         }
@@ -517,7 +520,15 @@ class CombinedDashboardViewModel(
                     upcomingMovies = upcomingMovies,
                     upcomingTv = upcomingTv,
                     quickPickItem = quickPick,
-                    networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats, bazarrStats, downloadClients),
+                    networkStatus =
+                        resolveNetworkStatus(
+                            instances,
+                            seerrInstances,
+                            prowlarrStats,
+                            bazarrStats,
+                            downloadClients,
+                            tracearrStats,
+                        ),
                     isRefreshing = refreshing,
                 )
             }.collect { newState ->
@@ -676,6 +687,7 @@ class CombinedDashboardViewModel(
         prowlarrInstances: List<ProwlarrDashboardState>,
         bazarrInstances: List<BazarrDashboardState>,
         downloadClients: List<DownloadClientDashboardState>,
+        tracearrInstances: List<TracearrDashboardState> = emptyList(),
     ): NetworkStatusState {
         val networkUtils = getNetworkUtils()
         val currentSsid =
@@ -713,7 +725,7 @@ class CombinedDashboardViewModel(
                     isLocal = state.instance.isUsingLocalNetwork(),
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
                     icon = state.instance.type.icon,
-                    isOnline = true, // Assume online if we have state
+                    isOnline = state.isOnline,
                     isLocalSwitchingEnabled = state.instance.localNetworkEnabled,
                 ),
             )
@@ -739,7 +751,20 @@ class CombinedDashboardViewModel(
                     isLocal = state.instance.isUsingLocalNetwork(),
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
                     icon = state.instance.type.icon,
-                    isOnline = true, // Assume online if we have state
+                    isOnline = state.isOnline,
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled,
+                ),
+            )
+        }
+
+        tracearrInstances.forEach { state ->
+            instanceStatuses.add(
+                InstanceNetworkStatus(
+                    instanceName = state.instance.label,
+                    isLocal = state.instance.isUsingLocalNetwork(),
+                    currentEndpoint = state.instance.getEffectiveBaseUrl(),
+                    icon = state.instance.type.icon,
+                    isOnline = state.stats != null,
                     isLocalSwitchingEnabled = state.instance.localNetworkEnabled,
                 ),
             )
@@ -811,6 +836,7 @@ class CombinedDashboardViewModel(
                     .filterIsInstance<BazarrInstanceRepository>()
             bazarrRepos.forEach { repo ->
                 try {
+                    repo.getSystemStatus()
                     repo.refreshBadges()
                 } catch (e: Exception) {
                     logger.error(e) { "Error refreshing Bazarr instance ${repo.instance.label}" }

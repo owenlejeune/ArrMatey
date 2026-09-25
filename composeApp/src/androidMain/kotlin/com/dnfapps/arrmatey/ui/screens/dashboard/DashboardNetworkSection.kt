@@ -33,7 +33,10 @@ import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
-fun DashboardNetworkSection(state: CombinedDashboardState.Success) {
+fun DashboardNetworkSection(
+    state: CombinedDashboardState.Success,
+    isEditing: Boolean = false,
+) {
     val networkState = state.networkStatus
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -65,17 +68,19 @@ fun DashboardNetworkSection(state: CombinedDashboardState.Success) {
                     modifier = Modifier.weight(1f),
                 )
 
-                networkState?.ssid?.let { ssid ->
-                    Text(
-                        text = ssid,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier =
-                            Modifier
-                                .clip(MaterialTheme.shapes.small)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .padding(horizontal = 8.dp, vertical = 4.dp),
-                    )
+                if (!isEditing) {
+                    networkState?.ssid?.let { ssid ->
+                        Text(
+                            text = ssid,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier =
+                                Modifier
+                                    .clip(MaterialTheme.shapes.small)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                        )
+                    }
                 }
             }
 

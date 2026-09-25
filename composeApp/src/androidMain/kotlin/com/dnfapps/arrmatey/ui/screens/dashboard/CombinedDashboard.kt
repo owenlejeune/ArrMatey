@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -180,7 +181,10 @@ fun DashboardCardContent(
             )
 
         DashboardCards.Network ->
-            DashboardNetworkSection(currentState)
+            DashboardNetworkSection(
+                state = currentState,
+                isEditing = isEditing,
+            )
 
         DashboardCards.RecentlyAdded ->
             RecentlyAddedSection(
@@ -421,6 +425,10 @@ fun CombinedDashboard(
         if (isEditing && searchBarState.isExpanded()) {
             searchBarState.animateToCollapsed()
         }
+    }
+
+    BackHandler(enabled = isEditing) {
+        viewModel.toggleEditing()
     }
 
     Scaffold(
@@ -665,7 +673,7 @@ fun CombinedDashboard(
                                                         .padding(innerPadding)
                                                         .clip(MaterialTheme.shapes.large)
                                                         .combinedClickable(
-                                                            enabled = !isEditing && cardOnClick != null,
+                                                            enabled = !isEditing,
                                                             onClick = { cardOnClick?.invoke() },
                                                             onLongClick = {
                                                                 if (!isEditing) {

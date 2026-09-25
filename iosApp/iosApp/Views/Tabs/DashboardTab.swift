@@ -458,7 +458,7 @@ struct DashboardCardView: View {
             case .pendingRequests: DashboardPendingRequestsSection(state: state, isEditing: isEditing, onRequestClick: onRequestClick)
             case .pendingIssues: DashboardPendingIssuesSection(state: state, isEditing: isEditing, onIssueClick: onIssueClick)
             case .prowlarrOverview: DashboardProwlarrSection(state: state, isEditing: isEditing)
-            case .network: DashboardNetworkSection(state: state)
+            case .network: DashboardNetworkSection(state: state, isEditing: isEditing)
             case .recentlyAdded: DashboardRecentlyAddedSection(state: state)
             case .downloadClients: DashboardDownloadClientsSection(state: state, isEditing: isEditing)
             case .activityQueue: DashboardActivityQueueSection(state: state, isEditing: isEditing, onItemClick: onActivityClick)
@@ -727,6 +727,7 @@ struct DashboardTracearrSection: View {
 
 struct DashboardNetworkSection: View {
     let state: CombinedDashboardStateSuccess
+    var isEditing: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -739,7 +740,7 @@ struct DashboardNetworkSection: View {
 
                 Spacer()
 
-                if let ssid = state.networkStatus?.ssid {
+                if !isEditing, let ssid = state.networkStatus?.ssid {
                     Text(ssid)
                         .font(.system(size: 10, weight: .bold))
                         .padding(.horizontal, 8)
