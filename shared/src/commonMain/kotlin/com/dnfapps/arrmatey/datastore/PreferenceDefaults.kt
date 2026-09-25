@@ -37,6 +37,12 @@ object PreferenceDefaults {
     // Download Client
     val DOWNLOAD_CLIENT_SORT_BY: SortBy = SortBy.Title
     val DOWNLOAD_CLIENT_SORT_ORDER: SortOrder = SortOrder.Asc
+    const val DOWNLOAD_DELETE_FILES: Boolean = false
+
+    // Queue Item Removal
+    const val QUEUE_REMOVE_FROM_CLIENT: Boolean = false
+    const val QUEUE_ADD_TO_BLOCKLIST: Boolean = false
+    const val QUEUE_SKIP_REDOWNLOAD: Boolean = true
 
     // Dashboard
     val DASHBOARD_CARDS_ORDER: List<DashboardCards> = DashboardCards.defaultEntries.toList()

@@ -135,6 +135,8 @@ class ExportDataUseCase(
                     downloadQueueSortState = if (includeUiPreferences) preferencesStore.observeDownloadClientUiState().first() else null,
                     dashboardCardsOrder = if (includeUiPreferences) preferencesStore.dashboardCardsOrder.first() else null,
                     showDashboardSearch = if (includeUiPreferences) preferencesStore.showDashboardSearch.first() else null,
+                    queueRemovalPreferences = if (includeUiPreferences) preferencesStore.queueRemovalPreferences.first() else null,
+                    downloadDeleteFiles = if (includeUiPreferences) preferencesStore.downloadDeleteFiles.first() else null,
                 )
             } else {
                 null

@@ -64,6 +64,9 @@ interface PreferencesStore {
     val useColoredActivityCards: Flow<Boolean>
     val useColoredCalendarCards: Flow<Boolean>
 
+    val queueRemovalPreferences: Flow<QueueRemovalPreferences>
+    val downloadDeleteFiles: Flow<Boolean>
+
     fun observeCalendarFilterState(): Flow<CalendarFilterState>
 
     suspend fun saveCalendarFilterState(state: CalendarFilterState)
@@ -160,6 +163,10 @@ interface PreferencesStore {
     fun toggleUseColoredCalendarCards()
 
     fun setUseColoredCalendarCards(value: Boolean)
+
+    fun saveQueueRemovalPreferences(preferences: QueueRemovalPreferences)
+
+    fun setDownloadDeleteFiles(value: Boolean)
 
     companion object {
         operator fun invoke(dataStoreFactory: DataStoreFactory): PreferencesStore = DefaultPreferencesStore(dataStoreFactory)
@@ -753,6 +760,38 @@ class DefaultPreferencesStore(
         scope.launch {
             dataStore.edit {
                 it[PreferenceKeys.USE_COLORED_CALENDAR_CARDS] = value
+            }
+        }
+    }
+
+    override val queueRemovalPreferences: Flow<QueueRemovalPreferences> =
+        dataStore.data.map {
+            QueueRemovalPreferences(
+                removeFromClient = it[PreferenceKeys.QUEUE_REMOVE_FROM_CLIENT] ?: PreferenceDefaults.QUEUE_REMOVE_FROM_CLIENT,
+                addToBlocklist = it[PreferenceKeys.QUEUE_ADD_TO_BLOCKLIST] ?: PreferenceDefaults.QUEUE_ADD_TO_BLOCKLIST,
+                skipRedownload = it[PreferenceKeys.QUEUE_SKIP_REDOWNLOAD] ?: PreferenceDefaults.QUEUE_SKIP_REDOWNLOAD,
+            )
+        }
+
+    override fun saveQueueRemovalPreferences(preferences: QueueRemovalPreferences) {
+        scope.launch {
+            dataStore.edit {
+                it[PreferenceKeys.QUEUE_REMOVE_FROM_CLIENT] = preferences.removeFromClient
+                it[PreferenceKeys.QUEUE_ADD_TO_BLOCKLIST] = preferences.addToBlocklist
+                it[PreferenceKeys.QUEUE_SKIP_REDOWNLOAD] = preferences.skipRedownload
+            }
+        }
+    }
+
+    override val downloadDeleteFiles: Flow<Boolean> =
+        dataStore.data.map {
+            it[PreferenceKeys.DOWNLOAD_DELETE_FILES] ?: PreferenceDefaults.DOWNLOAD_DELETE_FILES
+        }
+
+    override fun setDownloadDeleteFiles(value: Boolean) {
+        scope.launch {
+            dataStore.edit {
+                it[PreferenceKeys.DOWNLOAD_DELETE_FILES] = value
             }
         }
     }

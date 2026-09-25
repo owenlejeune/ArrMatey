@@ -635,6 +635,12 @@ class UnifiedMediaDetailsViewModel(
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
     ) {
+        instanceHandler.updatePreferences(
+            preferences.value.copy(
+                deleteDeleteFiles = deleteFiles,
+                deleteAddExclusion = addImportExclusion,
+            ),
+        )
         arrActionsHandler.deleteMedia(
             scope = viewModelScope,
             repositoryProvider = { instanceHandler.getActiveArrRepository() },

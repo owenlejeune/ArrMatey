@@ -76,7 +76,7 @@ extension SkieSwiftFlow {
             }
         }
     }
-    
+
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T) -> Void) {
         _ = Task { [weak owner] in
             for try await value in self {
@@ -92,5 +92,16 @@ extension SkieSwiftFlow {
         observeAsync(on: owner) { owner, value in
             owner[keyPath: keyPath] = value
         }
+    }
+    
+    func firstValue() async -> T? {
+        do {
+            for try await value in self {
+                return value
+            }
+        } catch {
+            return nil
+        }
+        return nil
     }
 }
