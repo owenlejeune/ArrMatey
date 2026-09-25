@@ -119,7 +119,9 @@ class CombinedDashboardViewModel(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences(),
+                initialValue =
+                    com.dnfapps.arrmatey.datastore
+                        .DiscoverSectionPreferences(),
             )
 
     private val arrInstancesFlow =

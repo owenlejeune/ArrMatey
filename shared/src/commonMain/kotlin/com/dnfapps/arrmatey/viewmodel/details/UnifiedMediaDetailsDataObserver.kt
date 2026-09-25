@@ -40,8 +40,15 @@ class UnifiedMediaDetailsDataObserver(
     private val getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
     private val onIsMonitoredUpdated: (Boolean) -> Unit,
 ) {
-    private val dataFlow:
-        Flow<Quint<ArrInstanceRepository?, List<ArrInstanceRepository>, SeerrInstanceRepository?, BazarrInstanceRepository?, Map<Long, ArrMedia?>>> =
+    private val dataFlow: Flow<
+        Quint<
+            ArrInstanceRepository?,
+            List<ArrInstanceRepository>,
+            SeerrInstanceRepository?,
+            BazarrInstanceRepository?,
+            Map<Long, ArrMedia?>,
+        >,
+    > =
         combine(
             instanceHandler.activeArrRepoFlow,
             instanceHandler.allArrReposFlow,

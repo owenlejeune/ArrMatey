@@ -73,7 +73,12 @@ fun UnifiedMediaDetailsToolbarMenu(
     val showArrActions = success.hasArrId && isArrConfigured
     val showSeerrActions =
         isSeerrConfigured &&
-            (buttonState.showReportIssueButton || buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
+            (
+                buttonState.showReportIssueButton ||
+                    buttonState.showRemoveFromServiceButton ||
+                    buttonState.showClearDataButton ||
+                    buttonState.showMarkAsAvailableButton
+            )
     val showMissingInstances = success.missingInstances.isNotEmpty()
     val showMenuButton = showArrActions || showSeerrActions || showMissingInstances
 

@@ -481,11 +481,9 @@ class SeerrInstanceRepository(
 
     suspend fun getIssueDetails(issueId: Long): NetworkResult<Issue> = client.getIssueDetails(issueId)
 
-    suspend fun getRadarrServices(): NetworkResult<List<Service>> =
-        client.getRadarrServices().onSuccess { _radarrServices.value = it }
+    suspend fun getRadarrServices(): NetworkResult<List<Service>> = client.getRadarrServices().onSuccess { _radarrServices.value = it }
 
-    suspend fun getSonarrServices(): NetworkResult<List<Service>> =
-        client.getSonarrServices().onSuccess { _sonarrServices.value = it }
+    suspend fun getSonarrServices(): NetworkResult<List<Service>> = client.getSonarrServices().onSuccess { _sonarrServices.value = it }
 
     suspend fun getRadarrDetails(serverId: Long): NetworkResult<ServiceDetails> = client.getRadarrDetails(serverId)
 

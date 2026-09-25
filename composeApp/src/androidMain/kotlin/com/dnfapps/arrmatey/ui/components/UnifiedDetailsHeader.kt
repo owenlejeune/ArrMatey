@@ -130,7 +130,7 @@ fun UnifiedDetailsHeader(
                 }
                 listOfNotNull(
                     certification,
-                    releasedBy
+                    releasedBy,
                 ).joinToString(BULLET).takeUnless { it.isEmpty() }?.let { info ->
                     Text(
                         text = info,

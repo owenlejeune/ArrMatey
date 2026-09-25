@@ -104,9 +104,10 @@ private fun OverlayTopAppBar(
     if (!view.isInEditMode) {
         val window = (view.context as? Activity)?.window
         if (window != null) {
-            val insetsController = remember(window, view) {
-                WindowCompat.getInsetsController(window, view)
-            }
+            val insetsController =
+                remember(window, view) {
+                    WindowCompat.getInsetsController(window, view)
+                }
             DisposableEffect(insetsController, isScrolled, isDarkTheme) {
                 insetsController.isAppearanceLightStatusBars = if (isScrolled) !isDarkTheme else false
                 onDispose {

@@ -118,10 +118,11 @@ fun SeerrPersonDetailsScreen(
                         onRefresh = { viewModel.refreshDetails() },
                     ) {
                         LazyVerticalGrid(
-                            columns = MinColumnsAdaptiveGridCells(
-                                minSize = GridDensity.Normal.minSize,
-                                minColumns = 3
-                            ),
+                            columns =
+                                MinColumnsAdaptiveGridCells(
+                                    minSize = GridDensity.Normal.minSize,
+                                    minColumns = 3,
+                                ),
                             state = gridState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding =
