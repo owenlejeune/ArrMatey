@@ -114,6 +114,14 @@ class CombinedDashboardViewModel(
                 initialValue = true,
             )
 
+    val discoverSectionPreferences: StateFlow<com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences> =
+        preferencesStore.discoverSectionPreferences
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences(),
+            )
+
     private val arrInstancesFlow =
         instanceManager.instanceRepositories
             .flatMapLatest { repoMap ->

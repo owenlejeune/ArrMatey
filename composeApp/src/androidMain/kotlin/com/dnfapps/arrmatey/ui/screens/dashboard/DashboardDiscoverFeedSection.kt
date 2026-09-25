@@ -33,8 +33,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,7 +44,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
@@ -51,6 +56,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
+import org.koin.compose.koinInject
 
 @Composable
 fun DashboardDiscoverFeedSection(
@@ -58,18 +64,23 @@ fun DashboardDiscoverFeedSection(
     onMediaClick: (tmdbId: Long, requestType: RequestType) -> Unit,
     isEditing: Boolean = false,
     enabled: Boolean = true,
+    preferencesStore: PreferencesStore = koinInject(),
 ) {
-    var selectedCategory by rememberSaveable { mutableStateOf(DiscoverCategory.TRENDING) }
-
-    val currentItems: List<DiscoverResult> = state.getDiscoverFeedItems(selectedCategory)
+    val sectionPreferences by preferencesStore.discoverSectionPreferences.collectAsStateWithLifecycle(
+        initialValue = DiscoverSectionPreferences(),
+    )
 
     val categories =
-        listOf(
-            DiscoverCategory.TRENDING to MR.strings.trending,
-            DiscoverCategory.POPULAR_MOVIES to MR.strings.popular_movies,
-            DiscoverCategory.POPULAR_SERIES to MR.strings.popular_series,
-            DiscoverCategory.UPCOMING_MOVIES to MR.strings.upcoming_movies,
-        )
+        remember(sectionPreferences.visibleCategories) {
+            val visible = sectionPreferences.visibleCategories
+            if (visible.isNotEmpty()) visible else DiscoverCategory.entries
+        }
+
+    var selectedCategory by rememberSaveable { mutableStateOf<DiscoverCategory?>(null) }
+
+    val activeCategory = (selectedCategory?.takeIf { it in categories }) ?: categories.firstOrNull() ?: DiscoverCategory.TRENDING
+
+    val currentItems: List<DiscoverResult> = state.getDiscoverFeedItems(activeCategory)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -125,8 +136,8 @@ fun DashboardDiscoverFeedSection(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     userScrollEnabled = enabled,
                 ) {
-                    items(categories) { (category, labelRes) ->
-                        val isSelected = selectedCategory == category
+                    items(categories) { category ->
+                        val isSelected = activeCategory == category
                         FilterChip(
                             selected = isSelected,
                             onClick = {
@@ -136,7 +147,7 @@ fun DashboardDiscoverFeedSection(
                             },
                             label = {
                                 Text(
-                                    text = mokoString(labelRes),
+                                    text = mokoString(category.title),
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 )
@@ -147,7 +158,9 @@ fun DashboardDiscoverFeedSection(
                                         DiscoverCategory.TRENDING -> Icons.AutoMirrored.Filled.TrendingUp
                                         DiscoverCategory.POPULAR_MOVIES -> Icons.Default.Movie
                                         DiscoverCategory.POPULAR_SERIES -> Icons.Default.Tv
-                                        else -> Icons.Default.CalendarToday
+                                        DiscoverCategory.UPCOMING_MOVIES,
+                                        DiscoverCategory.UPCOMING_SERIES,
+                                        -> Icons.Default.CalendarToday
                                     }
                                 Icon(
                                     imageVector = icon,

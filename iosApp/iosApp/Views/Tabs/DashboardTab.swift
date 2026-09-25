@@ -472,6 +472,7 @@ struct DashboardCardView: View {
                 DashboardDiscoverFeedSection(
                     state: state,
                     isEditing: isEditing,
+                    visibleCategories: viewModel.discoverSectionPreferences.visibleCategories,
                     onMediaClick: { id, type in
                         if !isEditing {
                             navigationManager.goToSeerrDetailsOnDashboard(tmdbId: id, requestType: type)
@@ -2318,16 +2319,36 @@ struct DashboardDiscoverQuickPickSection: View {
 struct DashboardDiscoverFeedSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var visibleCategories: [DiscoverCategory] = []
     var onMediaClick: ((Int64, RequestType) -> Void)? = nil
 
-    @State private var selectedCategory: DiscoverCategory = .trending
+    @State private var selectedCategory: DiscoverCategory? = nil
 
-    private let categories: [(DiscoverCategory, String, String)] = [
-        (.trending, MR.strings().trending.localized(), "chart.line.uptrend.xyaxis"),
-        (.popularMovies, MR.strings().popular_movies.localized(), "film"),
-        (.popularSeries, MR.strings().popular_series.localized(), "tv"),
-        (.upcomingMovies, MR.strings().upcoming_movies.localized(), "calendar")
-    ]
+    private var activeCategories: [DiscoverCategory] {
+        visibleCategories.isEmpty ? DiscoverCategory.entries : visibleCategories
+    }
+
+    private var currentSelectedCategory: DiscoverCategory {
+        if let selected = selectedCategory, activeCategories.contains(selected) {
+            return selected
+        }
+        return activeCategories.first ?? .trending
+    }
+
+    private var categories: [(DiscoverCategory, String, String)] {
+        return activeCategories.map { category in
+            let title = category.title.localized()
+            let icon: String
+            switch category {
+            case .trending: icon = "chart.line.uptrend.xyaxis"
+            case .popularMovies: icon = "film"
+            case .popularSeries: icon = "tv"
+            case .upcomingMovies, .upcomingSeries: icon = "calendar"
+            default: icon = "calendar"
+            }
+            return (category, title, icon)
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -2352,7 +2373,7 @@ struct DashboardDiscoverFeedSection: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(categories, id: \.0) { category, title, icon in
-                            let isSelected = selectedCategory == category
+                            let isSelected = currentSelectedCategory == category
                             Button(action: {
                                 withAnimation { selectedCategory = category }
                             }) {
@@ -2372,7 +2393,7 @@ struct DashboardDiscoverFeedSection: View {
                     }
                 }
 
-                let items = state.getDiscoverFeedItems(category: selectedCategory)
+                let items = state.getDiscoverFeedItems(category: currentSelectedCategory)
 
                 if items.isEmpty {
                     Text(MR.strings().no_media_found.localized())

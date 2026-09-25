@@ -18,6 +18,7 @@ class DashboardViewModelS: ObservableObject {
     @Published private(set) var showFirstLaunchAlert: Bool = false
     @Published private(set) var showDashboardSearch: Bool = true
     @Published var cards: [DashboardCards] = []
+    @Published private(set) var discoverSectionPreferences = DiscoverSectionPreferences()
 
     init() {
         self.viewModel = KoinBridge.shared.getDashboardViewModel()
@@ -40,6 +41,9 @@ class DashboardViewModelS: ObservableObject {
         }
         viewModel.cards.observeAsync(on: self) { owner, cards in
             owner.cards = cards
+        }
+        viewModel.discoverSectionPreferences.observeAsync(on: self) { owner, prefs in
+            owner.discoverSectionPreferences = prefs
         }
     }
 

@@ -105,9 +105,8 @@ sealed interface CombinedDashboardState {
                 DiscoverCategory.TRENDING -> trendingMedia
                 DiscoverCategory.POPULAR_MOVIES -> popularMovies
                 DiscoverCategory.POPULAR_SERIES -> popularTv
-                DiscoverCategory.UPCOMING_MOVIES,
-                DiscoverCategory.UPCOMING_SERIES,
-                -> upcomingMovies.ifEmpty { upcomingTv }
+                DiscoverCategory.UPCOMING_MOVIES -> upcomingMovies
+                DiscoverCategory.UPCOMING_SERIES -> upcomingTv
             }
 
         fun resolveMediaStatus(item: DiscoverResult): com.dnfapps.arrmatey.seerr.api.model.MediaStatus {
