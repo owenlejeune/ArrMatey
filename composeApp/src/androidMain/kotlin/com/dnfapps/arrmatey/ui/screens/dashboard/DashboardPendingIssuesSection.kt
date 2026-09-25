@@ -63,13 +63,14 @@ fun DashboardPendingIssuesSection(
     onIssueClick: (MediaIssuePackage) -> Unit = {},
 ) {
     var selectedFilter by remember { mutableStateOf(IssueState.Open) }
-    val filteredIssues = remember(selectedFilter, state.allIssues) {
-        if (selectedFilter == IssueState.All) {
-            state.allIssues
-        } else {
-            state.allIssues.filter { it.issue.matchesFilter(selectedFilter) }
+    val filteredIssues =
+        remember(selectedFilter, state.allIssues) {
+            if (selectedFilter == IssueState.All) {
+                state.allIssues
+            } else {
+                state.allIssues.filter { it.issue.matchesFilter(selectedFilter) }
+            }
         }
-    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -244,12 +245,13 @@ private fun CompactIssueCard(
                         if (issue.media?.mediaType == RequestType.Tv) {
                             val seasonLabel = issue.problemSeason.takeUnless { it == 0 }?.let { "S$it" }
                             val episodeLabel = issue.problemEpisode.takeUnless { it == 0 }?.let { "E$it" }
-                            val tvInfo = when {
-                                seasonLabel != null && episodeLabel != null -> "$seasonLabel • $episodeLabel"
-                                seasonLabel != null -> seasonLabel
-                                episodeLabel != null -> episodeLabel
-                                else -> null
-                            }
+                            val tvInfo =
+                                when {
+                                    seasonLabel != null && episodeLabel != null -> "$seasonLabel • $episodeLabel"
+                                    seasonLabel != null -> seasonLabel
+                                    episodeLabel != null -> episodeLabel
+                                    else -> null
+                                }
                             if (tvInfo != null) {
                                 Text(
                                     text = tvInfo,

@@ -74,7 +74,7 @@ interface SeerrClient {
     suspend fun getRequests(
         page: Int = 1,
         pageSize: Int = 100,
-        filter: RequestState = RequestState.All
+        filter: RequestState = RequestState.All,
     ): NetworkResult<RequestResponse>
 
     suspend fun getRequestCount(): NetworkResult<RequestCount>
@@ -210,7 +210,7 @@ class SeerrClientImpl(
     override suspend fun getRequests(
         page: Int,
         pageSize: Int,
-        filter: RequestState
+        filter: RequestState,
     ): NetworkResult<RequestResponse> =
         get(
             "request",

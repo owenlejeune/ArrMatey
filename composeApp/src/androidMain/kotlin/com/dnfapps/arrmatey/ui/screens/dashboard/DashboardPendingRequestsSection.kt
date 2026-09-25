@@ -59,13 +59,14 @@ fun DashboardPendingRequestsSection(
     onRequestClick: (MediaRequestPackage) -> Unit = {},
 ) {
     var selectedFilter by remember { mutableStateOf(RequestState.Pending) }
-    val filteredRequests = remember(selectedFilter, state.allRequests) {
-        if (selectedFilter == RequestState.All) {
-            state.allRequests
-        } else {
-            state.allRequests.filter { it.request.matchesFilter(selectedFilter) }
+    val filteredRequests =
+        remember(selectedFilter, state.allRequests) {
+            if (selectedFilter == RequestState.All) {
+                state.allRequests
+            } else {
+                state.allRequests.filter { it.request.matchesFilter(selectedFilter) }
+            }
         }
-    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
