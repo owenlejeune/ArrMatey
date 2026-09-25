@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -52,6 +51,7 @@ import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.PersonDetailsHeader
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.helpers.MinColumnsAdaptiveGridCells
 import com.dnfapps.arrmatey.utils.GridDensity
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -118,7 +118,10 @@ fun SeerrPersonDetailsScreen(
                         onRefresh = { viewModel.refreshDetails() },
                     ) {
                         LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = GridDensity.Normal.minSize),
+                            columns = MinColumnsAdaptiveGridCells(
+                                minSize = GridDensity.Normal.minSize,
+                                minColumns = 3
+                            ),
                             state = gridState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding =
