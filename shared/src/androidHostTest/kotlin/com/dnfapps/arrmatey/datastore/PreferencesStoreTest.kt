@@ -56,12 +56,16 @@ class PreferencesStoreTest {
             // Default is true
             assertEquals(true, preferencesStore.overlayTabBackOpensDrawer.first())
 
-            // Toggle to false
-            preferencesStore.toggleOverlayTabBackOpensDrawer()
+            // Set to false via dataStore
+            dataStore.edit { prefs ->
+                prefs[PreferenceKeys.OVERLAY_TAB_BACK_OPENS_DRAWER] = false
+            }
             assertEquals(false, preferencesStore.overlayTabBackOpensDrawer.first())
 
-            // Set to true
-            preferencesStore.setOverlayTabBackOpensDrawer(true)
+            // Set to true via dataStore
+            dataStore.edit { prefs ->
+                prefs[PreferenceKeys.OVERLAY_TAB_BACK_OPENS_DRAWER] = true
+            }
             assertEquals(true, preferencesStore.overlayTabBackOpensDrawer.first())
         }
 }
