@@ -68,7 +68,7 @@ class PagingController<T : Any>(
         if (!currentState.canLoadMore) return
 
         scope.launch {
-            _state.update { it.copy(isLoadingMore = true) }
+            _state.update { it.copy(isLoadingMore = true, error = null) }
 
             val nextPage = currentState.currentPage + 1
 

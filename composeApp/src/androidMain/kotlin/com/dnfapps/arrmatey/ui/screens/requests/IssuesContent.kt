@@ -49,6 +49,7 @@ fun IssuesContent(
                     hasMore = pagedData.hasMore,
                     isLoadingMore = pagedData.isLoadingMore,
                     onLoadMore = onLoadMore,
+                    loadMoreFailed = pagedData.loadMoreFailed,
                     onSelectIssue = {
                         selectedIssue = it
                     },

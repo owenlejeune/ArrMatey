@@ -189,6 +189,7 @@ struct RequestsContentView: View {
                     items: pagedData.items as! [MediaRequestPackage],
                     hasMore: pagedData.hasMore,
                     isLoadingMore: pagedData.isLoadingMore,
+                    loadMoreFailed: pagedData.loadMoreFailed,
                     userState: userState,
                     operationsState: operationsState,
                     onApprove: onApprove,
@@ -276,6 +277,7 @@ struct IssuesContentView: View {
                     items: pagedData.items as! [MediaIssuePackage],
                     hasMore: pagedData.hasMore,
                     isLoadingMore: pagedData.isLoadingMore,
+                    loadMoreFailed: pagedData.loadMoreFailed,
                     onLoadMore: onLoadMore,
                     onSelectIssue: { selectedIssue = $0 }
                 )
@@ -315,6 +317,7 @@ private struct RequestsListView: View {
     let items: [MediaRequestPackage]
     let hasMore: Bool
     let isLoadingMore: Bool
+    var loadMoreFailed: Bool = false
     let userState: SeerrUser?
     let operationsState: RequestOperationsState
     let onApprove: (Int64) -> Void
@@ -357,6 +360,15 @@ private struct RequestsListView: View {
                 if isLoadingMore {
                     ProgressView()
                         .padding(16)
+                } else if loadMoreFailed {
+                    Button(action: onLoadMore) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.accentColor)
+                            .padding(8)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(16)
                 }
             }
             .padding(16)
@@ -370,6 +382,7 @@ private struct IssuesListView: View {
     let items: [MediaIssuePackage]
     let hasMore: Bool
     let isLoadingMore: Bool
+    var loadMoreFailed: Bool = false
     let onLoadMore: () -> Void
     let onSelectIssue: (MediaIssuePackage) -> Void
 
@@ -391,6 +404,15 @@ private struct IssuesListView: View {
                 if isLoadingMore {
                     ProgressView()
                         .padding(16)
+                } else if loadMoreFailed {
+                    Button(action: onLoadMore) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.accentColor)
+                            .padding(8)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(16)
                 }
             }
             .padding(16)

@@ -15,5 +15,8 @@ data class PagedData<T>(
     val canLoadMore: Boolean
         get() = hasMore && !isLoadingMore && !isLoading
 
+    val loadMoreFailed: Boolean
+        get() = error != null && items.isNotEmpty() && hasMore && !isLoadingMore
+
     constructor() : this(emptyList()) // empty ios constructor
 }

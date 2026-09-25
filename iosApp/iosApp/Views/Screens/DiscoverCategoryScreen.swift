@@ -44,6 +44,16 @@ struct DiscoverCategoryScreen: View {
                         if data.isLoadingMore {
                             ProgressView()
                                 .padding(.vertical, 16)
+                        } else if data.loadMoreFailed {
+                            Button(action: { viewModel.loadNextPageForCategory(category) }) {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.accentColor)
+                                    .padding(8)
+                            }
+                            .buttonStyle(.plain)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
                         }
                     }
                     .padding(16)

@@ -71,6 +71,7 @@ fun RequestsContent(
                     onRemoveFromService = onRemoveFromService,
                     onNavigateToDetails = onNavigateToDetails,
                     onLoadMore = onLoadMore,
+                    loadMoreFailed = pagedData.loadMoreFailed,
                     onViewRequest = { pkg -> selectedRequestPackageForSheet = pkg },
                 )
             }

@@ -87,6 +87,15 @@ struct DiscoverSection: View {
                         if data.isLoadingMore {
                             ProgressView()
                                 .padding(.horizontal, horizontalPadding)
+                        } else if data.loadMoreFailed {
+                            Button(action: onLoadMore) {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.accentColor)
+                                    .padding(8)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, horizontalPadding)
                         }
                     }
                     .padding(.horizontal, horizontalPadding)

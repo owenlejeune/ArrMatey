@@ -10,7 +10,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
@@ -22,7 +27,9 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
 fun RequestsList(
@@ -38,6 +45,7 @@ fun RequestsList(
     onRemoveFromService: (MediaRequest) -> Unit,
     onNavigateToDetails: (Long, RequestType) -> Unit,
     onLoadMore: () -> Unit,
+    loadMoreFailed: Boolean = false,
     onViewRequest: ((MediaRequestPackage) -> Unit)? = null,
 ) {
     val listState = rememberLazyListState()
@@ -106,6 +114,27 @@ fun RequestsList(
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.5.dp,
                     )
+                }
+            }
+        } else if (loadMoreFailed) {
+            item {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    IconButton(
+                        onClick = onLoadMore,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = mokoString(MR.strings.retry),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
             }
         }
