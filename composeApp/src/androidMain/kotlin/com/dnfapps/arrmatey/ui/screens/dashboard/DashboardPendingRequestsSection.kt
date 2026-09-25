@@ -2,8 +2,10 @@ package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -152,25 +155,14 @@ private fun CompactRequestCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.Top,
             ) {
-                val posterModel: Any? =
+                val posterModel =
                     if (details?.fullPosterPath != null) {
                         rememberRemoteImageData(details.fullPosterPath)
                     } else {
-                        painterResource(if (request.type == RequestType.Tv) MR.images.sonarr_mock_poster else MR.images.radarr_mock_poster)
+                        null
                     }
 
-                if (posterModel is Painter) {
-                    Image(
-                        painter = posterModel,
-                        contentDescription = null,
-                        modifier =
-                            Modifier
-                                .width(60.dp)
-                                .aspectRatio(AspectRatio.Poster.ratio)
-                                .clip(MaterialTheme.shapes.medium),
-                        contentScale = ContentScale.Crop,
-                    )
-                } else {
+                if (posterModel != null) {
                     AsyncImage(
                         model = posterModel,
                         contentDescription = null,
@@ -181,6 +173,23 @@ private fun CompactRequestCard(
                                 .clip(MaterialTheme.shapes.medium),
                         contentScale = ContentScale.Crop,
                     )
+                } else {
+                    Box(
+                        modifier =
+                            Modifier
+                                .width(60.dp)
+                                .aspectRatio(AspectRatio.Poster.ratio)
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.BrokenImage,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
                 }
 
                 Column(
