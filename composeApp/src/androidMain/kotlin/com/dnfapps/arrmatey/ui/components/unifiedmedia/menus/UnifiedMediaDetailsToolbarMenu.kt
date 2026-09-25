@@ -44,6 +44,7 @@ import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 
@@ -65,13 +66,14 @@ fun UnifiedMediaDetailsToolbarMenu(
     onMarkAsAvailable: () -> Unit,
     onRemoveFromService: () -> Unit,
     onClearData: () -> Unit,
+    onReportIssue: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteFile: (() -> Unit)? = null,
 ) {
     val showArrActions = success.hasArrId && isArrConfigured
     val showSeerrActions =
         isSeerrConfigured &&
-            (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
+            (buttonState.showReportIssueButton || buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
     val showMissingInstances = success.missingInstances.isNotEmpty()
     val showMenuButton = showArrActions || showSeerrActions || showMissingInstances
 
@@ -144,6 +146,7 @@ fun UnifiedMediaDetailsToolbarMenu(
                     onMarkAsAvailable = onMarkAsAvailable,
                     onRemoveFromService = onRemoveFromService,
                     onClearData = onClearData,
+                    onReportIssue = onReportIssue,
                     onDismiss = { showMenu = false },
                 )
             }
@@ -321,9 +324,26 @@ private fun SeerrActionsMenuGroup(
     onMarkAsAvailable: () -> Unit,
     onRemoveFromService: () -> Unit,
     onClearData: () -> Unit,
+    onReportIssue: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     DropdownMenuGroup(shapes = MenuDefaults.groupShape(groupIndex, totalGroups)) {
+        if (buttonState.showReportIssueButton) {
+            DropdownMenuItem(
+                text = { Text(mokoString(MR.strings.report_issue)) },
+                onClick = {
+                    onReportIssue()
+                    onDismiss()
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = ArrOrange,
+                    )
+                },
+            )
+        }
         if (buttonState.showMarkAsAvailableButton) {
             DropdownMenuItem(
                 text = { Text(mokoString(MR.strings.mark_as_available)) },

@@ -19,7 +19,7 @@ struct UnifiedMediaDetailsToolbarMenuView: View {
     var body: some View {
         let buttonState = viewModel.buttonState
         let showArrActions = success.hasArrId && viewModel.isArrConfigured
-        let showSeerrActions = viewModel.isSeerrConfigured && (buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
+        let showSeerrActions = viewModel.isSeerrConfigured && (buttonState.showReportIssueButton || buttonState.showRemoveFromServiceButton || buttonState.showClearDataButton || buttonState.showMarkAsAvailableButton)
         let showMissingInstances = !success.missingInstances.isEmpty
         let showMenuButton = showArrActions || showSeerrActions || showMissingInstances
 
@@ -68,6 +68,12 @@ struct UnifiedMediaDetailsToolbarMenuView: View {
 
                 if showSeerrActions {
                     Section {
+                        if buttonState.showReportIssueButton {
+                            Button(action: { viewModel.showReportIssueSheet() }) {
+                                Label(MR.strings().report_issue.localized(), systemImage: "exclamationmark.triangle")
+                            }
+                        }
+
                         if buttonState.showMarkAsAvailableButton {
                             let markTitle = viewModel.resolvedRequestType == RequestType.movie ? MR.strings().mark_as_available.localized() : MR.strings().mark_all_seasons_as_available.localized()
                             Button(action: { viewModel.markSeerrMediaAsAvailable() }) {

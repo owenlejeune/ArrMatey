@@ -21,28 +21,10 @@ struct ClearLogoView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(minHeight: 64)
-//                        .background {
-//                            if colorScheme == .light {
-//                                RoundedRectangle(cornerRadius: 16)
-//                                    .fill(Color.black.opacity(0.4))
-//                                    .blur(radius: 5)
-//                                    .padding(-4)
-//                            }
-//                        }
+                        .shadow(color: Color.black.opacity(0.6), radius: 3, x: 0, y: 1.5)
                 }
-//                else {
-//                    Color.clear.frame(height: 64)
-//                }
             }
             .frame(maxWidth: .infinity, alignment: .center)
         }
-//        else {
-//            Text(item.title ?? MR.strings().unknown.localized())
-//                .font(.system(size: 36, weight: .bold))
-//                .lineLimit(4)
-//                .truncationMode(.tail)
-//                .multilineTextAlignment(.center)
-//                .frame(maxWidth: .infinity, alignment: .center)
-//        }
     }
 }

@@ -22,23 +22,12 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            reportIssueButton
             watchMenu
             addRequestButton
             approvalMenu
             monitorButton
             instanceSwitcher
             overflowMenu
-        }
-    }
-
-    @ViewBuilder
-    private var reportIssueButton: some View {
-        if viewModel.buttonState.showReportIssueButton {
-            Button(action: { viewModel.showReportIssueSheet() }) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundColor(.orange)
-            }
         }
     }
 

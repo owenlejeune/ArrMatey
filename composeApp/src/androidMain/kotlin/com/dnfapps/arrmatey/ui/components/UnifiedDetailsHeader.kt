@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -32,6 +37,7 @@ import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun UnifiedDetailsHeader(
     type: InstanceType?,
@@ -67,7 +73,7 @@ fun UnifiedDetailsHeader(
                     .padding(top = topPadding)
                     .padding(horizontal = 12.dp)
                     .align(Alignment.BottomCenter),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
             BasePosterItem(
@@ -87,6 +93,19 @@ fun UnifiedDetailsHeader(
                         AsyncImage(
                             model = rememberRemoteImageData(clearLogo),
                             contentDescription = null,
+                            colorFilter = ColorFilter.tint(Color.Black.copy(alpha = 0.75f)),
+                            modifier =
+                                Modifier
+                                    .align(Alignment.CenterStart)
+                                    .height(120.dp)
+                                    .padding(horizontal = 6.dp)
+                                    .offset(y = 1.5.dp)
+                                    .blur(2.5.dp),
+                            contentScale = ContentScale.Fit,
+                        )
+                        AsyncImage(
+                            model = rememberRemoteImageData(clearLogo),
+                            contentDescription = null,
                             modifier =
                                 Modifier
                                     .align(Alignment.CenterStart)
@@ -103,16 +122,18 @@ fun UnifiedDetailsHeader(
                     year,
                     runtimeString,
                     seasonCount,
-                    certification,
                 ).joinToString(BULLET).takeUnless { it.isEmpty() }?.let { info ->
                     Text(
                         text = info,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMediumEmphasized,
                     )
                 }
-                releasedBy?.let { releasedBy ->
+                listOfNotNull(
+                    certification,
+                    releasedBy
+                ).joinToString(BULLET).takeUnless { it.isEmpty() }?.let { info ->
                     Text(
-                        text = releasedBy,
+                        text = info,
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }

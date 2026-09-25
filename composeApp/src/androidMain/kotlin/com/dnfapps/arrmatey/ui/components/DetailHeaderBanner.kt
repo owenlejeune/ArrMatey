@@ -44,6 +44,26 @@ fun BoxScope.DetailHeaderBanner(
         Box(
             modifier =
                 Modifier
+                    .height(120.dp)
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            colors =
+                                listOf(
+                                    Color.Black.copy(alpha = 0.7f),
+                                    Color.Black.copy(alpha = 0.3f),
+                                    Color.Transparent,
+                                ),
+                            startY = 0f,
+                            endY = Float.POSITIVE_INFINITY,
+                        ),
+                    ),
+        )
+
+        Box(
+            modifier =
+                Modifier
                     .height(gradientHeight)
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()

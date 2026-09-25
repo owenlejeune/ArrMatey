@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,10 +13,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,6 +94,25 @@ private fun OverlayTopAppBar(
             // Fade in over 200 pixels of scroll
             val fadeDistance = 200f
             (scrollValueProvider() / fadeDistance).coerceIn(0f, 1f)
+        }
+    }
+
+    val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val isScrolled = headerBackgroundAlpha > 0.5f
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        val window = (view.context as? Activity)?.window
+        if (window != null) {
+            val insetsController = remember(window, view) {
+                WindowCompat.getInsetsController(window, view)
+            }
+            DisposableEffect(insetsController, isScrolled, isDarkTheme) {
+                insetsController.isAppearanceLightStatusBars = if (isScrolled) !isDarkTheme else false
+                onDispose {
+                    insetsController.isAppearanceLightStatusBars = !isDarkTheme
+                }
+            }
         }
     }
 

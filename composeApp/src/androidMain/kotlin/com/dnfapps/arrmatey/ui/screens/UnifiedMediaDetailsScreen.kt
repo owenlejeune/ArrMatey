@@ -356,23 +356,6 @@ fun UnifiedMediaDetailsScreen(
                         val canAddDirectly = !success.hasArrId && success.arrMedia != null && isArrConfigured
                         val resolvedType = viewModel.resolvedInstanceType
 
-                        AnimatedVisibility(
-                            visible = buttonState.showReportIssueButton,
-                            enter = fadeIn() + expandHorizontally(),
-                            exit = fadeOut() + shrinkHorizontally(),
-                        ) {
-                            IconButton(
-                                onClick = { viewModel.showReportIssueSheet() },
-                                colors = IconButtonDefaults.headerBarColors(),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Warning,
-                                    contentDescription = mokoString(MR.strings.report_issue),
-                                    tint = ArrOrange,
-                                )
-                            }
-                        }
-
                         MediaActionsToolbarMenus(
                             buttonState = buttonState,
                             canAddDirectly = canAddDirectly,
@@ -448,6 +431,7 @@ fun UnifiedMediaDetailsScreen(
                             onMarkAsAvailable = { viewModel.markSeerrMediaAsAvailable() },
                             onRemoveFromService = { confirmRemoveFromService = true },
                             onClearData = { confirmClearData = true },
+                            onReportIssue = { viewModel.showReportIssueSheet() },
                         )
                     }
                 },
