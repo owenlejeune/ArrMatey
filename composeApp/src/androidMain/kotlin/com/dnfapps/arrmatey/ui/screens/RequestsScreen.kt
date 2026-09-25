@@ -59,7 +59,9 @@ fun RequestsScreen(
     val pagedData by viewModel.requestsState.collectAsStateWithLifecycle()
     val issuesData by viewModel.issuesState.collectAsStateWithLifecycle()
     val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
+    val selectedIssueFilter by viewModel.selectedIssueFilter.collectAsStateWithLifecycle()
     val pendingRequestsCount by viewModel.pendingRequestsCount.collectAsStateWithLifecycle()
+    val openIssuesCount by viewModel.openIssuesCount.collectAsStateWithLifecycle()
     val requestOperationsState by viewModel.operationsState.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val requestActionStatus by viewModel.requestActionStatus.collectAsStateWithLifecycle()
@@ -143,8 +145,8 @@ fun RequestsScreen(
                                         text =
                                             buildString {
                                                 append(mokoString(MR.strings.issues))
-                                                if (issuesData.totalItemCount > 0) {
-                                                    append(" (${issuesData.totalItemCount})")
+                                                if (openIssuesCount > 0) {
+                                                    append(" ($openIssuesCount)")
                                                 }
                                             },
                                     )
@@ -175,6 +177,8 @@ fun RequestsScreen(
                         } else {
                             IssuesContent(
                                 pagedData = issuesData,
+                                selectedFilter = selectedIssueFilter,
+                                onFilterSelected = { viewModel.setIssueFilter(it) },
                                 onLoadMore = { viewModel.loadNextIssuesPage() },
                                 onRetry = { viewModel.retryIssues() },
                                 onClearError = { viewModel.clearIssuesError() },
@@ -221,6 +225,8 @@ fun RequestsScreen(
                                 Box(modifier = Modifier.weight(1f)) {
                                     IssuesContent(
                                         pagedData = issuesData,
+                                        selectedFilter = selectedIssueFilter,
+                                        onFilterSelected = { viewModel.setIssueFilter(it) },
                                         onLoadMore = { viewModel.loadNextIssuesPage() },
                                         onRetry = { viewModel.retryIssues() },
                                         onClearError = { viewModel.clearIssuesError() },

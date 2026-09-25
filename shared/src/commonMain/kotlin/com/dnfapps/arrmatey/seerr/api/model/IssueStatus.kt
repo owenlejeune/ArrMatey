@@ -8,6 +8,7 @@ enum class IssueStatus(
     val resource: StringResource,
 ) {
     Open(1, MR.strings.open),
+    Closed(2, MR.strings.closed),
     Unknown(-1, MR.strings.unknown),
     ;
 

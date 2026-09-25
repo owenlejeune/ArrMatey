@@ -6,11 +6,14 @@ import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResponse
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
+import com.dnfapps.arrmatey.seerr.api.model.IssueCount
+import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.IssuesResponse
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestCount
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestState
@@ -73,6 +76,8 @@ interface SeerrClient {
         pageSize: Int = 100,
         filter: RequestState = RequestState.All
     ): NetworkResult<RequestResponse>
+
+    suspend fun getRequestCount(): NetworkResult<RequestCount>
 
     suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest>
 
@@ -147,7 +152,10 @@ interface SeerrClient {
     suspend fun getIssues(
         page: Int = 1,
         pageSize: Int = 100,
+        filter: IssueState = IssueState.All,
     ): NetworkResult<IssuesResponse>
+
+    suspend fun getIssueCount(): NetworkResult<IssueCount>
 
     suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue>
 
@@ -212,6 +220,8 @@ class SeerrClientImpl(
                 "filter" to filter.value,
             ),
         )
+
+    override suspend fun getRequestCount(): NetworkResult<RequestCount> = get("request/count")
 
     override suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> = post("request", request)
 
@@ -301,15 +311,18 @@ class SeerrClientImpl(
     override suspend fun getIssues(
         page: Int,
         pageSize: Int,
+        filter: IssueState,
     ): NetworkResult<IssuesResponse> =
         get(
             "issue",
             mapOf(
                 "take" to pageSize,
                 "skip" to (page - 1) * pageSize,
-                "filter" to "open",
+                "filter" to filter.value,
             ),
         )
+
+    override suspend fun getIssueCount(): NetworkResult<IssueCount> = get("issue/count")
 
     override suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> = post("issue", issue)
 

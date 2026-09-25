@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
+import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
@@ -120,16 +121,22 @@ class SeerrInstanceRepository(
             }
             launch {
                 client
-                    .getRequests(page = 1, pageSize = 1, filter = RequestState.Pending)
-                    .onSuccess { response ->
-                        _pendingRequestsCount.value = response.pageInfo.results
+                    .getRequestCount()
+                    .onSuccess { count ->
+                        _pendingRequestsCount.value = count.pending
                     }
             }
             launch {
                 client
-                    .getIssues(page = 1, pageSize = 20)
+                    .getIssueCount()
+                    .onSuccess { count ->
+                        _openIssuesCount.value = count.open
+                    }
+            }
+            launch {
+                client
+                    .getIssues(page = 1, pageSize = 50, filter = IssueState.All)
                     .onSuccess { response ->
-                        _openIssuesCount.value = response.pageInfo.results
                         val enrichedIssues = issuePackageService.enrichIssues(response.results)
                         _openIssues.value = enrichedIssues
                     }.onError { _, _, _ ->
@@ -475,10 +482,10 @@ class SeerrInstanceRepository(
 
     suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> = client.submitIssue(issue)
 
-    fun getIssuesPaging(): PagingSource<MediaIssuePackage> =
+    fun getIssuesPaging(filter: IssueState = IssueState.All): PagingSource<MediaIssuePackage> =
         BasePagingSource(
             fetcher = { page ->
-                client.getIssues(page = page)
+                client.getIssues(page = page, filter = filter)
             },
             processor = { response ->
                 val enrichedIssues = issuePackageService.enrichIssues(response.results)

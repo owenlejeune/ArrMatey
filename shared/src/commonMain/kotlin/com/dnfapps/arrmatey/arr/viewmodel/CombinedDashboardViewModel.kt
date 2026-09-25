@@ -186,7 +186,7 @@ class CombinedDashboardViewModel(
                                     pendingRequestsCount = pendingCount,
                                     openIssuesCount = issuesCount,
                                     requests = requests,
-                                    openIssues = issues,
+                                    issues = issues,
                                     isOnline = isOnline,
                                 )
                             }

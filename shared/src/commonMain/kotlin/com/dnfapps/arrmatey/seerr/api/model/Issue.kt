@@ -16,4 +16,11 @@ data class Issue(
     val media: RequestMedia? = null,
     val createdBy: RequestUser? = null,
     val comments: List<Comment> = emptyList(),
-)
+) {
+    fun matchesFilter(state: IssueState): Boolean =
+        when (state) {
+            IssueState.All -> true
+            IssueState.Open -> IssueStatus.fromValue(status) == IssueStatus.Open
+            IssueState.Closed -> IssueStatus.fromValue(status) == IssueStatus.Closed
+        }
+}

@@ -23,11 +23,16 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -56,6 +62,15 @@ fun DashboardPendingIssuesSection(
     enabled: Boolean = true,
     onIssueClick: (MediaIssuePackage) -> Unit = {},
 ) {
+    var selectedFilter by remember { mutableStateOf(IssueState.Open) }
+    val filteredIssues = remember(selectedFilter, state.allIssues) {
+        if (selectedFilter == IssueState.All) {
+            state.allIssues
+        } else {
+            state.allIssues.filter { it.issue.matchesFilter(selectedFilter) }
+        }
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -86,7 +101,6 @@ fun DashboardPendingIssuesSection(
                 )
             }
 
-            val openIssues = state.openIssues
             if (state.seerrInstances.isEmpty()) {
                 Text(
                     text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
@@ -98,27 +112,43 @@ fun DashboardPendingIssuesSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
-            } else if (openIssues.isEmpty()) {
-                Text(
-                    text = mokoString(MR.strings.no_issues_found),
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
             } else {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    items(openIssues, key = { it.issue.id }) { item ->
-                        CompactIssueCard(
-                            issuePackage = item,
-                            onClick = { if (enabled) onIssueClick(item) },
+                    items(IssueState.entries) { filterState ->
+                        FilterChip(
+                            selected = selectedFilter == filterState,
+                            onClick = { selectedFilter = filterState },
+                            label = { Text(mokoString(filterState.resource)) },
                         )
+                    }
+                }
+
+                if (filteredIssues.isEmpty()) {
+                    Text(
+                        text = mokoString(MR.strings.no_issues_found),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                } else {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                    ) {
+                        items(filteredIssues, key = { it.issue.id }) { item ->
+                            CompactIssueCard(
+                                issuePackage = item,
+                                onClick = { if (enabled) onIssueClick(item) },
+                            )
+                        }
                     }
                 }
             }
@@ -211,6 +241,24 @@ private fun CompactIssueCard(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
+                        if (issue.media?.mediaType == RequestType.Tv) {
+                            val seasonLabel = issue.problemSeason.takeUnless { it == 0 }?.let { "S$it" }
+                            val episodeLabel = issue.problemEpisode.takeUnless { it == 0 }?.let { "E$it" }
+                            val tvInfo = when {
+                                seasonLabel != null && episodeLabel != null -> "$seasonLabel • $episodeLabel"
+                                seasonLabel != null -> seasonLabel
+                                episodeLabel != null -> episodeLabel
+                                else -> null
+                            }
+                            if (tvInfo != null) {
+                                Text(
+                                    text = tvInfo,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
                     }
 
                     Text(
@@ -241,17 +289,6 @@ private fun CompactIssueCard(
                         }
                     }
                 }
-            }
-
-            if (issue.media?.mediaType == RequestType.Tv) {
-                val seasonLabel = issue.problemSeason.takeUnless { it == 0 }?.toString() ?: mokoString(MR.strings.all)
-                val episodeLabel = issue.problemEpisode.takeUnless { it == 0 }?.toString() ?: mokoString(MR.strings.all)
-                Text(
-                    text = "S$seasonLabel • E$episodeLabel",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
             }
 
             issue.createdBy?.let { createdBy ->

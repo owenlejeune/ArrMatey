@@ -22,6 +22,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
@@ -33,10 +34,15 @@ fun IssuesList(
     hasMore: Boolean,
     isLoadingMore: Boolean,
     onLoadMore: () -> Unit,
+    selectedFilter: IssueState? = null,
     loadMoreFailed: Boolean = false,
     onSelectIssue: (MediaIssuePackage) -> Unit,
 ) {
     val listState = rememberLazyListState()
+
+    LaunchedEffect(selectedFilter) {
+        listState.scrollToItem(0)
+    }
 
     LaunchedEffect(listState) {
         snapshotFlow {
@@ -60,7 +66,7 @@ fun IssuesList(
             PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
-                top = 16.dp,
+                top = 0.dp,
                 bottom = 16.dp + LocalFloatingBarBottomPadding.current,
             ),
         verticalArrangement = Arrangement.spacedBy(12.dp),

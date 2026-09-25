@@ -123,7 +123,7 @@ fun SeerrSection(
                     CountStatItem(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.BugReport,
-                        label = mokoString(MR.strings.issues),
+                        label = mokoString(MR.strings.dashboard_pending_issues),
                         count = totalIssues,
                         iconColor =
                             if (totalIssues > 0) {

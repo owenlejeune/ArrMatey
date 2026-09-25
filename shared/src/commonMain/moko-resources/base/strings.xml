@@ -669,6 +669,7 @@
     <string name="approved_by">Approved by</string>
     <string name="opened_by">Opened by</string>
     <string name="open">Open</string>
+    <string name="closed">Closed</string>
     <string name="pending_request">Pending Request</string>
     <string name="season_label_short">Season</string>
     <string name="episodes_label_short"># of Episodes</string>

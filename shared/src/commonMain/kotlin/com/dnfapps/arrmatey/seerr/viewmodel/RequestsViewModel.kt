@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
@@ -72,8 +73,27 @@ class RequestsViewModel(
             initialValue = PagedData(),
         )
 
-    private val _issuesState = MutableStateFlow<PagedData<MediaIssuePackage>>(PagedData())
-    val issuesState: StateFlow<PagedData<MediaIssuePackage>> = _issuesState.asStateFlow()
+    private val _rawIssuesState = MutableStateFlow<PagedData<MediaIssuePackage>>(PagedData())
+
+    private val _selectedIssueFilter = MutableStateFlow(IssueState.Open)
+    val selectedIssueFilter: StateFlow<IssueState> = _selectedIssueFilter.asStateFlow()
+
+    val issuesState: StateFlow<PagedData<MediaIssuePackage>> =
+        combine(_rawIssuesState, _selectedIssueFilter) { data, filter ->
+            if (filter == IssueState.All) {
+                data
+            } else {
+                val filteredItems = data.items.filter { it.issue.matchesFilter(filter) }
+                data.copy(
+                    items = filteredItems,
+                    totalItemCount = filteredItems.size,
+                )
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PagedData(),
+        )
 
     private val _operationsState = MutableStateFlow(RequestOperationsState())
     val operationsState: StateFlow<RequestOperationsState> = _operationsState.asStateFlow()
@@ -118,6 +138,17 @@ class RequestsViewModel(
                 initialValue = 0,
             )
 
+    val openIssuesCount: StateFlow<Int> =
+        selectedRepository
+            .filterNotNull()
+            .flatMapLatest { repo ->
+                repo.openIssuesCount
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 0,
+            )
+
     init {
         initializePagingController()
     }
@@ -142,10 +173,10 @@ class RequestsViewModel(
 
                     viewModelScope.launch {
                         issuesPagingController =
-                            getIssuesUseCase.createPagingController(repo, viewModelScope)
+                            getIssuesUseCase.createPagingController(repo, viewModelScope, IssueState.All)
                         issuesPagingController?.loadInitialPage()
                         issuesPagingController?.state?.collect {
-                            _issuesState.value = it
+                            _rawIssuesState.value = it
                         }
                     }
 
@@ -156,6 +187,10 @@ class RequestsViewModel(
 
     fun setFilter(filter: RequestState) {
         _selectedFilter.value = filter
+    }
+
+    fun setIssueFilter(filter: IssueState) {
+        _selectedIssueFilter.value = filter
     }
 
     private fun observeOperationStates(repo: SeerrInstanceRepository) {

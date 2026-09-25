@@ -626,7 +626,7 @@ struct DashboardSeerrSection: View {
 
             HStack(spacing: 12) {
                 StatCard(icon: "tray", label: MR.strings().dashboard_pending_requests.localized(), value: "\(totalRequests)", color: .purple, onClick: isEditing ? nil : onRequestClick)
-                StatCard(icon: "ladybug", label: MR.strings().issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary, onClick: isEditing ? nil : onIssueClick)
+                StatCard(icon: "ladybug", label: MR.strings().dashboard_pending_issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary, onClick: isEditing ? nil : onIssueClick)
             }
         }
     }
@@ -1688,6 +1688,15 @@ struct DashboardPendingIssuesSection: View {
     let isEditing: Bool
     var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
     @EnvironmentObject private var navigationManager: NavigationManager
+    @State private var selectedFilter: IssueState = .open
+
+    private var filteredIssues: [MediaIssuePackage] {
+        if selectedFilter == .all {
+            return state.allIssues
+        } else {
+            return state.allIssues.filter { $0.issue.matchesFilter(state: selectedFilter) }
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -1698,8 +1707,29 @@ struct DashboardPendingIssuesSection: View {
                     .bold()
             }
 
-            let openIssues = state.openIssues
-            if openIssues.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(IssueState.allCases, id: \.self) { filterState in
+                        let isSelected = selectedFilter == filterState
+                        Button(action: { selectedFilter = filterState }) {
+                            Text(filterState.resource.localized())
+                                .font(.subheadline)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+                                .foregroundColor(isSelected ? .white : .primary)
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.primary.opacity(0.1), lineWidth: isSelected ? 0 : 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
+            if filteredIssues.isEmpty {
                 Text(MR.strings().no_issues_found.localized())
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -1707,7 +1737,7 @@ struct DashboardPendingIssuesSection: View {
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        ForEach(openIssues, id: \.issue.id) { issuePackage in
+                        ForEach(filteredIssues, id: \.issue.id) { issuePackage in
                             CompactIssueCard(issuePackage: issuePackage) {
                                 if let onIssueClick = onIssueClick {
                                     onIssueClick(issuePackage)
@@ -1753,13 +1783,26 @@ struct CompactIssueCard: View {
 
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 4) {
+                            if let mediaType = issue.media?.mediaType {
+                                RequestTypeChip(type: mediaType)
+                            }
                             if let year = details?.displayDate?.year {
                                 Text(String(year))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
-                            if let mediaType = issue.media?.mediaType {
-                                RequestTypeChip(type: mediaType)
+                            if issue.media?.mediaType == .tv {
+                                let seasonLabel = issue.problemSeason == 0 ? nil : "S\(issue.problemSeason)"
+                                let episodeLabel = issue.problemEpisode == 0 ? nil : "E\(issue.problemEpisode)"
+                                if let season = seasonLabel, let episode = episodeLabel {
+                                    Text("\(season) • \(episode)")
+                                        .font(.caption2.bold())
+                                        .foregroundColor(.accentColor)
+                                } else if let season = seasonLabel {
+                                    Text(season)
+                                        .font(.caption2.bold())
+                                        .foregroundColor(.accentColor)
+                                }
                             }
                         }
 
@@ -1769,14 +1812,6 @@ struct CompactIssueCard: View {
 
                         SeerrIssueStatusChip(issue: issue)
                     }
-                }
-
-                if issue.media?.mediaType == .tv {
-                    let seasonLabel = issue.problemSeason == 0 ? MR.strings().all.localized() : "\(issue.problemSeason)"
-                    let episodeLabel = issue.problemEpisode == 0 ? MR.strings().all.localized() : "\(issue.problemEpisode)"
-                    Text("S\(seasonLabel) E\(episodeLabel)")
-                        .font(.caption2.bold())
-                        .foregroundColor(.accentColor)
                 }
 
                 if let createdBy = issue.createdBy {
