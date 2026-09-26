@@ -9,17 +9,8 @@ import SwiftUI
 import Shared
 
 struct ActivityTab: View {
-    @Environment(\.navigationContext) private var context
-    
     var body: some View {
-        switch context {
-        case .mainTab:
-            NavigationStack {
-                ActivityTabContent()
-            }
-        case .launcher:
-            ActivityTabContent()
-        }
+        ActivityTabContent()
     }
 }
 
@@ -40,11 +31,13 @@ struct ActivityTabContent: View {
             .navigationTitle(titleText)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigationManager.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
+                if navigationManager.shouldShowDrawerButton(for: TabItemStandard.activity.key) {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            navigationManager.showLauncher = true
+                        } label: {
+                            Image(systemName: "line.3.horizontal")
+                        }
                     }
                 }
 

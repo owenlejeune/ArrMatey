@@ -12,114 +12,213 @@ import UserNotifications
 class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     private let tabManager: TabManager = KoinBridge.shared.getTabManager()
 
-    @Published var settingsPath = NavigationPath()
-    @Published var seriesPath = NavigationPath()
-    @Published var moviePath = NavigationPath()
-    @Published var musicPath = NavigationPath()
-    @Published var bookPath = NavigationPath()
-    @Published var audiobookPath = NavigationPath()
-    @Published var seerrPath = NavigationPath()
-    @Published var launcherPath = NavigationPath()
-    @Published var dashboardPath = NavigationPath()
-    @Published var bazarrPath = NavigationPath()
-    @Published var tracearrPath = NavigationPath()
-    @Published var libraryPath = NavigationPath()
-    @Published var calendarPath = NavigationPath()
+    @Published var paths: [String: NavigationPath] = [:]
 
-    @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemSettings.shared)
+    @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemStandard.dashboard as TabItem)
     @Published var selectedDrawerTab: AnyTabItem? = nil
 
     @Published var showLauncher: Bool = false
+    @Published var showMoreDrawer: Bool = false
 
     private var pendingSettingsRoute: SettingsRoute? = nil
 
+    // MARK: - Scoped Path Accessors
+
+    func pathBinding(for tabKey: String) -> Binding<NavigationPath> {
+        Binding(
+            get: { self.paths[tabKey] ?? NavigationPath() },
+            set: { self.paths[tabKey] = $0 }
+        )
+    }
+
+    func path(for tabKey: String) -> NavigationPath {
+        paths[tabKey] ?? NavigationPath()
+    }
+
+    func setPath(_ path: NavigationPath, for tabKey: String) {
+        paths[tabKey] = path
+    }
+
+    // MARK: - Compatibility Path Properties
+
+    var settingsPath: NavigationPath {
+        get { paths[TabItemSettings.shared.key] ?? NavigationPath() }
+        set { paths[TabItemSettings.shared.key] = newValue }
+    }
+    var seriesPath: NavigationPath {
+        get { paths[TabItemStandard.shows.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.shows.key] = newValue }
+    }
+    var moviePath: NavigationPath {
+        get { paths[TabItemStandard.movies.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.movies.key] = newValue }
+    }
+    var musicPath: NavigationPath {
+        get { paths[TabItemStandard.music.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.music.key] = newValue }
+    }
+    var bookPath: NavigationPath {
+        get { paths[TabItemStandard.books.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.books.key] = newValue }
+    }
+    var audiobookPath: NavigationPath {
+        get { paths[TabItemStandard.audiobooks.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.audiobooks.key] = newValue }
+    }
+    var seerrPath: NavigationPath {
+        get { paths[TabItemStandard.requests.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.requests.key] = newValue }
+    }
+    var launcherPath: NavigationPath {
+        get { paths["launcher"] ?? NavigationPath() }
+        set { paths["launcher"] = newValue }
+    }
+    var dashboardPath: NavigationPath {
+        get { paths[TabItemStandard.dashboard.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.dashboard.key] = newValue }
+    }
+    var bazarrPath: NavigationPath {
+        get { paths[TabItemStandard.bazarr.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.bazarr.key] = newValue }
+    }
+    var tracearrPath: NavigationPath {
+        get { paths[TabItemStandard.tracearr.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.tracearr.key] = newValue }
+    }
+    var libraryPath: NavigationPath {
+        get { paths[TabItemStandard.library.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.library.key] = newValue }
+    }
+    var calendarPath: NavigationPath {
+        get { paths[TabItemStandard.calendar.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.calendar.key] = newValue }
+    }
+
+    // MARK: - Modern Router Operations
+
+    func push(_ route: AppRoute) {
+        let key = activeContextKey()
+        var currentPath = paths[key] ?? NavigationPath()
+        currentPath.append(route)
+        paths[key] = currentPath
+    }
+
+    func push<T: Hashable>(_ route: T) {
+        let key = activeContextKey()
+        var currentPath = paths[key] ?? NavigationPath()
+        currentPath.append(route)
+        paths[key] = currentPath
+    }
+
+    func navigate(to tabKey: String, pushing route: AppRoute? = nil) {
+        let allTabs = tabManager.tabConfiguration.value.visibleTabs + tabManager.tabConfiguration.value.drawerTabs
+        if let match = allTabs.first(where: { $0.key == tabKey }) {
+            navigateToTab(match)
+        }
+        if let route = route {
+            push(route)
+        }
+    }
+
+    func pop() {
+        let key = activeContextKey()
+        guard var currentPath = paths[key], !currentPath.isEmpty else { return }
+        currentPath.removeLast()
+        paths[key] = currentPath
+    }
+
+    func popToRoot() {
+        let key = activeContextKey()
+        paths[key] = NavigationPath()
+    }
+
+    private func activeContextKey() -> String {
+        if showLauncher {
+            return "launcher"
+        }
+        return selectedTab.key
+    }
+
+    // MARK: - Navigation Intents
+
     func go(to route: MediaRoute, of type: InstanceType) {
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
             return
         }
 
         if selectedTab.key == TabItemStandard.library.key {
-            libraryPath.append(route)
+            var libPath = paths[TabItemStandard.library.key] ?? NavigationPath()
+            libPath.append(route)
+            paths[TabItemStandard.library.key] = libPath
             return
         }
 
         navigateToTab(tabFor(type))
 
-        switch type {
-        case .sonarr: seriesPath.append(route)
-        case .radarr: moviePath.append(route)
-        case .lidarr: musicPath.append(route)
-        case .bookshelf: bookPath.append(route)
-        case .listenarr: audiobookPath.append(route)
-        case .seerr: break
-        case .prowlarr: break
-        case .bazarr: break
-        case .tracearr: break
-        }
+        let targetKey = tabKey(for: type)
+        var tabPath = paths[targetKey] ?? NavigationPath()
+        tabPath.append(route)
+        paths[targetKey] = tabPath
     }
 
     func replaceCurrent(with route: MediaRoute, for type: InstanceType) {
         if showLauncher {
-            if !launcherPath.isEmpty { launcherPath.removeLast() }
-            launcherPath.append(route)
+            var lPath = paths["launcher"] ?? NavigationPath()
+            if !lPath.isEmpty { lPath.removeLast() }
+            lPath.append(route)
+            paths["launcher"] = lPath
             return
         }
 
         if selectedTab.key == TabItemStandard.library.key {
-            if !libraryPath.isEmpty { libraryPath.removeLast() }
-            libraryPath.append(route)
+            var libPath = paths[TabItemStandard.library.key] ?? NavigationPath()
+            if !libPath.isEmpty { libPath.removeLast() }
+            libPath.append(route)
+            paths[TabItemStandard.library.key] = libPath
             return
         }
 
         navigateToTab(tabFor(type))
 
-        switch type {
-        case .sonarr:
-            if !seriesPath.isEmpty { seriesPath.removeLast() }
-            seriesPath.append(route)
-        case .radarr:
-            if !moviePath.isEmpty { moviePath.removeLast() }
-            moviePath.append(route)
-        case .lidarr:
-            if !musicPath.isEmpty { musicPath.removeLast() }
-            musicPath.append(route)
-        case .bookshelf:
-            if !bookPath.isEmpty { bookPath.removeLast() }
-            bookPath.append(route)
-        case .listenarr:
-            if !audiobookPath.isEmpty { audiobookPath.removeLast() }
-            audiobookPath.append(route)
-        case .seerr: break
-        case .prowlarr: break // Prowlarr doesn't use media routes
-        case .bazarr: break // Bazarr doesn't use media routes
-        case .tracearr: break
-        }
+        let targetKey = tabKey(for: type)
+        var tabPath = paths[targetKey] ?? NavigationPath()
+        if !tabPath.isEmpty { tabPath.removeLast() }
+        tabPath.append(route)
+        paths[targetKey] = tabPath
     }
 
     func go(to route: SettingsRoute) {
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
         } else {
-            settingsPath.append(route)
+            var sPath = paths[TabItemSettings.shared.key] ?? NavigationPath()
+            sPath.append(route)
+            paths[TabItemSettings.shared.key] = sPath
         }
     }
 
     func go(to route: BazarrRoute) {
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
         } else {
-            bazarrPath.append(route)
+            var bPath = paths[TabItemStandard.bazarr.key] ?? NavigationPath()
+            bPath.append(route)
+            paths[TabItemStandard.bazarr.key] = bPath
         }
     }
 
     func go(to route: TracearrRoute) {
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
         } else if selectedTab.key == TabItemStandard.dashboard.key {
-            dashboardPath.append(route)
+            var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
+            dPath.append(route)
+            paths[TabItemStandard.dashboard.key] = dPath
         } else {
-            tracearrPath.append(route)
+            var tPath = paths[TabItemStandard.tracearr.key] ?? NavigationPath()
+            tPath.append(route)
+            paths[TabItemStandard.tracearr.key] = tPath
         }
     }
 
@@ -136,9 +235,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
         if showLauncher {
             let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
-            launcherPath.append(settingsTab)
-            launcherPath.append(SettingsRoute.services)
-            launcherPath.append(SettingsRoute.newInstance(type))
+            var lPath = paths["launcher"] ?? NavigationPath()
+            lPath.append(settingsTab)
+            lPath.append(SettingsRoute.services)
+            lPath.append(SettingsRoute.newInstance(type))
+            paths["launcher"] = lPath
         } else {
             pendingSettingsRoute = .newInstance(type)
             showLauncher = true
@@ -150,26 +251,19 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
         if showLauncher {
             let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
-            launcherPath.append(settingsTab)
-            launcherPath.append(SettingsRoute.services)
-            launcherPath.append(SettingsRoute.editInstance(id))
+            var lPath = paths["launcher"] ?? NavigationPath()
+            lPath.append(settingsTab)
+            lPath.append(SettingsRoute.services)
+            lPath.append(SettingsRoute.editInstance(id))
+            paths["launcher"] = lPath
         } else {
             pendingSettingsRoute = .editInstance(id)
             showLauncher = true
         }
     }
 
-    private func clearAllPaths() {
-        seriesPath = NavigationPath()
-        moviePath = NavigationPath()
-        musicPath = NavigationPath()
-        bookPath = NavigationPath()
-        audiobookPath = NavigationPath()
-        seerrPath = NavigationPath()
-        launcherPath = NavigationPath()
-        bazarrPath = NavigationPath()
-        tracearrPath = NavigationPath()
-        libraryPath = NavigationPath()
+    func clearAllPaths() {
+        paths.removeAll()
     }
 
     func maybeEditInstance(of type: InstanceType, _ instance: Instance?) {
@@ -180,41 +274,35 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func applyPendingRoute() {
         if let route = pendingSettingsRoute {
-            launcherPath.append(SettingsRoute.services)
-            launcherPath.append(route)
+            var lPath = paths["launcher"] ?? NavigationPath()
+            lPath.append(SettingsRoute.services)
+            lPath.append(route)
+            paths["launcher"] = lPath
             pendingSettingsRoute = nil
         }
     }
 
     func completeSetupAndDismiss() {
         self.showLauncher = false
-
-        self.launcherPath = NavigationPath()
-        self.settingsPath = NavigationPath()
-
-        self.seriesPath = NavigationPath()
-        self.moviePath = NavigationPath()
-        self.musicPath = NavigationPath()
-        self.bookPath = NavigationPath()
-        self.audiobookPath = NavigationPath()
-        self.libraryPath = NavigationPath()
-
-        self.seerrPath = NavigationPath()
-        self.tracearrPath = NavigationPath()
+        self.paths.removeAll()
     }
 
     func goInLauncher(to route: SettingsRoute) {
-        launcherPath.append(route)
+        var lPath = paths["launcher"] ?? NavigationPath()
+        lPath.append(route)
+        paths["launcher"] = lPath
     }
 
     func popLauncherPath() {
-        if !launcherPath.isEmpty {
-            launcherPath.removeLast()
+        var lPath = paths["launcher"] ?? NavigationPath()
+        if !lPath.isEmpty {
+            lPath.removeLast()
+            paths["launcher"] = lPath
         }
     }
 
     func clearLauncherPath() {
-        launcherPath = NavigationPath()
+        paths["launcher"] = NavigationPath()
     }
 
     func openSettings() {
@@ -224,32 +312,45 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     func popToSettings() {
         if showLauncher {
             clearLauncherPath()
-            launcherPath.append(AnyTabItem(item: TabItemSettings.shared))
+            var lPath = NavigationPath()
+            lPath.append(AnyTabItem(item: TabItemSettings.shared))
+            paths["launcher"] = lPath
         } else {
-            settingsPath = NavigationPath()
+            paths[TabItemSettings.shared.key] = NavigationPath()
         }
     }
 
     func goToSeerrDetails(tmdbId: Int64, requestType: RequestType) {
         let route = SeerrRoute.details(tmdbId: tmdbId, requestType: requestType)
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
         } else {
-            seerrPath.append(route)
+            var sPath = paths[TabItemStandard.requests.key] ?? NavigationPath()
+            sPath.append(route)
+            paths[TabItemStandard.requests.key] = sPath
         }
     }
 
     func goToDiscoverCategory(category: DiscoverCategory) {
         let route = SeerrRoute.category(category: category)
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
         } else {
-            seerrPath.append(route)
+            var sPath = paths[TabItemStandard.requests.key] ?? NavigationPath()
+            sPath.append(route)
+            paths[TabItemStandard.requests.key] = sPath
         }
     }
 
     func goToPersonDetails(id: Int64) {
-        goToSeerrDetails(tmdbId: id, requestType: .person)
+        let route = SeerrRoute.personDetails(id: id)
+        if showLauncher {
+            push(route)
+        } else {
+            var sPath = paths[TabItemStandard.requests.key] ?? NavigationPath()
+            sPath.append(route)
+            paths[TabItemStandard.requests.key] = sPath
+        }
     }
 
     func goToDetails(
@@ -258,7 +359,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
-        instanceId: Int64? = nil
+        instanceId: Int64? = nil,
+        episodeId: Int64? = nil
     ) {
         let route = MediaRoute.details(
             arrId: arrId,
@@ -266,23 +368,28 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             tvdbId: tvdbId,
             instanceType: instanceType,
             requestType: requestType,
-            instanceId: instanceId
+            instanceId: instanceId,
+            episodeId: episodeId
         )
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
         } else if let type = instanceType {
             go(to: route, of: type)
         } else if selectedTab.key == TabItemStandard.tracearr.key {
-            tracearrPath.append(route)
+            var tPath = paths[TabItemStandard.tracearr.key] ?? NavigationPath()
+            tPath.append(route)
+            paths[TabItemStandard.tracearr.key] = tPath
         } else {
-            seerrPath.append(route)
+            var sPath = paths[TabItemStandard.requests.key] ?? NavigationPath()
+            sPath.append(route)
+            paths[TabItemStandard.requests.key] = sPath
         }
     }
 
     func goToPreview(_ json: String, type: InstanceType) {
         let route = MediaRoute.preview(json, type: type)
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
         } else {
             go(to: route, of: type)
         }
@@ -308,7 +415,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
-        instanceId: Int64? = nil
+        instanceId: Int64? = nil,
+        episodeId: Int64? = nil
     ) {
         let route = MediaRoute.details(
             arrId: arrId,
@@ -316,12 +424,15 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             tvdbId: tvdbId,
             instanceType: instanceType,
             requestType: requestType,
-            instanceId: instanceId
+            instanceId: instanceId,
+            episodeId: episodeId
         )
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
         } else {
-            dashboardPath.append(route)
+            var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
+            dPath.append(route)
+            paths[TabItemStandard.dashboard.key] = dPath
         }
     }
 
@@ -331,19 +442,23 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         } else {
             let route = SeerrRoute.details(tmdbId: tmdbId, requestType: requestType)
             if showLauncher {
-                launcherPath.append(route)
+                push(route)
             } else {
-                dashboardPath.append(route)
+                var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
+                dPath.append(route)
+                paths[TabItemStandard.dashboard.key] = dPath
             }
         }
     }
 
     func goToPersonDetailsOnDashboard(id: Int64) {
-        let route = MediaRoute.details(tmdbId: id, requestType: .person)
+        let route = SeerrRoute.personDetails(id: id)
         if showLauncher {
-            launcherPath.append(route)
+            push(route)
         } else {
-            dashboardPath.append(route)
+            var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
+            dPath.append(route)
+            paths[TabItemStandard.dashboard.key] = dPath
         }
     }
 
@@ -356,9 +471,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             } else if let type = type {
                 let route = MediaRoute.preview(item.toJson(), type: type)
                 if showLauncher {
-                    launcherPath.append(route)
+                    push(route)
                 } else {
-                    dashboardPath.append(route)
+                    var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
+                    dPath.append(route)
+                    paths[TabItemStandard.dashboard.key] = dPath
                 }
             }
         } else {
@@ -382,7 +499,9 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func openOverlay(_ tab: TabItem) {
         clearLauncherPath()
-        launcherPath.append(AnyTabItem(item: tab))
+        var lPath = NavigationPath()
+        lPath.append(AnyTabItem(item: tab))
+        paths["launcher"] = lPath
         showLauncher = true
     }
 
@@ -445,8 +564,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                 let instanceId = (userInfo[NotificationConstants.shared.EXTRA_INSTANCE_ID] as? String).flatMap { Int64($0) }
                 let episodeId = (userInfo[NotificationConstants.shared.EXTRA_EPISODE_ID] as? String).flatMap { Int64($0) }
 
-                calendarPath = NavigationPath()
-                calendarPath.append(MediaRoute.details(
+                var calPath = NavigationPath()
+                calPath.append(MediaRoute.details(
                     arrId: itemId,
                     tmdbId: tmdbId,
                     tvdbId: nil,
@@ -455,6 +574,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                     instanceId: instanceId,
                     episodeId: episodeId
                 ))
+                paths[TabItemStandard.calendar.key] = calPath
             }
         case NotificationConstants.shared.ACTION_OPEN_DOWNLOADS:
             openDownloadsTab()
@@ -474,14 +594,17 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func openArrDashboard(id: Int64) {
+        let route = SettingsRoute.arrDashboard(id)
         if showLauncher {
-            launcherPath.append(SettingsRoute.arrDashboard(id))
+            push(route)
         } else {
-            dashboardPath.append(SettingsRoute.arrDashboard(id))
+            var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
+            dPath.append(route)
+            paths[TabItemStandard.dashboard.key] = dPath
         }
     }
 
-    private func tabFor(_ type: InstanceType) -> TabItem {
+    func tabFor(_ type: InstanceType) -> TabItem {
         switch type {
         case .sonarr: return TabItemStandard.shows as TabItem
         case .radarr: return TabItemStandard.movies as TabItem
@@ -494,6 +617,31 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .tracearr: return TabItemStandard.tracearr as TabItem
         }
     }
+
+    func tabKey(for type: InstanceType) -> String {
+        tabFor(type).key
+    }
+
+    func shouldShowDrawerButton(for tabKey: String) -> Bool {
+        guard UIDevice.current.userInterfaceIdiom == .phone else { return false }
+        guard !showLauncher else { return false }
+        let visibleTabs = tabManager.tabConfiguration.value.visibleTabs
+        guard visibleTabs.contains(where: { $0.key == tabKey }) else { return false }
+        guard selectedTab.key == tabKey else { return false }
+        guard (paths[tabKey]?.isEmpty ?? true) else { return false }
+        return true
+    }
+}
+
+// MARK: - App Navigation Routes
+
+enum AppRoute: Hashable {
+    case media(MediaRoute)
+    case seerr(SeerrRoute)
+    case settings(SettingsRoute)
+    case bazarr(BazarrRoute)
+    case tracearr(TracearrRoute)
+    case customWebpage(id: Int64)
 }
 
 enum MediaRoute: Hashable {
@@ -508,7 +656,7 @@ enum MediaRoute: Hashable {
     )
     case search(query: String, type: InstanceType, instanceId: Int64? = nil)
     case globalSearch(query: String = "")
-    case preview(_ json : String, type: InstanceType)
+    case preview(_ json: String, type: InstanceType)
     case movieRelease(movieId: Int64, instanceId: Int64? = nil)
     case movieFiles(String)
     case seriesReleases(
@@ -533,9 +681,10 @@ enum MediaRoute: Hashable {
 enum SeerrRoute: Hashable {
     case details(tmdbId: Int64, requestType: RequestType)
     case category(category: DiscoverCategory)
+    case personDetails(id: Int64)
 }
 
-enum SettingsRoute : Hashable {
+enum SettingsRoute: Hashable {
     case services
     case userInterface
     case integrations

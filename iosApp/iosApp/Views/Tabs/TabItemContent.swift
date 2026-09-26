@@ -16,30 +16,27 @@ struct TabItemContent: View {
         Group {
             if let standard = tabItem as? TabItemStandard {
                 switch standard {
-                case .library: LibraryTab().environment(\.navigationContext, .mainTab)
-                case .shows: SeriesTab().environment(\.navigationContext, .mainTab)
-                case .movies: MoviesTab().environment(\.navigationContext, .mainTab)
-                case .music: MusicTab().environment(\.navigationContext, .mainTab)
-                case .books: BooksTab().environment(\.navigationContext, .mainTab)
-                case .audiobooks: AudiobooksTab().environment(\.navigationContext, .mainTab)
-                case .activity: ActivityTab().environment(\.navigationContext, .mainTab)
-                case .calendar: CalendarTab().environment(\.navigationContext, .mainTab)
-                case .downloads: DownloadsTab().environment(\.navigationContext, .mainTab)
-                case .requests: RequestsTab().environment(\.navigationContext, .mainTab)
-                case .discover: DiscoverTab().environment(\.navigationContext, .mainTab)
-                case .prowlarr: ProwlarrTab().environment(\.navigationContext, .mainTab)
-                case .bazarr: BazarrTab().environment(\.navigationContext, .mainTab)
-                case .dashboard: DashboardTab().environment(\.navigationContext, .mainTab)
-                case .tracearr: TracearrTab().environment(\.navigationContext, .mainTab)
+                case .library: LibraryTab()
+                case .shows: SeriesTab()
+                case .movies: MoviesTab()
+                case .music: MusicTab()
+                case .books: BooksTab()
+                case .audiobooks: AudiobooksTab()
+                case .activity: ActivityTab()
+                case .calendar: CalendarTab()
+                case .downloads: DownloadsTab()
+                case .requests: RequestsTab()
+                case .discover: DiscoverTab()
+                case .prowlarr: ProwlarrTab()
+                case .bazarr: BazarrTab()
+                case .dashboard: DashboardTab()
+                case .tracearr: TracearrTab()
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {
                 CustomWebpageViewerScreen(webpageId: custom.id)
             } else if let _ = tabItem as? TabItemSettings {
                 SettingsScreen()
             }
-        }
-        .navigationDestination(for: SettingsRoute.self) { route in
-            SettingsRouteView(route: route)
         }
     }
 }

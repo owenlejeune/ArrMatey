@@ -2,30 +2,8 @@ import Shared
 import SwiftUI
 
 struct TracearrTab: View {
-    @Environment(\.navigationContext) private var context
-    @EnvironmentObject private var navigationManager: NavigationManager
-
     var body: some View {
-        switch context {
-        case .mainTab:
-            NavigationStack(path: $navigationManager.tracearrPath) {
-                TracearrTabContent()
-                    .navigationDestination(for: MediaRoute.self) { route in
-                        MediaRouteDestination(route: route)
-                    }
-                    .navigationDestination(for: TracearrRoute.self) { route in
-                        TracearrRouteDestination(route: route)
-                    }
-            }
-        case .launcher:
-            TracearrTabContent()
-                .navigationDestination(for: MediaRoute.self) { route in
-                    MediaRouteDestination(route: route)
-                }
-                .navigationDestination(for: TracearrRoute.self) { route in
-                    TracearrRouteDestination(route: route)
-                }
-        }
+        TracearrTabContent()
     }
 }
 
@@ -174,7 +152,7 @@ struct TracearrTabContent: View {
                     )
                     .menuIndicator(.hidden)
                 }
-            } else {
+            } else if navigationManager.shouldShowDrawerButton(for: TabItemStandard.tracearr.key) {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         navigationManager.showLauncher = true
@@ -564,9 +542,11 @@ struct CompactStatCard: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 4) {
                 Image(systemName: iconName)
-                    .font(.system(size: 20))
+                    .font(.system(size: 18))
                 Text(value)
-                    .font(.title3.bold())
+                    .font(.headline.bold())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .foregroundColor(contentColor)
 
@@ -574,8 +554,9 @@ struct CompactStatCard: View {
                 .font(.caption)
                 .foregroundColor(contentColor.opacity(0.8))
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
-        .padding(16)
+        .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(containerColor)
         .cornerRadius(16)
@@ -619,28 +600,34 @@ struct SplitStatCard: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: iconName)
-                .font(.system(size: 28))
+                .font(.system(size: 22))
                 .foregroundColor(contentColor)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
                     Text(firstValue)
-                        .font(.title3.bold())
+                        .font(.subheadline.bold())
+                        .lineLimit(1)
                     Text(firstLabel)
-                        .font(.caption)
+                        .font(.caption2)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
                 .foregroundColor(contentColor)
 
                 HStack(spacing: 4) {
                     Text(secondValue)
-                        .font(.title3.bold())
+                        .font(.subheadline.bold())
+                        .lineLimit(1)
                     Text(secondLabel)
-                        .font(.caption)
+                        .font(.caption2)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
                 .foregroundColor(contentColor)
             }
         }
-        .padding(16)
+        .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(containerColor)
         .cornerRadius(16)
@@ -677,7 +664,9 @@ struct TracearrDashboardStatsView: View {
                 }
             }
 
-            let columns = isExpanded ? Array(repeating: GridItem(.flexible(), spacing: 12), count: 4) : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+            let columns = isExpanded
+                ? [GridItem(.adaptive(minimum: 140, maximum: .infinity), spacing: 12)]
+                : [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
             LazyVGrid(columns: columns, spacing: 12) {
                 CountStatItem(
