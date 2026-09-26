@@ -19,6 +19,7 @@ import com.dnfapps.arrmatey.model.SmartAddSeerrAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -162,17 +163,23 @@ interface PreferencesStore {
     fun setUseColoredCalendarCards(value: Boolean)
 
     companion object {
-        operator fun invoke(dataStoreFactory: DataStoreFactory): PreferencesStore = DefaultPreferencesStore(dataStoreFactory)
+        operator fun invoke(
+            dataStoreFactory: DataStoreFactory,
+            scope: CoroutineScope = defaultPreferencesScope(),
+        ): PreferencesStore = DefaultPreferencesStore(dataStoreFactory, scope)
     }
 }
 
+// SupervisorJob so one failed write can't cancel the scope and silently drop every later write.
+internal fun defaultPreferencesScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
 class DefaultPreferencesStore(
     private val dataStoreFactory: DataStoreFactory,
+    private val scope: CoroutineScope = defaultPreferencesScope(),
 ) : PreferencesStore {
     override val defaultAppColor: AppColor = dataStoreFactory.defaultAppColor
 
     private val dataStore: DataStore<Preferences> = dataStoreFactory.provideDataStore()
-    private val scope = CoroutineScope(Dispatchers.IO)
 
     override val tabPreferences: Flow<TabPreferences> =
         dataStore.data.map { preferences ->
