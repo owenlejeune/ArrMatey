@@ -108,11 +108,13 @@ struct ArrTab: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         if !arrMediaViewModel.isInSelectionMode {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    navigation.showLauncher = true
-                } label: {
-                    Image(systemName: "line.3.horizontal")
+            if navigation.shouldShowDrawerButton(for: navigation.tabKey(for: type)) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigation.showLauncher = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
                 }
             }
 

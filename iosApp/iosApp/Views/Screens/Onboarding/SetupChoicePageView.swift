@@ -144,8 +144,9 @@ struct SetupChoicePageView: View {
 
                     Spacer(minLength: 20)
                 }
+                .frame(maxWidth: 540)
                 .frame(minHeight: geometry.size.height)
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .center)
             }
         }
     }

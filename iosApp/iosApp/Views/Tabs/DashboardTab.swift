@@ -10,18 +10,8 @@ import SwiftUI
 import Combine
 
 struct DashboardTab: View {
-    @Environment(\.navigationContext) private var context
-    @EnvironmentObject private var navigationManager: NavigationManager
-
     var body: some View {
-        switch context {
-        case .mainTab:
-            NavigationStack(path: $navigationManager.dashboardPath) {
-                DashboardTabContent()
-            }
-        case .launcher:
-            DashboardTabContent()
-        }
+        DashboardTabContent()
     }
 }
 
@@ -113,7 +103,7 @@ struct DashboardTabContent: View {
         }
         .animation(.easeInOut(duration: 0.3), value: toastMessage != nil)
         .toolbar {
-            if !viewModel.isEditing {
+            if !viewModel.isEditing && navigationManager.shouldShowDrawerButton(for: TabItemStandard.dashboard.key) {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         navigationManager.showLauncher = true
@@ -302,21 +292,6 @@ struct DashboardTabContent: View {
         }
         .refreshable {
             viewModel.refresh()
-        }
-        .navigationDestination(for: SettingsRoute.self) { route in
-            SettingsRouteView(route: route)
-        }
-        .navigationDestination(for: MediaRoute.self) { route in
-            MediaRouteDestination(route: route)
-        }
-        .navigationDestination(for: SeerrRoute.self) { route in
-            SeerrRouteDestination(route: route)
-        }
-        .navigationDestination(for: TracearrRoute.self) { route in
-            TracearrRouteDestination(route: route)
-        }
-        .navigationDestination(for: BazarrRoute.self) { route in
-            BazarrRouteDestination(route: route)
         }
     }
 
@@ -718,7 +693,7 @@ struct DashboardTracearrSection: View {
                 let stats = statsList[index]
                 TracearrDashboardStatsView(
                     stats: stats,
-                    isExpanded: isLargeScreen,
+                    isExpanded: false,
                     showTodayHeader: !isEditing,
                     onNavigateToHistory: { navigationManager.go(to: TracearrRoute.history) },
                     onNavigateToAllUsers: { navigationManager.go(to: TracearrRoute.users) },

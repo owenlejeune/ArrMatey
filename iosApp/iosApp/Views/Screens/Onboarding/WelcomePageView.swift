@@ -67,7 +67,7 @@ struct WelcomePageView: View {
                         Text(MR.strings().onboarding_supported_services.localized())
                             .font(.caption.bold())
                             .foregroundColor(.secondary)
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, 4)
 
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                             ForEach(supportedServices) { service in
@@ -91,13 +91,14 @@ struct WelcomePageView: View {
                                 .cornerRadius(12)
                             }
                         }
-                        .padding(.horizontal, 20)
                     }
+                    .padding(.horizontal, 20)
 
                     Spacer(minLength: 20)
                 }
+                .frame(maxWidth: 540)
                 .frame(minHeight: geometry.size.height)
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .center)
             }
         }
     }
