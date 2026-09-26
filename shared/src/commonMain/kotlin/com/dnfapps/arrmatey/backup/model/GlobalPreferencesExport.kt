@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.backup.model
 import com.dnfapps.arrmatey.arr.state.CalendarFilterState
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
+import com.dnfapps.arrmatey.datastore.QueueRemovalPreferences
 import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueSortState
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -40,6 +41,8 @@ data class GlobalPreferencesExport(
     val downloadQueueSortState: DownloadQueueSortState? = null,
     val dashboardCardsOrder: List<DashboardCards>? = null,
     val showDashboardSearch: Boolean? = null,
+    val queueRemovalPreferences: QueueRemovalPreferences? = null,
+    val downloadDeleteFiles: Boolean? = null,
 ) {
     val hasUiPreferences: Boolean
         get() =
@@ -57,7 +60,9 @@ data class GlobalPreferencesExport(
                 calendarFilterState != null ||
                 downloadQueueSortState != null ||
                 dashboardCardsOrder != null ||
-                showDashboardSearch != null
+                showDashboardSearch != null ||
+                queueRemovalPreferences != null ||
+                downloadDeleteFiles != null
 
     val hasIntegrationsPreferences: Boolean
         get() =

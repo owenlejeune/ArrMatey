@@ -37,6 +37,11 @@ internal object PreferenceKeys {
 
     val DOWNLOAD_CLIENT_SORT_BY = stringPreferencesKey("downloadClientSortBy")
     val DOWNLOAD_CLIENT_SORT_ORDER = stringPreferencesKey("downloadClientSortOrder")
+    val DOWNLOAD_DELETE_FILES = booleanPreferencesKey("downloadDeleteFiles")
+
+    val QUEUE_REMOVE_FROM_CLIENT = booleanPreferencesKey("queueRemoveFromClient")
+    val QUEUE_ADD_TO_BLOCKLIST = booleanPreferencesKey("queueAddToBlocklist")
+    val QUEUE_SKIP_REDOWNLOAD = booleanPreferencesKey("queueSkipRedownload")
 
     val DASHBOARD_CARDS_ORDER = stringPreferencesKey("dashboardCardsOrderKey")
     val DASHBOARD_FIRST_LAUNCH = booleanPreferencesKey("dashboardFirstLaunchKey")

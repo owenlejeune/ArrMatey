@@ -9,6 +9,8 @@ import Shared
 import SwiftUI
 
 struct RemoveQueueItemView: View {
+    private let preferencesStore = KoinBridge.shared.getPreferencesStore()
+
     @State private var remove: Bool = false
     @State private var block: Bool = false
     @State private var skip: Bool = true
@@ -39,9 +41,22 @@ struct RemoveQueueItemView: View {
             }
         }
         .toolbarTitleDisplayMode(.inline)
+        .task {
+            guard let saved = await preferencesStore.queueRemovalPreferences.firstValue() else { return }
+            remove = saved.removeFromClient
+            block = saved.addToBlocklist
+            skip = saved.skipRedownload
+        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
+                    preferencesStore.saveQueueRemovalPreferences(
+                        preferences: QueueRemovalPreferences(
+                            removeFromClient: remove,
+                            addToBlocklist: block,
+                            skipRedownload: skip
+                        )
+                    )
                     onDelete(remove, block, block && skip)
                 } label: {
                     Label(MR.strings().delete.localized(), systemImage: "trash")

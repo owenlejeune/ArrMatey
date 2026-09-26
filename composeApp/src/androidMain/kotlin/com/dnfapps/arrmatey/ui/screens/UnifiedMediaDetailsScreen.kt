@@ -763,6 +763,8 @@ fun UnifiedMediaDetailsScreen(
                 if (confirmDelete) {
                     ConfirmDeleteAlert(
                         deleteInProgress = deleteStatus is OperationStatus.InProgress,
+                        initialAddExclusion = preferences.deleteAddExclusion,
+                        initialDeleteFiles = preferences.deleteDeleteFiles,
                         onDismiss = { confirmDelete = false },
                         onDelete = { deleteFiles, addExclusion ->
                             viewModel.deleteMedia(deleteFiles, addExclusion)

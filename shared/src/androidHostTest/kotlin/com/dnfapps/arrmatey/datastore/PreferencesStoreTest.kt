@@ -68,4 +68,63 @@ class PreferencesStoreTest {
             }
             assertEquals(true, preferencesStore.overlayTabBackOpensDrawer.first())
         }
+
+    @Test
+    fun testQueueRemovalPreferences() =
+        runTest {
+            val file = tmpFolder.newFile("test_queue_removal.preferences_pb")
+            val dataStore = PreferenceDataStoreFactory.create { file }
+
+            every { dataStoreFactory.provideDataStore() } returns dataStore
+            every { dataStoreFactory.defaultAppColor } returns AppColor.ArrMatey
+
+            val preferencesStore = PreferencesStore(dataStoreFactory)
+
+            // Skipping redownload defaults to true, unlike the other two
+            assertEquals(QueueRemovalPreferences(), preferencesStore.queueRemovalPreferences.first())
+
+            // Set one key at a time so a mix-up between them can't pass
+            dataStore.edit { prefs ->
+                prefs[PreferenceKeys.QUEUE_REMOVE_FROM_CLIENT] = true
+            }
+            assertEquals(
+                QueueRemovalPreferences(removeFromClient = true),
+                preferencesStore.queueRemovalPreferences.first(),
+            )
+
+            dataStore.edit { prefs ->
+                prefs[PreferenceKeys.QUEUE_ADD_TO_BLOCKLIST] = true
+            }
+            assertEquals(
+                QueueRemovalPreferences(removeFromClient = true, addToBlocklist = true),
+                preferencesStore.queueRemovalPreferences.first(),
+            )
+
+            dataStore.edit { prefs ->
+                prefs[PreferenceKeys.QUEUE_SKIP_REDOWNLOAD] = false
+            }
+            assertEquals(
+                QueueRemovalPreferences(removeFromClient = true, addToBlocklist = true, skipRedownload = false),
+                preferencesStore.queueRemovalPreferences.first(),
+            )
+        }
+
+    @Test
+    fun testDownloadDeleteFiles() =
+        runTest {
+            val file = tmpFolder.newFile("test_download_delete_files.preferences_pb")
+            val dataStore = PreferenceDataStoreFactory.create { file }
+
+            every { dataStoreFactory.provideDataStore() } returns dataStore
+            every { dataStoreFactory.defaultAppColor } returns AppColor.ArrMatey
+
+            val preferencesStore = PreferencesStore(dataStoreFactory)
+
+            assertEquals(false, preferencesStore.downloadDeleteFiles.first())
+
+            dataStore.edit { prefs ->
+                prefs[PreferenceKeys.DOWNLOAD_DELETE_FILES] = true
+            }
+            assertEquals(true, preferencesStore.downloadDeleteFiles.first())
+        }
 }

@@ -68,6 +68,7 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.datastore.QueueRemovalPreferences
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.OperationStatus
@@ -688,10 +689,12 @@ fun ConfirmDeleteItemSheet(
     onDismiss: () -> Unit,
     deleteInProgress: Boolean,
     onDelete: (Boolean, Boolean, Boolean) -> Unit,
+    preferencesStore: PreferencesStore = koinInject(),
 ) {
-    var removeFromClient by remember { mutableStateOf(false) }
-    var blocklistRelease by remember { mutableStateOf(false) }
-    var skipRedownload by remember { mutableStateOf(true) }
+    val savedChoices by preferencesStore.queueRemovalPreferences.collectAsStateWithLifecycle(QueueRemovalPreferences())
+    var removeFromClient by remember(savedChoices) { mutableStateOf(savedChoices.removeFromClient) }
+    var blocklistRelease by remember(savedChoices) { mutableStateOf(savedChoices.addToBlocklist) }
+    var skipRedownload by remember(savedChoices) { mutableStateOf(savedChoices.skipRedownload) }
 
     ModalBottomSheet(
         onDismissRequest = {
@@ -735,6 +738,13 @@ fun ConfirmDeleteItemSheet(
             }
             Button(
                 onClick = {
+                    preferencesStore.saveQueueRemovalPreferences(
+                        QueueRemovalPreferences(
+                            removeFromClient = removeFromClient,
+                            addToBlocklist = blocklistRelease,
+                            skipRedownload = skipRedownload,
+                        ),
+                    )
                     onDelete(removeFromClient, blocklistRelease, blocklistRelease && skipRedownload)
                 },
                 colors =
