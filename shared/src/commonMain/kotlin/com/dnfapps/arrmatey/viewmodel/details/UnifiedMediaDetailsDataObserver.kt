@@ -89,12 +89,13 @@ class UnifiedMediaDetailsDataObserver(
                 instanceHandler.updateAddSheetUiState { it.copy(availableInstances = filteredInstances) }
 
                 val currentTarget = instanceHandler.addSheetUiState.value.targetInstance
-                val activeInst = current.availableInstances.find { it.id == current.selectedInstanceId }
+                val selectedId = current.selectedInstanceId ?: instanceHandler.selectedInstanceId.value
+                val activeInst = current.availableInstances.find { it.id == selectedId }
                 val newTarget =
-                    if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
-                        currentTarget
-                    } else if (activeInst != null && filteredInstances.any { it.id == activeInst.id }) {
+                    if (activeInst != null && filteredInstances.any { it.id == activeInst.id }) {
                         activeInst
+                    } else if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
+                        currentTarget
                     } else {
                         filteredInstances.firstOrNull()
                     }
@@ -133,12 +134,13 @@ class UnifiedMediaDetailsDataObserver(
                 instanceHandler.updateAddSheetUiState { it.copy(availableInstances = filteredInstances) }
 
                 val currentTarget = instanceHandler.addSheetUiState.value.targetInstance
-                val activeInst = activeRepo?.instance
+                val selectedId = instanceHandler.selectedInstanceId.value
+                val activeInst = allRepos.find { it.instance.id == selectedId }?.instance ?: activeRepo?.instance
                 val newTarget =
-                    if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
-                        currentTarget
-                    } else if (activeInst != null && filteredInstances.any { it.id == activeInst.id }) {
+                    if (activeInst != null && filteredInstances.any { it.id == activeInst.id }) {
                         activeInst
+                    } else if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
+                        currentTarget
                     } else {
                         filteredInstances.firstOrNull()
                     }

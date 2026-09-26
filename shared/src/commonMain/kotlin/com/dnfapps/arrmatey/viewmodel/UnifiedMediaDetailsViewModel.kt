@@ -141,6 +141,9 @@ class UnifiedMediaDetailsViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _isAddOrRequestInProgress = MutableStateFlow(false)
+    val isAddOrRequestInProgress: StateFlow<Boolean> = _isAddOrRequestInProgress.asStateFlow()
+
     private val _uiState = MutableStateFlow<UnifiedMediaDetailsUiState>(UnifiedMediaDetailsUiState.Initial)
     val uiState: StateFlow<UnifiedMediaDetailsUiState> = _uiState.asStateFlow()
 
@@ -312,32 +315,36 @@ class UnifiedMediaDetailsViewModel(
         instanceHandler.setAddSheetTargetInstance(instance)
     }
 
+    private suspend fun executeRefresh() {
+        _isRefreshing.value = true
+        try {
+            val repository = instanceHandler.getActiveArrRepository()
+            val effectiveId = instanceHandler.getEffectiveArrId(_uiState.value)
+            val seerrRepository = instanceHandler.getSeerrRepository()
+            coroutineScope {
+                if (repository != null) {
+                    launch { repository.refreshQualityProfiles() }
+                    launch { repository.refreshRootFolders() }
+                    launch { repository.refreshTags() }
+                    if (effectiveId != null && effectiveId != 0L) {
+                        launch { repository.getMediaDetails(effectiveId) }
+                    }
+                }
+                if (seerrRepository != null && tmdbId != null && resolvedRequestType != null) {
+                    launch { seerrRepository.refreshMediaDetails(tmdbId, resolvedRequestType) }
+                }
+                launch { activityQueueService.manualRefresh() }
+                launch { recommendationsHandler.refresh() }
+            }
+            dataObserver.observeData(_uiState)
+        } finally {
+            _isRefreshing.value = false
+        }
+    }
+
     fun refresh() {
         viewModelScope.launch {
-            _isRefreshing.value = true
-            try {
-                val repository = instanceHandler.getActiveArrRepository()
-                val effectiveId = instanceHandler.getEffectiveArrId(_uiState.value)
-                val seerrRepository = instanceHandler.getSeerrRepository()
-                coroutineScope {
-                    if (repository != null) {
-                        launch { repository.refreshQualityProfiles() }
-                        launch { repository.refreshRootFolders() }
-                        launch { repository.refreshTags() }
-                        if (effectiveId != null && effectiveId != 0L) {
-                            launch { repository.getMediaDetails(effectiveId) }
-                        }
-                    }
-                    if (seerrRepository != null && tmdbId != null && resolvedRequestType != null) {
-                        launch { seerrRepository.refreshMediaDetails(tmdbId, resolvedRequestType) }
-                    }
-                    launch { activityQueueService.manualRefresh() }
-                    launch { recommendationsHandler.refresh() }
-                }
-                dataObserver.observeData(_uiState)
-            } finally {
-                _isRefreshing.value = false
-            }
+            executeRefresh()
         }
     }
 
@@ -418,8 +425,10 @@ class UnifiedMediaDetailsViewModel(
                     ?.id
             },
             selectInstance = ::selectInstance,
-            refresh = ::refresh,
+            refresh = ::executeRefresh,
             logger = logger,
+            onFlowStart = { _isAddOrRequestInProgress.value = true },
+            onFlowComplete = { _isAddOrRequestInProgress.value = false },
         )
     }
 
@@ -463,7 +472,9 @@ class UnifiedMediaDetailsViewModel(
             seasons = seasons,
             is4k = is4k,
             userId = userId,
-            onSuccessRefresh = ::refresh,
+            onSuccessRefresh = ::executeRefresh,
+            onFlowStart = { _isAddOrRequestInProgress.value = true },
+            onFlowComplete = { _isAddOrRequestInProgress.value = false },
         )
     }
 

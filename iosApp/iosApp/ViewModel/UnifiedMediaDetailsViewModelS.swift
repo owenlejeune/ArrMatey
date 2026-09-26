@@ -12,6 +12,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
 
     @Published private(set) var uiState: UnifiedMediaDetailsUiState = UnifiedMediaDetailsUiStateInitial()
     @Published private(set) var isRefreshing: Bool = false
+    @Published private(set) var isAddOrRequestInProgress: Bool = false
     @Published private(set) var buttonState: MediaButtonState = MediaButtonState()
     @Published private(set) var isMonitored: Bool = false
     @Published private(set) var isArrConfigured: Bool = false
@@ -98,6 +99,9 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.uiState.observeAsync(on: self, to: \.uiState)
         viewModel.isRefreshing.observeAsync(on: self) { owner, refreshing in
             owner.isRefreshing = refreshing.boolValue
+        }
+        viewModel.isAddOrRequestInProgress.observeAsync(on: self) { owner, inProgress in
+            owner.isAddOrRequestInProgress = inProgress.boolValue
         }
         viewModel.buttonState.observeAsync(on: self, to: \.buttonState)
         viewModel.isMonitored.observeAsync(on: self) { owner, monitored in

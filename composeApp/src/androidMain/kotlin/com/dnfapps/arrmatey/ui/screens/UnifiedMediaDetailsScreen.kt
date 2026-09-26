@@ -137,6 +137,7 @@ fun UnifiedMediaDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val isAddOrRequestInProgress by viewModel.isAddOrRequestInProgress.collectAsStateWithLifecycle()
     val recommendationsState by viewModel.recommendationsState.collectAsStateWithLifecycle()
     val similarState by viewModel.similarState.collectAsStateWithLifecycle()
     val selectedInstanceId by viewModel.selectedInstanceId.collectAsStateWithLifecycle()
@@ -351,6 +352,7 @@ fun UnifiedMediaDetailsScreen(
                         MediaActionsToolbarMenus(
                             buttonState = buttonState,
                             canAddDirectly = canAddDirectly,
+                            isAddOrRequestInProgress = isAddOrRequestInProgress,
                             onWatchClicked = { url, provider ->
                                 handleWatchClick(url, provider, context, moko)
                             },
@@ -360,7 +362,14 @@ fun UnifiedMediaDetailsScreen(
                             onViewRequestClicked = { viewModel.showViewRequestSheet() },
                             onApproveRequestClicked = { viewModel.showViewRequestSheet() },
                             onDeclineRequestClicked = { viewModel.declineRequest(it) },
-                            onAddClicked = { showAddSheet = true },
+                            onAddClicked = {
+                                val currentSelectedId = success.selectedInstanceId ?: selectedInstanceId
+                                val currentInst = success.availableInstances.find { it.id == currentSelectedId }
+                                if (currentInst != null) {
+                                    viewModel.setAddSheetTargetInstance(currentInst)
+                                }
+                                showAddSheet = true
+                            },
                         )
 
                         if (resolvedType != null && success.availableInstances.size > 1) {

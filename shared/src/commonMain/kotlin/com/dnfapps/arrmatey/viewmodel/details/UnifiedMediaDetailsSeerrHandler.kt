@@ -68,33 +68,40 @@ class UnifiedMediaDetailsSeerrHandler(
         seasons: List<Int>? = null,
         is4k: Boolean = false,
         userId: Long? = null,
-        onSuccessRefresh: () -> Unit,
+        onSuccessRefresh: suspend () -> Unit,
+        onFlowStart: (() -> Unit)? = null,
+        onFlowComplete: (() -> Unit)? = null,
     ) {
         scope.launch {
-            val repository = repositoryProvider() ?: return@launch
-            val mediaType = resolvedRequestType ?: return@launch
-            val mediaId = tmdbId ?: return@launch
-            val body =
-                RequestMediaBody(
-                    mediaType = mediaType,
-                    mediaId = mediaId,
-                    is4k = is4k,
-                    serverId = null,
-                    profileId = profileId,
-                    rootFolder = rootFolder,
-                    languageProfileId = languageProfileId,
-                    seasons = seasons,
-                    userId = userId,
-                )
-            _requestStatus.value = OperationStatus.InProgress
-            submitRequestUseCase(body, repository)
-                .onSuccess {
-                    _requestStatus.value = OperationStatus.Success()
-                    hideRequestSheet()
-                    onSuccessRefresh()
-                }.onError { code, message, cause ->
-                    _requestStatus.value = OperationStatus.Error(code, message, cause)
-                }
+            onFlowStart?.invoke()
+            try {
+                val repository = repositoryProvider() ?: return@launch
+                val mediaType = resolvedRequestType ?: return@launch
+                val mediaId = tmdbId ?: return@launch
+                val body =
+                    RequestMediaBody(
+                        mediaType = mediaType,
+                        mediaId = mediaId,
+                        is4k = is4k,
+                        serverId = null,
+                        profileId = profileId,
+                        rootFolder = rootFolder,
+                        languageProfileId = languageProfileId,
+                        seasons = seasons,
+                        userId = userId,
+                    )
+                _requestStatus.value = OperationStatus.InProgress
+                submitRequestUseCase(body, repository)
+                    .onSuccess {
+                        _requestStatus.value = OperationStatus.Success()
+                        hideRequestSheet()
+                        onSuccessRefresh()
+                    }.onError { code, message, cause ->
+                        _requestStatus.value = OperationStatus.Error(code, message, cause)
+                    }
+            } finally {
+                onFlowComplete?.invoke()
+            }
         }
     }
 

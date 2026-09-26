@@ -56,11 +56,24 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
     private var addRequestButton: some View {
         let buttonState = viewModel.buttonState
         let canAddDirectly = !success.hasArrId && success.arrMedia != nil && viewModel.isArrConfigured
+        let isInProgress = viewModel.isAddOrRequestInProgress
 
-        if canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton {
-            Button(action: onShowAddSheet) {
-                Image(systemName: "plus")
+        if canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton || isInProgress {
+            Button(action: {
+                if let selectedId = success.selectedInstanceId?.int64Value,
+                   let currentInst = success.availableInstances.first(where: { $0.id == selectedId }) {
+                    viewModel.setAddSheetTargetInstance(instance: currentInst)
+                }
+                onShowAddSheet()
+            }) {
+                if isInProgress {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else {
+                    Image(systemName: "plus")
+                }
             }
+            .disabled(isInProgress)
         }
     }
 
