@@ -456,6 +456,11 @@ struct DashboardCardView: View {
                         if !isEditing {
                             navigationManager.goToSeerrDetailsOnDashboard(tmdbId: id, requestType: type)
                         }
+                    },
+                    onLoadMore: { category in
+                        if !isEditing {
+                            viewModel.loadNextDiscoverPage(category: category)
+                        }
                     }
                 )
             case .discoverSpotlight:
@@ -2365,6 +2370,7 @@ struct DashboardDiscoverFeedSection: View {
     let isEditing: Bool
     var visibleCategories: [DiscoverCategory] = []
     var onMediaClick: ((Int64, RequestType) -> Void)? = nil
+    var onLoadMore: ((DiscoverCategory) -> Void)? = nil
 
     @State private var selectedCategory: DiscoverCategory? = nil
 
@@ -2447,13 +2453,22 @@ struct DashboardDiscoverFeedSection: View {
                 } else {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(items, id: \.id) { item in
+                            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                                 DiscoverPosterItem(item: item, onItemClick: { it in
                                     if !isEditing {
                                         onMediaClick?(it.id, it.mediaType)
                                     }
                                 })
                                 .frame(width: 110)
+                                .onAppear {
+                                    if index >= items.count - 4 && !isEditing {
+                                        onLoadMore?(currentSelectedCategory)
+                                    }
+                                }
+                            }
+                            if state.isLoadingDiscoverFeed(category: currentSelectedCategory) {
+                                ProgressView()
+                                    .padding(.horizontal, 16)
                             }
                         }
                     }

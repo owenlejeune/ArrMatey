@@ -78,6 +78,7 @@ import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.entensions.PaddingValues
@@ -151,6 +152,7 @@ fun DashboardCardContent(
     onNavigateToTracearrActivity: () -> Unit = {},
     onShuffleQuickPick: () -> Unit = {},
     onMediaRequestClick: (DiscoverResult) -> Unit = {},
+    onLoadMoreDiscoverFeed: (DiscoverCategory) -> Unit = {},
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
@@ -300,6 +302,9 @@ fun DashboardCardContent(
                 enabled = !isEditing && enabled,
                 onMediaClick = { tmdbId, type ->
                     if (!isEditing && enabled) onNavigateToSeerrMediaDetails(tmdbId, type)
+                },
+                onLoadMore = { category ->
+                    if (!isEditing && enabled) onLoadMoreDiscoverFeed(category)
                 },
             )
 
@@ -710,6 +715,9 @@ fun CombinedDashboard(
                                                     onNavigateToTracearrActivity = onNavigateToTracearrActivity,
                                                     onShuffleQuickPick = { viewModel.shuffleQuickPick() },
                                                     onMediaRequestClick = { if (!isEditing) selectedMediaForRequest = it },
+                                                    onLoadMoreDiscoverFeed = { category ->
+                                                        viewModel.loadNextDiscoverPage(category)
+                                                    },
                                                 )
                                             }
                                             if (isEditing) {

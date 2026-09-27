@@ -76,6 +76,7 @@ sealed interface CombinedDashboardState {
         val quickPickItem: DiscoverResult? = null,
         val networkStatus: NetworkStatusState? = null,
         val isRefreshing: Boolean = false,
+        val isLoadingMoreDiscover: Map<DiscoverCategory, Boolean> = emptyMap(),
     ) : CombinedDashboardState {
         val allRequests: List<MediaRequestPackage>
             get() = seerrInstances.flatMap { it.requests }
@@ -114,6 +115,9 @@ sealed interface CombinedDashboardState {
                 DiscoverCategory.UPCOMING_MOVIES -> upcomingMovies
                 DiscoverCategory.UPCOMING_SERIES -> upcomingTv
             }
+
+        fun isLoadingDiscoverFeed(category: DiscoverCategory): Boolean =
+            isLoadingMoreDiscover[category] == true
 
         fun resolveMediaStatus(item: DiscoverResult): com.dnfapps.arrmatey.seerr.api.model.MediaStatus {
             val directStatus =

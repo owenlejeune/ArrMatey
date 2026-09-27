@@ -22,6 +22,7 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
@@ -407,6 +408,10 @@ class CombinedDashboardViewModel(
     private val _upcomingTvDiscover = MutableStateFlow<List<DiscoverResult>>(emptyList())
     private val _quickPickItem = MutableStateFlow<DiscoverResult?>(null)
 
+    private val discoverPageMap = mutableMapOf<DiscoverCategory, Int>()
+    private val discoverHasMoreMap = mutableMapOf<DiscoverCategory, Boolean>()
+    private val _isDiscoverLoadingMore = MutableStateFlow<Map<DiscoverCategory, Boolean>>(emptyMap())
+
     init {
         observeDashboard()
         viewModelScope.launch {
@@ -455,6 +460,7 @@ class CombinedDashboardViewModel(
                     _upcomingTvDiscover,
                     _quickPickItem,
                     _isRefreshing,
+                    _isDiscoverLoadingMore,
                 ),
             ) { args ->
                 @Suppress("UNCHECKED_CAST")
@@ -511,6 +517,9 @@ class CombinedDashboardViewModel(
 
                 val refreshing = args[17] as Boolean
 
+                @Suppress("UNCHECKED_CAST")
+                val isDiscoverLoadingMore = args[18] as Map<DiscoverCategory, Boolean>
+
                 CombinedDashboardState.Success(
                     instances = instances,
                     seerrInstances = seerrInstances,
@@ -540,6 +549,7 @@ class CombinedDashboardViewModel(
                             tracearrStats,
                         ),
                     isRefreshing = refreshing,
+                    isLoadingMoreDiscover = isDiscoverLoadingMore,
                 )
             }.collect { newState ->
                 _state.value = newState
@@ -596,9 +606,14 @@ class CombinedDashboardViewModel(
 
     private suspend fun fetchDiscoverData() {
         val seerrRepo = instanceManager.getAllSeerrRepositories().firstOrNull() ?: return
+        discoverPageMap.clear()
+        discoverHasMoreMap.clear()
+
         try {
             val trendingRes = seerrRepo.client.getTrending(page = 1)
             if (trendingRes is NetworkResult.Success) {
+                discoverPageMap[DiscoverCategory.TRENDING] = 1
+                discoverHasMoreMap[DiscoverCategory.TRENDING] = 1 < trendingRes.data.totalPages
                 val enrichedTrending =
                     coroutineScope {
                         trendingRes.data.results
@@ -619,6 +634,8 @@ class CombinedDashboardViewModel(
         try {
             val moviesRes = seerrRepo.client.getDiscoverMovies(page = 1)
             if (moviesRes is NetworkResult.Success) {
+                discoverPageMap[DiscoverCategory.POPULAR_MOVIES] = 1
+                discoverHasMoreMap[DiscoverCategory.POPULAR_MOVIES] = 1 < moviesRes.data.totalPages
                 val enrichedMovies =
                     coroutineScope {
                         moviesRes.data.results
@@ -639,6 +656,8 @@ class CombinedDashboardViewModel(
         try {
             val tvRes = seerrRepo.client.getDiscoverTv(page = 1)
             if (tvRes is NetworkResult.Success) {
+                discoverPageMap[DiscoverCategory.POPULAR_SERIES] = 1
+                discoverHasMoreMap[DiscoverCategory.POPULAR_SERIES] = 1 < tvRes.data.totalPages
                 val enrichedTv =
                     coroutineScope {
                         tvRes.data.results
@@ -666,6 +685,8 @@ class CombinedDashboardViewModel(
         try {
             val upcomingMoviesRes = seerrRepo.client.getUpcomingMovies(page = 1, today = today)
             if (upcomingMoviesRes is NetworkResult.Success) {
+                discoverPageMap[DiscoverCategory.UPCOMING_MOVIES] = 1
+                discoverHasMoreMap[DiscoverCategory.UPCOMING_MOVIES] = 1 < upcomingMoviesRes.data.totalPages
                 _upcomingMoviesDiscover.value = upcomingMoviesRes.data.results
             }
         } catch (e: Exception) {
@@ -675,6 +696,8 @@ class CombinedDashboardViewModel(
         try {
             val upcomingTvRes = seerrRepo.client.getUpcomingTv(page = 1, today = today)
             if (upcomingTvRes is NetworkResult.Success) {
+                discoverPageMap[DiscoverCategory.UPCOMING_SERIES] = 1
+                discoverHasMoreMap[DiscoverCategory.UPCOMING_SERIES] = 1 < upcomingTvRes.data.totalPages
                 _upcomingTvDiscover.value = upcomingTvRes.data.results
             }
         } catch (e: Exception) {
@@ -687,6 +710,104 @@ class CombinedDashboardViewModel(
                     .distinctBy { "${it.mediaType.name}_${it.id}" }
             if (pool.isNotEmpty()) {
                 _quickPickItem.value = pool.random()
+            }
+        }
+    }
+
+    fun loadNextDiscoverPage(category: DiscoverCategory) {
+        if (_isDiscoverLoadingMore.value[category] == true) return
+        if (discoverHasMoreMap[category] == false) return
+
+        val seerrRepo = instanceManager.getAllSeerrRepositories().firstOrNull() ?: return
+        val currentPage = discoverPageMap[category] ?: 1
+        val nextPage = currentPage + 1
+
+        viewModelScope.launch {
+            _isDiscoverLoadingMore.value = _isDiscoverLoadingMore.value + (category to true)
+            try {
+                when (category) {
+                    DiscoverCategory.TRENDING -> {
+                        val res = seerrRepo.client.getTrending(page = nextPage)
+                        if (res is NetworkResult.Success) {
+                            discoverPageMap[category] = nextPage
+                            discoverHasMoreMap[category] = nextPage < res.data.totalPages && res.data.results.isNotEmpty()
+                            val currentList = _trendingDiscover.value
+                            val existingKeys = currentList.map { "${it.id}_${it.mediaType.name}" }.toSet()
+                            val newItems = res.data.results.filter { "${it.id}_${it.mediaType.name}" !in existingKeys }
+                            _trendingDiscover.value = currentList + newItems
+                        } else {
+                            discoverHasMoreMap[category] = false
+                        }
+                    }
+                    DiscoverCategory.POPULAR_MOVIES -> {
+                        val res = seerrRepo.client.getDiscoverMovies(page = nextPage)
+                        if (res is NetworkResult.Success) {
+                            discoverPageMap[category] = nextPage
+                            discoverHasMoreMap[category] = nextPage < res.data.totalPages && res.data.results.isNotEmpty()
+                            val currentList = _popularMoviesDiscover.value
+                            val existingKeys = currentList.map { "${it.id}_${it.mediaType.name}" }.toSet()
+                            val newItems = res.data.results.filter { "${it.id}_${it.mediaType.name}" !in existingKeys }
+                            _popularMoviesDiscover.value = currentList + newItems
+                        } else {
+                            discoverHasMoreMap[category] = false
+                        }
+                    }
+                    DiscoverCategory.POPULAR_SERIES -> {
+                        val res = seerrRepo.client.getDiscoverTv(page = nextPage)
+                        if (res is NetworkResult.Success) {
+                            discoverPageMap[category] = nextPage
+                            discoverHasMoreMap[category] = nextPage < res.data.totalPages && res.data.results.isNotEmpty()
+                            val currentList = _popularTvDiscover.value
+                            val existingKeys = currentList.map { "${it.id}_${it.mediaType.name}" }.toSet()
+                            val newItems = res.data.results.filter { "${it.id}_${it.mediaType.name}" !in existingKeys }
+                            _popularTvDiscover.value = currentList + newItems
+                        } else {
+                            discoverHasMoreMap[category] = false
+                        }
+                    }
+                    DiscoverCategory.UPCOMING_MOVIES -> {
+                        val today =
+                            Clock.System
+                                .now()
+                                .toLocalDateTime(TimeZone.currentSystemDefault())
+                                .date
+                                .toString()
+                        val res = seerrRepo.client.getUpcomingMovies(page = nextPage, today = today)
+                        if (res is NetworkResult.Success) {
+                            discoverPageMap[category] = nextPage
+                            discoverHasMoreMap[category] = nextPage < res.data.totalPages && res.data.results.isNotEmpty()
+                            val currentList = _upcomingMoviesDiscover.value
+                            val existingKeys = currentList.map { "${it.id}_${it.mediaType.name}" }.toSet()
+                            val newItems = res.data.results.filter { "${it.id}_${it.mediaType.name}" !in existingKeys }
+                            _upcomingMoviesDiscover.value = currentList + newItems
+                        } else {
+                            discoverHasMoreMap[category] = false
+                        }
+                    }
+                    DiscoverCategory.UPCOMING_SERIES -> {
+                        val today =
+                            Clock.System
+                                .now()
+                                .toLocalDateTime(TimeZone.currentSystemDefault())
+                                .date
+                                .toString()
+                        val res = seerrRepo.client.getUpcomingTv(page = nextPage, today = today)
+                        if (res is NetworkResult.Success) {
+                            discoverPageMap[category] = nextPage
+                            discoverHasMoreMap[category] = nextPage < res.data.totalPages && res.data.results.isNotEmpty()
+                            val currentList = _upcomingTvDiscover.value
+                            val existingKeys = currentList.map { "${it.id}_${it.mediaType.name}" }.toSet()
+                            val newItems = res.data.results.filter { "${it.id}_${it.mediaType.name}" !in existingKeys }
+                            _upcomingTvDiscover.value = currentList + newItems
+                        } else {
+                            discoverHasMoreMap[category] = false
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                logger.error(e) { "Error loading next page for discover category $category" }
+            } finally {
+                _isDiscoverLoadingMore.value = _isDiscoverLoadingMore.value + (category to false)
             }
         }
     }
