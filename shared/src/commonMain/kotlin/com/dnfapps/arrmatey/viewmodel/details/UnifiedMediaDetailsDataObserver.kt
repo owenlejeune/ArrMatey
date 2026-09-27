@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.usecase.GetInstancePresencesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetUnifiedMediaDetailsUseCase
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -57,6 +59,13 @@ class UnifiedMediaDetailsDataObserver(
             instanceHandler.instancePresencesMap,
         ) { activeRepo, allRepos, seerrRepo, bazarrRepo, presencesMap ->
             Quint(activeRepo, allRepos, seerrRepo, bazarrRepo, presencesMap)
+        }.distinctUntilChanged { old, new ->
+            // The body writes back into these flows, so compare the resolved id rather than raw presences.
+            old.first === new.first &&
+                old.second == new.second &&
+                old.third === new.third &&
+                old.fourth === new.fourth &&
+                targetArrIdFor(old.first, old.fifth) == targetArrIdFor(new.first, new.fifth)
         }
 
     fun observeData(uiStateFlow: MutableStateFlow<UnifiedMediaDetailsUiState>) {
@@ -86,25 +95,12 @@ class UnifiedMediaDetailsDataObserver(
                         val isPresent = arrMedia?.let { it.id != null && it.id != 0L } ?: false
                         !isPresent
                     }
-                instanceHandler.updateAddSheetUiState { it.copy(availableInstances = filteredInstances) }
-
-                val currentTarget = instanceHandler.addSheetUiState.value.targetInstance
                 val selectedId = current.selectedInstanceId ?: instanceHandler.selectedInstanceId.value
                 val activeInst = current.availableInstances.find { it.id == selectedId }
-                val newTarget =
-                    if (activeInst != null && filteredInstances.any { it.id == activeInst.id }) {
-                        activeInst
-                    } else if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
-                        currentTarget
-                    } else {
-                        filteredInstances.firstOrNull()
-                    }
-                if (newTarget?.id != currentTarget?.id ||
-                    instanceHandler.addSheetUiState.value.qualityProfiles
-                        .isEmpty()
-                ) {
-                    instanceHandler.setAddSheetTargetInstance(newTarget)
-                }
+                syncAddSheetTarget(
+                    filteredInstances = filteredInstances,
+                    activeInstance = activeInst,
+                )
             }
         }
 
@@ -131,25 +127,12 @@ class UnifiedMediaDetailsDataObserver(
                         val isPresent = arrMedia?.let { it.id != null && it.id != 0L } ?: false
                         !isPresent
                     }
-                instanceHandler.updateAddSheetUiState { it.copy(availableInstances = filteredInstances) }
-
-                val currentTarget = instanceHandler.addSheetUiState.value.targetInstance
                 val selectedId = instanceHandler.selectedInstanceId.value
                 val activeInst = allRepos.find { it.instance.id == selectedId }?.instance ?: activeRepo?.instance
-                val newTarget =
-                    if (activeInst != null && filteredInstances.any { it.id == activeInst.id }) {
-                        activeInst
-                    } else if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
-                        currentTarget
-                    } else {
-                        filteredInstances.firstOrNull()
-                    }
-                if (newTarget?.id != currentTarget?.id ||
-                    instanceHandler.addSheetUiState.value.qualityProfiles
-                        .isEmpty()
-                ) {
-                    instanceHandler.setAddSheetTargetInstance(newTarget)
-                }
+                syncAddSheetTarget(
+                    filteredInstances = filteredInstances,
+                    activeInstance = activeInst,
+                )
 
                 if (activeRepo != null) {
                     if (instanceHandler.selectedInstanceId.value == null) {
@@ -175,13 +158,7 @@ class UnifiedMediaDetailsDataObserver(
                     }
                 }
 
-                val cachedArrMedia = activeRepo?.let { map[it.instance.id] }
-                val targetArrId =
-                    if (activeRepo?.instance?.id == instanceHandler.initialInstanceId) {
-                        cachedArrMedia?.id ?: arrId
-                    } else {
-                        cachedArrMedia?.id
-                    }
+                val targetArrId = targetArrIdFor(activeRepo, map)
 
                 val combineMedia = preferencesStore.combineSeerrArrMedia.first()
                 val showBazarr = preferencesStore.bazarrDetailsIntegration.first()
@@ -279,6 +256,41 @@ class UnifiedMediaDetailsDataObserver(
                     }
                 }
             }
+        }
+    }
+
+    private fun targetArrIdFor(
+        activeRepo: ArrInstanceRepository?,
+        presences: Map<Long, ArrMedia?>,
+    ): Long? {
+        val cachedArrMedia = activeRepo?.let { presences[it.instance.id] }
+        return if (activeRepo?.instance?.id == instanceHandler.initialInstanceId) {
+            cachedArrMedia?.id ?: arrId
+        } else {
+            cachedArrMedia?.id
+        }
+    }
+
+    private fun syncAddSheetTarget(
+        filteredInstances: List<Instance>,
+        activeInstance: Instance?,
+    ) {
+        instanceHandler.updateAddSheetUiState { it.copy(availableInstances = filteredInstances) }
+
+        val currentTarget = instanceHandler.addSheetUiState.value.targetInstance
+        val newTarget =
+            if (currentTarget != null && filteredInstances.any { it.id == currentTarget.id }) {
+                currentTarget
+            } else if (activeInstance != null && filteredInstances.any { it.id == activeInstance.id }) {
+                activeInstance
+            } else {
+                filteredInstances.firstOrNull()
+            }
+        if (newTarget?.id != currentTarget?.id ||
+            instanceHandler.addSheetUiState.value.qualityProfiles
+                .isEmpty()
+        ) {
+            instanceHandler.setAddSheetTargetInstance(newTarget)
         }
     }
 }

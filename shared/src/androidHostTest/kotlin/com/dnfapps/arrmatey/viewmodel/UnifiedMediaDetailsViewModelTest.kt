@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.viewmodel
 
+import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
@@ -7,6 +8,7 @@ import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,6 +21,8 @@ class UnifiedMediaDetailsViewModelTest {
 
         val observeScopedReposByTypeUseCase = mockk<ObserveScopedReposByTypeUseCase>()
         every { observeScopedReposByTypeUseCase(any()) } returns flowOf(emptyList())
+
+        val activityQueueService = mockk<ActivityQueueService>(relaxed = true)
 
         val viewModel =
             UnifiedMediaDetailsViewModel(
@@ -63,7 +67,7 @@ class UnifiedMediaDetailsViewModelTest {
                 observeScopedReposByTypeUseCase = observeScopedReposByTypeUseCase,
                 getInstancePresencesUseCase = mockk(),
                 deleteQueueItemUseCase = mockk(),
-                activityQueueService = mockk(relaxed = true),
+                activityQueueService = activityQueueService,
                 removeSeerrMediaFileUseCase = mockk(),
                 clearSeerrMediaDataUseCase = mockk(),
                 markSeerrMediaAsAvailableUseCase = mockk(),
@@ -82,5 +86,6 @@ class UnifiedMediaDetailsViewModelTest {
         assertEquals(InstanceType.Radarr, viewModel.resolvedInstanceType)
         assertEquals(RequestType.Movie, viewModel.resolvedRequestType)
         assertEquals(false, viewModel.isAddOrRequestInProgress.value)
+        verify { activityQueueService.startPolling() }
     }
 }

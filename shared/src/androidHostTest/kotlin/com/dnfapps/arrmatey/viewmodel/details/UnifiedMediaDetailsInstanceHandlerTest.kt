@@ -80,9 +80,7 @@ class UnifiedMediaDetailsInstanceHandlerTest {
             handler.setAddSheetTargetInstance(targetInstance)
 
             assertEquals(targetInstance, handler.addSheetUiState.value.targetInstance)
-            coVerify { mockRepo.refreshQualityProfiles() }
-            coVerify { mockRepo.refreshRootFolders() }
-            coVerify { mockRepo.refreshTags() }
+            coVerify { mockRepo.refreshAllMetadata() }
         }
 
     @Test

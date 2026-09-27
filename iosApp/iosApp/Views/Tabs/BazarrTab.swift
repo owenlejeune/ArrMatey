@@ -7,25 +7,8 @@ import SwiftUI
 import Shared
 
 struct BazarrTab: View {
-    @Environment(\.navigationContext) private var context
-    @EnvironmentObject private var navigation: NavigationManager
-
     var body: some View {
-        switch context {
-        case .mainTab:
-            NavigationStack(path: $navigation.bazarrPath) {
-                BazarrTabContent()
-                    .navigationDestination(for: BazarrRoute.self) { route in
-                        BazarrRouteDestination(route: route)
-                    }
-                    .navigationDestination(for: AnyTabItem.self) { anyTabItem in
-                        let tab: TabItem = anyTabItem.item
-                        TabItemContent(tabItem: tab)
-                    }
-            }
-        case .launcher:
-            BazarrTabContent()
-        }
+        BazarrTabContent()
     }
 }
 
@@ -112,11 +95,13 @@ struct BazarrTabContent: View {
         }
         .navigationTitle(MR.strings().bazarr.localized())
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    navigation.showLauncher = true
-                } label: {
-                    Image(systemName: "line.3.horizontal")
+            if navigation.shouldShowDrawerButton(for: TabItemStandard.bazarr.key) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigation.showLauncher = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
                 }
             }
         }

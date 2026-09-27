@@ -12,6 +12,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+
+private const val MAX_CONCURRENT_SEASON_REQUESTS = 6
 
 class GetSeerrMediaDetailsUseCase {
     operator fun invoke(
@@ -40,11 +44,14 @@ class GetSeerrMediaDetailsUseCase {
 
                             if (type == RequestType.Tv && mediaDetails is TvDetails) {
                                 val seasonCount = mediaDetails.numberOfSeasons
+                                val seasonSemaphore = Semaphore(MAX_CONCURRENT_SEASON_REQUESTS)
                                 val seasons =
                                     (1..seasonCount)
                                         .map { seasonNumber ->
                                             async {
-                                                repository.getSeasonDetails(tmdbId, seasonNumber)
+                                                seasonSemaphore.withPermit {
+                                                    repository.getSeasonDetails(tmdbId, seasonNumber)
+                                                }
                                             }
                                         }.awaitAll()
                                         .filterIsInstance<NetworkResult.Success<Season>>()

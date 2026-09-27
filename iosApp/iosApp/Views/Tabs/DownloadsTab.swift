@@ -132,11 +132,13 @@ struct DownloadsTab: View {
                 }
             }
         } else {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    navigation.showLauncher = true
-                } label: {
-                    Image(systemName: "line.3.horizontal")
+            if navigation.shouldShowDrawerButton(for: TabItemStandard.downloads.key) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigation.showLauncher = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
                 }
             }
 

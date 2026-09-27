@@ -6,12 +6,15 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.networking.NetworkResult
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class GetMediaDetailsUseCase(
     private val instanceManager: InstanceManager,
@@ -81,6 +84,7 @@ class GetMediaDetailsUseCase(
                 is NetworkResult.Success -> {
                     repository.episodes
                         .map { it[seriesId] ?: emptyList() }
+                        .distinctUntilChanged()
                         .collect { episodes ->
                             emit(
                                 MediaDetailsUiState.Success(
@@ -90,7 +94,7 @@ class GetMediaDetailsUseCase(
                             )
                         }
                 }
-                else -> {} // do nothing for now
+                else -> emit(MediaDetailsUiState.Success(item = series))
             }
         }
 
@@ -105,6 +109,7 @@ class GetMediaDetailsUseCase(
                 is NetworkResult.Success -> {
                     repository.movieExtraFiles
                         .map { it[movieId] ?: emptyList() }
+                        .distinctUntilChanged()
                         .collect { extraFiles ->
                             emit(
                                 MediaDetailsUiState.Success(
@@ -124,9 +129,11 @@ class GetMediaDetailsUseCase(
         artist: ArrMedia,
     ): Flow<MediaDetailsUiState> =
         flow {
-            repository.getArtistAlbums(artistId)
-            repository.getArtistTracks(artistId)
-            repository.getArtistTrackFiles(artistId)
+            coroutineScope {
+                launch { repository.getArtistAlbums(artistId) }
+                launch { repository.getArtistTracks(artistId) }
+                launch { repository.getArtistTrackFiles(artistId) }
+            }
 
             combine(
                 repository.artistAlbums,
@@ -143,9 +150,10 @@ class GetMediaDetailsUseCase(
                     tracks = tracks,
                     trackFiles = files,
                 )
-            }.collect { state ->
-                emit(state)
-            }
+            }.distinctUntilChanged()
+                .collect { state ->
+                    emit(state)
+                }
         }
 
     private fun loadReadarrDetails(
@@ -154,8 +162,10 @@ class GetMediaDetailsUseCase(
         author: ArrMedia,
     ): Flow<MediaDetailsUiState> =
         flow {
-            repository.getAuthorBookFiles(authorId)
-            repository.getAuthorSeries(authorId)
+            coroutineScope {
+                launch { repository.getAuthorBookFiles(authorId) }
+                launch { repository.getAuthorSeries(authorId) }
+            }
 
             combine(
                 repository.authorBookFiles,
@@ -172,8 +182,9 @@ class GetMediaDetailsUseCase(
                     bookSeries = bookSeries,
                     books = books,
                 )
-            }.collect { state ->
-                emit(state)
-            }
+            }.distinctUntilChanged()
+                .collect { state ->
+                    emit(state)
+                }
         }
 }

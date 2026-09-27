@@ -265,16 +265,15 @@ class UnifiedMediaDetailsInstanceHandler(
                     )
                 }
                 scope.launch {
-                    repo.refreshQualityProfiles()
-                    _addSheetUiState.update { it.copy(qualityProfiles = repo.qualityProfiles.value) }
-                }
-                scope.launch {
-                    repo.refreshRootFolders()
-                    _addSheetUiState.update { it.copy(rootFolders = repo.rootFolders.value) }
-                }
-                scope.launch {
-                    repo.refreshTags()
-                    _addSheetUiState.update { it.copy(tags = repo.tags.value) }
+                    // Throttled; avoids refetching profiles/folders/tags on every details open.
+                    repo.refreshAllMetadata()
+                    _addSheetUiState.update {
+                        it.copy(
+                            qualityProfiles = repo.qualityProfiles.value,
+                            rootFolders = repo.rootFolders.value,
+                            tags = repo.tags.value,
+                        )
+                    }
                 }
             }
         }

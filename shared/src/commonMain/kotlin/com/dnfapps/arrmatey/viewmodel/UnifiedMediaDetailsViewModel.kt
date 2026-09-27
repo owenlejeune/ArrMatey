@@ -289,9 +289,8 @@ class UnifiedMediaDetailsViewModel(
             initialTmdbId = tmdbId,
             initialRequestType = resolvedRequestType,
         )
-        viewModelScope.launch {
-            activityQueueService.manualRefresh()
-        }
+        // No-op if already polling; restarts it if another screen's onCleared stopped it.
+        activityQueueService.startPolling()
     }
 
     fun loadNextRecommendationsPage() {
