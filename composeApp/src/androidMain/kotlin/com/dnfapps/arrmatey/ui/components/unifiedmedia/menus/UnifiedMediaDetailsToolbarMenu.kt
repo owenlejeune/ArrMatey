@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Delete
@@ -188,23 +186,7 @@ private fun ArrPrimaryMenuGroup(
                 onDismiss()
             },
             leadingIcon = { Icon(Icons.Default.Search, null) },
-        )
-        DropdownMenuItem(
-            text = {
-                Text(
-                    mokoString(if (isMonitored) MR.strings.unmonitored else MR.strings.monitored),
-                )
-            },
-            onClick = {
-                onRefresh()
-                onDismiss()
-            },
-            leadingIcon = {
-                Icon(
-                    if (isMonitored) Icons.Default.BookmarkBorder else Icons.Default.Bookmark,
-                    null,
-                )
-            },
+            enabled = isMonitored,
         )
         DropdownMenuItem(
             text = { Text(mokoString(MR.strings.edit)) },
