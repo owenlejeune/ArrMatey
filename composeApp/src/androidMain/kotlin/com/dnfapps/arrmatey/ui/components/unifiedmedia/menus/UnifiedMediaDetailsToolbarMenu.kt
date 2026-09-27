@@ -230,26 +230,6 @@ private fun ArrPrimaryMenuGroup(
             },
             leadingIcon = { Icon(Icons.Default.Edit, null) },
         )
-        if (missingInstances.isNotEmpty()) {
-            HorizontalDivider(modifier = Modifier.padding(MenuDefaults.HorizontalDividerPadding))
-            missingInstances.forEach { instance ->
-                DropdownMenuItem(
-                    text = { Text(mokoString(MR.strings.add_to_arr, instance.label)) },
-                    onClick = {
-                        onAddMissingInstance(instance)
-                        onDismiss()
-                    },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(instance.type.tabIcon),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = instance.type.associatedColor,
-                        )
-                    },
-                )
-            }
-        }
     }
 }
 
