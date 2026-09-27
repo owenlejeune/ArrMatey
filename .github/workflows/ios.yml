@@ -106,3 +106,23 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
             -derivedDataPath derived_data \
             -quiet
+
+  ios-status:
+    name: iOS Status Check
+    needs: [changes, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate iOS Status
+        run: |
+          changes_res="${{ needs.changes.result }}"
+          build_res="${{ needs.build.result }}"
+          if [[ "$changes_res" == "failure" || "$changes_res" == "cancelled" ]]; then
+            echo "Changes detection failed or was cancelled."
+            exit 1
+          fi
+          if [[ "$build_res" == "failure" || "$build_res" == "cancelled" ]]; then
+            echo "iOS build failed or was cancelled."
+            exit 1
+          fi
+          echo "iOS CI passed or was skipped (build: $build_res)."
