@@ -52,20 +52,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v6
         with:
-          java-version: '17'
-          distribution: 'zulu'
+          java-version: '21'
+          distribution: 'temurin'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
-        with:
-          # jdks isn't cached by default, so the pinned daemon JVM re-downloads every run.
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
