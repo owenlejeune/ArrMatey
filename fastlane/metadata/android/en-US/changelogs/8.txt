@@ -1,0 +1,6 @@
+Bug reports have slowed, so I'm officially removing the pre-release and alpha tags! This isn't quite a "1.0" release, but I'm happy enough with the state of app to begin considering these as main-line releases.
+
+## New Features
+* Prowlarr - view and manage your indexers, and see their status
+* Download clients
+    * Support for Transmission, Deluge, qBittorrent, and SABnzbd

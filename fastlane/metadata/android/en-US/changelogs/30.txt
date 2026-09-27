@@ -1,0 +1,22 @@
+### New Features
+* Large Screen & Tablet Support: Added dual-panel layout support for the Discover tab with configurable settings toggle, edge gradients, and optimized floating action buttons.
+* Dashboard Cards & Sections: Added dedicated dashboard cards for Universal Search, Pending Seerr Requests, and Pending Seerr Issues.
+* Universal Search Overlay: Quickly open a Universal Search overlay scanning across all media and services by tapping the Dashboard navigation tab.
+* Dashboard Info Sheets: Added interactive sheets for viewing instance health notices and detailed Seerr request info directly from the dashboard.
+* Top-Level File Deletion: Delete movie and audiobook files directly from the options menu, as well as long-pressing downloaded episodes to delete episode files.
+* Integration Toggles: Turn Seerr, Arr, and Bazarr integrations on or off independently in settings.
+
+### Improvements
+* Dashboard Activity & Progress: Grouped download client activity items by task and updated download progress track styling for improved visual clarity.
+* Dashboard Performance: Split the monolithic dashboard UI flow into modular components for smoother rendering and state updates.
+* Seerr Request Workflows: Moved Watch and Request actions into the media toolbar, added Seerr auto-approve configuration with confirmation dialogs, and a direct button to view requests.
+* File & Episode Details: Episode rows now display file sizes and tapping episode notifications directly opens the specific episode view.
+* Plurals & Localization: Improved plural count handling across all supported languages.
+
+### Bug Fixes
+* Fixed movie file deletion.
+* Fixed season pack vs. single episode interactive search navigation.
+* Fixed matching of series seasons between Sonarr and Seerr.
+* Fixed lookup results merging with existing library items.
+* Fixed tab bar tap behavior for opening hidden tabs.
+* Prevented unnecessary details reloads after interactive searches.

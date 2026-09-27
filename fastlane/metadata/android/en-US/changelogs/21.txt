@@ -1,0 +1,14 @@
+### New Features
+* Dashboard: A centralized view for all your Arr instances, download clients, and requests.
+* Listenarr Integration: Full support for the Listenarr audiobook management server, including library browsing, searching, and activity tracking.
+* Android App Shortcuts: Long-press the app icon to quickly jump to your favorite services or search directly. Check out the new shortcuts customization screen for more details.
+
+### Improvements
+* UI Overhaul: Redesigned media details headers with better logo integration and layout optimization.
+* Theming & Polish: Consistent title styling, layout improvements, and haptic feedback throughout the app.
+* Performance: Optimized data fetching and caching for multi-instance setups.
+
+### Bug Fixes
+* Fixed navigation loops when opening services from the app launcher.
+* Resolved layout issues with overlapping navigation titles and header images.
+* Fixed various data synchronization issues when switching between local and remote networks.
