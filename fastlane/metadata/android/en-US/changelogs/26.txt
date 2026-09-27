@@ -1,0 +1,8 @@
+* Long-press on library items to perform quick/bulk actions
+* Manual theme, color preferences, and AMOLED dark theme support
+* Support for custom filters in library views
+* Bazarr subtitle downloads and missing subtitles dashboard card
+* Improved local network permission handling on Android 17
+* Enhanced download client error reporting
+* Persistent delete settings (add exclusion and delete files)
+* Improved loading indicators in activity and download views

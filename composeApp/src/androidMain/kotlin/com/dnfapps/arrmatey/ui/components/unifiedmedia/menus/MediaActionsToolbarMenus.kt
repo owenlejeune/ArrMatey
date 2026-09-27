@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
@@ -48,6 +49,7 @@ fun MediaActionsToolbarMenus(
     onApproveRequestClicked: (Long) -> Unit,
     onDeclineRequestClicked: (Long) -> Unit,
     onAddClicked: () -> Unit,
+    isAddOrRequestInProgress: Boolean = false,
 ) {
     if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
         var showWatchMenu by remember { mutableStateOf(false) }
@@ -180,13 +182,30 @@ fun MediaActionsToolbarMenus(
 
     // Add Action
     val showAddAction =
-        canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton
+        canAddDirectly ||
+            buttonState.showRequestButton ||
+            buttonState.showRequest4kButton ||
+            buttonState.showRequestMoreButton ||
+            isAddOrRequestInProgress
     if (showAddAction) {
         IconButton(
             onClick = onAddClicked,
-            colors = IconButtonDefaults.headerBarColors(),
+            enabled = !isAddOrRequestInProgress,
+            colors =
+                IconButtonDefaults.headerBarColors(
+                    disabledContainerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                    disabledContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
         ) {
-            Icon(Icons.Default.Add, mokoString(MR.strings.add))
+            if (isAddOrRequestInProgress) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    strokeWidth = 2.5.dp,
+                )
+            } else {
+                Icon(Icons.Default.Add, mokoString(MR.strings.add))
+            }
         }
     }
 }

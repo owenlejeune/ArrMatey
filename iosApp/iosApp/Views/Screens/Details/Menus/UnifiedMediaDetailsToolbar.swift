@@ -16,7 +16,8 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
     let onConfirmDeleteFile: () -> Void
     let onConfirmRemoveFromService: () -> Void
     let onConfirmClearData: () -> Void
-    let onAddNewInstance: (InstanceType) -> Void
+    var onAddNewInstance: ((InstanceType) -> Void)? = nil
+    var onShowMonitoring: (() -> Void)? = nil
 
     @Environment(\.openURL) private var openURL
 
@@ -26,7 +27,6 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
             addRequestButton
             approvalMenu
             monitorButton
-            instanceSwitcher
             overflowMenu
         }
     }
@@ -56,11 +56,24 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
     private var addRequestButton: some View {
         let buttonState = viewModel.buttonState
         let canAddDirectly = !success.hasArrId && success.arrMedia != nil && viewModel.isArrConfigured
+        let isInProgress = viewModel.isAddOrRequestInProgress
 
-        if canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton {
-            Button(action: onShowAddSheet) {
-                Image(systemName: "plus")
+        if canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton || buttonState.showRequestMoreButton || isInProgress {
+            Button(action: {
+                if let selectedId = success.selectedInstanceId?.int64Value,
+                   let currentInst = success.availableInstances.first(where: { $0.id == selectedId }) {
+                    viewModel.setAddSheetTargetInstance(instance: currentInst)
+                }
+                onShowAddSheet()
+            }) {
+                if isInProgress {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else {
+                    Image(systemName: "plus")
+                }
             }
+            .disabled(isInProgress)
         }
     }
 
@@ -99,23 +112,6 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
     }
 
     @ViewBuilder
-    private var instanceSwitcher: some View {
-        if success.availableInstances.count > 1, let resolvedType = viewModel.resolvedInstanceType {
-            InstancePickerMenu(
-                instances: success.availableInstances,
-                selectedInstanceId: success.selectedInstanceId?.int64Value,
-                onChangeInstance: { inst in
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        viewModel.selectInstance(instanceId: inst.id)
-                    }
-                },
-                onAddNewInstance: { onAddNewInstance(resolvedType) }
-            )
-            .menuIndicator(.hidden)
-        }
-    }
-
-    @ViewBuilder
     private var overflowMenu: some View {
         UnifiedMediaDetailsToolbarMenuView(
             success: success,
@@ -125,7 +121,8 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
             onShowAddSheetForInstance: onShowAddSheetForInstance,
             onConfirmDeleteFile: onConfirmDeleteFile,
             onConfirmRemoveFromService: onConfirmRemoveFromService,
-            onConfirmClearData: onConfirmClearData
+            onConfirmClearData: onConfirmClearData,
+            onShowMonitoring: onShowMonitoring
         )
     }
 }

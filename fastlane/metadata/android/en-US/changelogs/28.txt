@@ -1,0 +1,19 @@
+### New Features
+* Unified Library: Combined all your *Arr libraries into a single unified view for easier management of your media collection.
+* Unified Search: A powerful new search experience in the Discover tab that scans across all your configured instances and services simultaneously.
+* Schedule Item Details: Tap on an item in the schedule to view detailed information about upcoming releases.
+* Instance Actions: A new actions menu for configured instances, allowing for quicker management and troubleshooting. Accessible from the Instance Dashboard screen or library search field icon.
+
+### Improvements
+* Customizable Tab Bar: Long-press the tab bar to easily hide or reveal tabs, tailoring the navigation to your needs.
+* Dynamic Path Selection: Tap on the path or root folder in media details to quickly change the storage location for your media.
+* TMDB Integration: Added support for opening TMDB links directly within the Android app. Check out the Settings section for configuration instructions.
+* Improved Queue Management: Queue items are now better associated with their respective instances for clearer tracking.
+
+### Bug Fixes
+* Fixed an issue with file size calculation when moving files in Arr instances.
+* Resolved a bug where adding import list exclusions would fail for certain types.
+* Fixed "Move Files" functionality that was previously broken in some scenarios.
+* Improved error reporting and UI feedback when adding, editing, or deleting media.
+* Fixed subtitle language handling for "null" or unknown language values.
+* Various fixes for calendar loading, media playback buttons, and season deletion.

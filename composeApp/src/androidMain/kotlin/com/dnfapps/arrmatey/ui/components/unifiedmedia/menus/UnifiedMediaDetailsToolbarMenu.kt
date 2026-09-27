@@ -4,11 +4,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Delete
@@ -23,7 +21,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -69,6 +66,7 @@ fun UnifiedMediaDetailsToolbarMenu(
     onReportIssue: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteFile: (() -> Unit)? = null,
+    onChangeMonitoring: (() -> Unit)? = null,
 ) {
     val showArrActions = success.hasArrId && isArrConfigured
     val showSeerrActions =
@@ -111,10 +109,12 @@ fun UnifiedMediaDetailsToolbarMenu(
                 ArrPrimaryMenuGroup(
                     groupIndex = currentGroup++,
                     totalGroups = totalGroups,
+                    instanceType = instanceType,
                     isMonitored = isMonitored,
                     missingInstances = success.missingInstances,
                     onRefresh = onRefresh,
                     onAutomaticLookup = onAutomaticLookup,
+                    onChangeMonitoring = onChangeMonitoring,
                     onAddMissingInstance = onAddMissingInstance,
                     onEdit = onEdit,
                     onDismiss = { showMenu = false },
@@ -164,10 +164,12 @@ fun UnifiedMediaDetailsToolbarMenu(
 private fun ArrPrimaryMenuGroup(
     groupIndex: Int,
     totalGroups: Int,
+    instanceType: InstanceType?,
     isMonitored: Boolean,
     missingInstances: List<Instance>,
     onRefresh: () -> Unit,
     onAutomaticLookup: () -> Unit,
+    onChangeMonitoring: (() -> Unit)?,
     onAddMissingInstance: (Instance) -> Unit,
     onEdit: () -> Unit,
     onDismiss: () -> Unit,
@@ -188,24 +190,36 @@ private fun ArrPrimaryMenuGroup(
                 onDismiss()
             },
             leadingIcon = { Icon(Icons.Default.Search, null) },
+            enabled = isMonitored,
         )
-        DropdownMenuItem(
-            text = {
-                Text(
-                    mokoString(if (isMonitored) MR.strings.unmonitored else MR.strings.monitored),
-                )
-            },
-            onClick = {
-                onRefresh()
-                onDismiss()
-            },
-            leadingIcon = {
-                Icon(
-                    if (isMonitored) Icons.Default.BookmarkBorder else Icons.Default.Bookmark,
-                    null,
-                )
-            },
-        )
+        if (instanceType == InstanceType.Sonarr && onChangeMonitoring != null) {
+            DropdownMenuItem(
+                text = { Text(mokoString(MR.strings.series_monitoring)) },
+                onClick = {
+                    onChangeMonitoring()
+                    onDismiss()
+                },
+                leadingIcon = { Icon(Icons.Default.Bookmark, null) },
+            )
+        } else if (instanceType == InstanceType.Lidarr && onChangeMonitoring != null) {
+            DropdownMenuItem(
+                text = { Text(mokoString(MR.strings.artist_monitoring)) },
+                onClick = {
+                    onChangeMonitoring()
+                    onDismiss()
+                },
+                leadingIcon = { Icon(Icons.Default.Bookmark, null) },
+            )
+        } else if (instanceType == InstanceType.Bookshelf && onChangeMonitoring != null) {
+            DropdownMenuItem(
+                text = { Text(mokoString(MR.strings.book_monitoring)) },
+                onClick = {
+                    onChangeMonitoring()
+                    onDismiss()
+                },
+                leadingIcon = { Icon(Icons.Default.Bookmark, null) },
+            )
+        }
         DropdownMenuItem(
             text = { Text(mokoString(MR.strings.edit)) },
             onClick = {
@@ -214,26 +228,6 @@ private fun ArrPrimaryMenuGroup(
             },
             leadingIcon = { Icon(Icons.Default.Edit, null) },
         )
-        if (missingInstances.isNotEmpty()) {
-            HorizontalDivider(modifier = Modifier.padding(MenuDefaults.HorizontalDividerPadding))
-            missingInstances.forEach { instance ->
-                DropdownMenuItem(
-                    text = { Text(mokoString(MR.strings.add_to_arr, instance.label)) },
-                    onClick = {
-                        onAddMissingInstance(instance)
-                        onDismiss()
-                    },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(instance.type.tabIcon),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = instance.type.associatedColor,
-                        )
-                    },
-                )
-            }
-        }
     }
 }
 

@@ -1,0 +1,18 @@
+### New Features
+* Unified Media Details: Combined Arr, Seerr, and Bazarr into a single cohesive media experience, allowing you to view library status and metadata seamlessly in one place.
+* Multi-Instance Support: View media presence across multiple configured Arr instances and easily switch active instances directly within media details.
+* Seerr Discover: A new Discover tab to browse trending, popular, and upcoming movies and TV shows, with rich search and cast & crew filmographies.
+* Direct Smart Add & Requests: Add unmonitored media to any configured Arr instance or submit custom Seerr requests directly from the unified details screen.
+
+### Improvements
+* Unified Seasons & Episodes: Manage season monitoring, search interactive releases, and view Bazarr subtitles in one unified view.
+* Download Queue Bulk Actions: Long-press items in the download queue to perform multi-selection and bulk pause, resume, or delete actions.
+* Multi-Client Display: Download items now display client badges when multiple download clients are configured.
+* Predictive Back Gesture: Support for predictive back navigation transitions on Android.
+* Interactive Search Sorting: Reversed default sorting for interactive search releases to prioritize the most relevant results.
+
+### Bug Fixes
+* Fixed an issue with qBittorrent authentication latching and API key handling.
+* Fixed an issue where Prowlarr would incorrectly report as offline.
+* Fixed delete and error reporting handling in the downloads queue.
+* General performance and UI stability improvements.

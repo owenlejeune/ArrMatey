@@ -1,0 +1,26 @@
+This release focuses on navigation flexibility, file management improvements, and a completely overhauled downloads experience. We've added the ability to hide navigation items completely, introduced movie file deletion, and enhanced the custom webpage viewer and instance setup process.
+
+### Download Clients
+* Complete overhaul of the downloads tab for a more responsive and informative experience
+* Added detailed status tracking and state management for Deluge, qBittorrent, SABnzbd, and Transmission
+* New context-aware actions for managing active downloads
+* Improved polling and synchronization for real-time queue updates
+
+### Navigation & Customization
+* You can now completely hide navigation items from both the bottom bar and drawer using the new "Hidden" section in the customizer
+* New "Smart instance switcher" setting that automatically hides the switcher when only one instance of a service is configured
+
+### Custom Webpage Viewer
+* Smoother scrolling
+* Added a loading progress indicator for a better browsing experience
+* New browser-like features: Share, Copy Link, and Open in Browser
+* Support for updating a custom webpage's URL directly from the viewer to the currently viewed page
+
+### UI/UX Refinements
+* Introduced the ability to delete movie files without removing the movie from your library
+* Enhanced setup process with a direct link to the instance API key page
+* Better validation and error messaging for host URLs during configuration
+
+### Bug Fixes
+* Fixed instance filtering logic in the activity queue
+* Resolved several layout regressions and improved overall stability

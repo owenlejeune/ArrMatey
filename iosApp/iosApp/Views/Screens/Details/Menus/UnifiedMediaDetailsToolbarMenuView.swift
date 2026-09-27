@@ -15,6 +15,7 @@ struct UnifiedMediaDetailsToolbarMenuView: View {
     var onConfirmDeleteFile: (() -> Void)? = nil
     let onConfirmRemoveFromService: () -> Void
     let onConfirmClearData: () -> Void
+    var onShowMonitoring: (() -> Void)? = nil
 
     var body: some View {
         let buttonState = viewModel.buttonState
@@ -36,6 +37,20 @@ struct UnifiedMediaDetailsToolbarMenuView: View {
                                 Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
                             }
                             .disabled(!viewModel.isMonitored)
+                        }
+
+                        if viewModel.resolvedInstanceType == .sonarr, let onShowMonitoring = onShowMonitoring {
+                            Button(action: onShowMonitoring) {
+                                Label(MR.strings().series_monitoring.localized(), systemImage: "bookmark")
+                            }
+                        } else if viewModel.resolvedInstanceType == .lidarr, let onShowMonitoring = onShowMonitoring {
+                            Button(action: onShowMonitoring) {
+                                Label(MR.strings().artist_monitoring.localized(), systemImage: "bookmark")
+                            }
+                        } else if viewModel.resolvedInstanceType == .bookshelf, let onShowMonitoring = onShowMonitoring {
+                            Button(action: onShowMonitoring) {
+                                Label(MR.strings().book_monitoring.localized(), systemImage: "bookmark")
+                            }
                         }
 
                         Button(action: onShowEditSheet) {

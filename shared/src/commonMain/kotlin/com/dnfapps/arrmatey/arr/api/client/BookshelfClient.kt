@@ -6,6 +6,9 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorBulkEditBody
 import com.dnfapps.arrmatey.arr.api.model.AuthorEditorBody
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorOptions
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitoringBody
+import com.dnfapps.arrmatey.arr.api.model.AuthorMonitoringOption
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookEdition
 import com.dnfapps.arrmatey.arr.api.model.BookFile
@@ -16,6 +19,7 @@ import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
+import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -151,14 +155,27 @@ class BookshelfClient(
     override suspend fun updateMonitoring(
         ids: List<Long>,
         monitor: Any,
-    ): NetworkResult<Unit> {
-        val options = monitor as? AuthorMonitorOptions ?: return NetworkResult.Error(message = "Invalid monitor options")
-        val body =
-            AuthorBulkEditBody(
-                authorIds = ids,
-                monitored = options.monitored,
-                monitorNewItems = options.monitorNewItems,
-            )
-        return put("author/editor", body)
-    }
+    ): NetworkResult<Unit> =
+        when (monitor) {
+            is AuthorMonitorType -> {
+                post(
+                    endpoint = "bookshelf",
+                    body =
+                        AuthorMonitoringBody(
+                            authors = ids.map { IdWrapper(it) },
+                            monitoringOptions = AuthorMonitoringOption(monitor),
+                        ),
+                )
+            }
+            is AuthorMonitorOptions -> {
+                val body =
+                    AuthorBulkEditBody(
+                        authorIds = ids,
+                        monitored = monitor.monitored,
+                        monitorNewItems = monitor.monitorNewItems,
+                    )
+                put("author/editor", body)
+            }
+            else -> NetworkResult.Error(message = "Invalid monitor options")
+        }
 }

@@ -299,6 +299,29 @@ class UnifiedMediaDetailsArrActionsHandler(
         }
     }
 
+    fun updateMonitoring(
+        scope: CoroutineScope,
+        repositoryProvider: suspend () -> ArrInstanceRepository?,
+        effectiveIdProvider: () -> Long?,
+        monitorOption: Any,
+        onSuccessRefresh: (() -> Unit)? = null,
+    ) {
+        scope.launch {
+            val repository = repositoryProvider() ?: return@launch
+            val effectiveId = effectiveIdProvider() ?: return@launch
+            _editStatus.value = OperationStatus.InProgress
+            updateMediaUseCase
+                .bulkUpdateMonitoring(listOf(effectiveId), monitorOption, repository)
+                .onSuccess {
+                    repository.getMediaDetails(effectiveId)
+                    onSuccessRefresh?.invoke()
+                    _editStatus.value = OperationStatus.Success()
+                }.onError { code, message, cause ->
+                    _editStatus.value = OperationStatus.Error(code = code, message = message, cause = cause)
+                }
+        }
+    }
+
     fun updateAlbum(
         scope: CoroutineScope,
         repositoryProvider: suspend () -> ArrInstanceRepository?,
@@ -550,86 +573,93 @@ class UnifiedMediaDetailsArrActionsHandler(
         selectedInstanceIdProvider: () -> Long?,
         addSheetTargetInstanceIdProvider: () -> Long?,
         selectInstance: (Long) -> Unit,
-        refresh: () -> Unit,
+        refresh: suspend () -> Unit,
         logger: Logger,
+        onFlowStart: (() -> Unit)? = null,
+        onFlowComplete: (() -> Unit)? = null,
     ) {
         scope.launch {
-            val type = resolvedInstanceType
-            if (type == null) {
-                logger.error {
-                    "UnifiedMediaDetailsViewModel.smartAdd: resolvedInstanceType is null (requestType=$requestType, instanceType=$instanceType); cannot add '${item.title}'"
+            onFlowStart?.invoke()
+            try {
+                val type = resolvedInstanceType
+                if (type == null) {
+                    logger.error {
+                        "UnifiedMediaDetailsViewModel.smartAdd: resolvedInstanceType is null (requestType=$requestType, instanceType=$instanceType); cannot add '${item.title}'"
+                    }
+                    emitFallbackAddError("Unsupported media type")
+                    return@launch
                 }
-                emitFallbackAddError("Unsupported media type")
-                return@launch
-            }
 
-            val successState = uiState as? UnifiedMediaDetailsUiState.Success
-            val seerrMediaDetails = successState?.seerrMedia
-            val pendingRequest = seerrMediaDetails?.mediaInfo?.requests?.firstOrNull { it.status == 1 }
+                val successState = uiState as? UnifiedMediaDetailsUiState.Success
+                val seerrMediaDetails = successState?.seerrMedia
+                val pendingRequest = seerrMediaDetails?.mediaInfo?.requests?.firstOrNull { it.status == 1 }
 
-            if (pendingRequest != null) {
-                val action = preferencesStore.smartAddSeerrAction.first()
-                if (action == SmartAddSeerrAction.AlwaysAsk) {
-                    _pendingSeerrRequest.value = pendingRequest
-                } else if (action == SmartAddSeerrAction.Approve) {
-                    handlePendingRequestActionInternal(
-                        scope = scope,
-                        preferencesStore = preferencesStore,
-                        requestId = pendingRequest.id,
-                        action = SmartAddSeerrAction.Approve,
-                        rememberChoice = false,
-                        refresh = refresh,
-                    )
-                } else if (action == SmartAddSeerrAction.Decline) {
-                    handlePendingRequestActionInternal(
-                        scope = scope,
-                        preferencesStore = preferencesStore,
-                        requestId = pendingRequest.id,
-                        action = SmartAddSeerrAction.Decline,
-                        rememberChoice = false,
-                        refresh = refresh,
-                    )
+                if (pendingRequest != null) {
+                    val action = preferencesStore.smartAddSeerrAction.first()
+                    if (action == SmartAddSeerrAction.AlwaysAsk) {
+                        _pendingSeerrRequest.value = pendingRequest
+                    } else if (action == SmartAddSeerrAction.Approve) {
+                        handlePendingRequestActionInternal(
+                            scope = scope,
+                            preferencesStore = preferencesStore,
+                            requestId = pendingRequest.id,
+                            action = SmartAddSeerrAction.Approve,
+                            rememberChoice = false,
+                            refresh = refresh,
+                        )
+                    } else if (action == SmartAddSeerrAction.Decline) {
+                        handlePendingRequestActionInternal(
+                            scope = scope,
+                            preferencesStore = preferencesStore,
+                            requestId = pendingRequest.id,
+                            action = SmartAddSeerrAction.Decline,
+                            rememberChoice = false,
+                            refresh = refresh,
+                        )
+                    }
                 }
-            }
 
-            val effectiveInstanceId =
-                targetInstanceId ?: addSheetTargetInstanceIdProvider() ?: selectedInstanceIdProvider()
+                val effectiveInstanceId =
+                    targetInstanceId ?: addSheetTargetInstanceIdProvider() ?: selectedInstanceIdProvider()
 
-            val targetRepo =
+                val targetRepo =
+                    if (effectiveInstanceId != null) {
+                        targetRepoProvider(effectiveInstanceId)
+                    } else {
+                        activeRepoProvider()
+                    }
+
+                if (targetRepo == null) {
+                    logger.error {
+                        "UnifiedMediaDetailsViewModel.smartAdd: no repository resolved (type=$type, effectiveInstanceId=$effectiveInstanceId); cannot add '${item.title}'"
+                    }
+                    emitFallbackAddError("No instance available")
+                    return@launch
+                }
+
+                val collectJob =
+                    launch {
+                        targetRepo.addItemStatus.collect { _addItemStatus.value = it }
+                    }
+
+                logger.info {
+                    "UnifiedMediaDetailsViewModel.smartAdd: adding '${item.title}' to instance ${targetRepo.instance.id} (${targetRepo.instance.label}) type=$type searchOnAdd=$searchOnAdd"
+                }
+
+                smartAddMediaUseCase(
+                    instanceType = type,
+                    repository = targetRepo,
+                    item = item,
+                    searchOnAdd = searchOnAdd,
+                )
                 if (effectiveInstanceId != null) {
-                    targetRepoProvider(effectiveInstanceId)
-                } else {
-                    activeRepoProvider()
+                    selectInstance(effectiveInstanceId)
                 }
-
-            if (targetRepo == null) {
-                logger.error {
-                    "UnifiedMediaDetailsViewModel.smartAdd: no repository resolved (type=$type, effectiveInstanceId=$effectiveInstanceId); cannot add '${item.title}'"
-                }
-                emitFallbackAddError("No instance available")
-                return@launch
+                refresh()
+                collectJob.cancel()
+            } finally {
+                onFlowComplete?.invoke()
             }
-
-            val collectJob =
-                launch {
-                    targetRepo.addItemStatus.collect { _addItemStatus.value = it }
-                }
-
-            logger.info {
-                "UnifiedMediaDetailsViewModel.smartAdd: adding '${item.title}' to instance ${targetRepo.instance.id} (${targetRepo.instance.label}) type=$type searchOnAdd=$searchOnAdd"
-            }
-
-            smartAddMediaUseCase(
-                instanceType = type,
-                repository = targetRepo,
-                item = item,
-                searchOnAdd = searchOnAdd,
-            )
-            if (effectiveInstanceId != null) {
-                selectInstance(effectiveInstanceId)
-            }
-            refresh()
-            collectJob.cancel()
         }
     }
 
@@ -673,7 +703,7 @@ class UnifiedMediaDetailsArrActionsHandler(
         requestId: Long,
         action: SmartAddSeerrAction,
         rememberChoice: Boolean,
-        refresh: () -> Unit,
+        refresh: suspend () -> Unit,
     ) {
         _pendingSeerrRequest.value = null
         refresh()

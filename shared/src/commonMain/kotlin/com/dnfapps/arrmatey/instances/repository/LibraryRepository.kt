@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlin.time.Duration.Companion.milliseconds
@@ -450,10 +451,14 @@ class LibraryRepository(
             }
 
             _mediaDetailsCache
-                .map { cache ->
-                    cache[id]?.let { NetworkResult.Success(it) }
-                        ?: NetworkResult.Error(message = "Media not found in cache")
-                }.collect { emit(it) }
+                .map { cache -> cache[id] }
+                .distinctUntilChanged()
+                .collect { cached ->
+                    emit(
+                        cached?.let { NetworkResult.Success(it) }
+                            ?: NetworkResult.Error(message = "Media not found in cache"),
+                    )
+                }
         }
 
     fun observeItemHistory(itemId: Long): Flow<List<HistoryItem>> =

@@ -1,0 +1,35 @@
+This release introduces official support for Readarr and Bookshelf, integrated Seerr request management, and extensive library view customization. We've also enhanced the calendar experience, improved download client connectivity, and UI refinements.
+
+### Seerr
+* View and manage requests and issues directly within the app
+* Supports Seerr, Overseerr, and Jellyseerr instances
+* Currently in beta, so please report any issues you encounter!
+
+### Readarr / Bookshelf
+* Official support for Readarr and Bookshelf forks
+* Manage authors and books, view book details, and track new releases
+* Familiar functionality from Sonarr, Radarr, and Lidarr, now for your reading library!
+
+### Library View Customization
+* Adjust grid density and spacing to fit more items on screen
+* Toggle poster details and footer visibility to your preference
+* New view mode options for a more personalized experience
+* Check it out in your *arr instance library menu!
+
+### Calendar & Activity
+* Now includes tracking for Books and Authors
+* Improved "load more" functionality for exploring future release dates
+* Added service-based color coding for better visual distinction between instances
+
+### Download Client Improvements
+* Local network switching based on SSID for seamless transitions between home and remote connections
+* Support for Basic Authentication and API Keys
+* Enhanced SSL certificate support, including support for user-installed certificates
+
+### UI/UX Refinements
+* Updated typography using Google Sans font
+* New "Search on Add" option when adding new media to your library
+* Improved poster grid and details header layout
+
+### Bug Fixes
+* Fixed various minor bugs

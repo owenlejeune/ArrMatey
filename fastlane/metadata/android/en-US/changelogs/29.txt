@@ -1,0 +1,2 @@
+* fix a bug where new shows and movies would fail to load if no Seerr instance is present
+* add the ability to tap on notifications to open media

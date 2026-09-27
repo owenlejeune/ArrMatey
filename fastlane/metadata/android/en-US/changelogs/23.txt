@@ -1,0 +1,14 @@
+### New Features
+* Bazarr Integration: Connect your Bazarr instance to manage subtitles for Sonarr and Radarr. Browse missing subtitles, manually search providers, and download directly in the app.
+* Import/Export: Easily back up and restore your settings and instances. Perfect for moving between devices or keeping your configuration safe.
+* Credential Encryption: Your API keys and credentials are now securely encrypted when stored in the local database.
+
+### Improvements
+* Global View Customization: You can now apply your library view preferences (grid vs list, sorting, etc.) globally across all instances.
+* Details Screen Refresh: Updated UI for episode, book, and request details for better readability and consistency.
+* Embedded Subtitles: Available and missing subtitles are visible directly in movie/episode details screens when Bazarr is configured.
+
+### Bug Fixes
+* Fixed an issue where Seerr requests might not appear in certain views.
+* Resolved navigation issues when deep-linking to specific episodes.
+* Minor UI and color fixes

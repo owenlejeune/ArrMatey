@@ -21,7 +21,18 @@ data class ArtistMonitoringBody(
 
 @Serializable
 data class ArtistMonitoringOption(
-    val monitoringBody: ArtistMonitorType,
+    val monitor: ArtistMonitorType,
+)
+
+@Serializable
+data class AuthorMonitoringBody(
+    val authors: List<IdWrapper>,
+    val monitoringOptions: AuthorMonitoringOption,
+)
+
+@Serializable
+data class AuthorMonitoringOption(
+    val monitor: AuthorMonitorType,
 )
 
 @Serializable

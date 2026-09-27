@@ -1,0 +1,17 @@
+### New Features
+* Tracearr Integration: Added Tracearr integration with active stream monitoring and playback statistics on the dashboard and episode views.
+* Onboarding Setup Flow: Added an interactive onboarding experience to quickly configure initial app preferences. Can be re-run from the Settings at any time.
+* Fresh Coat of Paint: Shapes, typography, and colours have been updated across the app for consistency and to reflect modern design principles.
+* Discover Dashboard Cards: Dedicated Discover Feed, Quick Pick, and Spotlight cards integrated into the Combined Dashboard.
+* Unified Search Filters: Added filter options for instances, media types, status, and monitoring flags in Unified Search.
+* Floating Navigation Bar: Introduced a modern floating navigation bar for fluid navigation across primary screens.
+* Similar Media Recommendations: Discover similar recommendations directly from media detail overview screens.
+
+### Improvements
+* Instance Context Preservation: Navigating to media details now preserves locally selected instance context across Android and iOS.
+* Unified Library Search: Enhanced library search capabilities and refined menu filter options.
+
+### Bug Fixes
+* Navigation Drawer: Fixed navigation drawer tap responsiveness during opening animation.
+* Calendar & Library Loading: Fixed calendar loading states and resolved ViewModel key collisions during library loading.
+* Poster Overlap: Fixed issue where poster text was overlapped by images.

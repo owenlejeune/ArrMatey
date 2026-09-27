@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 class GetUnifiedMediaDetailsUseCase(
     private val getMediaDetailsUseCase: GetMediaDetailsUseCase,
@@ -129,6 +130,9 @@ class GetUnifiedMediaDetailsUseCase(
                                     it.mediaType == RequestType.Tv
                                 }?.id
                         emit(foundId)
+                    }.onStart {
+                        // Let the combine downstream emit before the title search resolves.
+                        emit(null)
                     }.flatMapLatest { searchedTmdbId ->
                         if (searchedTmdbId != null) {
                             getSeerrAndRatingsFlow(searchedTmdbId, RequestType.Tv, seerrRepository)
@@ -182,7 +186,11 @@ class GetUnifiedMediaDetailsUseCase(
         bazarr: BazarrDetails,
         arrRepository: ArrInstanceRepository? = null,
     ): UnifiedMediaDetailsUiState {
-        if (arrState is MediaDetailsUiState.Loading || seerrState is SeerrDetailsState.Loading) {
+        if (arrState is MediaDetailsUiState.Loading) {
+            return UnifiedMediaDetailsUiState.Loading
+        }
+        // Render Arr data as soon as it lands; Seerr enrichment fills in afterwards.
+        if (seerrState is SeerrDetailsState.Loading && arrState !is MediaDetailsUiState.Success) {
             return UnifiedMediaDetailsUiState.Loading
         }
 
