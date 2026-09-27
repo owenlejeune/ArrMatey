@@ -11,17 +11,15 @@ struct BottomTabView: View {
     var tabItem: TabItem
 
     var body: some View {
-        NavigationStack {
-            TabItemContent(tabItem: tabItem)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            navigationManager.openSettings()
-                        } label: {
-                            Image(systemName: "gear")
-                        }
+        TabItemContent(tabItem: tabItem)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigationManager.openSettings()
+                    } label: {
+                        Image(systemName: "gear")
                     }
                 }
-        }
+            }
     }
 }

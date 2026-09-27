@@ -523,19 +523,23 @@ struct LibraryTabContent: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         if libraryViewModel.arrInstances.isEmpty || selectedInstance == nil {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    navigationManager.showLauncher = true
-                } label: {
-                    Image(systemName: "line.3.horizontal")
+            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.library.key) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigationManager.showLauncher = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
                 }
             }
         } else if !libraryViewModel.isInSelectionMode {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    navigationManager.showLauncher = true
-                } label: {
-                    Image(systemName: "line.3.horizontal")
+            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.library.key) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigationManager.showLauncher = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
                 }
             }
 

@@ -9,17 +9,8 @@ import SwiftUI
 import Shared
 
 struct ProwlarrTab: View {
-    @Environment(\.navigationContext) private var context
-    
     var body: some View {
-        switch context {
-        case .mainTab:
-            NavigationStack {
-                ProwlarrTabContent()
-            }
-        case .launcher:
-            ProwlarrTabContent()
-        }
+        ProwlarrTabContent()
     }
 }
 
@@ -46,11 +37,13 @@ struct ProwlarrTabContent: View {
         }
         .navigationTitle(MR.strings().prowlarr.localized())
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    navigationManager.showLauncher = true
-                } label: {
-                    Image(systemName: "line.3.horizontal")
+            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.prowlarr.key) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        navigationManager.showLauncher = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                    }
                 }
             }
 

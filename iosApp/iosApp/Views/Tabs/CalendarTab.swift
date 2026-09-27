@@ -9,21 +9,8 @@ import Shared
 import SwiftUI
 
 struct CalendarTab: View {
-    @Environment(\.navigationContext) private var context
-    @EnvironmentObject private var navigationManager: NavigationManager
-
     var body: some View {
-        switch context {
-        case .mainTab:
-            NavigationStack(path: $navigationManager.calendarPath) {
-                CalendarTabContent()
-                    .navigationDestination(for: MediaRoute.self) { route in
-                        MediaRouteDestination(route: route)
-                    }
-            }
-        case .launcher:
-            CalendarTabContent()
-        }
+        CalendarTabContent()
     }
 }
 
@@ -109,11 +96,13 @@ struct CalendarTabContent: View {
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            Button {
-                navigationManager.showLauncher = true
-            } label: {
-                Image(systemName: "line.3.horizontal")
+        if navigationManager.shouldShowDrawerButton(for: TabItemStandard.calendar.key) {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    navigationManager.showLauncher = true
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                }
             }
         }
 

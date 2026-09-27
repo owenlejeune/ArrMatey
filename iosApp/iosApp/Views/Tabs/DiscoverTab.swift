@@ -7,21 +7,8 @@ import SwiftUI
 import Shared
 
 struct DiscoverTab: View {
-    @Environment(\.navigationContext) private var context
-    @EnvironmentObject private var navigationManager: NavigationManager
-
     var body: some View {
-        switch context {
-        case .mainTab:
-            NavigationStack(path: $navigationManager.seerrPath) { // Using seerrPath for now
-                DiscoverTabContent()
-                    .navigationDestination(for: SeerrRoute.self) { route in
-                        SeerrRouteDestination(route: route)
-                    }
-            }
-        case .launcher:
-            DiscoverTabContent()
-        }
+        DiscoverTabContent()
     }
 }
 
@@ -29,7 +16,6 @@ private struct DiscoverTabContent: View {
     @StateObject private var viewModel = DiscoverViewModelS()
     @StateObject private var instancesViewModel = InstancesViewModelS(type: .seerr)
     @EnvironmentObject private var navigationManager: NavigationManager
-    @Environment(\.navigationContext) private var context
     @State private var searchQuery = ""
     @State private var showCustomizationSheet = false
 
@@ -153,13 +139,12 @@ private struct DiscoverTabContent: View {
         }
         .navigationTitle(MR.strings().discover.localized())
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(context == .mainTab)
         .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always))
         .onChange(of: searchQuery) { _, newValue in
             viewModel.updateSearchQuery(newValue)
         }
         .toolbar {
-            if context == .mainTab {
+            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.discover.key) {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         navigationManager.showLauncher = true

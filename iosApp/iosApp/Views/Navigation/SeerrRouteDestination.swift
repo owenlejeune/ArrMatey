@@ -20,6 +20,8 @@ struct SeerrRouteDestination: View {
             }
         case .category(let category):
             DiscoverCategoryScreen(category: category)
+        case .personDetails(let id):
+            SeerrPersonDetailsScreen(personId: id)
         }
     }
 }
