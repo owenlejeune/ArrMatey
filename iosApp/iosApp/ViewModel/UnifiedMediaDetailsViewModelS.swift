@@ -242,6 +242,10 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.updateAlbum(album: album)
     }
 
+    func updateMonitoring(_ monitorOption: Any) {
+        viewModel.updateMonitoring(monitorOption: monitorOption)
+    }
+
     func resetEditStatus() {
         viewModel.resetEditStatus()
     }

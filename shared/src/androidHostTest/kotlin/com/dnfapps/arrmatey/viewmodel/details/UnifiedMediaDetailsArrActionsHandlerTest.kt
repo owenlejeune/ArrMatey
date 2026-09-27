@@ -116,6 +116,24 @@ class UnifiedMediaDetailsArrActionsHandlerTest {
         }
 
     @Test
+    fun testUpdateMonitoring() =
+        runTest(UnconfinedTestDispatcher()) {
+            val mockRepo = mockk<ArrInstanceRepository>()
+            coEvery { updateMediaUseCase.bulkUpdateMonitoring(listOf(456L), any(), mockRepo) } returns NetworkResult.Success(Unit)
+            coEvery { mockRepo.getMediaDetails(456L) } returns NetworkResult.Success(mockk())
+
+            handler.updateMonitoring(
+                scope = TestScope(UnconfinedTestDispatcher()),
+                repositoryProvider = { mockRepo },
+                effectiveIdProvider = { 456L },
+                monitorOption = "none",
+            )
+
+            coVerify { updateMediaUseCase.bulkUpdateMonitoring(listOf(456L), "none", mockRepo) }
+            assertTrue(handler.editStatus.value is OperationStatus.Success)
+        }
+
+    @Test
     fun testDismissPendingRequestDialog() {
         handler.dismissPendingRequestDialog()
         assertNull(handler.pendingSeerrRequest.value)

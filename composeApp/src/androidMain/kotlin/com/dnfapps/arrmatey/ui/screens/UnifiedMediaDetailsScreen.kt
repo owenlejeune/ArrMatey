@@ -85,6 +85,9 @@ import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.AddMediaSheetsHost
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.EditMediaSheetsHost
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeerrReportIssueSheetHost
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeerrViewRequestSheetHost
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.ArtistMonitoringSheet
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.BookMonitoringSheet
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeriesMonitoringSheet
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.tabs.OverviewTabContent
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.tabs.SeasonsFilesTabContent
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
@@ -175,6 +178,9 @@ fun UnifiedMediaDetailsScreen(
     var showEditSheet by remember { mutableStateOf(false) }
     var showEditPathSheet by remember { mutableStateOf(false) }
     var showAddSheet by remember { mutableStateOf(false) }
+    var showSeriesMonitoringSheet by remember { mutableStateOf(false) }
+    var showArtistMonitoringSheet by remember { mutableStateOf(false) }
+    var showBookMonitoringSheet by remember { mutableStateOf(false) }
     var moveFilesItem by remember { mutableStateOf<ArrMedia?>(null) }
     var confirmDeleteSeasonNumber by remember { mutableStateOf<Int?>(null) }
     var confirmDeleteAlbum by remember { mutableStateOf<Long?>(null) }
@@ -423,6 +429,15 @@ fun UnifiedMediaDetailsScreen(
                             onRemoveFromService = { confirmRemoveFromService = true },
                             onClearData = { confirmClearData = true },
                             onReportIssue = { viewModel.showReportIssueSheet() },
+                            onChangeMonitoring = {
+                                if (resolvedType == InstanceType.Sonarr) {
+                                    showSeriesMonitoringSheet = true
+                                } else if (resolvedType == InstanceType.Lidarr) {
+                                    showArtistMonitoringSheet = true
+                                } else if (resolvedType == InstanceType.Bookshelf) {
+                                    showBookMonitoringSheet = true
+                                }
+                            },
                         )
                     }
                 },
@@ -885,6 +900,33 @@ fun UnifiedMediaDetailsScreen(
                             confirmClearData = false
                         },
                         onDismiss = { confirmClearData = false },
+                    )
+                }
+
+                if (showSeriesMonitoringSheet) {
+                    SeriesMonitoringSheet(
+                        onDismissRequest = { showSeriesMonitoringSheet = false },
+                        onOptionSelected = { option ->
+                            viewModel.updateMonitoring(option)
+                        },
+                    )
+                }
+
+                if (showArtistMonitoringSheet) {
+                    ArtistMonitoringSheet(
+                        onDismissRequest = { showArtistMonitoringSheet = false },
+                        onOptionSelected = { option ->
+                            viewModel.updateMonitoring(option)
+                        },
+                    )
+                }
+
+                if (showBookMonitoringSheet) {
+                    BookMonitoringSheet(
+                        onDismissRequest = { showBookMonitoringSheet = false },
+                        onOptionSelected = { option ->
+                            viewModel.updateMonitoring(option)
+                        },
                     )
                 }
 

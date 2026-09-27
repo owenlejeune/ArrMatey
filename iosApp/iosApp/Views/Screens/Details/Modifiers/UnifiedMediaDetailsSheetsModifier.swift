@@ -13,6 +13,9 @@ struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
     @Binding var showEditPathSheet: Bool
     @Binding var showAddSheet: Bool
     @Binding var showConfirmSheet: Bool
+    @Binding var showSeriesMonitoringSheet: Bool
+    @Binding var showArtistMonitoringSheet: Bool
+    @Binding var showBookMonitoringSheet: Bool
     @Binding var moveFilesItem: ArrMedia?
     @Binding var editAlbum: ArrAlbum?
     @Binding var selectedQueueItem: QueueItem?
@@ -91,6 +94,27 @@ struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
                     instanceLabel: label,
                     onConfirm: { addExclusion, deleteFiles in
                         viewModel.deleteMedia(deleteFiles: deleteFiles, addImportExclusion: addExclusion)
+                    }
+                )
+            }
+            .sheet(isPresented: $showSeriesMonitoringSheet) {
+                SeriesMonitoringSheet(
+                    onSelectOption: { option in
+                        viewModel.updateMonitoring(option)
+                    }
+                )
+            }
+            .sheet(isPresented: $showArtistMonitoringSheet) {
+                ArtistMonitoringSheet(
+                    onSelectOption: { option in
+                        viewModel.updateMonitoring(option)
+                    }
+                )
+            }
+            .sheet(isPresented: $showBookMonitoringSheet) {
+                BookMonitoringSheet(
+                    onSelectOption: { option in
+                        viewModel.updateMonitoring(option)
                     }
                 )
             }

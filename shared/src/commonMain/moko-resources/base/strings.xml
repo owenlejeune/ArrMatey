@@ -227,6 +227,9 @@
     <string name="relevance">Relevance</string>
     <string name="quality_profile">Quality profile</string>
     <string name="monitor">Monitor</string>
+    <string name="series_monitoring">Series Monitoring</string>
+    <string name="artist_monitoring">Artist Monitoring</string>
+    <string name="book_monitoring">Book Monitoring</string>
     <string name="monitor_author">Monitor Author</string>
     <string name="update_monitoring">Update Monitoring</string>
     <string name="monitor_new_albums">Monitor New Albums</string>

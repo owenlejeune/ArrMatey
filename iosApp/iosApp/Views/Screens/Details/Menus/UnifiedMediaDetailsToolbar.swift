@@ -17,6 +17,7 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
     let onConfirmRemoveFromService: () -> Void
     let onConfirmClearData: () -> Void
     var onAddNewInstance: ((InstanceType) -> Void)? = nil
+    var onShowMonitoring: (() -> Void)? = nil
 
     @Environment(\.openURL) private var openURL
 
@@ -120,7 +121,8 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
             onShowAddSheetForInstance: onShowAddSheetForInstance,
             onConfirmDeleteFile: onConfirmDeleteFile,
             onConfirmRemoveFromService: onConfirmRemoveFromService,
-            onConfirmClearData: onConfirmClearData
+            onConfirmClearData: onConfirmClearData,
+            onShowMonitoring: onShowMonitoring
         )
     }
 }

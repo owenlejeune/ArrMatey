@@ -622,6 +622,16 @@ class UnifiedMediaDetailsViewModel(
         )
     }
 
+    fun updateMonitoring(monitorOption: Any) {
+        arrActionsHandler.updateMonitoring(
+            scope = viewModelScope,
+            repositoryProvider = { instanceHandler.getActiveArrRepository() },
+            effectiveIdProvider = { instanceHandler.getEffectiveArrId(_uiState.value) },
+            monitorOption = monitorOption,
+            onSuccessRefresh = ::refresh,
+        )
+    }
+
     fun updateAlbum(album: ArrAlbum) {
         arrActionsHandler.updateAlbum(
             scope = viewModelScope,
