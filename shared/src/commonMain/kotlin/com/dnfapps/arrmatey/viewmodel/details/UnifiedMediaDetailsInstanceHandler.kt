@@ -243,7 +243,7 @@ class UnifiedMediaDetailsInstanceHandler(
                 availableInstances.value.firstOrNull { it.id == instanceId }
                     ?: currentSuccess.availableInstances.firstOrNull { it.id == instanceId }
                     ?: getArrInstanceRepositoryUseCase(instanceId)?.instance
-            if (targetMedia == null && targetInst != null) {
+            if (targetInst != null) {
                 setAddSheetTargetInstance(targetInst)
             }
         }

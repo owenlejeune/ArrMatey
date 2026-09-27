@@ -9,7 +9,11 @@ import androidx.compose.ui.graphics.Color
 fun IconButtonDefaults.headerBarColors(
     containerColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = MaterialTheme.colorScheme.onBackground,
+    disabledContainerColor: Color = containerColor.copy(alpha = .8f),
+    disabledContentColor: Color = contentColor.copy(alpha = .8f),
 ) = iconButtonColors(
     containerColor = containerColor.copy(alpha = .8f),
     contentColor = contentColor,
+    disabledContainerColor = disabledContainerColor,
+    disabledContentColor = disabledContentColor,
 )

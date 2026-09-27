@@ -12,6 +12,9 @@ struct UnifiedMediaDetailsScreen: View {
     @EnvironmentObject private var navigationManager: NavigationManager
 
     @State private var showConfirmSheet = false
+    @State private var showSeriesMonitoringSheet = false
+    @State private var showArtistMonitoringSheet = false
+    @State private var showBookMonitoringSheet = false
     @State private var showEditSheet = false
     @State private var showEditPathSheet = false
     @State private var showAddSheet = false
@@ -87,6 +90,9 @@ struct UnifiedMediaDetailsScreen: View {
             showEditPathSheet: $showEditPathSheet,
             showAddSheet: $showAddSheet,
             showConfirmSheet: $showConfirmSheet,
+            showSeriesMonitoringSheet: $showSeriesMonitoringSheet,
+            showArtistMonitoringSheet: $showArtistMonitoringSheet,
+            showBookMonitoringSheet: $showBookMonitoringSheet,
             moveFilesItem: $moveFilesItem,
             editAlbum: $editAlbum,
             selectedQueueItem: $selectedQueueItem,
@@ -193,6 +199,23 @@ extension UnifiedMediaDetailsScreen {
                         if isMovieOrTv {
                             TracearrSummaryChipRowView(uiState: tracearrState)
                                 .padding(.top, 4)
+                        }
+
+                        if success.availableInstances.count > 1 && !success.instancePresences.isEmpty {
+                            InstancePresenceChipsView(
+                                presences: success.instancePresences,
+                                selectedInstanceId: success.selectedInstanceId?.int64Value,
+                                onSelectInstance: { instId in
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        viewModel.selectInstance(instanceId: instId)
+                                    }
+                                },
+                                onAddInstance: { missingInst in
+                                    viewModel.setAddSheetTargetInstance(instance: missingInst)
+                                    showAddSheet = true
+                                }
+                            )
+                            .padding(.top, 4)
                         }
                     }
 
@@ -332,6 +355,15 @@ extension UnifiedMediaDetailsScreen {
                     onConfirmClearData: { confirmClearData = true },
                     onAddNewInstance: { instanceType in
                         navigationManager.goToNewInstance(of: instanceType)
+                    },
+                    onShowMonitoring: {
+                        if viewModel.resolvedInstanceType == .sonarr {
+                            showSeriesMonitoringSheet = true
+                        } else if viewModel.resolvedInstanceType == .lidarr {
+                            showArtistMonitoringSheet = true
+                        } else if viewModel.resolvedInstanceType == .bookshelf {
+                            showBookMonitoringSheet = true
+                        }
                     }
                 )
             }

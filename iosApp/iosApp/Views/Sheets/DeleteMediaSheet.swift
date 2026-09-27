@@ -12,6 +12,7 @@ struct DeleteMediaSheet: View {
     let isLoading: Bool
     let initialAddExclusion: Bool
     let initialDeleteFiles: Bool
+    let instanceLabel: String?
     let onConfirm: (_ addExclusion: Bool, _ deleteFiles: Bool) -> Void
     
     @State private var addExclusion: Bool
@@ -19,10 +20,17 @@ struct DeleteMediaSheet: View {
     
     @Environment(\.dismiss) private var dismiss
     
-    init(isLoading: Bool, initialAddExclusion: Bool = false, initialDeleteFiles: Bool = false, onConfirm: @escaping (_ addExclusion: Bool, _ deleteFiles: Bool) -> Void) {
+    init(
+        isLoading: Bool,
+        initialAddExclusion: Bool = false,
+        initialDeleteFiles: Bool = false,
+        instanceLabel: String? = nil,
+        onConfirm: @escaping (_ addExclusion: Bool, _ deleteFiles: Bool) -> Void
+    ) {
         self.isLoading = isLoading
         self.initialAddExclusion = initialAddExclusion
         self.initialDeleteFiles = initialDeleteFiles
+        self.instanceLabel = instanceLabel
         self.onConfirm = onConfirm
         self._addExclusion = State(initialValue: initialAddExclusion)
         self._deleteFiles = State(initialValue: initialDeleteFiles)
@@ -31,6 +39,17 @@ struct DeleteMediaSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let instanceLabel = instanceLabel {
+                    Section {
+                        HStack {
+                            Text(MR.strings().instances.localized())
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(instanceLabel)
+                                .fontWeight(.medium)
+                        }
+                    }
+                }
                 Section {
                     Toggle(MR.strings().add_exclusion.localized(), isOn: $addExclusion)
                 } footer: {

@@ -95,9 +95,11 @@ class UnifiedMediaDetailsDataObserver(
                         val isPresent = arrMedia?.let { it.id != null && it.id != 0L } ?: false
                         !isPresent
                     }
+                val selectedId = current.selectedInstanceId ?: instanceHandler.selectedInstanceId.value
+                val activeInst = current.availableInstances.find { it.id == selectedId }
                 syncAddSheetTarget(
                     filteredInstances = filteredInstances,
-                    activeInstance = current.availableInstances.find { it.id == current.selectedInstanceId },
+                    activeInstance = activeInst,
                 )
             }
         }
@@ -125,9 +127,11 @@ class UnifiedMediaDetailsDataObserver(
                         val isPresent = arrMedia?.let { it.id != null && it.id != 0L } ?: false
                         !isPresent
                     }
+                val selectedId = instanceHandler.selectedInstanceId.value
+                val activeInst = allRepos.find { it.instance.id == selectedId }?.instance ?: activeRepo?.instance
                 syncAddSheetTarget(
                     filteredInstances = filteredInstances,
-                    activeInstance = activeRepo?.instance,
+                    activeInstance = activeInst,
                 )
 
                 if (activeRepo != null) {

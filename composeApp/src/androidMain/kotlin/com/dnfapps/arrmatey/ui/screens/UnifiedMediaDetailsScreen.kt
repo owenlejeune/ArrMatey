@@ -64,7 +64,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
-import com.dnfapps.arrmatey.ui.components.InstancePicker
+import com.dnfapps.arrmatey.ui.components.InstancePresenceChips
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
@@ -82,9 +82,12 @@ import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.PendingSeerrReque
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.menus.MediaActionsToolbarMenus
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.menus.UnifiedMediaDetailsToolbarMenu
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.AddMediaSheetsHost
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.ArtistMonitoringSheet
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.BookMonitoringSheet
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.EditMediaSheetsHost
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeerrReportIssueSheetHost
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeerrViewRequestSheetHost
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeriesMonitoringSheet
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.tabs.OverviewTabContent
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.tabs.SeasonsFilesTabContent
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
@@ -137,6 +140,7 @@ fun UnifiedMediaDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val isAddOrRequestInProgress by viewModel.isAddOrRequestInProgress.collectAsStateWithLifecycle()
     val recommendationsState by viewModel.recommendationsState.collectAsStateWithLifecycle()
     val similarState by viewModel.similarState.collectAsStateWithLifecycle()
     val selectedInstanceId by viewModel.selectedInstanceId.collectAsStateWithLifecycle()
@@ -174,6 +178,9 @@ fun UnifiedMediaDetailsScreen(
     var showEditSheet by remember { mutableStateOf(false) }
     var showEditPathSheet by remember { mutableStateOf(false) }
     var showAddSheet by remember { mutableStateOf(false) }
+    var showSeriesMonitoringSheet by remember { mutableStateOf(false) }
+    var showArtistMonitoringSheet by remember { mutableStateOf(false) }
+    var showBookMonitoringSheet by remember { mutableStateOf(false) }
     var moveFilesItem by remember { mutableStateOf<ArrMedia?>(null) }
     var confirmDeleteSeasonNumber by remember { mutableStateOf<Int?>(null) }
     var confirmDeleteAlbum by remember { mutableStateOf<Long?>(null) }
@@ -351,6 +358,7 @@ fun UnifiedMediaDetailsScreen(
                         MediaActionsToolbarMenus(
                             buttonState = buttonState,
                             canAddDirectly = canAddDirectly,
+                            isAddOrRequestInProgress = isAddOrRequestInProgress,
                             onWatchClicked = { url, provider ->
                                 handleWatchClick(url, provider, context, moko)
                             },
@@ -360,18 +368,15 @@ fun UnifiedMediaDetailsScreen(
                             onViewRequestClicked = { viewModel.showViewRequestSheet() },
                             onApproveRequestClicked = { viewModel.showViewRequestSheet() },
                             onDeclineRequestClicked = { viewModel.declineRequest(it) },
-                            onAddClicked = { showAddSheet = true },
+                            onAddClicked = {
+                                val currentSelectedId = success.selectedInstanceId ?: selectedInstanceId
+                                val currentInst = success.availableInstances.find { it.id == currentSelectedId }
+                                if (currentInst != null) {
+                                    viewModel.setAddSheetTargetInstance(currentInst)
+                                }
+                                showAddSheet = true
+                            },
                         )
-
-                        if (resolvedType != null && success.availableInstances.size > 1) {
-                            InstancePicker(
-                                type = resolvedType,
-                                currentInstance = success.availableInstances.firstOrNull { it.id == success.selectedInstanceId },
-                                typeInstances = success.availableInstances,
-                                onInstanceSelected = { viewModel.selectInstance(it.id) },
-                                buttonColors = IconButtonDefaults.headerBarColors(),
-                            )
-                        }
 
                         if (showArrActions) {
                             IconButton(
@@ -424,6 +429,15 @@ fun UnifiedMediaDetailsScreen(
                             onRemoveFromService = { confirmRemoveFromService = true },
                             onClearData = { confirmClearData = true },
                             onReportIssue = { viewModel.showReportIssueSheet() },
+                            onChangeMonitoring = {
+                                if (resolvedType == InstanceType.Sonarr) {
+                                    showSeriesMonitoringSheet = true
+                                } else if (resolvedType == InstanceType.Lidarr) {
+                                    showArtistMonitoringSheet = true
+                                } else if (resolvedType == InstanceType.Bookshelf) {
+                                    showBookMonitoringSheet = true
+                                }
+                            },
                         )
                     }
                 },
@@ -498,6 +512,19 @@ fun UnifiedMediaDetailsScreen(
                                         TracearrSummaryChipRow(
                                             uiState = tracearrState,
                                             modifier = Modifier.padding(top = 8.dp),
+                                        )
+                                    }
+
+                                    if (successState.availableInstances.size > 1 && successState.instancePresences.isNotEmpty()) {
+                                        InstancePresenceChips(
+                                            presences = successState.instancePresences,
+                                            selectedInstanceId = successState.selectedInstanceId ?: selectedInstanceId,
+                                            onSelectInstance = { instId -> viewModel.selectInstance(instId) },
+                                            onAddInstance = { missingInst ->
+                                                viewModel.setAddSheetTargetInstance(missingInst)
+                                                showAddSheet = true
+                                            },
+                                            modifier = Modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
                                         )
                                     }
 
@@ -761,10 +788,18 @@ fun UnifiedMediaDetailsScreen(
                 }
 
                 if (confirmDelete) {
+                    val currentSelectedId = successState?.selectedInstanceId ?: selectedInstanceId
+                    val currentInstLabel =
+                        if ((successState?.availableInstances?.size ?: 0) > 1) {
+                            successState?.availableInstances?.find { it.id == currentSelectedId }?.label
+                        } else {
+                            null
+                        }
                     ConfirmDeleteAlert(
                         deleteInProgress = deleteStatus is OperationStatus.InProgress,
                         initialAddExclusion = preferences.deleteAddExclusion,
                         initialDeleteFiles = preferences.deleteDeleteFiles,
+                        instanceLabel = currentInstLabel,
                         onDismiss = { confirmDelete = false },
                         onDelete = { deleteFiles, addExclusion ->
                             viewModel.deleteMedia(deleteFiles, addExclusion)
@@ -866,6 +901,33 @@ fun UnifiedMediaDetailsScreen(
                             confirmClearData = false
                         },
                         onDismiss = { confirmClearData = false },
+                    )
+                }
+
+                if (showSeriesMonitoringSheet) {
+                    SeriesMonitoringSheet(
+                        onDismissRequest = { showSeriesMonitoringSheet = false },
+                        onOptionSelected = { option ->
+                            viewModel.updateMonitoring(option)
+                        },
+                    )
+                }
+
+                if (showArtistMonitoringSheet) {
+                    ArtistMonitoringSheet(
+                        onDismissRequest = { showArtistMonitoringSheet = false },
+                        onOptionSelected = { option ->
+                            viewModel.updateMonitoring(option)
+                        },
+                    )
+                }
+
+                if (showBookMonitoringSheet) {
+                    BookMonitoringSheet(
+                        onDismissRequest = { showBookMonitoringSheet = false },
+                        onOptionSelected = { option ->
+                            viewModel.updateMonitoring(option)
+                        },
                     )
                 }
 

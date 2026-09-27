@@ -85,6 +85,7 @@ class UnifiedMediaDetailsViewModelTest {
 
         assertEquals(InstanceType.Radarr, viewModel.resolvedInstanceType)
         assertEquals(RequestType.Movie, viewModel.resolvedRequestType)
+        assertEquals(false, viewModel.isAddOrRequestInProgress.value)
         verify { activityQueueService.startPolling() }
     }
 }
