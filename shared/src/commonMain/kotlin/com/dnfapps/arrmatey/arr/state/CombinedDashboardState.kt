@@ -116,8 +116,7 @@ sealed interface CombinedDashboardState {
                 DiscoverCategory.UPCOMING_SERIES -> upcomingTv
             }
 
-        fun isLoadingDiscoverFeed(category: DiscoverCategory): Boolean =
-            isLoadingMoreDiscover[category] == true
+        fun isLoadingDiscoverFeed(category: DiscoverCategory): Boolean = isLoadingMoreDiscover[category] == true
 
         fun resolveMediaStatus(item: DiscoverResult): com.dnfapps.arrmatey.seerr.api.model.MediaStatus {
             val directStatus =
