@@ -34,6 +34,7 @@ fun ConfirmDeleteAlert(
     deleteInProgress: Boolean,
     initialAddExclusion: Boolean = false,
     initialDeleteFiles: Boolean = false,
+    instanceLabel: String? = null,
     onDismiss: () -> Unit,
     onDelete: (Boolean, Boolean) -> Unit,
 ) {
@@ -58,6 +59,13 @@ fun ConfirmDeleteAlert(
                     .padding(horizontal = 24.dp)
                     .padding(bottom = 24.dp),
         ) {
+            if (instanceLabel != null) {
+                Text(
+                    text = "${mokoString(MR.strings.instances)}: $instanceLabel",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             LabelledSwitch(
                 label = mokoString(MR.strings.add_exclusion),
                 sublabel = mokoString(MR.strings.add_exclusion_description),

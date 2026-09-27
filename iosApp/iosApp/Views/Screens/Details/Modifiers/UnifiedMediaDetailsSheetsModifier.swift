@@ -80,10 +80,15 @@ struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
                 }
             }
             .sheet(isPresented: $showConfirmSheet) {
+                let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess
+                let label: String? = (success?.availableInstances.count ?? 0) > 1
+                    ? success?.availableInstances.first(where: { $0.id == success?.selectedInstanceId?.int64Value })?.label
+                    : nil
                 DeleteMediaSheet(
                     isLoading: viewModel.deleteStatus is OperationStatusInProgress,
                     initialAddExclusion: viewModel.preferences.deleteAddExclusion,
                     initialDeleteFiles: viewModel.preferences.deleteDeleteFiles,
+                    instanceLabel: label,
                     onConfirm: { addExclusion, deleteFiles in
                         viewModel.deleteMedia(deleteFiles: deleteFiles, addImportExclusion: addExclusion)
                     }

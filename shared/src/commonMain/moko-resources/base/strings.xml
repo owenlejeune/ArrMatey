@@ -186,6 +186,7 @@
     <string name="wanted">Wanted</string>
     <string name="missing">Missing</string>
     <string name="downloaded">Downloaded</string>
+    <string name="not_added">Not Added</string>
     <string name="cutoff_unmet">Cutoff Unmet</string>
     <string name="continuing_only">Continuing Only</string>
     <string name="ended_only">Ended Only</string>

@@ -194,6 +194,23 @@ extension UnifiedMediaDetailsScreen {
                             TracearrSummaryChipRowView(uiState: tracearrState)
                                 .padding(.top, 4)
                         }
+
+                        if success.availableInstances.count > 1 && !success.instancePresences.isEmpty {
+                            InstancePresenceChipsView(
+                                presences: success.instancePresences,
+                                selectedInstanceId: success.selectedInstanceId?.int64Value,
+                                onSelectInstance: { instId in
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        viewModel.selectInstance(instanceId: instId)
+                                    }
+                                },
+                                onAddInstance: { missingInst in
+                                    viewModel.setAddSheetTargetInstance(instance: missingInst)
+                                    showAddSheet = true
+                                }
+                            )
+                            .padding(.top, 4)
+                        }
                     }
 
                     if hasSeasonsOrFiles || hasTracearr {

@@ -193,6 +193,12 @@ private struct MediaRequestOrAddSheetContent: View {
                 selectedSeasons = Set(tv.seasons.map { $0.seasonNumber })
             }
         }
+        .onChange(of: viewModel.addSheetUiState.targetInstance?.id) { _, _ in
+            selectedMovieTags = []
+            selectedSeriesTags = []
+            syncQualityProfiles(force: true)
+            syncRootFolders(force: true)
+        }
         .onChange(of: viewModel.addSheetUiState.qualityProfiles.count) { _, _ in
             syncQualityProfiles()
         }
@@ -253,23 +259,23 @@ private struct MediaRequestOrAddSheetContent: View {
         .background(Color(UIColor.systemBackground))
     }
 
-    private func syncQualityProfiles() {
+    private func syncQualityProfiles(force: Bool = false) {
         if let firstId = effectiveQualityProfiles.first?.id {
-            if selectedMovieQualityProfileId == nil {
+            if force || selectedMovieQualityProfileId == nil || !effectiveQualityProfiles.contains(where: { $0.id == selectedMovieQualityProfileId }) {
                 selectedMovieQualityProfileId = firstId
             }
-            if selectedSeriesQualityProfileId == nil {
+            if force || selectedSeriesQualityProfileId == nil || !effectiveQualityProfiles.contains(where: { $0.id == selectedSeriesQualityProfileId }) {
                 selectedSeriesQualityProfileId = firstId
             }
         }
     }
 
-    private func syncRootFolders() {
+    private func syncRootFolders(force: Bool = false) {
         if let firstId = effectiveRootFolders.first?.id {
-            if selectedMovieRootFolderId == nil {
+            if force || selectedMovieRootFolderId == nil || !effectiveRootFolders.contains(where: { $0.id == selectedMovieRootFolderId }) {
                 selectedMovieRootFolderId = firstId
             }
-            if selectedSeriesRootFolderId == nil {
+            if force || selectedSeriesRootFolderId == nil || !effectiveRootFolders.contains(where: { $0.id == selectedSeriesRootFolderId }) {
                 selectedSeriesRootFolderId = firstId
             }
         }

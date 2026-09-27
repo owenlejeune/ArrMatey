@@ -64,7 +64,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
-import com.dnfapps.arrmatey.ui.components.InstancePicker
+import com.dnfapps.arrmatey.ui.components.InstancePresenceChips
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
@@ -372,16 +372,6 @@ fun UnifiedMediaDetailsScreen(
                             },
                         )
 
-                        if (resolvedType != null && success.availableInstances.size > 1) {
-                            InstancePicker(
-                                type = resolvedType,
-                                currentInstance = success.availableInstances.firstOrNull { it.id == success.selectedInstanceId },
-                                typeInstances = success.availableInstances,
-                                onInstanceSelected = { viewModel.selectInstance(it.id) },
-                                buttonColors = IconButtonDefaults.headerBarColors(),
-                            )
-                        }
-
                         if (showArrActions) {
                             IconButton(
                                 onClick = { viewModel.toggleMonitored() },
@@ -507,6 +497,19 @@ fun UnifiedMediaDetailsScreen(
                                         TracearrSummaryChipRow(
                                             uiState = tracearrState,
                                             modifier = Modifier.padding(top = 8.dp),
+                                        )
+                                    }
+
+                                    if (successState.availableInstances.size > 1 && successState.instancePresences.isNotEmpty()) {
+                                        InstancePresenceChips(
+                                            presences = successState.instancePresences,
+                                            selectedInstanceId = successState.selectedInstanceId ?: selectedInstanceId,
+                                            onSelectInstance = { instId -> viewModel.selectInstance(instId) },
+                                            onAddInstance = { missingInst ->
+                                                viewModel.setAddSheetTargetInstance(missingInst)
+                                                showAddSheet = true
+                                            },
+                                            modifier = Modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
                                         )
                                     }
 
@@ -770,10 +773,17 @@ fun UnifiedMediaDetailsScreen(
                 }
 
                 if (confirmDelete) {
+                    val currentSelectedId = successState?.selectedInstanceId ?: selectedInstanceId
+                    val currentInstLabel = if ((successState?.availableInstances?.size ?: 0) > 1) {
+                        successState?.availableInstances?.find { it.id == currentSelectedId }?.label
+                    } else {
+                        null
+                    }
                     ConfirmDeleteAlert(
                         deleteInProgress = deleteStatus is OperationStatus.InProgress,
                         initialAddExclusion = preferences.deleteAddExclusion,
                         initialDeleteFiles = preferences.deleteDeleteFiles,
+                        instanceLabel = currentInstLabel,
                         onDismiss = { confirmDelete = false },
                         onDelete = { deleteFiles, addExclusion ->
                             viewModel.deleteMedia(deleteFiles, addExclusion)

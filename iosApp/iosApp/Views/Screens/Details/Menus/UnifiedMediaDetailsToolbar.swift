@@ -16,7 +16,7 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
     let onConfirmDeleteFile: () -> Void
     let onConfirmRemoveFromService: () -> Void
     let onConfirmClearData: () -> Void
-    let onAddNewInstance: (InstanceType) -> Void
+    var onAddNewInstance: ((InstanceType) -> Void)? = nil
 
     @Environment(\.openURL) private var openURL
 
@@ -26,7 +26,6 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
             addRequestButton
             approvalMenu
             monitorButton
-            instanceSwitcher
             overflowMenu
         }
     }
@@ -108,23 +107,6 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
             Button(action: { viewModel.toggleMonitored() }) {
                 Image(systemName: viewModel.isMonitored ? "bookmark.fill" : "bookmark")
             }
-        }
-    }
-
-    @ViewBuilder
-    private var instanceSwitcher: some View {
-        if success.availableInstances.count > 1, let resolvedType = viewModel.resolvedInstanceType {
-            InstancePickerMenu(
-                instances: success.availableInstances,
-                selectedInstanceId: success.selectedInstanceId?.int64Value,
-                onChangeInstance: { inst in
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        viewModel.selectInstance(instanceId: inst.id)
-                    }
-                },
-                onAddNewInstance: { onAddNewInstance(resolvedType) }
-            )
-            .menuIndicator(.hidden)
         }
     }
 
