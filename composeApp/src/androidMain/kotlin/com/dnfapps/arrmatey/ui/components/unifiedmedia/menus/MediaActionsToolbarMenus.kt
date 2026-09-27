@@ -182,8 +182,11 @@ fun MediaActionsToolbarMenus(
 
     // Add Action
     val showAddAction =
-        canAddDirectly || buttonState.showRequestButton || buttonState.showRequest4kButton ||
-            buttonState.showRequestMoreButton || isAddOrRequestInProgress
+        canAddDirectly ||
+            buttonState.showRequestButton ||
+            buttonState.showRequest4kButton ||
+            buttonState.showRequestMoreButton ||
+            isAddOrRequestInProgress
     if (showAddAction) {
         IconButton(
             onClick = onAddClicked,

@@ -310,13 +310,13 @@ class UnifiedMediaDetailsArrActionsHandler(
             val repository = repositoryProvider() ?: return@launch
             val effectiveId = effectiveIdProvider() ?: return@launch
             _editStatus.value = OperationStatus.InProgress
-            updateMediaUseCase.bulkUpdateMonitoring(listOf(effectiveId), monitorOption, repository)
+            updateMediaUseCase
+                .bulkUpdateMonitoring(listOf(effectiveId), monitorOption, repository)
                 .onSuccess {
                     repository.getMediaDetails(effectiveId)
                     onSuccessRefresh?.invoke()
                     _editStatus.value = OperationStatus.Success()
-                }
-                .onError { code, message, cause ->
+                }.onError { code, message, cause ->
                     _editStatus.value = OperationStatus.Error(code = code, message = message, cause = cause)
                 }
         }

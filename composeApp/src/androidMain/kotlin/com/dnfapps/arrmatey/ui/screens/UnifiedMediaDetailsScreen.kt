@@ -82,11 +82,11 @@ import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.PendingSeerrReque
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.menus.MediaActionsToolbarMenus
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.menus.UnifiedMediaDetailsToolbarMenu
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.AddMediaSheetsHost
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.ArtistMonitoringSheet
+import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.BookMonitoringSheet
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.EditMediaSheetsHost
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeerrReportIssueSheetHost
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeerrViewRequestSheetHost
-import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.ArtistMonitoringSheet
-import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.BookMonitoringSheet
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets.SeriesMonitoringSheet
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.tabs.OverviewTabContent
 import com.dnfapps.arrmatey.ui.components.unifiedmedia.tabs.SeasonsFilesTabContent
@@ -789,11 +789,12 @@ fun UnifiedMediaDetailsScreen(
 
                 if (confirmDelete) {
                     val currentSelectedId = successState?.selectedInstanceId ?: selectedInstanceId
-                    val currentInstLabel = if ((successState?.availableInstances?.size ?: 0) > 1) {
-                        successState?.availableInstances?.find { it.id == currentSelectedId }?.label
-                    } else {
-                        null
-                    }
+                    val currentInstLabel =
+                        if ((successState?.availableInstances?.size ?: 0) > 1) {
+                            successState?.availableInstances?.find { it.id == currentSelectedId }?.label
+                        } else {
+                            null
+                        }
                     ConfirmDeleteAlert(
                         deleteInProgress = deleteStatus is OperationStatus.InProgress,
                         initialAddExclusion = preferences.deleteAddExclusion,

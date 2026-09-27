@@ -50,55 +50,71 @@ fun InstancePresenceChips(
             val isPresent = presence.isPresent
             val arrMedia = presence.arrMedia
 
-            val containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.secondaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            }
+            val containerColor =
+                if (isSelected) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                }
 
-            val contentColor = if (isSelected) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            }
+            val contentColor =
+                if (isSelected) {
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
 
-            val (statusText, statusColor) = when {
-                !isPresent -> Pair(
-                    mokoString(MR.strings.not_added),
-                    if (isSelected) contentColor.copy(alpha = 0.7f) else MaterialTheme.colorScheme.outline,
-                )
-                arrMedia != null && (arrMedia.isDownloaded || (arrMedia as? ArrMovie)?.hasFile == true || ((arrMedia as? ArrSeries)?.statistics?.episodeFileCount ?: 0) > 0) -> Pair(
-                    mokoString(MR.strings.downloaded),
-                    if (isSelected) Color(0xFF4ADE80) else Color(0xFF16A34A),
-                )
-                arrMedia?.monitored == true -> Pair(
-                    mokoString(MR.strings.monitored),
-                    if (isSelected) Color(0xFFFBBF24) else Color(0xFFD97706),
-                )
-                else -> Pair(
-                    mokoString(MR.strings.unmonitored),
-                    if (isSelected) contentColor.copy(alpha = 0.7f) else MaterialTheme.colorScheme.outline,
-                )
-            }
+            val (statusText, statusColor) =
+                when {
+                    !isPresent ->
+                        Pair(
+                            mokoString(MR.strings.not_added),
+                            if (isSelected) contentColor.copy(alpha = 0.7f) else MaterialTheme.colorScheme.outline,
+                        )
+                    arrMedia != null &&
+                        (
+                            arrMedia.isDownloaded ||
+                                (arrMedia as? ArrMovie)?.hasFile == true ||
+                                ((arrMedia as? ArrSeries)?.statistics?.episodeFileCount ?: 0) > 0
+                        ) ->
+                        Pair(
+                            mokoString(MR.strings.downloaded),
+                            if (isSelected) Color(0xFF4ADE80) else Color(0xFF16A34A),
+                        )
+                    arrMedia?.monitored == true ->
+                        Pair(
+                            mokoString(MR.strings.monitored),
+                            if (isSelected) Color(0xFFFBBF24) else Color(0xFFD97706),
+                        )
+                    else ->
+                        Pair(
+                            mokoString(MR.strings.unmonitored),
+                            if (isSelected) contentColor.copy(alpha = 0.7f) else MaterialTheme.colorScheme.outline,
+                        )
+                }
 
             Surface(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable {
-                        if (isPresent) {
-                            onSelectInstance(presence.instance.id)
-                        } else {
-                            onAddInstance(presence.instance)
-                        }
-                    },
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            if (isPresent) {
+                                onSelectInstance(presence.instance.id)
+                            } else {
+                                onAddInstance(presence.instance)
+                            }
+                        },
                 shape = RoundedCornerShape(12.dp),
                 color = containerColor,
                 tonalElevation = if (isSelected) 4.dp else 0.dp,
-                border = if (isSelected) {
-                    androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-                } else if (!isPresent) {
-                    androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                } else null,
+                border =
+                    if (isSelected) {
+                        androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                    } else if (!isPresent) {
+                        androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    } else {
+                        null
+                    },
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -114,10 +130,11 @@ fun InstancePresenceChips(
                         )
                     } else {
                         Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(statusColor),
+                            modifier =
+                                Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(statusColor),
                         )
                     }
 

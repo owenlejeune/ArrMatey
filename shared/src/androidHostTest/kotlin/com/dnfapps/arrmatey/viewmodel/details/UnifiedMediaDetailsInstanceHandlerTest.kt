@@ -102,8 +102,16 @@ class UnifiedMediaDetailsInstanceHandlerTest {
             every { getArrInstanceRepositoryUseCase(10L) } returns mockRepoA
             every { getArrInstanceRepositoryUseCase(20L) } returns mockRepoB
 
-            val instanceA = mockk<Instance> { every { id } returns 10L; every { label } returns "Sonarr A" }
-            val instanceB = mockk<Instance> { every { id } returns 20L; every { label } returns "Sonarr B" }
+            val instanceA =
+                mockk<Instance> {
+                    every { id } returns 10L
+                    every { label } returns "Sonarr A"
+                }
+            val instanceB =
+                mockk<Instance> {
+                    every { id } returns 20L
+                    every { label } returns "Sonarr B"
+                }
             every { mockRepoA.instance } returns instanceA
             every { mockRepoB.instance } returns instanceB
 
@@ -130,7 +138,11 @@ class UnifiedMediaDetailsInstanceHandlerTest {
                 )
 
             handler.setAddSheetTargetInstance(instanceA)
-            assertEquals(10L, handler.addSheetUiState.value.targetInstance?.id)
+            assertEquals(
+                10L,
+                handler.addSheetUiState.value.targetInstance
+                    ?.id,
+            )
 
             val mockUiState = mockk<com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState.Success>(relaxed = true)
             every { mockUiState.availableInstances } returns listOf(instanceA, instanceB)
@@ -144,6 +156,10 @@ class UnifiedMediaDetailsInstanceHandlerTest {
             )
 
             assertEquals(20L, handler.selectedInstanceId.value)
-            assertEquals(20L, handler.addSheetUiState.value.targetInstance?.id)
+            assertEquals(
+                20L,
+                handler.addSheetUiState.value.targetInstance
+                    ?.id,
+            )
         }
 }
