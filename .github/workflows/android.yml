@@ -93,3 +93,23 @@ jobs:
         with:
           name: app-debug
           path: composeApp/build/outputs/apk/debug/composeApp-debug.apk
+
+  android-status:
+    name: Android Status Check
+    needs: [changes, check-and-build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate Android Status
+        run: |
+          changes_res="${{ needs.changes.result }}"
+          build_res="${{ needs.check-and-build.result }}"
+          if [[ "$changes_res" == "failure" || "$changes_res" == "cancelled" ]]; then
+            echo "Changes detection failed or was cancelled."
+            exit 1
+          fi
+          if [[ "$build_res" == "failure" || "$build_res" == "cancelled" ]]; then
+            echo "Android build failed or was cancelled."
+            exit 1
+          fi
+          echo "Android CI passed or was skipped (build: $build_res)."
