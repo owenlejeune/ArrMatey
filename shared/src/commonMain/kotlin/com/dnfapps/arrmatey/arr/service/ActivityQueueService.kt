@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.coroutineScope
+
 class ActivityQueueService(
     private val instanceManager: InstanceManager,
 ) {
@@ -53,8 +55,11 @@ class ActivityQueueService(
         pollingJob =
             scope.launch {
                 while (isActive) {
-                    pollActivityTasks()
-                    pollHistory()
+                    try {
+                        pollActivityTasks()
+                        pollHistory()
+                    } catch (_: Exception) {
+                    }
                     delay(pollingDelay)
                 }
             }
@@ -65,56 +70,80 @@ class ActivityQueueService(
         pollingJob = null
     }
 
+    fun removeTaskLocally(taskId: Int) {
+        _allActivityTasks.value = _allActivityTasks.value.filter { it.id != taskId }
+        val issueCount = _allActivityTasks.value.groupByTask().count { task -> task.hasIssue }
+        _tasksWithIssues.value = issueCount
+    }
+
     private suspend fun pollActivityTasks() {
         _isPolling.value = true
-        val repositories =
-            instanceManager
-                .getAllArrRepositories()
-                .filter { it.instance.type.supportsActivityQueue }
+        try {
+            val repositories =
+                instanceManager
+                    .getAllArrRepositories()
+                    .filter { it.instance.type.supportsActivityQueue }
 
-        val allTasks =
-            repositories
-                .map { repo ->
-                    scope.async {
-                        repo.refreshActivityTasks()
-                        repo.activityTasks.value
-                    }
-                }.awaitAll()
-                .flatten()
+            val allTasks =
+                coroutineScope {
+                    repositories
+                        .map { repo ->
+                            async {
+                                try {
+                                    repo.refreshActivityTasks()
+                                    repo.activityTasks.value
+                                } catch (_: Exception) {
+                                    repo.activityTasks.value
+                                }
+                            }
+                        }.awaitAll()
+                        .flatten()
+                }
 
-        _allActivityTasks.value = allTasks
+            _allActivityTasks.value = allTasks
 
-        val issueCount = allTasks.groupByTask().count { task -> task.hasIssue }
-        _tasksWithIssues.value = issueCount
-        if (repositories.isNotEmpty()) {
-            _hasLoaded.value = true
+            val issueCount = allTasks.groupByTask().count { task -> task.hasIssue }
+            _tasksWithIssues.value = issueCount
+            if (repositories.isNotEmpty()) {
+                _hasLoaded.value = true
+            }
+        } finally {
+            _isPolling.value = false
         }
-        _isPolling.value = false
     }
 
     private suspend fun pollHistory() {
         _isHistoryLoading.value = true
-        val repositories =
-            instanceManager
-                .getAllArrRepositories()
-                .filter { it.instance.type.supportsActivityQueue }
+        try {
+            val repositories =
+                instanceManager
+                    .getAllArrRepositories()
+                    .filter { it.instance.type.supportsActivityQueue }
 
-        val allHistoryList =
-            repositories
-                .map { repo ->
-                    scope.async {
-                        repo.refreshHistory()
-                        repo.history.value
-                    }
-                }.awaitAll()
-                .flatten()
-                .sortedByDescending { it.date }
+            val allHistoryList =
+                coroutineScope {
+                    repositories
+                        .map { repo ->
+                            async {
+                                try {
+                                    repo.refreshHistory()
+                                    repo.history.value
+                                } catch (_: Exception) {
+                                    repo.history.value
+                                }
+                            }
+                        }.awaitAll()
+                        .flatten()
+                        .sortedByDescending { it.date }
+                }
 
-        _allHistory.value = allHistoryList
-        if (repositories.isNotEmpty()) {
-            _hasHistoryLoaded.value = true
+            _allHistory.value = allHistoryList
+            if (repositories.isNotEmpty()) {
+                _hasHistoryLoaded.value = true
+            }
+        } finally {
+            _isHistoryLoading.value = false
         }
-        _isHistoryLoading.value = false
     }
 
     fun cleanup() {

@@ -407,6 +407,9 @@ class ActivityQueueViewModel(
             deleteQueueItemUseCase(item, removeFromClient, addToBlocklist, skipRedownload)
                 .collect { state ->
                     _removeItemState.value = state
+                    if (state is OperationStatus.Success) {
+                        activityQueueService.removeTaskLocally(item.id)
+                    }
                 }
         }
     }
