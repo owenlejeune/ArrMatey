@@ -438,5 +438,6 @@ class ActivityQueueViewModel(
     ) = when (sortBy) {
         QueueSortBy.Title -> items.orderedSortedBy(sortOrder) { it.titleLabel }
         QueueSortBy.Added -> items.orderedSortedBy(sortOrder) { it.added }
+        QueueSortBy.Progress -> items.orderedSortedBy(sortOrder) { it.progressPercent }
     }
 }
