@@ -36,7 +36,6 @@ windowSize = "1.4.0"
 aboutLibraries = "15.2.0"
 composeMarkdown = "0.7.2"
 kmp-logger = "2.0.0"
-google-fonts = "1.11.2"
 adaptive = "1.2.0"
 flexible-bottomsheet = "0.4.0"
 turbine = "1.2.1"
@@ -98,7 +97,6 @@ aboutlibraries = { module = "com.mikepenz:aboutlibraries-core", version.ref = "a
 aboutlibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
 compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "composeMarkdown" }
 kmp-logger = { module = "io.github.shivathapaa:logger", version.ref = "kmp-logger" }
-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "google-fonts" }
 flexible-bottomsheet = { module = "com.github.skydoves:flexible-bottomsheet-material3", version.ref = "flexible-bottomsheet" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
